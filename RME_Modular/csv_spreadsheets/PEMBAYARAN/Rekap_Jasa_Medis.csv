@@ -1,0 +1,5 @@
+ID_Invoice,Tanggal,Dokter,Perawat,Kategori_Item,Nama_Item,Tarif_Kotor,Biaya_Lab,Dasar_Bagi_Hasil,Persen_JM,Tipe_Aturan,JM_Dokter_Kotor,Potongan_Perawat,JM_Dokter_Bersih,JM_Perawat,Bagian_Klinik,Status_JM,Waktu_Hitung
+INV/SHELDON/0001/1026,10-10-2026,drg. Sheldon Cooper, Sp.Ort,-,Tindakan,Pemasangan Mahkota PFM (Crown),1500000,350000,1150000,50%,Default Dokter,575000,0,575000,0,575000,Pending Pelunasan,10-10-2026 10:15:05
+INV/SHELDON/0002/1026,10-10-2026,drg. Leonard Hofstadter,-,Tindakan,Foto Rontgen Periapikal Digital,100000,0,100000,15%,Default Tindakan (Flat),15000,0,15000,0,85000,Siap Cair,10-10-2026 11:20:05
+INV/SHELDON/0003/1026,10-10-2026,drg. Sheldon Cooper, Sp.Ort,-,Tindakan,Perawatan Saluran Akar (PSA) Molar,1500000,0,1500000,55%,Tarif Khusus Dokter,825000,0,825000,0,675000,Siap Cair,10-10-2026 14:05:05
+INV/SHELDON/0004/1026,10-10-2026,drg. Sheldon Cooper, Sp.Ort,Bernadette Rostenkowski,Tindakan,Pemasangan Behel Standar (Include Scaling),5000000,0,5000000,50%,Default Dokter,2500000,50000,2450000,50000,2500000,Siap Cair,10-10-2026 16:30:05

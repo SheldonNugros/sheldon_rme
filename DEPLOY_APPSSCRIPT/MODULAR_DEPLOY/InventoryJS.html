@@ -1,0 +1,154 @@
+<script>
+ let rawDataInventory = [];
+
+
+ function initInventoryModule() {
+   loadInventoryData();
+   if(document.getElementById('restockTanggal')) {
+      document.getElementById('restockTanggal').value = getTodayIso();
+   }
+ }
+
+
+ function loadInventoryData() {
+   google.script.run.withSuccessHandler(res => {
+     rawDataInventory = res || [];
+     renderInventoryTable(rawDataInventory);
+     populateRestockDropdown(rawDataInventory);
+   }).getMasterInventory();
+ }
+
+
+ function renderInventoryTable(list) {
+   let tbody = document.getElementById('tbodyInventory');
+   document.getElementById('badgeTotalGudang').innerText = list.length + ' Item';
+  
+   if (list.length === 0) {
+     tbody.innerHTML = '<tr><td colspan="7" class="text-center py-10 text-slate-400 font-bold">Belum ada data barang gudang.</td></tr>';
+     return;
+   }
+
+
+   tbody.innerHTML = list.map(item => {
+     let isKritis = item.stok <= item.kritis;
+     let badgeStatus = isKritis
+       ? `<span class="px-2 py-0.5 bg-rose-100 text-rose-700 rounded-full font-bold text-[9px] border border-rose-200 animate-pulse">🚨 Stok Kritis</span>`
+       : `<span class="px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full font-bold text-[9px] border border-emerald-200">Aman</span>`;
+    
+     let katBadge = item.kategori.toLowerCase() === 'obat'
+       ? `<span class="bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded text-[9px] font-bold border border-amber-200">Obat</span>`
+       : `<span class="bg-sky-50 text-sky-700 px-1.5 py-0.5 rounded text-[9px] font-bold border border-sky-200">BMHP</span>`;
+
+
+     return `
+       <tr class="hover:bg-slate-50 transition-colors">
+         <td class="p-3"><p class="font-mono font-bold text-slate-700">${item.kode}</p><p class="mt-0.5">${katBadge}</p></td>
+         <td class="p-3 font-bold text-slate-900">${item.nama}</td>
+         <td class="p-3 text-center text-slate-600">${item.satuan}</td>
+         <td class="p-3 text-right font-mono text-slate-600">Rp ${formatUangDashboard(item.hpp)}</td>
+         <td class="p-3 text-right"><p class="font-mono font-bold text-emerald-600">Rp ${formatUangDashboard(item.hargaJual)}</p><p class="text-[9px] text-slate-400">Margin: ${item.margin}%</p></td>
+         <td class="p-3 text-center font-black text-sm text-slate-800">${item.stok}</td>
+         <td class="p-3 text-center">${badgeStatus}</td>
+       </tr>
+     `;
+   }).join('');
+ }
+
+
+ function filterGudangTable() {
+   let q = document.getElementById('cariGudangInput').value.toLowerCase().trim();
+   let filtered = rawDataInventory.filter(i => i.nama.toLowerCase().includes(q) || i.kode.toLowerCase().includes(q));
+   renderInventoryTable(filtered);
+ }
+
+
+ function populateRestockDropdown(list) {
+   let sel = document.getElementById('restockPilihItem');
+   // Filter hanya yang bukan tindakan
+   let validItems = list.filter(i => i.kategori.toLowerCase() !== 'tindakan');
+   sel.innerHTML = '<option value="" disabled selected>-- Pilih Item dari Master --</option>' +
+     validItems.map(i => `<option value="${i.kode}" data-nama="${i.nama}" data-hpp="${i.hpp}" data-satuan-beli="${i.satuanBeli || 'Pcs'}" data-isi="${i.isiPerSatuan || 1}" data-satuan="${i.satuan || 'Pcs'}">${i.kode} - ${i.nama} (Stok: ${i.stok})</option>`).join('');
+ }
+
+
+ function onItemRestockSelect(sel) {
+   let opt = sel.options[sel.selectedIndex];
+   let hpp = opt.getAttribute('data-hpp') || 0;
+   let isi = parseFloat(opt.getAttribute('data-isi')) || 1;
+   let defaultHrgBeli = (hpp * isi) || hpp;
+   document.getElementById('restockHargaBeli').value = defaultHrgBeli;
+   updateRestockConversionPreview();
+ }
+
+
+ function updateRestockConversionPreview() {
+   let sel = document.getElementById('restockPilihItem');
+   let box = document.getElementById('restockKonversiBox');
+   let text = document.getElementById('restockKonversiText');
+   if (!sel || sel.selectedIndex <= 0) {
+     if (box) box.classList.add('hidden');
+     return;
+   }
+   let opt = sel.options[sel.selectedIndex];
+   let qtyBeli = parseFloat(document.getElementById('restockQty').value) || 0;
+   let isi = parseFloat(opt.getAttribute('data-isi')) || 1;
+   let satBeli = opt.getAttribute('data-satuan-beli') || 'Box';
+   let satPcs = opt.getAttribute('data-satuan') || 'Pcs';
+   let totalPcs = qtyBeli * isi;
+
+   if (box && text) {
+     box.classList.remove('hidden');
+     text.innerHTML = `<strong>${qtyBeli}</strong> ${satBeli} &times; <strong>${isi}</strong> ${satPcs} = <span class="font-black text-emerald-900">${totalPcs} ${satPcs}</span> masuk ke stok tersedia.`;
+   }
+ }
+
+
+ function bukaModalRestock() {
+   document.getElementById('modalRestock').classList.remove('hidden');
+   updateRestockConversionPreview();
+ }
+
+
+ function tutupModalRestock() {
+   document.getElementById('modalRestock').classList.add('hidden');
+   document.getElementById('formRestock').reset();
+   document.getElementById('restockTanggal').value = getTodayIso();
+   let box = document.getElementById('restockKonversiBox');
+   if (box) box.classList.add('hidden');
+ }
+
+
+ function handleSimpanRestock(e) {
+   e.preventDefault();
+   let sel = document.getElementById('restockPilihItem');
+   let opt = sel.options[sel.selectedIndex];
+  
+   let payload = {
+     currentUser: window.activeNamaAccount,
+     tanggal: document.getElementById('restockTanggal').value,
+     noFaktur: document.getElementById('restockNoFaktur') ? document.getElementById('restockNoFaktur').value.trim() : '-',
+     kode: sel.value,
+     nama: opt.getAttribute('data-nama'),
+     qty: document.getElementById('restockQty').value,
+     hargaBeli: document.getElementById('restockHargaBeli').value,
+     supplier: document.getElementById('restockSupplier').value,
+     expiredDate: document.getElementById('restockExpired').value
+   };
+
+
+   let btn = document.getElementById('btnSimpanRestock');
+   btn.innerHTML = 'MENYIMPAN...'; btn.disabled = true;
+
+
+   google.script.run.withSuccessHandler(res => {
+     btn.innerHTML = 'Simpan & Masukkan Stok'; btn.disabled = false;
+     if(res.success) {
+       showToast('success', res.message);
+       tutupModalRestock();
+       loadInventoryData();
+     } else {
+       showToast('error', res.message);
+     }
+   }).simpanPembelianGudang(payload);
+ }
+</script>

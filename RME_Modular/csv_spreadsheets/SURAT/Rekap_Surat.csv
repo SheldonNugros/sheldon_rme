@@ -1,0 +1,8 @@
+Jenis_Surat,Kode,Sheet,Jumlah_Terbit,No_Surat_Terakhir
+Surat Keterangan Sakit,SKS,Surat_Sakit,=COUNTA(Surat_Sakit!D2:D),"=IFERROR(INDEX(Surat_Sakit!D2:D,COUNTA(Surat_Sakit!D2:D)),""-"")"
+Surat Kontrol,SKP,Surat_Kontrol,=COUNTA(Surat_Kontrol!D2:D),"=IFERROR(INDEX(Surat_Kontrol!D2:D,COUNTA(Surat_Kontrol!D2:D)),""-"")"
+Resume Medis,RMP,Resume_Medis,=COUNTA(Resume_Medis!D2:D),"=IFERROR(INDEX(Resume_Medis!D2:D,COUNTA(Resume_Medis!D2:D)),""-"")"
+Surat Rujukan,SRP,Surat_Rujukan,=COUNTA(Surat_Rujukan!D2:D),"=IFERROR(INDEX(Surat_Rujukan!D2:D,COUNTA(Surat_Rujukan!D2:D)),""-"")"
+Pengantar Laboratorium,SPL,Surat_Lab,=COUNTA(Surat_Lab!D2:D),"=IFERROR(INDEX(Surat_Lab!D2:D,COUNTA(Surat_Lab!D2:D)),""-"")"
+Pengantar Radiologi,SPR,Surat_Radiologi,=COUNTA(Surat_Radiologi!D2:D),"=IFERROR(INDEX(Surat_Radiologi!D2:D,COUNTA(Surat_Radiologi!D2:D)),""-"")"
+TOTAL,,,=SUM(D2:D7),

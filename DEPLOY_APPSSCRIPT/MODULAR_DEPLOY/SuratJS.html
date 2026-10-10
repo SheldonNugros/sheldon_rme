@@ -1,0 +1,960 @@
+<style>
+  div[id^="panelSurat"] div.overflow-x-auto, 
+  div[id^="panelSurat"] div.overflow-y-auto,
+  div[id^="panelResume"] div.overflow-x-auto, 
+  div[id^="panelResume"] div.overflow-y-auto {
+     max-height: 70vh !important;
+     height: 70vh !important;
+  }
+  
+  table tbody tr td {
+     padding-top: 0.6rem !important;
+     padding-bottom: 0.6rem !important;
+  }
+</style>
+<script>
+ const SURAT_PER_PAGE = 15; 
+ 
+ let dataSuratGlobal = []; 
+ let filteredSuratList = [];
+ let rawListSKS = []; let filteredListSKS = []; let pageSKS = 1;
+ let rawListSKP = []; let filteredListSKP = []; let pageSKP = 1;
+ let rawListRSM = []; let filteredListRSM = []; let pageRSM = 1;
+ let rawListSPM = []; let filteredListSPM = []; let pageSPM = 1;
+ let rawListLAB = []; let filteredListLAB = []; let pageLAB = 1;
+ let rawListRAD = []; let filteredListRAD = []; let pageRAD = 1;
+ let listDokterDanSIP = [];
+ let debounceTimerId = {};
+
+
+ function setupAutocompleteNav(inputId, resultId, highlightColor, resetFuncName) {
+   const input = document.getElementById(inputId);
+   const resultBox = document.getElementById(resultId);
+   if (!input || !resultBox) return;
+   let currentFocus = -1;
+   input.addEventListener('input', function() { currentFocus = -1; });
+   input.addEventListener('keydown', function(e) {
+     let items = resultBox.querySelectorAll('.search-item');
+     if (e.key === 'Escape') {
+       e.preventDefault(); resultBox.classList.add('hidden'); input.value = '';
+       if (typeof window[resetFuncName] === 'function') window[resetFuncName](); return;
+     }
+     if (!items || items.length === 0 || resultBox.classList.contains('hidden')) return;
+     if (e.key === 'ArrowDown') { e.preventDefault(); currentFocus++; setActive(items, highlightColor); }
+     else if (e.key === 'ArrowUp') { e.preventDefault(); currentFocus--; setActive(items, highlightColor); }
+     else if (e.key === 'Enter') { e.preventDefault(); if (currentFocus > -1) { items[currentFocus].click(); } else if (items.length > 0) { items[0].click(); } }
+   });
+   function setActive(items, color) {
+     items.forEach(item => { item.style.backgroundColor = ''; });
+     if (currentFocus >= items.length) currentFocus = 0;
+     if (currentFocus < 0) currentFocus = (items.length - 1);
+     items[currentFocus].style.backgroundColor = color;
+     items[currentFocus].scrollIntoView({ block: 'nearest' });
+   }
+ }
+
+
+ function autoTitleCase(el) {
+   if (!el || !el.value) return;
+   const start = el.selectionStart; const end = el.selectionEnd;
+   el.value = el.value.replace(/(^|[\s\/\-\.\(\)])([a-z])/g, (m, p1, p2) => p1 + p2.toUpperCase());
+   el.setSelectionRange(start, end);
+ }
+ 
+ function formatTglIndo(tglStr) {
+   if (!tglStr || tglStr === '-') return '-';
+   let parts = String(tglStr).split('-'); if (parts.length !== 3) return tglStr;
+   const bulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+   return `${parseInt(parts[2], 10)} ${bulan[parseInt(parts[1], 10) - 1]} ${parts[0]}`;
+ }
+ 
+ function formatTglAngka(tglStr) {
+   if (!tglStr || tglStr === '-') return '-';
+   let parts = String(tglStr).split('-'); 
+   if (parts.length === 3 && parts[0].length === 4) { return `${parts[2]}-${parts[1]}-${parts[0]}`; }
+   return tglStr;
+ }
+ 
+ function getTodayIso() {
+   let d = new Date();
+   let y = d.getFullYear();
+   let mm = String(d.getMonth() + 1).padStart(2, '0');
+   let dd = String(d.getDate()).padStart(2, '0');
+   return `${y}-${mm}-${dd}`;
+ }
+ function getBulanRomawi(bulanAngka) {
+   const romawi = ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
+   return romawi[parseInt(bulanAngka, 10)] || "";
+ }
+ function terbilangSKS(angka) {
+    const huruf = ["", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan", "Sepuluh"];
+    return huruf[parseInt(angka)] || "";
+ }
+
+
+  function eksekusiCetakSurat(namaFileSurat, idAreaPrint) {
+     const printContent = document.getElementById(idAreaPrint).innerHTML;
+     const originalTitle = document.title;
+     let cleanName = (namaFileSurat || "Surat_Klinik").replace(/[\/\\]/g, '_');
+     document.title = cleanName; 
+
+     const suratCss = `
+       @page { size: A4; margin: 0; }
+       body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 14px; color: #000; margin: 0; padding: 0; background: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+       .surat-container { width: 210mm; min-height: 297mm; padding: 20mm 15mm; box-sizing: border-box; margin: 0 auto; position: relative; }
+       h1, h2, h3, h4, p { margin: 0; }
+       .text-center { text-align: center; } .text-justify { text-align: justify; } .text-right { text-align: right; }
+       .font-bold { font-weight: bold; } .font-black { font-weight: 900; } .font-normal { font-weight: normal; }
+       .underline { text-decoration: underline; } .uppercase { text-transform: uppercase; }
+       .w-full { width: 100%; } .w-32 { width: 128px; } .w-40 { width: 160px; } .w-48 { width: 192px; } .w-56 { width: 224px; } .w-4 { width: 16px; } .w-2 { width: 8px; } .w-64 { width: 256px; }
+       .px-3 { padding-left: 12px; padding-right: 12px; } .py-1\\.5 { padding-top: 6px; padding-bottom: 6px; } .py-2 { padding-top: 8px; padding-bottom: 8px; }
+       .mb-2 { margin-bottom: 8px; } .mb-4 { margin-bottom: 16px; } .mb-5 { margin-bottom: 20px; } .mb-6 { margin-bottom: 24px; } .mb-8 { margin-bottom: 32px; } .mb-10 { margin-bottom: 40px; } .mb-24 { margin-bottom: 96px; }
+       .mt-1 { margin-top: 4px; } .mt-4 { margin-top: 16px; } .mt-6 { margin-top: 24px; } .mt-8 { margin-top: 32px; } .mt-12 { margin-top: 48px; }
+       .ml-4 { margin-left: 16px; } .ml-6 { margin-left: 24px; }
+       .flex { display: flex; } .justify-between { justify-content: space-between; } .justify-end { justify-content: flex-end; } .flex-col { flex-direction: column; } .items-center { align-items: center; } .align-top { vertical-align: top; }
+       .text-sm { font-size: 14px; } .text-xs { font-size: 12px; }
+       .leading-relaxed { line-height: 1.6; } .leading-tight { line-height: 1.25; }
+       table { border-collapse: collapse; width: 100%; } td { vertical-align: top; }
+       .border { border-width: 1px; } .border-b { border-bottom-width: 1px; } .border-l { border-left-width: 1px; } .border-slate-400 { border-color: #94a3b8; border-style: solid; }
+       .bg-slate-50 { background-color: #f8fafc; }
+       .divide-y > tr > td { border-bottom: 1px solid #94a3b8; } .divide-y > tr:last-child > td { border-bottom: none; }
+     `;
+
+     // Strategi 1: Buka Top-Level Popup Window (Agar Save As PDF mengambil judul cleanName)
+     try {
+       let printWin = window.open('', '_blank', 'width=850,height=900');
+       if (printWin && !printWin.closed) {
+         printWin.document.open();
+         printWin.document.write(`
+           <!DOCTYPE html><html><head><meta charset="utf-8"><title>${cleanName}</title><style>${suratCss}</style></head><body><div class="surat-container">${printContent}</div></body></html>
+         `);
+         printWin.document.close();
+         printWin.focus();
+         setTimeout(() => {
+           printWin.document.title = cleanName;
+           printWin.print();
+           printWin.onafterprint = function() { printWin.close(); document.title = originalTitle; };
+         }, 500);
+         return;
+       }
+     } catch (err) {
+       console.warn('Popup print window blocked, fallback to iframe:', err);
+     }
+
+     // Strategi 2: Fallback Hidden Iframe jika popup diblokir oleh browser
+     let printFrame = document.getElementById('printFrameSurat');
+     if (!printFrame) {
+         printFrame = document.createElement('iframe'); printFrame.id = 'printFrameSurat';
+         printFrame.style.cssText = 'position:absolute; width:0px; height:0px; border:none; z-index:-999;';
+         document.body.appendChild(printFrame);
+     }
+     
+     const frameDoc = printFrame.contentWindow.document; frameDoc.open();
+     frameDoc.write(`
+       <html><head><title>${cleanName}</title>
+         <style>${suratCss}</style>
+       </head><body><div class="surat-container">${printContent}</div></body></html>
+     `);
+     frameDoc.close(); printFrame.contentWindow.focus();
+     setTimeout(() => { 
+         document.title = cleanName;
+         if (printFrame.contentWindow && printFrame.contentWindow.document) {
+           printFrame.contentWindow.document.title = cleanName;
+         }
+         printFrame.contentWindow.print(); 
+         printFrame.contentWindow.onafterprint = function() { document.title = originalTitle; };
+         setTimeout(() => { document.title = originalTitle; }, 15000);
+     }, 600);
+  }
+
+  // FUNGSI PREVIEW / VIEW SURAT MEDIS SEBELUM CETAK
+  function bukaModalPreviewSurat(namaSurat, idAreaPrint, jenisSurat) {
+    const area = document.getElementById(idAreaPrint);
+    const container = document.getElementById('modalPreviewSuratContainer');
+    const modal = document.getElementById('modalPreviewSurat');
+    const titleEl = document.getElementById('modalPreviewSuratTitle');
+    const btnCetak = document.getElementById('btnModalCetakSurat');
+
+    if (!area || !container || !modal) return;
+    
+    if (titleEl) titleEl.innerText = `Pratinjau ${jenisSurat || 'Surat Medis'} (${namaSurat})`;
+    container.innerHTML = area.innerHTML;
+    
+    if (btnCetak) {
+      btnCetak.onclick = function() {
+        eksekusiCetakSurat(namaSurat, idAreaPrint);
+      };
+    }
+    
+    modal.classList.remove('hidden');
+  }
+
+  function tutupModalPreviewSurat() {
+    const modal = document.getElementById('modalPreviewSurat');
+    if (modal) modal.classList.add('hidden');
+  }
+
+  // FUNGSI DIRECT DOWNLOAD PDF DENGAN NAMA NOMOR SURAT
+  function downloadPDFSurat(namaFileSurat, idAreaPrint) {
+    let cleanName = (namaFileSurat || "Dokumen_Surat").replace(/[\/\\]/g, '_');
+    const el = document.getElementById(idAreaPrint);
+    if (!el) { showToast('error', 'Elemen surat tidak ditemukan.'); return; }
+    
+    showToast('info', `Mempersiapkan PDF: ${cleanName}.pdf...`);
+    
+    if (typeof html2pdf !== 'undefined') {
+      const opt = {
+        margin: [5, 5, 5, 5],
+        filename: `${cleanName}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      };
+      html2pdf().set(opt).from(el).save().then(() => {
+        showToast('success', `Berhasil mengunduh: ${cleanName}.pdf`);
+      }).catch(err => {
+        console.error('html2pdf error:', err);
+        showToast('warning', 'Mengalihkan ke dialog cetak browser...');
+        eksekusiCetakSurat(cleanName, idAreaPrint);
+      });
+    } else {
+      eksekusiCetakSurat(cleanName, idAreaPrint);
+    }
+  }
+
+
+ function resetSemuaTombolSurat() {
+   const btnConfig = {
+     'navSakit': ['bg-teal-50', 'border-teal-500', 'ring-2', 'ring-teal-200', 'shadow-md', 'scale-105'],
+     'navKontrol': ['bg-blue-50', 'border-blue-500', 'ring-2', 'ring-blue-200', 'shadow-md', 'scale-105'],
+     'navResume': ['bg-purple-50', 'border-purple-500', 'ring-2', 'ring-purple-200', 'shadow-md', 'scale-105'],
+     'navRujukan': ['bg-rose-50', 'border-rose-500', 'ring-2', 'ring-rose-200', 'shadow-md', 'scale-105'],
+     'navLab': ['bg-cyan-50', 'border-cyan-500', 'ring-2', 'ring-cyan-200', 'shadow-md', 'scale-105'],
+     'navRadiologi': ['bg-indigo-50', 'border-indigo-500', 'ring-2', 'ring-indigo-200', 'shadow-md', 'scale-105']
+   };
+   
+   Object.keys(btnConfig).forEach(id => {
+      let btn = document.getElementById(id);
+      if(btn) {
+         btn.classList.remove(...btnConfig[id]);
+         btn.classList.add('bg-white', 'border-slate-200'); 
+      }
+   });
+ }
+
+
+ function changeSuratMenu(menu) {
+   // Sembunyikan Panel Beranda
+   document.getElementById('panelSuratBeranda').classList.add('hidden');
+   
+   ['panelSuratSakit', 'panelSuratKontrol', 'panelResumeMedis', 'panelSuratRujukan', 'panelSuratLab', 'panelSuratRadiologi'].forEach(id => {
+     let el = document.getElementById(id); if (el) el.classList.add('hidden');
+   });
+   resetSemuaTombolSurat();
+   
+   const activeStyles = {
+     'sakit': { id: 'navSakit', classes: ['bg-teal-50', 'border-teal-500', 'ring-2', 'ring-teal-200', 'shadow-md', 'scale-105'] },
+     'kontrol': { id: 'navKontrol', classes: ['bg-blue-50', 'border-blue-500', 'ring-2', 'ring-blue-200', 'shadow-md', 'scale-105'] },
+     'resume': { id: 'navResume', classes: ['bg-purple-50', 'border-purple-500', 'ring-2', 'ring-purple-200', 'shadow-md', 'scale-105'] },
+     'rujukan': { id: 'navRujukan', classes: ['bg-rose-50', 'border-rose-500', 'ring-2', 'ring-rose-200', 'shadow-md', 'scale-105'] },
+     'lab': { id: 'navLab', classes: ['bg-cyan-50', 'border-cyan-500', 'ring-2', 'ring-cyan-200', 'shadow-md', 'scale-105'] },
+     'radiologi': { id: 'navRadiologi', classes: ['bg-indigo-50', 'border-indigo-500', 'ring-2', 'ring-indigo-200', 'shadow-md', 'scale-105'] }
+   };
+   if (activeStyles[menu]) {
+      let btn = document.getElementById(activeStyles[menu].id);
+      if(btn) {
+         btn.classList.remove('bg-white', 'border-slate-200');
+         btn.classList.add(...activeStyles[menu].classes);
+      }
+   }
+   
+   if (menu === 'sakit') { document.getElementById('panelSuratSakit').classList.remove('hidden'); searchSksTable(); }
+   else if (menu === 'kontrol') { document.getElementById('panelSuratKontrol').classList.remove('hidden'); searchSkpTable(); }
+   else if (menu === 'resume') { document.getElementById('panelResumeMedis').classList.remove('hidden'); searchRsmTable(); }
+   else if (menu === 'rujukan') { document.getElementById('panelSuratRujukan').classList.remove('hidden'); searchSpmTable(); }
+   else if (menu === 'lab') { document.getElementById('panelSuratLab').classList.remove('hidden'); searchLabTable(); }
+   else if (menu === 'radiologi') { document.getElementById('panelSuratRadiologi').classList.remove('hidden'); searchRadTable(); }
+ }
+
+
+ function tutupFormSurat() {
+    ['panelSuratSakit', 'panelSuratKontrol', 'panelResumeMedis', 'panelSuratRujukan', 'panelSuratLab', 'panelSuratRadiologi'].forEach(id => { let el = document.getElementById(id); if (el) el.classList.add('hidden'); });
+    resetSemuaTombolSurat(); 
+    // Munculkan kembali Panel Beranda (Dashboard)
+    document.getElementById('panelSuratBeranda').classList.remove('hidden');
+ }
+
+
+ function initSuratModule() {
+   if (document.getElementById('sksTglMulai')) document.getElementById('sksTglMulai').value = getTodayIso();
+   if (document.getElementById('rsmTglKunjungan')) document.getElementById('rsmTglKunjungan').value = getTodayIso();
+   if (document.getElementById('spmTglCetak')) document.getElementById('spmTglCetak').value = getTodayIso();
+   if (document.getElementById('labTglCetak')) document.getElementById('labTglCetak').value = getTodayIso();
+   if (document.getElementById('radTglCetak')) document.getElementById('radTglCetak').value = getTodayIso();
+  
+   setupAutocompleteNav('sksSearchPasien', 'sksSearchResult', '#ccfbf1', 'resetFormSKS'); 
+   setupAutocompleteNav('skpSearchPasien', 'skpSearchResult', '#dbeafe', 'resetFormSKP'); 
+   setupAutocompleteNav('rsmSearchPasien', 'rsmSearchResult', '#f3e8ff', 'resetFormRSM'); 
+   setupAutocompleteNav('spmSearchPasien', 'spmSearchResult', '#ffe4e6', 'resetFormSPM'); 
+   setupAutocompleteNav('labSearchPasien', 'labSearchResult', '#cffafe', 'resetFormLAB'); 
+   setupAutocompleteNav('radSearchPasien', 'radSearchResult', '#e0e7ff', 'resetFormRAD'); 
+   
+   loadDokterMasterSIP();
+   loadAllRiwayatSurat();
+ }
+
+ document.addEventListener('KlinikDataReady', initSuratModule);
+ if (window.KlinikData && window.KlinikData.statusLoad && window.KlinikData.statusLoad.master) {
+   initSuratModule();
+ }
+
+
+ function loadDokterMasterSIP() {
+   google.script.run
+     .withSuccessHandler(res => {
+       listDokterDanSIP = res || [];
+       if(listDokterDanSIP.length === 0) { listDokterDanSIP = [{ nama: "drg. A", sip: "-" }, { nama: "drg. B", sip: "-" }]; }
+       populateDokterOptions();
+     }).getDaftarDokterSIP();
+ }
+
+
+ function populateDokterOptions() {
+   ['sksDokter', 'skpDokterTujuan', 'rsmDokter', 'spmDokter', 'labDokter', 'radDokter'].forEach(id => {
+     const el = document.getElementById(id); if (!el) return;
+     const cur = el.value; el.innerHTML = '<option value="" disabled selected>-- Pilih Dokter --</option>';
+     listDokterDanSIP.forEach(d => { const opt = document.createElement('option'); opt.value = d.nama; opt.textContent = d.nama; el.appendChild(opt); });
+     if (cur) { el.value = cur; } else if (window.activeNamaAccount) { const found = listDokterDanSIP.find(x => x.nama === window.activeNamaAccount); if (found) el.value = found.nama; }
+   });
+ }
+
+
+ function getSIP(namaDokter) {
+   const doc = listDokterDanSIP.find(x => x.nama === namaDokter);
+   return doc && doc.sip && doc.sip !== '-' && doc.sip !== '' ? `SIP. ${doc.sip}` : 'SIP. -';
+ }
+
+
+ // ====================================================
+ // FUNGSI PENARIK DATA SURAT & STATISTIK (DASHBOARD)
+ // ====================================================
+ function updateStatistikSurat() {
+    let stats = { SKS: 0, SKP: 0, RSM: 0, SRP: 0, LAB: 0, RAD: 0 };
+    dataSuratGlobal.forEach(s => {
+        if (stats[s.jenisSurat] !== undefined) {
+            stats[s.jenisSurat]++;
+        } else if (s.jenisSurat === 'SPM') {
+            stats['SRP']++; // Menangani history lama yang masih SPM
+        }
+    });
+    
+    document.getElementById('statSKS').innerText = stats.SKS;
+    document.getElementById('statSKP').innerText = stats.SKP;
+    document.getElementById('statRSM').innerText = stats.RSM;
+    document.getElementById('statSRP').innerText = stats.SRP;
+    document.getElementById('statLAB').innerText = stats.LAB;
+    document.getElementById('statRAD').innerText = stats.RAD;
+ }
+
+
+ function loadAllRiwayatSurat() {
+   if (typeof google !== 'undefined' && google.script && google.script.run && google.script.run.getSemuaRiwayatSurat) {
+       google.script.run.withSuccessHandler(res => {
+           dataSuratGlobal = res || [];
+           
+           // Panggil Update Dashboard Statistik
+           updateStatistikSurat();
+           
+           rawListSKS = dataSuratGlobal.filter(s => s.jenisSurat === 'SKS');
+           rawListSKP = dataSuratGlobal.filter(s => s.jenisSurat === 'SKP');
+           rawListRSM = dataSuratGlobal.filter(s => s.jenisSurat === 'RSM');
+           rawListSPM = dataSuratGlobal.filter(s => s.jenisSurat === 'SRP' || s.jenisSurat === 'SPM');
+           rawListLAB = dataSuratGlobal.filter(s => s.jenisSurat === 'LAB');
+           rawListRAD = dataSuratGlobal.filter(s => s.jenisSurat === 'RAD');
+           
+           searchSksTable();
+           searchSkpTable();
+           searchRsmTable();
+           searchSpmTable();
+           searchLabTable();
+           searchRadTable();
+       }).getSemuaRiwayatSurat();
+   }
+ }
+
+
+ // ====================================================
+ // FITUR QUICK SEARCH / VERIFIKASI DOKUMEN
+ // ====================================================
+ function prosesVerifikasiSurat() {
+    let q = document.getElementById('inputVerifikasiSurat').value.toLowerCase().trim();
+    let container = document.getElementById('hasilVerifikasiContainer');
+    
+    if (q.length < 3) {
+        container.classList.add('hidden');
+        return;
+    }
+    
+    let results = dataSuratGlobal.filter(s => 
+        (s.noSurat && s.noSurat.toLowerCase().includes(q)) || 
+        (s.namaPasien && s.namaPasien.toLowerCase().includes(q))
+    );
+    
+    if (results.length === 0) {
+        container.innerHTML = `<div class="p-4 bg-rose-50 text-rose-600 rounded-xl border border-rose-200 text-center font-bold text-xs">⚠️ Dokumen tidak ditemukan. Pastikan Nomor Surat atau Nama Pasien benar.</div>`;
+    } else {
+        let html = results.slice(0, 5).map(s => {
+            let warnaBadge = "bg-slate-100 text-slate-600 border-slate-200";
+            if(s.jenisSurat === "SKS") warnaBadge = "bg-teal-50 text-teal-600 border-teal-200";
+            if(s.jenisSurat === "SKP") warnaBadge = "bg-blue-50 text-blue-600 border-blue-200";
+            if(s.jenisSurat === "RSM") warnaBadge = "bg-purple-50 text-purple-600 border-purple-200";
+            if(s.jenisSurat === "SRP" || s.jenisSurat === "SPM") warnaBadge = "bg-rose-50 text-rose-600 border-rose-200";
+            if(s.jenisSurat === "LAB") warnaBadge = "bg-cyan-50 text-cyan-600 border-cyan-200";
+            if(s.jenisSurat === "RAD") warnaBadge = "bg-indigo-50 text-indigo-600 border-indigo-200";
+            
+            return `
+            <div class="p-4 bg-white border border-emerald-200 rounded-xl shadow-sm flex flex-col md:flex-row md:items-center justify-between border-l-4 border-l-emerald-500 gap-3">
+                <div>
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="px-2 py-0.5 border rounded text-[9px] font-black uppercase ${warnaBadge}">${s.jenisSurat}</span>
+                        <span class="font-mono font-bold text-slate-800 text-xs">${s.noSurat}</span>
+                    </div>
+                    <p class="font-bold text-emerald-700 text-sm">${s.namaPasien}</p>
+                    <p class="text-[10px] text-slate-500 mt-0.5">Tgl Terbit: ${s.tglCetak} • Dokter/Penanggung Jawab: ${s.dokter}</p>
+                </div>
+                <div class="md:text-right">
+                    <span class="text-xs font-black text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-200">✅ DOKUMEN VALID</span>
+                </div>
+            </div>`;
+        }).join('');
+        
+        if(results.length > 5) {
+            html += `<div class="text-center text-[10px] text-slate-400 font-bold mt-2 pt-2">Menampilkan 5 dari ${results.length} dokumen. Ketik lebih spesifik...</div>`;
+        }
+        
+        container.innerHTML = html;
+    }
+    container.classList.remove('hidden');
+ }
+
+
+ function masterSearchPasienLogic(inputQ, resultBoxId, onClickPrefix, colorClass) {
+   if (debounceTimerId[resultBoxId]) clearTimeout(debounceTimerId[resultBoxId]);
+   
+   debounceTimerId[resultBoxId] = setTimeout(() => {
+     let resBox = document.getElementById(resultBoxId);
+     if (!resBox) return;
+     let q = (inputQ || '').toLowerCase().trim();
+     if (!q || q.length < 2) { resBox.classList.add('hidden'); return; }
+     
+     let allPasien = (window.KlinikData && Array.isArray(window.KlinikData.pasien)) ? window.KlinikData.pasien : [];
+     let list = allPasien.filter(p => {
+       let n = (p.namaPasien || '').toLowerCase();
+       let rm = (p.noRm || '').toLowerCase();
+       return n.includes(q) || rm.includes(q);
+     });
+     
+     if (list.length === 0) {
+       resBox.innerHTML = '<div class="p-2.5 text-slate-400 font-medium text-xs text-center">Pasien tidak ditemukan</div>';
+     } else {
+       resBox.innerHTML = list.slice(0, 6).map(p => `
+         <div onclick="pilihPasien${onClickPrefix}('${p.idPasien}')" class="search-item p-2.5 cursor-pointer border-b border-slate-100 flex justify-between items-center transition-colors hover:bg-slate-50">
+           <div><p class="font-bold text-slate-800 text-xs">${p.namaPasien}</p></div>
+           <span class="font-mono text-[10px] bg-${colorClass}-100 text-${colorClass}-800 px-2 py-0.5 rounded font-bold">${p.noRm}</span>
+         </div>
+       `).join('');
+     }
+     resBox.classList.remove('hidden');
+   }, 300);
+ }
+
+
+ 
+ // Tutup dropdown autocomplete saat klik di luar area
+ document.addEventListener('click', function(e) {
+   ['sks', 'skp', 'rsm', 'spm', 'lab', 'rad'].forEach(prefix => {
+     let inp = document.getElementById(prefix + 'SearchPasien');
+     let res = document.getElementById(prefix + 'SearchResult');
+     if (res && !res.classList.contains('hidden')) {
+       if (!res.contains(e.target) && e.target !== inp) {
+         res.classList.add('hidden');
+       }
+     }
+   });
+ });
+
+ // ===================================== SKS =====================================
+ function searchPasienSKS() { masterSearchPasienLogic(document.getElementById('sksSearchPasien').value.toLowerCase(), 'sksSearchResult', 'SKS', 'teal'); }
+ function pilihPasienSKS(id) {
+   let p = window.KlinikData.pasien.find(x => x.idPasien === id); if (!p) return;
+   document.getElementById('sksIdPasien').value = p.idPasien; document.getElementById('sksNoRm').value = p.noRm;
+   let umurClean = String(p.umur).replace(/tahun|th/gi, '').trim(); let umurFinal = umurClean ? umurClean + ' Tahun' : '';
+   document.getElementById('sksNama').value = p.namaPasien; document.getElementById('sksUmur').value = umurFinal;
+   document.getElementById('sksJK').value = p.jenisKelamin === 'L' || p.jenisKelamin === 'Laki-Laki' ? 'Laki-Laki' : (p.jenisKelamin ? 'Perempuan' : '');
+   document.getElementById('sksAlamat').value = p.alamat || ''; document.getElementById('sksPekerjaan').value = p.pekerjaan || ''; document.getElementById('sksSearchPasien').value = p.namaPasien;
+   document.getElementById('sksSearchResult').classList.add('hidden');
+ }
+ function validasiLamaSKS(el) {
+   let val = parseInt(el.value, 10);
+   if (!isNaN(val) && val > 5) {
+     el.value = 5;
+     if (typeof showToast === 'function') {
+       showToast('warning', 'Lama istirahat maksimal 5 hari! Isian lebih dari 5 hari ditolak.');
+     }
+   } else if (!isNaN(val) && val < 1) {
+     el.value = 1;
+   }
+ }
+ function hitungTglSelesaiSKS() {
+   let lamaEl = document.getElementById('sksLamaHari');
+   let lama = parseInt(lamaEl.value, 10);
+   if (!isNaN(lama) && lama > 5) {
+     lamaEl.value = 5;
+     lama = 5;
+     if (typeof showToast === 'function') {
+       showToast('warning', 'Lama istirahat maksimal 5 hari! Isian lebih dari 5 hari ditolak.');
+     }
+   }
+   let tglMulaiStr = document.getElementById('sksTglMulai').value;
+   if(isNaN(lama) || lama < 1) { document.getElementById('sksTglSelesai').value = ''; return; }
+   if (tglMulaiStr) { 
+     let d = new Date(tglMulaiStr); 
+     d.setDate(d.getDate() + (lama - 1)); 
+     let y = d.getFullYear();
+     let mm = String(d.getMonth() + 1).padStart(2, '0'), dd = String(d.getDate()).padStart(2, '0'); 
+     document.getElementById('sksTglSelesai').value = `${y}-${mm}-${dd}`; 
+   }
+ }
+ function resetFormSKS() { document.getElementById('formSKS').reset(); document.getElementById('sksIdPasien').value = ''; document.getElementById('sksNoRm').value = ''; document.getElementById('sksTglMulai').value = getTodayIso(); populateDokterOptions(); hitungTglSelesaiSKS(); }
+ function searchSksTable() { 
+    if(debounceTimerId['sksTable']) clearTimeout(debounceTimerId['sksTable']);
+    debounceTimerId['sksTable'] = setTimeout(() => {
+      let q = document.getElementById('sksSearchTable').value.toLowerCase().trim(); filteredListSKS = rawListSKS.filter(s => (s.namaPasien || '').toLowerCase().includes(q)); pageSKS = 1; renderSksTable(); 
+    }, 400);
+ }
+ function renderSksTable() {
+   let tbody = document.getElementById('sksTableBody'); document.getElementById('sksTotalBadge').innerText = `Total: ${filteredListSKS.length} Surat`;
+   let totalPages = Math.ceil(filteredListSKS.length / SURAT_PER_PAGE) || 1; if (pageSKS > totalPages) pageSKS = totalPages;
+   document.getElementById('sksPageInfo').innerText = `Halaman ${pageSKS} dari ${totalPages}`; document.getElementById('btnPrevSKS').disabled = (pageSKS === 1); document.getElementById('btnNextSKS').disabled = (pageSKS === totalPages || filteredListSKS.length === 0);
+   let startIdx = (pageSKS - 1) * SURAT_PER_PAGE; let pageData = filteredListSKS.slice(startIdx, startIdx + SURAT_PER_PAGE);
+   if(pageData.length === 0) { tbody.innerHTML = '<tr><td colspan="5" class="text-center text-slate-400 py-6 font-bold">Belum ada riwayat SKS tersimpan.</td></tr>'; return; }
+   tbody.innerHTML = pageData.map(s => {
+       let tglTampil = formatTglAngka(s.tglCetak || '-');
+       return `<tr class="hover:bg-slate-50 transition-colors border-b border-slate-100"><td class="p-3 font-mono font-bold text-teal-700">${s.noSurat}</td><td class="p-3 font-bold text-slate-800">${s.namaPasien || '-'}</td><td class="p-3 text-slate-600 font-medium">${tglTampil}</td><td class="p-3 font-bold text-slate-800">${s.lamaHari || '-'} Hari</td><td class="p-3 text-center"><div class="inline-flex gap-1.5"><button onclick="cetakUlangSKS('${s.noSurat}')" class="px-2.5 py-1.5 bg-white shadow-sm hover:bg-teal-50 hover:text-teal-700 rounded-lg text-[10px] font-bold border border-slate-200 transition-colors">🖨️ Cetak</button><button onclick="viewSKS('${s.noSurat}')" class="px-2.5 py-1.5 bg-teal-50 text-teal-700 hover:bg-teal-600 hover:text-white rounded-lg text-[10px] font-bold border border-teal-200 transition-colors">👁️ View</button></div></td></tr>`;
+   }).join('');
+ }
+ function prevPageSKS() { if(pageSKS > 1) { pageSKS--; renderSksTable(); } }
+ function nextPageSKS() { let t = Math.ceil(filteredListSKS.length/SURAT_PER_PAGE); if(pageSKS < t) { pageSKS++; renderSksTable(); } }
+ function populatePrintAreaSKS(item) {
+    document.getElementById('sksPrintNoSurat').innerText = 'No : ' + item.noSurat; document.getElementById('sksPrintNama').innerText = item.namaPasien; document.getElementById('sksPrintUmur').innerText = item.umur; document.getElementById('sksPrintJK').innerText = item.jk; document.getElementById('sksPrintPekerjaan').innerText = item.pekerjaan; document.getElementById('sksPrintAlamat').innerText = item.alamat; document.getElementById('sksPrintLama').innerText = item.lamaHari; document.getElementById('sksPrintLamaTerbilang').innerText = terbilangSKS(item.lamaHari); document.getElementById('sksPrintMulai').innerText = formatTglIndo(item.tglMulai); document.getElementById('sksPrintSelesai').innerText = formatTglIndo(item.tglSelesai); document.getElementById('sksPrintTglCetak').innerText = 'Payakumbuh, ' + item.tglCetak; document.getElementById('sksPrintDokter').innerText = item.dokter; document.getElementById('sksPrintSIP').innerText = getSIP(item.dokter);
+ }
+ function cetakUlangSKS(noSurat) {
+    let item = rawListSKS.find(x => x.noSurat === noSurat); if (!item) return;
+    populatePrintAreaSKS(item); eksekusiCetakSurat(item.noSurat, 'printAreaSKS');
+ }
+   function viewSKS(noSurat) {
+     let item = rawListSKS.find(x => x.noSurat === noSurat); if (!item) return;
+     populatePrintAreaSKS(item);
+     bukaModalPreviewSurat(item.noSurat, 'printAreaSKS', 'Surat Keterangan Sakit');
+  }
+  function downloadPdfSKS(noSurat) {
+    let item = rawListSKS.find(x => x.noSurat === noSurat); if (!item) return;
+    populatePrintAreaSKS(item); downloadPDFSurat(item.noSurat, 'printAreaSKS');
+ }
+ function handleCetakSKS(e) {
+   e.preventDefault(); if (!document.getElementById('sksIdPasien').value) { showToast('warning', 'Pilih pasien terlebih dahulu!'); return; }
+   let lamaVal = parseInt(document.getElementById('sksLamaHari').value, 10);
+   if (isNaN(lamaVal) || lamaVal < 1) { showToast('warning', 'Masukkan lama istirahat minimal 1 hari!'); return; }
+   if (lamaVal > 5) {
+     document.getElementById('sksLamaHari').value = 5;
+     hitungTglSelesaiSKS();
+     showToast('error', 'Isian ditolak! Lama istirahat surat sakit maksimal 5 hari.');
+     return;
+   }
+   let lamaInput = String(lamaVal);
+   let payload = { currentUser: window.activeNamaAccount, idPasien: document.getElementById('sksIdPasien').value, noRm: document.getElementById('sksNoRm').value, namaPasien: document.getElementById('sksNama').value, umur: document.getElementById('sksUmur').value, jk: document.getElementById('sksJK').value, alamat: document.getElementById('sksAlamat').value, pekerjaan: document.getElementById('sksPekerjaan').value, lamaHari: lamaInput, tglMulai: document.getElementById('sksTglMulai').value, tglSelesai: document.getElementById('sksTglSelesai').value, dokter: document.getElementById('sksDokter').value };
+   let btn = document.getElementById('btnCetakSKS'); btn.innerHTML = 'MENYIMPAN...'; btn.disabled = true;
+   
+   let blnStr = ("0" + (new Date().getMonth() + 1)).slice(-2); 
+   let blnRomawi = getBulanRomawi(blnStr); 
+   let thn4Digit = new Date().getFullYear().toString(); 
+   let urutStr = ("000" + (rawListSKS.length + 1)).slice(-3); 
+   let fallbackNo = "SKS/SHELDON/" + urutStr + "/" + blnRomawi + "-" + thn4Digit;
+   
+   if (typeof google !== 'undefined' && google.script && google.script.run && google.script.run.simpanSuratSakit) {
+       google.script.run.withSuccessHandler(res => {
+         btn.innerHTML = 'SIMPAN & CETAK SKS'; btn.disabled = false;
+         if (res.success) {
+           let finalNoSurat = res.noSurat && res.noSurat.includes('SKS') ? res.noSurat : fallbackNo;
+           document.getElementById('sksPrintNoSurat').innerText = 'No : ' + finalNoSurat; document.getElementById('sksPrintNama').innerText = payload.namaPasien; document.getElementById('sksPrintUmur').innerText = payload.umur; document.getElementById('sksPrintJK').innerText = payload.jk; document.getElementById('sksPrintPekerjaan').innerText = payload.pekerjaan; document.getElementById('sksPrintAlamat').innerText = payload.alamat; document.getElementById('sksPrintLama').innerText = payload.lamaHari; document.getElementById('sksPrintLamaTerbilang').innerText = terbilangSKS(payload.lamaHari); document.getElementById('sksPrintMulai').innerText = formatTglIndo(payload.tglMulai); document.getElementById('sksPrintSelesai').innerText = formatTglIndo(payload.tglSelesai); document.getElementById('sksPrintTglCetak').innerText = 'Payakumbuh, ' + formatTglIndo(getTodayIso()); document.getElementById('sksPrintDokter').innerText = payload.dokter; document.getElementById('sksPrintSIP').innerText = getSIP(payload.dokter);
+           eksekusiCetakSurat(finalNoSurat, 'printAreaSKS'); showToast('success', 'Surat Sakit berhasil disimpan.');
+           rawListSKS.unshift({ noSurat: finalNoSurat, tglCetak: formatTglIndo(getTodayIso()), namaPasien: payload.namaPasien, lamaHari: payload.lamaHari, ...payload }); dataSuratGlobal.unshift({jenisSurat: 'SKS', noSurat: finalNoSurat, tglCetak: formatTglIndo(getTodayIso()), namaPasien: payload.namaPasien, noRm: payload.noRm, dokter: payload.dokter}); resetFormSKS(); updateStatistikSurat(); searchSksTable(); 
+         } else showToast('error', res.message);
+       }).withFailureHandler(err => { btn.innerHTML = 'SIMPAN & CETAK SKS'; btn.disabled = false; showToast('error', 'Koneksi Terputus: ' + err.message); }).simpanSuratSakit(payload);
+   } else {
+       setTimeout(() => {
+           btn.innerHTML = 'SIMPAN & CETAK SKS'; btn.disabled = false;
+           document.getElementById('sksPrintNoSurat').innerText = 'No : ' + fallbackNo; document.getElementById('sksPrintNama').innerText = payload.namaPasien; document.getElementById('sksPrintUmur').innerText = payload.umur; document.getElementById('sksPrintJK').innerText = payload.jk; document.getElementById('sksPrintPekerjaan').innerText = payload.pekerjaan; document.getElementById('sksPrintAlamat').innerText = payload.alamat; document.getElementById('sksPrintLama').innerText = payload.lamaHari; document.getElementById('sksPrintLamaTerbilang').innerText = terbilangSKS(payload.lamaHari); document.getElementById('sksPrintMulai').innerText = formatTglIndo(payload.tglMulai); document.getElementById('sksPrintSelesai').innerText = formatTglIndo(payload.tglSelesai); document.getElementById('sksPrintTglCetak').innerText = 'Payakumbuh, ' + formatTglIndo(getTodayIso()); document.getElementById('sksPrintDokter').innerText = payload.dokter; document.getElementById('sksPrintSIP').innerText = getSIP(payload.dokter);
+           eksekusiCetakSurat(fallbackNo, 'printAreaSKS'); showToast('success', 'Preview Surat Sakit Ditampilkan.');
+           rawListSKS.unshift({ noSurat: fallbackNo, tglCetak: formatTglIndo(getTodayIso()), namaPasien: payload.namaPasien, lamaHari: payload.lamaHari, ...payload }); dataSuratGlobal.unshift({jenisSurat: 'SKS', noSurat: fallbackNo, tglCetak: formatTglIndo(getTodayIso()), namaPasien: payload.namaPasien, noRm: payload.noRm, dokter: payload.dokter}); resetFormSKS(); updateStatistikSurat(); searchSksTable(); 
+       }, 500);
+   }
+ }
+
+
+ // ===================================== SKP =====================================
+ function searchPasienSKP() { masterSearchPasienLogic(document.getElementById('skpSearchPasien').value.toLowerCase(), 'skpSearchResult', 'SKP', 'blue'); }
+ function pilihPasienSKP(id) {
+   let p = window.KlinikData.pasien.find(x => x.idPasien === id); if (!p) return;
+   document.getElementById('skpIdPasien').value = p.idPasien; document.getElementById('skpNoRm').value = p.noRm; document.getElementById('skpNama').value = p.namaPasien; document.getElementById('skpSearchPasien').value = p.namaPasien; document.getElementById('skpSearchResult').classList.add('hidden');
+   let rmList = (window.KlinikData.rekamMedis || []).filter(r => r.idPasien === id);
+   if (rmList.length > 0) { let lastRm = rmList[rmList.length - 1]; document.getElementById('skpDiagnosis').value = lastRm.assessmentICD || ''; document.getElementById('skpTindakan').value = lastRm.tindakanHariIni || ''; }
+ }
+ function resetFormSKP() { document.getElementById('formSKP').reset(); document.getElementById('skpIdPasien').value = ''; document.getElementById('skpNoRm').value = ''; populateDokterOptions(); }
+ function searchSkpTable() { 
+    if(debounceTimerId['skpTable']) clearTimeout(debounceTimerId['skpTable']);
+    debounceTimerId['skpTable'] = setTimeout(() => {
+       let q = document.getElementById('skpSearchTable').value.toLowerCase().trim(); filteredListSKP = rawListSKP.filter(s => (s.namaPasien || '').toLowerCase().includes(q)); pageSKP = 1; renderSkpTable(); 
+    }, 400);
+ }
+ function renderSkpTable() {
+   let tbody = document.getElementById('skpTableBody'); document.getElementById('skpTotalBadge').innerText = `Total: ${filteredListSKP.length} Surat`;
+   let totalPages = Math.ceil(filteredListSKP.length / SURAT_PER_PAGE) || 1; if (pageSKP > totalPages) pageSKP = totalPages;
+   document.getElementById('skpPageInfo').innerText = `Halaman ${pageSKP} dari ${totalPages}`; document.getElementById('btnPrevSKP').disabled = (pageSKP === 1); document.getElementById('btnNextSKP').disabled = (pageSKP === totalPages || filteredListSKP.length === 0);
+   let startIdx = (pageSKP - 1) * SURAT_PER_PAGE; let pageData = filteredListSKP.slice(startIdx, startIdx + SURAT_PER_PAGE);
+   if(pageData.length === 0) { tbody.innerHTML = '<tr><td colspan="5" class="text-center text-slate-400 py-6 font-bold">Belum ada riwayat SKP tersimpan.</td></tr>'; return; }
+   tbody.innerHTML = pageData.map(s => {
+       let tglTampil = formatTglAngka(s.tglCetak || '-');
+       return `<tr class="hover:bg-slate-50 transition-colors border-b border-slate-100"><td class="p-3 font-mono font-bold text-blue-700">${s.noSurat}</td><td class="p-3 font-bold text-slate-800">${s.namaPasien || '-'} <br> <span class="font-normal text-[10px] text-slate-500 font-mono">RM: ${s.noRm || '-'}</span></td><td class="p-3 text-slate-600 font-medium">${tglTampil}</td><td class="p-3 font-bold text-slate-800">${s.dokterTujuan || '-'}</td><td class="p-3 text-center"><div class="inline-flex gap-1.5"><button onclick="cetakUlangSKP('${s.noSurat}')" class="px-2.5 py-1.5 bg-white shadow-sm hover:bg-blue-50 hover:text-blue-700 rounded-lg text-[10px] font-bold border border-slate-200 transition-colors">🖨️ Cetak</button><button onclick="viewSKP('${s.noSurat}')" class="px-2.5 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-600 hover:text-white rounded-lg text-[10px] font-bold border border-blue-200 transition-colors">👁️ View</button></div></td></tr>`;
+   }).join('');
+ }
+ function prevPageSKP() { if(pageSKP > 1) { pageSKP--; renderSkpTable(); } }
+ function nextPageSKP() { let t = Math.ceil(filteredListSKP.length/SURAT_PER_PAGE); if(pageSKP < t) { pageSKP++; renderSkpTable(); } }
+ function cetakUlangSKP(noSurat) {
+    let item = rawListSKP.find(x => x.noSurat === noSurat); if (!item) return;
+    document.getElementById('skpPrintNoSurat').innerText = 'No : ' + item.noSurat; document.getElementById('skpPrintNama').innerText = item.namaPasien; document.getElementById('skpPrintNoRm').innerText = item.noRm; document.getElementById('skpPrintDiagnosis').innerText = item.diagnosis; document.getElementById('skpPrintTindakan').innerText = item.tindakan;
+    if (item.tglKontrol && item.tglKontrol.match(/\d{4}-\d{2}-\d{2}/)) { document.getElementById('skpPrintTglKontrol').innerText = formatTglIndo(item.tglKontrol); } else { document.getElementById('skpPrintTglKontrol').innerHTML = item.tglKontrol ? item.tglKontrol : '&nbsp;'; }
+    document.getElementById('skpPrintDokterTujuan').innerText = item.dokterTujuan; document.getElementById('skpPrintAlasan').innerHTML = item.alasanKontrol ? item.alasanKontrol : '&nbsp;'; document.getElementById('skpPrintTglCetak').innerText = 'Payakumbuh, ' + item.tglCetak; document.getElementById('skpPrintDokter').innerText = item.dokterTujuan; document.getElementById('skpPrintSIP').innerText = getSIP(item.dokterTujuan);
+    eksekusiCetakSurat(item.noSurat, 'printAreaSKP');
+ }
+ function handleCetakSKP(e) {
+   e.preventDefault(); if (!document.getElementById('skpIdPasien').value) { showToast('warning', 'Pilih pasien terlebih dahulu!'); return; }
+   let payload = { currentUser: window.activeNamaAccount, idPasien: document.getElementById('skpIdPasien').value, noRm: document.getElementById('skpNoRm').value, namaPasien: document.getElementById('skpNama').value, diagnosis: document.getElementById('skpDiagnosis').value, tindakan: document.getElementById('skpTindakan').value, tglKontrol: document.getElementById('skpTglKontrol').value || '', dokterTujuan: document.getElementById('skpDokterTujuan').value, alasanKontrol: document.getElementById('skpAlasan').value || '' };
+   let btn = document.getElementById('btnCetakSKP'); btn.innerHTML = 'MENYIMPAN...'; btn.disabled = true;
+   let blnStr = ("0" + (new Date().getMonth() + 1)).slice(-2); let blnRomawi = getBulanRomawi(blnStr); let thn4Digit = new Date().getFullYear().toString(); let urutStr = ("000" + (rawListSKP.length + 1)).slice(-3); 
+   let fallbackNo = "SKP/SHELDON/" + urutStr + "/" + blnRomawi + "-" + thn4Digit; 
+   
+   if (typeof google !== 'undefined' && google.script && google.script.run && google.script.run.simpanSuratKontrol) {
+       google.script.run.withSuccessHandler(res => {
+         btn.innerHTML = 'SIMPAN & CETAK SKP'; btn.disabled = false;
+         if (res.success) {
+           let finalNoSurat = res.noSurat && res.noSurat.includes('SKP') ? res.noSurat : fallbackNo;
+           document.getElementById('skpPrintNoSurat').innerText = 'No : ' + finalNoSurat; document.getElementById('skpPrintNama').innerText = payload.namaPasien; document.getElementById('skpPrintNoRm').innerText = payload.noRm; document.getElementById('skpPrintDiagnosis').innerText = payload.diagnosis; document.getElementById('skpPrintTindakan').innerText = payload.tindakan;
+           if (payload.tglKontrol && payload.tglKontrol.match(/\d{4}-\d{2}-\d{2}/)) { document.getElementById('skpPrintTglKontrol').innerText = formatTglIndo(payload.tglKontrol); } else { document.getElementById('skpPrintTglKontrol').innerHTML = payload.tglKontrol ? payload.tglKontrol : '&nbsp;'; }
+           document.getElementById('skpPrintDokterTujuan').innerText = payload.dokterTujuan; document.getElementById('skpPrintAlasan').innerHTML = payload.alasanKontrol ? payload.alasanKontrol : '&nbsp;'; document.getElementById('skpPrintTglCetak').innerText = 'Payakumbuh, ' + formatTglIndo(getTodayIso()); document.getElementById('skpPrintDokter').innerText = payload.dokterTujuan; document.getElementById('skpPrintSIP').innerText = getSIP(payload.dokterTujuan);
+           eksekusiCetakSurat(finalNoSurat, 'printAreaSKP'); showToast('success', 'Surat Kontrol berhasil disimpan.');
+           rawListSKP.unshift({ noSurat: finalNoSurat, tglCetak: formatTglIndo(getTodayIso()), namaPasien: payload.namaPasien, dokterTujuan: payload.dokterTujuan, ...payload }); dataSuratGlobal.unshift({jenisSurat: 'SKP', noSurat: finalNoSurat, tglCetak: formatTglIndo(getTodayIso()), namaPasien: payload.namaPasien, noRm: payload.noRm, dokter: payload.dokterTujuan}); resetFormSKP(); updateStatistikSurat(); searchSkpTable(); 
+         } else showToast('error', res.message);
+       }).withFailureHandler(err => { btn.innerHTML = 'SIMPAN & CETAK SKP'; btn.disabled = false; showToast('error', 'Koneksi Terputus: ' + err.message); }).simpanSuratKontrol(payload);
+   } else {
+       setTimeout(() => {
+           btn.innerHTML = 'SIMPAN & CETAK SKP'; btn.disabled = false;
+           document.getElementById('skpPrintNoSurat').innerText = 'No : ' + fallbackNo; document.getElementById('skpPrintNama').innerText = payload.namaPasien; document.getElementById('skpPrintNoRm').innerText = payload.noRm; document.getElementById('skpPrintDiagnosis').innerText = payload.diagnosis; document.getElementById('skpPrintTindakan').innerText = payload.tindakan;
+           if (payload.tglKontrol && payload.tglKontrol.match(/\d{4}-\d{2}-\d{2}/)) { document.getElementById('skpPrintTglKontrol').innerText = formatTglIndo(payload.tglKontrol); } else { document.getElementById('skpPrintTglKontrol').innerHTML = payload.tglKontrol ? payload.tglKontrol : '&nbsp;'; }
+           document.getElementById('skpPrintDokterTujuan').innerText = payload.dokterTujuan; document.getElementById('skpPrintAlasan').innerHTML = payload.alasanKontrol ? payload.alasanKontrol : '&nbsp;'; document.getElementById('skpPrintTglCetak').innerText = 'Payakumbuh, ' + formatTglIndo(getTodayIso()); document.getElementById('skpPrintDokter').innerText = payload.dokterTujuan; document.getElementById('skpPrintSIP').innerText = getSIP(payload.dokterTujuan);
+           eksekusiCetakSurat(fallbackNo, 'printAreaSKP'); showToast('success', 'Preview Surat Kontrol Ditampilkan.');
+           rawListSKP.unshift({ noSurat: fallbackNo, tglCetak: formatTglIndo(getTodayIso()), namaPasien: payload.namaPasien, dokterTujuan: payload.dokterTujuan, ...payload }); dataSuratGlobal.unshift({jenisSurat: 'SKP', noSurat: fallbackNo, tglCetak: formatTglIndo(getTodayIso()), namaPasien: payload.namaPasien, noRm: payload.noRm, dokter: payload.dokterTujuan}); resetFormSKP(); updateStatistikSurat(); searchSkpTable(); 
+       }, 500);
+   }
+ }
+
+
+ // ===================================== RSM =====================================
+ function searchPasienRSM() { masterSearchPasienLogic(document.getElementById('rsmSearchPasien').value.toLowerCase(), 'rsmSearchResult', 'RSM', 'purple'); }
+ function pilihPasienRSM(id) {
+   let p = window.KlinikData.pasien.find(x => x.idPasien === id); if (!p) return;
+   document.getElementById('rsmIdPasien').value = p.idPasien; document.getElementById('rsmNoRm').value = p.noRm;
+   let tglLahirFinal = p.tanggalLahir ? formatTglIndo(p.tanggalLahir) : '-'; let umurClean = String(p.umur).replace(/tahun|th/gi, '').trim(); let gabungUmur = umurClean ? ` / ${umurClean} Tahun` : '';
+   document.getElementById('rsmNama').value = p.namaPasien; document.getElementById('rsmUmur').value = tglLahirFinal + gabungUmur; document.getElementById('rsmAlamat').value = p.alamat || ''; document.getElementById('rsmSearchPasien').value = p.namaPasien; document.getElementById('rsmSearchResult').classList.add('hidden');
+   let rmList = (window.KlinikData.rekamMedis || []).filter(r => r.idPasien === id);
+   if (rmList.length > 0) {
+     let lastRm = rmList[rmList.length - 1]; document.getElementById('rsmRingkasanKlinis').value = (lastRm.chiefComplaint || '') + (lastRm.presentIllness ? ' | ' + lastRm.presentIllness : ''); document.getElementById('rsmPemeriksaanPenunjang').value = lastRm.pemeriksaanPenunjang || ''; document.getElementById('rsmDiagnosisKerja').value = lastRm.assessmentICD || ''; document.getElementById('rsmTindakanMedis').value = lastRm.tindakanHariIni || ''; document.getElementById('rsmMedikamentosa').value = lastRm.resepObat || '';
+     let edukasi = lastRm.catatanEdukasi || ''; if (edukasi.toLowerCase().includes('catatan edukasi') || edukasi.toLowerCase() === 'kondisi stabil pasca perawatan.') { edukasi = ''; } document.getElementById('rsmHasilPerawatan').value = edukasi;
+   }
+ }
+ function resetFormRSM() { document.getElementById('formRSM').reset(); document.getElementById('rsmIdPasien').value = ''; document.getElementById('rsmNoRm').value = ''; document.getElementById('rsmTglKunjungan').value = getTodayIso(); populateDokterOptions(); }
+ function searchRsmTable() { 
+    if(debounceTimerId['rsmTable']) clearTimeout(debounceTimerId['rsmTable']);
+    debounceTimerId['rsmTable'] = setTimeout(() => {
+       let q = document.getElementById('rsmSearchTable').value.toLowerCase().trim(); filteredListRSM = rawListRSM.filter(s => (s.namaPasien || '').toLowerCase().includes(q)); pageRSM = 1; renderRsmTable(); 
+    }, 400);
+ }
+ function renderRsmTable() {
+   let tbody = document.getElementById('rsmTableBody'); document.getElementById('rsmTotalBadge').innerText = `Total: ${filteredListRSM.length} Surat`;
+   let totalPages = Math.ceil(filteredListRSM.length / SURAT_PER_PAGE) || 1; if (pageRSM > totalPages) pageRSM = totalPages;
+   document.getElementById('rsmPageInfo').innerText = `Halaman ${pageRSM} dari ${totalPages}`; document.getElementById('btnPrevRSM').disabled = (pageRSM === 1); document.getElementById('btnNextRSM').disabled = (pageRSM === totalPages || filteredListRSM.length === 0);
+   let startIdx = (pageRSM - 1) * SURAT_PER_PAGE; let pageData = filteredListRSM.slice(startIdx, startIdx + SURAT_PER_PAGE);
+   if(pageData.length === 0) { tbody.innerHTML = '<tr><td colspan="6" class="text-center text-slate-400 py-6 font-bold">Belum ada riwayat RSM tersimpan.</td></tr>'; return; }
+   tbody.innerHTML = pageData.map(s => {
+       let tglTampil = formatTglAngka(s.tglCetak || '-');
+       return `<tr class="hover:bg-slate-50 transition-colors border-b border-slate-100"><td class="p-3 font-mono font-bold text-purple-700">${s.noSurat}</td><td class="p-3 font-bold text-slate-800">${s.namaPasien || '-'} <br> <span class="font-normal text-[10px] text-slate-500 font-mono">RM: ${s.noRm || '-'}</span></td><td class="p-3 text-slate-600 font-medium">${tglTampil}</td><td class="p-3 font-bold text-slate-800">${s.dokter || '-'}</td><td class="p-3 text-center"><div class="inline-flex gap-1.5"><button onclick="cetakUlangRSM('${s.noSurat}')" class="px-2.5 py-1.5 bg-white shadow-sm hover:bg-purple-50 hover:text-purple-700 rounded-lg text-[10px] font-bold border border-slate-200 transition-colors">🖨️ Cetak</button><button onclick="viewRSM('${s.noSurat}')" class="px-2.5 py-1.5 bg-purple-50 text-purple-700 hover:bg-purple-600 hover:text-white rounded-lg text-[10px] font-bold border border-purple-200 transition-colors">👁️ View</button></div></td></tr>`;
+   }).join('');
+ }
+ function prevPageRSM() { if(pageRSM > 1) { pageRSM--; renderRsmTable(); } }
+ function nextPageRSM() { let t = Math.ceil(filteredListRSM.length/SURAT_PER_PAGE); if(pageRSM < t) { pageRSM++; renderRsmTable(); } }
+ function populatePrintAreaRSM(item) {
+    document.getElementById('rsmPrintNoSurat').innerText = 'No : ' + item.noSurat; document.getElementById('rsmPrintNama').innerText = item.namaPasien; document.getElementById('rsmPrintNoRm').innerText = item.noRm; document.getElementById('rsmPrintUmur').innerText = item.umur; document.getElementById('rsmPrintTglKunjungan').innerText = formatTglIndo(item.tglKunjungan); document.getElementById('rsmPrintAlamat').innerText = item.alamat; document.getElementById('rsmPrintRingkasan').innerText = item.ringkasanKlinis; document.getElementById('rsmPrintPenunjang').innerText = item.pemeriksaanPenunjang; document.getElementById('rsmPrintDiagnosis').innerText = item.diagnosisKerja; document.getElementById('rsmPrintTindakan').innerText = item.tindakanMedis; document.getElementById('rsmPrintObat').innerText = item.medikamentosa; document.getElementById('rsmPrintHasil').innerText = item.hasilPerawatan; document.getElementById('rsmPrintKeperluan').innerText = item.keperluan; document.getElementById('rsmPrintTglCetak').innerText = 'Payakumbuh, ' + item.tglCetak; document.getElementById('rsmPrintDokter').innerText = item.dokter; document.getElementById('rsmPrintSIP').innerText = getSIP(item.dokter); document.getElementById('rsmPrintTtdPasien').innerText = item.namaPasien;
+ }
+ function cetakUlangRSM(noSurat) {
+    let item = rawListRSM.find(x => x.noSurat === noSurat); if (!item) return;
+    populatePrintAreaRSM(item); eksekusiCetakSurat(item.noSurat, 'printAreaRSM');
+ }
+   function viewRSM(noSurat) {
+     let item = rawListRSM.find(x => x.noSurat === noSurat); if (!item) return;
+     populatePrintAreaRSM(item);
+     bukaModalPreviewSurat(item.noSurat, 'printAreaRSM', 'Resume Medis Pasien');
+  }
+  function downloadPdfRSM(noSurat) {
+    let item = rawListRSM.find(x => x.noSurat === noSurat); if (!item) return;
+    populatePrintAreaRSM(item); downloadPDFSurat(item.noSurat, 'printAreaRSM');
+ }
+ function handleCetakRSM(e) {
+   e.preventDefault(); if (!document.getElementById('rsmIdPasien').value) { showToast('warning', 'Pilih pasien terlebih dahulu!'); return; }
+   const payload = { currentUser: window.activeNamaAccount, idPasien: document.getElementById('rsmIdPasien').value, noRm: document.getElementById('rsmNoRm').value, namaPasien: document.getElementById('rsmNama').value, umur: document.getElementById('rsmUmur').value, alamat: document.getElementById('rsmAlamat').value, tglKunjungan: document.getElementById('rsmTglKunjungan').value, ringkasanKlinis: document.getElementById('rsmRingkasanKlinis').value, pemeriksaanPenunjang: document.getElementById('rsmPemeriksaanPenunjang').value, diagnosisKerja: document.getElementById('rsmDiagnosisKerja').value, tindakanMedis: document.getElementById('rsmTindakanMedis').value, medikamentosa: document.getElementById('rsmMedikamentosa').value, hasilPerawatan: document.getElementById('rsmHasilPerawatan').value, keperluan: document.getElementById('rsmKeperluan').value, dokter: document.getElementById('rsmDokter').value };
+   for (let key in payload) { if (!payload[key] || payload[key].trim() === "") { showToast('error', 'Semua isian pada Resume Medis wajib diisi lengkap!'); return; } }
+   let btn = document.getElementById('btnCetakRSM'); btn.innerHTML = 'MENYIMPAN...'; btn.disabled = true;
+   let blnStr = ("0" + (new Date().getMonth() + 1)).slice(-2); let blnRomawi = getBulanRomawi(blnStr); let thn4Digit = new Date().getFullYear().toString(); let urutStr = ("000" + (rawListRSM.length + 1)).slice(-3); let fallbackNo = "RMP/SHELDON/" + urutStr + "/" + blnRomawi + "-" + thn4Digit;
+   if (typeof google !== 'undefined' && google.script && google.script.run && google.script.run.simpanResumeMedis) {
+       google.script.run.withSuccessHandler(res => {
+         btn.innerHTML = 'SIMPAN & CETAK RESUME'; btn.disabled = false;
+         if (res.success) {
+           let finalNoSurat = res.noSurat && res.noSurat.includes('RMP') ? res.noSurat : fallbackNo;
+           document.getElementById('rsmPrintNoSurat').innerText = 'No : ' + finalNoSurat; document.getElementById('rsmPrintNama').innerText = payload.namaPasien; document.getElementById('rsmPrintNoRm').innerText = payload.noRm; document.getElementById('rsmPrintUmur').innerText = payload.umur; document.getElementById('rsmPrintTglKunjungan').innerText = formatTglIndo(payload.tglKunjungan); document.getElementById('rsmPrintAlamat').innerText = payload.alamat; document.getElementById('rsmPrintRingkasan').innerText = payload.ringkasanKlinis; document.getElementById('rsmPrintPenunjang').innerText = payload.pemeriksaanPenunjang; document.getElementById('rsmPrintDiagnosis').innerText = payload.diagnosisKerja; document.getElementById('rsmPrintTindakan').innerText = payload.tindakanMedis; document.getElementById('rsmPrintObat').innerText = payload.medikamentosa; document.getElementById('rsmPrintHasil').innerText = payload.hasilPerawatan; document.getElementById('rsmPrintKeperluan').innerText = payload.keperluan; document.getElementById('rsmPrintTglCetak').innerText = 'Payakumbuh, ' + formatTglIndo(getTodayIso()); document.getElementById('rsmPrintDokter').innerText = payload.dokter; document.getElementById('rsmPrintSIP').innerText = getSIP(payload.dokter); document.getElementById('rsmPrintTtdPasien').innerText = payload.namaPasien;
+           eksekusiCetakSurat(finalNoSurat, 'printAreaRSM'); showToast('success', 'Resume Medis berhasil disimpan.');
+           rawListRSM.unshift({ noSurat: finalNoSurat, tglCetak: formatTglIndo(getTodayIso()), ...payload }); dataSuratGlobal.unshift({jenisSurat: 'RSM', noSurat: finalNoSurat, tglCetak: formatTglIndo(getTodayIso()), namaPasien: payload.namaPasien, noRm: payload.noRm, dokter: payload.dokter}); resetFormRSM(); updateStatistikSurat(); searchRsmTable(); 
+         } else showToast('error', res.message);
+       }).withFailureHandler(err => { btn.innerHTML = 'SIMPAN & CETAK RESUME'; btn.disabled = false; showToast('error', 'Koneksi Terputus: ' + err.message); }).simpanResumeMedis(payload);
+   } else {
+       setTimeout(() => {
+           btn.innerHTML = 'SIMPAN & CETAK RESUME'; btn.disabled = false;
+           document.getElementById('rsmPrintNoSurat').innerText = 'No : ' + fallbackNo; document.getElementById('rsmPrintNama').innerText = payload.namaPasien; document.getElementById('rsmPrintNoRm').innerText = payload.noRm; document.getElementById('rsmPrintUmur').innerText = payload.umur; document.getElementById('rsmPrintTglKunjungan').innerText = formatTglIndo(payload.tglKunjungan); document.getElementById('rsmPrintAlamat').innerText = payload.alamat; document.getElementById('rsmPrintRingkasan').innerText = payload.ringkasanKlinis; document.getElementById('rsmPrintPenunjang').innerText = payload.pemeriksaanPenunjang; document.getElementById('rsmPrintDiagnosis').innerText = payload.diagnosisKerja; document.getElementById('rsmPrintTindakan').innerText = payload.tindakanMedis; document.getElementById('rsmPrintObat').innerText = payload.medikamentosa; document.getElementById('rsmPrintHasil').innerText = payload.hasilPerawatan; document.getElementById('rsmPrintKeperluan').innerText = payload.keperluan; document.getElementById('rsmPrintTglCetak').innerText = 'Payakumbuh, ' + formatTglIndo(getTodayIso()); document.getElementById('rsmPrintDokter').innerText = payload.dokter; document.getElementById('rsmPrintSIP').innerText = getSIP(payload.dokter); document.getElementById('rsmPrintTtdPasien').innerText = payload.namaPasien;
+           eksekusiCetakSurat(fallbackNo, 'printAreaRSM'); showToast('success', 'Preview Resume Medis Ditampilkan.');
+           rawListRSM.unshift({ noSurat: fallbackNo, tglCetak: formatTglIndo(getTodayIso()), ...payload }); dataSuratGlobal.unshift({jenisSurat: 'RSM', noSurat: fallbackNo, tglCetak: formatTglIndo(getTodayIso()), namaPasien: payload.namaPasien, noRm: payload.noRm, dokter: payload.dokter}); resetFormRSM(); updateStatistikSurat(); searchRsmTable(); 
+       }, 500);
+   }
+ }
+
+
+ // ===================================== SPM =====================================
+ function searchPasienSPM() { masterSearchPasienLogic(document.getElementById('spmSearchPasien').value.toLowerCase(), 'spmSearchResult', 'SPM', 'rose'); }
+ function pilihPasienSPM(id) {
+   let p = window.KlinikData.pasien.find(x => x.idPasien === id); if (!p) return;
+   document.getElementById('spmIdPasien').value = p.idPasien; document.getElementById('spmNoRm').value = p.noRm;
+   let tglLahirFinal = p.tanggalLahir ? formatTglIndo(p.tanggalLahir) : '-'; let umurClean = String(p.umur).replace(/tahun|th/gi, '').trim(); let gabungUmur = umurClean ? ` / ${umurClean} Tahun` : '';
+   document.getElementById('spmNama').value = p.namaPasien; document.getElementById('spmUmur').value = tglLahirFinal + gabungUmur; document.getElementById('spmJK').value = p.jenisKelamin === 'L' || p.jenisKelamin === 'Laki-Laki' ? 'Laki-Laki' : (p.jenisKelamin ? 'Perempuan' : '-'); document.getElementById('spmAlamat').value = p.alamat || '-'; document.getElementById('spmSearchPasien').value = p.namaPasien; document.getElementById('spmSearchResult').classList.add('hidden');
+   let rmList = (window.KlinikData.rekamMedis || []).filter(r => r.idPasien === id);
+   if (rmList.length > 0) { let lastRm = rmList[rmList.length - 1]; document.getElementById('spmAnamnesa').value = (lastRm.chiefComplaint || '') + (lastRm.presentIllness ? ' | ' + lastRm.presentIllness : ''); document.getElementById('spmFisik').value = lastRm.pemeriksaanPenunjang || ''; document.getElementById('spmDiagnosis').value = lastRm.assessmentICD || ''; document.getElementById('spmTerapi').value = (lastRm.tindakanHariIni || '') + (lastRm.resepObat ? ' | ' + lastRm.resepObat : ''); }
+ }
+ function resetFormSPM() { document.getElementById('formSPM').reset(); document.getElementById('spmIdPasien').value = ''; document.getElementById('spmNoRm').value = ''; document.getElementById('spmTglCetak').value = getTodayIso(); populateDokterOptions(); }
+ function searchSpmTable() { 
+    if(debounceTimerId['spmTable']) clearTimeout(debounceTimerId['spmTable']);
+    debounceTimerId['spmTable'] = setTimeout(() => {
+       let q = document.getElementById('spmSearchTable').value.toLowerCase().trim(); filteredListSPM = rawListSPM.filter(s => (s.namaPasien || '').toLowerCase().includes(q)); pageSPM = 1; renderSpmTable(); 
+    }, 400);
+ }
+ function renderSpmTable() {
+   let tbody = document.getElementById('spmTableBody'); document.getElementById('spmTotalBadge').innerText = `Total: ${filteredListSPM.length} Surat`;
+   let totalPages = Math.ceil(filteredListSPM.length / SURAT_PER_PAGE) || 1; if (pageSPM > totalPages) pageSPM = totalPages;
+   document.getElementById('spmPageInfo').innerText = `Halaman ${pageSPM} dari ${totalPages}`; document.getElementById('btnPrevSPM').disabled = (pageSPM === 1); document.getElementById('btnNextSPM').disabled = (pageSPM === totalPages || filteredListSPM.length === 0);
+   let startIdx = (pageSPM - 1) * SURAT_PER_PAGE; let pageData = filteredListSPM.slice(startIdx, startIdx + SURAT_PER_PAGE);
+   if(pageData.length === 0) { tbody.innerHTML = '<tr><td colspan="5" class="text-center text-slate-400 py-6 font-bold">Belum ada riwayat Surat Pengantar Medis tersimpan.</td></tr>'; return; }
+   tbody.innerHTML = pageData.map(s => {
+       let tglTampil = formatTglAngka(s.tglCetak || '-');
+       return `<tr class="hover:bg-slate-50 transition-colors border-b border-slate-100"><td class="p-3 font-mono font-bold text-rose-700">${s.noSurat}</td><td class="p-3 font-bold text-slate-800">${s.namaPasien || '-'} <br> <span class="font-normal text-[10px] text-slate-500 font-mono">RM: ${s.noRm || '-'}</span></td><td class="p-3 text-slate-600 font-medium">${tglTampil}</td><td class="p-3 font-bold text-slate-800">${s.tujuan || '-'}</td><td class="p-3 text-center"><div class="inline-flex gap-1.5"><button onclick="cetakUlangSPM('${s.noSurat}')" class="px-2.5 py-1.5 bg-white shadow-sm hover:bg-rose-50 hover:text-rose-700 rounded-lg text-[10px] font-bold border border-slate-200 transition-colors">🖨️ Cetak</button><button onclick="viewSPM('${s.noSurat}')" class="px-2.5 py-1.5 bg-rose-50 text-rose-700 hover:bg-rose-600 hover:text-white rounded-lg text-[10px] font-bold border border-rose-200 transition-colors">👁️ View</button></div></td></tr>`;
+   }).join('');
+ }
+ function prevPageSPM() { if(pageSPM > 1) { pageSPM--; renderSpmTable(); } }
+ function nextPageSPM() { let t = Math.ceil(filteredListSPM.length/SURAT_PER_PAGE); if(pageSPM < t) { pageSPM++; renderSpmTable(); } }
+ function populatePrintAreaSPM(item) {
+    document.getElementById('spmPrintNoSurat').innerText = 'No : ' + item.noSurat; document.getElementById('spmPrintTglAtas').innerText = 'Payakumbuh, ' + item.tglCetak; document.getElementById('spmPrintTujuan').innerText = item.tujuan; document.getElementById('spmPrintNama').innerText = item.namaPasien; document.getElementById('spmPrintUmur').innerText = item.umur; document.getElementById('spmPrintJK').innerText = item.jk; document.getElementById('spmPrintAlamat').innerText = item.alamat; document.getElementById('spmPrintAnamnesa').innerText = item.anamnesa; document.getElementById('spmPrintFisik').innerText = item.fisik; document.getElementById('spmPrintDiagnosis').innerText = item.diagnosis; document.getElementById('spmPrintTerapi').innerText = item.terapi; document.getElementById('spmPrintDokter').innerText = item.dokter; document.getElementById('spmPrintSIP').innerText = getSIP(item.dokter);
+ }
+ function cetakUlangSPM(noSurat) {
+    let item = rawListSPM.find(x => x.noSurat === noSurat); if (!item) return;
+    populatePrintAreaSPM(item); eksekusiCetakSurat(item.noSurat, 'printAreaSPM');
+ }
+   function viewSPM(noSurat) {
+     let item = rawListSPM.find(x => x.noSurat === noSurat); if (!item) return;
+     populatePrintAreaSPM(item);
+     bukaModalPreviewSurat(item.noSurat, 'printAreaSPM', 'Surat Rujukan Medis');
+  }
+  function downloadPdfSPM(noSurat) {
+    let item = rawListSPM.find(x => x.noSurat === noSurat); if (!item) return;
+    populatePrintAreaSPM(item); downloadPDFSurat(item.noSurat, 'printAreaSPM');
+ }
+ function handleCetakSPM(e) {
+   e.preventDefault(); if (!document.getElementById('spmIdPasien').value) { showToast('warning', 'Pilih pasien terlebih dahulu!'); return; }
+   const payload = { currentUser: window.activeNamaAccount, idPasien: document.getElementById('spmIdPasien').value, noRm: document.getElementById('spmNoRm').value, namaPasien: document.getElementById('spmNama').value, umur: document.getElementById('spmUmur').value, jk: document.getElementById('spmJK').value, alamat: document.getElementById('spmAlamat').value, tujuan: document.getElementById('spmTujuan').value, tglCetakOri: document.getElementById('spmTglCetak').value, anamnesa: document.getElementById('spmAnamnesa').value, fisik: document.getElementById('spmFisik').value, diagnosis: document.getElementById('spmDiagnosis').value, terapi: document.getElementById('spmTerapi').value, dokter: document.getElementById('spmDokter').value };
+   for (let key in payload) { if (!payload[key] || payload[key].trim() === "") { showToast('error', 'Semua isian Rujukan wajib diisi lengkap!'); return; } }
+   let btn = document.getElementById('btnCetakSPM'); btn.innerHTML = 'MENYIMPAN...'; btn.disabled = true;
+   let blnStr = ("0" + (new Date().getMonth() + 1)).slice(-2); let blnRomawi = getBulanRomawi(blnStr); let thn4Digit = new Date().getFullYear().toString(); let urutStr = ("000" + (rawListSPM.length + 1)).slice(-3); 
+   let fallbackNo = "SRP/SHELDON/" + urutStr + "/" + blnRomawi + "-" + thn4Digit; 
+   let formattedTglCetak = formatTglIndo(payload.tglCetakOri);
+   
+   if (typeof google !== 'undefined' && google.script && google.script.run && google.script.run.simpanSuratRujukan) {
+       google.script.run.withSuccessHandler(res => {
+         btn.innerHTML = 'SIMPAN & CETAK SRP'; btn.disabled = false;
+         if (res.success) {
+           let finalNoSurat = res.noSurat && res.noSurat.includes('SRP') ? res.noSurat : fallbackNo;
+           document.getElementById('spmPrintNoSurat').innerText = 'No : ' + finalNoSurat; document.getElementById('spmPrintTglAtas').innerText = 'Payakumbuh, ' + formattedTglCetak; document.getElementById('spmPrintTujuan').innerText = payload.tujuan; document.getElementById('spmPrintNama').innerText = payload.namaPasien; document.getElementById('spmPrintUmur').innerText = payload.umur; document.getElementById('spmPrintJK').innerText = payload.jk; document.getElementById('spmPrintAlamat').innerText = payload.alamat; document.getElementById('spmPrintAnamnesa').innerText = payload.anamnesa; document.getElementById('spmPrintFisik').innerText = payload.fisik; document.getElementById('spmPrintDiagnosis').innerText = payload.diagnosis; document.getElementById('spmPrintTerapi').innerText = payload.terapi; document.getElementById('spmPrintDokter').innerText = payload.dokter; document.getElementById('spmPrintSIP').innerText = getSIP(payload.dokter);
+           eksekusiCetakSurat(finalNoSurat, 'printAreaSPM'); showToast('success', 'Surat Rujukan berhasil disimpan.');
+           rawListSPM.unshift({ noSurat: finalNoSurat, tglCetak: formattedTglCetak, ...payload }); dataSuratGlobal.unshift({jenisSurat: 'SRP', noSurat: finalNoSurat, tglCetak: formattedTglCetak, namaPasien: payload.namaPasien, noRm: payload.noRm, dokter: payload.dokter}); resetFormSPM(); updateStatistikSurat(); searchSpmTable(); 
+         } else showToast('error', res.message);
+       }).withFailureHandler(err => { btn.innerHTML = 'SIMPAN & CETAK SRP'; btn.disabled = false; showToast('error', 'Koneksi Terputus: ' + err.message); }).simpanSuratRujukan(payload);
+   } else {
+       setTimeout(() => {
+           btn.innerHTML = 'SIMPAN & CETAK SRP'; btn.disabled = false;
+           document.getElementById('spmPrintNoSurat').innerText = 'No : ' + fallbackNo; document.getElementById('spmPrintTglAtas').innerText = 'Payakumbuh, ' + formattedTglCetak; document.getElementById('spmPrintTujuan').innerText = payload.tujuan; document.getElementById('spmPrintNama').innerText = payload.namaPasien; document.getElementById('spmPrintUmur').innerText = payload.umur; document.getElementById('spmPrintJK').innerText = payload.jk; document.getElementById('spmPrintAlamat').innerText = payload.alamat; document.getElementById('spmPrintAnamnesa').innerText = payload.anamnesa; document.getElementById('spmPrintFisik').innerText = payload.fisik; document.getElementById('spmPrintDiagnosis').innerText = payload.diagnosis; document.getElementById('spmPrintTerapi').innerText = payload.terapi; document.getElementById('spmPrintDokter').innerText = payload.dokter; document.getElementById('spmPrintSIP').innerText = getSIP(payload.dokter);
+           eksekusiCetakSurat(fallbackNo, 'printAreaSPM'); showToast('success', 'Preview Surat Rujukan Ditampilkan.');
+           rawListSPM.unshift({ noSurat: fallbackNo, tglCetak: formattedTglCetak, ...payload }); dataSuratGlobal.unshift({jenisSurat: 'SRP', noSurat: fallbackNo, tglCetak: formattedTglCetak, namaPasien: payload.namaPasien, noRm: payload.noRm, dokter: payload.dokter}); resetFormSPM(); updateStatistikSurat(); searchSpmTable(); 
+       }, 500);
+   }
+ }
+
+
+ // ===================================== LAB =====================================
+ function searchPasienLAB() { masterSearchPasienLogic(document.getElementById('labSearchPasien').value.toLowerCase(), 'labSearchResult', 'LAB', 'cyan'); }
+ function pilihPasienLAB(id) {
+   let p = window.KlinikData.pasien.find(x => x.idPasien === id); if (!p) return;
+   document.getElementById('labIdPasien').value = p.idPasien; document.getElementById('labNoRm').value = p.noRm;
+   let tglLahirFinal = p.tanggalLahir ? formatTglIndo(p.tanggalLahir) : '-'; let umurClean = String(p.umur).replace(/tahun|th/gi, '').trim(); let gabungUmur = umurClean ? ` / ${umurClean} Tahun` : '';
+   document.getElementById('labNama').value = p.namaPasien; document.getElementById('labUmur').value = tglLahirFinal + gabungUmur; document.getElementById('labJK').value = p.jenisKelamin === 'L' || p.jenisKelamin === 'Laki-Laki' ? 'Laki-Laki' : (p.jenisKelamin ? 'Perempuan' : '-'); document.getElementById('labAlamat').value = p.alamat || '-'; document.getElementById('labSearchPasien').value = p.namaPasien; document.getElementById('labSearchResult').classList.add('hidden');
+   let rmList = (window.KlinikData.rekamMedis || []).filter(r => r.idPasien === id);
+   if (rmList.length > 0) { let lastRm = rmList[rmList.length - 1]; document.getElementById('labDiagnosis').value = lastRm.assessmentICD || ''; }
+ }
+ function resetFormLAB() { document.getElementById('formLAB').reset(); document.getElementById('labIdPasien').value = ''; document.getElementById('labNoRm').value = ''; document.getElementById('labTglCetak').value = getTodayIso(); populateDokterOptions(); }
+ function searchLabTable() { 
+    if(debounceTimerId['labTable']) clearTimeout(debounceTimerId['labTable']);
+    debounceTimerId['labTable'] = setTimeout(() => {
+       let q = document.getElementById('labSearchTable').value.toLowerCase().trim(); filteredListLAB = rawListLAB.filter(s => (s.namaPasien || '').toLowerCase().includes(q)); pageLAB = 1; renderLabTable(); 
+    }, 400);
+ }
+ function renderLabTable() {
+   let tbody = document.getElementById('labTableBody'); document.getElementById('labTotalBadge').innerText = `Total: ${filteredListLAB.length} Surat`;
+   let totalPages = Math.ceil(filteredListLAB.length / SURAT_PER_PAGE) || 1; if (pageLAB > totalPages) pageLAB = totalPages;
+   document.getElementById('labPageInfo').innerText = `Halaman ${pageLAB} dari ${totalPages}`; document.getElementById('btnPrevLAB').disabled = (pageLAB === 1); document.getElementById('btnNextLAB').disabled = (pageLAB === totalPages || filteredListLAB.length === 0);
+   let startIdx = (pageLAB - 1) * SURAT_PER_PAGE; let pageData = filteredListLAB.slice(startIdx, startIdx + SURAT_PER_PAGE);
+   if(pageData.length === 0) { tbody.innerHTML = '<tr><td colspan="5" class="text-center text-slate-400 py-6 font-bold">Belum ada riwayat Pengantar Lab tersimpan.</td></tr>'; return; }
+   tbody.innerHTML = pageData.map(s => {
+       let tglTampil = formatTglAngka(s.tglCetak || '-');
+       return `<tr class="hover:bg-slate-50 transition-colors border-b border-slate-100"><td class="p-3 font-mono font-bold text-cyan-700">${s.noSurat}</td><td class="p-3 font-bold text-slate-800">${s.namaPasien || '-'} <br> <span class="font-normal text-[10px] text-slate-500 font-mono">RM: ${s.noRm || '-'}</span></td><td class="p-3 text-slate-600 font-medium">${tglTampil}</td><td class="p-3 font-bold text-slate-800">${s.diagnosis || '-'}</td><td class="p-3 text-center"><div class="inline-flex gap-1.5"><button onclick="cetakUlangLAB('${s.noSurat}')" class="px-2.5 py-1.5 bg-white shadow-sm hover:bg-cyan-50 hover:text-cyan-700 rounded-lg text-[10px] font-bold border border-slate-200 transition-colors">🖨️ Cetak</button><button onclick="viewLAB('${s.noSurat}')" class="px-2.5 py-1.5 bg-cyan-50 text-cyan-700 hover:bg-cyan-600 hover:text-white rounded-lg text-[10px] font-bold border border-cyan-200 transition-colors">👁️ View</button></div></td></tr>`;
+   }).join('');
+ }
+ function prevPageLAB() { if(pageLAB > 1) { pageLAB--; renderLabTable(); } }
+ function nextPageLAB() { let t = Math.ceil(filteredListLAB.length/SURAT_PER_PAGE); if(pageLAB < t) { pageLAB++; renderLabTable(); } }
+ function cetakUlangLAB(noSurat) {
+    let item = rawListLAB.find(x => x.noSurat === noSurat); if (!item) return;
+    document.getElementById('labPrintNoSurat').innerText = 'No : ' + item.noSurat; document.getElementById('labPrintTglAtas').innerText = 'Payakumbuh, ' + item.tglCetak; document.getElementById('labPrintTujuan').innerText = item.tujuan; document.getElementById('labPrintNama').innerText = item.namaPasien; document.getElementById('labPrintUmur').innerText = item.umur; document.getElementById('labPrintJK').innerText = item.jk; document.getElementById('labPrintAlamat').innerText = item.alamat; document.getElementById('labPrintDiagnosis').innerText = item.diagnosis; document.getElementById('labPrintPemeriksaan').innerHTML = (item.pemeriksaan || '').replace(/\n/g, '<br>'); document.getElementById('labPrintDokter').innerText = item.dokter; document.getElementById('labPrintSIP').innerText = getSIP(item.dokter);
+    eksekusiCetakSurat(item.noSurat, 'printAreaLAB');
+ }
+ function handleCetakLAB(e) {
+   e.preventDefault(); if (!document.getElementById('labIdPasien').value) { showToast('warning', 'Pilih pasien terlebih dahulu!'); return; }
+   const payload = { currentUser: window.activeNamaAccount, idPasien: document.getElementById('labIdPasien').value, noRm: document.getElementById('labNoRm').value, namaPasien: document.getElementById('labNama').value, umur: document.getElementById('labUmur').value, jk: document.getElementById('labJK').value, alamat: document.getElementById('labAlamat').value, tujuan: document.getElementById('labTujuan').value, tglCetakOri: document.getElementById('labTglCetak').value, diagnosis: document.getElementById('labDiagnosis').value, pemeriksaan: document.getElementById('labPemeriksaan').value, dokter: document.getElementById('labDokter').value };
+   for (let key in payload) { if (!payload[key] || payload[key].trim() === "") { showToast('error', 'Semua isian LAB wajib diisi lengkap!'); return; } }
+   let btn = document.getElementById('btnCetakLAB'); btn.innerHTML = 'MENYIMPAN...'; btn.disabled = true;
+   let blnStr = ("0" + (new Date().getMonth() + 1)).slice(-2); let blnRomawi = getBulanRomawi(blnStr); let thn4Digit = new Date().getFullYear().toString(); let urutStr = ("000" + (rawListLAB.length + 1)).slice(-3); let fallbackNo = "SPL/SHELDON/" + urutStr + "-" + blnRomawi + "-" + thn4Digit; let formattedTglCetak = formatTglIndo(payload.tglCetakOri);
+   
+   let teksPemeriksaanCetak = payload.pemeriksaan.replace(/\n/g, '<br>');
+
+
+   if (typeof google !== 'undefined' && google.script && google.script.run && google.script.run.simpanSuratLab) {
+       google.script.run.withSuccessHandler(res => {
+         btn.innerHTML = 'SIMPAN & CETAK LAB'; btn.disabled = false;
+         if (res.success) {
+           let finalNoSurat = res.noSurat && res.noSurat.includes('SPL') ? res.noSurat : fallbackNo;
+           document.getElementById('labPrintNoSurat').innerText = 'No : ' + finalNoSurat; document.getElementById('labPrintTglAtas').innerText = 'Payakumbuh, ' + formattedTglCetak; document.getElementById('labPrintTujuan').innerText = payload.tujuan; document.getElementById('labPrintNama').innerText = payload.namaPasien; document.getElementById('labPrintUmur').innerText = payload.umur; document.getElementById('labPrintJK').innerText = payload.jk; document.getElementById('labPrintAlamat').innerText = payload.alamat; document.getElementById('labPrintDiagnosis').innerText = payload.diagnosis; document.getElementById('labPrintPemeriksaan').innerHTML = teksPemeriksaanCetak; document.getElementById('labPrintDokter').innerText = payload.dokter; document.getElementById('labPrintSIP').innerText = getSIP(payload.dokter);
+           eksekusiCetakSurat(finalNoSurat, 'printAreaLAB'); showToast('success', 'Surat Lab berhasil disimpan.');
+           rawListLAB.unshift({ noSurat: finalNoSurat, tglCetak: formattedTglCetak, ...payload }); dataSuratGlobal.unshift({jenisSurat: 'LAB', noSurat: finalNoSurat, tglCetak: formattedTglCetak, namaPasien: payload.namaPasien, noRm: payload.noRm, dokter: payload.dokter}); resetFormLAB(); updateStatistikSurat(); searchLabTable(); 
+         } else showToast('error', res.message);
+       }).withFailureHandler(err => { btn.innerHTML = 'SIMPAN & CETAK LAB'; btn.disabled = false; showToast('error', 'Koneksi Terputus: ' + err.message); }).simpanSuratLab(payload);
+   } else {
+       setTimeout(() => {
+           btn.innerHTML = 'SIMPAN & CETAK LAB'; btn.disabled = false;
+           document.getElementById('labPrintNoSurat').innerText = 'No : ' + fallbackNo; document.getElementById('labPrintTglAtas').innerText = 'Payakumbuh, ' + formattedTglCetak; document.getElementById('labPrintTujuan').innerText = payload.tujuan; document.getElementById('labPrintNama').innerText = payload.namaPasien; document.getElementById('labPrintUmur').innerText = payload.umur; document.getElementById('labPrintJK').innerText = payload.jk; document.getElementById('labPrintAlamat').innerText = payload.alamat; document.getElementById('labPrintDiagnosis').innerText = payload.diagnosis; document.getElementById('labPrintPemeriksaan').innerHTML = teksPemeriksaanCetak; document.getElementById('labPrintDokter').innerText = payload.dokter; document.getElementById('labPrintSIP').innerText = getSIP(payload.dokter);
+           eksekusiCetakSurat(fallbackNo, 'printAreaLAB'); showToast('success', 'Preview Surat Lab Ditampilkan.');
+           rawListLAB.unshift({ noSurat: fallbackNo, tglCetak: formattedTglCetak, ...payload }); dataSuratGlobal.unshift({jenisSurat: 'LAB', noSurat: fallbackNo, tglCetak: formattedTglCetak, namaPasien: payload.namaPasien, noRm: payload.noRm, dokter: payload.dokter}); resetFormLAB(); updateStatistikSurat(); searchLabTable(); 
+       }, 500);
+   }
+ }
+
+
+ // ===================================== RAD (RADIOLOGI) =====================================
+ function searchPasienRAD() { masterSearchPasienLogic(document.getElementById('radSearchPasien').value.toLowerCase(), 'radSearchResult', 'RAD', 'indigo'); }
+ function pilihPasienRAD(id) {
+   let p = window.KlinikData.pasien.find(x => x.idPasien === id); if (!p) return;
+   document.getElementById('radIdPasien').value = p.idPasien; document.getElementById('radNoRm').value = p.noRm;
+   let tglLahirFinal = p.tanggalLahir ? formatTglIndo(p.tanggalLahir) : '-'; let umurClean = String(p.umur).replace(/tahun|th/gi, '').trim(); let gabungUmur = umurClean ? ` / ${umurClean} Tahun` : '';
+   document.getElementById('radNama').value = p.namaPasien; document.getElementById('radUmur').value = tglLahirFinal + gabungUmur; document.getElementById('radJK').value = p.jenisKelamin === 'L' || p.jenisKelamin === 'Laki-Laki' ? 'Laki-Laki' : (p.jenisKelamin ? 'Perempuan' : '-'); document.getElementById('radAlamat').value = p.alamat || '-'; document.getElementById('radSearchPasien').value = p.namaPasien; document.getElementById('radSearchResult').classList.add('hidden');
+   let rmList = (window.KlinikData.rekamMedis || []).filter(r => r.idPasien === id);
+   if (rmList.length > 0) { let lastRm = rmList[rmList.length - 1]; document.getElementById('radDiagnosis').value = lastRm.assessmentICD || ''; }
+ }
+ function resetFormRAD() { document.getElementById('formRAD').reset(); document.getElementById('radIdPasien').value = ''; document.getElementById('radNoRm').value = ''; document.getElementById('radTglCetak').value = getTodayIso(); populateDokterOptions(); }
+ function searchRadTable() { 
+    if(debounceTimerId['radTable']) clearTimeout(debounceTimerId['radTable']);
+    debounceTimerId['radTable'] = setTimeout(() => {
+       let q = document.getElementById('radSearchTable').value.toLowerCase().trim(); filteredListRAD = rawListRAD.filter(s => (s.namaPasien || '').toLowerCase().includes(q)); pageRAD = 1; renderRadTable(); 
+    }, 400);
+ }
+ function renderRadTable() {
+   let tbody = document.getElementById('radTableBody'); document.getElementById('radTotalBadge').innerText = `Total: ${filteredListRAD.length} Surat`;
+   let totalPages = Math.ceil(filteredListRAD.length / SURAT_PER_PAGE) || 1; if (pageRAD > totalPages) pageRAD = totalPages;
+   document.getElementById('radPageInfo').innerText = `Halaman ${pageRAD} dari ${totalPages}`; document.getElementById('btnPrevRAD').disabled = (pageRAD === 1); document.getElementById('btnNextRAD').disabled = (pageRAD === totalPages || filteredListRAD.length === 0);
+   let startIdx = (pageRAD - 1) * SURAT_PER_PAGE; let pageData = filteredListRAD.slice(startIdx, startIdx + SURAT_PER_PAGE);
+   if(pageData.length === 0) { tbody.innerHTML = '<tr><td colspan="5" class="text-center text-slate-400 py-6 font-bold">Belum ada riwayat Pengantar Radiologi tersimpan.</td></tr>'; return; }
+   tbody.innerHTML = pageData.map(s => {
+       let tglTampil = formatTglAngka(s.tglCetak || '-');
+       return `<tr class="hover:bg-slate-50 transition-colors border-b border-slate-100"><td class="p-3 font-mono font-bold text-indigo-700">${s.noSurat}</td><td class="p-3 font-bold text-slate-800">${s.namaPasien || '-'} <br> <span class="font-normal text-[10px] text-slate-500 font-mono">RM: ${s.noRm || '-'}</span></td><td class="p-3 text-slate-600 font-medium">${tglTampil}</td><td class="p-3 font-bold text-slate-800">${s.diagnosis || '-'}</td><td class="p-3 text-center"><div class="inline-flex gap-1.5"><button onclick="cetakUlangRAD('${s.noSurat}')" class="px-2.5 py-1.5 bg-white shadow-sm hover:bg-indigo-50 hover:text-indigo-700 rounded-lg text-[10px] font-bold border border-slate-200 transition-colors">🖨️ Cetak</button><button onclick="viewRAD('${s.noSurat}')" class="px-2.5 py-1.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-600 hover:text-white rounded-lg text-[10px] font-bold border border-indigo-200 transition-colors">👁️ View</button></div></td></tr>`;
+   }).join('');
+ }
+ function prevPageRAD() { if(pageRAD > 1) { pageRAD--; renderRadTable(); } }
+ function nextPageRAD() { let t = Math.ceil(filteredListRAD.length/SURAT_PER_PAGE); if(pageRAD < t) { pageRAD++; renderRadTable(); } }
+ function cetakUlangRAD(noSurat) {
+    let item = rawListRAD.find(x => x.noSurat === noSurat); if (!item) return;
+    document.getElementById('radPrintNoSurat').innerText = 'No : ' + item.noSurat; document.getElementById('radPrintTglAtas').innerText = 'Payakumbuh, ' + item.tglCetak; document.getElementById('radPrintTujuan').innerText = item.tujuan; document.getElementById('radPrintNama').innerText = item.namaPasien; document.getElementById('radPrintUmur').innerText = item.umur; document.getElementById('radPrintJK').innerText = item.jk; document.getElementById('radPrintAlamat').innerText = item.alamat; document.getElementById('radPrintDiagnosis').innerText = item.diagnosis; document.getElementById('radPrintPemeriksaan').innerHTML = (item.pemeriksaan || '').replace(/\n/g, '<br>'); document.getElementById('radPrintDokter').innerText = item.dokter; document.getElementById('radPrintSIP').innerText = getSIP(item.dokter);
+    eksekusiCetakSurat(item.noSurat, 'printAreaRAD');
+ }
+ function handleCetakRAD(e) {
+   e.preventDefault(); if (!document.getElementById('radIdPasien').value) { showToast('warning', 'Pilih pasien terlebih dahulu!'); return; }
+   const payload = { currentUser: window.activeNamaAccount, idPasien: document.getElementById('radIdPasien').value, noRm: document.getElementById('radNoRm').value, namaPasien: document.getElementById('radNama').value, umur: document.getElementById('radUmur').value, jk: document.getElementById('radJK').value, alamat: document.getElementById('radAlamat').value, tujuan: document.getElementById('radTujuan').value, tglCetakOri: document.getElementById('radTglCetak').value, diagnosis: document.getElementById('radDiagnosis').value, pemeriksaan: document.getElementById('radPemeriksaan').value, dokter: document.getElementById('radDokter').value };
+   for (let key in payload) { if (!payload[key] || payload[key].trim() === "") { showToast('error', 'Semua isian Radiologi wajib diisi lengkap!'); return; } }
+   let btn = document.getElementById('btnCetakRAD'); btn.innerHTML = 'MENYIMPAN...'; btn.disabled = true;
+   
+   let blnStr = ("0" + (new Date().getMonth() + 1)).slice(-2); 
+   let blnRomawi = getBulanRomawi(blnStr); 
+   let thn4Digit = new Date().getFullYear().toString(); 
+   let urutStr = ("000" + (rawListRAD.length + 1)).slice(-3); 
+   let fallbackNo = "SPR/SHELDON/" + urutStr + "-" + blnRomawi + "-" + thn4Digit; 
+   let formattedTglCetak = formatTglIndo(payload.tglCetakOri);
+
+
+   let teksPemeriksaanCetak = payload.pemeriksaan.replace(/\n/g, '<br>');
+   
+   if (typeof google !== 'undefined' && google.script && google.script.run && google.script.run.simpanSuratRadiologi) {
+       google.script.run.withSuccessHandler(res => {
+         btn.innerHTML = 'SIMPAN & CETAK RADIOLOGI'; btn.disabled = false;
+         if (res.success) {
+           let finalNoSurat = res.noSurat && res.noSurat.includes('SPR') ? res.noSurat : fallbackNo;
+           document.getElementById('radPrintNoSurat').innerText = 'No : ' + finalNoSurat; document.getElementById('radPrintTglAtas').innerText = 'Payakumbuh, ' + formattedTglCetak; document.getElementById('radPrintTujuan').innerText = payload.tujuan; document.getElementById('radPrintNama').innerText = payload.namaPasien; document.getElementById('radPrintUmur').innerText = payload.umur; document.getElementById('radPrintJK').innerText = payload.jk; document.getElementById('radPrintAlamat').innerText = payload.alamat; document.getElementById('radPrintDiagnosis').innerText = payload.diagnosis; document.getElementById('radPrintPemeriksaan').innerHTML = teksPemeriksaanCetak; document.getElementById('radPrintDokter').innerText = payload.dokter; document.getElementById('radPrintSIP').innerText = getSIP(payload.dokter);
+           eksekusiCetakSurat(finalNoSurat, 'printAreaRAD'); showToast('success', 'Surat Radiologi berhasil disimpan.');
+           rawListRAD.unshift({ noSurat: finalNoSurat, tglCetak: formattedTglCetak, ...payload }); dataSuratGlobal.unshift({jenisSurat: 'RAD', noSurat: finalNoSurat, tglCetak: formattedTglCetak, namaPasien: payload.namaPasien, noRm: payload.noRm, dokter: payload.dokter}); resetFormRAD(); updateStatistikSurat(); searchRadTable(); 
+         } else showToast('error', res.message);
+       }).withFailureHandler(err => { btn.innerHTML = 'SIMPAN & CETAK RADIOLOGI'; btn.disabled = false; showToast('error', 'Koneksi Terputus: ' + err.message); }).simpanSuratRadiologi(payload);
+   } else {
+       setTimeout(() => {
+           btn.innerHTML = 'SIMPAN & CETAK RADIOLOGI'; btn.disabled = false;
+           document.getElementById('radPrintNoSurat').innerText = 'No : ' + fallbackNo; document.getElementById('radPrintTglAtas').innerText = 'Payakumbuh, ' + formattedTglCetak; document.getElementById('radPrintTujuan').innerText = payload.tujuan; document.getElementById('radPrintNama').innerText = payload.namaPasien; document.getElementById('radPrintUmur').innerText = payload.umur; document.getElementById('radPrintJK').innerText = payload.jk; document.getElementById('radPrintAlamat').innerText = payload.alamat; document.getElementById('radPrintDiagnosis').innerText = payload.diagnosis; document.getElementById('radPrintPemeriksaan').innerHTML = teksPemeriksaanCetak; document.getElementById('radPrintDokter').innerText = payload.dokter; document.getElementById('radPrintSIP').innerText = getSIP(payload.dokter);
+           eksekusiCetakSurat(fallbackNo, 'printAreaRAD'); showToast('success', 'Preview Surat Radiologi Ditampilkan.');
+           rawListRAD.unshift({ noSurat: fallbackNo, tglCetak: formattedTglCetak, ...payload }); dataSuratGlobal.unshift({jenisSurat: 'RAD', noSurat: fallbackNo, tglCetak: formattedTglCetak, namaPasien: payload.namaPasien, noRm: payload.noRm, dokter: payload.dokter}); resetFormRAD(); updateStatistikSurat(); searchRadTable(); 
+       }, 500);
+   }
+ }
+</script>

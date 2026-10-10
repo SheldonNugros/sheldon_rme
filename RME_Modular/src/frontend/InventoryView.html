@@ -1,0 +1,112 @@
+<div class="space-y-6 text-xs text-slate-800">
+  <!-- HEADER MODUL -->
+ <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-6 rounded-2xl shadow-sm border border-slate-200 gap-4">
+   <div>
+     <h2 class="text-lg font-black text-slate-900 flex items-center gap-2">
+       <span class="text-2xl">📦</span> Manajemen Gudang (Obat & BMHP)
+     </h2>
+     <p class="text-slate-500 mt-1">Kontrol stok real-time, tanggal kadaluarsa, dan pencatatan barang masuk.</p>
+   </div>
+   <div class="flex gap-2">
+     <button onclick="bukaModalRestock()" class="px-4 py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl transition-all shadow-sm flex items-center gap-2">
+       📥 + Restock Barang Masuk
+     </button>
+     <button onclick="loadInventoryData()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-all">
+       🔄 Refresh
+     </button>
+   </div>
+ </div>
+
+
+ <!-- TABEL INVENTORY -->
+ <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+   <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+     <div class="flex items-center gap-2">
+       <span class="font-bold text-slate-700">Daftar Stok Gudang</span>
+       <span id="badgeTotalGudang" class="px-2.5 py-0.5 bg-indigo-100 text-indigo-700 rounded-full font-black text-[10px]">0 Item</span>
+     </div>
+     <input type="text" id="cariGudangInput" oninput="filterGudangTable()" placeholder="🔍 Cari nama obat / BMHP..." class="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs outline-none w-64">
+   </div>
+  
+   <div class="overflow-x-auto max-h-[65vh]">
+     <table class="w-full text-left border-collapse">
+       <thead class="bg-slate-100 text-slate-600 uppercase text-[10px] font-black sticky top-0 z-10">
+         <tr>
+           <th class="p-3">Kode / Kategori</th>
+           <th class="p-3">Nama Barang</th>
+           <th class="p-3 text-center">Satuan</th>
+           <th class="p-3 text-right">HPP (Modal)</th>
+           <th class="p-3 text-right">Margin / Jual</th>
+           <th class="p-3 text-center">Sisa Stok</th>
+           <th class="p-3 text-center">Status</th>
+         </tr>
+       </thead>
+       <tbody id="tbodyInventory" class="divide-y divide-slate-100">
+         <tr><td colspan="7" class="text-center py-10 text-slate-400 font-bold">Memuat data gudang...</td></tr>
+       </tbody>
+     </table>
+   </div>
+ </div>
+
+
+ <!-- MODAL RESTOCK BARANG MASUK -->
+ <div id="modalRestock" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm hidden">
+   <div class="bg-white rounded-2xl w-full max-w-lg p-6 shadow-2xl space-y-4">
+     <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+       <h3 class="text-base font-black text-slate-900">Form Restock Barang Masuk</h3>
+       <button onclick="tutupModalRestock()" class="text-slate-400 hover:text-rose-500 font-bold text-lg">&times;</button>
+     </div>
+    
+     <form id="formRestock" onsubmit="handleSimpanRestock(event)" class="space-y-3">
+       <div class="grid grid-cols-2 gap-3">
+         <div>
+           <label class="block font-bold text-slate-700 mb-1">Tanggal Masuk *</label>
+           <input type="date" id="restockTanggal" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg font-bold">
+         </div>
+         <div>
+           <label class="block font-bold text-slate-700 mb-1">No. Faktur / Batch *</label>
+           <input type="text" id="restockNoFaktur" required placeholder="Misal: INV-2026-001" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg font-bold">
+         </div>
+       </div>
+       <div>
+         <label class="block font-bold text-slate-700 mb-1">Pilih / Cari Item Obat & BMHP *</label>
+         <select id="restockPilihItem" required onchange="onItemRestockSelect(this)" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg font-bold">
+           <option value="" disabled selected>-- Pilih Item dari Master --</option>
+         </select>
+       </div>
+       <div class="grid grid-cols-2 gap-3">
+         <div>
+           <label class="block font-bold text-slate-700 mb-1">Jumlah Masuk (Qty Beli) *</label>
+           <input type="number" id="restockQty" min="1" required placeholder="0" oninput="updateRestockConversionPreview()" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg font-bold">
+         </div>
+         <div>
+           <label class="block font-bold text-slate-700 mb-1">Harga Beli Satuan *</label>
+           <input type="number" id="restockHargaBeli" min="0" required placeholder="0" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg font-bold">
+         </div>
+       </div>
+       <div id="restockKonversiBox" class="p-2.5 bg-emerald-50 border border-emerald-200 rounded-lg text-xs text-emerald-800 hidden">
+         <span class="font-bold">Konversi Masuk Gudang: </span>
+         <span id="restockKonversiText">1 Box &times; 100 Pcs = 100 Pcs</span>
+       </div>
+       <div class="grid grid-cols-2 gap-3">
+         <div>
+           <label class="block font-bold text-slate-700 mb-1">Supplier / PBF *</label>
+           <input type="text" id="restockSupplier" required placeholder="Nama Apotek/PBF" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg">
+         </div>
+         <div>
+           <label class="block font-bold text-slate-700 mb-1">Tanggal Kadaluarsa (ED) *</label>
+           <input type="date" id="restockExpired" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg font-bold">
+         </div>
+       </div>
+
+
+       <div class="flex justify-end gap-2 pt-4 border-t border-slate-100">
+         <button type="button" onclick="tutupModalRestock()" class="px-4 py-2 bg-slate-100 font-bold text-slate-600 rounded-xl">Batal</button>
+         <button type="submit" id="btnSimpanRestock" class="px-5 py-2 bg-teal-600 hover:bg-teal-700 text-white font-black rounded-xl shadow-sm">Simpan & Masukkan Stok</button>
+       </div>
+     </form>
+   </div>
+ </div>
+
+
+</div>

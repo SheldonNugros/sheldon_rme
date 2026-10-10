@@ -1,0 +1,261 @@
+<script>
+// ==========================================
+// MODUL INFORMASI (TINDAKAN, OBAT, BMHP)
+// ==========================================
+let dataInfoTindakan = [];
+let dataInfoObat = [];
+let dataInfoBmhp = [];
+let infoActiveTab = 'tindakan';
+
+function initInformasiModule() {
+  loadInfoTindakanData();
+  loadInfoObatData();
+  loadInfoBmhpData();
+}
+
+function changeInfoTab(tab) {
+  infoActiveTab = tab;
+  ['panelInfoTindakan', 'panelInfoObat', 'panelInfoBmhp'].forEach(id => {
+    let el = document.getElementById(id);
+    if (el) el.classList.add('hidden');
+  });
+
+  ['tabInfoTindakan', 'tabInfoObat', 'tabInfoBmhp'].forEach(id => {
+    let btn = document.getElementById(id);
+    if (btn) {
+      btn.classList.remove('bg-white', 'text-indigo-700', 'shadow-sm');
+      btn.classList.add('text-slate-600');
+    }
+  });
+
+  if (tab === 'tindakan') {
+    let p = document.getElementById('panelInfoTindakan'); if (p) p.classList.remove('hidden');
+    let b = document.getElementById('tabInfoTindakan');
+    if (b) { b.classList.add('bg-white', 'text-indigo-700', 'shadow-sm'); b.classList.remove('text-slate-600'); }
+    renderInfoTindakan();
+  } else if (tab === 'obat') {
+    let p = document.getElementById('panelInfoObat'); if (p) p.classList.remove('hidden');
+    let b = document.getElementById('tabInfoObat');
+    if (b) { b.classList.add('bg-white', 'text-indigo-700', 'shadow-sm'); b.classList.remove('text-slate-600'); }
+    renderInfoObat();
+  } else if (tab === 'bmhp') {
+    let p = document.getElementById('panelInfoBmhp'); if (p) p.classList.remove('hidden');
+    let b = document.getElementById('tabInfoBmhp');
+    if (b) { b.classList.add('bg-white', 'text-indigo-700', 'shadow-sm'); b.classList.remove('text-slate-600'); }
+    renderInfoBmhp();
+  }
+}
+
+// ------------------------------------------
+// 1. DATA & RENDER TINDAKAN
+// ------------------------------------------
+function loadInfoTindakanData() {
+  if (typeof google !== 'undefined' && google.script && google.script.run) {
+    google.script.run.withSuccessHandler(res => {
+      dataInfoTindakan = res || [];
+      populateInfoKategoriDropdown();
+      renderInfoTindakan();
+    }).getDaftarTindakanLengkap();
+  }
+}
+
+function populateInfoKategoriDropdown() {
+  let sel = document.getElementById('filterInfoKategoriTindakan');
+  if (!sel) return;
+
+  let currentVal = sel.value;
+  let categories = [...new Set(dataInfoTindakan.map(t => t.kategori).filter(Boolean))].sort();
+
+  sel.innerHTML = '<option value="">Semua Kategori</option>';
+  categories.forEach(cat => {
+    let opt = document.createElement('option');
+    opt.value = cat;
+    opt.textContent = cat;
+    sel.appendChild(opt);
+  });
+  if (currentVal) sel.value = currentVal;
+}
+
+function renderInfoTindakan() {
+  let tbody = document.getElementById('tbodyInfoTindakan');
+  if (!tbody) return;
+
+  let q = (document.getElementById('cariInfoTindakan')?.value || '').toLowerCase().trim();
+  let kat = (document.getElementById('filterInfoKategoriTindakan')?.value || '').toLowerCase().trim();
+
+  let filtered = dataInfoTindakan.filter(t => {
+    let matchQuery = !q || (t.nama && t.nama.toLowerCase().includes(q)) || (t.kode && t.kode.toLowerCase().includes(q));
+    let matchKat = !kat || (t.kategori && t.kategori.toLowerCase() === kat);
+    return matchQuery && matchKat;
+  });
+
+  let badge = document.getElementById('badgeCountInfoTindakan');
+  if (badge) badge.innerText = `${filtered.length} Tindakan`;
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4" class="text-center py-8 text-slate-400 font-bold">Data tindakan tidak ditemukan.</td></tr>';
+    return;
+  }
+
+  const fmtRp = (n) => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
+
+  tbody.innerHTML = filtered.map((t, idx) => `
+    <tr class="hover:bg-slate-50 transition-colors border-b border-slate-100">
+      <td class="p-3.5 text-center text-slate-400 font-mono font-bold">${idx + 1}</td>
+      <td class="p-3.5">
+        <p class="font-bold text-slate-900">${t.nama || '-'}</p>
+        <p class="text-[10px] font-mono font-semibold text-slate-400 mt-0.5">${t.kode || '-'}</p>
+      </td>
+      <td class="p-3.5">
+        <span class="px-2.5 py-1 bg-indigo-50 text-indigo-700 font-bold rounded-lg text-[10px] border border-indigo-100">
+          ${t.kategori || 'Umum'}
+        </span>
+      </td>
+      <td class="p-3.5 text-right font-black text-slate-900 text-sm font-mono">
+        ${fmtRp(t.harga || t.tarif)}
+      </td>
+    </tr>
+  `).join('');
+}
+
+// ------------------------------------------
+// 2. DATA & RENDER OBAT
+// ------------------------------------------
+function loadInfoObatData() {
+  if (typeof google !== 'undefined' && google.script && google.script.run) {
+    google.script.run.withSuccessHandler(res => {
+      dataInfoObat = res || [];
+      renderInfoObat();
+    }).getDaftarObatLengkap();
+  }
+}
+
+function renderInfoObat() {
+  let tbody = document.getElementById('tbodyInfoObat');
+  if (!tbody) return;
+
+  let q = (document.getElementById('cariInfoObat')?.value || '').toLowerCase().trim();
+
+  let filtered = dataInfoObat.filter(o => {
+    if (!q) return true;
+    let matchNama = o.nama && o.nama.toLowerCase().includes(q);
+    let matchKandungan = o.kandungan && o.kandungan.toLowerCase().includes(q);
+    let matchKode = o.kode && o.kode.toLowerCase().includes(q);
+    return matchNama || matchKandungan || matchKode;
+  });
+
+  let badge = document.getElementById('badgeCountInfoObat');
+  if (badge) badge.innerText = `${filtered.length} Item Obat`;
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-slate-400 font-bold">Data obat tidak ditemukan.</td></tr>';
+    return;
+  }
+
+  const fmtRp = (n) => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
+
+  tbody.innerHTML = filtered.map((o, idx) => {
+    let stok = Number(o.stok) || 0;
+    let min = Number(o.stokMin) || 0;
+    let badgeStatus = '';
+    if (stok <= 0) {
+      badgeStatus = '<span class="px-2.5 py-0.5 bg-rose-100 text-rose-700 rounded-full font-bold text-[9px] border border-rose-200">Habis</span>';
+    } else if (stok <= min) {
+      badgeStatus = '<span class="px-2.5 py-0.5 bg-amber-100 text-amber-700 rounded-full font-bold text-[9px] border border-amber-200">Stok Kritis</span>';
+    } else {
+      badgeStatus = '<span class="px-2.5 py-0.5 bg-emerald-100 text-emerald-700 rounded-full font-bold text-[9px] border border-emerald-200">Tersedia</span>';
+    }
+
+    let kandDisplay = o.kandungan && o.kandungan !== '-'
+      ? `<span class="text-indigo-600 font-semibold">🧪 ${o.kandungan}</span>`
+      : `<span class="text-slate-400 italic">-</span>`;
+
+    return `
+      <tr class="hover:bg-slate-50 transition-colors border-b border-slate-100">
+        <td class="p-3.5 text-center text-slate-400 font-mono font-bold">${idx + 1}</td>
+        <td class="p-3.5">
+          <p class="font-bold text-slate-900">${o.nama || '-'}</p>
+          <p class="text-[10px] text-slate-400 font-mono mt-0.5">${o.kode || '-'} • Satuan: ${o.satuan || 'Unit'}</p>
+        </td>
+        <td class="p-3.5 text-slate-700 font-medium">${kandDisplay}</td>
+        <td class="p-3.5 text-center">
+          <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-700">
+            ${o.satuanBeli || 'Box'} @ ${o.isiPerSatuan || 1} ${o.satuan || 'Pcs'}
+          </span>
+        </td>
+        <td class="p-3.5 text-right font-black text-slate-900 text-sm font-mono">${fmtRp(o.hargaJual || o.harga)}</td>
+        <td class="p-3.5 text-center">
+          <span class="font-black text-sm ${stok <= min ? 'text-rose-600' : 'text-slate-800'} font-mono">${stok}</span>
+          <span class="text-[10px] text-slate-400 block">${o.satuan || 'Unit'}</span>
+        </td>
+        <td class="p-3.5 text-center">${badgeStatus}</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+// ------------------------------------------
+// 3. DATA & RENDER BMHP
+// ------------------------------------------
+function loadInfoBmhpData() {
+  if (typeof google !== 'undefined' && google.script && google.script.run) {
+    google.script.run.withSuccessHandler(res => {
+      dataInfoBmhp = res || [];
+      renderInfoBmhp();
+    }).getDaftarBMHPLengkap();
+  }
+}
+
+function renderInfoBmhp() {
+  let tbody = document.getElementById('tbodyInfoBmhp');
+  if (!tbody) return;
+
+  let q = (document.getElementById('cariInfoBmhp')?.value || '').toLowerCase().trim();
+
+  let filtered = dataInfoBmhp.filter(b => {
+    if (!q) return true;
+    let matchNama = b.nama && b.nama.toLowerCase().includes(q);
+    let matchKode = b.kode && b.kode.toLowerCase().includes(q);
+    return matchNama || matchKode;
+  });
+
+  let badge = document.getElementById('badgeCountInfoBmhp');
+  if (badge) badge.innerText = `${filtered.length} Item BMHP`;
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-slate-400 font-bold">Data BMHP tidak ditemukan.</td></tr>';
+    return;
+  }
+
+  const fmtRp = (n) => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
+
+  tbody.innerHTML = filtered.map((b, idx) => {
+    let stok = Number(b.stok) || 0;
+    let min = Number(b.stokMin) || 0;
+    let badgeStatus = '';
+    if (stok <= 0) {
+      badgeStatus = '<span class="px-2.5 py-0.5 bg-rose-100 text-rose-700 rounded-full font-bold text-[9px] border border-rose-200">Habis</span>';
+    } else if (stok <= min) {
+      badgeStatus = '<span class="px-2.5 py-0.5 bg-amber-100 text-amber-700 rounded-full font-bold text-[9px] border border-amber-200">Stok Kritis</span>';
+    } else {
+      badgeStatus = '<span class="px-2.5 py-0.5 bg-emerald-100 text-emerald-700 rounded-full font-bold text-[9px] border border-emerald-200">Tersedia</span>';
+    }
+
+    return `
+      <tr class="hover:bg-slate-50 transition-colors border-b border-slate-100">
+        <td class="p-3.5 text-center text-slate-400 font-mono font-bold">${idx + 1}</td>
+        <td class="p-3.5">
+          <p class="font-bold text-slate-900">${b.nama || '-'}</p>
+          <p class="text-[10px] text-slate-400 font-mono mt-0.5">${b.kode || '-'} • Satuan: ${b.satuan || 'Unit'}</p>
+        </td>
+        <td class="p-3.5 text-right font-black text-slate-900 text-sm font-mono">${fmtRp(b.hargaJual || b.harga)}</td>
+        <td class="p-3.5 text-center">
+          <span class="font-black text-sm ${stok <= min ? 'text-rose-600' : 'text-slate-800'} font-mono">${stok}</span>
+          <span class="text-[10px] text-slate-400 block">${b.satuan || 'Unit'}</span>
+        </td>
+        <td class="p-3.5 text-center">${badgeStatus}</td>
+      </tr>
+    `;
+  }).join('');
+}
+</script>

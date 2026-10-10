@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Preview: Ringkasan DMF-T Index & Odontogram Pop-up - RME Klinik Gigi</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    @media print {
+      body { background: white !important; color: black !important; padding: 0 !important; }
+      .no-print { display: none !important; }
+    }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen p-4 md:p-8">
+
+  <!-- TOP BAR / HEADER -->
+  <header class="max-w-5xl mx-auto mb-6 bg-slate-800/90 border border-slate-700/80 rounded-2xl p-5 shadow-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <div class="flex items-center gap-3.5">
+      <div class="w-12 h-12 rounded-2xl bg-sky-500/20 border border-sky-400/40 flex items-center justify-center text-3xl shadow-inner">
+        🦷
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-950 text-emerald-300 border border-emerald-700">Preview Layout Baru</span>
+          <span class="text-xs text-slate-400 font-mono">Odontogram Model Periodontal Charting</span>
+        </div>
+        <h1 class="text-lg md:text-xl font-black text-white mt-0.5">Informasi Awal DMF-T Index + Modal Gambar Odontogram</h1>
+        <p class="text-xs text-slate-300">Gambar odontogram awal disembunyikan dan diringkas ke metrik DMF-T. Klik tombol untuk membuka gambar grafis interaktif!</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <span class="px-3 py-1.5 rounded-xl bg-sky-950 text-sky-300 border border-sky-700 text-xs font-bold flex items-center gap-1.5">
+        <span>✨</span> Ringkas &amp; Rapi
+      </span>
+    </div>
+  </header>
+
+  <!-- MAIN PREVIEW CONTAINER (EMR DETAIL MODAL VIEW) -->
+  <main class="max-w-5xl mx-auto bg-white text-slate-800 rounded-2xl shadow-2xl p-6 md:p-8 border border-slate-200">
+    
+    <!-- MODAL TITLE HEADER -->
+    <div class="border-b-2 border-slate-800 pb-4 mb-6">
+      <h2 class="text-xl font-black text-center uppercase tracking-widest text-slate-900">Rekam Medis Pasien</h2>
+      <p class="text-center text-xs font-bold mt-1 text-slate-600">SHELDON Oral Maxillofacial Surgery &amp; Dental Implant Center</p>
+    </div>
+
+    <!-- PASIEN INFO -->
+    <table class="w-full text-xs font-medium mb-6">
+      <tr>
+        <td class="w-32 text-slate-500">Nama Pasien</td>
+        <td class="font-bold text-base text-indigo-700">: Ny. Sarah Amalia</td>
+        <td class="w-32 text-slate-500">No. RM</td>
+        <td class="font-bold font-mono">: RM-2026-0042</td>
+      </tr>
+      <tr>
+        <td class="text-slate-500">Tgl Pemeriksaan</td>
+        <td class="font-bold">: 08 Oktober 2026</td>
+        <td class="text-slate-500">Dokter</td>
+        <td class="font-bold">: drg. Sheldon Sp.BM</td>
+      </tr>
+    </table>
+
+    <div class="space-y-4 text-xs">
+
+      <!-- 1. ANAMNESIS & FISIK (Ringkas) -->
+      <div>
+        <h4 class="font-black bg-slate-100 p-1.5 border-l-4 border-slate-800 mb-2 uppercase">Anamnesis</h4>
+        <table class="w-full">
+          <tr><td class="w-40 py-1 text-slate-600">Chief Complain (CC)</td><td>: Gigi geraham kanan bawah berlubang dan ngilu bila minum dingin</td></tr>
+          <tr><td class="py-1 text-slate-600">Present Illness (PI)</td><td>: Sejak 2 minggu terakhir, kadang berdenyut ringan</td></tr>
+          <tr><td class="py-1 text-slate-600">Past Dental / Medical</td><td>: Pernah tumpat gigi 46 (2 tahun lalu) / Tidak ada riwayat penyakit sistemik</td></tr>
+        </table>
+      </div>
+
+      <div>
+        <h4 class="font-black bg-slate-100 p-1.5 border-l-4 border-slate-800 mb-2 uppercase">Pemeriksaan Fisik</h4>
+        <table class="w-full">
+          <tr>
+            <td class="w-32 py-1 text-slate-600">Kesan Umum</td><td>: Baik, kooperatif</td>
+            <td class="w-32 py-1 text-slate-600">Tensi (mmHg)</td><td>: 120/80</td>
+          </tr>
+          <tr>
+            <td class="py-1 text-slate-600">Nafas / Nadi</td><td>: 18x/mnt / 76x/mnt</td>
+            <td class="py-1 text-slate-600">Suhu / BB / TB</td><td>: 36.5 °C / 58 kg / 162 cm</td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- 2. MODUL ODONTOGRAM: KARTU RINGKASAN AWAL DMF-T INDEX (SESUAI REQUEST)   -->
+      <!-- ========================================================================= -->
+      <div class="bg-sky-50/60 border border-sky-200 p-3.5 rounded-xl text-left">
+        <div class="flex justify-between items-center mb-2">
+          <h4 class="font-black text-sky-900 uppercase text-xs flex items-center gap-1.5">
+            <span>🦷</span> Peta Odontogram Saat Kunjungan
+          </h4>
+          <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-sky-100 text-sky-800 border border-sky-300">
+            Tercatat (2 Gigi)
+          </span>
+        </div>
+        
+        <!-- GRID 4 KOLOM DMF-T INDEX -->
+        <div class="grid grid-cols-4 gap-2 text-center text-xs">
+          <div class="bg-white p-2 rounded-lg border border-slate-200 shadow-sm">
+            <span class="text-[9px] text-slate-500 block font-bold">Decayed (D)</span>
+            <span class="font-black text-rose-600 text-sm">1</span>
+          </div>
+          <div class="bg-white p-2 rounded-lg border border-slate-200 shadow-sm">
+            <span class="text-[9px] text-slate-500 block font-bold">Missing (M)</span>
+            <span class="font-black text-slate-800 text-sm">0</span>
+          </div>
+          <div class="bg-white p-2 rounded-lg border border-slate-200 shadow-sm">
+            <span class="text-[9px] text-slate-500 block font-bold">Filled (F)</span>
+            <span class="font-black text-emerald-600 text-sm">1</span>
+          </div>
+          <div class="bg-white p-2 rounded-lg border border-slate-200 shadow-sm">
+            <span class="text-[9px] text-slate-500 block font-bold">Total DMF-T</span>
+            <span class="font-black text-sky-700 text-sm">2</span>
+          </div>
+        </div>
+
+        <!-- TOMBOL BUKA GAMBAR ODONTOGRAM -->
+        <div class="mt-2.5 text-right no-print">
+          <button type="button" onclick="bukaModalOdontoDemo()" class="px-3.5 py-1.5 bg-sky-600 hover:bg-sky-700 text-white rounded-lg font-bold text-[10px] shadow-sm transition-all flex items-center gap-1.5 ml-auto">
+            <span>🦷</span> Buka Gambar Odontogram &rarr;
+          </button>
+        </div>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- 3. DIAGNOSIS GIGI (TULISAN) - TEPAT DI BAWAH ODONTOGRAM                   -->
+      <!-- ========================================================================= -->
+      <div>
+        <h4 class="font-black bg-slate-100 p-1.5 border-l-4 border-slate-800 mb-2 uppercase">Diagnosis Gigi (Tulisan)</h4>
+        <ul class="list-disc pl-5 space-y-1 text-slate-700">
+          <li><b>Gigi 46:</b> <span class="text-slate-600">Permukaan: occlusal=car</span> <span class="text-indigo-600 font-bold">(Diag: Pulpitis Reversibel)</span> <span class="text-amber-600 italic">[Catatan: Kavitas media dentin, perkusi (-), palpasi (-)]</span></li>
+          <li><b>Gigi 47:</b> <span class="text-slate-600">Permukaan: occlusal=cfr</span> <span class="text-indigo-600 font-bold">(Diag: Tumpatan Komposit Baik)</span></li>
+        </ul>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- 4. MODUL PERIODONTAL CHARTING (FORMAT KARTU IDENTIK)                      -->
+      <!-- ========================================================================= -->
+      <div class="bg-indigo-50/60 border border-indigo-200 p-3.5 rounded-xl text-left">
+        <div class="flex justify-between items-center mb-2">
+          <h4 class="font-black text-indigo-900 uppercase text-xs flex items-center gap-1.5">
+            <span>🦷</span> Hasil Periodontal Charting
+          </h4>
+          <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-indigo-100 text-indigo-700 border border-indigo-200">Tercatat</span>
+        </div>
+        <div class="grid grid-cols-3 gap-2 text-center text-xs">
+          <div class="bg-white p-2 rounded-lg border border-slate-200">
+            <span class="text-[9px] text-slate-500 block font-bold">Total Sites</span>
+            <span class="font-black text-slate-800">192 Titik</span>
+          </div>
+          <div class="bg-white p-2 rounded-lg border border-slate-200">
+            <span class="text-[9px] text-slate-500 block font-bold">Deep Pockets (&ge;4mm)</span>
+            <span class="font-black text-rose-600">4 Titik</span>
+          </div>
+          <div class="bg-white p-2 rounded-lg border border-slate-200">
+            <span class="text-[9px] text-slate-500 block font-bold">Bleeding Index (BOP)</span>
+            <span class="font-black text-rose-600">12%</span>
+          </div>
+        </div>
+        <div class="mt-2.5 text-right no-print">
+          <button type="button" class="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-bold text-[10px] shadow-sm transition-all flex items-center gap-1.5 ml-auto opacity-70 cursor-not-allowed">
+            <span>📊</span> Buka Grafik Charting Lengkap &rarr;
+          </button>
+        </div>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- 5. MODUL OHI-S                                                            -->
+      <!-- ========================================================================= -->
+      <div class="bg-teal-50/60 border border-teal-200 p-3.5 rounded-xl text-left">
+        <div class="flex justify-between items-center mb-2">
+          <h4 class="font-black text-teal-900 uppercase text-xs flex items-center gap-1.5">
+            <span>🪥</span> Hasil Pemeriksaan OHI-S
+          </h4>
+          <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-300">Baik (0.83)</span>
+        </div>
+        <div class="grid grid-cols-3 gap-2 text-center text-xs">
+          <div class="bg-white p-2 rounded-lg border border-slate-200">
+            <span class="text-[9px] text-slate-500 block font-bold">Debris Index (DI-S)</span>
+            <span class="font-black text-slate-800">0.50</span>
+          </div>
+          <div class="bg-white p-2 rounded-lg border border-slate-200">
+            <span class="text-[9px] text-slate-500 block font-bold">Calculus Index (CI-S)</span>
+            <span class="font-black text-slate-800">0.33</span>
+          </div>
+          <div class="bg-white p-2 rounded-lg border border-slate-200">
+            <span class="text-[9px] text-slate-500 block font-bold">Total OHI-S Score</span>
+            <span class="font-black text-teal-700">0.83 (Baik)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. DIAGNOSA ICD & TINDAKAN & OBAT -->
+      <div>
+        <h4 class="font-black bg-slate-100 p-1.5 border-l-4 border-slate-800 mb-2 uppercase">Diagnosa ICD-10</h4>
+        <div class="space-y-1 text-slate-700">
+          <div>&bull; <b>K02.1</b> - Caries of dentine <span class="italic text-slate-500">- Karies media oklusal gigi 46</span></div>
+        </div>
+      </div>
+
+      <div>
+        <h4 class="font-black bg-slate-100 p-1.5 border-l-4 border-slate-800 mb-2 uppercase">Tindakan ICD-9-CM &amp; Prosedur</h4>
+        <div class="space-y-1 text-slate-700">
+          <div>&bull; <b>23.2</b> - Restoration of tooth by filling <span class="italic text-slate-500">- Penambalan komposit resin nanofill oklusal gigi 46</span></div>
+        </div>
+      </div>
+
+      <div>
+        <h4 class="font-black bg-slate-100 p-1.5 border-l-4 border-slate-800 mb-2 uppercase">Terapi Obat &amp; Resep</h4>
+        <table class="w-full text-slate-700">
+          <thead><tr class="text-slate-500 border-b"><th class="text-left py-1">Obat</th><th class="text-center">Jumlah</th><th class="text-left">Instruksi</th></tr></thead>
+          <tbody>
+            <tr><td class="py-1">Asam Mefenamat 500mg</td><td class="text-center">10 tab</td><td>3x1 tab prn (bila nyeri)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ========================================================================= -->
+  <!-- POPUP MODAL GAMBAR ODONTOGRAM INTERAKTIF (MUNCUL SAAT KLIK TOMBOL)       -->
+  <!-- ========================================================================= -->
+  <div id="modalOdontoDemo" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full border border-slate-200 overflow-hidden flex flex-col max-h-[92vh]">
+      
+      <!-- Modal Header -->
+      <div class="px-5 py-3.5 bg-gradient-to-r from-sky-800 to-sky-950 text-white flex justify-between items-center shadow-md">
+        <div class="flex items-center gap-2.5">
+          <span class="text-xl">🦷</span>
+          <div>
+            <h3 class="font-bold text-sm tracking-wide">Peta Gambar Odontogram Interaktif Pasien</h3>
+            <p class="text-[10px] text-sky-200">Ny. Sarah Amalia &bull; No. RM: RM-2026-0042 &bull; Standar PDGI (5 Bidang Geometris)</p>
+          </div>
+        </div>
+        <button type="button" onclick="tutupModalOdontoDemo()" class="text-sky-200 hover:text-white p-1 rounded-lg hover:bg-sky-700/50 text-xl font-bold transition-all">&times;</button>
+      </div>
+
+      <!-- Modal Body (Odontogram SVG Graphics) -->
+      <div class="p-5 overflow-y-auto space-y-4">
+        
+        <!-- Legend Strip -->
+        <div class="flex flex-wrap items-center justify-center gap-3 p-2 bg-slate-50 rounded-xl border border-slate-200 text-[10px]">
+          <span class="font-bold text-slate-700">Keterangan:</span>
+          <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded bg-white border border-slate-400 inline-block"></span> Sehat (SOU)</span>
+          <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded bg-rose-500 inline-block"></span> Karies (CAR)</span>
+          <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded bg-emerald-500 inline-block"></span> Tumpatan Komposit (CFR)</span>
+          <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded bg-slate-700 inline-block"></span> Tumpatan Logam (AMF)</span>
+          <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded bg-amber-400 inline-block"></span> Gigi Hilang (MIS)</span>
+        </div>
+
+        <!-- Odontogram SVG Chart -->
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-inner text-center overflow-x-auto">
+          
+          <!-- RAHANG ATAS -->
+          <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Rahang Atas (Maxilla)</div>
+          <div class="flex items-center justify-center gap-4 border-b border-slate-300 pb-3">
+            <!-- 18 - 11 -->
+            <div class="flex gap-1.5 flex-row-reverse">
+              <!-- Loop mock teeth 18 to 11 -->
+              <div class="flex flex-col items-center"><span class="text-[9px] font-bold text-slate-600 mb-0.5">18</span><div class="w-7 h-7"><svg viewBox="0 0 100 100" class="w-full h-full"><rect x="4" y="4" width="92" height="92" rx="8" fill="#fff" stroke="#94a3b8" stroke-width="2"/><polygon points="10,10 90,10 70,30 30,30" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="30,70 70,70 90,90 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="10,10 30,30 30,70 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="90,10 70,30 70,70 90,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="30,30 70,30 70,70 30,70" fill="#fff" stroke="#64748b" stroke-width="1.5"/></svg></div></div>
+              <div class="flex flex-col items-center"><span class="text-[9px] font-bold text-slate-600 mb-0.5">17</span><div class="w-7 h-7"><svg viewBox="0 0 100 100" class="w-full h-full"><rect x="4" y="4" width="92" height="92" rx="8" fill="#fff" stroke="#94a3b8" stroke-width="2"/><polygon points="10,10 90,10 70,30 30,30" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="30,70 70,70 90,90 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="10,10 30,30 30,70 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="90,10 70,30 70,70 90,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="30,30 70,30 70,70 30,70" fill="#fff" stroke="#64748b" stroke-width="1.5"/></svg></div></div>
+              <div class="flex flex-col items-center"><span class="text-[9px] font-bold text-slate-600 mb-0.5">16</span><div class="w-7 h-7"><svg viewBox="0 0 100 100" class="w-full h-full"><rect x="4" y="4" width="92" height="92" rx="8" fill="#fff" stroke="#94a3b8" stroke-width="2"/><polygon points="10,10 90,10 70,30 30,30" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="30,70 70,70 90,90 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="10,10 30,30 30,70 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="90,10 70,30 70,70 90,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="30,30 70,30 70,70 30,70" fill="#fff" stroke="#64748b" stroke-width="1.5"/></svg></div></div>
+              <div class="flex flex-col items-center"><span class="text-[9px] font-bold text-slate-600 mb-0.5">15</span><div class="w-7 h-7"><svg viewBox="0 0 100 100" class="w-full h-full"><rect x="4" y="4" width="92" height="92" rx="8" fill="#fff" stroke="#94a3b8" stroke-width="2"/><polygon points="10,10 90,10 70,30 30,30" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="30,70 70,70 90,90 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="10,10 30,30 30,70 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="90,10 70,30 70,70 90,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="30,30 70,30 70,70 30,70" fill="#fff" stroke="#64748b" stroke-width="1.5"/></svg></div></div>
+              <div class="flex flex-col items-center"><span class="text-[9px] font-bold text-slate-600 mb-0.5">14</span><div class="w-7 h-7"><svg viewBox="0 0 100 100" class="w-full h-full"><rect x="4" y="4" width="92" height="92" rx="8" fill="#fff" stroke="#94a3b8" stroke-width="2"/><polygon points="10,10 90,10 70,30 30,30" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="30,70 70,70 90,90 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="10,10 30,30 30,70 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="90,10 70,30 70,70 90,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="30,30 70,30 70,70 30,70" fill="#fff" stroke="#64748b" stroke-width="1.5"/></svg></div></div>
+              <div class="flex flex-col items-center"><span class="text-[9px] font-bold text-slate-600 mb-0.5">13</span><div class="w-7 h-7"><svg viewBox="0 0 100 100" class="w-full h-full"><rect x="4" y="4" width="92" height="92" rx="8" fill="#fff" stroke="#94a3b8" stroke-width="2"/><polygon points="10,10 90,10 70,30 30,30" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="30,70 70,70 90,90 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="10,10 30,30 30,70 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="90,10 70,30 70,70 90,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="30,30 70,30 70,70 30,70" fill="#fff" stroke="#64748b" stroke-width="1.5"/></svg></div></div>
+              <div class="flex flex-col items-center"><span class="text-[9px] font-bold text-slate-600 mb-0.5">12</span><div class="w-7 h-7"><svg viewBox="0 0 100 100" class="w-full h-full"><rect x="4" y="4" width="92" height="92" rx="8" fill="#fff" stroke="#94a3b8" stroke-width="2"/><polygon points="10,10 90,10 70,30 30,30" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="30,70 70,70 90,90 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="10,10 30,30 30,70 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="90,10 70,30 70,70 90,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="30,30 70,30 70,70 30,70" fill="#fff" stroke="#64748b" stroke-width="1.5"/></svg></div></div>
+              <div class="flex flex-col items-center"><span class="text-[9px] font-bold text-slate-600 mb-0.5">11</span><div class="w-7 h-7"><svg viewBox="0 0 100 100" class="w-full h-full"><rect x="4" y="4" width="92" height="92" rx="8" fill="#fff" stroke="#94a3b8" stroke-width="2"/><polygon points="10,10 90,10 70,30 30,30" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="30,70 70,70 90,90 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="10,10 30,30 30,70 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="90,10 70,30 70,70 90,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="30,30 70,30 70,70 30,70" fill="#fff" stroke="#64748b" stroke-width="1.5"/></svg></div></div>
+            </div>
+            <!-- Vertical Divider -->
+            <div class="w-px h-10 bg-slate-300"></div>
+            <!-- 21 - 28 -->
+            <div class="flex gap-1.5">
+              <div class="flex flex-col items-center"><span class="text-[9px] font-bold text-slate-600 mb-0.5">21</span><div class="w-7 h-7"><svg viewBox="0 0 100 100" class="w-full h-full"><rect x="4" y="4" width="92" height="92" rx="8" fill="#fff" stroke="#94a3b8" stroke-width="2"/><polygon points="10,10 90,10 70,30 30,30" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="30,70 70,70 90,90 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="10,10 30,30 30,70 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="90,10 70,30 70,70 90,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="30,30 70,30 70,70 30,70" fill="#fff" stroke="#64748b" stroke-width="1.5"/></svg></div></div>
+              <div class="flex flex-col items-center"><span class="text-[9px] font-bold text-slate-600 mb-0.5">22</span><div class="w-7 h-7"><svg viewBox="0 0 100 100" class="w-full h-full"><rect x="4" y="4" width="92" height="92" rx="8" fill="#fff" stroke="#94a3b8" stroke-width="2"/><polygon points="10,10 90,10 70,30 30,30" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="30,70 70,70 90,90 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="10,10 30,30 30,70 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="90,10 70,30 70,70 90,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="30,30 70,30 70,70 30,70" fill="#fff" stroke="#64748b" stroke-width="1.5"/></svg></div></div>
+              <div class="flex flex-col items-center"><span class="text-[9px] font-bold text-slate-600 mb-0.5">23</span><div class="w-7 h-7"><svg viewBox="0 0 100 100" class="w-full h-full"><rect x="4" y="4" width="92" height="92" rx="8" fill="#fff" stroke="#94a3b8" stroke-width="2"/><polygon points="10,10 90,10 70,30 30,30" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="30,70 70,70 90,90 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="10,10 30,30 30,70 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="90,10 70,30 70,70 90,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="30,30 70,30 70,70 30,70" fill="#fff" stroke="#64748b" stroke-width="1.5"/></svg></div></div>
+              <div class="flex flex-col items-center"><span class="text-[9px] font-bold text-slate-600 mb-0.5">24</span><div class="w-7 h-7"><svg viewBox="0 0 100 100" class="w-full h-full"><rect x="4" y="4" width="92" height="92" rx="8" fill="#fff" stroke="#94a3b8" stroke-width="2"/><polygon points="10,10 90,10 70,30 30,30" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="30,70 70,70 90,90 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="10,10 30,30 30,70 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="90,10 70,30 70,70 90,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="30,30 70,30 70,70 30,70" fill="#fff" stroke="#64748b" stroke-width="1.5"/></svg></div></div>
+              <div class="flex flex-col items-center"><span class="text-[9px] font-bold text-slate-600 mb-0.5">25</span><div class="w-7 h-7"><svg viewBox="0 0 100 100" class="w-full h-full"><rect x="4" y="4" width="92" height="92" rx="8" fill="#fff" stroke="#94a3b8" stroke-width="2"/><polygon points="10,10 90,10 70,30 30,30" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="30,70 70,70 90,90 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="10,10 30,30 30,70 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="90,10 70,30 70,70 90,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="30,30 70,30 70,70 30,70" fill="#fff" stroke="#64748b" stroke-width="1.5"/></svg></div></div>
+              <div class="flex flex-col items-center"><span class="text-[9px] font-bold text-slate-600 mb-0.5">26</span><div class="w-7 h-7"><svg viewBox="0 0 100 100" class="w-full h-full"><rect x="4" y="4" width="92" height="92" rx="8" fill="#fff" stroke="#94a3b8" stroke-width="2"/><polygon points="10,10 90,10 70,30 30,30" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="30,70 70,70 90,90 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="10,10 30,30 30,70 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="90,10 70,30 70,70 90,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="30,30 70,30 70,70 30,70" fill="#fff" stroke="#64748b" stroke-width="1.5"/></svg></div></div>
+              <div class="flex flex-col items-center"><span class="text-[9px] font-bold text-slate-600 mb-0.5">27</span><div class="w-7 h-7"><svg viewBox="0 0 100 100" class="w-full h-full"><rect x="4" y="4" width="92" height="92" rx="8" fill="#fff" stroke="#94a3b8" stroke-width="2"/><polygon points="10,10 90,10 70,30 30,30" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="30,70 70,70 90,90 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="10,10 30,30 30,70 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="90,10 70,30 70,70 90,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="30,30 70,30 70,70 30,70" fill="#fff" stroke="#64748b" stroke-width="1.5"/></svg></div></div>
+              <div class="flex flex-col items-center"><span class="text-[9px] font-bold text-slate-600 mb-0.5">28</span><div class="w-7 h-7"><svg viewBox="0 0 100 100" class="w-full h-full"><rect x="4" y="4" width="92" height="92" rx="8" fill="#fff" stroke="#94a3b8" stroke-width="2"/><polygon points="10,10 90,10 70,30 30,30" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="30,70 70,70 90,90 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="10,10 30,30 30,70 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="90,10 70,30 70,70 90,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="30,30 70,30 70,70 30,70" fill="#fff" stroke="#64748b" stroke-width="1.5"/></svg></div></div>
+            </div>
+          </div>
+
+          <!-- RAHANG BAWAH -->
+          <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-3 mb-1.5">Rahang Bawah (Mandibula)</div>
+          <div class="flex items-center justify-center gap-4">
+            <!-- 48 - 41 -->
+            <div class="flex gap-1.5 flex-row-reverse">
+              <div class="flex flex-col items-center"><span class="text-[9px] font-bold text-slate-600 mb-0.5">48</span><div class="w-7 h-7"><svg viewBox="0 0 100 100" class="w-full h-full"><rect x="4" y="4" width="92" height="92" rx="8" fill="#fff" stroke="#94a3b8" stroke-width="2"/><polygon points="10,10 90,10 70,30 30,30" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="30,70 70,70 90,90 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="10,10 30,30 30,70 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="90,10 70,30 70,70 90,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="30,30 70,30 70,70 30,70" fill="#fff" stroke="#64748b" stroke-width="1.5"/></svg></div></div>
+              
+              <!-- GIGI 47 (FILLED - CFR COMPOSITE GREEN) -->
+              <div class="flex flex-col items-center">
+                <span class="text-[9px] font-bold text-emerald-700 mb-0.5">47</span>
+                <div class="w-7 h-7 ring-2 ring-emerald-500 rounded-lg">
+                  <svg viewBox="0 0 100 100" class="w-full h-full">
+                    <rect x="4" y="4" width="92" height="92" rx="8" fill="#fff" stroke="#10b981" stroke-width="2"/>
+                    <polygon points="10,10 90,10 70,30 30,30" fill="#fff" stroke="#64748b" stroke-width="1.5"/>
+                    <polygon points="30,70 70,70 90,90 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/>
+                    <polygon points="10,10 30,30 30,70 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/>
+                    <polygon points="90,10 70,30 70,70 90,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/>
+                    <!-- Oklusal Filled Hijau -->
+                    <polygon points="30,30 70,30 70,70 30,70" fill="#10b981" stroke="#047857" stroke-width="1.5"/>
+                  </svg>
+                </div>
+              </div>
+
+              <!-- GIGI 46 (CARIES - RED) -->
+              <div class="flex flex-col items-center">
+                <span class="text-[9px] font-bold text-rose-700 mb-0.5">46</span>
+                <div class="w-7 h-7 ring-2 ring-rose-500 rounded-lg">
+                  <svg viewBox="0 0 100 100" class="w-full h-full">
+                    <rect x="4" y="4" width="92" height="92" rx="8" fill="#fff" stroke="#ef4444" stroke-width="2"/>
+                    <polygon points="10,10 90,10 70,30 30,30" fill="#fff" stroke="#64748b" stroke-width="1.5"/>
+                    <polygon points="30,70 70,70 90,90 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/>
+                    <polygon points="10,10 30,30 30,70 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/>
+                    <polygon points="90,10 70,30 70,70 90,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/>
+                    <!-- Oklusal Karies Merah -->
+                    <polygon points="30,30 70,30 70,70 30,70" fill="#ef4444" stroke="#b91c1c" stroke-width="1.5"/>
+                  </svg>
+                </div>
+              </div>
+
+              <div class="flex flex-col items-center"><span class="text-[9px] font-bold text-slate-600 mb-0.5">45</span><div class="w-7 h-7"><svg viewBox="0 0 100 100" class="w-full h-full"><rect x="4" y="4" width="92" height="92" rx="8" fill="#fff" stroke="#94a3b8" stroke-width="2"/><polygon points="10,10 90,10 70,30 30,30" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="30,70 70,70 90,90 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="10,10 30,30 30,70 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="90,10 70,30 70,70 90,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="30,30 70,30 70,70 30,70" fill="#fff" stroke="#64748b" stroke-width="1.5"/></svg></div></div>
+              <div class="flex flex-col items-center"><span class="text-[9px] font-bold text-slate-600 mb-0.5">44</span><div class="w-7 h-7"><svg viewBox="0 0 100 100" class="w-full h-full"><rect x="4" y="4" width="92" height="92" rx="8" fill="#fff" stroke="#94a3b8" stroke-width="2"/><polygon points="10,10 90,10 70,30 30,30" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="30,70 70,70 90,90 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="10,10 30,30 30,70 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="90,10 70,30 70,70 90,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="30,30 70,30 70,70 30,70" fill="#fff" stroke="#64748b" stroke-width="1.5"/></svg></div></div>
+              <div class="flex flex-col items-center"><span class="text-[9px] font-bold text-slate-600 mb-0.5">43</span><div class="w-7 h-7"><svg viewBox="0 0 100 100" class="w-full h-full"><rect x="4" y="4" width="92" height="92" rx="8" fill="#fff" stroke="#94a3b8" stroke-width="2"/><polygon points="10,10 90,10 70,30 30,30" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="30,70 70,70 90,90 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="10,10 30,30 30,70 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="90,10 70,30 70,70 90,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="30,30 70,30 70,70 30,70" fill="#fff" stroke="#64748b" stroke-width="1.5"/></svg></div></div>
+              <div class="flex flex-col items-center"><span class="text-[9px] font-bold text-slate-600 mb-0.5">42</span><div class="w-7 h-7"><svg viewBox="0 0 100 100" class="w-full h-full"><rect x="4" y="4" width="92" height="92" rx="8" fill="#fff" stroke="#94a3b8" stroke-width="2"/><polygon points="10,10 90,10 70,30 30,30" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="30,70 70,70 90,90 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="10,10 30,30 30,70 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="90,10 70,30 70,70 90,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="30,30 70,30 70,70 30,70" fill="#fff" stroke="#64748b" stroke-width="1.5"/></svg></div></div>
+              <div class="flex flex-col items-center"><span class="text-[9px] font-bold text-slate-600 mb-0.5">41</span><div class="w-7 h-7"><svg viewBox="0 0 100 100" class="w-full h-full"><rect x="4" y="4" width="92" height="92" rx="8" fill="#fff" stroke="#94a3b8" stroke-width="2"/><polygon points="10,10 90,10 70,30 30,30" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="30,70 70,70 90,90 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="10,10 30,30 30,70 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="90,10 70,30 70,70 90,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="30,30 70,30 70,70 30,70" fill="#fff" stroke="#64748b" stroke-width="1.5"/></svg></div></div>
+            </div>
+            <!-- Vertical Divider -->
+            <div class="w-px h-10 bg-slate-300"></div>
+            <!-- 31 - 38 -->
+            <div class="flex gap-1.5">
+              <div class="flex flex-col items-center"><span class="text-[9px] font-bold text-slate-600 mb-0.5">31</span><div class="w-7 h-7"><svg viewBox="0 0 100 100" class="w-full h-full"><rect x="4" y="4" width="92" height="92" rx="8" fill="#fff" stroke="#94a3b8" stroke-width="2"/><polygon points="10,10 90,10 70,30 30,30" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="30,70 70,70 90,90 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="10,10 30,30 30,70 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="90,10 70,30 70,70 90,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="30,30 70,30 70,70 30,70" fill="#fff" stroke="#64748b" stroke-width="1.5"/></svg></div></div>
+              <div class="flex flex-col items-center"><span class="text-[9px] font-bold text-slate-600 mb-0.5">32</span><div class="w-7 h-7"><svg viewBox="0 0 100 100" class="w-full h-full"><rect x="4" y="4" width="92" height="92" rx="8" fill="#fff" stroke="#94a3b8" stroke-width="2"/><polygon points="10,10 90,10 70,30 30,30" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="30,70 70,70 90,90 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="10,10 30,30 30,70 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="90,10 70,30 70,70 90,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="30,30 70,30 70,70 30,70" fill="#fff" stroke="#64748b" stroke-width="1.5"/></svg></div></div>
+              <div class="flex flex-col items-center"><span class="text-[9px] font-bold text-slate-600 mb-0.5">33</span><div class="w-7 h-7"><svg viewBox="0 0 100 100" class="w-full h-full"><rect x="4" y="4" width="92" height="92" rx="8" fill="#fff" stroke="#94a3b8" stroke-width="2"/><polygon points="10,10 90,10 70,30 30,30" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="30,70 70,70 90,90 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="10,10 30,30 30,70 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="90,10 70,30 70,70 90,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="30,30 70,30 70,70 30,70" fill="#fff" stroke="#64748b" stroke-width="1.5"/></svg></div></div>
+              <div class="flex flex-col items-center"><span class="text-[9px] font-bold text-slate-600 mb-0.5">34</span><div class="w-7 h-7"><svg viewBox="0 0 100 100" class="w-full h-full"><rect x="4" y="4" width="92" height="92" rx="8" fill="#fff" stroke="#94a3b8" stroke-width="2"/><polygon points="10,10 90,10 70,30 30,30" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="30,70 70,70 90,90 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="10,10 30,30 30,70 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="90,10 70,30 70,70 90,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="30,30 70,30 70,70 30,70" fill="#fff" stroke="#64748b" stroke-width="1.5"/></svg></div></div>
+              <div class="flex flex-col items-center"><span class="text-[9px] font-bold text-slate-600 mb-0.5">35</span><div class="w-7 h-7"><svg viewBox="0 0 100 100" class="w-full h-full"><rect x="4" y="4" width="92" height="92" rx="8" fill="#fff" stroke="#94a3b8" stroke-width="2"/><polygon points="10,10 90,10 70,30 30,30" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="30,70 70,70 90,90 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="10,10 30,30 30,70 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="90,10 70,30 70,70 90,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="30,30 70,30 70,70 30,70" fill="#fff" stroke="#64748b" stroke-width="1.5"/></svg></div></div>
+              <div class="flex flex-col items-center"><span class="text-[9px] font-bold text-slate-600 mb-0.5">36</span><div class="w-7 h-7"><svg viewBox="0 0 100 100" class="w-full h-full"><rect x="4" y="4" width="92" height="92" rx="8" fill="#fff" stroke="#94a3b8" stroke-width="2"/><polygon points="10,10 90,10 70,30 30,30" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="30,70 70,70 90,90 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="10,10 30,30 30,70 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="90,10 70,30 70,70 90,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="30,30 70,30 70,70 30,70" fill="#fff" stroke="#64748b" stroke-width="1.5"/></svg></div></div>
+              <div class="flex flex-col items-center"><span class="text-[9px] font-bold text-slate-600 mb-0.5">37</span><div class="w-7 h-7"><svg viewBox="0 0 100 100" class="w-full h-full"><rect x="4" y="4" width="92" height="92" rx="8" fill="#fff" stroke="#94a3b8" stroke-width="2"/><polygon points="10,10 90,10 70,30 30,30" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="30,70 70,70 90,90 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="10,10 30,30 30,70 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="90,10 70,30 70,70 90,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="30,30 70,30 70,70 30,70" fill="#fff" stroke="#64748b" stroke-width="1.5"/></svg></div></div>
+              <div class="flex flex-col items-center"><span class="text-[9px] font-bold text-slate-600 mb-0.5">38</span><div class="w-7 h-7"><svg viewBox="0 0 100 100" class="w-full h-full"><rect x="4" y="4" width="92" height="92" rx="8" fill="#fff" stroke="#94a3b8" stroke-width="2"/><polygon points="10,10 90,10 70,30 30,30" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="30,70 70,70 90,90 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="10,10 30,30 30,70 10,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="90,10 70,30 70,70 90,90" fill="#fff" stroke="#64748b" stroke-width="1.5"/><polygon points="30,30 70,30 70,70 30,70" fill="#fff" stroke="#64748b" stroke-width="1.5"/></svg></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ringkasan Kondisi Gigi Pop-up -->
+        <div class="bg-sky-50 border border-sky-200 rounded-xl p-3 text-xs">
+          <div class="font-bold text-sky-900 mb-1">Rincian Odontogram:</div>
+          <div class="space-y-1 text-slate-700">
+            <div>&bull; <b>Gigi 46:</b> Karies dentin permukaan Oklusal (Merah)</div>
+            <div>&bull; <b>Gigi 47:</b> Tumpatan komposit permukaan Oklusal (Hijau)</div>
+            <div>&bull; Gigi lainnya: Kondisi normal / sehat (Putih)</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="px-5 py-3 bg-slate-100 border-t border-slate-200 flex justify-end">
+        <button type="button" onclick="tutupModalOdontoDemo()" class="px-4 py-2 bg-slate-700 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow transition-all">
+          Tutup Gambar
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    function bukaModalOdontoDemo() {
+      document.getElementById('modalOdontoDemo').classList.remove('hidden');
+    }
+    function tutupModalOdontoDemo() {
+      document.getElementById('modalOdontoDemo').classList.add('hidden');
+    }
+  </script>
+</body>
+</html>

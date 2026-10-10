@@ -1,0 +1,1051 @@
+<script>
+ let optPerawatKSR = '';
+ let invoiceGroups = {};
+ let currentPreviewInvId = null;
+
+
+ // VARIABEL PAGINATION & FILTER
+ let currentPageKSR = 1;
+ let itemsPerPageKSR = 10;
+ let filteredInvoicesList = [];
+
+
+ // LINK ASLI GOOGLE DRIVE KOP SURAT ANDA
+ const LINK_KOP_SURAT = "https://lh3.googleusercontent.com/d/1GjKfmHhcGWgmPcQmuw00gLUBbP3_fead";
+
+
+ function parseUangKSR(val) { if(!val) return 0; return parseInt(val.toString().replace(/[^0-9]/g, '')) || 0; }
+ function formatRpKSR(angka) { return parseInt(angka).toLocaleString('id-ID'); }
+ function autoFormatUang(el) { let v = parseUangKSR(el.value); el.value = v === 0 ? '' : formatRpKSR(v); }
+ function validasiTglMaxKasir(el) { let t = getTodayIso(); if(el.value > t) el.value = t; }
+
+
+ function parseDateKasir(str) {
+   if (!str) return 0;
+   let d = new Date(str);
+   if (!isNaN(d.getTime())) return d.getTime();
+   let parts = str.toString().split(/[-/ ]/);
+   if (parts.length >= 3) {
+      if(parts[0].length === 4) return new Date(parts[0], parts[1]-1, parts[2]).getTime();
+      return new Date(parts[2], parts[1]-1, parts[0]).getTime();
+   }
+   return 0;
+ }
+
+
+ function formatTglIndoFull(tglStr) {
+   if(!tglStr) return '-';
+   try {
+     let ms = parseDateKasir(tglStr);
+     if(ms === 0) return tglStr;
+     let d = new Date(ms);
+     let bln = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+     return `${d.getDate()} ${bln[d.getMonth()]} ${d.getFullYear()}`;
+   } catch(e) { return tglStr; }
+ }
+
+
+ function terbilangKSR(angka) {
+   let a = Math.abs(parseInt(angka, 10));
+   if (a === 0) return "";
+   let huruf = ["", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan", "Sepuluh", "Sebelas"];
+   let temp = "";
+   if (a < 12) { temp = " " + huruf[a]; }
+   else if (a < 20) { temp = terbilangKSR(a - 10) + " Belas"; }
+   else if (a < 100) { temp = terbilangKSR(Math.floor(a / 10)) + " Puluh" + terbilangKSR(a % 10); }
+   else if (a < 200) { temp = " Seratus" + terbilangKSR(a - 100); }
+   else if (a < 1000) { temp = terbilangKSR(Math.floor(a / 100)) + " Ratus" + terbilangKSR(a % 100); }
+   else if (a < 2000) { temp = " Seribu" + terbilangKSR(a - 1000); }
+   else if (a < 1000000) { temp = terbilangKSR(Math.floor(a / 1000)) + " Ribu" + terbilangKSR(a % 1000); }
+   else if (a < 1000000000) { temp = terbilangKSR(Math.floor(a / 1000000)) + " Juta" + terbilangKSR(a % 1000000); }
+   return temp;
+ }
+
+
+ document.addEventListener('KlinikDataReady', () => {
+   let t = getTodayIso();
+   let elTgl = document.getElementById('ksrTgl');
+   if(elTgl) { elTgl.value = t; elTgl.max = t; }
+  
+   let selDokter = document.getElementById('ksrDokter');
+   if(selDokter) {
+     selDokter.innerHTML = '<option value="">-- Pilih Dokter --</option>';
+     let dokters = window.KlinikData.staff.filter(s => s.role.toLowerCase().includes('dokter gigi'));
+     dokters.forEach(d => { selDokter.innerHTML += `<option value="${d.nama}">${d.nama}</option>`; });
+   }
+
+
+   let perawats = (window.KlinikData && Array.isArray(window.KlinikData.staff))
+     ? window.KlinikData.staff.filter(s => s.role && s.role.toLowerCase().includes('perawat gigi'))
+     : [];
+   optPerawatKSR = '<option value="">-- Perawat --</option>';
+   perawats.forEach(p => { optPerawatKSR += `<option value="${p.nama}">${p.nama}</option>`; });
+
+
+   let dlObat = document.getElementById('dlObatKasir'); if(dlObat) dlObat.innerHTML = window.KlinikData.obat.map(o => `<option value="${o.nama}">${o.nama} (Stok: ${o.stok !== undefined ? o.stok : 0} ${o.satuan || 'Pcs'})</option>`).join('');
+   let dlBMHP = document.getElementById('dlBMHPKasir'); if(dlBMHP) dlBMHP.innerHTML = window.KlinikData.bmhp.map(b => `<option value="${b.nama}">${b.nama} (Stok: ${b.stok !== undefined ? b.stok : 0} ${b.satuan || 'Pcs'})</option>`).join('');
+  
+   updateDatalistTindakan();
+
+
+   let searchPas = document.getElementById('ksrSearchPasien');
+   if(searchPas) {
+     searchPas.addEventListener('input', function() {
+       let q = this.value.toLowerCase().trim(), resBox = document.getElementById('ksrSearchResult');
+       if (!q || q.length < 2) { resBox.classList.add('hidden'); return; }
+       let listData = window.KlinikData.pasien || [];
+       let list = listData.filter(p => p.namaPasien.toLowerCase().includes(q) || p.noRm.toLowerCase().includes(q));
+       if (list.length === 0) resBox.innerHTML = '<div class="p-2 text-slate-400 text-xs">Tidak ditemukan</div>';
+       else resBox.innerHTML = list.slice(0, 5).map(p => `<div onclick="pilihPasienKSR('${p.idPasien}')" class="p-2 hover:bg-indigo-50 cursor-pointer border-b border-slate-100 flex justify-between"><b>${p.namaPasien}</b> <span class="text-[10px] text-slate-500">${p.noRm}</span></div>`).join('');
+       resBox.classList.remove('hidden');
+     });
+   }
+
+
+   setTimeout(() => { resetPageAndSearch(); }, 500);
+ });
+
+
+ document.addEventListener('DOMContentLoaded', () => {
+    let btnNav = document.getElementById('nav-riwayat-invoice');
+    if(btnNav) {
+      btnNav.addEventListener('click', () => { setTimeout(resetPageAndSearch, 100); });
+    }
+ });
+
+
+ function pilihPasienKSR(id) {
+   let p = window.KlinikData.pasien.find(x => x.idPasien === id); if (!p) return;
+   document.getElementById('ksrSearchPasien').value = ''; document.getElementById('ksrSearchResult').classList.add('hidden');
+   document.getElementById('ksrNama').value = p.namaPasien; document.getElementById('ksrRM').value = p.noRm; document.getElementById('ksrID').value = p.idPasien;
+
+   // CEK STATUS CICILAN / TAGIHAN BERJALAN PASIEN INI
+   cekNotifikasiCicilanPasien(p.idPasien, p.namaPasien);
+ }
+
+ function cekNotifikasiCicilanPasien(idPasien, namaPasien) {
+   let alertBox = document.getElementById('alertCicilanPasien');
+   let alertIcon = document.getElementById('alertCicilanIcon');
+   let alertTitle = document.getElementById('alertCicilanTitle');
+   let alertBody = document.getElementById('alertCicilanBody');
+   if (!alertBox || !alertTitle || !alertBody) return;
+
+   let pm = window.KlinikData.pembayaran || [];
+   // Ambil semua invoice pasien ini
+   let patientInvoices = {};
+   pm.forEach(r => {
+     if (r.idPasien === idPasien) {
+       let invId = r.idInvoice || "INV-UNSPECIFIED";
+       if (!patientInvoices[invId]) {
+         patientInvoices[invId] = {
+           idInvoice: invId,
+           tanggal: r.tanggal,
+           status: r.status,
+           totalInvoice: r.totalInvoice,
+           metode: r.metode,
+           keterangan: r.keterangan || "",
+           items: []
+         };
+       }
+       patientInvoices[invId].items.push(r.item);
+     }
+   });
+
+   let invList = Object.values(patientInvoices).sort((a, b) => {
+     let diff = parseDateKasir(b.tanggal) - parseDateKasir(a.tanggal);
+     if (diff !== 0) return diff;
+     return (b.idInvoice || '').localeCompare(a.idInvoice || '');
+   });
+   
+   if (invList.length === 0) {
+     alertBox.classList.add('hidden');
+     return;
+   }
+
+   // Periksa apakah invoice terakhir adalah "Uang Muka"
+   let latestInv = invList[0];
+   let dpInvoices = invList.filter(inv => (inv.status || "").toLowerCase().includes("uang muka"));
+
+   if (dpInvoices.length > 0 && (latestInv.status || "").toLowerCase().includes("uang muka")) {
+     // ADA CICILAN BERJALAN (BELUM LUNAS)
+     let totalSudahBayar = dpInvoices.reduce((acc, cur) => acc + (cur.totalInvoice || 0), 0);
+     let itemsStr = latestInv.items.slice(0, 3).join(", ") + (latestInv.items.length > 3 ? "..." : "");
+
+     alertBox.className = "p-4 rounded-xl border-2 bg-amber-50 border-amber-300 text-amber-900 transition-all shadow-sm";
+     alertIcon.innerText = "⚠️";
+     alertTitle.innerHTML = `<span class="text-amber-800">PERINGATAN KASIR:</span> Pasien Memiliki Tagihan Berjalan (Belum Lunas)`;
+     alertBody.innerHTML = `
+       <div class="space-y-1 text-[11px] leading-relaxed">
+         <p>Pasien <b>${namaPasien}</b> tercatat melakukan pembayaran bertahap (<b>${latestInv.status}</b>):</p>
+         <div class="bg-white/80 p-2.5 rounded-lg border border-amber-200 mt-1">
+           <p>• Layanan Terakhir: <b>${itemsStr}</b></p>
+           <p>• Invoice Terakhir: <span class="font-mono font-bold text-indigo-700">${latestInv.idInvoice}</span> (${latestInv.tanggal || '-'})</p>
+           <p>• Total Pembayaran yang Sudah Masuk: <b class="text-emerald-700">Rp ${formatRpKSR(totalSudahBayar)}</b> (${dpInvoices.length} termin pembayaran)</p>
+           ${latestInv.keterangan ? `<p class="italic text-slate-600 mt-0.5">• Catatan Kasir: "${latestInv.keterangan}"</p>` : ''}
+         </div>
+         <p class="mt-1 font-bold text-amber-900">
+           👉 Jika kunjungan hari ini adalah pelunasan akhir, ubah Status Pembayaran menjadi <span class="px-1.5 py-0.5 bg-emerald-100 text-emerald-800 rounded font-black">Pelunasan</span>.
+         </p>
+       </div>
+     `;
+     alertBox.classList.remove('hidden');
+   } else if ((latestInv.status || "").toLowerCase().includes("pelunasan")) {
+     // TERAKHIR SUDAH DILUNASI
+     alertBox.className = "p-3.5 rounded-xl border-2 bg-emerald-50 border-emerald-300 text-emerald-900 transition-all shadow-sm";
+     alertIcon.innerText = "✅";
+     alertTitle.innerHTML = `<span class="text-emerald-800">INFO STATUS:</span> Paket Perawatan Sebelumnya Telah LUNAS`;
+     alertBody.innerHTML = `
+       <p class="text-[11px]">Invoice terakhir <span class="font-mono font-bold text-indigo-700">${latestInv.idInvoice}</span> pada ${latestInv.tanggal || '-'} tercatat <b class="text-emerald-700">PELUNASAN PENUH</b>. Saat ini pasien dapat memulai tagihan tindakan baru.</p>
+     `;
+     alertBox.classList.remove('hidden');
+   } else {
+     alertBox.classList.add('hidden');
+   }
+ }
+
+
+ function onStatusBayarChange() {
+   let stat = document.getElementById('ksrStatus').value;
+   let boxDp = document.getElementById('boxNominalDp');
+   let subDp = document.getElementById('subLabelDpInfo');
+   let lblJudul = document.getElementById('lblJudulTotalBayar');
+
+   if (stat === 'Uang Muka') {
+     if (boxDp) boxDp.classList.remove('hidden');
+     if (subDp) subDp.classList.remove('hidden');
+     if (lblJudul) lblJudul.innerText = 'TOTAL PAKET / TINDAKAN';
+     hitungSisaTagihanDp();
+   } else {
+     if (boxDp) boxDp.classList.add('hidden');
+     if (subDp) subDp.classList.add('hidden');
+     if (lblJudul) lblJudul.innerText = 'TOTAL BIAYA TINDAKAN';
+   }
+ }
+
+ function hitungSisaTagihanDp() {
+   let totalPaket = parseUangKSR(document.getElementById('valTotalBayarRaw').value);
+   let nominalDpInput = document.getElementById('ksrNominalDp');
+   let nominalDp = nominalDpInput ? parseUangKSR(nominalDpInput.value) : 0;
+   let sisa = Math.max(0, totalPaket - nominalDp);
+
+   let lblPreview = document.getElementById('lblSisaTagihanPreview');
+   if (lblPreview) {
+     lblPreview.innerText = 'Sisa: Rp ' + formatRpKSR(sisa);
+   }
+
+   let lblDp = document.getElementById('lblDisplayDp');
+   let lblSisa = document.getElementById('lblDisplaySisa');
+   if (lblDp) lblDp.innerText = 'Rp ' + formatRpKSR(nominalDp);
+   if (lblSisa) lblSisa.innerText = 'Rp ' + formatRpKSR(sisa);
+ }
+
+
+ function groupRiwayatInvoices() {
+   invoiceGroups = {};
+   let pm = window.KlinikData.pembayaran || [];
+   pm.forEach(row => {
+     let invId = row.idInvoice || "INV-LAMA";
+     if(!invoiceGroups[invId]) {
+       invoiceGroups[invId] = { idInvoice: invId, tanggal: row.tanggal, namaPasien: row.namaPasien, noRm: row.noRm, dokter: row.dokter, totalInvoice: row.totalInvoice, metode: row.metode, status: row.status, keterangan: row.keterangan || "", kasir: row.kasir, items: [] };
+     }
+     invoiceGroups[invId].items.push({ item: row.item, qty: row.qty, harga: row.harga, diskon: row.diskon, grandTotalItem: row.grandTotalItem });
+   });
+ }
+
+
+ function highlightTxt(text, query) {
+   if (!query || !text) return text;
+   const regex = new RegExp(`(${query})`, 'gi');
+   return text.toString().replace(regex, '<span class="bg-yellow-300 text-slate-900 px-0.5 rounded font-black">$1</span>');
+ }
+
+
+ // ==========================================
+ // PAGINATION & FILTER KALENDER LOGIC
+ // ==========================================
+ function resetPageAndSearch() {
+   currentPageKSR = 1;
+   searchRiwayatInvoice();
+ }
+
+
+ function prevPageKSR() {
+   if (currentPageKSR > 1) { currentPageKSR--; renderTablePageKSR(); }
+ }
+
+
+ function nextPageKSR() {
+   let totalPages = Math.ceil(filteredInvoicesList.length / itemsPerPageKSR);
+   if (currentPageKSR < totalPages) { currentPageKSR++; renderTablePageKSR(); }
+ }
+
+
+ function bukaRiwayatInvoice() {
+   groupRiwayatInvoices();
+   let inputEl = document.getElementById('inputCariRiwayat');
+   if(inputEl) inputEl.value = '';
+   resetPageAndSearch();
+   if(typeof switchMenu === 'function') switchMenu('riwayat-invoice');
+ }
+
+
+ function searchRiwayatInvoice() {
+   groupRiwayatInvoices();
+   let resBox = document.getElementById('tbodyRiwayatInvoice');
+   if (!resBox) return;
+
+
+   let inputEl = document.getElementById('inputCariRiwayat');
+   let tglMulaiEl = document.getElementById('filterTglMulai');
+   let tglAkhirEl = document.getElementById('filterTglAkhir');
+
+
+   let q = inputEl ? inputEl.value.toLowerCase().trim() : "";
+   let tMulai = tglMulaiEl && tglMulaiEl.value ? new Date(tglMulaiEl.value).setHours(0,0,0,0) : null;
+   let tAkhir = tglAkhirEl && tglAkhirEl.value ? new Date(tglAkhirEl.value).setHours(23,59,59,999) : null;
+  
+   // Sort Newest to Oldest (Terbaru dibuat di atas)
+   let sortedInvoices = Object.values(invoiceGroups).sort((a, b) => parseDateKasir(b.tanggal) - parseDateKasir(a.tanggal));
+  
+   // Terapkan Filter
+   sortedInvoices = sortedInvoices.filter(inv => {
+     let isMatchTxt = true;
+     if (q) isMatchTxt = inv.namaPasien.toLowerCase().includes(q) || inv.idInvoice.toLowerCase().includes(q);
+    
+     let invTime = parseDateKasir(inv.tanggal);
+     let isMatchDate = true;
+     if (tMulai && invTime < tMulai) isMatchDate = false;
+     if (tAkhir && invTime > tAkhir) isMatchDate = false;
+
+
+     return isMatchTxt && isMatchDate;
+   });
+
+
+   filteredInvoicesList = sortedInvoices;
+
+
+   // Update Label Total Invoice
+   let lblTotal = document.getElementById('labelTotalInvoice');
+   if(lblTotal) lblTotal.innerText = filteredInvoicesList.length;
+
+
+   renderTablePageKSR();
+ }
+
+
+ function renderTablePageKSR() {
+   let resBox = document.getElementById('tbodyRiwayatInvoice');
+   if (!resBox) return;
+
+
+   let totalPages = Math.ceil(filteredInvoicesList.length / itemsPerPageKSR) || 1;
+   if (currentPageKSR > totalPages) currentPageKSR = totalPages;
+
+
+   let btnPrev = document.getElementById('btnPrevPage');
+   let btnNext = document.getElementById('btnNextPage');
+   let lblCur = document.getElementById('labelCurrentPage');
+   let lblTot = document.getElementById('labelTotalPage');
+
+
+   if (lblCur) lblCur.innerText = currentPageKSR;
+   if (lblTot) lblTot.innerText = totalPages;
+   if (btnPrev) btnPrev.disabled = (currentPageKSR === 1);
+   if (btnNext) btnNext.disabled = (currentPageKSR === totalPages || filteredInvoicesList.length === 0);
+
+
+   let startIdx = (currentPageKSR - 1) * itemsPerPageKSR;
+   let endIdx = startIdx + itemsPerPageKSR;
+   let pageData = filteredInvoicesList.slice(startIdx, endIdx);
+
+
+   let q = document.getElementById('inputCariRiwayat') ? document.getElementById('inputCariRiwayat').value.toLowerCase().trim() : "";
+
+
+   if(pageData.length === 0) {
+     resBox.innerHTML = '<tr><td colspan="6" class="text-center text-rose-500 font-bold py-10 text-xs">Belum ada transaksi / Data tidak ditemukan.</td></tr>';
+     return;
+   }
+
+
+   resBox.innerHTML = pageData.map(inv => {
+     let statBadge = '';
+     let st = (inv.status || 'Lunas').toLowerCase();
+     if (st.includes('uang muka')) {
+       statBadge = '<span class="px-2 py-0.5 bg-amber-100 text-amber-800 rounded text-[9px] font-black border border-amber-300">DP / Cicilan</span>';
+     } else if (st.includes('pelunasan')) {
+       statBadge = '<span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded text-[9px] font-black border border-emerald-300">Pelunasan</span>';
+     } else {
+       statBadge = '<span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-[9px] font-bold border border-blue-200">Lunas</span>';
+     }
+
+     return `
+     <tr class="hover:bg-slate-50 transition-colors">
+       <td class="p-4">
+         <p class="font-bold text-slate-700 text-[11px]">${formatTglIndoFull(inv.tanggal)}</p>
+         <p class="text-[10px] font-mono text-slate-400 mt-0.5">${inv.idInvoice}</p>
+       </td>
+       <td class="p-4">
+         <p class="font-bold text-indigo-700 text-sm">${highlightTxt(inv.namaPasien, q)}</p>
+         <p class="text-[10px] text-slate-500 font-mono mt-0.5">RM: ${inv.noRm}</p>
+       </td>
+       <td class="p-4 text-right">
+         <p class="font-black text-emerald-600 text-sm">Rp ${formatRpKSR(inv.totalInvoice)}</p>
+       </td>
+       <td class="p-4 text-center">
+         <div class="flex flex-col items-center gap-1">
+           <span class="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-[10px] font-bold border border-slate-200 shadow-sm">${inv.metode || '-'}</span>
+           ${statBadge}
+         </div>
+       </td>
+       <td class="p-4 max-w-xs">
+         <p class="text-[11px] text-slate-600 truncate" title="${inv.keterangan || '-'}">${inv.keterangan || '-'}</p>
+       </td>
+       <td class="p-4 text-center">
+         <div class="flex justify-center gap-1.5">
+           <button type="button" onclick="previewInvoiceLama('${inv.idInvoice}')" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-[10px] font-bold border border-slate-300 transition-colors" title="View Preview">👁️ View</button>
+           <button type="button" onclick="actionKirimWA('${inv.idInvoice}')" class="px-3 py-1.5 bg-teal-50 hover:bg-teal-100 text-teal-700 rounded-lg text-[10px] font-bold border border-teal-200 transition-colors" title="Kirim via WhatsApp">💬 WA</button>
+         </div>
+       </td>
+     </tr>
+   `}).join('');
+ }
+
+
+ function previewInvoiceLama(id) { currentPreviewInvId = id; let inv = invoiceGroups[id]; if(!inv) return; generateA4Invoice(inv); }
+ function closeKwitansi() { let mdl = document.getElementById('modalKwitansi'); if(mdl) mdl.classList.add('hidden'); currentPreviewInvId = null; }
+
+
+ // ==========================================
+ // LOGIKA KASIR (INPUT & HITUNG)
+ // ==========================================
+  function updateDatalistTindakan() {
+    let dokEl = document.getElementById('ksrDokter');
+    if(!dokEl) return;
+    let dokName = dokEl.value, targetRole = "";
+    if (dokName) { let d = window.KlinikData.staff.find(x => x.nama === dokName); if(d) targetRole = d.role.toLowerCase(); }
+   
+    let allTindakan = window.KlinikData.tindakan || [];
+    let isUmum = function(t) {
+      let kat = (t.kategori || '').toLowerCase();
+      let kod = (t.kode || '').toUpperCase();
+      return kat.includes('umum') || kod.startsWith('UMM');
+    };
+
+    let filtered = allTindakan;
+    if (targetRole.includes('spesialis')) {
+      filtered = allTindakan.filter(function(t) { return t.kategori.toLowerCase().includes('spesialis') || isUmum(t); });
+    } else if (targetRole.includes('umum') || targetRole === 'dokter') {
+      filtered = allTindakan.filter(function(t) { return isUmum(t); });
+    } else if (targetRole) {
+      filtered = allTindakan.filter(function(t) { return t.kategori.toLowerCase().includes(targetRole) || isUmum(t); });
+    }
+    let dlTindakan = document.getElementById('dlTindakanKasir');
+    if(dlTindakan) dlTindakan.innerHTML = filtered.map(function(t) { return `<option value="${t.nama}">`; }).join('');
+  }
+
+
+ function onInputDatalistChange(el, type) {
+   let val = el.value, obj = null;
+   if (type === 'tindakan') obj = window.KlinikData.tindakan.find(x => x.nama === val);
+   else if (type === 'obat') obj = window.KlinikData.obat.find(x => x.nama === val);
+   else if (type === 'bmhp') obj = window.KlinikData.bmhp.find(x => x.nama === val);
+
+   let row = el.closest('tr');
+   if (obj) {
+     row.querySelector('.val-harga').value = formatRpKSR(obj.harga || obj.hargaJual || 0);
+     el.setAttribute('data-kode', obj.kode || obj.idObat || '');
+     el.setAttribute('data-stok', obj.stok !== undefined ? obj.stok : 9999);
+     if (type === 'obat' || type === 'bmhp') {
+       let stokLabel = row.querySelector('.val-stok-label');
+       if (stokLabel) {
+         stokLabel.innerText = 'Sisa Stok: ' + (obj.stok !== undefined ? obj.stok : 0) + ' ' + (obj.satuan || 'Pcs');
+         stokLabel.className = 'val-stok-label text-[9px] font-bold block mt-0.5 ' + (obj.stok <= 0 ? 'text-rose-600 font-black animate-pulse' : (obj.stok <= (obj.stokMin || 10) ? 'text-amber-600' : 'text-emerald-600'));
+       }
+     }
+   } else {
+     row.querySelector('.val-harga').value = '0';
+     el.removeAttribute('data-kode');
+     el.removeAttribute('data-stok');
+     let stokLabel = row.querySelector('.val-stok-label');
+     if (stokLabel) stokLabel.innerText = '';
+   }
+   hitungRowKSR(row, type);
+ }
+
+
+ function hitungRowKSR(row, type) {
+   let hrg = parseUangKSR(row.querySelector('.val-harga').value);
+   let qtyInput = row.querySelector('.val-qty');
+   let qty = parseInt(qtyInput ? qtyInput.value : 0) || 0;
+   let disc = parseFloat(row.querySelector('.val-disc').value) || 0;
+   if (disc > 100) { disc = 100; row.querySelector('.val-disc').value = 100; }
+
+   // Validasi batas stok real-time untuk Obat & BMHP
+   if (type === 'obat' || type === 'bmhp') {
+     let namaInput = row.querySelector('.val-nama');
+     let stokLabel = row.querySelector('.val-stok-label');
+     if (namaInput && namaInput.hasAttribute('data-stok')) {
+       let stokAvail = parseInt(namaInput.getAttribute('data-stok'));
+       if (!isNaN(stokAvail)) {
+         if (qty > stokAvail) {
+           qtyInput.classList.add('border-rose-500', 'bg-rose-50', 'text-rose-600', 'font-black');
+           if (stokLabel) {
+             stokLabel.innerText = '⚠️ Stok tidak mencukupi (Tersedia: ' + stokAvail + ')';
+             stokLabel.className = 'val-stok-label text-[9px] font-black block mt-0.5 text-rose-600 animate-pulse';
+           }
+         } else {
+           qtyInput.classList.remove('border-rose-500', 'bg-rose-50', 'text-rose-600', 'font-black');
+           if (stokLabel && namaInput.value) {
+             stokLabel.innerText = 'Sisa Stok: ' + stokAvail;
+             stokLabel.className = 'val-stok-label text-[9px] font-bold block mt-0.5 ' + (stokAvail <= 0 ? 'text-rose-600 font-black' : 'text-emerald-600');
+           }
+         }
+       }
+     }
+   }
+  
+   let total = hrg * qty;
+   let grand = total - (total * (disc / 100)); // Labor diabaikan dari rumus total
+   row.querySelector('.val-grand').value = grand === 0 ? '0' : formatRpKSR(grand);
+   hitungGrandTotalSemua();
+ }
+
+
+ function hitungGrandTotalSemua() {
+   let sum = 0; document.querySelectorAll('.val-grand').forEach(el => { sum += parseUangKSR(el.value); });
+   document.getElementById('lblTotalBayarKSR').innerText = 'Rp ' + formatRpKSR(sum);
+   document.getElementById('valTotalBayarRaw').value = sum;
+ }
+
+
+ function addKasirTindakan() {
+   let tb = document.getElementById('ksrTbodyTindakan');
+   let tr = document.createElement('tr'); tr.className = "hover:bg-slate-50 border-b border-slate-100 row-tindakan";
+   tr.innerHTML = `<td class="p-1.5"><input type="text" list="dlTindakanKasir" onchange="onInputDatalistChange(this, 'tindakan')" placeholder="Ketik/Cari Tindakan..." class="val-nama w-full px-2 py-1.5 bg-white border border-slate-300 rounded outline-none focus:ring-1 focus:ring-indigo-500"></td><td class="p-1.5"><input type="text" readonly class="val-harga w-full px-2 py-1.5 bg-slate-100 border border-slate-200 rounded text-right font-bold text-slate-600 outline-none" value="0"></td><td class="p-1.5"><input type="text" maxlength="2" value="1" oninput="this.value=this.value.replace(/[^0-9]/g,''); hitungRowKSR(this.closest('tr'), 'tindakan')" class="val-qty w-full px-2 py-1.5 bg-white border border-slate-300 rounded text-center outline-none focus:ring-1 focus:ring-indigo-500"></td><td class="p-1.5"><input type="text" value="0" oninput="autoFormatUang(this); hitungRowKSR(this.closest('tr'), 'tindakan')" class="val-labor w-full px-2 py-1.5 bg-white border border-slate-300 rounded text-right outline-none focus:ring-1 focus:ring-indigo-500"></td><td class="p-1.5"><input type="text" maxlength="3" value="0" oninput="this.value=this.value.replace(/[^0-9]/g,''); hitungRowKSR(this.closest('tr'), 'tindakan')" class="val-disc w-full px-2 py-1.5 bg-white border border-slate-300 rounded text-center outline-none focus:ring-1 focus:ring-indigo-500"></td><td class="p-1.5"><input type="text" readonly class="val-grand w-full px-2 py-1.5 bg-indigo-50 border border-indigo-200 rounded text-right font-black text-indigo-700 outline-none" value="0"></td><td class="p-1.5"><select class="val-perawat w-full px-2 py-1.5 bg-white border border-slate-300 rounded outline-none focus:ring-1 focus:ring-indigo-500">${optPerawatKSR}</select></td><td class="p-1.5 text-center"><button type="button" onclick="this.closest('tr').remove(); hitungGrandTotalSemua();" class="w-7 h-7 bg-rose-100 text-rose-600 rounded font-black hover:bg-rose-200">X</button></td>`;
+   tb.appendChild(tr);
+ }
+
+
+ function addKasirObat() {
+   let tb = document.getElementById('ksrTbodyObat');
+   let tr = document.createElement('tr'); tr.className = "hover:bg-slate-50 border-b border-slate-100 row-obat";
+   tr.innerHTML = `<td class="p-1.5"><input type="text" list="dlObatKasir" onchange="onInputDatalistChange(this, 'obat')" placeholder="Ketik/Cari Obat..." class="val-nama w-full px-2 py-1.5 bg-white border border-slate-300 rounded outline-none focus:ring-1 focus:ring-emerald-500"><span class="val-stok-label text-[9px] font-bold block mt-0.5"></span></td><td class="p-1.5"><input type="text" readonly class="val-harga w-full px-2 py-1.5 bg-slate-100 border border-slate-200 rounded text-right font-bold text-slate-600 outline-none" value="0"></td><td class="p-1.5"><input type="text" maxlength="2" value="1" oninput="this.value=this.value.replace(/[^0-9]/g,''); hitungRowKSR(this.closest('tr'), 'obat')" class="val-qty w-full px-2 py-1.5 bg-white border border-slate-300 rounded text-center outline-none focus:ring-1 focus:ring-emerald-500"></td><td class="p-1.5"><input type="text" maxlength="3" value="0" oninput="this.value=this.value.replace(/[^0-9]/g,''); hitungRowKSR(this.closest('tr'), 'obat')" class="val-disc w-full px-2 py-1.5 bg-white border border-slate-300 rounded text-center outline-none focus:ring-1 focus:ring-emerald-500"></td><td class="p-1.5"><input type="text" readonly class="val-grand w-full px-2 py-1.5 bg-emerald-50 border border-emerald-200 rounded text-right font-black text-emerald-700 outline-none" value="0"></td><td class="p-1.5 text-center"><button type="button" onclick="this.closest('tr').remove(); hitungGrandTotalSemua();" class="w-7 h-7 bg-rose-100 text-rose-600 rounded font-black hover:bg-rose-200">X</button></td>`;
+   tb.appendChild(tr);
+ }
+
+
+ function addKasirBMHP() {
+   let tb = document.getElementById('ksrTbodyBMHP');
+   let tr = document.createElement('tr'); tr.className = "hover:bg-slate-50 border-b border-slate-100 row-bmhp";
+   tr.innerHTML = `<td class="p-1.5"><input type="text" list="dlBMHPKasir" onchange="onInputDatalistChange(this, 'bmhp')" placeholder="Ketik/Cari BMHP..." class="val-nama w-full px-2 py-1.5 bg-white border border-slate-300 rounded outline-none focus:ring-1 focus:ring-amber-500"><span class="val-stok-label text-[9px] font-bold block mt-0.5"></span></td><td class="p-1.5"><input type="text" readonly class="val-harga w-full px-2 py-1.5 bg-slate-100 border border-slate-200 rounded text-right font-bold text-slate-600 outline-none" value="0"></td><td class="p-1.5"><input type="text" maxlength="2" value="1" oninput="this.value=this.value.replace(/[^0-9]/g,''); hitungRowKSR(this.closest('tr'), 'bmhp')" class="val-qty w-full px-2 py-1.5 bg-white border border-slate-300 rounded text-center outline-none focus:ring-1 focus:ring-amber-500"></td><td class="p-1.5"><input type="text" maxlength="3" value="0" oninput="this.value=this.value.replace(/[^0-9]/g,''); hitungRowKSR(this.closest('tr'), 'bmhp')" class="val-disc w-full px-2 py-1.5 bg-white border border-slate-300 rounded text-center outline-none focus:ring-1 focus:ring-amber-500"></td><td class="p-1.5"><input type="text" readonly class="val-grand w-full px-2 py-1.5 bg-amber-50 border border-amber-200 rounded text-right font-black text-amber-700 outline-none" value="0"></td><td class="p-1.5 text-center"><button type="button" onclick="this.closest('tr').remove(); hitungGrandTotalSemua();" class="w-7 h-7 bg-rose-100 text-rose-600 rounded font-black hover:bg-rose-200">X</button></td>`;
+   tb.appendChild(tr);
+ }
+
+
+ function resetFormBilling() {
+   document.getElementById('ksrNama').value = ''; document.getElementById('ksrRM').value = ''; document.getElementById('ksrID').value = ''; document.getElementById('ksrDokter').value = ''; document.getElementById('ksrMetode').value = ''; document.getElementById('ksrStatus').value = ''; document.getElementById('ksrKet').value = '';
+   let ksrDp = document.getElementById('ksrNominalDp'); if (ksrDp) ksrDp.value = '';
+   onStatusBayarChange();
+   document.getElementById('ksrTbodyTindakan').innerHTML = ''; document.getElementById('ksrTbodyObat').innerHTML = ''; document.getElementById('ksrTbodyBMHP').innerHTML = '';
+   document.getElementById('ksrSearchPasien').value = '';
+   let alertCicilan = document.getElementById('alertCicilanPasien');
+   if (alertCicilan) alertCicilan.classList.add('hidden');
+   hitungGrandTotalSemua(); window.scrollTo({ top: 0, behavior: 'smooth' });
+ }
+
+
+ function simpanBillingFinal() {
+   let idPasien = document.getElementById('ksrID').value;
+   if (!idPasien) { showToast('error', 'Cari dan Pilih Pasien terlebih dahulu!'); return; }
+  
+   let tgl = document.getElementById('ksrTgl').value, dok = document.getElementById('ksrDokter').value, met = document.getElementById('ksrMetode').value, stat = document.getElementById('ksrStatus').value;
+   if(!tgl || !dok || !met || !stat) { showToast('error', 'Lengkapi field bertanda * (Dokter, Tgl, Metode, Status)'); return; }
+
+   let totalBiayaTindakan = parseUangKSR(document.getElementById('valTotalBayarRaw').value);
+   let nominalBayarAkhir = totalBiayaTindakan;
+   let ketTambahan = document.getElementById('ksrKet').value.trim();
+
+   if (stat === 'Uang Muka') {
+     let dpVal = parseUangKSR(document.getElementById('ksrNominalDp').value);
+     if (dpVal <= 0) {
+       showToast('error', 'Harap isi nominal Uang Muka / DP yang dibayarkan!');
+       let elDp = document.getElementById('ksrNominalDp');
+       if (elDp) elDp.focus();
+       return;
+     }
+     if (dpVal > totalBiayaTindakan) {
+       showToast('error', 'Nominal DP tidak boleh melebihi total biaya paket (Rp ' + formatRpKSR(totalBiayaTindakan) + ')!');
+       return;
+     }
+     nominalBayarAkhir = dpVal;
+     let sisaTagihan = totalBiayaTindakan - dpVal;
+     let infoDp = '[DP: Rp ' + formatRpKSR(dpVal) + ' | Total Paket: Rp ' + formatRpKSR(totalBiayaTindakan) + ' | Sisa Piutang: Rp ' + formatRpKSR(sisaTagihan) + ']';
+     ketTambahan = ketTambahan ? (ketTambahan + ' ' + infoDp) : infoDp;
+   }
+
+   let btn = document.getElementById('btnSimpanBilling'); btn.innerHTML = 'MEMPROSES...'; btn.disabled = true;
+
+   let errTbl = false;
+   let stokError = false;
+   let stokErrorMsg = '';
+
+   let tTindakan = [];
+   let tbTindakanEl = document.getElementById('ksrTbodyTindakan');
+   let rowsTindakanList = tbTindakanEl ? tbTindakanEl.querySelectorAll('.row-tindakan') : [];
+   rowsTindakanList.forEach(tr => {
+     let nInput = tr.querySelector('.val-nama');
+     let n = nInput ? nInput.value : '';
+     if (n) {
+       tTindakan.push({
+         nama: n,
+         harga: parseUangKSR(tr.querySelector('.val-harga') ? tr.querySelector('.val-harga').value : 0),
+         qty: tr.querySelector('.val-qty') ? tr.querySelector('.val-qty').value : 1,
+         labor: parseUangKSR(tr.querySelector('.val-labor') ? tr.querySelector('.val-labor').value : 0),
+         diskon: tr.querySelector('.val-disc') ? tr.querySelector('.val-disc').value : 0,
+         grandTotal: parseUangKSR(tr.querySelector('.val-grand') ? tr.querySelector('.val-grand').value : 0),
+         perawat: tr.querySelector('.val-perawat') ? tr.querySelector('.val-perawat').value : ''
+       });
+     } else {
+       errTbl = true;
+     }
+   });
+   
+   let tObat = []; 
+   let tbObatEl = document.getElementById('ksrTbodyObat');
+   let rowsObatList = tbObatEl ? tbObatEl.querySelectorAll('.row-obat') : [];
+   rowsObatList.forEach(tr => { 
+     let nInput = tr.querySelector('.val-nama');
+     let n = nInput ? nInput.value : ''; 
+     let kd = nInput ? (nInput.getAttribute('data-kode') || '') : '';
+     let q = parseInt(tr.querySelector('.val-qty') ? tr.querySelector('.val-qty').value : 1) || 0;
+     if (n) { 
+       if (nInput && nInput.hasAttribute('data-stok')) {
+         let sAvail = parseInt(nInput.getAttribute('data-stok'));
+         if (!isNaN(sAvail) && q > sAvail) {
+           stokError = true;
+           stokErrorMsg = 'Stok "' + n + '" tidak mencukupi (Diminta: ' + q + ', Tersedia: ' + sAvail + ')!';
+         }
+       }
+       tObat.push({ 
+         kode: kd, 
+         nama: n, 
+         harga: parseUangKSR(tr.querySelector('.val-harga') ? tr.querySelector('.val-harga').value : 0), 
+         qty: q, 
+         diskon: tr.querySelector('.val-disc') ? tr.querySelector('.val-disc').value : 0, 
+         grandTotal: parseUangKSR(tr.querySelector('.val-grand') ? tr.querySelector('.val-grand').value : 0) 
+       }); 
+     } else { errTbl = true; } 
+   });
+
+   let tBMHP = []; 
+   let tbBmhpEl = document.getElementById('ksrTbodyBMHP');
+   let rowsBmhpList = tbBmhpEl ? tbBmhpEl.querySelectorAll('.row-bmhp') : [];
+   rowsBmhpList.forEach(tr => { 
+     let nInput = tr.querySelector('.val-nama');
+     let n = nInput ? nInput.value : ''; 
+     let kd = nInput ? (nInput.getAttribute('data-kode') || '') : '';
+     let q = parseInt(tr.querySelector('.val-qty') ? tr.querySelector('.val-qty').value : 1) || 0;
+     if (n) { 
+       if (nInput && nInput.hasAttribute('data-stok')) {
+         let sAvail = parseInt(nInput.getAttribute('data-stok'));
+         if (!isNaN(sAvail) && q > sAvail) {
+           stokError = true;
+           stokErrorMsg = 'Stok "' + n + '" tidak mencukupi (Diminta: ' + q + ', Tersedia: ' + sAvail + ')!';
+         }
+       }
+       tBMHP.push({ 
+         kode: kd, 
+         nama: n, 
+         harga: parseUangKSR(tr.querySelector('.val-harga') ? tr.querySelector('.val-harga').value : 0), 
+         qty: q, 
+         diskon: tr.querySelector('.val-disc') ? tr.querySelector('.val-disc').value : 0, 
+         grandTotal: parseUangKSR(tr.querySelector('.val-grand') ? tr.querySelector('.val-grand').value : 0) 
+       }); 
+     } else { errTbl = true; } 
+   });
+
+   if (errTbl) { showToast('error', 'Semua baris tabel yang ditambahkan harus diisi namanya!'); btn.innerHTML = 'SIMPAN DATA INVOICE'; btn.disabled = false; return; }
+   if (stokError) { showToast('error', stokErrorMsg); btn.innerHTML = 'SIMPAN DATA INVOICE'; btn.disabled = false; return; }
+   if (tTindakan.length===0 && tObat.length===0 && tBMHP.length===0) { showToast('error', 'Minimal input satu tindakan/obat/BMHP!'); btn.innerHTML = 'SIMPAN DATA INVOICE'; btn.disabled = false; return; }
+
+   let kasirNama = window.activeNamaAccount || 'Kasir';
+
+   let payload = {
+     idPasien: idPasien, noRm: document.getElementById('ksrRM').value, namaPasien: document.getElementById('ksrNama').value,
+     tglTindakan: tgl, dokter: dok, metode: met, status: stat, keterangan: ketTambahan,
+     totalBayar: nominalBayarAkhir, kasir: kasirNama,
+     tindakanStr: JSON.stringify(tTindakan), obatStr: JSON.stringify(tObat), bmhpStr: JSON.stringify(tBMHP)
+   };
+
+   google.script.run.withSuccessHandler(res => {
+     btn.innerHTML = 'SIMPAN DATA INVOICE'; btn.disabled = false;
+     if (res && res.success) {
+       showToast('success', 'Berhasil! No: ' + res.idInvoice);
+      
+       let newItems = [];
+       tTindakan.forEach(t => newItems.push({ item: t.nama, qty: t.qty, harga: t.harga, diskon: t.diskon, grandTotalItem: t.grandTotal }));
+       tObat.forEach(t => newItems.push({ kode: t.kode, item: t.nama, qty: t.qty, harga: t.harga, diskon: t.diskon, grandTotalItem: t.grandTotal }));
+       tBMHP.forEach(t => newItems.push({ kode: t.kode, item: t.nama, qty: t.qty, harga: t.harga, diskon: t.diskon, grandTotalItem: t.grandTotal }));
+      
+       // 1. Perbarui data lokal mentah (KlinikData.pembayaran) terlebih dahulu
+       if (window.KlinikData && Array.isArray(window.KlinikData.pembayaran)) {
+         newItems.forEach(it => {
+           window.KlinikData.pembayaran.push({
+             idInvoice: res.idInvoice,
+             tanggal: tgl,
+             idPasien: payload.idPasien,
+             noRm: payload.noRm,
+             namaPasien: payload.namaPasien,
+             dokter: payload.dokter,
+             item: it.item,
+             qty: it.qty,
+             harga: it.harga,
+             diskon: it.diskon,
+             grandTotalItem: it.grandTotalItem,
+             totalInvoice: payload.totalBayar,
+             metode: payload.metode,
+             status: payload.status,
+             keterangan: payload.keterangan,
+             kasir: payload.kasir
+           });
+         });
+       }
+
+       // 2. Bangun ulang grup riwayat invoice dan render tabel
+       groupRiwayatInvoices();
+       resetPageAndSearch();
+       
+       resetFormBilling();
+     } else { 
+       showToast('error', res ? res.message : 'Terjadi kendala saat menyimpan data ke server!'); 
+     }
+   }).withFailureHandler(err => {
+     btn.innerHTML = 'SIMPAN DATA INVOICE'; btn.disabled = false; 
+     showToast('error', 'Koneksi gagal atau terjadi kesalahan server: ' + (err ? err.message : ''));
+   }).simpanPembayaranBaru(payload);
+ }
+
+
+ // ==========================================
+ // CETAK INVOICE A4 PROFESIONAL
+ // ==========================================
+ function actionLangsungCetak(id, isPDF) {
+   currentPreviewInvId = id; let inv = invoiceGroups[id]; if(!inv) return; generateA4Invoice(inv); setTimeout(()=>{ actionCetakDanPDF(isPDF); }, 300);
+ }
+
+
+ function actionKirimWA(id) {
+   let inv = invoiceGroups[id]; if(!inv) return;
+   let msg = `Halo ${inv.namaPasien},%0A%0ABerikut adalah ringkasan tagihan Anda:%0A*No Invoice:* ${inv.idInvoice}%0A*Tanggal Kunjungan:* ${formatTglIndoFull(inv.tanggal)}%0A*Total Bayar:* Rp ${formatRpKSR(inv.totalInvoice)}%0A*Status:* ${inv.metode} - ${inv.status}%0A%0ATerima Kasih Atas Kunjungan Anda,%0ASemoga Cepat Sembuh & Sehat Selalu.`;
+   window.open(`https://wa.me/?text=${msg}`, '_blank');
+ }
+
+
+ function generateA4Invoice(inv) {
+   let tglFormated = formatTglIndoFull(inv.tanggal);
+  
+   // TANGGAL CETAK (Hari ini) UNTUK TANDA TANGAN
+   let tglSekarang = new Date();
+   let bln = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+   let tglCetak = `${tglSekarang.getDate()} ${bln[tglSekarang.getMonth()]} ${tglSekarang.getFullYear()}`;
+
+
+   let alamatPasien = "-";
+   if(window.KlinikData && window.KlinikData.pasien) {
+     let pas = window.KlinikData.pasien.find(p => p.namaPasien === inv.namaPasien || p.noRm === inv.noRm);
+     if(pas && pas.alamat) alamatPasien = pas.alamat;
+   }
+  
+   let tbody = inv.items.map(it => {
+     let discTxt = (it.diskon == 0 || it.diskon === "0" || !it.diskon) ? "" : `${it.diskon}%`;
+     return `
+     <tr style="border-bottom: 1px solid #e2e8f0;">
+       <td style="padding: 14px 10px; text-align: left; color: #1e293b;">${it.item}</td>
+       <td style="padding: 14px 10px; text-align: center; color: #1e293b;">${it.qty}</td>
+       <td style="padding: 14px 10px; text-align: right; color: #1e293b;">${formatRpKSR(it.harga)}</td>
+       <td style="padding: 14px 10px; text-align: center; color: #1e293b;">${discTxt}</td>
+       <td style="padding: 14px 10px; text-align: right; color: #1e293b; font-weight: bold;">${formatRpKSR(it.grandTotalItem)}</td>
+     </tr>`;
+   }).join('');
+
+
+   let imgHtml = `<img src="${LINK_KOP_SURAT}" style="width: 100%; height: auto; margin-bottom: 5px; display: block;" alt="Kop Surat">`;
+   let teksTerbilang = inv.totalInvoice == 0 ? "Nol" : terbilangKSR(inv.totalInvoice).trim();
+
+
+   let htmlA4 = `
+     <div style="width: 210mm; max-width: 210mm; min-height: 297mm; height: 297mm; background: #fff; margin: 0 auto; padding: 25px 35px 50px 35px; box-sizing: border-box; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; position: relative; overflow: hidden;">
+      
+       ${imgHtml}
+      
+       <div style="text-align: center; margin-bottom: 25px;">
+         <h1 style="margin: 0; font-size: 28px; font-weight: 800; letter-spacing: 4px; color: #0f172a;">INVOICE</h1>
+         <p style="margin: 2px 0 0 0; font-size: 14px; color: #64748b; font-weight: bold;">No : ${inv.idInvoice}</p>
+       </div>
+
+
+       <table style="width: 100%; font-size: 14px; margin-bottom: 30px; line-height: 1.6;">
+         <tr>
+           <td style="width: 140px; font-weight: bold; color: #475569;">Nama Pasien</td>
+           <td style="width: 250px; font-weight: bold; color: #0f172a;">: ${inv.namaPasien}</td>
+           <td style="width: 170px; font-weight: bold; text-align: right; color: #475569; padding-right: 15px;">Metode Pembayaran</td>
+           <td style="width: 120px; text-align: left; font-weight: bold; color: #0f172a;">: ${inv.metode}</td>
+         </tr>
+         <tr>
+           <td style="font-weight: bold; color: #475569; vertical-align: top;">Alamat</td>
+           <td style="color: #333; vertical-align: top;">: ${alamatPasien}</td>
+           <td style="font-weight: bold; text-align: right; color: #475569; vertical-align: top; padding-right: 15px;">Status</td>
+           <td style="text-align: left; font-weight: bold; color: #0f172a; vertical-align: top;">: ${inv.status}</td>
+         </tr>
+         <tr>
+           <td style="font-weight: bold; color: #475569; vertical-align: top;">Tanggal Kunjungan</td>
+           <td style="color: #333; vertical-align: top;">: ${tglFormated}</td>
+           <td colspan="2"></td>
+         </tr>
+       </table>
+
+
+       <table style="width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 30px;">
+         <thead>
+           <tr style="background-color: #f8fafc; border-top: 2px solid #cbd5e1; border-bottom: 2px solid #cbd5e1;">
+             <th style="padding: 14px 10px; text-align: left; color: #334155; width: 45%;">Tindakan/Layanan</th>
+             <th style="padding: 14px 10px; text-align: center; color: #334155; width: 10%;">Qty</th>
+             <th style="padding: 14px 10px; text-align: right; color: #334155; width: 15%;">Biaya</th>
+             <th style="padding: 14px 10px; text-align: center; color: #334155; width: 10%;">Diskon</th>
+             <th style="padding: 14px 10px; text-align: right; color: #334155; width: 20%;">Total</th>
+           </tr>
+         </thead>
+         <tbody>${tbody}</tbody>
+       </table>
+
+
+       <div>
+         <div style="float: left; width: 360px; border: 1px solid #cbd5e1; padding: 15px; border-radius: 8px; background-color: #f8fafc; box-sizing: border-box; display: flex; align-items: center; min-height: 54px;">
+            <p style="margin: 0; font-size: 13px; font-weight: bold; color: #0f172a; font-style: italic; line-height: 1.5;">${teksTerbilang} Rupiah</p>
+         </div>
+
+
+         <div style="float: right; width: 320px; font-size: 14px;">
+           <table style="width: 100%; border-collapse: collapse;">
+             <tr style="background-color: #f8fafc; border-radius: 8px;">
+               <td style="padding: 15px; font-weight: bold; color: #0f172a; font-size: 16px;">GRAND TOTAL</td>
+               <td style="padding: 15px; text-align: right; font-size: 20px; font-weight: 900; color: #0f172a;">Rp ${formatRpKSR(inv.totalInvoice)}</td>
+             </tr>
+           </table>
+         </div>
+         <div style="clear: both;"></div>
+       </div>
+
+
+       <div style="margin-top: 50px; width: 250px; float: right; text-align: center;">
+         <p style="margin: 0; font-size: 14px; color: #475569;">Payakumbuh, ${tglCetak}</p>
+         <p style="margin: 5px 0 60px 0; font-size: 14px; color: #475569;">Hormat Kami,</p>
+         <p style="margin: 0; font-weight: bold; font-size: 15px; color: #0f172a;">( SHELDON ADMIN )</p>
+       </div>
+       <div style="clear: both;"></div>
+
+
+       <div style="position: absolute; bottom: 12mm; left: 0; right: 0; text-align: center; width: 100%; pointer-events: none;">
+         <p style="margin: 0; font-size: 11px; font-weight: 800; color: #0f172a; letter-spacing: 0.3px;">Terima Kasih Telah Memercayakan Kesehatan Gigi & Mulut Anda Kepada Kami</p>
+         <p style="margin: 4px 0 0 0; font-size: 10px; font-weight: bold; color: #64748b; letter-spacing: 0.5px;">Senyum Sehat Percaya Diri</p>
+       </div>
+
+
+     </div>`;
+  
+   let elPrint = document.getElementById('printAreaKwitansi');
+   if(elPrint) { elPrint.innerHTML = htmlA4; }
+   let mdl = document.getElementById('modalKwitansi');
+   if(mdl) mdl.classList.remove('hidden');
+ }
+
+
+  function actionCetakDanPDF(isPDFMode) {
+    if(!currentPreviewInvId) return;
+    let inv = invoiceGroups[currentPreviewInvId];
+    let originalTitle = document.title;
+    let suggestedFileName = (inv.idInvoice || "INVOICE").replace(/[\/\\]/g, '_');
+    const elArea = document.getElementById('printAreaKwitansi');
+
+    // JIKA MODE SAVE PDF DAN HTML2PDF TERSEDIA: LANGSUNG DOWNLOAD FILE PDF DENGAN NAMA NOMOR INVOICE
+    if (isPDFMode && typeof html2pdf !== 'undefined' && elArea) {
+      showToast('info', 'Mempersiapkan PDF: ' + suggestedFileName + '.pdf...');
+      const opt = {
+        margin: [0, 0, 0, 0],
+        filename: suggestedFileName + '.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      };
+      html2pdf().set(opt).from(elArea).save().then(() => {
+        showToast('success', 'Berhasil mengunduh: ' + suggestedFileName + '.pdf');
+      }).catch(err => {
+        console.error('html2pdf kwitansi error:', err);
+        showToast('warning', 'Mengalihkan ke dialog cetak browser...');
+        bukaPrintWindowInvoice(suggestedFileName, originalTitle);
+      });
+      return;
+    }
+
+    bukaPrintWindowInvoice(suggestedFileName, originalTitle);
+  }
+
+  function bukaPrintWindowInvoice(suggestedFileName, originalTitle) {
+    const contentHtml = document.getElementById('printAreaKwitansi').innerHTML;
+    const docStyle = '@page { size: A4 portrait; margin: 0; } html, body { padding: 0; margin: 0; background: white; -webkit-print-color-adjust: exact; print-color-adjust: exact; overflow: hidden !important; } * { box-sizing: border-box; }';
+
+    // Solusi 1: Popup Top-Level Window agar Save As PDF memakai judul suggestedFileName
+    try {
+      let printWin = window.open('', '_blank', 'width=850,height=900');
+      if (printWin && !printWin.closed) {
+        printWin.document.open();
+        printWin.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>' + suggestedFileName + '</title><style>' + docStyle + '</style></head><body>' + contentHtml + '</body></html>');
+        printWin.document.close();
+        printWin.focus();
+        setTimeout(() => {
+          printWin.document.title = suggestedFileName;
+          printWin.print();
+          printWin.onafterprint = function() { printWin.close(); document.title = originalTitle; };
+        }, 500);
+        return;
+      }
+    } catch(e) {
+      console.warn('Popup invoice print window blocked, fallback to iframe:', e);
+    }
+
+    // Solusi 2: Fallback Iframe jika popup diblokir
+    const pf = document.getElementById('printFrameBayar').contentWindow;
+    pf.document.open();
+    pf.document.write('<html><head><title>' + suggestedFileName + '</title><style>' + docStyle + '</style></head><body>' + contentHtml + '</body></html>');
+    pf.document.close(); pf.focus();
+    document.title = suggestedFileName;
+    setTimeout(() => { 
+      document.title = suggestedFileName;
+      if (pf.document) pf.document.title = suggestedFileName;
+      pf.print(); 
+      pf.onafterprint = function() { document.title = originalTitle; };
+      setTimeout(() => { document.title = originalTitle; }, 15000);
+    }, 600);
+  }
+</script>
+
+
+<script>
+// ========================================================
+// FILTER OTOMATIS: DOKTER, PERAWAT & TINDAKAN KASIR
+// ========================================================
+
+
+// Memicu pengisian form kasir setelah data selesai didownload
+document.addEventListener("KlinikDataReady", initKasirDropdowns);
+
+
+// Fallback jika event sudah keburu lewat (refresh halaman)
+if(window.KlinikData && window.KlinikData.statusLoad && window.KlinikData.statusLoad.master) {
+   initKasirDropdowns();
+}
+
+
+function initKasirDropdowns() {
+ // 1 & 3: Menyuntikkan Daftar Dokter dan Perawat ke Elemen Dropdown Anda
+ let kasirDokter = document.querySelector('select[id*="dokter"], select[name*="dokter"], #dokterPemeriksa');
+ let kasirPerawat = document.querySelector('select[id*="perawat"], select[name*="perawat"], #perawat');
+  if (window.KlinikData && window.KlinikData.staff) {
+    // A. Injeksi Dokter
+    if (kasirDokter) {
+        let dokters = window.KlinikData.staff.filter(s => s.role.toLowerCase().includes('dokter'));
+        let html = '<option value="" disabled selected>-- Pilih Dokter --</option>';
+        dokters.forEach(d => { html += `<option value="${d.nama}" data-role="${d.role}">${d.nama}</option>`; });
+        kasirDokter.innerHTML = html;
+       
+        // Event listener untuk memicu penyaringan "Tindakan" saat dokter dipilih
+        kasirDokter.addEventListener('change', filterTindakanKasir);
+    }
+   
+    // B. Injeksi Perawat (Khusus Role Perawat Gigi)
+    if (kasirPerawat) {
+        let perawats = (window.KlinikData && Array.isArray(window.KlinikData.staff))
+          ? window.KlinikData.staff.filter(s => s.role && s.role.toLowerCase().includes('perawat gigi'))
+          : [];
+        let html = '<option value="" disabled selected>-- Pilih Perawat Pendamping --</option>';
+        perawats.forEach(p => { html += `<option value="${p.nama}">${p.nama}</option>`; });
+        kasirPerawat.innerHTML = html;
+    }
+ }
+  // 2, 4, 5: Buat daftar Tindakan, Obat, dan BMHP awal
+ renderDatalistKasir();
+}
+
+
+// Logika Pemotongan Pilihan Tindakan Sesuai Role (Kategori Umum / UMM selalu muncul untuk semua role dokter)
+function filterTindakanKasir(e) {
+  let opt = e.target.options[e.target.selectedIndex];
+  let roleDokter = (opt.getAttribute('data-role') || "").toLowerCase();
+ 
+  let allTindakan = window.KlinikData.tindakan || [];
+  let isUmum = function(t) {
+    let kat = (t.kategori || '').toLowerCase();
+    let kod = (t.kode || '').toUpperCase();
+    return kat.includes('umum') || kod.startsWith('UMM');
+  };
+  let filtered = [];
+ 
+  if (roleDokter.includes('spesialis')) {
+      // Spesialis: Bisa memilih Spesialis & Umum (UMM)
+      filtered = allTindakan.filter(function(t) { return t.kategori.toLowerCase().includes('spesialis') || isUmum(t); });
+  } else if (roleDokter.includes('umum') || roleDokter === 'dokter') {
+      // Dokter Umum: Bisa memilih kategori Umum (UMM)
+      filtered = allTindakan.filter(function(t) { return isUmum(t); });
+  } else if (roleDokter) {
+      filtered = allTindakan.filter(function(t) { return t.kategori.toLowerCase().includes(roleDokter) || isUmum(t); });
+  } else {
+      filtered = allTindakan;
+  }
+ 
+  // Perbarui hanya daftar tindakan
+  renderDatalistKasir(filtered);
+}
+
+
+// Membaca Data Mentah menjadi Pilihan Dropdown / Datalist (Otomatis Menempel ke Input)
+function renderDatalistKasir(tindakanTersaring = null) {
+  // A. Tindakan (Terfilter)
+  let listTindakan = tindakanTersaring || window.KlinikData.tindakan || [];
+  let dlTindakan = document.getElementById('listTindakanKasir');
+  if (!dlTindakan) {
+      dlTindakan = document.createElement('datalist');
+      dlTindakan.id = 'listTindakanKasir';
+      document.body.appendChild(dlTindakan);
+  }
+  dlTindakan.innerHTML = listTindakan.map(t => `<option value="${t.nama}">`).join('');
+  document.querySelectorAll('input[id*="tindakan"], input[name*="tindakan"]').forEach(el => el.setAttribute('list', 'listTindakanKasir'));
+
+
+  // B. Obat (Dari Master_Obat)
+  let dlObat = document.getElementById('listObatKasir');
+  if (!dlObat) {
+      dlObat = document.createElement('datalist');
+      dlObat.id = 'listObatKasir';
+      document.body.appendChild(dlObat);
+  }
+  if (window.KlinikData.obat) {
+      dlObat.innerHTML = window.KlinikData.obat.map(o => `<option value="${o.nama}">`).join('');
+  }
+  document.querySelectorAll('input[id*="obat"], input[name*="obat"]').forEach(el => el.setAttribute('list', 'listObatKasir'));
+
+
+  // C. BMHP (Dari Master_BMHP)
+  let dlBmhp = document.getElementById('listBmhpKasir');
+  if (!dlBmhp) {
+      dlBmhp = document.createElement('datalist');
+      dlBmhp.id = 'listBmhpKasir';
+      document.body.appendChild(dlBmhp);
+  }
+  if (window.KlinikData.bmhp) {
+      dlBmhp.innerHTML = window.KlinikData.bmhp.map(b => `<option value="${b.nama}">`).join('');
+  }
+  document.querySelectorAll('input[id*="bmhp"], input[name*="bmhp"]').forEach(el => el.setAttribute('list', 'listBmhpKasir'));
+}
+</script>

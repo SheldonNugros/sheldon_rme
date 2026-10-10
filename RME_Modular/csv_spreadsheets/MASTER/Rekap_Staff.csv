@@ -1,0 +1,1 @@
+"=IFERROR(QUERY(Data!A1:G,""select C, count(B) where B is not null group by C label count(B) 'Jumlah_Staff'"",1),""-"")",,,"=IFERROR(QUERY(Data!A1:G,""select E, count(B) where B is not null group by E label count(B) 'Jumlah'"",1),""-"")"

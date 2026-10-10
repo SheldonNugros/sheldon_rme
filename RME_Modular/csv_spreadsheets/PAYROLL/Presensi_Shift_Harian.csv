@@ -1,0 +1,6 @@
+ID_Presensi,Tanggal,ID_Pekerja,Nama_Pekerja,Role,Shift,Jam_Masuk,Jam_Pulang,Status_Kehadiran,Uang_Harian_Didapat,Verifikator,Waktu_Sistem
+ATT-202610-001,01-10-2026,STF-001,"drg. Sheldon Cooper, Sp.Ort",Dokter Gigi Spesialis,Shift 1,08:55,15:05,Hadir,150000,Penny Teller,01-10-2026 15:10:00
+ATT-202610-002,01-10-2026,STF-004,Bernadette Rostenkowski,Perawat Gigi,Shift 1,08:45,15:15,Hadir,50000,Penny Teller,01-10-2026 15:10:00
+ATT-202610-003,01-10-2026,STF-002,"drg. Leonard Hofstadter",Dokter Gigi Umum,Shift 2,14:55,21:05,Hadir,120000,Howard Wolowitz,01-10-2026 21:10:00
+ATT-202610-004,01-10-2026,STF-004,Bernadette Rostenkowski,Perawat Gigi,Shift 2,14:50,21:10,Hadir,60000,Howard Wolowitz,01-10-2026 21:10:00
+ATT-202610-005,02-10-2026,STF-001,"drg. Sheldon Cooper, Sp.Ort",Dokter Gigi Spesialis,Shift 2,14:50,21:15,Hadir,200000,Howard Wolowitz,02-10-2026 21:20:00

@@ -1,0 +1,338 @@
+<script>
+  function formatRupiahAI(angka) {
+    if (!angka && angka !== 0) return '0';
+    var number_string = angka.toString().replace(/[^,\d]/g, ''), split = number_string.split(','),
+    sisa = split[0].length % 3, rupiah = split[0].substr(0, sisa), ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+    if(ribuan){ var separator = sisa ? '.' : ''; rupiah += separator + ribuan.join('.'); }
+    return split[1] != undefined ? rupiah + ',' + split[1] : rupiah;
+  }
+
+  // Pengendali filter tampilan AI berdasarkan Role yang sedang aktif
+  function applyAIRoleAccess() {
+    const role = (window.activeUserRole || "").toLowerCase();
+    const isSuper = role.includes('super user') || role.includes('owner');
+    const isDokter = role.includes('dokter');
+
+    const roleBadge = document.getElementById('aiRoleBadge');
+    const switchContainer = document.getElementById('aiRoleSwitchContainer');
+
+    if (roleBadge) {
+      if (isSuper) {
+        roleBadge.innerText = "SUPER USER (AKSES PENUH)";
+        roleBadge.className = "ml-2 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-purple-100 text-purple-800 uppercase tracking-widest";
+      } else if (isDokter) {
+        roleBadge.innerText = "DOKTER (KLINIS & ODONTOGRAM)";
+        roleBadge.className = "ml-2 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-cyan-100 text-cyan-800 uppercase tracking-widest";
+      } else {
+        roleBadge.innerText = (window.activeUserRole || "STAFF").toUpperCase();
+      }
+    }
+
+    if (isSuper) {
+      if (switchContainer) switchContainer.classList.remove('hidden');
+      switchAIViewMode('all');
+    } else if (isDokter) {
+      if (switchContainer) switchContainer.classList.add('hidden');
+      switchAIViewMode('dokter');
+    } else {
+      if (switchContainer) switchContainer.classList.add('hidden');
+      switchAIViewMode('dokter');
+    }
+  }
+
+  function switchAIViewMode(mode) {
+    const secSuperKpi = document.getElementById('aiSecKpiSuperuser');
+    const secSuperFin = document.getElementById('aiSecFinansial');
+    const secSuperLog = document.getElementById('aiSecLogistik');
+    const bannerStok = document.getElementById('aiBannerStokContainer');
+    const secKlinis = document.getElementById('aiSecKlinis');
+
+    const btnAll = document.getElementById('aiBtnModeAll');
+    const btnDokter = document.getElementById('aiBtnModeDokter');
+    const btnSuper = document.getElementById('aiBtnModeSuper');
+
+    // Reset button styles
+    [btnAll, btnDokter, btnSuper].forEach(b => {
+      if (b) {
+        b.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-600 hover:text-slate-900";
+      }
+    });
+
+    if (mode === 'dokter') {
+      if (secSuperKpi) secSuperKpi.classList.add('hidden');
+      if (secSuperFin) secSuperFin.classList.add('hidden');
+      if (secSuperLog) secSuperLog.classList.add('hidden');
+      if (bannerStok) bannerStok.classList.add('hidden');
+      if (secKlinis) secKlinis.classList.remove('hidden');
+      if (btnDokter) btnDokter.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-white text-cyan-700 shadow-sm";
+    } else if (mode === 'superuser') {
+      if (secSuperKpi) secSuperKpi.classList.remove('hidden');
+      if (secSuperFin) secSuperFin.classList.remove('hidden');
+      if (secSuperLog) secSuperLog.classList.remove('hidden');
+      if (bannerStok) bannerStok.classList.remove('hidden');
+      if (secKlinis) secKlinis.classList.add('hidden');
+      if (btnSuper) btnSuper.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-white text-indigo-700 shadow-sm";
+    } else { // 'all'
+      if (secSuperKpi) secSuperKpi.classList.remove('hidden');
+      if (secSuperFin) secSuperFin.classList.remove('hidden');
+      if (secSuperLog) secSuperLog.classList.remove('hidden');
+      if (bannerStok) bannerStok.classList.remove('hidden');
+      if (secKlinis) secKlinis.classList.remove('hidden');
+      if (btnAll) btnAll.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-white text-purple-700 shadow-sm";
+    }
+  }
+
+  function loadAIInsights(isManual) {
+    applyAIRoleAccess();
+
+    const btnRefresh = document.getElementById('btnRefreshAI');
+    if (btnRefresh) {
+      btnRefresh.disabled = true;
+      btnRefresh.innerHTML = '<svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg> <span>Memperbarui...</span>';
+    }
+
+    if (isManual && typeof showToast === 'function') {
+      showToast('info', 'Memperbarui AI Insights & kalkulasi data...');
+    }
+
+    document.getElementById('aiTotalPasien').innerText = '...';
+    document.getElementById('aiPendapatan').innerText = 'Rp ...';
+    document.getElementById('aiForecastPendapatan').innerText = 'Rp ...';
+    document.getElementById('aiHariSibukText').innerText = 'Menganalisis...';
+
+    google.script.run.withSuccessHandler(function(data) {
+      if (btnRefresh) {
+        btnRefresh.disabled = false;
+        btnRefresh.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> <span>Refresh AI</span>';
+      }
+
+      if (isManual && typeof showToast === 'function') {
+        showToast('success', 'AI Insights & Analitik berhasil diperbarui secara real-time!');
+      }
+
+      if (data.error) {
+        if (typeof showToast === 'function') showToast('error', "Gagal memuat AI Insights: " + data.error);
+        return;
+      }
+
+      // 1. KPI Finansial & Operasional (Super User)
+      document.getElementById('aiTotalPasien').innerText = data.totalPasien || 0;
+      document.getElementById('aiPendapatan').innerText = 'Rp ' + formatRupiahAI(data.pendapatan || 0);
+      document.getElementById('aiForecastPendapatan').innerText = 'Rp ' + formatRupiahAI(data.forecastPendapatan || 0);
+      document.getElementById('aiHariSibukText').innerText = data.hariSibuk || "Normal";
+
+      // 2. Banner Notif Stok
+      var banStok = document.getElementById('aiBannerStok');
+      var notifTxt = document.getElementById('aiNotifStok');
+      if (notifTxt) notifTxt.innerText = data.notifStok || "Semua stok aman.";
+      if (banStok) {
+        if (data.notifStok && data.notifStok.includes('🚨')) {
+          banStok.className = "bg-rose-100 border border-rose-300 text-rose-900 p-4 rounded-2xl shadow-sm flex gap-3 items-center font-bold";
+        } else {
+          banStok.className = "bg-amber-100 border border-amber-300 text-amber-900 p-4 rounded-2xl shadow-sm flex gap-3 items-center font-semibold";
+        }
+      }
+
+      // -----------------------------------------------------------------------
+      // 3. SEKSI KLINIS & ODONTOGRAM (DOKTER)
+      // -----------------------------------------------------------------------
+      if (data.dmftSummary) {
+        document.getElementById('aiDmftTotalScore').innerText = data.dmftSummary.avgDMFT || "0.0";
+        document.getElementById('aiDmftDecayed').innerText = data.dmftSummary.avgD || "0";
+        document.getElementById('aiDmftMissing').innerText = data.dmftSummary.avgM || "0";
+        document.getElementById('aiDmftFilled').innerText = data.dmftSummary.avgF || "0";
+        document.getElementById('aiDmftKesimpulan').innerText = data.dmftSummary.kesimpulan || "-";
+      }
+
+      // 3a. Recall Treatment List
+      let recallHtml = '';
+      if (data.recallTreatments && data.recallTreatments.length > 0) {
+        data.recallTreatments.forEach(item => {
+          let badgeColor = item.statusRecall.includes('Segera') ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-700';
+          recallHtml += `
+            <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="font-extrabold text-slate-800 text-xs">${item.namaPasien}</span>
+                  <span class="text-[10px] text-slate-400">(${item.noRm})</span>
+                  <span class="px-2 py-0.5 rounded text-[9px] font-black bg-cyan-100 text-cyan-800">Gigi ${item.gigi}</span>
+                </div>
+                <p class="text-[10px] text-slate-500 mt-0.5">${item.kondisi} &bull; Terakhir periksa: ${item.tglPemeriksaan || '-'}</p>
+              </div>
+              <span class="px-2.5 py-1 rounded-lg text-[10px] font-bold ${badgeColor} whitespace-nowrap">${item.selisihHari} Hari Lalu</span>
+            </div>`;
+        });
+      } else {
+        recallHtml = '<p class="text-slate-400 italic">Tidak ada perawatan sementara atau saluran akar yang tertunda &gt; 14 hari.</p>';
+      }
+      document.getElementById('aiRecallList').innerHTML = recallHtml;
+
+      // 3b. Kontraindikasi & Polifarmasi
+      let kontraHtml = '';
+      if (data.kontraindikasiList && data.kontraindikasiList.length > 0) {
+        data.kontraindikasiList.forEach(item => {
+          kontraHtml += `
+            <div class="p-3 bg-rose-50/60 border border-rose-200 rounded-xl">
+              <div class="flex items-center justify-between mb-1">
+                <span class="font-bold text-rose-900 text-xs">${item.namaPasien} (${item.noRm})</span>
+                <span class="px-2 py-0.5 rounded text-[9px] font-black bg-rose-200 text-rose-800 uppercase">${item.kondisi}</span>
+              </div>
+              <p class="text-[11px] text-rose-800/90 leading-relaxed font-medium">${item.peringatan}</p>
+            </div>`;
+        });
+      } else {
+        kontraHtml = '<p class="text-slate-400 italic">Tidak terdeteksi riwayat komorbiditas atau kontraindikasi risiko tinggi pada pasien aktif.</p>';
+      }
+      document.getElementById('aiKontraindikasiList').innerHTML = kontraHtml;
+
+      // -----------------------------------------------------------------------
+      // 4. SEKSI FINANSIAL & OPERASIONAL (SUPER USER)
+      // -----------------------------------------------------------------------
+      // 4a. Layanan Paling Menguntungkan (High-Margin)
+      let marginHtml = '';
+      if (data.topMarginServices && data.topMarginServices.length > 0) {
+        data.topMarginServices.forEach(item => {
+          marginHtml += `
+            <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between">
+              <div class="min-w-0 pr-2">
+                <p class="font-bold text-slate-800 text-xs truncate">${item.nama}</p>
+                <p class="text-[10px] text-slate-500">Tarif: Rp ${formatRupiahAI(item.harga)} &bull; Terjual: ${item.qty}x</p>
+              </div>
+              <div class="text-right whitespace-nowrap">
+                <span class="px-2 py-0.5 rounded-lg text-[10px] font-black bg-emerald-100 text-emerald-800">Margin ${item.marginPct}%</span>
+                <p class="text-[10px] font-bold text-slate-700 mt-1">Laba: Rp ${formatRupiahAI(item.totalProfit)}</p>
+              </div>
+            </div>`;
+        });
+      } else {
+        marginHtml = '<p class="text-slate-400 italic">Belum ada data tindakan kasir untuk analisis margin.</p>';
+      }
+      document.getElementById('aiMarginServicesList').innerHTML = marginHtml;
+
+      // 4b. Heatmap Jam Sibuk
+      let hourHtml = '';
+      if (data.hourHeatmap) {
+        let maxH = Math.max(...Object.values(data.hourHeatmap), 1);
+        Object.keys(data.hourHeatmap).forEach(label => {
+          let count = data.hourHeatmap[label];
+          let pct = Math.round((count / maxH) * 100);
+          hourHtml += `
+            <div>
+              <div class="flex justify-between text-[11px] font-bold mb-1">
+                <span class="text-slate-700">${label}</span>
+                <span class="text-indigo-600">${count} Kunjungan</span>
+              </div>
+              <div class="w-full bg-slate-100 rounded-full h-2"><div class="bg-indigo-600 h-2 rounded-full" style="width: ${pct}%"></div></div>
+            </div>`;
+        });
+      }
+      document.getElementById('aiHeatmapHours').innerHTML = hourHtml;
+
+      // -----------------------------------------------------------------------
+      // 5. SEKSI LOGISTIK CERDAS (SUPER USER)
+      // -----------------------------------------------------------------------
+      // 5a. Burn-Rate Restock
+      let burnHtml = '';
+      if (data.burnRatePredictions && data.burnRatePredictions.length > 0) {
+        data.burnRatePredictions.forEach(item => {
+          let badgeClass = item.estimasiHariHabis <= 5 ? 'bg-rose-100 text-rose-800 font-black' : 'bg-amber-100 text-amber-800 font-bold';
+          burnHtml += `
+            <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between">
+              <div>
+                <p class="font-extrabold text-slate-800 text-xs">${item.nama}</p>
+                <p class="text-[10px] text-slate-500">Stok Saat Ini: <span class="font-bold text-slate-700">${item.stok} ${item.satuan}</span> &bull; Laju Pakai: ~${item.avgPerHari} ${item.satuan}/hari</p>
+              </div>
+              <div class="text-right">
+                <span class="px-2.5 py-1 rounded-lg text-[10px] ${badgeClass}">Habis dalam ~${item.estimasiHariHabis} Hari</span>
+              </div>
+            </div>`;
+        });
+      } else {
+        burnHtml = '<p class="text-slate-400 italic">Laju konsumsi aman, tidak ada item yang diprediksi habis dalam 14 hari ke depan.</p>';
+      }
+      document.getElementById('aiBurnRateList').innerHTML = burnHtml;
+
+      // 5b. Expired Alerts
+      let expHtml = '';
+      if (data.expiredAlerts && data.expiredAlerts.length > 0) {
+        data.expiredAlerts.forEach(item => {
+          expHtml += `
+            <div class="p-2.5 bg-rose-50 border border-rose-200 rounded-xl flex justify-between items-center text-[11px]">
+              <span class="font-bold text-rose-900 truncate max-w-[140px]">${item.nama}</span>
+              <span class="text-rose-700 font-bold">~${item.sisaBulan} bln lagi</span>
+            </div>`;
+        });
+      } else {
+        expHtml = '<p class="text-slate-400 italic">Tidak ada item mendekati expired.</p>';
+      }
+      document.getElementById('aiExpiredList').innerHTML = expHtml;
+
+      // 5c. Slow-Moving Items
+      let slowHtml = '';
+      if (data.slowMovingItems && data.slowMovingItems.length > 0) {
+        data.slowMovingItems.forEach(item => {
+          slowHtml += `
+            <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-xl flex justify-between items-center text-[11px]">
+              <span class="font-bold text-slate-700 truncate max-w-[140px]">${item.nama}</span>
+              <span class="text-slate-500 font-semibold">${item.stok} ${item.satuan}</span>
+            </div>`;
+        });
+      } else {
+        slowHtml = '<p class="text-slate-400 italic">Perputaran inventaris dinamis merata.</p>';
+      }
+      document.getElementById('aiSlowMovingList').innerHTML = slowHtml;
+
+      // -----------------------------------------------------------------------
+      // 6. SEKSI TREN LAYANAN & PROMOSI
+      // -----------------------------------------------------------------------
+      // Top Tindakan
+      let tindakanHtml = '';
+      if (data.topTindakan && data.topTindakan.length > 0) {
+        let maxT = data.topTindakan[0].jumlah;
+        data.topTindakan.forEach(item => {
+          let pct = Math.round((item.jumlah / maxT) * 100);
+          tindakanHtml += `
+            <div>
+              <div class="flex justify-between text-[11px] font-bold mb-1">
+                <span class="text-slate-700 truncate max-w-[150px]">${item.nama}</span>
+                <span class="text-teal-600">${item.jumlah}x</span>
+              </div>
+              <div class="w-full bg-slate-100 rounded-full h-2"><div class="bg-teal-500 h-2 rounded-full" style="width: ${pct}%"></div></div>
+            </div>`;
+        });
+      }
+      document.getElementById('aiTopTindakan').innerHTML = tindakanHtml;
+
+      // Top Obat
+      let obatHtml = '';
+      if (data.topObat && data.topObat.length > 0) {
+        let maxO = data.topObat[0].jumlah;
+        data.topObat.forEach(item => {
+          let pct = Math.round((item.jumlah / maxO) * 100);
+          obatHtml += `
+            <div>
+              <div class="flex justify-between text-[11px] font-bold mb-1">
+                <span class="text-slate-700 truncate max-w-[150px]">${item.nama}</span>
+                <span class="text-amber-600">${item.jumlah} Unit</span>
+              </div>
+              <div class="w-full bg-slate-100 rounded-full h-2"><div class="bg-amber-500 h-2 rounded-full" style="width: ${pct}%"></div></div>
+            </div>`;
+        });
+      }
+      document.getElementById('aiTopObat').innerHTML = obatHtml;
+
+      // Rekomendasi Text
+      document.getElementById('aiRekomendasi').innerText = data.rekomendasi || "-";
+      document.getElementById('aiTargetPromo').innerText = data.targetPromo || "-";
+
+    }).withFailureHandler(function(err) {
+      if (btnRefresh) {
+        btnRefresh.disabled = false;
+        btnRefresh.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> <span>Refresh AI</span>';
+      }
+      if (typeof showToast === 'function') {
+        showToast('error', 'Gagal memuat AI Insights: ' + (err.message || err));
+      }
+    }).getAIInsightsData(window.activeUserRole, window.authToken);
+  }
+</script>

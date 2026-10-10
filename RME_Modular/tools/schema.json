@@ -1,0 +1,1263 @@
+{
+  "PASIEN": {
+    "title": "RME Sheldon - 01 Pasien",
+    "sheets": [
+      {
+        "name": "Data_Pasien",
+        "headers": [
+          "ID_Pasien",
+          "Nama_Pasien",
+          "No_RM",
+          "Jenis_Kelamin",
+          "Tempat_Lahir",
+          "Tanggal_Lahir",
+          "Umur",
+          "Agama",
+          "Golongan_Darah",
+          "Pekerjaan",
+          "NIK",
+          "Alamat",
+          "Provinsi",
+          "Kabupaten",
+          "Kecamatan",
+          "Kelurahan",
+          "WhatsApp",
+          "Alergi",
+          "Riwayat_Penyakit",
+          "Catatan",
+          "Tanggal_Daftar"
+        ],
+        "formats": {
+          "Tanggal_Lahir": "dd-mm-yyyy",
+          "Tanggal_Daftar": "dd-mm-yyyy",
+          "NIK": "@",
+          "WhatsApp": "@"
+        },
+        "validations": {
+          "Jenis_Kelamin": [
+            "Laki-Laki",
+            "Perempuan"
+          ],
+          "Agama": [
+            "Islam",
+            "Kristen",
+            "Katolik",
+            "Hindu",
+            "Buddha",
+            "Khonghucu"
+          ],
+          "Golongan_Darah": [
+            "A",
+            "B",
+            "AB",
+            "O"
+          ]
+        },
+        "rows": []
+      },
+      {
+        "name": "Statistik_Pasien",
+        "kind": "formula",
+        "grid": [
+          [
+            "Metrik",
+            "Nilai",
+            "",
+            "No_RM",
+            "Nama_Pasien",
+            "Umur_Saat_Ini"
+          ],
+          [
+            "Total Pasien",
+            "=COUNTA(Data_Pasien!A2:A)",
+            "",
+            "={\"\",\"\",\"\";ARRAYFORMULA(IF(Data_Pasien!A2:A=\"\",\"\",{Data_Pasien!C2:C,Data_Pasien!B2:B,IFERROR(DATEDIF(Data_Pasien!F2:F,TODAY(),\"Y\")&\" Tahun\",\"-\")}))}"
+          ],
+          [
+            "Laki-Laki",
+            "=COUNTIF(Data_Pasien!D2:D,\"Laki-Laki\")"
+          ],
+          [
+            "Perempuan",
+            "=COUNTIF(Data_Pasien!D2:D,\"Perempuan\")"
+          ],
+          [
+            "Pasien Baru Bulan Ini",
+            "=COUNTIFS(Data_Pasien!U2:U,\">=\"&(EOMONTH(TODAY(),-1)+1),Data_Pasien!U2:U,\"<=\"&EOMONTH(TODAY(),0))"
+          ],
+          [
+            "Rata-rata Umur (Tahun)",
+            "=IFERROR(ROUND(AVERAGE(FILTER(DATEDIF(Data_Pasien!F2:F,TODAY(),\"Y\"),ISNUMBER(Data_Pasien!F2:F))),1),\"-\")"
+          ],
+          [
+            "Anak (< 12 th)",
+            "=IFERROR(SUMPRODUCT(ISNUMBER(Data_Pasien!F2:F)*(IFERROR(DATEDIF(Data_Pasien!F2:F,TODAY(),\"Y\"),999)<12)),0)"
+          ],
+          [
+            "Remaja (12-17 th)",
+            "=IFERROR(SUMPRODUCT(ISNUMBER(Data_Pasien!F2:F)*(IFERROR(DATEDIF(Data_Pasien!F2:F,TODAY(),\"Y\"),-1)>=12)*(IFERROR(DATEDIF(Data_Pasien!F2:F,TODAY(),\"Y\"),999)<18)),0)"
+          ],
+          [
+            "Dewasa (18-59 th)",
+            "=IFERROR(SUMPRODUCT(ISNUMBER(Data_Pasien!F2:F)*(IFERROR(DATEDIF(Data_Pasien!F2:F,TODAY(),\"Y\"),-1)>=18)*(IFERROR(DATEDIF(Data_Pasien!F2:F,TODAY(),\"Y\"),999)<60)),0)"
+          ],
+          [
+            "Lansia (>= 60 th)",
+            "=IFERROR(SUMPRODUCT(ISNUMBER(Data_Pasien!F2:F)*(IFERROR(DATEDIF(Data_Pasien!F2:F,TODAY(),\"Y\"),-1)>=60)),0)"
+          ]
+        ]
+      }
+    ]
+  },
+  "PEMBAYARAN": {
+    "title": "RME Sheldon - 02 Pembayaran",
+    "sheets": [
+      {
+        "name": "Data_Pembayaran",
+        "headers": [
+          "ID_Invoice",
+          "Tanggal_Tindakan",
+          "ID_Pasien",
+          "No_RM",
+          "Nama_Pasien",
+          "Dokter_Pemeriksa",
+          "Kategori_Item",
+          "Nama_Item",
+          "Harga_Satuan",
+          "Qty",
+          "Labor",
+          "Diskon_Persen",
+          "Grand_Total_Item",
+          "Perawat",
+          "Total_Invoice",
+          "Metode_Bayar",
+          "Status_Pembayaran",
+          "Keterangan",
+          "Kasir_Bertugas",
+          "Waktu_Sistem"
+        ],
+        "formats": {
+          "Tanggal_Tindakan": "dd-mm-yyyy",
+          "Harga_Satuan": "#,##0",
+          "Labor": "#,##0",
+          "Grand_Total_Item": "#,##0",
+          "Total_Invoice": "#,##0",
+          "Waktu_Sistem": "dd-mm-yyyy hh:mm:ss"
+        },
+        "validations": {
+          "Kategori_Item": [
+            "Tindakan",
+            "Obat",
+            "BMHP"
+          ],
+          "Metode_Bayar": [
+            "Tunai",
+            "Transfer Bank",
+            "QRIS",
+            "Kartu Debit/Kredit",
+            "Asuransi"
+          ],
+          "Status_Pembayaran": [
+            "Lunas",
+            "Uang Muka",
+            "Pelunasan"
+          ]
+        },
+        "rows": []
+      },
+      {
+        "name": "Rekap_Invoice",
+        "kind": "formula",
+        "note": "1 baris = 1 invoice. Kolom K mengaudit Total_Invoice vs jumlah Grand_Total_Item.",
+        "grid": [
+          [
+            "=QUERY(Data_Pembayaran!A1:T,\"select A, B, E, F, max(O), P, Q, S, sum(M), count(H) where A is not null group by A, B, E, F, P, Q, S order by B desc label max(O) 'Total_Invoice', sum(M) 'Total_Item', count(H) 'Jumlah_Item'\",1)",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "={\"Audit\";ARRAYFORMULA(IF(A2:A=\"\",\"\",IF(E2:E=I2:I,\"OK\",\"SELISIH\")))}"
+          ]
+        ]
+      },
+      {
+        "name": "Rekap_Harian",
+        "kind": "formula",
+        "grid": [
+          [
+            "=IFERROR(QUERY(Rekap_Invoice!A1:J,\"select B, count(A), sum(E) where A is not null group by B order by B desc label count(A) 'Jumlah_Invoice', sum(E) 'Total_Pendapatan'\",1),\"Belum ada transaksi\")",
+            "",
+            "",
+            "",
+            "=IFERROR(QUERY(Rekap_Invoice!A1:J,\"select year(B), month(B)+1, count(A), sum(E) where B is not null group by year(B), month(B)+1 order by year(B) desc, month(B)+1 desc label year(B) 'Tahun', month(B)+1 'Bulan', count(A) 'Jumlah_Invoice', sum(E) 'Total_Pendapatan'\",1),\"Kolom Tanggal_Tindakan harus berformat tanggal\")"
+          ]
+        ]
+      },
+      {
+        "name": "Rekap_Metode_Dokter",
+        "kind": "formula",
+        "grid": [
+          [
+            "=IFERROR(QUERY(Rekap_Invoice!A1:J,\"select F, count(A), sum(E) where A is not null group by F order by sum(E) desc label count(A) 'Jumlah_Invoice', sum(E) 'Total'\",1),\"-\")",
+            "",
+            "",
+            "",
+            "=IFERROR(QUERY(Data_Pembayaran!A1:T,\"select F, G, sum(J), sum(M) where A is not null group by F, G order by F label sum(J) 'Total_Qty', sum(M) 'Total_Omzet'\",1),\"-\")",
+            "",
+            "",
+            "",
+            "",
+            "=IFERROR(QUERY(Data_Pembayaran!A1:T,\"select N, count(H), sum(M) where G = 'Tindakan' and N is not null and N <> '' group by N order by count(H) desc label count(H) 'Jumlah_Tindakan', sum(M) 'Total_Omzet'\",1),\"-\")"
+          ]
+        ]
+      },
+      {
+        "name": "Rekap_Item",
+        "kind": "formula",
+        "grid": [
+          [
+            "=IFERROR(QUERY(Data_Pembayaran!A1:T,\"select G, H, sum(J), sum(M) where A is not null group by G, H order by sum(M) desc label sum(J) 'Total_Qty', sum(M) 'Total_Omzet'\",1),\"-\")"
+          ]
+        ]
+      }
+    ]
+  },
+  "REKAM_MEDIS": {
+    "title": "RME Sheldon - 03 Rekam Medis",
+    "sheets": [
+      {
+        "name": "Data_Rekam_Medis",
+        "headers": [
+          "ID_RM_Klinis",
+          "ID_Pasien",
+          "No_RM",
+          "Nama_Pasien",
+          "Tanggal_Pemeriksaan",
+          "Dokter_Pemeriksa",
+          "Anamnesis_JSON",
+          "Fisik_JSON",
+          "Odontogram_JSON",
+          "Tindakan_JSON",
+          "Resep_Obat_JSON",
+          "Catatan_Edukasi",
+          "Waktu_Simpan"
+        ],
+        "formats": {
+          "Tanggal_Pemeriksaan": "dd-mm-yyyy",
+          "Waktu_Simpan": "dd-mm-yyyy hh:mm:ss"
+        },
+        "rows": []
+      },
+      {
+        "name": "Rekap_Kunjungan",
+        "kind": "formula",
+        "grid": [
+          [
+            "=IFERROR(QUERY(Data_Rekam_Medis!A1:M,\"select F, count(A) where A is not null group by F order by count(A) desc label count(A) 'Jumlah_Pemeriksaan'\",1),\"-\")",
+            "",
+            "",
+            "=IFERROR(QUERY(Data_Rekam_Medis!A1:M,\"select year(E), month(E)+1, count(A) where E is not null group by year(E), month(E)+1 order by year(E) desc, month(E)+1 desc label year(E) 'Tahun', month(E)+1 'Bulan', count(A) 'Jumlah_Kunjungan'\",1),\"Kolom Tanggal_Pemeriksaan harus berformat tanggal\")",
+            "",
+            "",
+            "",
+            "=IFERROR(QUERY(Data_Rekam_Medis!A1:M,\"select B, D, count(A), max(E) where A is not null group by B, D order by count(A) desc label count(A) 'Total_Kunjungan', max(E) 'Kunjungan_Terakhir'\",1),\"-\")"
+          ]
+        ]
+      }
+    ]
+  },
+  "SURAT": {
+    "title": "RME Sheldon - 04 Surat",
+    "sheets": [
+      {
+        "name": "Surat_Sakit",
+        "headers": [
+          "ID_Pasien",
+          "No_RM",
+          "Nama_Pasien",
+          "No_Surat",
+          "Tgl_Cetak",
+          "Lama_Hari",
+          "Tgl_Mulai",
+          "Tgl_Selesai",
+          "Dokter",
+          "Waktu_Sistem",
+          "Pembuat"
+        ],
+        "rows": []
+      },
+      {
+        "name": "Surat_Kontrol",
+        "headers": [
+          "ID_Pasien",
+          "No_RM",
+          "Nama_Pasien",
+          "No_Surat",
+          "Tgl_Cetak",
+          "Diagnosis",
+          "Tindakan",
+          "Tgl_Kontrol",
+          "Dokter_Tujuan",
+          "Alasan",
+          "Waktu_Sistem",
+          "Pembuat"
+        ],
+        "rows": []
+      },
+      {
+        "name": "Resume_Medis",
+        "headers": [
+          "ID_Pasien",
+          "No_RM",
+          "Nama_Pasien",
+          "No_Surat",
+          "Tgl_Cetak",
+          "Tgl_Kunjungan",
+          "Anamnesis",
+          "Penunjang",
+          "Diagnosis",
+          "Tindakan",
+          "Obat",
+          "Hasil",
+          "Keperluan",
+          "Dokter",
+          "Waktu_Sistem",
+          "Pembuat"
+        ],
+        "rows": []
+      },
+      {
+        "name": "Surat_Rujukan",
+        "headers": [
+          "ID_Pasien",
+          "No_RM",
+          "Nama_Pasien",
+          "No_Surat",
+          "Tgl_Cetak",
+          "Tujuan",
+          "Anamnesa",
+          "Fisik",
+          "Diagnosis",
+          "Terapi",
+          "Dokter",
+          "Waktu_Sistem",
+          "Pembuat"
+        ],
+        "rows": []
+      },
+      {
+        "name": "Surat_Lab",
+        "headers": [
+          "ID_Pasien",
+          "No_RM",
+          "Nama_Pasien",
+          "No_Surat",
+          "Tgl_Cetak",
+          "Tujuan",
+          "Diagnosis",
+          "Pemeriksaan",
+          "Dokter",
+          "Waktu_Sistem",
+          "Pembuat"
+        ],
+        "rows": []
+      },
+      {
+        "name": "Surat_Radiologi",
+        "headers": [
+          "ID_Pasien",
+          "No_RM",
+          "Nama_Pasien",
+          "No_Surat",
+          "Tgl_Cetak",
+          "Tujuan",
+          "Diagnosis",
+          "Pemeriksaan",
+          "Dokter",
+          "Waktu_Sistem",
+          "Pembuat"
+        ],
+        "rows": []
+      },
+      {
+        "name": "Rekap_Surat",
+        "kind": "formula",
+        "grid": [
+          [
+            "Jenis_Surat",
+            "Kode",
+            "Sheet",
+            "Jumlah_Terbit",
+            "No_Surat_Terakhir"
+          ],
+          [
+            "Surat Keterangan Sakit",
+            "SKS",
+            "Surat_Sakit",
+            "=COUNTA(Surat_Sakit!D2:D)",
+            "=IFERROR(INDEX(Surat_Sakit!D2:D,COUNTA(Surat_Sakit!D2:D)),\"-\")"
+          ],
+          [
+            "Surat Kontrol",
+            "SKP",
+            "Surat_Kontrol",
+            "=COUNTA(Surat_Kontrol!D2:D)",
+            "=IFERROR(INDEX(Surat_Kontrol!D2:D,COUNTA(Surat_Kontrol!D2:D)),\"-\")"
+          ],
+          [
+            "Resume Medis",
+            "RMP",
+            "Resume_Medis",
+            "=COUNTA(Resume_Medis!D2:D)",
+            "=IFERROR(INDEX(Resume_Medis!D2:D,COUNTA(Resume_Medis!D2:D)),\"-\")"
+          ],
+          [
+            "Surat Rujukan",
+            "SRP",
+            "Surat_Rujukan",
+            "=COUNTA(Surat_Rujukan!D2:D)",
+            "=IFERROR(INDEX(Surat_Rujukan!D2:D,COUNTA(Surat_Rujukan!D2:D)),\"-\")"
+          ],
+          [
+            "Pengantar Laboratorium",
+            "SPL",
+            "Surat_Lab",
+            "=COUNTA(Surat_Lab!D2:D)",
+            "=IFERROR(INDEX(Surat_Lab!D2:D,COUNTA(Surat_Lab!D2:D)),\"-\")"
+          ],
+          [
+            "Pengantar Radiologi",
+            "SPR",
+            "Surat_Radiologi",
+            "=COUNTA(Surat_Radiologi!D2:D)",
+            "=IFERROR(INDEX(Surat_Radiologi!D2:D,COUNTA(Surat_Radiologi!D2:D)),\"-\")"
+          ],
+          [
+            "TOTAL",
+            "",
+            "",
+            "=SUM(D2:D7)",
+            ""
+          ]
+        ]
+      }
+    ]
+  },
+  "DATABASE": {
+    "title": "RME Sheldon - 05 Database Tindakan",
+    "sheets": [
+      {
+        "name": "Kategori",
+        "headers": [
+          "Kategori",
+          "Kode"
+        ],
+        "rows": [
+          [
+            "Umum",
+            "UMM"
+          ],
+          [
+            "Dokter Gigi Umum",
+            "DGU"
+          ],
+          [
+            "Dokter Gigi Spesialis",
+            "DGS"
+          ]
+        ]
+      },
+      {
+        "name": "Tindakan",
+        "headers": [
+          "Kode_Tindakan",
+          "Nama_Tindakan",
+          "Kategori",
+          "Tarif"
+        ],
+        "formats": {
+          "Tarif": "#,##0"
+        },
+        "validations": {
+          "Kategori": {
+            "range": "Kategori!A2:A"
+          }
+        },
+        "rows": [
+          [
+            "UMM-0001",
+            "Konsultasi Dokter Gigi",
+            "Umum",
+            50000
+          ],
+          [
+            "UMM-0002",
+            "Foto Rontgen Periapikal",
+            "Umum",
+            100000
+          ],
+          [
+            "DGU-0001",
+            "Tambal Gigi Komposit",
+            "Dokter Gigi Umum",
+            250000
+          ],
+          [
+            "DGU-0002",
+            "Scaling Rahang Atas & Bawah",
+            "Dokter Gigi Umum",
+            300000
+          ],
+          [
+            "DGU-0003",
+            "Pencabutan Gigi Permanen",
+            "Dokter Gigi Umum",
+            200000
+          ],
+          [
+            "DGS-0001",
+            "Perawatan Saluran Akar (PSA)",
+            "Dokter Gigi Spesialis",
+            1500000
+          ],
+          [
+            "DGS-0002",
+            "Odontektomi Gigi Impaksi",
+            "Dokter Gigi Spesialis",
+            2500000
+          ],
+          [
+            "DGS-0003",
+            "Pemasangan Bracket Ortodonti",
+            "Dokter Gigi Spesialis",
+            6000000
+          ]
+        ]
+      },
+      {
+        "name": "Rekap_Tindakan",
+        "kind": "formula",
+        "grid": [
+          [
+            "=IFERROR(QUERY(Tindakan!A1:D,\"select C, count(A), avg(D), min(D), max(D) where A is not null group by C label count(A) 'Jumlah_Tindakan', avg(D) 'Rata_Tarif', min(D) 'Tarif_Min', max(D) 'Tarif_Max'\",1),\"-\")"
+          ]
+        ]
+      }
+    ]
+  },
+  "MASTER": {
+    "title": "RME Sheldon - 06 Master User & Role",
+    "sheets": [
+      {
+        "name": "Data",
+        "headers": [
+          "Nama_Pekerja",
+          "Username",
+          "Kategori_Role",
+          "Password",
+          "Status",
+          "No_Registrasi",
+          "No_HP"
+        ],
+        "formats": {
+          "No_HP": "@"
+        },
+        "validations": {
+          "Kategori_Role": [
+            "Super User",
+            "Owner",
+            "Dokter Gigi Umum",
+            "Dokter Gigi Spesialis",
+            "Perawat Umum",
+            "Admin",
+            "Kasir",
+            "Staff"
+          ],
+          "Status": [
+            "Aktif",
+            "Tidak Aktif"
+          ]
+        },
+        "hiddenColumns": [
+          "Password"
+        ],
+        "rows": [
+          [
+            "Administrator Sistem",
+            "admin",
+            "Super User",
+            "GANTI_PASSWORD_INI",
+            "Aktif",
+            "-",
+            ""
+          ]
+        ]
+      },
+      {
+        "name": "Matriks_Role",
+        "kind": "formula",
+        "note": "Referensi saja. Sumber kebenaran hak akses ada di 00_Config.gs (ROLE_RULES).",
+        "grid": [
+          [
+            "Grup_Role",
+            "Cocok_Jika_Role",
+            "Dashboard",
+            "AI_Insights",
+            "Pasien",
+            "Rekam_Medis",
+            "Surat",
+            "Database_Master",
+            "Kasir",
+            "Riwayat_Invoice",
+            "Tulis_EMR",
+            "Tulis_Kasir",
+            "Restock_Gudang"
+          ],
+          [
+            "SUPER_USER",
+            "Super User / Owner",
+            "Ya",
+            "Ya",
+            "Ya",
+            "Ya",
+            "Ya",
+            "Ya",
+            "Ya",
+            "Ya",
+            "Ya",
+            "Ya",
+            "Ya"
+          ],
+          [
+            "DOKTER",
+            "Mengandung kata 'dokter'",
+            "-",
+            "-",
+            "Ya",
+            "Ya",
+            "Ya",
+            "-",
+            "-",
+            "-",
+            "Ya",
+            "-",
+            "-"
+          ],
+          [
+            "ADMIN_KASIR",
+            "Mengandung 'admin' / 'perawat umum' / 'kasir' / 'staff'",
+            "-",
+            "-",
+            "Ya",
+            "-",
+            "Ya",
+            "Ya",
+            "Ya",
+            "Ya",
+            "-",
+            "Ya",
+            "Admin saja"
+          ],
+          [
+            "DEFAULT",
+            "Role lainnya",
+            "-",
+            "-",
+            "Ya",
+            "-",
+            "-",
+            "-",
+            "-",
+            "-",
+            "-",
+            "-",
+            "-"
+          ]
+        ]
+      },
+      {
+        "name": "Rekap_Staff",
+        "kind": "formula",
+        "grid": [
+          [
+            "=IFERROR(QUERY(Data!A1:G,\"select C, count(B) where B is not null group by C label count(B) 'Jumlah_Staff'\",1),\"-\")",
+            "",
+            "",
+            "=IFERROR(QUERY(Data!A1:G,\"select E, count(B) where B is not null group by E label count(B) 'Jumlah'\",1),\"-\")"
+          ]
+        ]
+      }
+    ]
+  },
+  "LOG": {
+    "title": "RME Sheldon - 07 Log & Referensi",
+    "sheets": [
+      {
+        "name": "Log_Aktivitas",
+        "headers": [
+          "Waktu_Aktivitas",
+          "Nama_Account",
+          "Aksi",
+          "Detail"
+        ],
+        "rows": []
+      },
+      {
+        "name": "pekerjaan",
+        "headers": [
+          "Nama_Pekerjaan"
+        ],
+        "rows": [
+          [
+            "Belum/Tidak Bekerja"
+          ],
+          [
+            "Pelajar/Mahasiswa"
+          ],
+          [
+            "Ibu Rumah Tangga"
+          ],
+          [
+            "PNS"
+          ],
+          [
+            "TNI/Polri"
+          ],
+          [
+            "Karyawan Swasta"
+          ],
+          [
+            "Karyawan BUMN"
+          ],
+          [
+            "Wiraswasta"
+          ],
+          [
+            "Pedagang"
+          ],
+          [
+            "Petani/Pekebun"
+          ],
+          [
+            "Buruh"
+          ],
+          [
+            "Guru/Dosen"
+          ],
+          [
+            "Tenaga Kesehatan"
+          ],
+          [
+            "Pensiunan"
+          ],
+          [
+            "Lainnya"
+          ]
+        ]
+      },
+      {
+        "name": "Rekap_Log",
+        "kind": "formula",
+        "grid": [
+          [
+            "=IFERROR(QUERY(Log_Aktivitas!A1:D,\"select C, count(A) where A is not null group by C order by count(A) desc label count(A) 'Jumlah'\",1),\"-\")",
+            "",
+            "",
+            "=IFERROR(QUERY(Log_Aktivitas!A1:D,\"select B, count(A) where A is not null group by B order by count(A) desc label count(A) 'Jumlah_Aktivitas'\",1),\"-\")"
+          ]
+        ]
+      }
+    ]
+  },
+  "OBAT": {
+    "title": "RME Sheldon - 08 Gudang Obat",
+    "sheets": [
+      {
+        "name": "Master_Obat",
+        "headers": [
+          "ID_Obat",
+          "Nama_Obat",
+          "Kandungan_Obat",
+          "Satuan_Beli",
+          "Isi_Per_Satuan",
+          "Harga_Beli_Satuan",
+          "HPP_Pcs",
+          "Margin_Persen",
+          "Harga_Jual",
+          "Stock_Tersedia",
+          "Stock_Minimum",
+          "Terjual",
+          "={\"Status_Stok\";ARRAYFORMULA(IF(B2:B=\"\",\"\",IF(J2:J<=0,\"HABIS\",IF(J2:J<=K2:K,\"KRITIS\",\"AMAN\"))))}",
+          "={\"Nilai_Persediaan\";ARRAYFORMULA(IF(B2:B=\"\",\"\",J2:J*G2:G))}"
+        ],
+        "formats": {
+          "Harga_Beli_Satuan": "#,##0",
+          "HPP_Pcs": "#,##0",
+          "Harga_Jual": "#,##0",
+          "Nilai_Persediaan": "#,##0"
+        },
+        "rows": [
+          [
+            "OBT-0001",
+            "Amoxicillin 500 mg",
+            "Amoxicillin Trihydrate 500mg",
+            "Box",
+            100,
+            80000,
+            800,
+            "150%",
+            2000,
+            500,
+            50,
+            0
+          ],
+          [
+            "OBT-0002",
+            "Asam Mefenamat 500 mg",
+            "Mefenamic Acid 500mg",
+            "Box",
+            100,
+            50000,
+            500,
+            "200%",
+            1500,
+            500,
+            50,
+            0
+          ],
+          [
+            "OBT-0003",
+            "Paracetamol 500 mg",
+            "Paracetamol 500mg",
+            "Box",
+            100,
+            30000,
+            300,
+            "233.3%",
+            1000,
+            600,
+            50,
+            0
+          ],
+          [
+            "OBT-0004",
+            "Metronidazole 500 mg",
+            "Metronidazole 500mg",
+            "Box",
+            100,
+            60000,
+            600,
+            "200%",
+            1800,
+            300,
+            30,
+            0
+          ],
+          [
+            "OBT-0005",
+            "Ibuprofen 400 mg",
+            "Ibuprofen 400mg",
+            "Box",
+            100,
+            45000,
+            450,
+            "233.3%",
+            1500,
+            400,
+            40,
+            0
+          ]
+        ]
+      },
+      {
+        "name": "Riwayat_Pembelian",
+        "headers": [
+          "Tanggal",
+          "No_Faktur",
+          "ID_Obat",
+          "Nama_Obat",
+          "Harga",
+          "Tanggal_Kadaluarsa",
+          "Jumlah_Beli",
+          "Total_Beli",
+          "Supplier",
+          "Petugas",
+          "Waktu_Sistem"
+        ],
+        "formats": {
+          "Tanggal": "dd-mm-yyyy",
+          "Harga": "#,##0",
+          "Tanggal_Kadaluarsa": "dd-mm-yyyy",
+          "Waktu_Sistem": "dd-mm-yyyy hh:mm:ss"
+        },
+        "rows": [
+          [
+            "01-10-2026",
+            "OBT-0001",
+            "Amoxicillin 500 mg",
+            80000,
+            "31-12-2027",
+            5,
+            500,
+            "PT Kimia Farma",
+            "Super User",
+            "01-10-2026 09:00:00"
+          ],
+          [
+            "01-10-2026",
+            "OBT-0002",
+            "Asam Mefenamat 500 mg",
+            50000,
+            "31-12-2027",
+            5,
+            500,
+            "PT Kimia Farma",
+            "Super User",
+            "01-10-2026 09:00:00"
+          ],
+          [
+            "01-10-2026",
+            "OBT-0003",
+            "Paracetamol 500 mg",
+            30000,
+            "31-12-2027",
+            6,
+            600,
+            "PT Kimia Farma",
+            "Super User",
+            "01-10-2026 09:00:00"
+          ],
+          [
+            "01-10-2026",
+            "OBT-0004",
+            "Metronidazole 500 mg",
+            60000,
+            "31-12-2027",
+            3,
+            300,
+            "PT Kimia Farma",
+            "Super User",
+            "01-10-2026 09:00:00"
+          ],
+          [
+            "01-10-2026",
+            "OBT-0005",
+            "Ibuprofen 400 mg",
+            45000,
+            "31-12-2027",
+            4,
+            400,
+            "PT Kimia Farma",
+            "Super User",
+            "01-10-2026 09:00:00"
+          ]
+        ]
+      },
+      {
+        "name": "Rekap_Obat",
+        "kind": "formula",
+        "grid": [
+          [
+            "Metrik",
+            "Nilai",
+            "",
+            "=IFERROR(QUERY(Master_Obat!A1:N,\"select A, B, J, K, M where M = 'KRITIS' or M = 'HABIS' order by J asc\",1),\"Semua stok obat aman\")"
+          ],
+          [
+            "Total Item",
+            "=COUNTA(Master_Obat!B2:B)"
+          ],
+          [
+            "Total Fisik Stok Tersedia (Pcs)",
+            "=SUM(Master_Obat!J2:J)"
+          ],
+          [
+            "Total Obat Terjual (Pcs)",
+            "=SUM(Master_Obat!L2:L)"
+          ],
+          [
+            "Stok Kritis",
+            "=COUNTIFS(Master_Obat!J2:J,\"<=\"&Master_Obat!K2:K,Master_Obat!J2:J,\">0\")"
+          ],
+          [
+            "Stok Habis",
+            "=COUNTIF(Master_Obat!J2:J,\"<=0\")"
+          ],
+          [
+            "Nilai Persediaan (HPP)",
+            "=SUMPRODUCT(Master_Obat!J2:J,Master_Obat!G2:G)"
+          ],
+          [
+            "Total Pengeluaran Pembelian (Rp)",
+            "=SUM(Riwayat_Pembelian!D2:D*Riwayat_Pembelian!F2:F)"
+          ]
+        ]
+      }
+    ]
+  },
+  "BMHP": {
+    "title": "RME Sheldon - 09 Gudang BMHP",
+    "sheets": [
+      {
+        "name": "Master_BMHP",
+        "headers": [
+          "Kode_Item",
+          "Nama_Barang",
+          "Satuan",
+          "HPP",
+          "Harga_Jual",
+          "Stok_Tersedia",
+          "Stok_Minimum",
+          "Total_Terjual",
+          "Expired_Date",
+          "Supplier",
+          "={\"Margin_Persen\";ARRAYFORMULA(IF(B2:B=\"\",\"\",IFERROR(ROUND((E2:E-D2:D)/D2:D*100,1),0)))}",
+          "={\"Status_Stok\";ARRAYFORMULA(IF(B2:B=\"\",\"\",IF((I2:I<>\"\")*(I2:I<TODAY()),\"KADALUARSA\",IF(F2:F<=0,\"HABIS\",IF(F2:F<=G2:G,\"KRITIS\",\"AMAN\")))))}",
+          "={\"Nilai_Persediaan\";ARRAYFORMULA(IF(B2:B=\"\",\"\",F2:F*D2:D))}"
+        ],
+        "formats": {
+          "HPP": "#,##0",
+          "Harga_Jual": "#,##0",
+          "Expired_Date": "dd-mm-yyyy",
+          "Nilai_Persediaan": "#,##0"
+        },
+        "rows": [
+          [
+            "BMH-0001",
+            "Sarung Tangan Lateks",
+            "Pasang",
+            1500,
+            5000,
+            500,
+            100,
+            0,
+            "2028-06-30",
+            "Contoh Supplier"
+          ],
+          [
+            "BMH-0002",
+            "Masker Medis",
+            "Pcs",
+            700,
+            2500,
+            500,
+            100,
+            0,
+            "2028-06-30",
+            "Contoh Supplier"
+          ],
+          [
+            "BMH-0003",
+            "Cotton Roll",
+            "Pcs",
+            100,
+            500,
+            1000,
+            200,
+            0,
+            "2028-06-30",
+            "Contoh Supplier"
+          ],
+          [
+            "BMH-0004",
+            "Lidocaine Cartridge",
+            "Cartridge",
+            6000,
+            15000,
+            100,
+            20,
+            0,
+            "2027-06-30",
+            "Contoh Supplier"
+          ],
+          [
+            "BMH-0005",
+            "Needle Disposable 27G",
+            "Pcs",
+            1500,
+            5000,
+            200,
+            40,
+            0,
+            "2028-06-30",
+            "Contoh Supplier"
+          ]
+        ]
+      },
+      {
+        "name": "Riwayat_Pembelian",
+        "headers": [
+          "Tanggal",
+          "Kode_Item",
+          "Nama_Item",
+          "Qty",
+          "Harga_Beli",
+          "Subtotal",
+          "Supplier",
+          "Expired_Date",
+          "Petugas",
+          "Waktu_Sistem"
+        ],
+        "formats": {
+          "Tanggal": "dd-mm-yyyy",
+          "Harga_Beli": "#,##0",
+          "Subtotal": "#,##0",
+          "Expired_Date": "dd-mm-yyyy",
+          "Waktu_Sistem": "dd-mm-yyyy hh:mm:ss"
+        },
+        "rows": []
+      },
+      {
+        "name": "Rekap_Stok",
+        "kind": "formula",
+        "grid": [
+          [
+            "Metrik",
+            "Nilai",
+            "",
+            "=IFERROR(QUERY(Master_BMHP!A1:M,\"select A, B, F, G, I, L where L = 'KRITIS' or L = 'HABIS' or L = 'KADALUARSA' order by F asc\",1),\"Semua stok aman\")"
+          ],
+          [
+            "Total Item",
+            "=COUNTA(Master_BMHP!B2:B)"
+          ],
+          [
+            "Stok Kritis",
+            "=COUNTIF(Master_BMHP!L2:L,\"KRITIS\")"
+          ],
+          [
+            "Stok Habis",
+            "=COUNTIF(Master_BMHP!L2:L,\"HABIS\")"
+          ],
+          [
+            "Kadaluarsa",
+            "=COUNTIF(Master_BMHP!L2:L,\"KADALUARSA\")"
+          ],
+          [
+            "Nilai Persediaan (HPP)",
+            "=SUM(Master_BMHP!M2:M)"
+          ],
+          [
+            "Total Terjual (Unit)",
+            "=SUM(Master_BMHP!H2:H)"
+          ],
+          [
+            "Pembelian Bulan Ini (Rp)",
+            "=SUMIFS(Riwayat_Pembelian!F2:F,Riwayat_Pembelian!A2:A,\">=\"&(EOMONTH(TODAY(),-1)+1),Riwayat_Pembelian!A2:A,\"<=\"&EOMONTH(TODAY(),0))"
+          ]
+        ]
+      }
+    ]
+  },
+  "ICD10": {
+    "title": "RME Sheldon - 10 ICD-10",
+    "sheets": [
+      {
+        "name": "ICD_10",
+        "headers": [
+          "ICD10_Code",
+          "Disease_Description"
+        ],
+        "rows": [
+          [
+            "K00.0",
+            "Anodontia"
+          ],
+          [
+            "K00.6",
+            "Disturbances in tooth eruption"
+          ],
+          [
+            "K01.1",
+            "Impacted teeth"
+          ],
+          [
+            "K02.0",
+            "Caries limited to enamel"
+          ],
+          [
+            "K02.1",
+            "Caries of dentine"
+          ],
+          [
+            "K02.2",
+            "Caries of cementum"
+          ],
+          [
+            "K03.0",
+            "Excessive attrition of teeth"
+          ],
+          [
+            "K03.6",
+            "Deposits [accretions] on teeth"
+          ],
+          [
+            "K04.0",
+            "Pulpitis"
+          ],
+          [
+            "K04.1",
+            "Necrosis of pulp"
+          ],
+          [
+            "K04.4",
+            "Acute apical periodontitis of pulpal origin"
+          ],
+          [
+            "K04.5",
+            "Chronic apical periodontitis"
+          ],
+          [
+            "K04.6",
+            "Periapical abscess with sinus"
+          ],
+          [
+            "K04.7",
+            "Periapical abscess without sinus"
+          ],
+          [
+            "K05.0",
+            "Acute gingivitis"
+          ],
+          [
+            "K05.1",
+            "Chronic gingivitis"
+          ],
+          [
+            "K05.2",
+            "Acute periodontitis"
+          ],
+          [
+            "K05.3",
+            "Chronic periodontitis"
+          ],
+          [
+            "K06.0",
+            "Gingival recession"
+          ],
+          [
+            "K07.3",
+            "Anomalies of tooth position"
+          ],
+          [
+            "K08.1",
+            "Loss of teeth due to accident, extraction or local periodontal disease"
+          ],
+          [
+            "K12.0",
+            "Recurrent oral aphthae"
+          ],
+          [
+            "S02.5",
+            "Fracture of tooth"
+          ]
+        ]
+      }
+    ]
+  }
+}

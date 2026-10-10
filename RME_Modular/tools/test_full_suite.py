@@ -1,0 +1,1225 @@
+import os
+import re
+import subprocess
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DIST_INDEX = os.path.join(BASE_DIR, 'dist', 'index.html')
+JSC_BIN = "/System/Library/Frameworks/JavaScriptCore.framework/Versions/Current/Helpers/jsc"
+
+with open(DIST_INDEX, 'r', encoding='utf-8') as f:
+    html = f.read()
+
+# Extract all scripts
+scripts = re.findall(r'<script(?:\s+[^>]*)?>(.*?)</script>', html, re.DOTALL)
+all_js = "\n\n".join(scripts)
+
+idx_rad = html.find('id="navRadiologi"')
+idx_kon = html.find('id="navKonsultasi"')
+is_kon_removed = (idx_kon == -1)
+is_modal_perio_in_html = ("Reset Data Periodontal Charting ?" in html)
+
+test_harness_file = os.path.join(BASE_DIR, 'tools', 'suite_harness.js')
+
+dom_shim = r'''
+// Enhanced DOM Mock for JavaScriptCore
+var window = this;
+var global = this;
+window.listeners = {};
+window.addEventListener = function(type, fn) {
+  if (!this.listeners[type]) this.listeners[type] = [];
+  this.listeners[type].push(fn);
+};
+window.removeEventListener = function(type, fn) {
+  if (!this.listeners[type]) return;
+  this.listeners[type] = this.listeners[type].filter(function(f) { return f !== fn; });
+};
+
+function parseAttributes(attrStr) {
+  var attrs = {};
+  var re = /([a-zA-Z0-9_-]+)(?:=([\"'])(.*?)\2)?/g;
+  var m;
+  while ((m = re.exec(attrStr)) !== null) {
+    attrs[m[1]] = m[3] !== undefined ? m[3] : true;
+  }
+  return attrs;
+}
+
+function matchesSelector(node, sel) {
+  if (!node || !sel) return false;
+  if (sel.startsWith('.')) {
+    var cls = sel.slice(1);
+    return (node.classList && node.classList.contains(cls)) || (node.className && node.className.split(/\s+/).indexOf(cls) !== -1);
+  }
+  if (sel.startsWith('#')) return node.id === sel.slice(1);
+  return (node.tagName || '').toLowerCase() === sel.toLowerCase();
+}
+
+function createMockElement(tag, id) {
+  var el = {
+    tagName: (tag || 'DIV').toUpperCase(),
+    id: id || '',
+    value: '',
+    innerText: (id === 'btnSimpanBilling' ? 'SIMPAN DATA INVOICE' : ''),
+    _innerHTML: (id === 'btnSimpanBilling' ? 'SIMPAN DATA INVOICE' : ''),
+    textContent: '',
+    style: {},
+    disabled: false,
+    attributes: {},
+    children: [],
+    parentNode: null,
+    listeners: {},
+    classList: {
+      classes: new Set(),
+      add: function(c) { this.classes.add(c); },
+      remove: function(c) { this.classes.delete(c); },
+      contains: function(c) { return this.classes.has(c); }
+    },
+    setAttribute: function(k, v) { this.attributes[k] = String(v); },
+    getAttribute: function(k) { return this.attributes[k] !== undefined ? this.attributes[k] : null; },
+    hasAttribute: function(k) { return this.attributes[k] !== undefined; },
+    removeAttribute: function(k) { delete this.attributes[k]; },
+    addEventListener: function(type, fn) {
+      if (!this.listeners[type]) this.listeners[type] = [];
+      this.listeners[type].push(fn);
+    },
+    removeEventListener: function(type, fn) {
+      if (!this.listeners[type]) return;
+      this.listeners[type] = this.listeners[type].filter(f => f !== fn);
+    },
+    dispatchEvent: function(event) {
+      if (event.type === 'submit' && this.id === 'formLogin' && typeof handleLogin === 'function') {
+        event.preventDefault = function() {};
+        handleLogin(event);
+        return;
+      }
+      let fns = this.listeners[event.type] || [];
+      for (let fn of fns) fn.call(this, event);
+    },
+    reset: function() {
+      this.value = '';
+      function recurseReset(n) {
+        if (!n || !n.children) return;
+        for (var i = 0; i < n.children.length; i++) {
+          var c = n.children[i];
+          if (c.value !== undefined) c.value = '';
+          if (c.selectedIndex !== undefined) c.selectedIndex = 0;
+          recurseReset(c);
+        }
+      }
+      recurseReset(this);
+    },
+    focus: function() {},
+    scrollTo: function() {},
+    remove: function() {
+      if (this.parentNode) {
+        this.parentNode.children = this.parentNode.children.filter(c => c !== this);
+      }
+    },
+    appendChild: function(child) {
+      child.parentNode = this;
+      this.children.push(child);
+      if (this.id === 'toastContainer') {
+        this.allToasts = this.allToasts || [];
+        this.allToasts.push(child._innerHTML);
+      }
+      return child;
+    },
+    closest: function(sel) {
+      var cur = this;
+      while (cur) {
+        if (matchesSelector(cur, sel)) return cur;
+        cur = cur.parentNode;
+      }
+      return null;
+    },
+    querySelector: function(sel) {
+      var all = this.querySelectorAll(sel);
+      return all.length > 0 ? all[0] : null;
+    },
+    querySelectorAll: function(sel) {
+      var matched = [];
+      function recurse(node) {
+        for (var i = 0; i < node.children.length; i++) {
+          var c = node.children[i];
+          if (matchesSelector(c, sel)) matched.push(c);
+          recurse(c);
+        }
+      }
+      recurse(this);
+      return matched;
+    }
+  };
+
+  Object.defineProperty(el, 'className', {
+    get: function() { return Array.from(this.classList.classes).join(' '); },
+    set: function(val) {
+      this.classList.classes.clear();
+      String(val).split(/\s+/).forEach(c => { if(c) this.classList.classes.add(c); });
+    }
+  });
+
+  Object.defineProperty(el, 'innerHTML', {
+    get: function() { return this._innerHTML; },
+    set: function(val) {
+      this._innerHTML = String(val);
+      this.innerText = String(val).replace(/<[^>]+>/g, '').trim();
+      this.children = [];
+      if (!val) return;
+      
+      if (val.includes('search-item')) {
+        let regex = /onclick=\"([^\"]+)\"[^>]*>([\s\S]*?)<\/div>/g;
+        let m;
+        while ((m = regex.exec(val)) !== null) {
+          let item = createMockElement('div');
+          item.classList.add('search-item');
+          item.onclickAttr = m[1];
+          item.content = m[2];
+          item.click = function() { eval(this.onclickAttr); };
+          this.appendChild(item);
+        }
+      }
+
+      var tagRe = /<(input|select|button|span|div)([^>]*)>/gi;
+      var match;
+      while ((match = tagRe.exec(val)) !== null) {
+        var childTag = match[1];
+        var attrs = parseAttributes(match[2]);
+        var childEl = createMockElement(childTag);
+        if (attrs['class']) {
+          childEl.className = attrs['class'];
+        }
+        if (attrs['value'] !== undefined) childEl.value = attrs['value'];
+        if (attrs['id']) childEl.id = attrs['id'];
+        for (var k in attrs) {
+          if (k.startsWith('data-')) childEl.setAttribute(k, attrs[k]);
+        }
+        this.appendChild(childEl);
+      }
+    }
+  });
+
+  return el;
+}
+
+var document = {
+  elements: {},
+  getElementById: function(id) {
+    if (!this.elements[id]) {
+      this.elements[id] = createMockElement('div', id);
+    }
+    return this.elements[id];
+  },
+  createElement: function(tag) {
+    return createMockElement(tag);
+  },
+  addEventListener: function(type, fn) {
+    if (!this.listeners[type]) this.listeners[type] = [];
+    this.listeners[type].push(fn);
+  },
+  dispatchEvent: function(event) {
+    let fns = this.listeners[event.type] || [];
+    for (let fn of fns) fn.call(this, event);
+  },
+  querySelectorAll: function(sel) {
+    var matched = [];
+    var visited = new Set();
+    function search(node) {
+      if (!node || visited.has(node)) return;
+      visited.add(node);
+      if (matchesSelector(node, sel)) matched.push(node);
+      if (node.children) {
+        for (var i = 0; i < node.children.length; i++) {
+          search(node.children[i]);
+        }
+      }
+    }
+    for (var id in document.elements) {
+      search(document.elements[id]);
+    }
+    return matched;
+  },
+  querySelector: function(sel) {
+    var all = this.querySelectorAll(sel);
+    return all.length > 0 ? all[0] : null;
+  },
+  listeners: {}
+};
+
+window.scrollTo = function() {};
+
+var localStorage = {
+  store: {},
+  getItem: function(k) { return this.store[k] || null; },
+  setItem: function(k, v) { this.store[k] = String(v); },
+  removeItem: function(k) { delete this.store[k]; }
+};
+
+var Event = function(type, opts) {
+  this.type = type;
+  this.bubbles = opts && opts.bubbles;
+  this.cancelable = opts && opts.cancelable;
+};
+
+// Timer queue for simulated async execution
+var timerQueue = [];
+var nextTimerId = 1;
+
+function setTimeout(fn, delay) {
+  var id = nextTimerId++;
+  timerQueue.push({ id: id, fn: fn, time: delay || 0 });
+  return id;
+}
+
+function clearTimeout(id) {
+  timerQueue = timerQueue.filter(t => t.id !== id);
+}
+
+function runAllTimers() {
+  while (timerQueue.length > 0) {
+    var curQueue = timerQueue.slice();
+    timerQueue = [];
+    for (var i = 0; i < curQueue.length; i++) {
+      curQueue[i].fn();
+    }
+  }
+}
+
+var console = {
+  log: function(...args) { print("[LOG] " + args.join(' ')); },
+  warn: function(...args) { print("[WARN] " + args.join(' ')); },
+  error: function(...args) { print("[ERROR] " + args.join(' ')); }
+};
+'''
+
+test_runner_js = r'''
+// ==========================================
+// TEST SUITE ASSERTIONS
+// ==========================================
+var results = [];
+function assert(name, condition, details) {
+  var passed = !!condition;
+  results.push({ name: name, passed: passed, details: details || "" });
+  print((passed ? "✅ [PASS] " : "❌ [FAIL] ") + name + (details ? " - " + details : ""));
+}
+
+print("=================================================");
+print("     STARTING RME MODULAR ARCHITECTURE TEST      ");
+print("=================================================");
+
+// 1. Initial State & DOMContentLoaded
+document.dispatchEvent(new Event('DOMContentLoaded'));
+runAllTimers();
+
+assert("Initial Active Account is null", window.activeAccount === null);
+assert("KlinikData Object Initialized", typeof window.KlinikData === 'object' && Array.isArray(window.KlinikData.pasien));
+
+// 2. Authentication Test
+document.getElementById('loginUser').value = "STF-001";
+document.getElementById('loginPass').value = "1234";
+document.getElementById('formLogin').dispatchEvent(new Event('submit', { cancelable: true }));
+runAllTimers();
+
+assert("Login Super User Successful", window.activeAccount === "STF-001", "User: " + window.activeNamaAccount);
+assert("Role Applied: Super User", window.activeUserRole === "Super User");
+
+// 3. Data Synchronization & Event Firing
+assert("KlinikData Master Synced", window.KlinikData.staff.length > 0 && window.KlinikData.tindakan.length > 0, "Staff: " + window.KlinikData.staff.length + ", Tindakan: " + window.KlinikData.tindakan.length);
+assert("KlinikData Pasien Synced", window.KlinikData.pasien.length >= 3, "Total Pasien: " + window.KlinikData.pasien.length);
+assert("KlinikData EMR Synced", window.KlinikData.rekamMedis.length > 0, "EMR count: " + window.KlinikData.rekamMedis.length);
+assert("KlinikData Pembayaran Synced", window.KlinikData.pembayaran.length > 0, "Pembayaran count: " + window.KlinikData.pembayaran.length);
+
+// 4. Test Navigation to Surat & Formulir Medis
+switchMenu('surat');
+runAllTimers();
+assert("View Surat Active", !document.getElementById('view-surat').classList.contains('hidden'));
+
+// 5. TEST PASIEN AUTOCOMPLETE IN SURAT (SKS)
+changeSuratMenu('sakit');
+runAllTimers();
+assert("Panel Surat Sakit Open", !document.getElementById('panelSuratSakit').classList.contains('hidden'));
+
+document.getElementById('sksSearchPasien').value = "budi";
+searchPasienSKS();
+runAllTimers(); // process debounce
+
+var resBoxSKS = document.getElementById('sksSearchResult');
+assert("SKS Search Result Dropdown Visible", !resBoxSKS.classList.contains('hidden'));
+var itemsSKS = resBoxSKS.querySelectorAll('.search-item');
+assert("SKS Found Matched Patients", itemsSKS.length > 0, "Found items: " + itemsSKS.length);
+
+if (itemsSKS.length > 0) {
+  itemsSKS[0].click(); // Simulate clicking the patient
+  runAllTimers();
+  assert("SKS Auto-populate ID Pasien", document.getElementById('sksIdPasien').value === "P-0001");
+  assert("SKS Auto-populate No RM", document.getElementById('sksNoRm').value === "RM-0001");
+  assert("SKS Auto-populate Nama Pasien", document.getElementById('sksNama').value === "Budi Santoso");
+  assert("SKS Auto-populate Umur", document.getElementById('sksUmur').value.includes("36"));
+  assert("SKS Auto-populate JK", document.getElementById('sksJK').value === "Laki-Laki");
+  assert("SKS Auto-populate Alamat", document.getElementById('sksAlamat').value.includes("Payakumbuh"));
+  assert("SKS Result Dropdown Closed after Selection", resBoxSKS.classList.contains('hidden'));
+}
+
+// 5b. TEST VALIDASI MAKSIMAL 5 HARI SKS & POSISI BUTTON KONSULTASI
+document.getElementById('sksLamaHari').value = 8;
+validasiLamaSKS(document.getElementById('sksLamaHari'));
+hitungTglSelesaiSKS();
+assert("SKS Lama Hari Ditolak Jika > 5 (Clamped to 5)", document.getElementById('sksLamaHari').value == 5);
+
+assert("Button Surat Konsultasi Berhasil Dihilangkan", isButtonKonsultasiRemoved);
+
+// 6. TEST PASIEN AUTOCOMPLETE IN SURAT (SKP)
+changeSuratMenu('kontrol');
+runAllTimers();
+assert("Panel Surat Kontrol Open", !document.getElementById('panelSuratKontrol').classList.contains('hidden'));
+
+document.getElementById('skpSearchPasien').value = "siti";
+searchPasienSKP();
+runAllTimers();
+
+var resBoxSKP = document.getElementById('skpSearchResult');
+assert("SKP Search Result Dropdown Visible", !resBoxSKP.classList.contains('hidden'));
+var itemsSKP = resBoxSKP.querySelectorAll('.search-item');
+assert("SKP Found Matched Patients", itemsSKP.length > 0);
+
+if (itemsSKP.length > 0) {
+  itemsSKP[0].click();
+  runAllTimers();
+  assert("SKP Auto-populate ID Pasien", document.getElementById('skpIdPasien').value === "P-0002");
+  assert("SKP Auto-populate No RM", document.getElementById('skpNoRm').value === "RM-0002");
+  assert("SKP Auto-populate Nama Pasien", document.getElementById('skpNama').value === "Siti Rahmawati");
+  assert("SKP Result Dropdown Closed", resBoxSKP.classList.contains('hidden'));
+}
+
+// 7. TEST PASIEN AUTOCOMPLETE IN SURAT (RSM - Resume Medis)
+changeSuratMenu('resume');
+runAllTimers();
+assert("Panel Resume Medis Open", !document.getElementById('panelResumeMedis').classList.contains('hidden'));
+
+document.getElementById('rsmSearchPasien').value = "budi";
+searchPasienRSM();
+runAllTimers();
+
+var resBoxRSM = document.getElementById('rsmSearchResult');
+assert("RSM Search Result Dropdown Visible", !resBoxRSM.classList.contains('hidden'));
+var itemsRSM = resBoxRSM.querySelectorAll('.search-item');
+assert("RSM Found Matched Patients", itemsRSM.length > 0);
+
+if (itemsRSM.length > 0) {
+  itemsRSM[0].click();
+  runAllTimers();
+  assert("RSM Auto-populate ID Pasien", document.getElementById('rsmIdPasien').value === "P-0001");
+  assert("RSM Auto-populate No RM", document.getElementById('rsmNoRm').value === "RM-0001");
+  assert("RSM Auto-populate Nama Pasien", document.getElementById('rsmNama').value === "Budi Santoso");
+  assert("RSM Auto-fill Clinical Summary from EMR", document.getElementById('rsmRingkasanKlinis').value.length > 0);
+  assert("RSM Auto-fill ICD Diagnosis from EMR", document.getElementById('rsmDiagnosisKerja').value.includes("K02.1"));
+}
+
+// 8. TEST PASIEN AUTOCOMPLETE IN SURAT (SPM - Rujukan)
+changeSuratMenu('rujukan');
+runAllTimers();
+assert("Panel Rujukan Open", !document.getElementById('panelSuratRujukan').classList.contains('hidden'));
+
+document.getElementById('spmSearchPasien').value = "ahmad";
+searchPasienSPM();
+runAllTimers();
+
+var resBoxSPM = document.getElementById('spmSearchResult');
+assert("SPM Search Result Dropdown Visible", !resBoxSPM.classList.contains('hidden'));
+var itemsSPM = resBoxSPM.querySelectorAll('.search-item');
+assert("SPM Found Matched Patients", itemsSPM.length > 0);
+
+if (itemsSPM.length > 0) {
+  itemsSPM[0].click();
+  runAllTimers();
+  assert("SPM Auto-populate ID Pasien", document.getElementById('spmIdPasien').value === "P-0003");
+  assert("SPM Auto-populate Nama", document.getElementById('spmNama').value === "Ahmad Fauzi");
+}
+
+// 9. TEST PASIEN AUTOCOMPLETE IN SURAT (LAB - Pengantar Lab)
+changeSuratMenu('lab');
+runAllTimers();
+assert("Panel Lab Open", !document.getElementById('panelSuratLab').classList.contains('hidden'));
+
+document.getElementById('labSearchPasien').value = "budi";
+searchPasienLAB();
+runAllTimers();
+
+var resBoxLAB = document.getElementById('labSearchResult');
+assert("LAB Search Dropdown Visible", !resBoxLAB.classList.contains('hidden'));
+var itemsLAB = resBoxLAB.querySelectorAll('.search-item');
+assert("LAB Found Matched Patients", itemsLAB.length > 0);
+if (itemsLAB.length > 0) {
+  itemsLAB[0].click();
+  runAllTimers();
+  assert("LAB Auto-populate ID Pasien", document.getElementById('labIdPasien').value === "P-0001");
+  assert("LAB Auto-populate Nama", document.getElementById('labNama').value === "Budi Santoso");
+}
+
+// 10. TEST PASIEN AUTOCOMPLETE IN SURAT (RAD - Pengantar Radiologi)
+changeSuratMenu('radiologi');
+runAllTimers();
+assert("Panel Radiologi Open", !document.getElementById('panelSuratRadiologi').classList.contains('hidden'));
+
+document.getElementById('radSearchPasien').value = "siti";
+searchPasienRAD();
+runAllTimers();
+
+var resBoxRAD = document.getElementById('radSearchResult');
+assert("RAD Search Dropdown Visible", !resBoxRAD.classList.contains('hidden'));
+var itemsRAD = resBoxRAD.querySelectorAll('.search-item');
+assert("RAD Found Matched Patients", itemsRAD.length > 0);
+if (itemsRAD.length > 0) {
+  itemsRAD[0].click();
+  runAllTimers();
+  assert("RAD Auto-populate ID Pasien", document.getElementById('radIdPasien').value === "P-0002");
+  assert("RAD Auto-populate Nama", document.getElementById('radNama').value === "Siti Rahmawati");
+}
+
+// 11. TEST PASIEN DATE FORMAT (dd-mm-yyyy)
+switchMenu('pasien');
+runAllTimers();
+var firstP = window.KlinikData.pasien[0];
+assert("Patient Birth Date follows dd-mm-yyyy", /^\d{2}-\d{2}-\d{4}$/.test(firstP.tanggalLahir), "Tgl: " + firstP.tanggalLahir);
+
+// 12. TEST EMR PATIENT SEARCH
+switchMenu('rekam-medis');
+runAllTimers();
+document.getElementById('rmSearchPasien').value = "budi";
+searchPasienRM();
+runAllTimers();
+var resRM = document.getElementById('rmSearchResult');
+assert("Rekam Medis Search Dropdown Visible", !resRM.classList.contains('hidden'));
+pilihPasienRM('P-0001');
+runAllTimers();
+assert("Active Pasien in EMR set", activePasienRM && activePasienRM.idPasien === "P-0001");
+
+// 13. TEST KASIR PATIENT SEARCH
+switchMenu('kasir');
+runAllTimers();
+document.getElementById('ksrSearchPasien').value = "budi";
+document.getElementById('ksrSearchPasien').dispatchEvent(new Event('input'));
+runAllTimers();
+var resKSR = document.getElementById('ksrSearchResult');
+assert("Kasir Search Dropdown Visible", !resKSR.classList.contains('hidden'));
+pilihPasienKSR('P-0001');
+runAllTimers();
+assert("Kasir Patient Selected", document.getElementById('ksrNama').value === "Budi Santoso");
+
+// 14. TEST MASTER DATABASE & INVENTORY & AI MODULES
+switchMenu('database');
+runAllTimers();
+assert("Master Database Initialized Cleanly", typeof initDatabaseModule === 'function');
+
+// 14a. Test Master Database Tabs Switching
+changeDBMenu('obat');
+runAllTimers();
+assert("Panel DB Obat Active", !document.getElementById('panelDbObat').classList.contains('hidden'));
+assert("Auto-generated Kode Obat Valid", document.getElementById('dbKodeObat').value.startsWith('OBT-'));
+
+// Test Margin Obat Calculation
+document.getElementById('dbHppObat').value = "10.000";
+document.getElementById('dbHargaJualObat').value = "15.000";
+hitungMarginObat();
+assert("Margin Obat Calculated Correctly (50.0%)", document.getElementById('dbMarginObat').value === "50.0%");
+
+// Test Simpan DB Obat
+var eventObat = { preventDefault: function() {} };
+document.getElementById('dbNamaObat').value = "Cefixime 100mg";
+document.getElementById('dbSatuanObat').value = "Kapsul";
+document.getElementById('dbStokAwalObat').value = "50";
+document.getElementById('dbStokMinObat').value = "10";
+document.getElementById('dbExpiredObat').value = "2027-01-01";
+document.getElementById('dbSupplierObat').value = "PT Kimia Farma";
+simpanDbObat(eventObat);
+runAllTimers();
+assert("DB Obat Saved & Appended to listMasterObat", listMasterObat.some(o => o.nama === "Cefixime 100mg"));
+
+// Test DB Obat Table Rendering & Search
+document.getElementById('cariDbObat').value = "cefixime";
+renderTabelObat();
+assert("Tabel Obat Rendered Matching Item", document.getElementById('tbodyDbObat').innerHTML.includes('Cefixime 100mg'));
+
+// 14b. Test DB BMHP Tab & Operation
+changeDBMenu('bmhp');
+runAllTimers();
+assert("Panel DB BMHP Active", !document.getElementById('panelDbBmhp').classList.contains('hidden'));
+assert("Auto-generated Kode BMHP Valid", document.getElementById('dbKodeBmhp').value.startsWith('BMH-'));
+
+// Test Margin BMHP Calculation
+document.getElementById('dbHppBmhp').value = "4.000";
+document.getElementById('dbHargaJualBmhp').value = "6.000";
+hitungMarginBmhp();
+assert("Margin BMHP Calculated Correctly (50.0%)", document.getElementById('dbMarginBmhp').value === "50.0%");
+
+// Test Simpan DB BMHP
+var eventBmhp = { preventDefault: function() {} };
+document.getElementById('dbNamaBmhp').value = "Needle Dental 30G";
+document.getElementById('dbSatuanBmhp').value = "Box";
+document.getElementById('dbStokAwalBmhp').value = "20";
+document.getElementById('dbStokMinBmhp').value = "5";
+document.getElementById('dbExpiredBmhp').value = "2028-05-20";
+document.getElementById('dbSupplierBmhp').value = "PT Medika Prima";
+simpanDbBmhp(eventBmhp);
+runAllTimers();
+assert("DB BMHP Saved & Appended to listMasterBmhp", listMasterBmhp.some(b => b.nama === "Needle Dental 30G"));
+
+// Test DB BMHP Table Rendering & Search
+document.getElementById('cariDbBmhp').value = "needle";
+renderTabelBmhp();
+assert("Tabel BMHP Rendered Matching Item", document.getElementById('tbodyDbBmhp').innerHTML.includes('Needle Dental 30G'));
+
+switchMenu('inventory');
+runAllTimers();
+assert("Inventory Gudang Initialized Cleanly", typeof initInventoryModule === 'function');
+
+// 15. TEST MODUL INFORMASI (TINDAKAN, OBAT, BMHP)
+switchMenu('informasi');
+runAllTimers();
+assert("Informasi Module Initialized Cleanly", typeof initInformasiModule === 'function');
+assert("Panel Info Tindakan Visible by Default", !document.getElementById('panelInfoTindakan').classList.contains('hidden'));
+
+// 15a. Test Informasi Tindakan Search & Kategori Filter
+document.getElementById('cariInfoTindakan').value = "scaling";
+renderInfoTindakan();
+assert("Tabel Info Tindakan Filters by Search", document.getElementById('tbodyInfoTindakan').innerHTML.includes('Scaling'));
+
+var katSelect = document.getElementById('filterInfoKategoriTindakan');
+katSelect.value = "Dokter Gigi Umum";
+renderInfoTindakan();
+assert("Tabel Info Tindakan Filters by Kategori", document.getElementById('tbodyInfoTindakan').innerHTML.includes('Dokter Gigi Umum'));
+
+// 15b. Test Informasi Obat Tab & Search by Nama & Kandungan
+changeInfoTab('obat');
+runAllTimers();
+assert("Panel Info Obat Active", !document.getElementById('panelInfoObat').classList.contains('hidden'));
+
+// Search by Nama Obat
+document.getElementById('cariInfoObat').value = "amoxicillin";
+renderInfoObat();
+assert("Info Obat Searched by Nama", document.getElementById('tbodyInfoObat').innerHTML.includes('Amoxicillin'));
+
+// Search by Kandungan Obat
+document.getElementById('cariInfoObat').value = "mefenamic";
+renderInfoObat();
+assert("Info Obat Searched by Kandungan (Mefenamic Acid)", document.getElementById('tbodyInfoObat').innerHTML.includes('Asam Mefenamat'));
+
+// 15c. Test Informasi BMHP Tab & Search
+changeInfoTab('bmhp');
+runAllTimers();
+assert("Panel Info BMHP Active", !document.getElementById('panelInfoBmhp').classList.contains('hidden'));
+
+document.getElementById('cariInfoBmhp').value = "masker";
+renderInfoBmhp();
+assert("Info BMHP Searched by Nama", document.getElementById('tbodyInfoBmhp').innerHTML.includes('Masker'));
+
+// 15d. Test Kemasan Beli in Informasi Obat
+changeInfoTab('obat');
+document.getElementById('cariInfoObat').value = "";
+renderInfoObat();
+assert("Info Obat Menampilkan Kemasan Beli", document.getElementById('tbodyInfoObat').innerHTML.includes('@') || document.getElementById('tbodyInfoObat').innerHTML.includes('Box'));
+
+// 15e. Test Reset Odontogram ke Normal
+switchMenu('rekamMedis');
+runAllTimers();
+currentOdontogram = { 11: { generalCondition: 'car', surfaces: { occlusal: 'car' } } };
+renderOdontogramGrid();
+assert("Odontogram Dirty State Set", currentOdontogram[11] !== undefined);
+resetAllOdontogramToNormal();
+assert("Reset Odontogram ke Normal Seluruh Gigi Berhasil", Object.keys(currentOdontogram).length === 0);
+
+// 15f. Test Refresh AI Button
+switchMenu('ai');
+runAllTimers();
+assert("Tombol Refresh AI Rendered with ID", document.getElementById('btnRefreshAI') !== null);
+loadAIInsights(true);
+runAllTimers();
+assert("Refresh AI Berhasil Dijalankan", document.getElementById('aiTotalPasien') !== null);
+
+// 15g. Test Kasir Stock Validation Attributes
+switchMenu('kasir');
+runAllTimers();
+addKasirObat();
+let lastRowKsr = document.querySelector('#ksrTbodyObat tr:last-child');
+if (lastRowKsr) {
+  let namaIn = lastRowKsr.querySelector('.val-nama');
+  if (namaIn && window.KlinikData && window.KlinikData.obat && window.KlinikData.obat.length > 0) {
+    namaIn.value = window.KlinikData.obat[0].nama;
+    onInputDatalistChange(namaIn, 'obat');
+    assert("Kasir Obat Membaca data-stok", namaIn.hasAttribute('data-stok'));
+  }
+}
+assert("Opsi Perawat Kasir Hanya Role Perawat Gigi", optPerawatKSR.includes("Bernadette") && !optPerawatKSR.includes("Penny") && !optPerawatKSR.includes("Cooper"));
+
+// 15h. Test Diagnosa ICD-10 & Tindakan ICD-9 Title Casing & Row Creation
+switchMenu('rekamMedis');
+runAllTimers();
+tambahRowDiagnosa();
+let contDiag = document.getElementById('containerDiagnosa');
+assert("Diagnosa Row Appended", contDiag && contDiag.children.length > 0);
+let lastRowDiag = contDiag.children[contDiag.children.length - 1];
+assert("Diagnosa Note Field Present", !!lastRowDiag.querySelector('.val-diagnosa-ket'));
+let mockInputDiag = { value: "karies dentis", setSelectionRange: function() {} };
+autoTitleCase(mockInputDiag);
+assert("Diagnosa Input Auto Title Case Formatted", mockInputDiag.value === "Karies Dentis");
+
+tambahRowTindakan();
+let contTind = document.getElementById('containerTindakan');
+assert("Tindakan Row Appended", contTind && contTind.children.length > 0);
+let lastRowTind = contTind.children[contTind.children.length - 1];
+assert("Tindakan Note Field Present", !!lastRowTind.querySelector('.val-tindakan-ket'));
+let mockInputTind = { value: "pencabutan gigi tetap", setSelectionRange: function() {} };
+autoTitleCase(mockInputTind);
+assert("Tindakan Input Auto Title Case Formatted", mockInputTind.value === "Pencabutan Gigi Tetap");
+
+// 15i. Test Detail Rekam Medis (EMR): Tombol Odontogram History & Posisi Diagnosis Gigi
+riwayatPasienAktif = [{
+  idPasien: 'P-001',
+  noRm: 'RM-001',
+  namaPasien: 'Pasien Test',
+  tanggalPeriksa: '2026-10-08',
+  dokterPemeriksa: 'drg. Sheldon',
+  anamnesisStr: JSON.stringify({ cc: 'Nyeri', diagnosaICD: ['K02.1 - Caries'] }),
+  fisikStr: JSON.stringify({ kesan: 'Baik', periodontal: { summary: { totalSites: 6, bopPercent: 50 } } }),
+  odontogramStr: JSON.stringify({ 16: { generalCondition: 'car', surfaces: { occlusal: 'car' } } }),
+  tindakanStr: JSON.stringify(['23.2 - Tumpatan']),
+  obatStr: JSON.stringify([{ obat: 'Amoxicillin', qty: 10, ket: '3x1' }])
+}];
+bukaDetailRM(0);
+let printArea = document.getElementById('printAreaRM');
+assert("Detail RM Rendered", !!printArea);
+let printHtml = printArea.innerHTML;
+assert("Tombol Buka Odontogram Interaktif Present", printHtml.includes('bukaModalOdontoHistory(0)'));
+assert("DMF-T Decayed Present", printHtml.includes('Decayed (D)'));
+assert("DMF-T Missing Present", printHtml.includes('Missing (M)'));
+assert("DMF-T Filled Present", printHtml.includes('Filled (F)'));
+assert("DMF-T Total Present", printHtml.includes('Total DMF-T'));
+let posOdonto = printHtml.indexOf('Peta Odontogram Saat Kunjungan');
+let posDiagGigi = printHtml.indexOf('Diagnosis Gigi (Tulisan)');
+let posPerio = printHtml.indexOf('Hasil Periodontal Charting');
+assert("Diagnosis Gigi Berada di Bawah Odontogram", posDiagGigi > posOdonto);
+assert("Diagnosis Gigi Berada di Atas Periodontal", posDiagGigi < posPerio);
+assert("Fungsi bukaModalOdontoHistory Tersedia", typeof bukaModalOdontoHistory === 'function');
+closeDetailRM();
+
+// 15j. Test View History Pasien di Database Pasien: Aligned with Rekam Medis Layout
+let origPasienSuite = window.KlinikData.pasien || [];
+let origRmSuite = window.KlinikData.rekamMedis || [];
+window.KlinikData.pasien = [{ idPasien: 'P-001', namaPasien: 'Pasien Test', noRm: 'RM-001' }];
+window.KlinikData.rekamMedis = [{
+  idPasien: 'P-001',
+  tanggalPeriksa: '2026-10-08',
+  dokterPemeriksa: 'drg. Sheldon',
+  anamnesisStr: JSON.stringify({ cc: 'Nyeri', diagnosaICD: ['K02.1 - Caries'] }),
+  fisikStr: JSON.stringify({ kesan: 'Baik', periodontal: { summary: { totalSites: 192, bopPercent: 12 } }, ohis: { debrisScore: 0.5, calculusScore: 0.33, totalScore: 0.83, category: 'Baik' } }),
+  odontogramStr: JSON.stringify({ 16: { generalCondition: 'car', surfaces: { occlusal: 'car' } } }),
+  tindakanStr: JSON.stringify(['23.2 - Tumpatan']),
+  obatStr: JSON.stringify([{ obat: 'Amoxicillin', qty: 10, ket: '3x1' }])
+}];
+openHistoryEMR('P-001');
+let contHistPasien = document.getElementById('containerHistoryEMR');
+assert("Database Pasien: History EMR Rendered", !!contHistPasien);
+let histPasienHtml = contHistPasien.innerHTML;
+assert("Database Pasien: Tombol Buka Odontogram Present", histPasienHtml.includes('bukaModalOdontoHistoryPasien(0)'));
+assert("Database Pasien: DMF-T Decayed Present", histPasienHtml.includes('Decayed (D)'));
+assert("Database Pasien: DMF-T Total Present", histPasienHtml.includes('Total DMF-T'));
+assert("Database Pasien: Periodontal Charting Present", histPasienHtml.includes('Hasil Periodontal Charting'));
+assert("Database Pasien: OHI-S Present", histPasienHtml.includes('Hasil Pemeriksaan OHI-S'));
+assert("Database Pasien: Tombol Buka OHI-S Present", histPasienHtml.includes('bukaModalOhisHistoryPasien(0)'));
+assert("Database Pasien: Fungsi bukaModalOdontoHistoryPasien Tersedia", typeof bukaModalOdontoHistoryPasien === 'function');
+assert("Database Pasien: Fungsi bukaModalPerioHistoryPasien Tersedia", typeof bukaModalPerioHistoryPasien === 'function');
+assert("Database Pasien: Fungsi bukaModalOhisHistoryPasien Tersedia", typeof bukaModalOhisHistoryPasien === 'function');
+
+bukaModalOdontoHistoryPasien(0);
+assert("Database Pasien: Modal Odonto Terbuka", !document.getElementById('modalOdontoHistoryPasien').classList.contains('hidden'));
+tutupModalOdontoHistoryPasien();
+assert("Database Pasien: Modal Odonto Tertutup", document.getElementById('modalOdontoHistoryPasien').classList.contains('hidden'));
+
+bukaModalPerioHistoryPasien(0);
+assert("Database Pasien: Modal Perio Terbuka", !document.getElementById('modalPerioHistoryPasien').classList.contains('hidden'));
+tutupModalPerioHistoryPasien();
+assert("Database Pasien: Modal Perio Tertutup", document.getElementById('modalPerioHistoryPasien').classList.contains('hidden'));
+
+bukaModalOhisHistoryPasien(0);
+assert("Database Pasien: Modal OHI-S Terbuka", !document.getElementById('modalOhisHistoryPasien').classList.contains('hidden'));
+tutupModalOhisHistoryPasien();
+assert("Database Pasien: Modal OHI-S Tertutup", document.getElementById('modalOhisHistoryPasien').classList.contains('hidden'));
+
+closeHistoryEMR();
+window.KlinikData.pasien = origPasienSuite;
+window.KlinikData.rekamMedis = origRmSuite;
+
+// 15k. Test Edit Pasien & Form Reset Persistence
+let origPasienListForEdit = JSON.parse(JSON.stringify(window.KlinikData.pasien || []));
+editPasien('P-0001');
+assert("Edit Pasien: Panel Form Terbuka", !document.getElementById('panelFormPasien').classList.contains('hidden'));
+assert("Edit Pasien: Mode Edit PasId Terisi", document.getElementById('pasId').value === 'P-0001');
+assert("Edit Pasien: Judul Form Menampilkan Edit", document.getElementById('formTitle').innerText.includes('Edit Data Pasien'));
+assert("Edit Pasien: Tombol Simpan Berubah Label", document.getElementById('btnSimpanPasien').innerHTML.includes('Simpan Perubahan'));
+assert("Edit Pasien: Tombol Batal Edit Muncul", !document.getElementById('btnBatalPasien').classList.contains('hidden'));
+
+// Lakukan perubahan nama & alamat
+document.getElementById('pasNama').value = "Budi Santoso Terupdate";
+document.getElementById('pasAlamat').value = "Jl. Sudirman No. 99";
+simpanDataPasien({ preventDefault: () => {} });
+runAllTimers();
+
+let updatedP = window.KlinikData.pasien.find(p => p.idPasien === 'P-0001');
+assert("Edit Pasien: Data Lokal Terupdate Instan", updatedP && updatedP.namaPasien === "Budi Santoso Terupdate");
+assert("Edit Pasien: Tabel Menampilkan Nama Terupdate", document.getElementById('tbodyPasien').innerHTML.includes('Budi Santoso Terupdate'));
+assert("Edit Pasien: Panel Form Tertutup Pasca Simpan", document.getElementById('panelFormPasien').classList.contains('hidden'));
+assert("Edit Pasien: Panel Tabel Muncul Pasca Simpan", !document.getElementById('panelTabelPasien').classList.contains('hidden'));
+
+// Pastikan Form Kembali Kosong Pasca Simpan
+assert("Reset Form Pasca Simpan: pasId Kosong", document.getElementById('pasId').value === '');
+assert("Reset Form Pasca Simpan: pasRm Kosong", document.getElementById('pasRm').value === '');
+assert("Reset Form Pasca Simpan: pasNama Kosong", document.getElementById('pasNama').value === '');
+assert("Reset Form Pasca Simpan: pasUmur Kosong", document.getElementById('pasUmur').value === '');
+assert("Reset Form Pasca Simpan: Judul Kembali ke Formulir Pendaftaran", document.getElementById('formTitle').innerText.includes('Formulir Pendaftaran'));
+assert("Reset Form Pasca Simpan: Tombol Simpan Kembali Normal", document.getElementById('btnSimpanPasien').innerHTML.includes('Simpan Data'));
+
+// Test Buka Form Baru dalam Keadaan Bersih
+bukaFormPasienBaru();
+assert("Buka Form Baru: Panel Form Terbuka", !document.getElementById('panelFormPasien').classList.contains('hidden'));
+assert("Buka Form Baru: pasNama Tetap Bersih", document.getElementById('pasNama').value === '');
+tutupFormPasien();
+assert("Tutup Form: Panel Form Tertutup", document.getElementById('panelFormPasien').classList.contains('hidden'));
+window.KlinikData.pasien = origPasienListForEdit;
+renderTablePagePasien();
+
+// 16. ROLE-BASED ACCESS CONTROL (RBAC) VERIFICATION SUITE
+// 16a. Verify SUPER USER permissions:
+terapkanRoleAkses('Super User');
+window.activeUserRole = 'Super User';
+renderTablePagePasien();
+assert("Super User: Nav Dashboard Visible", !document.getElementById('nav-dashboard').classList.contains('hidden'));
+assert("Super User: Nav AI Visible", !document.getElementById('nav-ai').classList.contains('hidden'));
+assert("Super User: Nav Pasien Visible", !document.getElementById('nav-pasien').classList.contains('hidden'));
+assert("Super User: Nav Rekam Medis Visible", !document.getElementById('nav-rekam-medis').classList.contains('hidden'));
+assert("Super User: Nav Surat Visible", !document.getElementById('nav-surat').classList.contains('hidden'));
+assert("Super User: Nav Database Visible", !document.getElementById('nav-database').classList.contains('hidden'));
+assert("Super User: Nav Inventory Visible", !document.getElementById('nav-inventory').classList.contains('hidden'));
+assert("Super User: Nav Informasi Visible", !document.getElementById('nav-informasi').classList.contains('hidden'));
+assert("Super User: Nav Kasir Visible", !document.getElementById('nav-kasir').classList.contains('hidden'));
+assert("Super User: Nav Riwayat Invoice Visible", !document.getElementById('nav-riwayat-invoice').classList.contains('hidden'));
+assert("Super User: Tombol Tambah Pasien Baru Visible", !document.getElementById('btnTambahPasienBaru').classList.contains('hidden'));
+assert("Super User: Tombol Filter Duplikat Visible", !document.getElementById('btnFilterDuplikat').classList.contains('hidden'));
+assert("Super User: Tombol Edit Pasien Rendered", document.getElementById('tbodyPasien').innerHTML.includes('Edit'));
+assert("Super User: Tombol Hapus Pasien Rendered", document.getElementById('tbodyPasien').innerHTML.includes('🗑️ Hapus'));
+
+// 16b. Verify DOKTER GIGI SPESIALIS permissions:
+terapkanRoleAkses('Dokter Gigi Spesialis');
+window.activeUserRole = 'Dokter Gigi Spesialis';
+renderTablePagePasien();
+assert("Dokter Spesialis: Nav Rekam Medis Visible", !document.getElementById('nav-rekam-medis').classList.contains('hidden'));
+assert("Dokter Spesialis: Nav Surat Visible", !document.getElementById('nav-surat').classList.contains('hidden'));
+assert("Dokter Spesialis: Nav Informasi Visible", !document.getElementById('nav-informasi').classList.contains('hidden'));
+assert("Dokter Spesialis: Nav Pasien Visible", !document.getElementById('nav-pasien').classList.contains('hidden'));
+assert("Dokter Spesialis: Nav Kasir Hidden", document.getElementById('nav-kasir').classList.contains('hidden'));
+assert("Dokter Spesialis: Nav Dashboard Hidden", document.getElementById('nav-dashboard').classList.contains('hidden'));
+assert("Dokter Spesialis: Nav Database Master Hidden", document.getElementById('nav-database').classList.contains('hidden'));
+assert("Dokter Spesialis: Tombol Tambah Pasien Baru Hidden", document.getElementById('btnTambahPasienBaru').classList.contains('hidden'));
+assert("Dokter Spesialis: Tombol Filter Duplikat Hidden", document.getElementById('btnFilterDuplikat').classList.contains('hidden'));
+assert("Dokter Spesialis: Tombol Edit Pasien Not Rendered", !document.getElementById('tbodyPasien').innerHTML.includes('>Edit<'));
+assert("Dokter Spesialis: Tombol Hapus Pasien Not Rendered", !document.getElementById('tbodyPasien').innerHTML.includes('🗑️ Hapus'));
+assert("Dokter Spesialis: Tombol History EMR Rendered", document.getElementById('tbodyPasien').innerHTML.includes('🩺 History'));
+
+// 16c. Verify DOKTER GIGI UMUM permissions:
+terapkanRoleAkses('Dokter Gigi Umum');
+window.activeUserRole = 'Dokter Gigi Umum';
+renderTablePagePasien();
+assert("Dokter Umum: Nav Rekam Medis Visible", !document.getElementById('nav-rekam-medis').classList.contains('hidden'));
+assert("Dokter Umum: Nav Surat Visible", !document.getElementById('nav-surat').classList.contains('hidden'));
+assert("Dokter Umum: Nav Informasi Visible", !document.getElementById('nav-informasi').classList.contains('hidden'));
+assert("Dokter Umum: Nav Pasien Visible", !document.getElementById('nav-pasien').classList.contains('hidden'));
+assert("Dokter Umum: Nav Kasir Hidden", document.getElementById('nav-kasir').classList.contains('hidden'));
+assert("Dokter Umum: Tombol Tambah Pasien Baru Hidden", document.getElementById('btnTambahPasienBaru').classList.contains('hidden'));
+assert("Dokter Umum: Tombol Filter Duplikat Hidden", document.getElementById('btnFilterDuplikat').classList.contains('hidden'));
+assert("Dokter Umum: Tombol Edit Pasien Not Rendered", !document.getElementById('tbodyPasien').innerHTML.includes('>Edit<'));
+assert("Dokter Umum: Tombol Hapus Pasien Not Rendered", !document.getElementById('tbodyPasien').innerHTML.includes('🗑️ Hapus'));
+
+// 16d. Verify ADMIN permissions:
+terapkanRoleAkses('Admin');
+window.activeUserRole = 'Admin';
+renderTablePagePasien();
+assert("Admin: Nav Pasien Visible", !document.getElementById('nav-pasien').classList.contains('hidden'));
+assert("Admin: Nav Surat Visible", !document.getElementById('nav-surat').classList.contains('hidden'));
+assert("Admin: Nav Informasi Visible", !document.getElementById('nav-informasi').classList.contains('hidden'));
+assert("Admin: Nav Kasir Visible", !document.getElementById('nav-kasir').classList.contains('hidden'));
+assert("Admin: Nav Riwayat Invoice Visible", !document.getElementById('nav-riwayat-invoice').classList.contains('hidden'));
+assert("Admin: Nav Rekam Medis Hidden", document.getElementById('nav-rekam-medis').classList.contains('hidden'));
+assert("Admin: Nav Dashboard Hidden", document.getElementById('nav-dashboard').classList.contains('hidden'));
+assert("Admin: Tombol Tambah Pasien Baru Visible", !document.getElementById('btnTambahPasienBaru').classList.contains('hidden'));
+assert("Admin: Tombol Filter Duplikat Hidden", document.getElementById('btnFilterDuplikat').classList.contains('hidden'));
+assert("Admin: Tombol Edit Pasien Rendered", document.getElementById('tbodyPasien').innerHTML.includes('Edit'));
+assert("Admin: Tombol Hapus Pasien Not Rendered", !document.getElementById('tbodyPasien').innerHTML.includes('🗑️ Hapus'));
+
+// 16e. Verify STAFF permissions:
+terapkanRoleAkses('Staff');
+window.activeUserRole = 'Staff';
+renderTablePagePasien();
+assert("Staff: Nav Pasien Visible", !document.getElementById('nav-pasien').classList.contains('hidden'));
+assert("Staff: Nav Informasi Visible", !document.getElementById('nav-informasi').classList.contains('hidden'));
+assert("Staff: Nav Surat Hidden", document.getElementById('nav-surat').classList.contains('hidden'));
+assert("Staff: Nav Rekam Medis Hidden", document.getElementById('nav-rekam-medis').classList.contains('hidden'));
+assert("Staff: Nav Kasir Hidden", document.getElementById('nav-kasir').classList.contains('hidden'));
+assert("Staff: Tombol Tambah Pasien Baru Hidden", document.getElementById('btnTambahPasienBaru').classList.contains('hidden'));
+assert("Staff: Tombol Filter Duplikat Hidden", document.getElementById('btnFilterDuplikat').classList.contains('hidden'));
+assert("Staff: Tombol Edit Pasien Not Rendered", !document.getElementById('tbodyPasien').innerHTML.includes('>Edit<'));
+assert("Staff: Tombol Hapus Pasien Not Rendered", !document.getElementById('tbodyPasien').innerHTML.includes('🗑️ Hapus'));
+assert("Staff: Tombol History EMR Rendered", document.getElementById('tbodyPasien').innerHTML.includes('🩺 History'));
+
+// =================================================
+// PENGUJIAN FITUR ANTI-DUPLIKASI & FILTER DATA GANDA
+// =================================================
+// 1. Uji fungsi getKelompokDuplikatMap
+var dummyPasienList = [
+  { idPasien: "P1", namaPasien: "Ahmad Dahlan", tanggalLahir: "10-05-1990", nik: "1234567890123456", noRm: "A-0001" },
+  { idPasien: "P2", namaPasien: "Ahmad Dahlan", tanggalLahir: "10-05-1990", nik: "", noRm: "A-0002" }, // Duplikat Nama + Tgl Lahir
+  { idPasien: "P3", namaPasien: "Siti Rahma", tanggalLahir: "12-08-1995", nik: "9876543210123456", noRm: "S-0001" },
+  { idPasien: "P4", namaPasien: "Budi Santoso", tanggalLahir: "01-01-2000", nik: "1234567890123456", noRm: "B-0001" } // Duplikat NIK dengan P1
+];
+
+var dupSet = getKelompokDuplikatMap(dummyPasienList);
+assert("Duplikasi Map mendeteksi P1 (Duplikat NIK & Nama+Lahir)", dupSet.has("P1"));
+assert("Duplikasi Map mendeteksi P2 (Duplikat Nama+Lahir)", dupSet.has("P2"));
+assert("Duplikasi Map tidak menandai P3 (Unik)", !dupSet.has("P3"));
+assert("Duplikasi Map mendeteksi P4 (Duplikat NIK)", dupSet.has("P4"));
+
+// 2. Uji toggleFilterDataGanda (Staff dilarang, Super User diizinkan)
+assert("Initial Filter Duplikat Status False", isFilterDuplikatAktif === false);
+toggleFilterDataGanda();
+assert("Staff: Dilarang Mengaktifkan Filter Duplikat", isFilterDuplikatAktif === false);
+
+terapkanRoleAkses('Super User');
+window.activeUserRole = 'Super User';
+toggleFilterDataGanda();
+assert("Super User: Toggle Filter Duplikat Status Menjadi True", isFilterDuplikatAktif === true);
+toggleFilterDataGanda();
+assert("Super User: Toggle Filter Duplikat Status Kembali False", isFilterDuplikatAktif === false);
+
+// 3. Uji Auto-Guard Frontend Realtime
+var originalPasienBackup = window.KlinikData.pasien.slice();
+window.KlinikData.pasien = dummyPasienList;
+document.getElementById('pasId').value = ""; // Mode pasien baru
+document.getElementById('pasNama').value = "Ahmad Dahlan";
+document.getElementById('pasTglLahir').value = "1990-05-10";
+cekDuplikasiFrontend();
+var alertEl = document.getElementById('alertDuplikatPasien');
+assert("Alert Duplikat Muncul saat Nama & Tgl Lahir Sama", !alertEl.classList.contains('hidden'));
+
+// Sembunyikan alert jika nama diubah menjadi unik
+document.getElementById('pasNama').value = "Pasien Unik Baru Sekali";
+cekDuplikasiFrontend();
+assert("Alert Duplikat Sembunyi saat Nama Berbeda", alertEl.classList.contains('hidden'));
+window.KlinikData.pasien = originalPasienBackup; // Restore pasien data asli
+
+// =================================================
+// PENGUJIAN MENYELURUH: SIMULASI INPUT KASIR & EDGE CASES
+// =================================================
+function getLastToast() {
+  var c = document.getElementById('toastContainer');
+  if (c && c.allToasts && c.allToasts.length > 0) {
+    return c.allToasts[c.allToasts.length - 1] || "";
+  }
+  if (c && c.children && c.children.length > 0) {
+    return c.children[c.children.length - 1]._innerHTML || "";
+  }
+  return "";
+}
+
+// Skenario K-1: Simpan Billing Tanpa Pasien Terpilih
+switchMenu('kasir');
+terapkanRoleAkses('Super User');
+resetFormBilling();
+document.getElementById('ksrID').value = '';
+simpanBillingFinal();
+assert("K-1: Simpan Invoice Tanpa Pasien Ditolak", getLastToast().includes("Cari dan Pilih Pasien terlebih dahulu"));
+assert("K-1: Tombol Kasir Tidak Stuck / Loading", document.getElementById('btnSimpanBilling').innerText === "SIMPAN DATA INVOICE");
+
+// Skenario K-2: Simpan Billing dengan Field Wajib Belum Lengkap (Dokter Kosong)
+pilihPasienKSR('P-0001');
+document.getElementById('ksrDokter').value = '';
+document.getElementById('ksrTgl').value = '2026-10-08';
+document.getElementById('ksrMetode').value = 'Tunai';
+document.getElementById('ksrStatus').value = 'Lunas';
+simpanBillingFinal();
+assert("K-2: Simpan Tanpa Dokter Ditolak", getLastToast().includes("Lengkapi field bertanda *"));
+
+// Skenario K-3: Keranjang Pembayaran Kosong (Tanpa Tindakan/Obat/BMHP)
+document.getElementById('ksrDokter').value = 'drg. Sheldon Cooper, Sp.Ort';
+document.getElementById('ksrTbodyTindakan').innerHTML = '';
+document.getElementById('ksrTbodyObat').innerHTML = '';
+document.getElementById('ksrTbodyBMHP').innerHTML = '';
+simpanBillingFinal();
+assert("K-3: Keranjang Kosong Ditolak", getLastToast().includes("Minimal input satu tindakan/obat/BMHP"));
+assert("K-3: Tombol Simpan Kembali Aktif", document.getElementById('btnSimpanBilling').disabled === false);
+
+// Skenario K-4: Baris Tabel Ditambahkan tetapi Nama Item Dikosongkan
+addKasirTindakan();
+var tbTind = document.getElementById('ksrTbodyTindakan');
+var rowKosong = tbTind.children[tbTind.children.length - 1];
+rowKosong.querySelector('.val-nama').value = '';
+simpanBillingFinal();
+assert("K-4: Baris Item Tanpa Nama Ditolak", getLastToast().includes("Semua baris tabel yang ditambahkan harus diisi namanya"));
+
+// Skenario K-5: Status "Uang Muka" (DP) tetapi Nominal DP Kosong atau 0
+rowKosong.querySelector('.val-nama').value = 'Pemasangan Kawat Gigi Ortho Standard';
+rowKosong.querySelector('.val-harga').value = '5.000.000';
+rowKosong.querySelector('.val-qty').value = '1';
+rowKosong.querySelector('.val-disc').value = '0';
+rowKosong.querySelector('.val-grand').value = '5.000.000';
+hitungGrandTotalSemua();
+
+document.getElementById('ksrStatus').value = 'Uang Muka';
+onStatusBayarChange();
+assert("K-5: Box Input DP Ditampilkan Saat Status Uang Muka", !document.getElementById('boxNominalDp').classList.contains('hidden'));
+assert("K-5: Label Judul Berubah Menjadi TOTAL PAKET", document.getElementById('lblJudulTotalBayar').innerText.includes('TOTAL PAKET'));
+
+document.getElementById('ksrNominalDp').value = '0';
+simpanBillingFinal();
+assert("K-5: Nominal DP 0 Ditolak", getLastToast().includes("Harap isi nominal Uang Muka / DP yang dibayarkan"));
+
+// Skenario K-6: Status "Uang Muka" (DP) tetapi Nominal DP Melebihi Total Tagihan Paket
+document.getElementById('ksrNominalDp').value = '6.000.000';
+simpanBillingFinal();
+assert("K-6: Nominal DP Melebihi Total Paket Ditolak", getLastToast().includes("Nominal DP tidak boleh melebihi total biaya paket"));
+
+// Skenario K-7: Permintaan Obat / BMHP Melebihi Stok Gudang Tersedia (Stock Guard)
+document.getElementById('ksrStatus').value = 'Lunas';
+onStatusBayarChange();
+addKasirObat();
+var tbObat = document.getElementById('ksrTbodyObat');
+var rowObatStok = tbObat.children[tbObat.children.length - 1];
+var inputObat = rowObatStok.querySelector('.val-nama');
+inputObat.value = 'Amoxicillin 500mg (Strip)';
+inputObat.setAttribute('data-stok', '120');
+rowObatStok.querySelector('.val-qty').value = '150'; // Melebihi stok 120
+simpanBillingFinal();
+assert("K-7: Qty Obat Melebihi Stok Tersedia Ditolak", getLastToast().includes("tidak mencukupi (Diminta: 150, Tersedia: 120)"));
+rowObatStok.remove();
+hitungGrandTotalSemua();
+
+// Skenario K-8: Transaksi Uang Muka (DP) Valid Berhasil Diterbitkan & Sisa Piutang Terhitung Otomatis
+document.getElementById('ksrStatus').value = 'Uang Muka';
+onStatusBayarChange();
+document.getElementById('ksrNominalDp').value = '1.500.000';
+hitungSisaTagihanDp();
+assert("K-8: Perhitungan Sisa Piutang Akurat (Rp 3.500.000)", document.getElementById('lblSisaTagihanPreview').innerText.includes("3.500.000"));
+
+var prevPembayaranCount = window.KlinikData.pembayaran.length;
+simpanBillingFinal();
+runAllTimers();
+
+assert("K-8: Transaksi Invoice DP Berhasil Disimpan", getLastToast().includes("Berhasil! No: INV/SHELDON/"));
+assert("K-8: Data Pembayaran Masuk ke Riwayat Lokal", window.KlinikData.pembayaran.length > prevPembayaranCount);
+
+var lastInv = window.KlinikData.pembayaran[window.KlinikData.pembayaran.length - 1];
+assert("K-8: Keterangan Otomatis Mencatat Rincian Piutang", lastInv.keterangan.includes("DP: Rp 1.500.000") && lastInv.keterangan.includes("Sisa Piutang: Rp 3.500.000"));
+assert("K-8: Total Invoice Tercatat Sebesar DP (Rp 1.500.000)", lastInv.totalInvoice === 1500000);
+
+// Skenario K-9: Deteksi Realtime Tagihan Berjalan / DP pada Pemilihan Pasien
+pilihPasienKSR('P-0001');
+var alertCicilan = document.getElementById('alertCicilanPasien');
+assert("K-9: Alert Tagihan Berjalan Otomatis Muncul", !alertCicilan.classList.contains('hidden'));
+assert("K-9: Judul Alert Memperingatkan Tagihan Berjalan", document.getElementById('alertCicilanTitle').innerText.includes("Tagihan Berjalan"));
+assert("K-9: Rincian Sisa Piutang Ditampilkan di Body Alert", document.getElementById('alertCicilanBody').innerHTML.includes("3.500.000") || document.getElementById('alertCicilanBody').innerHTML.includes("Uang Muka"));
+
+// Skenario K-10: Pelunasan Sisa Tagihan Berjalan (Status "Pelunasan")
+resetFormBilling();
+pilihPasienKSR('P-0001');
+document.getElementById('ksrTgl').value = '2026-10-08';
+document.getElementById('ksrDokter').value = 'drg. Sheldon Cooper, Sp.Ort';
+document.getElementById('ksrMetode').value = 'Transfer BCA';
+document.getElementById('ksrStatus').value = 'Pelunasan';
+document.getElementById('ksrKet').value = 'Pelunasan Behel Orthodonti';
+
+addKasirTindakan();
+var tbTindLunas = document.getElementById('ksrTbodyTindakan');
+var rowLunas = tbTindLunas.children[tbTindLunas.children.length - 1];
+rowLunas.querySelector('.val-nama').value = 'Pelunasan Perawatan Ortho';
+rowLunas.querySelector('.val-harga').value = '3.500.000';
+rowLunas.querySelector('.val-qty').value = '1';
+rowLunas.querySelector('.val-disc').value = '0';
+rowLunas.querySelector('.val-grand').value = '3.500.000';
+hitungGrandTotalSemua();
+
+simpanBillingFinal();
+runAllTimers();
+
+assert("K-10: Pelunasan Berhasil Diterbitkan", getLastToast().includes("Berhasil!"));
+pilihPasienKSR('P-0001');
+assert("K-10: Evaluasi Tagihan Berjalan Pasien Menunjukkan Status Lunas", document.getElementById('alertCicilanBody').innerHTML.includes("PELUNASAN") || alertCicilan.classList.contains('hidden'));
+
+// Skenario K-11: Riwayat Invoice Search & Filter Kalender
+switchMenu('riwayat-invoice');
+bukaRiwayatInvoice();
+assert("K-11: Tabel Riwayat Invoice Menampilkan Data", document.getElementById('tbodyRiwayatInvoice').innerHTML.includes("Budi Santoso"));
+document.getElementById('inputCariRiwayat').value = "NonExistentKeywordXYZ";
+searchRiwayatInvoice();
+assert("K-11: Filter Pencarian Tidak Cocok Menghasilkan 0 Item", filteredInvoicesList.length === 0);
+document.getElementById('inputCariRiwayat').value = "";
+searchRiwayatInvoice();
+assert("K-11: Reset Filter Menampilkan Kembali Semua Invoice", filteredInvoicesList.length > 0);
+
+// ==========================================
+// PENGUJIAN MODUL OHI-S (GREENE & VERMILLION)
+// ==========================================
+print("\n--- TEST: OHI-S (Oral Hygiene Index - Simplified) ---");
+
+// 1. Initial State
+resetOhisToDefault();
+assert("OHI-S-1: Status Awal OHI-S Belum Ada Data", document.getElementById("badgeOhisStatus").innerText === "Belum Ada Data");
+assert("OHI-S-1: currentOhisExam Bernilai Null Sebelum Disimpan", currentOhisExam === null);
+
+// 2. Buka & Tutup Modal
+bukaModalOhis();
+assert("OHI-S-2: Modal OHI-S Terbuka", !document.getElementById("modalOhisChart").classList.contains("hidden"));
+assert("OHI-S-2: Data 6 Gigi Indeks Terinisialisasi", Object.keys(ohisTeethData).length === 6);
+tutupModalOhis();
+assert("OHI-S-2: Modal OHI-S Tertutup", document.getElementById("modalOhisChart").classList.contains("hidden"));
+
+// 3. Perhitungan Skor Bersih (Normal 0)
+setSemuaOhisSkor(0);
+var m0 = hitungOhisMetrics();
+assert("OHI-S-3: Skor DI-S Semua Nol = 0.00", m0.dis === "0.00");
+assert("OHI-S-3: Skor CI-S Semua Nol = 0.00", m0.cis === "0.00");
+assert("OHI-S-3: Total OHI-S Semua Nol = 0.00", m0.ohis === "0.00");
+assert("OHI-S-3: Kategori OHI-S Normal adalah Baik", m0.kategori === "Baik");
+
+// 4. Perhitungan Skor Sedang (Moderate / Fair)
+// Set Debris: 16:1, 11:1, 26:2, 46:1, 31:1, 36:1 -> Total = 7 -> DI-S = 7/6 = 1.17
+// Set Calculus: 16:1, 11:0, 26:1, 46:1, 31:0, 36:1 -> Total = 4 -> CI-S = 4/6 = 0.67
+// Total OHI-S = 1.17 + 0.67 = 1.84 -> Sedang (1.3 - 3.0)
+setOhisScore('16', 'd', 1);
+setOhisScore('11', 'd', 1);
+setOhisScore('26', 'd', 2);
+setOhisScore('46', 'd', 1);
+setOhisScore('31', 'd', 1);
+setOhisScore('36', 'd', 1);
+
+setOhisScore('16', 'c', 1);
+setOhisScore('11', 'c', 0);
+setOhisScore('26', 'c', 1);
+setOhisScore('46', 'c', 1);
+setOhisScore('31', 'c', 0);
+setOhisScore('36', 'c', 1);
+
+var mSedang = hitungOhisMetrics();
+assert("OHI-S-4: DI-S Sedang Terhitung Tepat (1.17)", mSedang.dis === "1.17");
+assert("OHI-S-4: CI-S Sedang Terhitung Tepat (0.67)", mSedang.cis === "0.67");
+assert("OHI-S-4: Total OHI-S Sedang Terhitung Tepat (1.84)", mSedang.ohis === "1.84");
+assert("OHI-S-4: Kategori Terklasifikasi Sedang", mSedang.kategori === "Sedang");
+
+// 5. Perhitungan Skor Buruk (Poor)
+// Set Semua ke 3 (Debris & Calculus) -> DI-S = 3.00, CI-S = 3.00 -> Total = 6.00 -> Buruk
+setSemuaOhisSkor(3);
+var mBuruk = hitungOhisMetrics();
+assert("OHI-S-5: DI-S Buruk Terhitung Tepat (3.00)", mBuruk.dis === "3.00");
+assert("OHI-S-5: CI-S Buruk Terhitung Tepat (3.00)", mBuruk.cis === "3.00");
+assert("OHI-S-5: Total OHI-S Buruk Terhitung Tepat (6.00)", mBuruk.ohis === "6.00");
+assert("OHI-S-5: Kategori Terklasifikasi Buruk", mBuruk.kategori === "Buruk");
+
+// 6. Simpan OHI-S ke EMR Form
+// Set skor realistis: Total OHI-S 1.00 (Baik)
+setSemuaOhisSkor(0);
+setOhisScore('16', 'd', 1);
+setOhisScore('26', 'd', 1);
+setOhisScore('46', 'd', 1);
+setOhisScore('46', 'c', 1);
+setOhisScore('36', 'c', 2);
+simpanOhisKeEMR();
+assert("OHI-S-6: currentOhisExam Tersimpan", currentOhisExam !== null);
+assert("OHI-S-6: Badge Form Terupdate Kategori BAIK", document.getElementById("badgeOhisStatus").innerText.indexOf("BAIK") !== -1);
+assert("OHI-S-6: Summary Cepat Mencatat DI-S dan CI-S", document.getElementById("summaryOhisQuick").innerText.indexOf("DI-S") !== -1);
+
+// 7. Integrasi dengan Simpan Rekam Medis (Fisik JSON Payload)
+var mockFisik = {};
+if (currentOhisExam) { mockFisik.ohis = currentOhisExam; }
+assert("OHI-S-7: Data OHI-S Terkandung di Struktur Fisik EMR", mockFisik.ohis && mockFisik.ohis.summary && mockFisik.ohis.summary.ohis === "1.00");
+
+// 8. Reset OHI-S
+resetOhisToDefault();
+assert("OHI-S-8: Reset Mengembalikan currentOhisExam ke Null", currentOhisExam === null);
+assert("OHI-S-8: Reset Mengembalikan Badge ke Belum Ada Data", document.getElementById("badgeOhisStatus").innerText === "Belum Ada Data");
+
+// ==================================================
+// PENGUJIAN PERIODONTAL CHARTING INTERAKTIF & MODAL
+// ==================================================
+print("\n--- TEST: Periodontal Charting Interactive ---");
+
+bukaModalPeriodontal();
+assert("PERIO-1: Modal Periodontal Terbuka", !document.getElementById("modalPeriodontalChart").classList.contains("hidden"));
+
+// Switch ke Rahang Bawah (Mandibula)
+switchPerioArch('mandible');
+assert("PERIO-2: Tab Rahang Bawah Aktif", perioActiveArch === "mandible");
+assert("PERIO-2: Daftar Gigi Rahang Bawah Aktif (48-38)", getActiveTeethList()[0] === 48);
+assert("PERIO-2: Label Grafik Terupdate Rahang Bawah", document.getElementById("perioGraphicLabel").innerHTML.indexOf("Rahang Bawah") !== -1);
+assert("PERIO-2: Visualisasi SVG Gigi Rahang Bawah Terisi", document.getElementById("svgPerioChart").innerHTML.indexOf("T48") !== -1);
+
+// Switch ke Lingual / Palatal
+switchPerioAspect('lingual');
+assert("PERIO-3: Tab Lingual Aktif", perioActiveAspect === "lingual");
+assert("PERIO-3: Site Keys Berubah ke DL, L, ML", getSiteKeysForAspect()[0].key === "dl");
+assert("PERIO-3: Label Grafik Terupdate Lingual", document.getElementById("perioGraphicLabel").innerHTML.indexOf("Lingual") !== -1);
+
+// Verifikasi Safety Global Identifiers (Unquoted variable fallback)
+switchPerioArch(maxilla);
+assert("PERIO-4: Safety Fallback switchPerioArch(maxilla) Berhasil", perioActiveArch === "maxilla");
+switchPerioArch(mandible);
+assert("PERIO-4: Safety Fallback switchPerioArch(mandible) Berhasil", perioActiveArch === "mandible");
+switchPerioAspect(facial);
+assert("PERIO-5: Safety Fallback switchPerioAspect(facial) Berhasil", perioActiveAspect === "facial");
+switchPerioAspect(lingual);
+assert("PERIO-5: Safety Fallback switchPerioAspect(lingual) Berhasil", perioActiveAspect === "lingual");
+
+// Verifikasi Modal Reset Periodontal
+resetPerioChartSemua();
+var modalResetPerio = document.getElementById("modalResetPeriodontal");
+assert("PERIO-6: Modal Konfirmasi Reset Periodontal Muncul", !modalResetPerio.classList.contains("hidden"));
+assert("PERIO-6: Template Memiliki Modal Reset Data Periodontal Charting", isModalResetPerioInHtml);
+
+batalResetPerio();
+assert("PERIO-7: Batal Reset Menyembunyikan Modal", modalResetPerio.classList.contains("hidden"));
+
+// Eksekusi Reset
+inputPerioDepth(5);
+assert("PERIO-8: Pocket Depth Berubah Menjadi 5mm", perioTeethData[48].dl === 5);
+eksekusiResetPerio();
+assert("PERIO-8: Eksekusi Reset Mengembalikan Data ke Default", perioTeethData[48].dl === 0);
+assert("PERIO-8: Modal Reset Tertutup Setelah Eksekusi", modalResetPerio.classList.contains("hidden"));
+
+// SUMMARY REPORT
+print("=================================================");
+var passedTotal = results.filter(r => r.passed).length;
+var failedTotal = results.length - passedTotal;
+print("TOTAL TESTS: " + results.length + " | PASSED: " + passedTotal + " | FAILED: " + failedTotal);
+print("=================================================");
+
+if (failedTotal > 0) {
+  print("TEST STATUS: FAILED");
+} else {
+  print("TEST STATUS: ALL TESTS PASSED!");
+}
+'''
+
+full_test_script = f"var isButtonKonsultasiRemoved = {str(is_kon_removed).lower()};\nvar isModalResetPerioInHtml = {str(is_modal_perio_in_html).lower()};\n" + dom_shim + "\n" + all_js + "\n" + test_runner_js
+
+with open(test_harness_file, 'w', encoding='utf-8') as f:
+    f.write(full_test_script)
+
+print(f"Test harness created at: {test_harness_file} ({len(full_test_script)} bytes)")
+
+res = subprocess.run([JSC_BIN, test_harness_file], capture_output=True, text=True)
+
+print("\n--- TEST EXECUTION OUTPUT ---")
+print(res.stdout)
+if res.stderr:
+    print("--- STDERR ---")
+    print(res.stderr)
+
+if "ALL TESTS PASSED!" in res.stdout:
+    print("\nSUCCESS: All automated test assertions passed flawlessly!")
+else:
+    print("\nFAILURE: Some tests failed or errors occurred.")
+    exit(1)

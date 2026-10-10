@@ -1,0 +1,5 @@
+Grup_Role,Cocok_Jika_Role,Dashboard,AI_Insights,Pasien,Rekam_Medis,Surat,Database_Master,Kasir,Riwayat_Invoice,Tulis_EMR,Tulis_Kasir,Restock_Gudang
+SUPER_USER,Super User / Owner,Ya,Ya,Ya,Ya,Ya,Ya,Ya,Ya,Ya,Ya,Ya
+DOKTER,Mengandung kata 'dokter',-,-,Ya,Ya,Ya,-,-,-,Ya,-,-
+ADMIN_KASIR,Mengandung 'admin' / 'perawat umum' / 'kasir' / 'staff',-,-,Ya,-,Ya,Ya,Ya,Ya,-,Ya,Admin saja
+DEFAULT,Role lainnya,-,-,Ya,-,-,-,-,-,-,-,-

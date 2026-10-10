@@ -1,0 +1,7 @@
+Nama_Pekerja,Username,Kategori_Role,Password,Status,No_Registrasi,No_HP,Persen_JM_Dokter
+Administrator Sistem,admin,Super User,admin123,Aktif,-,08123456789,-
+drg. Sheldon Cooper, Sp.Ort,sheldon,Dokter Gigi Spesialis,1234,Aktif,503/SIP-DRG/001/2024,081234567890,50%
+drg. Leonard Hofstadter,leonard,Dokter Gigi Umum,1111,Aktif,503/SIP-DRG/002/2024,081234567891,45%
+Penny Teller,penny,Kasir,2222,Aktif,-,081234567892,-
+Bernadette Rostenkowski,bernadette,Perawat Gigi,3333,Aktif,503/STR-PRW/003/2024,081234567893,-
+Howard Wolowitz,howard,Admin,4444,Aktif,-,081234567894,-

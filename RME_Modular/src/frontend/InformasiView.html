@@ -1,0 +1,143 @@
+<!-- MODUL INFORMASI (TINDAKAN, OBAT, BMHP) -->
+<div class="space-y-6">
+  <!-- TAB HEADER INFORMASI -->
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl font-bold shadow-sm">
+        ℹ️
+      </div>
+      <div>
+        <h2 class="text-base font-black text-slate-800">Pusat Informasi & Tarif Klinik</h2>
+        <p class="text-xs text-slate-500 font-medium">Katalog referensi cepat Tindakan Medis, Sediaan Obat, dan BMHP / Alkes</p>
+      </div>
+    </div>
+    
+    <!-- SUB-NAV TAB BUTTONS -->
+    <div class="flex items-center bg-slate-100 p-1 rounded-xl self-start md:self-auto gap-1">
+      <button onclick="changeInfoTab('tindakan')" id="tabInfoTindakan" class="px-4 py-2 rounded-lg text-xs font-bold transition-all bg-white text-indigo-700 shadow-sm">
+        🩺 Tindakan Medis
+      </button>
+      <button onclick="changeInfoTab('obat')" id="tabInfoObat" class="px-4 py-2 rounded-lg text-xs font-bold transition-all text-slate-600 hover:text-slate-900">
+        💊 Obat & Kandungan
+      </button>
+      <button onclick="changeInfoTab('bmhp')" id="tabInfoBmhp" class="px-4 py-2 rounded-lg text-xs font-bold transition-all text-slate-600 hover:text-slate-900">
+        💉 BMHP / Alkes
+      </button>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- 1. PANEL INFORMASI TINDAKAN -->
+  <!-- ============================================================== -->
+  <div id="panelInfoTindakan" class="space-y-4">
+    <!-- SEARCH & FILTER ROW -->
+    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+      <div class="flex-1 relative">
+        <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 text-sm">🔍</span>
+        <input type="text" id="cariInfoTindakan" oninput="renderInfoTindakan()" placeholder="Cari Nama Tindakan Medis..." class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-indigo-500 transition-all">
+      </div>
+      <div class="w-full md:w-72 flex items-center gap-2">
+        <label class="text-[11px] font-bold text-slate-500 uppercase whitespace-nowrap">Kategori:</label>
+        <select id="filterInfoKategoriTindakan" onchange="renderInfoTindakan()" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
+          <option value="">Semua Kategori</option>
+        </select>
+      </div>
+      <div class="text-right">
+        <span id="badgeCountInfoTindakan" class="px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-xl font-black text-xs border border-indigo-100">0 Tindakan</span>
+      </div>
+    </div>
+
+    <!-- TABEL TINDAKAN -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+      <div class="overflow-x-auto max-h-[60vh]">
+        <table class="w-full text-left whitespace-nowrap">
+          <thead class="bg-slate-50 text-[10px] uppercase font-bold text-slate-500 border-b border-slate-200 sticky top-0 z-10">
+            <tr>
+              <th class="p-3.5 w-16 text-center">No</th>
+              <th class="p-3.5">Nama Tindakan</th>
+              <th class="p-3.5">Kategori</th>
+              <th class="p-3.5 text-right">Harga / Tarif (Rp)</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyInfoTindakan" class="divide-y divide-slate-100 text-xs">
+            <tr><td colspan="4" class="text-center py-10 text-slate-400 font-bold">Memuat data tindakan...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- 2. PANEL INFORMASI OBAT -->
+  <!-- ============================================================== -->
+  <div id="panelInfoObat" class="hidden space-y-4">
+    <!-- SEARCH ROW -->
+    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+      <div class="flex-1 relative">
+        <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 text-sm">🔍</span>
+        <input type="text" id="cariInfoObat" oninput="renderInfoObat()" placeholder="Cari berdasarkan Nama Obat atau Kandungan Obat..." class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-indigo-500 transition-all">
+      </div>
+      <div class="text-right">
+        <span id="badgeCountInfoObat" class="px-3 py-1.5 bg-amber-50 text-amber-800 rounded-xl font-black text-xs border border-amber-200">0 Item Obat</span>
+      </div>
+    </div>
+
+    <!-- TABEL OBAT -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+      <div class="overflow-x-auto max-h-[60vh]">
+        <table class="w-full text-left whitespace-nowrap">
+          <thead class="bg-slate-50 text-[10px] uppercase font-bold text-slate-500 border-b border-slate-200 sticky top-0 z-10">
+            <tr>
+              <th class="p-3.5 w-16 text-center">No</th>
+              <th class="p-3.5">Nama Obat</th>
+              <th class="p-3.5">Kandungan / Komposisi</th>
+              <th class="p-3.5 text-center">Kemasan Beli</th>
+              <th class="p-3.5 text-right">Harga Jual (Rp)</th>
+              <th class="p-3.5 text-center">Stock Sisa</th>
+              <th class="p-3.5 text-center">Status</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyInfoObat" class="divide-y divide-slate-100 text-xs">
+            <tr><td colspan="7" class="text-center py-10 text-slate-400 font-bold">Memuat data obat...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- 3. PANEL INFORMASI BMHP -->
+  <!-- ============================================================== -->
+  <div id="panelInfoBmhp" class="hidden space-y-4">
+    <!-- SEARCH ROW -->
+    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+      <div class="flex-1 relative">
+        <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 text-sm">🔍</span>
+        <input type="text" id="cariInfoBmhp" oninput="renderInfoBmhp()" placeholder="Cari berdasarkan Nama BMHP / Alkes..." class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-indigo-500 transition-all">
+      </div>
+      <div class="text-right">
+        <span id="badgeCountInfoBmhp" class="px-3 py-1.5 bg-sky-50 text-sky-800 rounded-xl font-black text-xs border border-sky-200">0 Item BMHP</span>
+      </div>
+    </div>
+
+    <!-- TABEL BMHP -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+      <div class="overflow-x-auto max-h-[60vh]">
+        <table class="w-full text-left whitespace-nowrap">
+          <thead class="bg-slate-50 text-[10px] uppercase font-bold text-slate-500 border-b border-slate-200 sticky top-0 z-10">
+            <tr>
+              <th class="p-3.5 w-16 text-center">No</th>
+              <th class="p-3.5">Nama BMHP</th>
+              <th class="p-3.5 text-right">Harga Jual (Rp)</th>
+              <th class="p-3.5 text-center">Stock Sisa</th>
+              <th class="p-3.5 text-center">Status</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyInfoBmhp" class="divide-y divide-slate-100 text-xs">
+            <tr><td colspan="5" class="text-center py-10 text-slate-400 font-bold">Memuat data BMHP...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

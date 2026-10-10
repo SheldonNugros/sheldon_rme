@@ -1,0 +1,6 @@
+ID_Aturan,Role,Nama_Pekerja,Tipe_Kompensasi,Tarif_Shift_1,Tarif_Shift_2,Gaji_Pokok_Bulanan,Keterangan
+TARIF-001,Dokter Gigi Spesialis,"drg. Sheldon Cooper, Sp.Ort",Kombinasi Shift & Tindakan,150000,200000,0,"Shift 1 Rp 150rb, Shift 2 Rp 200rb + JM Tindakan (50%/55%)"
+TARIF-002,Dokter Gigi Umum,"drg. Leonard Hofstadter",Kombinasi Shift & Tindakan,100000,120000,0,"Shift 1 Rp 100rb, Shift 2 Rp 120rb + JM Tindakan"
+TARIF-003,Perawat Gigi,Bernadette Rostenkowski,Uang Harian Shift,50000,60000,0,"Shift 1 Rp 50rb, Shift 2 Rp 60rb + Fee Tindakan"
+TARIF-004,Admin / Kasir,Penny Teller,Gaji Bulanan Tetap,0,0,2500000,"Gaji Tetap Rp 2.500.000/bulan"
+TARIF-005,Admin / Kasir,Howard Wolowitz,Gaji Bulanan Tetap,0,0,2500000,"Gaji Tetap Rp 2.500.000/bulan"

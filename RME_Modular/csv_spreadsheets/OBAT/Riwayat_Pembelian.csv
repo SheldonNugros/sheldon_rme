@@ -1,0 +1,6 @@
+Tanggal,No_Faktur,ID_Obat,Nama_Obat,Harga,Tanggal_Kadaluarsa,Jumlah_Beli,Total_Beli,Supplier,Petugas,Waktu_Sistem
+01-10-2026,INV-KF-001,OBT-0001,Amoxicillin 500 mg,80000,31-12-2027,5,500,PT Kimia Farma,Super User,01-10-2026 09:00:00
+01-10-2026,INV-KF-002,OBT-0002,Asam Mefenamat 500 mg,50000,31-12-2027,5,500,PT Kimia Farma,Super User,01-10-2026 09:00:00
+01-10-2026,INV-KF-003,OBT-0003,Paracetamol 500 mg,30000,31-12-2027,6,600,PT Kimia Farma,Super User,01-10-2026 09:00:00
+01-10-2026,INV-KF-004,OBT-0004,Metronidazole 500 mg,60000,31-12-2027,3,300,PT Kimia Farma,Super User,01-10-2026 09:00:00
+01-10-2026,INV-KF-005,OBT-0005,Ibuprofen 400 mg,45000,31-12-2027,4,400,PT Kimia Farma,Super User,01-10-2026 09:00:00

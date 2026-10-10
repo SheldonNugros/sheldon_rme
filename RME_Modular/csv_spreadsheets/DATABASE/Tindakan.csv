@@ -1,0 +1,12 @@
+Kode_Tindakan,Nama_Tindakan,Kategori,Tarif,Labor,Persen_JM_Default
+UMM-0001,Konsultasi Dokter Gigi,Umum,50000,Tidak,
+UMM-0002,Foto Rontgen Periapikal Digital,Umum,100000,Tidak,15%
+DGU-0001,Penambalan Komposit Light-Cure,Dokter Gigi Umum,250000,Tidak,
+DGU-0002,Scaling Rahang Atas & Bawah,Dokter Gigi Umum,300000,Tidak,
+DGU-0003,Pencabutan Gigi Permanen Ringan,Dokter Gigi Umum,200000,Tidak,
+DGS-0001,Perawatan Saluran Akar (PSA) Molar,Dokter Gigi Spesialis,1500000,Tidak,
+DGS-0002,Odontektomi Gigi Impaksi M3,Dokter Gigi Spesialis,2500000,Tidak,
+DGS-0003,Pemasangan Behel Standar (Include Scaling),Dokter Gigi Spesialis,5000000,Tidak,
+LAB-0001,Pemasangan Mahkota PFM (Crown),Dokter Gigi Spesialis,1500000,Ya,
+LAB-0002,Gigi Tiruan Sebagian Lepasan (Valplast),Dokter Gigi Spesialis,1800000,Ya,
+LAB-0003,Inlay / Onlay Komposit Laboratorium,Dokter Gigi Umum,650000,Ya,

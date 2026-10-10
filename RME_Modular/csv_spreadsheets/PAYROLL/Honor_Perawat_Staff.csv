@@ -1,0 +1,4 @@
+ID_Payroll_Staff,Periode_Bulan,ID_Staff,Nama_Staff,Role,Gaji_Pokok_Bulanan,Hadir_Shift_1,Hadir_Shift_2,Total_Uang_Harian_Shift,Total_Fee_Tindakan,Uang_Makan_Transport,Lembur,Potongan_Kasbon,Total_Diterima_THP,Bank_Tujuan,No_Rekening,Status_Transfer,Tanggal_Transfer,Catatan,Waktu_Sistem
+PAY-STF-202610-001,Oktober 2026,STF-004,Bernadette Rostenkowski,Perawat Gigi,0,14,12,1420000,450000,500000,150000,0,2520000,BSI,7109281923,Draft,-,"Perawat: 14x Shift 1 (50rb) + 12x Shift 2 (60rb) + Fee Tindakan",10-10-2026 10:00:00
+PAY-STF-202610-002,Oktober 2026,STF-003,Penny Teller,Admin / Kasir,2500000,0,0,0,0,500000,100000,0,3100000,BCA,8271029381,Draft,-,"Admin: Gaji Pokok Bulanan Tetap 2.5jt + Makan/Transport 500rb",10-10-2026 10:00:00
+PAY-STF-202610-003,Oktober 2026,STF-005,Howard Wolowitz,Admin / Kasir,2500000,0,0,0,0,500000,0,0,3000000,Mandiri,1310091827361,Draft,-,"Admin: Gaji Pokok Bulanan Tetap 2.5jt + Makan/Transport 500rb",10-10-2026 10:00:00

@@ -1,0 +1,372 @@
+<div class="space-y-6 text-xs relative text-slate-800">
+ <!-- HEADER MODUL -->
+ <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-6 rounded-2xl shadow-sm border border-slate-200 gap-4">
+   <div>
+     <h2 class="text-lg font-black text-slate-900 flex items-center gap-2">
+       <span class="text-2xl">🗄️</span> Database Master
+     </h2>
+     <p class="text-slate-500 mt-1 text-xs">Pusat pengaturan data Tindakan, Obat, BMHP, dan Pencadangan Sistem.</p>
+   </div>
+   <div class="flex items-center gap-2.5 flex-wrap">
+     <button id="btnSinkronSheet" type="button" onclick="triggerSinkronSemuaSheet()" class="px-3.5 py-2.5 bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 font-bold rounded-xl text-xs transition-all flex items-center gap-1.5" title="Otomatis buat & perbarui seluruh sheet yang kurang pada database spreadsheet">
+       <span>🔄</span> Sinkronkan Sheet
+     </button>
+     <button id="btnSetupPayroll" type="button" onclick="triggerSetupPayroll()" class="px-3.5 py-2.5 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 font-bold rounded-xl text-xs transition-all flex items-center gap-1.5" title="Otomatis buat & sinkronkan Spreadsheet Payroll & Honor Dokter">
+       <span>💼</span> Setup Payroll Dokter
+     </button>
+     <button id="btnBackupSekarang" type="button" onclick="triggerManualBackup()" class="px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl text-xs shadow-md shadow-blue-500/20 transition-all flex items-center gap-2">
+       <span>💾</span> Backup Sekarang
+     </button>
+     <button id="btnPasangTriggerBackup" type="button" onclick="aktifkanAutoBackupTrigger()" class="px-3.5 py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 font-bold rounded-xl text-xs transition-all flex items-center gap-1.5" title="Aktifkan Jadwal Auto-Backup 02.00 Dini Hari">
+       <span>⏰</span> Auto-Backup (02.00 WIB)
+     </button>
+     <button id="btnPasangTriggerArsip" type="button" onclick="aktifkanArsipTahunanTrigger()" class="px-3.5 py-2.5 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 font-bold rounded-xl text-xs transition-all flex items-center gap-1.5" title="Aktifkan Jadwal Arsip Tahunan 1 Januari Pukul 01.00 WIB">
+       <span>📦</span> Auto-Arsip (1 Jan)
+     </button>
+   </div>
+ </div>
+
+
+ <!-- TAB NAVIGASI -->
+ <div class="flex gap-3 bg-white p-2 rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
+   <button onclick="changeDBMenu('tindakan')" id="btnDbTindakan" class="px-5 py-2.5 bg-indigo-50 text-indigo-700 font-bold rounded-lg transition-all flex-shrink-0">DB Tindakan</button>
+   <button onclick="changeDBMenu('obat')" id="btnDbObat" class="px-5 py-2.5 bg-white text-slate-600 font-bold rounded-lg hover:bg-slate-50 transition-all flex-shrink-0">DB Obat</button>
+   <button onclick="changeDBMenu('bmhp')" id="btnDbBmhp" class="px-5 py-2.5 bg-white text-slate-600 font-bold rounded-lg hover:bg-slate-50 transition-all flex-shrink-0">DB BMHP</button>
+ </div>
+
+
+ <!-- PANEL DB TINDAKAN -->
+ <div id="panelDbTindakan" class="space-y-6">
+  
+   <!-- FORM TAMBAH / EDIT TINDAKAN -->
+   <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+     <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
+       <h3 id="judulFormTindakan" class="text-sm font-black text-slate-800">Tambah Tindakan Baru</h3>
+       <button type="button" id="btnBatalEditTindakan" onclick="batalEditDbTindakan()" class="hidden px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-xs font-bold transition-all">✖ Batal Edit</button>
+     </div>
+     <form id="formDbTindakan" onsubmit="simpanDbTindakan(event)" class="space-y-4">
+       <input type="hidden" id="dbTindakanMode" value="tambah">
+      
+       <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+         <div>
+           <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase">Kategori *</label>
+           <select id="dbKategori" required onchange="generateKodeTindakan()" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
+             <option value="" disabled selected>Memuat Kategori...</option>
+           </select>
+         </div>
+         <div>
+           <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase">Kode Tindakan</label>
+           <input type="text" id="dbKodeTindakan" readonly placeholder="Auto..." class="w-full px-3 py-2.5 bg-slate-200 border border-slate-300 rounded-xl text-xs font-bold text-slate-600 outline-none text-center">
+         </div>
+         <div class="md:col-span-2">
+           <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase">Nama Tindakan *</label>
+           <input type="text" id="dbNamaTindakan" required oninput="autoTitleCaseDB(this)" placeholder="Ketik nama tindakan..." class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500">
+         </div>
+       </div>
+
+
+       <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+         <div class="md:col-span-2">
+           <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase">Tarif / Harga (Rp) *</label>
+           <div class="relative">
+             <span class="absolute inset-y-0 left-0 flex items-center pl-4 font-bold text-slate-400">Rp</span>
+             <input type="text" id="dbTarif" required oninput="formatRupiahInput(this)" placeholder="1.000.000" class="w-full pl-10 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500">
+           </div>
+         </div>
+         <div>
+           <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase">Laboratorium (Lab) *</label>
+           <select id="dbPerluLab" required class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
+             <option value="" disabled selected>-- Pilih Labor --</option>
+             <option value="Tidak">Tidak (Tanpa Lab)</option>
+             <option value="Ya">Ya (Perlu Lab Gigi)</option>
+           </select>
+         </div>
+         <div class="flex items-end justify-end">
+           <button type="submit" id="btnSimpanTindakan" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-black rounded-xl shadow-md shadow-indigo-500/30 transition-all text-xs">SIMPAN TINDAKAN</button>
+         </div>
+       </div>
+
+
+     </form>
+   </div>
+
+
+   <!-- TABEL DAFTAR TINDAKAN -->
+   <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 border-b border-slate-100 pb-3 gap-3">
+         <h3 class="font-black text-slate-800 text-sm">Daftar Tindakan Medis</h3>
+         <div class="w-full md:w-64 relative">
+           <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">🔍</span>
+           <input type="text" id="cariDbTindakan" oninput="renderTabelTindakan()" placeholder="Cari Tindakan / Kode..." class="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs outline-none focus:ring-2 focus:ring-indigo-500">
+         </div>
+      </div>
+      <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-sm max-h-[50vh]">
+        <table class="w-full text-left whitespace-nowrap">
+           <thead class="bg-slate-50 text-[10px] uppercase font-bold text-slate-500 border-b border-slate-200 sticky top-0 z-10">
+             <tr>
+               <th class="p-3">Kode</th>
+               <th class="p-3">Nama Tindakan</th>
+               <th class="p-3">Kategori (Role)</th>
+               <th class="p-3 text-right">Tarif (Rp)</th>
+               <th class="p-3 text-center">Labor</th>
+               <th class="p-3 text-center">Aksi</th>
+             </tr>
+           </thead>
+           <tbody id="tbodyDbTindakan" class="divide-y divide-slate-100 text-xs">
+              <tr><td colspan="6" class="text-center py-6 text-slate-400 font-bold">Memuat data tindakan...</td></tr>
+           </tbody>
+        </table>
+      </div>
+   </div>
+ </div>
+
+
+   <!-- PANEL DB OBAT -->
+  <div id="panelDbObat" class="hidden space-y-6">
+    <!-- FORM TAMBAH OBAT -->
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+      <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
+        <h3 class="text-sm font-black text-slate-800 flex items-center gap-2">
+          <span>💊</span> Tambah Master Obat Baru
+        </h3>
+        <span class="text-[11px] font-bold text-slate-400 bg-slate-100 px-2.5 py-1 rounded-lg">Sheet: Master_Obat</span>
+      </div>
+      <form id="formDbObat" onsubmit="simpanDbObat(event)" class="space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase">Kode Obat</label>
+            <input type="text" id="dbKodeObat" readonly placeholder="Auto..." class="w-full px-3 py-2.5 bg-slate-100 border border-slate-300 rounded-xl text-xs font-mono font-bold text-indigo-700 outline-none text-center">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase">Nama Obat / Sediaan *</label>
+            <input type="text" id="dbNamaObat" required oninput="autoTitleCaseDB(this)" placeholder="Contoh: Panadol Extra" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase">Kandungan / Komposisi</label>
+            <input type="text" id="dbKandunganObat" oninput="autoTitleCaseDB(this)" placeholder="Contoh: Paracetamol 500mg, Kafein 65mg" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase">Satuan Jual / Pemakaian *</label>
+            <input type="text" id="dbSatuanObat" required list="listSatuanObat" placeholder="Tablet / Strip / Botol" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500">
+            <datalist id="listSatuanObat">
+              <option value="Tablet"><option value="Kapsul"><option value="Kaplet"><option value="Strip">
+              <option value="Botol"><option value="Ampul"><option value="Vial"><option value="Tube">
+              <option value="Sachet"><option value="Box"><option value="Pcs">
+            </datalist>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase">Satuan Beli *</label>
+            <input type="text" id="dbSatuanBeliObat" list="listSatuanBeli" placeholder="Box / Strip / Botol" value="Box" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500">
+            <datalist id="listSatuanBeli">
+              <option value="Box"><option value="Strip"><option value="Botol"><option value="Tube"><option value="Flacon"><option value="Pcs">
+            </datalist>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase">Isi Per Satuan Beli (Pcs) *</label>
+            <input type="number" id="dbIsiPerSatuanObat" value="100" min="1" oninput="hitungHppPcsOtomatis();" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500 text-center">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase">Harga Beli Satuan (Rp) *</label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 flex items-center pl-3 font-bold text-slate-400 text-xs">Rp</span>
+              <input type="text" id="dbHargaBeliSatuanObat" oninput="formatRupiahInput(this); hitungHppPcsOtomatis();" placeholder="80.000" class="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500">
+            </div>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase">HPP Pcs (Rp) *</label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 flex items-center pl-3 font-bold text-slate-400 text-xs">Rp</span>
+              <input type="text" id="dbHppObat" required oninput="formatRupiahInput(this); hitungMarginObat();" placeholder="800" class="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500">
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase">Harga Jual Pcs (Rp) *</label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 flex items-center pl-3 font-bold text-slate-400 text-xs">Rp</span>
+              <input type="text" id="dbHargaJualObat" required oninput="formatRupiahInput(this); hitungMarginObat();" placeholder="2.000" class="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500">
+            </div>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase">Margin Keuntungan</label>
+            <input type="text" id="dbMarginObat" readonly placeholder="0%" class="w-full px-3 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-xs font-black text-emerald-600 outline-none text-center">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase">Stok Awal Masuk (Pcs)</label>
+            <input type="number" id="dbStokAwalObat" value="0" min="0" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500 text-center">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase">Stok Minimum (Alert Pcs)</label>
+            <input type="number" id="dbStokMinObat" value="10" min="0" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500 text-center">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase">Expired Date</label>
+            <input type="date" id="dbExpiredObat" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+          <div class="md:col-span-2">
+            <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase">Supplier / PBF</label>
+            <input type="text" id="dbSupplierObat" placeholder="Nama Distributor / PBF" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+          <div class="flex items-end justify-end">
+            <button type="submit" id="btnSimpanObat" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-black rounded-xl shadow-md shadow-indigo-500/30 transition-all text-xs">SIMPAN OBAT</button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- TABEL DAFTAR OBAT -->
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+       <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 border-b border-slate-100 pb-3 gap-3">
+          <div>
+            <h3 class="font-black text-slate-800 text-sm">Katalog Master Obat</h3>
+            <p class="text-[11px] text-slate-400 font-medium">Total item obat terdaftar dalam inventory</p>
+          </div>
+          <div class="w-full md:w-80 relative">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">🔍</span>
+            <input type="text" id="cariDbObat" oninput="renderTabelObat()" placeholder="Cari Nama / Kandungan / Kode..." class="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+       </div>
+       <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-sm max-h-[50vh]">
+         <table class="w-full text-left whitespace-nowrap">
+            <thead class="bg-slate-50 text-[10px] uppercase font-bold text-slate-500 border-b border-slate-200 sticky top-0 z-10">
+              <tr>
+                <th class="p-3">Kode</th>
+                <th class="p-3">Nama Obat</th>
+                <th class="p-3">Satuan</th>
+                <th class="p-3 text-right">HPP (Rp)</th>
+                <th class="p-3 text-right">Harga Jual (Rp)</th>
+                <th class="p-3 text-center">Stok</th>
+                <th class="p-3 text-center">Min</th>
+                <th class="p-3">Expired</th>
+                <th class="p-3">Supplier</th>
+                <th class="p-3 text-center">Status</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyDbObat" class="divide-y divide-slate-100 text-xs">
+               <tr><td colspan="10" class="text-center py-6 text-slate-400 font-bold">Memuat katalog obat...</td></tr>
+            </tbody>
+         </table>
+       </div>
+    </div>
+  </div>
+
+  <!-- PANEL DB BMHP -->
+  <div id="panelDbBmhp" class="hidden space-y-6">
+    <!-- FORM TAMBAH BMHP -->
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+      <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
+        <h3 class="text-sm font-black text-slate-800 flex items-center gap-2">
+          <span>💉</span> Tambah Master BMHP / Alkes Baru
+        </h3>
+        <span class="text-[11px] font-bold text-slate-400 bg-slate-100 px-2.5 py-1 rounded-lg">Sheet: Master_BMHP</span>
+      </div>
+      <form id="formDbBmhp" onsubmit="simpanDbBmhp(event)" class="space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase">Kode BMHP</label>
+            <input type="text" id="dbKodeBmhp" readonly placeholder="Auto..." class="w-full px-3 py-2.5 bg-slate-100 border border-slate-300 rounded-xl text-xs font-mono font-bold text-indigo-700 outline-none text-center">
+          </div>
+          <div class="md:col-span-2">
+            <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase">Nama Barang / Alkes *</label>
+            <input type="text" id="dbNamaBmhp" required oninput="autoTitleCaseDB(this)" placeholder="Contoh: Spuit 3cc / Jarum Suntik" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase">Satuan *</label>
+            <input type="text" id="dbSatuanBmhp" required list="listSatuanBmhp" placeholder="Pcs / Box / Roll" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500">
+            <datalist id="listSatuanBmhp">
+              <option value="Pcs"><option value="Box"><option value="Roll"><option value="Set">
+              <option value="Pack"><option value="Pasang"><option value="Unit"><option value="Lembar">
+            </datalist>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase">Harga Beli / HPP (Rp) *</label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 flex items-center pl-3 font-bold text-slate-400 text-xs">Rp</span>
+              <input type="text" id="dbHppBmhp" required oninput="formatRupiahInput(this); hitungMarginBmhp();" placeholder="2.000" class="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500">
+            </div>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase">Harga Jual (Rp) *</label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 flex items-center pl-3 font-bold text-slate-400 text-xs">Rp</span>
+              <input type="text" id="dbHargaJualBmhp" required oninput="formatRupiahInput(this); hitungMarginBmhp();" placeholder="3.500" class="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500">
+            </div>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase">Margin Keuntungan</label>
+            <input type="text" id="dbMarginBmhp" readonly placeholder="0%" class="w-full px-3 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-xs font-black text-emerald-600 outline-none text-center">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase">Stok Awal Masuk</label>
+            <input type="number" id="dbStokAwalBmhp" value="0" min="0" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500 text-center">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase">Stok Minimum (Alert)</label>
+            <input type="number" id="dbStokMinBmhp" value="10" min="0" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500 text-center">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase">Expired Date</label>
+            <input type="date" id="dbExpiredBmhp" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase">Supplier / Distributor</label>
+            <input type="text" id="dbSupplierBmhp" placeholder="Nama Distributor BMHP" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+          <div class="flex items-end justify-end">
+            <button type="submit" id="btnSimpanBmhp" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-black rounded-xl shadow-md shadow-indigo-500/30 transition-all text-xs">SIMPAN BMHP</button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- TABEL DAFTAR BMHP -->
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+       <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 border-b border-slate-100 pb-3 gap-3">
+          <div>
+            <h3 class="font-black text-slate-800 text-sm">Katalog Master BMHP & Alkes</h3>
+            <p class="text-[11px] text-slate-400 font-medium">Total item BMHP terdaftar dalam inventory</p>
+          </div>
+          <div class="w-full md:w-72 relative">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">🔍</span>
+            <input type="text" id="cariDbBmhp" oninput="renderTabelBmhp()" placeholder="Cari Nama / Kode / Supplier..." class="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+       </div>
+       <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-sm max-h-[50vh]">
+         <table class="w-full text-left whitespace-nowrap">
+            <thead class="bg-slate-50 text-[10px] uppercase font-bold text-slate-500 border-b border-slate-200 sticky top-0 z-10">
+              <tr>
+                <th class="p-3">Kode</th>
+                <th class="p-3">Nama Barang</th>
+                <th class="p-3">Satuan</th>
+                <th class="p-3 text-right">HPP (Rp)</th>
+                <th class="p-3 text-right">Harga Jual (Rp)</th>
+                <th class="p-3 text-center">Stok</th>
+                <th class="p-3 text-center">Min</th>
+                <th class="p-3">Expired</th>
+                <th class="p-3">Supplier</th>
+                <th class="p-3 text-center">Status</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyDbBmhp" class="divide-y divide-slate-100 text-xs">
+               <tr><td colspan="10" class="text-center py-6 text-slate-400 font-bold">Memuat katalog BMHP...</td></tr>
+            </tbody>
+         </table>
+       </div>
+    </div>
+  </div>
+
+</div>

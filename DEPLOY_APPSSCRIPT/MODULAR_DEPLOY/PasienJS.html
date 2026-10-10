@@ -1,0 +1,2131 @@
+<script>
+// ========================================================
+// ENGINE DATABASE PASIEN (CRUD, SEARCH, STATS & HISTORY)
+// ========================================================
+let currentPagePasien = 1;
+let itemsPerPagePasien = 10;
+let filteredPasienList = [];
+let isFilterDuplikatAktif = false;
+// 1. AUTO-LOAD SAAT DATA KLINIK SIAP
+document.addEventListener("KlinikDataReady", () => {
+  initPasienModule();
+});
+document.addEventListener("DOMContentLoaded", () => {
+setTimeout(() => {
+   if(window.KlinikData && window.KlinikData.statusLoad && window.KlinikData.statusLoad.pasien) {
+       initPasienModule();
+   }
+}, 1000);
+});
+function initPasienModule() {
+  let inputCari = document.getElementById('inputCariPasien');
+  if (inputCari) {
+      inputCari.removeEventListener('input', resetPageAndSearchPasien);
+      inputCari.addEventListener('input', resetPageAndSearchPasien);
+  }
+  updateStatistikPasienTampilan();
+  resetPageAndSearchPasien();
+  loadListPekerjaan();
+}
+// ========================================================
+// LOGIKA STATISTIK (TOTAL, L, P)
+// ========================================================
+function updateStatistikPasienTampilan() {
+  let list = window.KlinikData.pasien || [];
+  let total = list.length;
+  let laki = 0;
+  let perempuan = 0;
+  list.forEach(p => {
+      let jk = (p.jenisKelamin || "").toLowerCase();
+      if (jk.startsWith('l')) laki++;
+      else if (jk.startsWith('p')) perempuan++;
+  });
+  let elTotal = document.getElementById('labelTotalPasien');
+  let elLaki = document.getElementById('labelTotalLaki');
+  let elPerempuan = document.getElementById('labelTotalPerempuan');
+  if(elTotal) elTotal.innerText = total;
+  if(elLaki) elLaki.innerText = laki;
+  if(elPerempuan) elPerempuan.innerText = perempuan;
+}
+// ========================================================
+// LOGIKA FILTER DATA GANDA (DUPLIKAT)
+// ========================================================
+function toggleFilterDataGanda() {
+  const role = (window.activeUserRole || (window.currentUser && window.currentUser.role) || '').toString().toLowerCase();
+  const isSuperUser = (role.includes('super user') || role.includes('owner'));
+  if (role && !isSuperUser) {
+    if (typeof alertMsg === 'function') {
+      alertMsg('warning', 'Fitur Filter Data Ganda hanya dapat diakses oleh Super User.');
+    }
+    return;
+  }
+  isFilterDuplikatAktif = !isFilterDuplikatAktif;
+  let btn = document.getElementById('btnFilterDuplikat');
+  if (btn) {
+    if (isFilterDuplikatAktif) {
+      btn.className = "w-full sm:w-auto px-4 py-2 bg-amber-600 text-white font-bold rounded-xl text-xs shadow-sm transition-all flex items-center justify-center gap-1.5 whitespace-nowrap ring-2 ring-amber-400";
+      btn.innerHTML = "<span>✅</span> Mode Data Ganda Aktif";
+    } else {
+      btn.className = "w-full sm:w-auto px-4 py-2 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 font-bold rounded-xl text-xs shadow-sm transition-all flex items-center justify-center gap-1.5 whitespace-nowrap";
+      btn.innerHTML = "<span>⚠️</span> Filter Data Ganda";
+    }
+  }
+  currentPagePasien = 1;
+  searchPasienData();
+}
+
+function getKelompokDuplikatMap(list) {
+  let mapNamaLahir = new Map();
+  let mapNik = new Map();
+
+  list.forEach(p => {
+    let nama = (p.namaPasien || "").toLowerCase().trim().replace(/\s+/g, ' ');
+    let tgl = (p.tanggalLahir || "").trim();
+    let parts = tgl.split(/[-/]/);
+    let stdTgl = parts.length === 3 ? (parts[0].length === 4 ? `${parts[2]}-${parts[1]}-${parts[0]}` : tgl) : tgl;
+    let keyDob = nama && stdTgl ? `${nama}|${stdTgl}` : "";
+
+    let nik = (p.nik || "").trim();
+
+    if (keyDob) {
+      if (!mapNamaLahir.has(keyDob)) mapNamaLahir.set(keyDob, []);
+      mapNamaLahir.get(keyDob).push(p.idPasien);
+    }
+    if (nik && nik.length >= 10) {
+      if (!mapNik.has(nik)) mapNik.set(nik, []);
+      mapNik.get(nik).push(p.idPasien);
+    }
+  });
+
+  let duplicateIdSet = new Set();
+  mapNamaLahir.forEach(ids => {
+    if (ids.length > 1) ids.forEach(id => duplicateIdSet.add(id));
+  });
+  mapNik.forEach(ids => {
+    if (ids.length > 1) ids.forEach(id => duplicateIdSet.add(id));
+  });
+
+  return duplicateIdSet;
+}
+
+// ========================================================
+// LOGIKA PENCARIAN & PAGINATION TABEL
+// ========================================================
+function resetPageAndSearchPasien() {
+  currentPagePasien = 1;
+  searchPasienData();
+}
+function searchPasienData() {
+  let inputEl = document.getElementById('inputCariPasien');
+  let q = inputEl ? inputEl.value.toLowerCase().trim() : "";
+  let list = window.KlinikData.pasien || [];
+
+  if (isFilterDuplikatAktif) {
+    let dupSet = getKelompokDuplikatMap(list);
+    list = list.filter(p => dupSet.has(p.idPasien));
+    // Sort agar data yang kembar berdampingan
+    list.sort((a, b) => {
+      let nA = (a.namaPasien || "").toLowerCase();
+      let nB = (b.namaPasien || "").toLowerCase();
+      return nA.localeCompare(nB);
+    });
+  }
+
+  if (q) {
+      filteredPasienList = list.filter(p =>
+          (p.namaPasien || "").toLowerCase().includes(q) ||
+          (p.noRm || "").toLowerCase().includes(q) ||
+          (p.whatsapp || "").toLowerCase().includes(q)
+      );
+  } else {
+      filteredPasienList = list;
+  }
+  renderTablePagePasien();
+}
+function renderTablePagePasien() {
+  let tbody = document.getElementById('tbodyPasien');
+  if (!tbody) return;
+  let totalPages = Math.ceil(filteredPasienList.length / itemsPerPagePasien) || 1;
+  if (currentPagePasien > totalPages) currentPagePasien = totalPages;
+  let btnPrev = document.getElementById('btnPrevPagePasien');
+  let btnNext = document.getElementById('btnNextPagePasien');
+  let lblCur = document.getElementById('labelCurrentPagePasien');
+  let lblTot = document.getElementById('labelTotalPagePasien');
+  let lblData = document.getElementById('labelTotalDataString');
+  if (lblCur) lblCur.innerText = currentPagePasien;
+  if (lblTot) lblTot.innerText = totalPages;
+  if (lblData) lblData.innerText = `(Total: ${filteredPasienList.length} Pasien)`;
+  if (btnPrev) btnPrev.disabled = (currentPagePasien === 1);
+  if (btnNext) btnNext.disabled = (currentPagePasien === totalPages || filteredPasienList.length === 0);
+  let startIdx = (currentPagePasien - 1) * itemsPerPagePasien;
+  let pageData = filteredPasienList.slice(startIdx, startIdx + itemsPerPagePasien);
+  if (pageData.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="9" class="text-center py-10 text-slate-400 font-bold">Data pasien tidak ditemukan.</td></tr>';
+      return;
+  }
+  function formatTglAngkaDDMMYYYY(str) {
+    if (!str) return '-';
+    let s = String(str).trim();
+    let parts = s.split(/[-/]/);
+    if (parts.length === 3) {
+      if (parts[0].length === 4) {
+        return `${parts[2]}-${parts[1]}-${parts[0]}`;
+      }
+    }
+    return s;
+  }
+
+  tbody.innerHTML = pageData.map(p => `
+      <tr class="hover:bg-slate-50 transition-colors border-b border-slate-100">
+          <td class="p-3 font-mono font-bold text-indigo-600 text-xs">${p.noRm || '-'}</td>
+          <td class="p-3 font-bold text-slate-800 text-xs">${p.namaPasien || '-'}</td>
+          <td class="p-3 text-slate-600 text-xs">${p.jenisKelamin || '-'}</td>
+          <td class="p-3 text-slate-600 text-xs">${formatTglAngkaDDMMYYYY(p.tanggalLahir)} / ${p.umur || '-'}</td>
+          <td class="p-3 text-slate-600 text-xs">${p.whatsapp || '-'}</td>
+          <td class="p-3 text-rose-600 text-[11px] font-medium truncate max-w-[120px]" title="${p.riwayatPenyakit || '-'}">${p.riwayatPenyakit || '-'}</td>
+          <td class="p-3 text-amber-600 text-[11px] font-medium truncate max-w-[120px]" title="${p.alergi || '-'}">${p.alergi || '-'}</td>
+          <td class="p-3 text-slate-600 text-xs truncate max-w-[150px]" title="${p.alamat || '-'}">${p.alamat || '-'}</td>
+          <td class="p-3 text-center">
+              <div class="flex justify-center gap-1.5">
+                  ${(window.activeUserRole && (window.activeUserRole.toLowerCase().includes('super user') || window.activeUserRole.toLowerCase().includes('owner') || window.activeUserRole.toLowerCase().includes('admin'))) ? `<button onclick="editPasien('${p.idPasien}')" class="px-3 py-1.5 bg-white border border-slate-200 hover:bg-slate-100 text-slate-600 rounded-lg text-[10px] font-bold transition-all shadow-sm">Edit</button>` : ''}
+                  ${(window.activeUserRole && (window.activeUserRole.toLowerCase().includes('super user') || window.activeUserRole.toLowerCase().includes('owner'))) ? `<button onclick="konfirmasiHapusPasien('${p.idPasien}', '${p.namaPasien}')" class="px-2.5 py-1.5 bg-rose-50 border border-rose-200 hover:bg-rose-500 hover:text-white text-rose-600 rounded-lg text-[10px] font-bold transition-all shadow-sm" title="Hapus Pasien (Super User)">🗑️ Hapus</button>` : ''}
+                  <button onclick="openHistoryEMR('${p.idPasien}')" class="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg text-[10px] font-bold transition-all shadow-sm border border-indigo-200" title="Lihat Riwayat Rekam Medis">🩺 History</button>
+              </div>
+          </td>
+      </tr>
+  `).join('');
+}
+function prevPagePasien() { if (currentPagePasien > 1) { currentPagePasien--; renderTablePagePasien(); } }
+function nextPagePasien() { let t = Math.ceil(filteredPasienList.length / itemsPerPagePasien); if (currentPagePasien < t) { currentPagePasien++; renderTablePagePasien(); } }
+// ========================================================
+// LOGIKA FORM PASIEN (TAMBAH / EDIT / SIMPAN)
+// ========================================================
+function bukaFormPasienBaru() {
+  if (window.activeUserRole && (window.activeUserRole.toLowerCase().includes('dokter') || window.activeUserRole.toLowerCase().includes('staff'))) {
+    showToast('warning', 'Role Anda hanya memiliki akses View pada Database Pasien.');
+    return;
+  }
+  resetFormPasien();
+
+  document.getElementById('panelFormPasien').classList.remove('hidden');
+  document.getElementById('panelTabelPasien').classList.add('hidden');
+}
+
+function resetFormPasien() {
+  let form = document.getElementById('formPasienData');
+  if (form) form.reset();
+  
+  let fieldsToClear = [
+    'pasId', 'pasRm', 'pasNama', 'pasTglLahir', 'pasUmur', 'pasNik',
+    'pasWa', 'pasAlamat', 'pasRiwayat', 'pasAlergi', 'pasCatatan',
+    'pasProvinsi', 'pasKabupaten', 'pasKecamatan', 'pasKelurahan'
+  ];
+  fieldsToClear.forEach(id => {
+    let el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+
+  let selectFields = ['pasJk', 'pasAgama', 'pasGoldar', 'pasPekerjaan'];
+  selectFields.forEach(id => {
+    let el = document.getElementById(id);
+    if (el) {
+      el.value = '';
+      if (el.selectedIndex !== undefined) el.selectedIndex = 0;
+    }
+  });
+
+  let pasMode = document.getElementById('pasienMode');
+  if (pasMode) pasMode.value = 'baru';
+
+  // TANGGAL DAFTAR DEFAULT HARI INI
+  let tglInput = document.getElementById('pasienTglDaftar');
+  if (tglInput) {
+    let d = new Date();
+    let m = ("0" + (d.getMonth() + 1)).slice(-2);
+    let day = ("0" + d.getDate()).slice(-2);
+    tglInput.value = `${d.getFullYear()}-${m}-${day}`;
+  }
+
+  let formTitle = document.getElementById('formTitle');
+  if (formTitle) formTitle.innerText = 'Formulir Pendaftaran Pasien Baru';
+  let btnSimpan = document.getElementById('btnSimpanPasien');
+  if (btnSimpan) {
+    btnSimpan.innerHTML = '💾 Simpan Data Pasien';
+    btnSimpan.disabled = false;
+  }
+  let btnBatal = document.getElementById('btnBatalPasien');
+  if (btnBatal) btnBatal.classList.add('hidden');
+
+  let alertEl = document.getElementById('alertDuplikatPasien');
+  if (alertEl) alertEl.classList.add('hidden');
+}
+
+function batalEditPasien() {
+  resetFormPasien();
+  tutupFormPasien();
+}
+
+function tutupFormPasien() {
+  resetFormPasien();
+  document.getElementById('panelFormPasien').classList.add('hidden');
+  document.getElementById('panelTabelPasien').classList.remove('hidden');
+}
+
+// ========================================================
+// LAPIS 1: AUTO-GUARD CEK DUPLIKASI FRONTEND SECARA REAL-TIME
+// ========================================================
+function cekDuplikasiFrontend() {
+  let currentId = (document.getElementById('pasId').value || "").trim();
+  // Hanya aktif jika mode Pasien Baru (bukan sedang mengedit pasien lama)
+  if (currentId !== "") return;
+
+  let inputNama = (document.getElementById('pasNama').value || "").toLowerCase().trim().replace(/\s+/g, ' ');
+  let inputTgl = (document.getElementById('pasTglLahir').value || "").trim();
+  let inputNik = (document.getElementById('pasNik').value || "").trim();
+
+  let alertBox = document.getElementById('alertDuplikatPasien');
+  let alertText = document.getElementById('alertDuplikatText');
+  let btnBuka = document.getElementById('btnBukaPasienLama');
+  if (!alertBox || !alertText || !btnBuka) return;
+
+  if (!inputNama && !inputNik) {
+    alertBox.classList.add('hidden');
+    return;
+  }
+
+  let list = window.KlinikData && Array.isArray(window.KlinikData.pasien) ? window.KlinikData.pasien : [];
+  let found = null;
+  let reason = "";
+
+  // 1. Cek NIK Unik
+  if (inputNik && inputNik.length >= 10) {
+    found = list.find(p => (p.nik || "").trim() === inputNik);
+    if (found) reason = `NIK <b>${inputNik}</b> sudah terdaftar`;
+  }
+
+  // 2. Cek Nama + Tanggal Lahir Sama Persis
+  if (!found && inputNama.length >= 3 && inputTgl) {
+    // Normalisasi format inputTgl YYYY-MM-DD
+    let partsIn = inputTgl.split(/[-/]/);
+    let stdInputTgl = partsIn.length === 3 ? (partsIn[0].length === 4 ? `${partsIn[2]}-${partsIn[1]}-${partsIn[0]}` : inputTgl) : inputTgl;
+
+    found = list.find(p => {
+      let pNama = (p.namaPasien || "").toLowerCase().trim().replace(/\s+/g, ' ');
+      if (pNama !== inputNama) return false;
+      let pTgl = (p.tanggalLahir || "").trim();
+      let partsP = pTgl.split(/[-/]/);
+      let stdPTgl = partsP.length === 3 ? (partsP[0].length === 4 ? `${partsP[2]}-${partsP[1]}-${partsP[0]}` : pTgl) : pTgl;
+      return stdPTgl === stdInputTgl;
+    });
+
+    if (found) {
+      reason = `Nama Pasien <b>"${found.namaPasien}"</b> dengan Tanggal Lahir <b>${inputTgl}</b> sudah ada`;
+    }
+  }
+
+  if (found) {
+    alertText.innerHTML = `${reason} di sistem dengan <b>No. RM: ${found.noRm || '-'}</b> (${found.idPasien}).<br>Disarankan untuk membuka rekam medis pasien yang sudah ada agar tidak terjadi data dobel.`;
+    btnBuka.onclick = function() {
+      alertBox.classList.add('hidden');
+      editPasien(found.idPasien);
+    };
+    alertBox.classList.remove('hidden');
+  } else {
+    alertBox.classList.add('hidden');
+  }
+}
+function hitungUmurOtomatis() {
+  let tglLahirStr = document.getElementById('pasTglLahir').value;
+  if (!tglLahirStr) return;
+  let tglLahir = new Date(tglLahirStr);
+  let hariIni = new Date();
+  let umur = hariIni.getFullYear() - tglLahir.getFullYear();
+  let m = hariIni.getMonth() - tglLahir.getMonth();
+  if (m < 0 || (m === 0 && hariIni.getDate() < tglLahir.getDate())) { umur--; }
+  document.getElementById('pasUmur').value = umur > 0 ? umur + " Tahun" : "0 Tahun";
+}
+function editPasien(idPasien) {
+  if (window.activeUserRole && (window.activeUserRole.toLowerCase().includes('dokter') || window.activeUserRole.toLowerCase().includes('staff'))) {
+    showToast('warning', 'Role Anda hanya memiliki akses View pada Database Pasien.');
+    return;
+  }
+  let p = window.KlinikData && window.KlinikData.pasien ? window.KlinikData.pasien.find(x => x.idPasien === idPasien) : null;
+  if (!p) {
+    showToast('error', 'Data pasien tidak ditemukan.');
+    return;
+  }
+
+  if (document.getElementById('pasienMode')) document.getElementById('pasienMode').value = 'edit';
+  document.getElementById('pasId').value = p.idPasien || '';
+  document.getElementById('pasRm').value = p.noRm || '';
+  document.getElementById('pasNama').value = p.namaPasien || '';
+  
+  let tglL = p.tanggalLahir || '';
+  if (tglL.includes('-')) {
+    let parts = tglL.split('-');
+    if (parts[0].length === 2) {
+      tglL = `${parts[2]}-${parts[1]}-${parts[0]}`;
+    }
+  }
+  document.getElementById('pasTglLahir').value = tglL;
+  document.getElementById('pasJk').value = p.jenisKelamin || '';
+  document.getElementById('pasUmur').value = p.umur || '';
+  document.getElementById('pasAgama').value = p.agama || '';
+  document.getElementById('pasGoldar').value = p.golonganDarah || '';
+  document.getElementById('pasPekerjaan').value = p.pekerjaan || '';
+  document.getElementById('pasNik').value = p.nik || '';
+  document.getElementById('pasAlamat').value = p.alamat || '';
+  document.getElementById('pasProvinsi').value = p.provinsi || '';
+  document.getElementById('pasKabupaten').value = p.kabupaten || '';
+  document.getElementById('pasKecamatan').value = p.kecamatan || '';
+  document.getElementById('pasKelurahan').value = p.kelurahan || '';
+  document.getElementById('pasWa').value = p.whatsapp || '';
+  document.getElementById('pasAlergi').value = p.alergi || '';
+  document.getElementById('pasRiwayat').value = p.riwayatPenyakit || '';
+  if (document.getElementById('pasCatatan')) {
+    document.getElementById('pasCatatan').value = p.catatan || '';
+  }
+ 
+  let tglInput = document.getElementById('pasienTglDaftar');
+  if(tglInput) {
+      if (p.tglDaftar) {
+          tglInput.value = p.tglDaftar;
+      } else {
+          let d = new Date();
+          let m = ("0" + (d.getMonth() + 1)).slice(-2);
+          let day = ("0" + d.getDate()).slice(-2);
+          tglInput.value = `${d.getFullYear()}-${m}-${day}`;
+      }
+  }
+
+  let formTitle = document.getElementById('formTitle');
+  if (formTitle) formTitle.innerText = `Edit Data Pasien (${p.noRm || p.idPasien} - ${p.namaPasien})`;
+  let btnSimpan = document.getElementById('btnSimpanPasien');
+  if (btnSimpan) {
+    btnSimpan.innerHTML = '💾 Simpan Perubahan Data';
+    btnSimpan.disabled = false;
+  }
+  let btnBatal = document.getElementById('btnBatalPasien');
+  if (btnBatal) btnBatal.classList.remove('hidden');
+
+  let alertEl = document.getElementById('alertDuplikatPasien');
+  if (alertEl) alertEl.classList.add('hidden');
+ 
+  document.getElementById('panelTabelPasien').classList.add('hidden');
+  document.getElementById('panelFormPasien').classList.remove('hidden');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function simpanDataPasien(e) {
+  e.preventDefault();
+  let btn = document.getElementById('btnSimpanPasien');
+  let originalBtnHtml = btn ? btn.innerHTML : '💾 Simpan Data Pasien';
+  if (btn) {
+    btn.innerHTML = 'MENYIMPAN...';
+    btn.disabled = true;
+  }
+
+  let idVal = (document.getElementById('pasId').value || "").trim();
+  let rmVal = (document.getElementById('pasRm').value || "").trim();
+
+  let payload = {
+      idPasien: idVal,
+      noRm: rmVal,
+      namaPasien: (document.getElementById('pasNama').value || "").trim(),
+      tanggalLahir: (document.getElementById('pasTglLahir').value || "").trim(),
+      jenisKelamin: (document.getElementById('pasJk').value || "").trim(),
+      umur: (document.getElementById('pasUmur').value || "").trim(),
+      agama: (document.getElementById('pasAgama').value || "").trim(),
+      golonganDarah: (document.getElementById('pasGoldar').value || "").trim(),
+      pekerjaan: (document.getElementById('pasPekerjaan').value || "").trim(),
+      nik: (document.getElementById('pasNik').value || "").trim(),
+      alamat: (document.getElementById('pasAlamat').value || "").trim(),
+      provinsi: document.getElementById('pasProvinsi') ? (document.getElementById('pasProvinsi').value || "").trim() : "",
+      kabupaten: document.getElementById('pasKabupaten') ? (document.getElementById('pasKabupaten').value || "").trim() : "",
+      kecamatan: document.getElementById('pasKecamatan') ? (document.getElementById('pasKecamatan').value || "").trim() : "",
+      kelurahan: document.getElementById('pasKelurahan') ? (document.getElementById('pasKelurahan').value || "").trim() : "",
+      whatsapp: (document.getElementById('pasWa').value || "").trim(),
+      alergi: (document.getElementById('pasAlergi').value || "").trim(),
+      riwayatPenyakit: (document.getElementById('pasRiwayat').value || "").trim(),
+      catatan: document.getElementById('pasCatatan') ? (document.getElementById('pasCatatan').value || "").trim() : "",
+      tglDaftar: document.getElementById('pasienTglDaftar') ? document.getElementById('pasienTglDaftar').value : "",
+      currentUser: window.activeNamaAccount
+  };
+
+  const onSuccess = (res) => {
+      if (btn) {
+        btn.innerHTML = originalBtnHtml;
+        btn.disabled = false;
+      }
+      if (res && res.success) {
+          showToast('success', res.message || 'Data Pasien berhasil disimpan!');
+          
+          // 1. SINKRONISASI DATA LOKAL SECARA INSTAN (OPTIMISTIC UPDATE)
+          if (!window.KlinikData) window.KlinikData = {};
+          if (!Array.isArray(window.KlinikData.pasien)) window.KlinikData.pasien = [];
+
+          let targetId = res.idPasien || payload.idPasien;
+          let targetRm = res.noRm || payload.noRm;
+          
+          let existingIdx = -1;
+          if (payload.idPasien) {
+            existingIdx = window.KlinikData.pasien.findIndex(p => (p.idPasien || '').trim().toLowerCase() === payload.idPasien.trim().toLowerCase());
+          }
+          if (existingIdx === -1 && payload.noRm) {
+            existingIdx = window.KlinikData.pasien.findIndex(p => (p.noRm || '').trim().toLowerCase() === payload.noRm.trim().toLowerCase());
+          }
+
+          let updatedRecord = {
+            idPasien: targetId,
+            noRm: targetRm,
+            namaPasien: payload.namaPasien,
+            tanggalLahir: payload.tanggalLahir,
+            jenisKelamin: payload.jenisKelamin,
+            umur: payload.umur,
+            agama: payload.agama,
+            golonganDarah: payload.golonganDarah,
+            pekerjaan: payload.pekerjaan,
+            nik: payload.nik,
+            alamat: payload.alamat,
+            provinsi: payload.provinsi,
+            kabupaten: payload.kabupaten,
+            kecamatan: payload.kecamatan,
+            kelurahan: payload.kelurahan,
+            whatsapp: payload.whatsapp,
+            alergi: payload.alergi,
+            riwayatPenyakit: payload.riwayatPenyakit,
+            catatan: payload.catatan,
+            tglDaftar: payload.tglDaftar
+          };
+
+          if (existingIdx !== -1) {
+            Object.assign(window.KlinikData.pasien[existingIdx], updatedRecord);
+          } else {
+            window.KlinikData.pasien.unshift(updatedRecord);
+          }
+
+          // Perbarui statistik dan tabel secara instan
+          updateStatistikPasienTampilan();
+          searchPasienData();
+
+          // 2. KOSONGKAN FORM & KEMBALIKAN KE TABEL
+          tutupFormPasien();
+
+          // Refresh latar belakang jika tersedia
+          if (typeof startDataSync === 'function') {
+            startDataSync();
+          }
+      } else {
+          showToast('error', (res && res.message) ? res.message : 'Gagal menyimpan pasien.');
+      }
+  };
+
+  const onFailure = (err) => {
+      if (btn) {
+        btn.innerHTML = originalBtnHtml;
+        btn.disabled = false;
+      }
+      showToast('error', 'Gagal menyimpan: ' + (err ? err.message : 'Kesalahan server.'));
+  };
+
+  google.script.run
+    .withSuccessHandler(onSuccess)
+    .withFailureHandler(onFailure)
+    .simpanPasien(payload);
+}
+
+function konfirmasiHapusPasien(idPasien, namaPasien) {
+  if (confirm(`PERINGATAN SUPER USER:\nApakah Anda yakin ingin MENGHAPUS PERMANEN data pasien: "${namaPasien}" (${idPasien})?\nTindakan ini tidak dapat dibatalkan.`)) {
+    google.script.run.withSuccessHandler(res => {
+      if (res.success) {
+        showToast('success', res.message);
+        if (window.KlinikData && Array.isArray(window.KlinikData.pasien)) {
+          window.KlinikData.pasien = window.KlinikData.pasien.filter(p => p.idPasien !== idPasien);
+          filteredPasienList = filteredPasienList.filter(p => p.idPasien !== idPasien);
+        }
+        renderTablePagePasien();
+        startDataSync();
+      } else {
+        showToast('error', res.message);
+      }
+    }).withFailureHandler(err => {
+      showToast('error', 'Gagal menghapus: ' + err.message);
+    }).hapusPasienPermanen({ idPasien: idPasien, currentUser: window.activeNamaAccount });
+  }
+}
+
+function loadListPekerjaan() {
+google.script.run.withSuccessHandler(res => {
+  if (!res || res.length === 0) return;
+  let inputs = document.querySelectorAll('input, select');
+  let elPekerjaan = null;
+  for(let i = 0; i < inputs.length; i++) {
+     let elId = (inputs[i].id || "").toLowerCase();
+     let elName = (inputs[i].name || "").toLowerCase();
+     if(elId.includes("pekerjaan") || elName.includes("pekerjaan")) {
+        elPekerjaan = inputs[i]; break;
+     }
+  }
+  if (elPekerjaan) {
+    if (elPekerjaan.tagName.toLowerCase() === 'select') {
+      let optionsHtml = '<option value="" disabled selected>-- Pilih Pekerjaan --</option>';
+      res.forEach(p => { optionsHtml += `<option value="${p}">${p}</option>`; });
+      elPekerjaan.innerHTML = optionsHtml;
+    }
+    else {
+       let dl = document.getElementById('listPekerjaanData');
+       if(!dl) { dl = document.createElement('datalist'); dl.id = 'listPekerjaanData'; document.body.appendChild(dl); }
+       let optionsHtml = ''; res.forEach(p => { optionsHtml += `<option value="${p}">`; });
+       dl.innerHTML = optionsHtml; elPekerjaan.setAttribute('list', 'listPekerjaanData');
+    }
+  }
+}).getDaftarPekerjaan();
+}
+// ========================================================
+// ENGINE MIRRORING ODONTOGRAM & EMR (PERSIS REKAM MEDIS)
+// ========================================================
+const PAS_TOOTH_CONDITIONS = {
+ nor: { code: 'nor', label: 'Normal (SOU)', color: '#ffffff' },
+ car: { code: 'car', label: 'Karies (Car)', color: '#ef4444' },
+ cfr: { code: 'cfr', label: 'Komposit (Cfr)', color: '#10b981' },
+ amf: { code: 'amf', label: 'Amalgam (Amf)', color: '#475569' },
+ gif: { code: 'gif', label: 'GIC / Semen', color: '#f97316' },
+ fis: { code: 'fis', label: 'Sealant (Fis)', color: '#8b5cf6' },
+ mis: { code: 'mis', label: 'Hilang (X)', color: '#94a3b8' },
+ rrx: { code: 'rrx', label: 'Sisa Akar (RRX)', color: '#dc2626' },
+ nvt: { code: 'nvt', label: 'Non-Vital', color: '#0f172a' },
+ crn: { code: 'crn', label: 'Crown (Crn)', color: '#3b82f6' },
+ une: { code: 'une', label: 'Blm Erupsi', color: '#64748b' },
+ imx: { code: 'imx', label: 'Impaksi', color: '#ea580c' },
+  tmp: { code: 'tmp', label: 'Sementara (Tmp)', color: '#f59e0b' },
+  pre: { code: 'pre', label: 'Persistansi (Pre)', color: '#ec4899' }
+};
+const PAS_ADULT_UPPER_RIGHT = [18, 17, 16, 15, 14, 13, 12, 11];
+const PAS_ADULT_UPPER_LEFT  = [21, 22, 23, 24, 25, 26, 27, 28];
+const PAS_ADULT_LOWER_RIGHT = [48, 47, 46, 45, 44, 43, 42, 41];
+const PAS_ADULT_LOWER_LEFT  = [31, 32, 33, 34, 35, 36, 37, 38];
+function renderOdoVisualPasien(odoJsonStr) {
+ let odoData = {};
+ try { odoData = typeof odoJsonStr === 'string' ? JSON.parse(odoJsonStr) : odoJsonStr; } catch(e){}
+ const drawTooth = (num) => {
+   const tState = odoData[num] || { generalCondition: 'nor', surfaces: {} };
+   const surfs = tState.surfaces || {};
+   const genCond = tState.generalCondition || 'nor';
+   const isMissing = genCond === 'mis', isRadix = genCond === 'rrx', isCrown = genCond === 'crn', isNonVital = genCond === 'nvt', isUnerupted = genCond === 'une', isImpacted = genCond === 'imx', isPersistence = genCond === 'pre';
+    const isUpper = (num >= 11 && num <= 28) || (num >= 51 && num <= 65);
+   const isRightArch = (num >= 11 && num <= 18) || (num >= 41 && num <= 48) || (num >= 51 && num <= 55) || (num >= 81 && num <= 85);
+   const leftSurface = isRightArch ? 'distal' : 'mesial';
+   const rightSurface = isRightArch ? 'mesial' : 'distal';
+   const topSurface = isUpper ? 'buccal' : 'lingual';
+   const bottomSurface = isUpper ? 'lingual' : 'buccal';
+   const centerSurface = 'occlusal';
+ 
+   const getColor = (sKey) => {
+     if (isMissing || isRadix || isUnerupted) return '#f8fafc';
+     const cCode = surfs[sKey] || 'nor';
+     const cond = PAS_TOOTH_CONDITIONS[cCode];
+     return cond ? cond.color : '#ffffff';
+   };
+   return `
+     <div style="display:flex; flex-direction:column; align-items:center;">
+       <span style="font-size:8px; font-weight:bold; margin-bottom:2px; color:#475569;">${num}</span>
+       <div style="width:28px; height:28px; position:relative;">
+         ${isCrown ? `<div style="position:absolute; top:0; right:0; bottom:0; left:0; border-radius:9999px; border:1px solid #3b82f6; z-index:10; box-shadow:0 1px 2px 0 rgba(0,0,0,0.05);"></div>` : ''}
+         ${isPersistence ? `<div style="position:absolute; top:0; right:0; bottom:0; left:0; border-radius:9999px; border:2px dashed #ec4899; z-index:10; pointer-events:none; box-shadow:0 1px 2px 0 rgba(236,72,153,0.15);"></div>` : ''}
+         <svg viewBox="0 0 100 100" style="width:100%; height:100%;">
+           <rect x="4" y="4" width="92" height="92" rx="10" fill="${isMissing ? '#e2e8f0' : isUnerupted ? '#f1f5f9' : '#ffffff'}" stroke="#94a3b8" stroke-width="2" stroke-dasharray="${isUnerupted ? '4 3' : 'none'}"/>
+           ${!isMissing && !isRadix ? `
+             <polygon points="10,10 90,10 70,30 30,30" fill="${getColor(topSurface)}" stroke="#64748b" stroke-width="1.5"/>
+             <polygon points="30,70 70,70 90,90 10,90" fill="${getColor(bottomSurface)}" stroke="#64748b" stroke-width="1.5"/>
+             <polygon points="10,10 30,30 30,70 10,90" fill="${getColor(leftSurface)}" stroke="#64748b" stroke-width="1.5"/>
+             <polygon points="90,10 70,30 70,70 90,90" fill="${getColor(rightSurface)}" stroke="#64748b" stroke-width="1.5"/>
+             <polygon points="30,30 70,30 70,70 30,70" fill="${getColor(centerSurface)}" stroke="#64748b" stroke-width="1.5"/>
+           ` : ''}
+           ${isMissing ? `<g stroke="#475569" stroke-width="5"><line x1="20" y1="20" x2="80" y2="80"/><line x1="80" y1="20" x2="20" y2="80"/></g>` : ''}
+           ${isRadix ? `<polygon points="50,84 20,24 80,24" fill="#dc2626" stroke="#991b1b"/><text x="50" y="20" text-anchor="middle" font-size="16" font-weight="bold" fill="#dc2626">RRX</text>` : ''}
+           ${isPersistence ? `<circle cx="50" cy="50" r="32" fill="none" stroke="#ec4899" stroke-width="3" stroke-dasharray="4 2"/><text x="50" y="58" text-anchor="middle" font-size="20" font-weight="900" fill="#ec4899">P</text>` : ''}
+         </svg>
+       </div>
+     </div>`;
+ };
+ return `
+   <div style="background-color:#f8fafc; padding:12px; border-radius:12px; border:1px solid #e2e8f0; text-align:center; overflow-x:auto;">
+     <div style="display:flex; align-items:center; justify-content:center; gap:16px; border-bottom:1px solid #cbd5e1; padding-bottom:8px;">
+       <div style="display:flex; gap:4px; flex-direction:row-reverse;">${PAS_ADULT_UPPER_RIGHT.map(drawTooth).join('')}</div>
+       <div style="width:4px; background-color:#cbd5e1; height:40px; border-radius:9999px;"></div>
+       <div style="display:flex; gap:4px;">${PAS_ADULT_UPPER_LEFT.map(drawTooth).join('')}</div>
+     </div>
+     <div style="display:flex; align-items:center; justify-content:center; gap:16px; padding-top:8px;">
+       <div style="display:flex; gap:4px; flex-direction:row-reverse;">${PAS_ADULT_LOWER_RIGHT.map(drawTooth).join('')}</div>
+       <div style="width:4px; background-color:#cbd5e1; height:40px; border-radius:9999px;"></div>
+       <div style="display:flex; gap:4px;">${PAS_ADULT_LOWER_LEFT.map(drawTooth).join('')}</div>
+     </div>
+   </div>
+ `;
+}
+// Fungsi Pengecek apakah data EMR Teks atau JSON Visual
+function renderOdontogramData(str) {
+  if (!str || str === '-') return '-';
+  try {
+      let parsed = JSON.parse(str);
+      if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)) {
+          return renderOdoVisualPasien(str);
+      }
+  } catch(e) {}
+  return `<div style="background-color: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0; font-family: monospace; font-size: 12px;">${str}</div>`;
+}
+// ========================================================
+// FUNGSI MEMBUKA HISTORY LENGKAP (DIPERBAIKI)
+// ========================================================
+function openHistoryEMR(idPasien) {
+ let p = window.KlinikData.pasien.find(x => x.idPasien === idPasien);
+ if (!p) return;
+ let lblNamaRm = document.getElementById('lblHistoryNamaRM');
+ if(lblNamaRm) lblNamaRm.innerText = `${p.namaPasien} (RM: ${p.noRm || '-'})`;
+ let btnPrint = document.getElementById('btnPrintHistoryBtn');
+ if(btnPrint) btnPrint.setAttribute('onclick', `printHistoryEMR('${idPasien}')`);
+ let emrList = (window.KlinikData.rekamMedis || []).filter(r => r.idPasien === idPasien);
+ emrList.sort((a, b) => {
+   let valA = a.waktuSimpan ? new Date(a.waktuSimpan).getTime() : new Date(a.tanggalPeriksa || 0).getTime();
+   let valB = b.waktuSimpan ? new Date(b.waktuSimpan).getTime() : new Date(b.tanggalPeriksa || 0).getTime();
+   return valB - valA;
+ });
+ window.currentPasienHistoryEMRList = emrList;
+ let container = document.getElementById('containerHistoryEMR');
+ if(!container) return;
+ if (emrList.length === 0) {
+    container.innerHTML = '<div class="text-center py-10 bg-white rounded-xl border border-slate-200 text-slate-400 font-bold">Belum ada riwayat rekam medis untuk pasien ini.</div>';
+ } else {
+    let html = emrList.map((r, rIdx) => {
+       let odoJsonStr = r.odontogramStr || r.odontogram || "{}";
+       let ana = {}, fis = {}, odo = {}, tind = [], obat = [];
+       try { ana = JSON.parse(r.anamnesisStr || "{}"); } catch(e){}
+       try { fis = JSON.parse(r.fisikStr || "{}"); } catch(e){}
+       try { odo = typeof odoJsonStr === 'string' ? JSON.parse(odoJsonStr) : odoJsonStr; } catch(e){}
+       try { tind = JSON.parse(r.tindakanStr || "[]"); } catch(e){}
+       try { obat = JSON.parse(r.obatStr || "[]"); } catch(e){}
+     
+       // FORMAT TANGGAL: DD MONTH YYYY
+       let tglFormat = r.tanggalPeriksa || '-';
+       if(tglFormat !== '-') {
+            let parts = tglFormat.split('-');
+            if(parts.length === 3 && parts[0].length === 4) {
+                const bulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+                tglFormat = `${parseInt(parts[2], 10)} ${bulan[parseInt(parts[1], 10) - 1]} ${parts[0]}`;
+            }
+       }
+     
+       // Hitung Nilai DMF-T untuk Ringkasan Awal
+       let dCount = 0, mCount = 0, fCount = 0;
+       const arrGigiDewasa = [...PAS_ADULT_UPPER_RIGHT, ...PAS_ADULT_UPPER_LEFT, ...PAS_ADULT_LOWER_RIGHT, ...PAS_ADULT_LOWER_LEFT];
+       arrGigiDewasa.forEach(n => {
+         const t = odo[n]; if (!t) return;
+         if (t.generalCondition === 'car' || Object.values(t.surfaces || {}).includes('car')) dCount++;
+         else if (t.generalCondition === 'mis') mCount++;
+         else if (Object.values(t.surfaces || {}).some(c => ['cfr', 'amf', 'gif'].includes(c))) fCount++;
+       });
+       const dmftTotal = dCount + mCount + fCount;
+       const odoFilledGigi = Object.keys(odo).length;
+     
+       return `
+       <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-6">
+         <div class="border-b-2 border-slate-800 pb-4 mb-6 flex justify-between items-end">
+           <div>
+             <h2 class="text-xl font-black uppercase tracking-widest text-slate-900">Rekam Medis Pasien</h2>
+             <p class="text-xs font-bold mt-1 text-slate-600">SHELDON Oral Maxillofacial Surgery & Dental Implant Center</p>
+           </div>
+           <div class="text-right">
+             <p class="text-[10px] font-bold text-slate-500">Kunjungan: ${tglFormat}</p>
+             <p class="text-xs font-black text-indigo-700">${r.dokterPemeriksa || '-'}</p>
+           </div>
+         </div>
+       
+         <div class="space-y-4 text-xs">
+           <div>
+             <h4 class="font-black bg-slate-100 p-1.5 border-l-4 border-slate-800 mb-2 uppercase">Anamnesis</h4>
+             <table class="w-full">
+               <tr><td class="w-40 py-1 text-slate-600">Chief Complain (CC)</td><td>: ${ana.cc || '-'}</td></tr>
+               <tr><td class="py-1 text-slate-600">Present Illness (PI)</td><td>: ${ana.pi || '-'}</td></tr>
+               <tr><td class="py-1 text-slate-600">Past Dental/Medical Hist.</td><td>: ${ana.pdh || '-'} / ${ana.pmh || '-'}</td></tr>
+               <tr><td class="py-1 text-slate-600">Family Hist / Khusus</td><td>: ${ana.fh || '-'} / ${ana.khusus || '-'}</td></tr>
+             </table>
+             <div class="mt-2 text-[10px]"><b>Review Of System:</b>
+               Endo(${ana.ros?.endo||'-'}), Gastro(${ana.ros?.gastro||'-'}), Hemato(${ana.ros?.hemato||'-'}), Kardio(${ana.ros?.kardio||'-'}),
+               Muskulo(${ana.ros?.muskulo||'-'}), Neuro(${ana.ros?.neuro||'-'}), Resp(${ana.ros?.respirasi||'-'}), Uro(${ana.ros?.uro||'-'})
+             </div>
+           </div>
+         
+           <div>
+             <h4 class="font-black bg-slate-100 p-1.5 border-l-4 border-slate-800 mb-2 uppercase">Pemeriksaan Fisik</h4>
+             <table class="w-full">
+               <tr><td class="w-32 py-1 text-slate-600">Kesan Umum</td><td>: ${fis.kesan || '-'}</td><td class="w-32 py-1 text-slate-600">Kesadaran</td><td>: ${fis.kesadaran || '-'}</td></tr>
+               <tr><td class="py-1 text-slate-600">Tensi (mmHg)</td><td>: ${fis.tensi || '-'}</td><td class="py-1 text-slate-600">Nafas (x/mnt)</td><td>: ${fis.nafas || '-'}</td></tr>
+               <tr><td class="py-1 text-slate-600">Nadi (x/mnt)</td><td>: ${fis.nadi || '-'}</td><td class="py-1 text-slate-600">Suhu (°C)</td><td>: ${fis.suhu || '-'}</td></tr>
+               <tr><td class="py-1 text-slate-600">BB (kg) / TB (cm)</td><td colspan="3">: ${fis.bb || '-'} / ${fis.tb || '-'}</td></tr>
+             </table>
+             <table class="w-full mt-1">
+               <tr><td class="w-40 py-1 text-slate-600">Alergi</td><td>: ${fis.alergi || '-'}</td></tr>
+               <tr><td class="py-1 text-slate-600">Ekstra / Intra Oral</td><td>: ${fis.ekstra || '-'} / ${fis.intra || '-'}</td></tr>
+               <tr><td class="py-1 text-slate-600">Penunjang</td><td>: ${fis.penunjang || '-'}</td></tr>
+             </table>
+           </div>
+         
+           <!-- MODUL ODONTOGRAM: RINGKASAN AWAL DMF-T INDEX & TOMBOL INTERAKTIF -->
+           <div class="bg-sky-50/60 border border-sky-200 p-3.5 rounded-xl text-left">
+             <div class="flex justify-between items-center mb-2">
+               <h4 class="font-black text-sky-900 uppercase text-xs flex items-center gap-1.5">
+                 <span>🦷</span> Peta Odontogram Saat Kunjungan
+               </h4>
+               <span class="text-[10px] font-bold px-2 py-0.5 rounded ${odoFilledGigi === 0 ? 'bg-slate-100 text-slate-700 border border-slate-300' : 'bg-sky-100 text-sky-800 border border-sky-300'}">
+                 ${odoFilledGigi === 0 ? 'Semua Sehat (SOU)' : `Tercatat (${odoFilledGigi} Gigi)`}
+               </span>
+             </div>
+             <div class="grid grid-cols-4 gap-2 text-center text-xs">
+               <div class="bg-white p-2 rounded-lg border border-slate-200">
+                 <span class="text-[9px] text-slate-500 block font-bold">Decayed (D)</span>
+                 <span class="font-black ${dCount > 0 ? 'text-rose-600' : 'text-slate-800'}">${dCount}</span>
+               </div>
+               <div class="bg-white p-2 rounded-lg border border-slate-200">
+                 <span class="text-[9px] text-slate-500 block font-bold">Missing (M)</span>
+                 <span class="font-black ${mCount > 0 ? 'text-amber-600' : 'text-slate-800'}">${mCount}</span>
+               </div>
+               <div class="bg-white p-2 rounded-lg border border-slate-200">
+                 <span class="text-[9px] text-slate-500 block font-bold">Filled (F)</span>
+                 <span class="font-black ${fCount > 0 ? 'text-emerald-600' : 'text-slate-800'}">${fCount}</span>
+               </div>
+               <div class="bg-white p-2 rounded-lg border border-slate-200">
+                 <span class="text-[9px] text-slate-500 block font-bold">Total DMF-T</span>
+                 <span class="font-black ${dmftTotal > 0 ? 'text-sky-700' : 'text-slate-800'}">${dmftTotal}</span>
+               </div>
+             </div>
+             <div class="mt-2.5 text-right no-print">
+               <button type="button" onclick="bukaModalOdontoHistoryPasien(${rIdx})" class="px-3.5 py-1.5 bg-sky-600 hover:bg-sky-700 text-white rounded-lg font-bold text-[10px] shadow-sm transition-all flex items-center gap-1.5 ml-auto">
+                 <span>🦷</span> Buka Gambar Odontogram &rarr;
+               </button>
+             </div>
+           </div>
+         
+           <div>
+             <h4 class="font-black bg-slate-100 p-1.5 border-l-4 border-slate-800 mb-2 uppercase">Diagnosis Gigi (Tulisan)</h4>
+             <ul class="list-disc pl-5 columns-1 sm:columns-3 gap-6 space-y-1 text-xs">
+               ${Object.keys(odo).length === 0 ? '<li class="break-inside-avoid">Tidak ada kelainan (Normal/SOU) / Tidak ditandai</li>' :
+                 Object.keys(odo).map(gigi => {
+                   let dt = odo[gigi];
+                   let diag = dt.diagnosis ? `(Diag: ${dt.diagnosis})` : '';
+                   let nts = dt.notes ? `[Catatan: ${dt.notes}]` : '';
+                   let gen = dt.generalCondition !== 'nor' ? `Kondisi: ${dt.generalCondition}` : '';
+                   let sur = Object.entries(dt.surfaces||{}).filter(x=>x[1]!=='nor').map(x=>x[0]+'='+x[1]).join(', ');
+                   let srTx = sur ? `Permukaan: ${sur}` : '';
+                   return `<li class="break-inside-avoid"><b>Gigi ${gigi}:</b> <span class="text-slate-600">${gen}${srTx}</span> <span class="text-indigo-600 font-bold">${diag}</span> <span class="text-amber-600 italic">${nts}</span></li>`;
+                 }).join('')
+               }
+             </ul>
+           </div>
+         
+           ${fis.periodontal ? `
+           <div class="bg-indigo-50/60 border border-indigo-200 p-3.5 rounded-xl text-left">
+             <div class="flex justify-between items-center mb-2">
+               <h4 class="font-black text-indigo-900 uppercase text-xs flex items-center gap-1.5">
+                 <span>🦷</span> Hasil Periodontal Charting
+               </h4>
+               <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-indigo-100 text-indigo-700 border border-indigo-200">Tercatat</span>
+             </div>
+             <div class="grid grid-cols-3 gap-2 text-center text-xs">
+               <div class="bg-white p-2 rounded-lg border border-slate-200">
+                 <span class="text-[9px] text-slate-500 block font-bold">Total Sites</span>
+                 <span class="font-black text-slate-800">${fis.periodontal.summary?.totalSites || 0} Titik</span>
+               </div>
+               <div class="bg-white p-2 rounded-lg border border-slate-200">
+                 <span class="text-[9px] text-slate-500 block font-bold">Deep Pockets (&ge;4mm)</span>
+                 <span class="font-black ${(fis.periodontal.summary?.deepPockets || 0) > 0 ? "text-rose-600" : "text-slate-800"}">${fis.periodontal.summary?.deepPockets || 0} Titik</span>
+               </div>
+               <div class="bg-white p-2 rounded-lg border border-slate-200">
+                 <span class="text-[9px] text-slate-500 block font-bold">Bleeding Index (BOP)</span>
+                 <span class="font-black ${(fis.periodontal.summary?.bopPercent || 0) > 0 ? "text-rose-600" : "text-slate-800"}">${fis.periodontal.summary?.bopPercent || 0}%</span>
+               </div>
+             </div>
+             <div class="mt-2.5 text-right no-print">
+               <button type="button" onclick="bukaModalPerioHistoryPasien(${rIdx})" class="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-bold text-[10px] shadow-sm transition-all flex items-center gap-1.5 ml-auto">
+                 <span>📊</span> Buka Grafik Charting Lengkap &rarr;
+               </button>
+             </div>
+           </div>
+           ` : ""}
+         
+           ${fis.ohis ? `
+           <div class="bg-teal-50/60 border border-teal-200 p-3.5 rounded-xl text-left">
+             <div class="flex justify-between items-center mb-2">
+               <h4 class="font-black text-teal-900 uppercase text-xs flex items-center gap-1.5">
+                 <span>🪥</span> Hasil Pemeriksaan OHI-S
+               </h4>
+               <span class="text-[10px] font-bold px-2 py-0.5 rounded ${fis.ohis.category === 'Baik' || (fis.ohis.summary && fis.ohis.summary.kategori === 'Baik') ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : (fis.ohis.category === 'Sedang' || (fis.ohis.summary && fis.ohis.summary.kategori === 'Sedang')) ? 'bg-amber-100 text-amber-800 border border-amber-300' : 'bg-rose-100 text-rose-800 border border-rose-300'}">
+                 ${fis.ohis.category || (fis.ohis.summary ? fis.ohis.summary.kategori : 'Tercatat')} (${fis.ohis.totalScore || (fis.ohis.summary ? fis.ohis.summary.ohis : 0)})
+               </span>
+             </div>
+             <div class="grid grid-cols-3 gap-2 text-center text-xs">
+               <div class="bg-white p-2 rounded-lg border border-slate-200">
+                 <span class="text-[9px] text-slate-500 block font-bold">Debris Index (DI-S)</span>
+                 <span class="font-black text-slate-800">${fis.ohis.debrisScore || (fis.ohis.summary ? fis.ohis.summary.dis : 0)}</span>
+               </div>
+               <div class="bg-white p-2 rounded-lg border border-slate-200">
+                 <span class="text-[9px] text-slate-500 block font-bold">Calculus Index (CI-S)</span>
+                 <span class="font-black text-slate-800">${fis.ohis.calculusScore || (fis.ohis.summary ? fis.ohis.summary.cis : 0)}</span>
+               </div>
+               <div class="bg-white p-2 rounded-lg border border-slate-200">
+                 <span class="text-[9px] text-slate-500 block font-bold">Total OHI-S Score</span>
+                 <span class="font-black text-teal-700">${fis.ohis.totalScore || (fis.ohis.summary ? fis.ohis.summary.ohis : 0)}</span>
+               </div>
+             </div>
+             <div class="mt-2.5 text-right no-print">
+               <button type="button" onclick="bukaModalOhisHistoryPasien(${rIdx})" class="px-3.5 py-1.5 bg-teal-600 hover:bg-teal-700 text-white rounded-lg font-bold text-[10px] shadow-sm transition-all flex items-center gap-1.5 ml-auto">
+                 <span>🪥</span> Buka Detail Pemeriksaan OHI-S &rarr;
+               </button>
+             </div>
+           </div>
+           ` : ""}
+         
+           ${(ana.diagnosaICD && ana.diagnosaICD.length > 0) ? `
+           <div>
+             <h4 class="font-black bg-slate-100 p-1.5 border-l-4 border-slate-800 mb-2 uppercase">Diagnosa (ICD-10)</h4>
+             <ul class="list-disc pl-5 space-y-1 text-slate-800 font-bold mb-4">
+               ${ana.diagnosaICD.map(d => `<li>${d}</li>`).join('')}
+             </ul>
+           </div>
+           ` : ''}
+         
+           <div>
+             <h4 class="font-black bg-slate-100 p-1.5 border-l-4 border-slate-800 mb-2 uppercase">Tindakan (ICD-9)</h4>
+             <ul class="list-disc pl-5">${tind.length === 0 ? '<li>-</li>' : tind.map(t => `<li>${t}</li>`).join('')}</ul>
+           </div>
+         
+           <div>
+             <h4 class="font-black bg-slate-100 p-1.5 border-l-4 border-slate-800 mb-2 uppercase">Resep Obat</h4>
+             <table class="w-full text-left border border-slate-300 border-collapse">
+               <tr class="bg-slate-50"><th class="border border-slate-300 px-2 py-1">Nama Obat</th><th class="border border-slate-300 px-2 py-1 w-16 text-center">Qty</th><th class="border border-slate-300 px-2 py-1">Aturan Pakai</th></tr>
+               ${obat.length === 0 ? '<tr><td colspan="3" class="border border-slate-300 px-2 py-1 text-center">-</td></tr>' : obat.map(o => `<tr><td class="border border-slate-300 px-2 py-1">${o.obat}</td><td class="border border-slate-300 px-2 py-1 text-center font-bold">${o.qty}</td><td class="border border-slate-300 px-2 py-1">${o.ket}</td></tr>`).join('')}
+             </table>
+           </div>
+         
+           <div>
+             <h4 class="font-black bg-slate-100 p-1.5 border-l-4 border-slate-800 mb-2 uppercase">Catatan Edukasi</h4>
+             <p class="pl-2 bg-rose-50 p-2 rounded border border-rose-100 text-rose-800 font-medium">${r.catatanEdukasi || '-'}</p>
+           </div>
+         </div>
+       </div>
+       `;
+    }).join('');
+  
+    container.innerHTML = html;
+ }
+ let modal = document.getElementById('modalHistoryEMR');
+ if(modal) modal.classList.remove('hidden');
+}
+function closeHistoryEMR() {
+  let modal = document.getElementById('modalHistoryEMR');
+  if(modal) modal.classList.add('hidden');
+  tutupModalOdontoHistoryPasien();
+  tutupModalPerioHistoryPasien();
+  tutupModalOhisHistoryPasien();
+}
+
+// ----------------------------------------------------
+// MODAL VIEWER ODONTOGRAM HISTORY PASIEN
+// ----------------------------------------------------
+function tutupModalOdontoHistoryPasien() {
+  const m = document.getElementById('modalOdontoHistoryPasien');
+  if (m) m.classList.add('hidden');
+}
+
+function bukaModalOdontoHistoryPasien(idx) {
+  const r = (window.currentPasienHistoryEMRList || [])[idx];
+  if (!r) return;
+  const modal = document.getElementById('modalOdontoHistoryPasien');
+  if (!modal) return;
+
+  let odoJsonStr = r.odontogramStr || r.odontogram || "{}";
+  let odoData = {};
+  try {
+    odoData = typeof odoJsonStr === 'string' ? JSON.parse(odoJsonStr) : odoJsonStr;
+  } catch(e) {
+    odoData = {};
+  }
+
+  // Subtitle info
+  const sub = document.getElementById('lblSubOdontoPasien');
+  if (sub) {
+    sub.innerText = `Kunjungan: ${r.tanggalPeriksa || '-'} • Dokter: ${r.dokterPemeriksa || '-'}`;
+  }
+
+  // Hitung DMF-T
+  let dCount = 0, mCount = 0, fCount = 0;
+  if (odoData && typeof odoData === 'object') {
+    Object.keys(odoData).forEach(gigi => {
+      let t = odoData[gigi] || {};
+      let gen = (t.generalCondition || '').toLowerCase();
+      let surfs = t.surfaces || {};
+      if (gen === 'mis') mCount++;
+      let isFilled = gen === 'crn' || Object.values(surfs).some(v => ['amf', 'cof', 'gif'].includes(v));
+      if (isFilled) fCount++;
+      let isCaries = gen === 'rrx' || Object.values(surfs).some(v => ['car', 'dcf'].includes(v)) || ((t.diagnosis || '').toLowerCase().includes('karies'));
+      if (isCaries) dCount++;
+    });
+  }
+  let dmftTotal = dCount + mCount + fCount;
+
+  // Render Stat Cards DMF-T
+  const cardsCont = document.getElementById('odontoDmftCardsPasien');
+  if (cardsCont) {
+    cardsCont.innerHTML = `
+      <div class="bg-white p-3 rounded-xl border border-slate-200 text-center shadow-sm">
+        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Decayed (D)</span>
+        <span class="text-xl font-black ${dCount > 0 ? 'text-rose-600' : 'text-slate-800'} font-mono">${dCount}</span>
+      </div>
+      <div class="bg-white p-3 rounded-xl border border-slate-200 text-center shadow-sm">
+        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Missing (M)</span>
+        <span class="text-xl font-black ${mCount > 0 ? 'text-amber-600' : 'text-slate-800'} font-mono">${mCount}</span>
+      </div>
+      <div class="bg-white p-3 rounded-xl border border-slate-200 text-center shadow-sm">
+        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Filled (F)</span>
+        <span class="text-xl font-black ${fCount > 0 ? 'text-emerald-600' : 'text-slate-800'} font-mono">${fCount}</span>
+      </div>
+      <div class="bg-white p-3 rounded-xl border border-sky-200 bg-sky-50/50 text-center shadow-sm">
+        <span class="text-[9px] font-bold text-sky-700 uppercase tracking-wider block">Total DMF-T</span>
+        <span class="text-xl font-black ${dmftTotal > 0 ? 'text-sky-700' : 'text-slate-800'} font-mono">${dmftTotal}</span>
+      </div>
+    `;
+  }
+
+  // Render SVG Odontogram Lengkap
+  const visualCont = document.getElementById('odontoVisualContainerPasien');
+  if (visualCont) {
+    visualCont.innerHTML = renderOdoVisualPasien(JSON.stringify(odoData));
+  }
+
+  // Render Daftar Rincian Kondisi Gigi
+  const listCont = document.getElementById('odontoListDiagnosaPasien');
+  if (listCont) {
+    let keys = Object.keys(odoData || {});
+    if (keys.length === 0) {
+      listCont.innerHTML = '<p class="text-slate-400 italic">Tidak ada kelainan gigi yang tercatat (Semua normal/SOU).</p>';
+    } else {
+      listCont.innerHTML = keys.map(k => {
+        let dt = odoData[k] || {};
+        let diag = dt.diagnosis ? `(Diag: ${dt.diagnosis})` : '';
+        let nts = dt.notes ? `[Catatan: ${dt.notes}]` : '';
+        let gen = dt.generalCondition && dt.generalCondition !== 'nor' ? `Kondisi: ${dt.generalCondition}` : '';
+        let sur = Object.entries(dt.surfaces || {}).filter(x => x[1] !== 'nor').map(x => x[0] + '=' + x[1]).join(', ');
+        let srTx = sur ? `Permukaan: ${sur}` : '';
+        return `<div>&bull; <b>Gigi ${k}:</b> <span class="text-slate-600">${gen} ${srTx}</span> <span class="text-indigo-600 font-bold">${diag}</span> <span class="text-amber-600 italic">${nts}</span></div>`;
+      }).join('');
+    }
+  }
+
+  modal.classList.remove('hidden');
+}
+
+// ========================================================
+// CONTROLLER PERIODONTAL CHARTING HISTORY PASIEN (DARK CLINICAL MODE)
+// ========================================================
+let perioTeethDataPasien = {};
+let perioActiveArchPasien = "maxilla";
+let perioActiveAspectPasien = "facial";
+
+function tutupModalPerioHistoryPasien() {
+  const m = document.getElementById('modalPerioHistoryPasien');
+  if (m) m.classList.add('hidden');
+}
+
+function switchPerioArchPasien(arch) {
+  perioActiveArchPasien = arch;
+  const tabAtas = document.getElementById("tabPerioRahangAtasPasien");
+  const tabBawah = document.getElementById("tabPerioRahangBawahPasien");
+  if (tabAtas && tabBawah) {
+    if (arch === "maxilla") {
+      tabAtas.className = "flex-1 py-1.5 rounded-lg font-bold text-xs bg-blue-600 text-white transition-all shadow";
+      tabBawah.className = "flex-1 py-1.5 rounded-lg font-bold text-xs text-slate-400 hover:text-white hover:bg-slate-800 transition-all";
+    } else {
+      tabBawah.className = "flex-1 py-1.5 rounded-lg font-bold text-xs bg-blue-600 text-white transition-all shadow";
+      tabAtas.className = "flex-1 py-1.5 rounded-lg font-bold text-xs text-slate-400 hover:text-white hover:bg-slate-800 transition-all";
+    }
+  }
+  renderPerioUIPasien();
+}
+
+function switchPerioAspectPasien(aspect) {
+  perioActiveAspectPasien = aspect;
+  const tabF = document.getElementById("tabPerioFacialPasien");
+  const tabL = document.getElementById("tabPerioLingualPasien");
+  if (tabF && tabL) {
+    if (aspect === "facial") {
+      tabF.className = "px-3 py-1.5 rounded-lg font-bold text-xs bg-indigo-600 text-white transition-all";
+      tabL.className = "px-3 py-1.5 rounded-lg font-bold text-xs text-slate-400 hover:text-white hover:bg-slate-800 transition-all";
+    } else {
+      tabL.className = "px-3 py-1.5 rounded-lg font-bold text-xs bg-indigo-600 text-white transition-all";
+      tabF.className = "px-3 py-1.5 rounded-lg font-bold text-xs text-slate-400 hover:text-white hover:bg-slate-800 transition-all";
+    }
+  }
+  renderPerioUIPasien();
+}
+
+function getSiteKeysForAspectPasien() {
+  if (perioActiveAspectPasien === "facial") {
+    return [
+      { key: "df", label: "Distofacial (DF)" },
+      { key: "f",  label: "Midfacial (F)" },
+      { key: "mf", label: "Mesiofacial (MF)" }
+    ];
+  } else {
+    if (perioActiveArchPasien === "maxilla") {
+      return [
+        { key: "dp", label: "Distopalatal (DP)" },
+        { key: "p",  label: "Midpalatal (P)" },
+        { key: "mp", label: "Mesiopalatal (MP)" }
+      ];
+    } else {
+      return [
+        { key: "dl", label: "Distolingual (DL)" },
+        { key: "l",  label: "Midlingual (L)" },
+        { key: "ml", label: "Mesiolingual (ML)" }
+      ];
+    }
+  }
+}
+
+function renderPerioGraphicPasien(teethList) {
+  const svg = document.getElementById("svgPerioChartPasien");
+  if (!svg) return;
+
+  const sites = getSiteKeysForAspectPasien();
+  const toothWidth = 1000 / teethList.length;
+  const isMaxilla = (perioActiveArchPasien === "maxilla");
+
+  const gridLines = [
+    { depth: 1, y: isMaxilla ? 85 : 105, label: "1mm" },
+    { depth: 3, y: isMaxilla ? 70 : 120, label: "3mm" },
+    { depth: 6, y: isMaxilla ? 50 : 140, label: "6mm" },
+    { depth: 7, y: isMaxilla ? 40 : 150, label: "7mm" },
+    { depth: 9, y: isMaxilla ? 25 : 165, label: "9mm" }
+  ];
+
+  let svgContent = "";
+
+  // 1. Grid lines horizontal
+  gridLines.forEach(g => {
+    svgContent += `
+      <line x1="40" y1="${g.y}" x2="980" y2="${g.y}" stroke="#1e293b" stroke-dasharray="3,3" stroke-width="1"/>
+      <text x="10" y="${g.y + 3}" fill="#475569" font-size="9" font-family="monospace">${g.label}</text>
+    `;
+  });
+
+  // 2. Render visual per gigi
+  teethList.forEach((tNum, idx) => {
+    const tData = perioTeethDataPasien[tNum] || {};
+    const centerX = idx * toothWidth + (toothWidth / 2);
+
+    // Siluet mahkota & akar gigi
+    if (isMaxilla) {
+      svgContent += `
+        <path d="M ${centerX - 7} 80 C ${centerX - 8} 40, ${centerX - 3} 20, ${centerX} 15 C ${centerX + 3} 20, ${centerX + 8} 40, ${centerX + 7} 80 Z" fill="#94a3b8" fill-opacity="0.25" stroke="#64748b" stroke-width="1"/>
+        <path d="M ${centerX - 12} 82 C ${centerX - 14} 115, ${centerX - 10} 130, ${centerX} 132 C ${centerX + 10} 130, ${centerX + 14} 115, ${centerX + 12} 82 Z" fill="#cbd5e1" fill-opacity="0.75" stroke="#94a3b8" stroke-width="1.2"/>
+      `;
+    } else {
+      svgContent += `
+        <path d="M ${centerX - 12} 98 C ${centerX - 14} 65, ${centerX - 10} 50, ${centerX} 48 C ${centerX + 10} 50, ${centerX + 14} 65, ${centerX + 12} 98 Z" fill="#cbd5e1" fill-opacity="0.75" stroke="#94a3b8" stroke-width="1.2"/>
+        <path d="M ${centerX - 7} 100 C ${centerX - 8} 140, ${centerX - 3} 160, ${centerX} 165 C ${centerX + 3} 160, ${centerX + 8} 140, ${centerX + 7} 100 Z" fill="#94a3b8" fill-opacity="0.25" stroke="#64748b" stroke-width="1"/>
+      `;
+    }
+
+    // Nomor gigi
+    svgContent += `
+      <text x="${centerX}" y="${isMaxilla ? 150 : 38}" text-anchor="middle" fill="#94a3b8" font-size="10" font-weight="bold" font-family="monospace">T${tNum}</text>
+    `;
+
+    // 3 probe sites per gigi
+    const siteOffsets = [-10, 0, 10];
+    const depths = [tData[sites[0].key] || 0, tData[sites[1].key] || 0, tData[sites[2].key] || 0];
+    const bops = [!!tData["bop_" + sites[0].key], !!tData["bop_" + sites[1].key], !!tData["bop_" + sites[2].key]];
+
+    let polyPoints = [];
+    siteOffsets.forEach((off, sIdx) => {
+      const siteX = centerX + off;
+      const d = depths[sIdx];
+      const dPx = Math.min(d * 8, 75);
+      const siteY = isMaxilla ? (80 - dPx) : (100 + dPx);
+      polyPoints.push({ x: siteX, y: siteY, depth: d, isBop: bops[sIdx] });
+    });
+
+    // Arsiran pocket depth
+    if (isMaxilla) {
+      const hasDeep = depths.some(d => d >= 4);
+      const pocketColor = hasDeep ? "rgba(239, 68, 68, 0.45)" : "rgba(59, 130, 246, 0.2)";
+      const strokeColor = hasDeep ? "#ef4444" : "#3b82f6";
+      const polyStr = `${polyPoints[0].x},80 ${polyPoints[0].x},${polyPoints[0].y} ${polyPoints[1].x},${polyPoints[1].y} ${polyPoints[2].x},${polyPoints[2].y} ${polyPoints[2].x},80`;
+      svgContent += `
+        <polygon points="${polyStr}" fill="${pocketColor}" stroke="${strokeColor}" stroke-width="1.2"/>
+      `;
+    } else {
+      const hasDeep = depths.some(d => d >= 4);
+      const pocketColor = hasDeep ? "rgba(239, 68, 68, 0.45)" : "rgba(59, 130, 246, 0.2)";
+      const strokeColor = hasDeep ? "#ef4444" : "#3b82f6";
+      const polyStr = `${polyPoints[0].x},100 ${polyPoints[0].x},${polyPoints[0].y} ${polyPoints[1].x},${polyPoints[1].y} ${polyPoints[2].x},${polyPoints[2].y} ${polyPoints[2].x},100`;
+      svgContent += `
+        <polygon points="${polyStr}" fill="${pocketColor}" stroke="${strokeColor}" stroke-width="1.2"/>
+      `;
+    }
+
+    // Titik probe & BOP
+    polyPoints.forEach((pt) => {
+      if (pt.depth > 0) {
+        svgContent += `
+          <circle cx="${pt.x}" cy="${pt.y}" r="${pt.depth >= 4 ? 3.5 : 2.5}" fill="${pt.depth >= 4 ? '#f43f5e' : '#38bdf8'}" stroke="#0f172a" stroke-width="1"/>
+        `;
+      }
+      if (pt.isBop) {
+        const bopY = isMaxilla ? 83 : 97;
+        svgContent += `
+          <circle cx="${pt.x}" cy="${bopY}" r="3" fill="#f43f5e" stroke="#ffe4e6" stroke-width="1"/>
+        `;
+      }
+    });
+  });
+
+  svg.innerHTML = svgContent;
+}
+
+function renderPerioCardsPasien(teethList) {
+  const container = document.getElementById("perioCardsContainerPasien");
+  if (!container) return;
+
+  const sites = getSiteKeysForAspectPasien();
+
+  const html = teethList.map((tNum) => {
+    const tData = perioTeethDataPasien[tNum] || {};
+
+    const siteBoxes = sites.map((s) => {
+      const val = tData[s.key] || 0;
+      const isBop = !!tData["bop_" + s.key];
+      const isDeep = (val >= 4);
+
+      let valColor = "text-cyan-300";
+      let boxBg = "bg-slate-900 border-slate-800";
+      if (isDeep) {
+        valColor = "text-rose-400 font-black";
+        boxBg = "bg-rose-950/40 border-rose-800/60";
+      } else if (val === 0) {
+        valColor = "text-slate-500 font-medium";
+      }
+
+      const bopDot = isBop 
+        ? `<span class="w-2 h-2 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.9)] inline-block"></span>`
+        : `<span class="w-1.5 h-1.5 rounded-full bg-slate-700 inline-block"></span>`;
+
+      return `
+        <div class="flex-1 flex flex-col items-center justify-center p-1.5 rounded-lg border ${boxBg}">
+          <span class="text-[9px] font-bold text-slate-400 font-mono mb-0.5">${s.label.split(" ")[1].replace(/[()]/g,"")}</span>
+          <span class="text-sm font-black font-mono ${valColor}">${val || "-"}</span>
+          <div class="mt-1 flex items-center justify-center">${bopDot}</div>
+        </div>
+      `;
+    }).join("");
+
+    return `
+      <div class="bg-[#111827] border border-slate-800 rounded-xl p-2.5 flex flex-col">
+        <div class="flex items-center justify-between mb-2 pb-1 border-b border-slate-800/80">
+          <span class="font-black font-mono text-sm text-blue-400">T${tNum}</span>
+          <span class="text-[9px] text-slate-500 font-bold uppercase">${perioActiveAspectPasien}</span>
+        </div>
+        <div class="flex gap-1.5 justify-between">
+          ${siteBoxes}
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  container.innerHTML = html;
+}
+
+function renderPerioUIPasien() {
+  const teethList = (perioActiveArchPasien === "maxilla")
+    ? [18, 17, 16, 15, 14, 13, 12, 11, 21, 22, 23, 24, 25, 26, 27, 28]
+    : [48, 47, 46, 45, 44, 43, 42, 41, 31, 32, 33, 34, 35, 36, 37, 38];
+
+  // 1. Update Labels & Metrics
+  let totalSites = 0, deepPockets = 0, bopSites = 0;
+  const allTeethNums = [
+    18, 17, 16, 15, 14, 13, 12, 11, 21, 22, 23, 24, 25, 26, 27, 28,
+    48, 47, 46, 45, 44, 43, 42, 41, 31, 32, 33, 34, 35, 36, 37, 38
+  ];
+  const allSitesKeys = ["df", "f", "mf", "dp", "p", "mp", "dl", "l", "ml"];
+
+  allTeethNums.forEach(tNum => {
+    const t = perioTeethDataPasien[tNum];
+    if (t) {
+      allSitesKeys.forEach(sKey => {
+        if (typeof t[sKey] === "number" && t[sKey] > 0) {
+          totalSites++;
+          if (t[sKey] >= 4) deepPockets++;
+        }
+        if (t["bop_" + sKey]) {
+          bopSites++;
+        }
+      });
+    }
+  });
+
+  const bopPercent = totalSites > 0 ? Math.round((bopSites / totalSites) * 100) : 0;
+
+  const elTot = document.getElementById("metricTotalSitesPasien");
+  const elDeep = document.getElementById("metricDeepPocketsPasien");
+  const elBop = document.getElementById("metricBopPercentPasien");
+  if (elTot) elTot.innerText = totalSites;
+  if (elDeep) elDeep.innerText = deepPockets;
+  if (elBop) elBop.innerText = `${bopPercent}% (${bopSites} sites)`;
+
+  const elGLabel = document.getElementById("perioGraphicLabelPasien");
+  if (elGLabel) {
+    elGLabel.innerHTML = `${perioActiveArchPasien === "maxilla" ? "Rahang Atas (18-28)" : "Rahang Bawah (48-38)"} &bull; Tampilan ${perioActiveAspectPasien === "facial" ? "Fasial/Bukal" : (perioActiveArchPasien === "maxilla" ? "Palatal" : "Lingual")}`;
+  }
+
+  const elGridHeader = document.getElementById("perioGridHeaderPasien");
+  if (elGridHeader) {
+    elGridHeader.innerHTML = `Daftar Gigi ${perioActiveArchPasien === "maxilla" ? "Rahang Atas (18-28)" : "Rahang Bawah (48-38)"} (Tampilan ${perioActiveAspectPasien === "facial" ? "Fasial/Bukal" : (perioActiveArchPasien === "maxilla" ? "Palatal" : "Lingual")})`;
+  }
+
+  const elFooter = document.getElementById("perioFooterSummaryTextPasien");
+  if (elFooter) {
+    elFooter.innerHTML = `Terisi ${totalSites} titik &bull; Saku Dalam (&ge;4mm): ${deepPockets} titik &bull; Bleeding Index (BOP): ${bopPercent}% (${bopSites} titik perdarahan).`;
+  }
+
+  // 2. Render Cards Grid
+  renderPerioCardsPasien(teethList);
+
+  // 3. Render SVG Graphic
+  renderPerioGraphicPasien(teethList);
+}
+
+function bukaModalPerioHistoryPasien(idx) {
+  const r = (window.currentPasienHistoryEMRList || [])[idx];
+  if (!r) return;
+  const modal = document.getElementById('modalPerioHistoryPasien');
+  if (!modal) return;
+
+  let fis = {};
+  try { fis = JSON.parse(r.fisikStr || "{}"); } catch(e){}
+  if (!fis || !fis.periodontal || !fis.periodontal.teeth) {
+    if (typeof alertMsg === 'function') {
+      alertMsg("info", "Kunjungan ini tidak memiliki catatan data Periodontal Charting.");
+    }
+    return;
+  }
+
+  perioTeethDataPasien = JSON.parse(JSON.stringify(fis.periodontal.teeth || {}));
+  perioActiveArchPasien = "maxilla";
+  perioActiveAspectPasien = "facial";
+
+  const sub = document.getElementById('lblSubPerioPasien');
+  if (sub) {
+    sub.innerText = `Kunjungan: ${r.tanggalPeriksa || '-'} • Dokter: ${r.dokterPemeriksa || '-'}`;
+  }
+
+  // Reset tab button states & render UI
+  switchPerioArchPasien('maxilla');
+  switchPerioAspectPasien('facial');
+
+  modal.classList.remove('hidden');
+}
+
+
+// ========================================================
+// CONTROLLER OHI-S HISTORY PASIEN (DARK TEAL MODE)
+// ========================================================
+let ohisTeethDataPasien = {};
+
+function tutupModalOhisHistoryPasien() {
+  const m = document.getElementById('modalOhisHistoryPasien');
+  if (m) m.classList.add('hidden');
+}
+
+function renderOhisToothCardPasien(t) {
+  const dVal = (ohisTeethDataPasien[t.no] && typeof ohisTeethDataPasien[t.no].d === 'number') ? ohisTeethDataPasien[t.no].d : 0;
+  const cVal = (ohisTeethDataPasien[t.no] && typeof ohisTeethDataPasien[t.no].c === 'number') ? ohisTeethDataPasien[t.no].c : 0;
+
+  const btnPill = (tooth, type, val, currentVal) => {
+    const isSelected = (val === currentVal);
+    let colorClass = "bg-slate-800 text-slate-400 border-slate-700 opacity-60";
+    if (isSelected) {
+      if (val === 0) colorClass = "bg-emerald-600 text-white font-black border-emerald-400 shadow-md shadow-emerald-900/50 opacity-100 ring-2 ring-emerald-400";
+      else if (val === 1) colorClass = "bg-sky-600 text-white font-black border-sky-400 shadow-md shadow-sky-900/50 opacity-100 ring-2 ring-sky-400";
+      else if (val === 2) colorClass = "bg-amber-600 text-white font-black border-amber-400 shadow-md shadow-amber-900/50 opacity-100 ring-2 ring-amber-400";
+      else if (val === 3) colorClass = "bg-rose-600 text-white font-black border-rose-400 shadow-md shadow-rose-900/50 opacity-100 ring-2 ring-rose-400";
+    }
+    return `<div class="flex-1 py-1 px-1 rounded-lg text-xs font-bold border text-center ${colorClass}">${val}</div>`;
+  };
+
+  return `
+    <div class="bg-[#12222b] border border-teal-900/50 rounded-xl p-3 shadow-sm hover:border-teal-700/60 transition-colors">
+      <div class="flex justify-between items-center mb-2 pb-1.5 border-b border-teal-950">
+        <div class="flex items-center gap-2">
+          <span class="w-7 h-7 rounded-lg bg-teal-500/20 text-teal-300 font-black text-sm flex items-center justify-center border border-teal-500/30">${t.no}</span>
+          <div>
+            <div class="text-[11px] font-bold text-white">${t.name}</div>
+            <div class="text-[9px] text-teal-300 font-mono">Permukaan ${t.surface}</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- DEBRIS ROW -->
+      <div class="mb-2">
+        <div class="flex justify-between items-center text-[10px] mb-1">
+          <span class="font-bold text-slate-300">Debris (DI-S):</span>
+          <span class="font-mono text-teal-400 font-bold">Skor ${dVal}</span>
+        </div>
+        <div class="flex gap-1">
+          ${btnPill(t.no, 'd', 0, dVal)}
+          ${btnPill(t.no, 'd', 1, dVal)}
+          ${btnPill(t.no, 'd', 2, dVal)}
+          ${btnPill(t.no, 'd', 3, dVal)}
+        </div>
+      </div>
+
+      <!-- CALCULUS ROW -->
+      <div>
+        <div class="flex justify-between items-center text-[10px] mb-1">
+          <span class="font-bold text-slate-300">Calculus (CI-S):</span>
+          <span class="font-mono text-teal-400 font-bold">Skor ${cVal}</span>
+        </div>
+        <div class="flex gap-1">
+          ${btnPill(t.no, 'c', 0, cVal)}
+          ${btnPill(t.no, 'c', 1, cVal)}
+          ${btnPill(t.no, 'c', 2, cVal)}
+          ${btnPill(t.no, 'c', 3, cVal)}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function bukaModalOhisHistoryPasien(idx) {
+  const r = (window.currentPasienHistoryEMRList || [])[idx];
+  if (!r) return;
+  const modal = document.getElementById('modalOhisHistoryPasien');
+  if (!modal) return;
+
+  let fis = {};
+  try { fis = JSON.parse(r.fisikStr || "{}"); } catch(e){}
+  if (!fis || !fis.ohis) {
+    if (typeof alertMsg === 'function') {
+      alertMsg("info", "Kunjungan ini tidak memiliki catatan data OHI-S.");
+    }
+    return;
+  }
+
+  const ohis = fis.ohis;
+  const summary = ohis.summary || {};
+  ohisTeethDataPasien = JSON.parse(JSON.stringify(ohis.teeth || {}));
+
+  // Hitung metrik jika summary belum ada
+  let totD = 0, totC = 0, countD = 0, countC = 0;
+  const ohisTeethList = [
+    { no: "16", name: "Molar 1 Atas Kanan", arch: "maxilla", surface: "Bukal (Buccal)" },
+    { no: "11", name: "Insisivus 1 Atas Kanan", arch: "maxilla", surface: "Labial" },
+    { no: "26", name: "Molar 1 Atas Kiri", arch: "maxilla", surface: "Bukal (Buccal)" },
+    { no: "46", name: "Molar 1 Bawah Kanan", arch: "mandible", surface: "Lingual" },
+    { no: "31", name: "Insisivus 1 Bawah Kiri", arch: "mandible", surface: "Labial" },
+    { no: "36", name: "Molar 1 Bawah Kiri", arch: "mandible", surface: "Lingual" }
+  ];
+
+  ohisTeethList.forEach(t => {
+    const item = ohisTeethDataPasien[t.no];
+    if (item) {
+      if (typeof item.d === 'number') { totD += item.d; countD++; }
+      if (typeof item.c === 'number') { totC += item.c; countC++; }
+    }
+  });
+
+  const numD = countD > 0 ? (totD / countD) : (Number(ohis.debrisScore) || 0);
+  const numC = countC > 0 ? (totC / countC) : (Number(ohis.calculusScore) || 0);
+  const numTot = Number((numD + numC).toFixed(2));
+
+  const dis = summary.dis || numD.toFixed(2);
+  const cis = summary.cis || numC.toFixed(2);
+  const totalScore = summary.ohis || numTot.toFixed(2);
+
+  let kat = "Baik";
+  let katClass = "bg-emerald-950 text-emerald-300 border-emerald-600";
+  let rangeTxt = "Rentang: 0.0 - 1.2";
+
+  if (numTot > 3.0) {
+    kat = "Buruk (Poor)";
+    katClass = "bg-rose-950 text-rose-300 border-rose-600";
+    rangeTxt = "Rentang: 3.1 - 6.0";
+  } else if (numTot > 1.2) {
+    kat = "Sedang (Moderate)";
+    katClass = "bg-amber-950 text-amber-300 border-amber-600";
+    rangeTxt = "Rentang: 1.3 - 3.0";
+  } else {
+    kat = "Baik (Good)";
+    katClass = "bg-emerald-950 text-emerald-300 border-emerald-600";
+    rangeTxt = "Rentang: 0.0 - 1.2";
+  }
+
+  // Subtitle
+  const sub = document.getElementById('lblSubOhisPasien');
+  if (sub) {
+    sub.innerText = `Kunjungan: ${r.tanggalPeriksa || '-'} • Dokter: ${r.dokterPemeriksa || '-'}`;
+  }
+
+  // Render Maxilla Cards
+  const maxillaContainer = document.getElementById("ohisGridMaxillaPasien");
+  if (maxillaContainer) {
+    const maxTeeth = ohisTeethList.filter(t => t.arch === 'maxilla');
+    maxillaContainer.innerHTML = maxTeeth.map(renderOhisToothCardPasien).join('');
+  }
+
+  // Render Mandible Cards
+  const mandibleContainer = document.getElementById("ohisGridMandiblePasien");
+  if (mandibleContainer) {
+    const manTeeth = ohisTeethList.filter(t => t.arch === 'mandible');
+    mandibleContainer.innerHTML = manTeeth.map(renderOhisToothCardPasien).join('');
+  }
+
+  // Scores
+  const scoreDIS = document.getElementById("ohisScoreDISPasien");
+  if (scoreDIS) scoreDIS.innerText = dis;
+  const badgeDIS = document.getElementById("ohisBadgeDISPasien");
+  if (badgeDIS) badgeDIS.innerText = numD <= 0.6 ? "Baik" : (numD <= 1.8 ? "Sedang" : "Buruk");
+
+  const scoreCIS = document.getElementById("ohisScoreCISPasien");
+  if (scoreCIS) scoreCIS.innerText = cis;
+  const badgeCIS = document.getElementById("ohisBadgeCISPasien");
+  if (badgeCIS) badgeCIS.innerText = numC <= 0.6 ? "Baik" : (numC <= 1.8 ? "Sedang" : "Buruk");
+
+  const scoreTotal = document.getElementById("ohisScoreTotalPasien");
+  if (scoreTotal) scoreTotal.innerText = totalScore;
+
+  const badgeCat = document.getElementById("ohisBadgeCategoryPasien");
+  if (badgeCat) {
+    badgeCat.className = `px-3 py-1 rounded-xl font-black text-xs mt-1.5 uppercase shadow border ${katClass}`;
+    badgeCat.innerText = kat;
+  }
+
+  const rangeInfo = document.getElementById("ohisRangeInfoPasien");
+  if (rangeInfo) rangeInfo.innerText = rangeTxt;
+
+  modal.classList.remove('hidden');
+}
+
+// ========================================================
+// FUNGSI PENCETAKAN (PRINT PDF) EMR PASIEN
+// ========================================================
+function printHistoryEMR(idPasien) {
+ let p = window.KlinikData.pasien.find(x => x.idPasien === idPasien);
+ if (!p) return;
+ let emrList = (window.KlinikData.rekamMedis || []).filter(r => r.idPasien === idPasien);
+ emrList.sort((a, b) => {
+   let valA = a.waktuSimpan ? new Date(a.waktuSimpan).getTime() : new Date(a.tanggalPeriksa || 0).getTime();
+   let valB = b.waktuSimpan ? new Date(b.waktuSimpan).getTime() : new Date(b.tanggalPeriksa || 0).getTime();
+   return valB - valA;
+ });
+ let historyHtml = '';
+ if(emrList.length === 0) {
+     historyHtml = '<p style="text-align:center; color:#64748b; margin-top:20px;">Belum ada riwayat rekam medis.</p>';
+ } else {
+     historyHtml = emrList.map((r, idx) => {
+         let odoJsonStr = r.odontogramStr || r.odontogram || "{}";
+         let ana = {}, fis = {}, odo = {}, tind = [], obat = [];
+         try { ana = JSON.parse(r.anamnesisStr || "{}"); } catch(e){}
+         try { fis = JSON.parse(r.fisikStr || "{}"); } catch(e){}
+         try { odo = typeof odoJsonStr === 'string' ? JSON.parse(odoJsonStr) : odoJsonStr; } catch(e){}
+         try { tind = JSON.parse(r.tindakanStr || "[]"); } catch(e){}
+         try { obat = JSON.parse(r.obatStr || "[]"); } catch(e){}
+       
+         // Hitung Nilai DMF-T untuk Cetak
+         let dCount = 0, mCount = 0, fCount = 0;
+         const arrGigiDewasa = [...PAS_ADULT_UPPER_RIGHT, ...PAS_ADULT_UPPER_LEFT, ...PAS_ADULT_LOWER_RIGHT, ...PAS_ADULT_LOWER_LEFT];
+         arrGigiDewasa.forEach(n => {
+           const t = odo[n]; if (!t) return;
+           if (t.generalCondition === 'car' || Object.values(t.surfaces || {}).includes('car')) dCount++;
+           else if (t.generalCondition === 'mis') mCount++;
+           else if (Object.values(t.surfaces || {}).some(c => ['cfr', 'amf', 'gif'].includes(c))) fCount++;
+         });
+         const dmftTotal = dCount + mCount + fCount;
+         const odoFilledGigi = Object.keys(odo).length;
+       
+         let diagList = Object.keys(odo).length === 0 ? '<li class="break-inside-avoid">Tidak ada kelainan (Normal/SOU) / Tidak ditandai</li>' :
+           Object.keys(odo).map(gigi => {
+             let dt = odo[gigi];
+             let diag = dt.diagnosis ? `(Diag: ${dt.diagnosis})` : '';
+             let nts = dt.notes ? `[Catatan: ${dt.notes}]` : '';
+             let gen = dt.generalCondition !== 'nor' ? `Kondisi: ${dt.generalCondition}` : '';
+             let sur = Object.entries(dt.surfaces||{}).filter(x=>x[1]!=='nor').map(x=>x[0]+'='+x[1]).join(', ');
+             let srTx = sur ? `Permukaan: ${sur}` : '';
+             return `<li class="break-inside-avoid"><b>Gigi ${gigi}:</b> <span class="text-slate-600">${gen}${srTx}</span> <span class="text-indigo-600 font-bold">${diag}</span> <span class="text-amber-600 italic">${nts}</span></li>`;
+           }).join('');
+          
+         let obatList = obat.length === 0 ? '<tr><td colspan="3" class="border border-slate-300 px-2 py-1 text-center">-</td></tr>' :
+           obat.map(o => `<tr><td class="border border-slate-300 px-2 py-1">${o.obat}</td><td class="border border-slate-300 px-2 py-1 text-center font-bold">${o.qty}</td><td class="border border-slate-300 px-2 py-1">${o.ket}</td></tr>`).join('');
+        
+         let tglFormat = r.tanggalPeriksa || '-';
+         if(tglFormat !== '-') {
+            let parts = tglFormat.split('-');
+            if(parts.length === 3 && parts[0].length === 4) {
+                const bulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+                tglFormat = `${parseInt(parts[2], 10)} ${bulan[parseInt(parts[1], 10) - 1]} ${parts[0]}`;
+            }
+         }
+        
+         let diagGlobal = (ana.diagnosaICD && ana.diagnosaICD.length > 0) ? `<div><h4 class="font-black bg-slate-100 p-1.5 border-l-4 border-slate-800 mb-2 uppercase">Diagnosa (ICD-10)</h4><ul class="list-disc pl-5 space-y-1 text-slate-800 font-bold mb-4">${ana.diagnosaICD.map(d => `<li>${d}</li>`).join('')}</ul></div>` : '';
+
+
+         return `
+           <div style="page-break-inside: avoid; margin-bottom: 40px; border-bottom: 2px dashed #cbd5e1; padding-bottom: 30px;">
+             <div class="border-b-2 border-slate-800 pb-4 mb-6">
+               <h2 class="text-xl font-black text-center uppercase tracking-widest text-slate-900">Rekam Medis Pasien</h2>
+               <p class="text-center text-xs font-bold mt-1 text-slate-600">SHELDON Oral Maxillofacial Surgery & Dental Implant Center</p>
+             </div>
+          
+             <table class="w-full text-xs font-medium mb-6">
+               <tr><td class="w-32 text-slate-500">Nama Pasien</td><td class="font-bold text-base text-indigo-700">: ${p.namaPasien}</td>
+                   <td class="w-32 text-slate-500">No. RM</td><td class="font-bold font-mono">: ${p.noRm || '-'}</td></tr>
+               <tr><td class="text-slate-500">Tgl Pemeriksaan</td><td class="font-bold">: ${tglFormat}</td>
+                   <td class="text-slate-500">Dokter</td><td class="font-bold">: ${r.dokterPemeriksa || '-'}</td></tr>
+             </table>
+           
+             <div class="space-y-4 text-xs">
+               <div>
+                 <h4 class="font-black bg-slate-100 p-1.5 border-l-4 border-slate-800 mb-2 uppercase">Anamnesis</h4>
+                 <table class="w-full">
+                   <tr><td class="w-40 py-1 text-slate-600">Chief Complain (CC)</td><td>: ${ana.cc || '-'}</td></tr>
+                   <tr><td class="py-1 text-slate-600">Present Illness (PI)</td><td>: ${ana.pi || '-'}</td></tr>
+                   <tr><td class="py-1 text-slate-600">Past Dental/Medical Hist.</td><td>: ${ana.pdh || '-'} / ${ana.pmh || '-'}</td></tr>
+                   <tr><td class="py-1 text-slate-600">Family Hist / Khusus</td><td>: ${ana.fh || '-'} / ${ana.khusus || '-'}</td></tr>
+                 </table>
+                 <div class="mt-2 text-[10px]"><b>Review Of System:</b>
+                   Endo(${ana.ros?.endo||'-'}), Gastro(${ana.ros?.gastro||'-'}), Hemato(${ana.ros?.hemato||'-'}), Kardio(${ana.ros?.kardio||'-'}),
+                   Muskulo(${ana.ros?.muskulo||'-'}), Neuro(${ana.ros?.neuro||'-'}), Resp(${ana.ros?.respirasi||'-'}), Uro(${ana.ros?.uro||'-'})
+                 </div>
+               </div>
+             
+               <div>
+                 <h4 class="font-black bg-slate-100 p-1.5 border-l-4 border-slate-800 mb-2 uppercase">Pemeriksaan Fisik</h4>
+                 <table class="w-full">
+                   <tr><td class="w-32 py-1 text-slate-600">Kesan Umum</td><td>: ${fis.kesan || '-'}</td><td class="w-32 py-1 text-slate-600">Kesadaran</td><td>: ${fis.kesadaran || '-'}</td></tr>
+                   <tr><td class="py-1 text-slate-600">Tensi (mmHg)</td><td>: ${fis.tensi || '-'}</td><td class="py-1 text-slate-600">Nafas (x/mnt)</td><td>: ${fis.nafas || '-'}</td></tr>
+                   <tr><td class="py-1 text-slate-600">Nadi (x/mnt)</td><td>: ${fis.nadi || '-'}</td><td class="py-1 text-slate-600">Suhu (°C)</td><td>: ${fis.suhu || '-'}</td></tr>
+                   <tr><td class="py-1 text-slate-600">BB (kg) / TB (cm)</td><td colspan="3">: ${fis.bb || '-'} / ${fis.tb || '-'}</td></tr>
+                 </table>
+                 <table class="w-full mt-1">
+                   <tr><td class="w-40 py-1 text-slate-600">Alergi</td><td>: ${fis.alergi || '-'}</td></tr>
+                   <tr><td class="py-1 text-slate-600">Ekstra / Intra Oral</td><td>: ${fis.ekstra || '-'} / ${fis.intra || '-'}</td></tr>
+                   <tr><td class="py-1 text-slate-600">Penunjang</td><td>: ${fis.penunjang || '-'}</td></tr>
+                 </table>
+               </div>
+             
+               <!-- MODUL ODONTOGRAM: RINGKASAN AWAL DMF-T INDEX -->
+               <div class="bg-sky-50/60 border border-sky-200 p-3.5 rounded-xl text-left">
+                 <div class="flex justify-between items-center mb-2">
+                   <h4 class="font-black text-sky-900 uppercase text-xs flex items-center gap-1.5">
+                     <span>🦷</span> Peta Odontogram Saat Kunjungan
+                   </h4>
+                   <span class="text-[10px] font-bold px-2 py-0.5 rounded ${odoFilledGigi === 0 ? 'bg-slate-100 text-slate-700 border border-slate-300' : 'bg-sky-100 text-sky-800 border border-sky-300'}">
+                     ${odoFilledGigi === 0 ? 'Semua Sehat (SOU)' : `Tercatat (${odoFilledGigi} Gigi)`}
+                   </span>
+                 </div>
+                 <div class="grid grid-cols-4 gap-2 text-center text-xs">
+                   <div class="bg-white p-2 rounded-lg border border-slate-200">
+                     <span class="text-[9px] text-slate-500 block font-bold">Decayed (D)</span>
+                     <span class="font-black ${dCount > 0 ? 'text-rose-600' : 'text-slate-800'}">${dCount}</span>
+                   </div>
+                   <div class="bg-white p-2 rounded-lg border border-slate-200">
+                     <span class="text-[9px] text-slate-500 block font-bold">Missing (M)</span>
+                     <span class="font-black ${mCount > 0 ? 'text-amber-600' : 'text-slate-800'}">${mCount}</span>
+                   </div>
+                   <div class="bg-white p-2 rounded-lg border border-slate-200">
+                     <span class="text-[9px] text-slate-500 block font-bold">Filled (F)</span>
+                     <span class="font-black ${fCount > 0 ? 'text-emerald-600' : 'text-slate-800'}">${fCount}</span>
+                   </div>
+                   <div class="bg-white p-2 rounded-lg border border-slate-200">
+                     <span class="text-[9px] text-slate-500 block font-bold">Total DMF-T</span>
+                     <span class="font-black ${dmftTotal > 0 ? 'text-sky-700' : 'text-slate-800'}">${dmftTotal}</span>
+                   </div>
+                 </div>
+               </div>
+             
+               <div>
+                 <h4 class="font-black bg-slate-100 p-1.5 border-l-4 border-slate-800 mb-2 uppercase">Diagnosis Gigi (Tulisan)</h4>
+                 <ul class="list-disc pl-5 columns-1 sm:columns-3 gap-6 space-y-1 text-xs">${diagList}</ul>
+               </div>
+
+               ${fis.periodontal ? `
+               <div class="bg-indigo-50/60 border border-indigo-200 p-3.5 rounded-xl text-left">
+                 <div class="flex justify-between items-center mb-2">
+                   <h4 class="font-black text-indigo-900 uppercase text-xs flex items-center gap-1.5">
+                     <span>🦷</span> Hasil Periodontal Charting
+                   </h4>
+                   <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-indigo-100 text-indigo-700 border border-indigo-200">Tercatat</span>
+                 </div>
+                 <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                   <div class="bg-white p-2 rounded-lg border border-slate-200">
+                     <span class="text-[9px] text-slate-500 block font-bold">Total Sites</span>
+                     <span class="font-black text-slate-800">${fis.periodontal.summary?.totalSites || 0} Titik</span>
+                   </div>
+                   <div class="bg-white p-2 rounded-lg border border-slate-200">
+                     <span class="text-[9px] text-slate-500 block font-bold">Deep Pockets (&ge;4mm)</span>
+                     <span class="font-black ${(fis.periodontal.summary?.deepPockets || 0) > 0 ? "text-rose-600" : "text-slate-800"}">${fis.periodontal.summary?.deepPockets || 0} Titik</span>
+                   </div>
+                   <div class="bg-white p-2 rounded-lg border border-slate-200">
+                     <span class="text-[9px] text-slate-500 block font-bold">Bleeding Index (BOP)</span>
+                     <span class="font-black ${(fis.periodontal.summary?.bopPercent || 0) > 0 ? "text-rose-600" : "text-slate-800"}">${fis.periodontal.summary?.bopPercent || 0}%</span>
+                   </div>
+                 </div>
+               </div>
+               ` : ""}
+
+               ${fis.ohis ? `
+               <div class="bg-teal-50/60 border border-teal-200 p-3.5 rounded-xl text-left">
+                 <div class="flex justify-between items-center mb-2">
+                   <h4 class="font-black text-teal-900 uppercase text-xs flex items-center gap-1.5">
+                     <span>🪥</span> Hasil Pemeriksaan OHI-S
+                   </h4>
+                   <span class="text-[10px] font-bold px-2 py-0.5 rounded ${fis.ohis.category === 'Baik' ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : fis.ohis.category === 'Sedang' ? 'bg-amber-100 text-amber-800 border border-amber-300' : 'bg-rose-100 text-rose-800 border border-rose-300'}">
+                     ${fis.ohis.category || 'Tercatat'} (${fis.ohis.totalScore || 0})
+                   </span>
+                 </div>
+                 <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                   <div class="bg-white p-2 rounded-lg border border-slate-200">
+                     <span class="text-[9px] text-slate-500 block font-bold">Debris Index (DI-S)</span>
+                     <span class="font-black text-slate-800">${fis.ohis.debrisScore || 0}</span>
+                   </div>
+                   <div class="bg-white p-2 rounded-lg border border-slate-200">
+                     <span class="text-[9px] text-slate-500 block font-bold">Calculus Index (CI-S)</span>
+                     <span class="font-black text-slate-800">${fis.ohis.calculusScore || 0}</span>
+                   </div>
+                   <div class="bg-white p-2 rounded-lg border border-slate-200">
+                     <span class="text-[9px] text-slate-500 block font-bold">Total OHI-S Score</span>
+                     <span class="font-black text-teal-700">${fis.ohis.totalScore || 0}</span>
+                   </div>
+                 </div>
+               </div>
+               ` : ""}
+             
+               ${diagGlobal}
+             
+               <div>
+                 <h4 class="font-black bg-slate-100 p-1.5 border-l-4 border-slate-800 mb-2 uppercase">Tindakan (ICD-9)</h4>
+                 <ul class="list-disc pl-5">${tind.length === 0 ? '<li>-</li>' : tind.map(t => `<li>${t}</li>`).join('')}</ul>
+               </div>
+             
+               <div>
+                 <h4 class="font-black bg-slate-100 p-1.5 border-l-4 border-slate-800 mb-2 uppercase">Resep Obat</h4>
+                 <table class="w-full text-left border border-slate-300 border-collapse">
+                   <tr class="bg-slate-50"><th class="border border-slate-300 px-2 py-1">Nama Obat</th><th class="border border-slate-300 px-2 py-1 w-16 text-center">Qty</th><th class="border border-slate-300 px-2 py-1">Aturan Pakai</th></tr>
+                   ${obatList}
+                 </table>
+               </div>
+             
+               <div>
+                 <h4 class="font-black bg-slate-100 p-1.5 border-l-4 border-slate-800 mb-2 uppercase">Catatan Edukasi</h4>
+                 <p class="pl-2 bg-rose-50 p-2 rounded border border-rose-100 text-rose-800 font-medium">${r.catatanEdukasi || '-'}</p>
+               </div>
+             </div>
+           </div>
+         `;
+     }).join('');
+ }
+ let printFrame = document.getElementById('printFrameEMR');
+ if (!printFrame) {
+     printFrame = document.createElement('iframe'); printFrame.id = 'printFrameEMR';
+     printFrame.style.cssText = 'position:absolute; width:0px; height:0px; border:none; z-index:-999;';
+     document.body.appendChild(printFrame);
+ }
+ const dNow = new Date();
+ const arrBulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+ const tglCetakStr = `${dNow.getDate()} ${arrBulan[dNow.getMonth()]} ${dNow.getFullYear()}`;
+ const namaPasienBersih = (p.namaPasien || "Pasien").replace(/[/\\?%*:|"<>]/g, '').trim();
+ let cleanName = `${namaPasienBersih}-${tglCetakStr}`;
+ let originalTitle = document.title;
+ const frameDoc = printFrame.contentWindow.document;
+ frameDoc.open();
+ frameDoc.write(`
+   <html>
+   <head>
+     <title>${cleanName}</title>
+     <style>
+       @page {
+         size: A4 portrait;
+         margin: 0; /* Menghilangkan URL script.google.com dan jam/tanggal bawaan browser */
+       }
+       @media print {
+         body {
+           -webkit-print-color-adjust: exact !important;
+           print-color-adjust: exact !important;
+           margin: 0 !important;
+           padding: 1.5cm 1cm !important;
+           background: #ffffff !important;
+         }
+         .no-print { display: none !important; }
+       }
+       body { font-family: Arial, sans-serif; font-size: 12px; color: #000; padding: 20px; line-height: 1.5; }
+       h2, h4 { margin: 0 0 5px 0; }
+       .text-center { text-align: center; }
+       .uppercase { text-transform: uppercase; }
+       .font-black { font-weight: 900; }
+       .font-bold { font-weight: bold; }
+       .w-full { width: 100%; }
+       .w-32 { width: 120px; }
+       .w-40 { width: 150px; }
+       .border-b-2 { border-bottom: 2px solid #000; }
+       .pb-4 { padding-bottom: 15px; }
+       .mb-6 { margin-bottom: 20px; }
+       .mb-2 { margin-bottom: 10px; }
+       .mt-1 { margin-top: 5px; }
+       .mt-2 { margin-top: 10px; }
+       .bg-slate-100, .bg-slate-50, .bg-rose-50, .bg-slate-200 { background-color: #f1f5f9; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+       .p-1\\.5 { padding: 6px; }
+       .p-2 { padding: 8px; }
+       .p-3 { padding: 12px; }
+       .border-l-4 { border-left: 4px solid #000; }
+       .text-slate-500, .text-slate-600 { color: #475569; }
+       .text-indigo-700 { color: #4338ca; }
+       .text-rose-800 { color: #9f1239; }
+       .pl-5 { padding-left: 20px; }
+       .pl-2 { padding-left: 8px; }
+       .py-1 { padding-top: 4px; padding-bottom: 4px; }
+       table { border-collapse: collapse; }
+       .border { border: 1px solid #000; }
+       .px-2 { padding-left: 8px; padding-right: 8px; }
+       .text-xs { font-size: 11px; }
+       ul { margin: 0; }
+    
+       .no-print { display: none !important; }
+       .grid { display: flex; gap: 8px; }
+       .grid-cols-4 > div { flex: 1; }
+       .grid-cols-3 > div { flex: 1; }
+       .rounded, .rounded-lg { border-radius: 8px; }
+       .rounded-xl { border-radius: 12px; }
+       .bg-sky-50\/60, .bg-sky-50 { background-color: #f0f9ff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+       .bg-indigo-50\/60, .bg-indigo-50 { background-color: #eef2ff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+       .bg-teal-50\/60, .bg-teal-50 { background-color: #f0fdfa; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+       .border-sky-200 { border: 1px solid #bae6fd; }
+       .border-indigo-200 { border: 1px solid #c7d2fe; }
+       .border-teal-200 { border: 1px solid #99f6e4; }
+       .text-rose-600 { color: #e11d48 !important; }
+       .text-amber-600 { color: #d97706 !important; }
+       .text-emerald-600 { color: #059669 !important; }
+       .text-sky-700 { color: #0369a1 !important; }
+       .text-teal-700 { color: #0f766e !important; }
+
+       .flex { display: flex; }
+       .flex-col { flex-direction: column; }
+       .items-center { align-items: center; }
+       .justify-center { justify-content: center; }
+       .gap-4 { gap: 16px; }
+       .gap-1 { gap: 4px; }
+       .flex-row-reverse { flex-direction: row-reverse; }
+       .inline-block { display: inline-block; }
+       .w-6 { width: 24px; } .h-6 { height: 24px; }
+       .sm\\:w-8 { width: 32px; } .sm\\:h-8 { height: 32px; }
+       .w-1 { width: 4px; } .h-10 { height: 40px; }
+       .bg-slate-300 { background-color: #cbd5e1; }
+       .border-slate-300 { border-color: #cbd5e1; }
+       .border-b { border-bottom-width: 1px; }
+       .pb-2 { padding-bottom: 8px; }
+       .pt-2 { padding-top: 8px; }
+       .my-3 { margin-top: 12px; margin-bottom: 12px; }
+       .relative { position: relative; }
+       .absolute { position: absolute; }
+       .inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
+       .rounded-full { border-radius: 9999px; }
+       .z-10 { z-index: 10; }
+    
+       @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+     </style>
+   </head>
+   <body>${historyHtml}</body>
+   </html>
+ `);
+ frameDoc.close();
+ printFrame.contentWindow.focus();
+ document.title = cleanName;
+ setTimeout(() => {
+     document.title = cleanName;
+     if (printFrame.contentWindow.document) printFrame.contentWindow.document.title = cleanName;
+     printFrame.contentWindow.print();
+     printFrame.contentWindow.onafterprint = function() { document.title = originalTitle; };
+     setTimeout(() => { document.title = originalTitle; }, 15000);
+ }, 500);
+}
+
+
+// ========================================================
+// ENGINE BUKU INDEKS UTAMA PASIEN (MASTER PATIENT INDEX - MPI)
+// ========================================================
+
+function bukaModalMpi() {
+  renderKontenMpi();
+  let modal = document.getElementById('modalPreviewMpi');
+  if (modal) modal.classList.remove('hidden');
+}
+
+function tutupModalMpi() {
+  let modal = document.getElementById('modalPreviewMpi');
+  if (modal) modal.classList.add('hidden');
+}
+
+function renderKontenMpi() {
+  const container = document.getElementById('printAreaMpi');
+  if (!container) return;
+
+  // Ambil data pasien dan urutkan berdasarkan 4 digit angka No RM atau tanggal daftar
+  let list = (window.KlinikData && window.KlinikData.pasien) ? [...window.KlinikData.pasien] : [];
+  list.sort((a, b) => {
+    // 1. Ekstrak 4 digit angka dari No. RM (misal A-0004 -> 4)
+    let numA = parseInt((a.noRm || '').replace(/\D/g, ''), 10);
+    let numB = parseInt((b.noRm || '').replace(/\D/g, ''), 10);
+
+    if (!isNaN(numA) && !isNaN(numB) && numA !== numB) {
+      return numA - numB;
+    }
+
+    // 2. Jika No RM sama/tidak ada angka, urutkan berdasarkan tanggal daftar
+    let tglA = a.tglDaftar ? new Date(a.tglDaftar.split('-').reverse().join('-')).getTime() : 0;
+    let tglB = b.tglDaftar ? new Date(b.tglDaftar.split('-').reverse().join('-')).getTime() : 0;
+    if (tglA !== tglB) {
+      return tglA - tglB;
+    }
+
+    // 3. Fallback string natural comparison
+    return (a.noRm || '').localeCompare(b.noRm || '', undefined, { numeric: true });
+  });
+
+  // Bagi data menjadi chunk 30 baris per lembar kertas A4
+  const ITEMS_PER_PAGE = 30;
+  let pagesHtml = "";
+
+  if (list.length === 0) {
+    pagesHtml = `
+      <div class="mpi-page" style="width: 100%; box-sizing: border-box; padding: 2cm 1cm 1.5cm 1cm; position: relative;">
+        <!-- HEADER KONSISTEN SETIAP HALAMAN -->
+        <div style="text-align: center; margin-bottom: 12px;">
+          <h1 style="margin: 0; font-family: Arial, sans-serif; font-size: 13pt; font-weight: bold; letter-spacing: 0.5px; color: #000000; text-transform: uppercase;">
+            BUKU INDEKS PASIEN
+          </h1>
+        </div>
+
+        <table style="width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; font-size: 9.5pt; line-height: 1.3; table-layout: fixed; border: none;">
+          <thead>
+            <tr style="background-color: #0f172a; color: #ffffff;">
+              <th style="padding: 6px 5px; text-align: center; width: 6%; font-weight: bold; font-family: Arial, sans-serif; font-size: 9.5pt; color: #ffffff; border: none;">NO</th>
+              <th style="padding: 6px 8px; text-align: left; width: 34%; font-weight: bold; font-family: Arial, sans-serif; font-size: 9.5pt; color: #ffffff; border: none;">NAMA PASIEN</th>
+              <th style="padding: 6px 6px; text-align: center; width: 14%; font-weight: bold; font-family: Arial, sans-serif; font-size: 9.5pt; color: #ffffff; border: none;">NO. RM</th>
+              <th style="padding: 6px 5px; text-align: center; width: 14%; font-weight: bold; font-family: Arial, sans-serif; font-size: 9.5pt; color: #ffffff; border: none;">UMUR</th>
+              <th style="padding: 6px 5px; text-align: center; width: 12%; font-weight: bold; font-family: Arial, sans-serif; font-size: 9.5pt; color: #ffffff; border: none;">JENIS KELAMIN</th>
+              <th style="padding: 6px 6px; text-align: center; width: 20%; font-weight: bold; font-family: Arial, sans-serif; font-size: 9.5pt; color: #ffffff; border: none;">NO. TELP / WA</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="6" style="text-align:center; padding: 35px 20px; color: #64748b; font-style: italic; border-bottom: 1px solid #e2e8f0; font-family: Arial, sans-serif; font-size: 9.5pt;">Belum ada data pasien terdaftar di database.</td></tr>
+          </tbody>
+        </table>
+
+        <!-- FOOTER NOMOR HALAMAN (POJOK KANAN BAWAH) -->
+        <div style="text-align: right; margin-top: 12px; font-family: Arial, sans-serif; font-size: 9pt; color: #64748b;">
+          Page 1
+        </div>
+      </div>
+    `;
+  } else {
+    const totalPages = Math.ceil(list.length / ITEMS_PER_PAGE);
+
+    for (let pageIdx = 0; pageIdx < totalPages; pageIdx++) {
+      const pageNum = pageIdx + 1;
+      const startIdx = pageIdx * ITEMS_PER_PAGE;
+      const endIdx = startIdx + ITEMS_PER_PAGE;
+      const pageData = list.slice(startIdx, endIdx);
+
+      let rowHtml = pageData.map((p, localIdx) => {
+        let noUrut = startIdx + localIdx + 1;
+        let nama = p.namaPasien || "-";
+        let noRm = p.noRm || "-";
+        
+        let rawUmur = (p.umur || "").toString().trim();
+        let cleanUmur = rawUmur.replace(/\s*(thn|tahun)\b/gi, '').trim();
+        let umur = cleanUmur ? `${cleanUmur} Th` : "-";
+
+        let jkRaw = (p.jenisKelamin || "").toString().trim().toLowerCase();
+        let jk = "-";
+        if (jkRaw === 'l' || jkRaw.startsWith('laki')) {
+          jk = "L";
+        } else if (jkRaw === 'p' || jkRaw.startsWith('perempuan') || jkRaw.startsWith('wanita')) {
+          jk = "P";
+        } else if (p.jenisKelamin) {
+          jk = p.jenisKelamin.trim().toUpperCase().startsWith('L') ? 'L' : (p.jenisKelamin.trim().toUpperCase().startsWith('P') ? 'P' : p.jenisKelamin);
+        }
+
+        let noTelp = p.whatsapp || p.telepon || "-";
+        let bgRow = localIdx % 2 === 1 ? 'background-color: #f8fafc;' : 'background-color: #ffffff;';
+
+        return `
+          <tr style="border-bottom: 1px solid #e2e8f0; ${bgRow} font-family: Arial, sans-serif; font-size: 9.5pt; page-break-inside: avoid;">
+            <td style="padding: 4px 5px; text-align: center; color: #334155; border: none;">${noUrut}</td>
+            <td style="padding: 4px 8px; text-align: left; font-weight: bold; color: #0f172a; border: none;">${nama}</td>
+            <td style="padding: 4px 6px; text-align: center; font-family: Arial, monospace; font-weight: bold; color: #0284c7; border: none;">${noRm}</td>
+            <td style="padding: 4px 5px; text-align: center; color: #334155; border: none;">${umur}</td>
+            <td style="padding: 4px 5px; text-align: center; color: #334155; border: none;">${jk}</td>
+            <td style="padding: 4px 6px; text-align: center; font-family: Arial, monospace; color: #334155; border: none;">${noTelp}</td>
+          </tr>
+        `;
+      }).join('');
+
+      const isLastPage = (pageIdx === totalPages - 1);
+      const pageBreakStyle = isLastPage ? '' : 'page-break-after: always; break-after: page;';
+
+      pagesHtml += `
+        <div class="mpi-page" style="${pageBreakStyle} width: 100%; box-sizing: border-box; padding: 2cm 1cm 1.5cm 1cm; position: relative;">
+          <!-- HEADER KONSISTEN SETIAP HALAMAN -->
+          <div style="text-align: center; margin-bottom: 12px;">
+            <h1 style="margin: 0; font-family: Arial, sans-serif; font-size: 13pt; font-weight: bold; letter-spacing: 0.5px; color: #000000; text-transform: uppercase;">
+              BUKU INDEKS PASIEN
+            </h1>
+          </div>
+
+          <!-- TABEL DATA PASIEN (A4 PORTRAIT) -->
+          <table style="width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; font-size: 9.5pt; line-height: 1.3; table-layout: fixed; border: none;">
+            <thead>
+              <tr style="background-color: #0f172a; color: #ffffff;">
+                <th style="padding: 6px 5px; text-align: center; width: 6%; font-weight: bold; font-family: Arial, sans-serif; font-size: 9.5pt; color: #ffffff; border: none;">NO</th>
+                <th style="padding: 6px 8px; text-align: left; width: 34%; font-weight: bold; font-family: Arial, sans-serif; font-size: 9.5pt; color: #ffffff; border: none;">NAMA PASIEN</th>
+                <th style="padding: 6px 6px; text-align: center; width: 14%; font-weight: bold; font-family: Arial, sans-serif; font-size: 9.5pt; color: #ffffff; border: none;">NO. RM</th>
+                <th style="padding: 6px 5px; text-align: center; width: 14%; font-weight: bold; font-family: Arial, sans-serif; font-size: 9.5pt; color: #ffffff; border: none;">UMUR</th>
+                <th style="padding: 6px 5px; text-align: center; width: 12%; font-weight: bold; font-family: Arial, sans-serif; font-size: 9.5pt; color: #ffffff; border: none;">JENIS KELAMIN</th>
+                <th style="padding: 6px 6px; text-align: center; width: 20%; font-weight: bold; font-family: Arial, sans-serif; font-size: 9.5pt; color: #ffffff; border: none;">NO. TELP / WA</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rowHtml}
+            </tbody>
+          </table>
+
+          <!-- FOOTER NOMOR HALAMAN (POJOK KANAN BAWAH) -->
+          <div style="text-align: right; margin-top: 12px; font-family: Arial, sans-serif; font-size: 9pt; color: #64748b;">
+            Page ${pageNum}
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  container.innerHTML = pagesHtml;
+}
+
+function actionCetakDanPdfMpi(isPDFMode) {
+  const elArea = document.getElementById('printAreaMpi');
+  if (!elArea) return;
+
+  let cleanName = "BUKU_INDEKS_PASIEN";
+  let originalTitle = document.title;
+
+  showToast('info', 'Membuka dialog cetak... Silakan pilih "Simpan sebagai PDF" untuk menyimpan file.');
+  bukaPrintWindowMpi(cleanName, originalTitle);
+}
+
+function bukaPrintWindowMpi(cleanName, originalTitle) {
+  const contentHtml = document.getElementById('printAreaMpi').innerHTML;
+  const docStyle = `
+    @page {
+      size: A4 portrait;
+      margin: 0; /* Menghilangkan URL about:blank dan jam/tanggal bawaan browser */
+    }
+    @media print {
+      html, body {
+        margin: 0 !important;
+        padding: 0 !important;
+        box-sizing: border-box !important;
+        background: #ffffff !important;
+        font-family: Arial, sans-serif !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      .mpi-page {
+        page-break-after: always !important;
+        break-after: page !important;
+        box-sizing: border-box !important;
+        padding: 2cm 1cm 1.5cm 1cm !important;
+        min-height: 297mm !important;
+        position: relative !important;
+      }
+      .mpi-page:last-child {
+        page-break-after: auto !important;
+        break-after: auto !important;
+      }
+      tr {
+        page-break-inside: avoid !important;
+      }
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      background: #ffffff;
+      font-family: Arial, sans-serif;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .mpi-page {
+      box-sizing: border-box;
+      padding: 2cm 1cm 1.5cm 1cm;
+      min-height: 297mm;
+      position: relative;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      table-layout: fixed;
+      font-family: Arial, sans-serif;
+    }
+    th, td {
+      word-wrap: break-word;
+      font-family: Arial, sans-serif;
+    }
+  `;
+
+  // Strategi 1: Buka popup top-level window
+  try {
+    let printWin = window.open('', '_blank', 'width=950,height=950');
+    if (printWin && !printWin.closed) {
+      printWin.document.open();
+      printWin.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>${cleanName}</title><style>${docStyle}</style></head><body>${contentHtml}</body></html>`);
+      printWin.document.close();
+      printWin.focus();
+      setTimeout(() => {
+        printWin.print();
+        printWin.onafterprint = function() { printWin.close(); document.title = originalTitle; };
+      }, 500);
+      return;
+    }
+  } catch(e) {
+    console.warn('Popup print MPI blocked, fallback to iframe:', e);
+  }
+
+  // Strategi 2: Fallback Iframe
+  let printFrame = document.getElementById('printFrameMpi');
+  if (!printFrame) {
+    printFrame = document.createElement('iframe');
+    printFrame.id = 'printFrameMpi';
+    printFrame.style.cssText = 'position:absolute; width:0px; height:0px; border:none; z-index:-999;';
+    document.body.appendChild(printFrame);
+  }
+  const pf = printFrame.contentWindow;
+  pf.document.open();
+  pf.document.write(`<html><head><title>${cleanName}</title><style>${docStyle}</style></head><body>${contentHtml}</body></html>`);
+  pf.document.close();
+  pf.focus();
+  document.title = cleanName;
+  setTimeout(() => {
+    document.title = cleanName;
+    if (pf.document) pf.document.title = cleanName;
+    pf.print();
+    pf.onafterprint = function() { document.title = originalTitle; };
+    setTimeout(() => { document.title = originalTitle; }, 15000);
+  }, 600);
+}
+</script>

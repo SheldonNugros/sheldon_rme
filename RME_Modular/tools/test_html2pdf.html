@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+<div id="testArea" style="width: 210mm; min-height: 297mm; padding: 30px; background: white; color: black; font-family: sans-serif;">
+  <h1 style="text-align: center;">TEST DOKUMEN MPI</h1>
+  <table border="1" style="width: 100%;">
+    <tr><th>NO</th><th>NAMA</th></tr>
+    <tr><td>1</td><td>Budi</td></tr>
+  </table>
+</div>
+<script>
+window.testRun = function() {
+  const el = document.getElementById('testArea');
+  const opt = {
+    margin: [10, 8, 10, 8],
+    filename: 'test.pdf',
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true, letterRendering: true, scrollY: 0 },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  };
+  return html2pdf().set(opt).from(el).outputPdf('datauristring').then(pdfData => {
+    console.log("PDF_LENGTH: " + pdfData.length);
+    return pdfData;
+  }).catch(err => {
+    console.error("PDF_ERROR: " + err);
+  });
+};
+</script>
+</body>
+</html>

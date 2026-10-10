@@ -1,0 +1,266 @@
+﻿<script>
+ var arrInvoices = [];
+ var filteredInvoices = [];
+ var activeInvoice = null;
+  // Variabel untuk fitur Paginasi
+ var currentPageInv = 1;
+ var itemsPerPageInv = 10;
+
+
+ function formatRupiahInv(angka) {
+   var number_string = angka.toString().replace(/[^,\d]/g, ''), split = number_string.split(','),
+   sisa = split[0].length % 3, rupiah = split[0].substr(0, sisa), ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+   if(ribuan){ var separator = sisa ? '.' : ''; rupiah += separator + ribuan.join('.'); }
+   return split[1] != undefined ? rupiah + ',' + split[1] : rupiah;
+ }
+
+
+ function formatTglIndoInv(isoStr) {
+   if (!isoStr) return '-'; var d = new Date(isoStr); if (isNaN(d.getTime())) return isoStr;
+   var dd = String(d.getDate()).padStart(2, '0'); var mm = String(d.getMonth() + 1).padStart(2, '0'); var yyyy = d.getFullYear();
+   return dd + '-' + mm + '-' + yyyy;
+ }
+
+
+ function penyebut(nilai) {
+   nilai = Math.abs(nilai);
+   var huruf = ["", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan", "Sepuluh", "Sebelas"];
+   var temp = "";
+   if (nilai < 12) { temp = " " + huruf[nilai];
+   } else if (nilai < 20) { temp = penyebut(nilai - 10) + " Belas";
+   } else if (nilai < 100) { temp = penyebut(Math.floor(nilai / 10)) + " Puluh" + penyebut(nilai % 10);
+   } else if (nilai < 200) { temp = " Seratus" + penyebut(nilai - 100);
+   } else if (nilai < 1000) { temp = penyebut(Math.floor(nilai / 100)) + " Ratus" + penyebut(nilai % 100);
+   } else if (nilai < 2000) { temp = " Seribu" + penyebut(nilai - 1000);
+   } else if (nilai < 1000000) { temp = penyebut(Math.floor(nilai / 1000)) + " Ribu" + penyebut(nilai % 1000);
+   } else if (nilai < 1000000000) { temp = penyebut(Math.floor(nilai / 1000000)) + " Juta" + penyebut(nilai % 1000000);
+   } else if (nilai < 1000000000000) { temp = penyebut(Math.floor(nilai / 1000000000)) + " Miliar" + penyebut(nilai % 1000000000); }
+   return temp;
+ }
+
+
+ function angkaTerbilang(nilai) {
+   if(nilai === 0) return "Nol Rupiah";
+   var hasil = penyebut(nilai);
+   return hasil.trim() + " Rupiah";
+ }
+
+
+ function loadDataInvoice() {
+   document.getElementById('viewDaftarInvoice').classList.remove('hidden');
+   document.getElementById('viewDetailInvoice').classList.add('hidden');
+   document.getElementById('tabelBodyInvoice').innerHTML = '<tr><td colspan="7" class="text-center py-8 text-slate-400">Memuat data rekap pembayaran...</td></tr>';
+  
+   google.script.run.withSuccessHandler(function(data) {
+     arrInvoices = data || [];
+    
+     // SET TANGGAL DEFAULT KE HARI INI
+     var today = new Date().toISOString().split('T')[0];
+     document.getElementById('filterTglMulai').value = today;
+     document.getElementById('filterTglAkhir').value = today;
+    
+     // Kosongkan form pencarian kata kunci
+     document.getElementById('inputCariInvoice').value = '';
+    
+     currentPageInv = 1;
+    
+     // Langsung panggil filter untuk menerapkan Tgl Hari ini
+     filterInvoice();
+   }).getDaftarInvoice();
+ }
+
+
+ // FUNGSI FILTER BERDASARKAN KATA KUNCI & TANGGAL
+ function filterInvoice() {
+   var kw = document.getElementById('inputCariInvoice').value.toLowerCase();
+   var tglMulai = document.getElementById('filterTglMulai').value;
+   var tglAkhir = document.getElementById('filterTglAkhir').value;
+
+
+   filteredInvoices = arrInvoices.filter(function(inv) {
+     var matchKw = inv.namaPasien.toLowerCase().indexOf(kw) !== -1 || inv.idInvoice.toLowerCase().indexOf(kw) !== -1 || inv.noRm.toLowerCase().indexOf(kw) !== -1;
+    
+     var matchTgl = true;
+     // inv.tanggalBayar format dari backend adalah 'YYYY-MM-DD'
+     if (tglMulai && inv.tanggalBayar < tglMulai) matchTgl = false;
+     if (tglAkhir && inv.tanggalBayar > tglAkhir) matchTgl = false;
+
+
+     return matchKw && matchTgl;
+   });
+
+
+   currentPageInv = 1; // Kembali ke halaman pertama saat parameter berubah
+   renderTabelInvoice();
+ }
+
+
+ // FUNGSI RENDER TABEL (POSISI NAMA PASIEN & NO RM DITUKAR)
+ function renderTabelInvoice() {
+   var tbody = document.getElementById('tabelBodyInvoice');
+   var pageInfo = document.getElementById('invPageInfo');
+   var btnPrev = document.getElementById('btnPrevInv');
+   var btnNext = document.getElementById('btnNextInv');
+
+
+   if (filteredInvoices.length === 0) {
+     tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-rose-500 font-bold bg-rose-50">Tidak ada data pembayaran/invoice pada rentang tanggal tersebut. <br><span class="text-xs font-normal text-slate-500 mt-2 block">Silakan ubah Filter TGL atau klik ikon silang di kalender untuk menampilkan semua data.</span></td></tr>';
+     pageInfo.innerText = "Menampilkan 0 data";
+     btnPrev.disabled = true;
+     btnNext.disabled = true;
+     return;
+   }
+  
+   var totalPages = Math.ceil(filteredInvoices.length / itemsPerPageInv);
+   if (currentPageInv < 1) currentPageInv = 1;
+   if (currentPageInv > totalPages) currentPageInv = totalPages;
+
+
+   var startIdx = (currentPageInv - 1) * itemsPerPageInv;
+   var endIdx = Math.min(startIdx + itemsPerPageInv, filteredInvoices.length);
+
+
+   var htmlStr = '';
+  
+   for(var i = startIdx; i < endIdx; i++) {
+     var inv = filteredInvoices[i];
+     var badgeCls = (inv.statusPembayaran === 'Lunas' || inv.statusPembayaran === 'Pelunasan') ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800';
+    
+     htmlStr += '<tr class="hover:bg-teal-50 transition-colors">' +
+       '<td class="py-2.5 px-3 text-center"><button type="button" onclick="bukaDetailInvoice('+i+')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-[10px] font-bold shadow-sm">Lihat</button></td>' +
+       '<td class="py-2.5 px-3 font-bold text-teal-700 whitespace-nowrap">' + inv.idInvoice + '</td>' +
+       '<td class="py-2.5 px-3 text-slate-600 whitespace-nowrap">' + formatTglIndoInv(inv.tanggalBayar) + '</td>' +
+       '<td class="py-2.5 px-3 font-bold text-slate-900 border-l border-slate-200">' + inv.namaPasien + '</td>' +
+       '<td class="py-2.5 px-3 font-mono text-slate-500 font-bold">' + inv.noRm + '</td>' +
+       '<td class="py-2.5 px-3 text-center border-l border-slate-200"><span class="px-2 py-0.5 rounded uppercase tracking-wider text-[9px] font-bold ' + badgeCls + '">' + inv.statusPembayaran + '</span></td>' +
+       '<td class="py-2.5 px-3 text-right font-black text-slate-800 whitespace-nowrap">Rp ' + formatRupiahInv(inv.grandTotal) + '</td>' +
+     '</tr>';
+   }
+  
+   tbody.innerHTML = htmlStr;
+
+
+   // Update status tombol Paginasi
+   pageInfo.innerHTML = "Menampilkan <b>" + (startIdx + 1) + " - " + endIdx + "</b> dari <b>" + filteredInvoices.length + "</b> data";
+   btnPrev.disabled = (currentPageInv === 1);
+   btnNext.disabled = (currentPageInv === totalPages);
+ }
+
+
+ function prevPageInv() {
+   if (currentPageInv > 1) {
+     currentPageInv--;
+     renderTabelInvoice();
+   }
+ }
+
+
+ function nextPageInv() {
+   var totalPages = Math.ceil(filteredInvoices.length / itemsPerPageInv);
+   if (currentPageInv < totalPages) {
+     currentPageInv++;
+     renderTabelInvoice();
+   }
+ }
+
+
+ // BUKA DETAIL PDF INVOICE
+ function tutupDetailInvoice() {
+   document.getElementById('viewDaftarInvoice').classList.remove('hidden');
+   document.getElementById('viewDetailInvoice').classList.add('hidden');
+ }
+
+
+ function bukaDetailInvoice(idx) {
+   var inv = filteredInvoices[idx];
+   if (!inv) return;
+   activeInvoice = inv;
+  
+   document.getElementById('viewDaftarInvoice').classList.add('hidden');
+   document.getElementById('viewDetailInvoice').classList.remove('hidden');
+
+
+   var formattedDate = formatTglIndoInv(inv.tanggalBayar);
+
+
+   document.getElementById('invNumber').innerText = inv.idInvoice;
+   document.getElementById('invDate').innerText = formattedDate;
+  
+   var tglCetak = new Date();
+   document.getElementById('invTTDDate').innerText = formatTglIndoInv(tglCetak.toISOString().split('T')[0]);
+  
+   document.getElementById('invNamaPasien').innerText = inv.namaPasien;
+   document.getElementById('invAlamat').innerText = inv.alamat || '-';
+  
+   document.getElementById('invMetode').innerText = inv.metodeBayar;
+  
+   var badge = document.getElementById('invStatusBadge');
+   badge.innerText = inv.statusPembayaran.toUpperCase();
+   if(inv.statusPembayaran === 'Lunas' || inv.statusPembayaran === 'Pelunasan') {
+     badge.className = "text-emerald-700";
+   } else {
+     badge.className = "text-amber-700";
+   }
+
+
+   var trHtml = '';
+   for(var i=0; i<inv.rincianItems.length; i++) {
+     var itm = inv.rincianItems[i];
+     var discCell = '';
+     if (itm.diskonPercent == 0 || itm.diskonPercent === '') {
+       discCell = '<td class="py-2.5 px-2 text-center text-slate-900 font-bold">-</td>';
+     } else {
+       discCell = '<td class="py-2.5 px-2 text-center text-rose-600 font-bold">' + itm.diskonPercent + '%</td>';
+     }
+
+
+     trHtml += '<tr>' +
+       '<td class="py-2.5 px-2 text-center">' + (i+1) + '</td>' +
+       '<td class="py-2.5 px-2"><p class="font-bold text-slate-800">' + itm.nama + '</p></td>' +
+       '<td class="py-2.5 px-2 text-center font-bold text-slate-700">' + itm.qty + '</td>' +
+       '<td class="py-2.5 px-2 text-right whitespace-nowrap">Rp ' + formatRupiahInv(itm.tarif) + '</td>' +
+       discCell +
+       '<td class="py-2.5 px-2 text-right font-black text-slate-900 whitespace-nowrap">Rp ' + formatRupiahInv(itm.subtotal) + '</td>' +
+     '</tr>';
+   }
+   document.getElementById('invTbodyItems').innerHTML = trHtml;
+  
+   document.getElementById('invKeterangan').innerText = inv.keterangan || '-';
+   document.getElementById('invSubtotal').innerText = 'Rp ' + formatRupiahInv(inv.subtotalBiaya);
+  
+   var elDiskon = document.getElementById('invDiskon');
+   if (inv.totalDiskon == 0 || inv.totalDiskon === '') {
+     elDiskon.innerText = 'Rp 0';
+     elDiskon.className = 'font-semibold text-slate-900';
+   } else {
+     elDiskon.innerText = '-Rp ' + formatRupiahInv(inv.totalDiskon);
+     elDiskon.className = 'font-semibold text-rose-600';
+   }
+
+
+   document.getElementById('invGrandTotal').innerText = 'Rp ' + formatRupiahInv(inv.grandTotal);
+   document.getElementById('invTerbilang').innerText = angkaTerbilang(inv.grandTotal) + ".";
+ }
+
+
+ function kirimInvoiceWA() {
+   if(!activeInvoice) return;
+   var inv = activeInvoice;
+   var hp = inv.whatsapp || '';
+   if(hp.startsWith('0')) hp = '62' + hp.slice(1);
+  
+   var txt = "*KLINIK GIGI SHELDON*\n_Layanan Kesehatan Gigi & Mulut Profesional_\n------------------------------------------------\n*KUITANSI DIGITAL / INVOICE: " + inv.idInvoice + "*\nTanggal : " + formatTglIndoInv(inv.tanggalBayar) + "\nPasien  : " + inv.namaPasien + "\n\n*STATUS PEMBAYARAN:* *" + inv.statusPembayaran.toUpperCase() + " (" + inv.metodeBayar + ")*\n\n*GRAND TOTAL TAGIHAN: Rp " + formatRupiahInv(inv.grandTotal) + "*\n\nKeterangan:\n" + (inv.keterangan || '-') + "\n\nTerima kasih atas kunjungan Anda di Klinik Gigi SHELDON. Semoga sehat selalu! 😊";
+  
+   window.open('https://wa.me/' + hp + '?text=' + encodeURIComponent(txt), '_blank');
+ }
+
+
+ function cetakPDF() {
+   if (!activeInvoice) return;
+   var originalTitle = document.title;
+   var safeFileName = activeInvoice.idInvoice.replace(/\//g, '_');
+   document.title = safeFileName;
+   window.print();
+   setTimeout(function() { document.title = originalTitle; }, 1000);
+ }
+</script>

@@ -1,0 +1,630 @@
+<!-- KONTEN DATABASE PASIEN -->
+<div class="space-y-6 text-xs relative text-slate-800">
+
+
+ <!-- MODAL KONFIRMASI EDIT -->
+ <div id="modalConfirmEdit" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm transition-all">
+   <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl border border-slate-200 text-center transform transition-all">
+     <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center text-2xl mx-auto mb-4">⚠️</div>
+     <h3 class="text-lg font-black text-slate-800 mb-2">Edit Data Pasien?</h3>
+     <p class="text-xs text-slate-500 mb-6 leading-relaxed">Apakah Anda Yakin Ingin Merubah Data Pasien Ini?</p>
+     <div class="flex gap-3 justify-center">
+       <button type="button" onclick="cancelEditPasien()" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-colors w-full">Tidak, Batal</button>
+       <button type="button" onclick="proceedEditPasien()" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-md transition-colors w-full">Ya, Edit Data</button>
+     </div>
+   </div>
+ </div>
+
+
+ <!-- Header Modul (Tampil di Layar) -->
+ <div id="panelHeaderModul" class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-6 rounded-2xl shadow-sm border border-slate-200 gap-4">
+   <div>
+     <h2 class="text-lg font-black text-slate-900 flex items-center gap-2"><span class="text-2xl">🗃️</span> Database Pasien</h2>
+     <p class="text-slate-500 mt-1 text-xs">Pusat data induk seluruh pasien klinik Sheldon.</p>
+   </div>
+   <div class="flex items-center gap-3 w-full sm:w-auto">
+     <button id="btnTambahPasienBaru" onclick="bukaFormPasienBaru()" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs shadow-md shadow-indigo-500/30 transition-all flex items-center gap-2 whitespace-nowrap">
+       <span>+</span> Pasien Baru
+     </button>
+   </div>
+ </div>
+
+
+ <!-- FORMULIR PASIEN (KONDISIONAL: HIDDEN SAAT TABEL MUNCUL) -->
+ <div id="panelFormPasien" class="hidden bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+   <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+     <div class="flex items-center gap-3">
+       <div class="w-8 h-8 bg-indigo-50 text-indigo-600 rounded-lg flex items-center justify-center font-bold text-base">👤</div>
+       <div>
+         <h3 class="text-sm font-black text-slate-900" id="formTitle">Formulir Pendaftaran Pasien Baru</h3>
+         <p class="text-[10px] text-slate-500 font-medium">Input / Edit Data Pasien</p>
+       </div>
+     </div>
+     <button onclick="tutupFormPasien()" class="px-5 py-2 bg-rose-50 hover:bg-rose-500 text-rose-600 hover:text-white font-bold rounded-xl text-xs transition-all flex items-center gap-2 border border-rose-200 shadow-sm">⬅️ Kembali ke Tabel</button>
+   </div>
+
+
+   <form id="formPasienData" onsubmit="simpanDataPasien(event)" class="space-y-4">
+     <input type="hidden" id="pasienMode" value="baru">
+     <input type="hidden" id="pasId">
+     <input type="hidden" id="pasRm">
+
+     <!-- CONTAINER AUTO-GUARD PERINGATAN DUPLIKASI DATA -->
+     <div id="alertDuplikatPasien" class="hidden p-3.5 bg-amber-50 border-2 border-amber-300 rounded-xl flex items-start gap-3 transition-all animate-fade-in shadow-sm">
+       <span class="text-xl">⚠️</span>
+       <div class="flex-1">
+         <h4 class="text-xs font-black text-amber-900 uppercase tracking-wider">Perhatian: Kemungkinan Pasien Sudah Terdaftar!</h4>
+         <p id="alertDuplikatText" class="text-xs text-amber-800 font-medium mt-0.5 leading-relaxed"></p>
+         <div class="mt-2.5 flex items-center gap-2">
+           <button type="button" id="btnBukaPasienLama" class="px-3 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-bold shadow-sm transition-all">
+             Buka Data Pasien Lama
+           </button>
+           <button type="button" onclick="document.getElementById('alertDuplikatPasien').classList.add('hidden')" class="px-2.5 py-1 bg-white hover:bg-amber-100 text-amber-800 border border-amber-300 rounded-lg text-xs font-bold transition-all">
+             Abaikan / Lanjutkan
+           </button>
+         </div>
+       </div>
+     </div>
+
+     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+       <div>
+         <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Nama Lengkap Pasien *</label>
+         <input type="text" id="pasNama" required oninput="autoTitleCase(this); cekDuplikasiFrontend();" placeholder="Ketik nama pasien..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500">
+       </div>
+      
+       <div class="grid grid-cols-2 gap-2">
+         <div>
+           <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Jenis Kelamin *</label>
+           <select id="pasJk" required class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
+             <option value="" disabled selected>-- Pilih --</option>
+             <option value="Laki-Laki">Laki-Laki</option>
+             <option value="Perempuan">Perempuan</option>
+           </select>
+         </div>
+         <div>
+           <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Tanggal Daftar *</label>
+           <input type="date" id="pasienTglDaftar" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
+         </div>
+       </div>
+     </div>
+
+
+     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+       <div>
+         <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Tanggal Lahir *</label>
+         <input type="date" id="pasTglLahir" required onchange="hitungUmurOtomatis(); cekDuplikasiFrontend();" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
+       </div>
+       <div>
+         <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Umur</label>
+         <input type="text" id="pasUmur" readonly placeholder="Auto..." class="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl text-xs font-bold text-slate-600 outline-none">
+       </div>
+       <div>
+         <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Agama</label>
+         <!-- Atribut required dicabut, menjadi opsional -->
+         <select id="pasAgama" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
+           <option value="" selected>-- Pilih (Opsional) --</option>
+           <option value="Islam">Islam</option>
+           <option value="Kristen">Kristen</option>
+           <option value="Katolik">Katolik</option>
+           <option value="Hindu">Hindu</option>
+           <option value="Buddha">Buddha</option>
+           <option value="Khonghucu">Khonghucu</option>
+         </select>
+       </div>
+       <div>
+         <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Golongan Darah</label>
+         <select id="pasGoldar" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
+           <option value="" selected>-- Pilih --</option>
+           <option value="A">A</option><option value="B">B</option><option value="AB">AB</option><option value="O">O</option>
+         </select>
+       </div>
+     </div>
+
+
+     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+       <div>
+         <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Nomor NIK / KTP</label>
+         <input type="text" id="pasNik" maxlength="16" oninput="this.value = this.value.replace(/[^0-9]/g, ''); cekDuplikasiFrontend();" placeholder="16 Digit Angka NIK..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500">
+       </div>
+       <div>
+         <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Nomor WhatsApp</label>
+         <input type="text" id="pasWa" maxlength="15" oninput="this.value = this.value.replace(/[^0-9]/g, '')" placeholder="Misal: 0812..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500">
+       </div>
+       <div>
+         <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Pekerjaan *</label>
+         <select id="pasPekerjaan" required class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
+           <option value="" disabled selected>Memuat Data...</option>
+         </select>
+       </div>
+     </div>
+
+
+     <div>
+       <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Alamat Lengkap *</label>
+       <textarea id="pasAlamat" required oninput="autoTitleCase(this)" rows="2" placeholder="Detail alamat pasien..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+     </div>
+
+
+     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+       <div>
+         <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Riwayat Penyakit Sistemik</label>
+         <input type="text" id="pasRiwayat" oninput="autoTitleCase(this)" placeholder="Misal: Hipertensi, Diabetes..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500">
+       </div>
+       <div>
+         <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Riwayat Alergi Obat/Lain</label>
+         <input type="text" id="pasAlergi" oninput="autoTitleCase(this)" placeholder="Misal: Amoxicillin..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500">
+       </div>
+       <div>
+         <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Catatan Tambahan</label>
+         <input type="text" id="pasCatatan" oninput="autoTitleCase(this)" placeholder="Catatan lain..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500">
+       </div>
+     </div>
+    
+     <!-- Input Hidden Form Lengkap -->
+     <div class="hidden">
+         <input type="text" id="pasProvinsi"><input type="text" id="pasKabupaten"><input type="text" id="pasKecamatan"><input type="text" id="pasKelurahan">
+     </div>
+
+
+     <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
+       <button type="button" onclick="batalEditPasien()" id="btnBatalPasien" class="hidden px-5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-all">Batal Edit</button>
+       <button type="button" onclick="resetFormPasien()" id="btnResetPasien" class="px-5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-all">Reset Form</button>
+       <button type="submit" id="btnSimpanPasien" class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-black rounded-xl shadow-md transition-all">SIMPAN Data</button>
+     </div>
+   </form>
+ </div>
+
+
+ <!-- TABEL UTAMA PASIEN -->
+ <div id="panelTabelPasien" class="space-y-6">
+    
+   <!-- SUMMARY STATS -->
+   <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+     <div class="bg-indigo-50 border border-indigo-100 p-4 rounded-xl flex items-center justify-between shadow-sm">
+       <div>
+         <p class="text-indigo-600 font-bold text-[10px] uppercase">Total Pasien</p>
+         <h4 class="text-2xl font-black text-indigo-900" id="labelTotalPasien">0</h4>
+       </div>
+       <div class="text-3xl opacity-80">👥</div>
+     </div>
+     <div class="bg-blue-50 border border-blue-100 p-4 rounded-xl flex items-center justify-between shadow-sm">
+       <div>
+         <p class="text-blue-600 font-bold text-[10px] uppercase">Laki-Laki</p>
+         <h4 class="text-2xl font-black text-blue-900" id="labelTotalLaki">0</h4>
+       </div>
+       <div class="text-3xl opacity-80">👨</div>
+     </div>
+     <div class="bg-pink-50 border border-pink-100 p-4 rounded-xl flex items-center justify-between shadow-sm">
+       <div>
+         <p class="text-pink-600 font-bold text-[10px] uppercase">Perempuan</p>
+         <h4 class="text-2xl font-black text-pink-900" id="labelTotalPerempuan">0</h4>
+       </div>
+       <div class="text-3xl opacity-80">👩</div>
+     </div>
+   </div>
+
+
+   <!-- TABEL VIEW PASIEN -->
+   <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 border-b border-slate-100 pb-3 mb-3">
+       <div>
+         <h4 class="font-bold text-slate-800 text-sm">Database Pasien</h4>
+         <p class="text-[10px] text-slate-400 font-medium">Buku register dan data induk seluruh pasien klinik</p>
+       </div>
+       <div class="flex flex-col sm:flex-row items-center gap-2.5 w-full md:w-auto">
+         <div class="w-full sm:w-64 relative">
+           <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">🔍</span>
+           <input type="text" id="inputCariPasien" placeholder="Cari Nama / No. RM..." class="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500">
+         </div>
+         <button type="button" id="btnFilterDuplikat" onclick="toggleFilterDataGanda()" class="hidden w-full sm:w-auto px-4 py-2 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 font-bold rounded-xl text-xs shadow-sm transition-all flex items-center justify-center gap-1.5 whitespace-nowrap">
+           <span>⚠️</span> Filter Data Ganda
+         </button>
+         <button type="button" id="btnCetakMpi" onclick="bukaModalMpi()" class="w-full sm:w-auto px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs shadow-sm transition-all flex items-center justify-center gap-1.5 whitespace-nowrap">
+           <span>📖</span> Save PDF (Buku Indeks Pasien)
+         </button>
+       </div>
+     </div>
+    
+     <!-- TABEL DATA PASIEN -->
+     <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-sm mb-4">
+       <table class="w-full text-left whitespace-nowrap">
+         <thead class="bg-slate-50 text-[10px] uppercase font-bold text-slate-500 border-b border-slate-200 sticky top-0 z-10">
+           <tr>
+             <th class="p-3">No. RM</th>
+             <th class="p-3">Nama Pasien</th>
+             <th class="p-3">Kelamin</th>
+             <th class="p-3">Tanggal Lahir / Umur</th>
+             <th class="p-3">WhatsApp</th>
+             <th class="p-3">Penyakit Sistemik</th>
+             <th class="p-3">Alergi</th>
+             <th class="p-3">Alamat Lengkap</th>
+             <th class="p-3 text-center">Aksi</th>
+           </tr>
+         </thead>
+         <tbody id="tbodyPasien" class="divide-y divide-slate-100">
+           <tr><td colspan="9" class="text-center py-10 text-slate-400 font-bold">Memuat data pasien...</td></tr>
+         </tbody>
+       </table>
+     </div>
+
+
+     <!-- PAGINATION & TOTAL DATABASE -->
+     <div class="flex justify-between items-center mt-4">
+       <button id="btnPrevPagePasien" onclick="prevPagePasien()" disabled class="px-5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-50 disabled:opacity-40 transition-all shadow-sm">⬅️ Back</button>
+       <span class="text-xs font-bold text-slate-500">
+         Halaman <span id="labelCurrentPagePasien" class="text-indigo-600 font-black">1</span> dari <span id="labelTotalPagePasien" class="text-slate-800 font-black">1</span>
+         <span id="labelTotalDataString" class="ml-1 text-slate-400">(Total: 0 Pasien)</span>
+       </span>
+       <button id="btnNextPagePasien" onclick="nextPagePasien()" disabled class="px-5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-50 disabled:opacity-40 transition-all shadow-sm">Next ➡️</button>
+     </div>
+
+
+   </div>
+ </div>
+
+
+</div>
+
+
+<!-- MODAL HISTORY EMR PASIEN (VIEW & CETAK) -->
+<div id="modalHistoryEMR" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+ <div class="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[95vh] flex flex-col overflow-hidden">
+  
+   <!-- Header Modal -->
+   <div class="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+     <div>
+       <h3 class="font-black text-slate-800 text-lg flex items-center gap-2">
+         <span class="text-indigo-600">🩺</span> Riwayat Rekam Medis Pasien
+       </h3>
+       <p class="text-xs font-bold text-slate-500 mt-1" id="lblHistoryNamaRM">Nama Pasien - RM</p>
+     </div>
+     <div class="flex gap-3">
+       <button id="btnPrintHistoryBtn" class="px-4 py-2 bg-indigo-100 text-indigo-700 hover:bg-indigo-600 hover:text-white rounded-lg font-bold text-xs transition-colors flex items-center gap-2 shadow-sm border border-indigo-200">
+         🖨️ Cetak PDF
+       </button>
+       <button onclick="closeHistoryEMR()" class="w-9 h-9 flex items-center justify-center bg-rose-50 text-rose-600 hover:bg-rose-500 hover:text-white rounded-lg font-bold transition-colors text-lg">&times;</button>
+     </div>
+   </div>
+  
+   <!-- Kontainer Riwayat -->
+   <div class="p-5 overflow-y-auto bg-slate-100 flex-1">
+     <div id="containerHistoryEMR" class="space-y-4">
+        <!-- Data Riwayat Akan Muncul Di Sini -->
+     </div>
+   </div>
+  
+ </div>
+</div>
+<!-- ========================================== -->
+<!-- MODAL PREVIEW BUKU INDEKS UTAMA PASIEN (MPI)-->
+<!-- ========================================== -->
+<div id="modalPreviewMpi" class="hidden fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-all print:hidden">
+  <div class="bg-white rounded-2xl w-full max-w-5xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden">
+    <!-- Header Modal -->
+    <div class="flex justify-between items-center px-6 py-4 border-b border-slate-200 bg-slate-50">
+      <div>
+        <h3 class="text-sm font-black text-slate-800 flex items-center gap-2">
+          <span>📖</span> Buku Indeks Pasien
+        </h3>
+        <p class="text-[10px] text-slate-500 font-medium" id="lblSubMpi">Format Cetak A4 Portrait &bull; Font Arial 10pt &bull; Urut No. RM</p>
+      </div>
+      <div class="flex gap-2">
+        <button type="button" onclick="actionCetakDanPdfMpi(true)" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-xs shadow-sm transition-colors flex items-center gap-1.5">
+          <span>📥</span> Save PDF / Cetak
+        </button>
+        <button type="button" onclick="tutupModalMpi()" class="w-9 h-9 flex items-center justify-center text-slate-400 hover:text-rose-500 font-bold bg-white rounded-lg border border-slate-200 hover:bg-rose-50 text-xl transition-colors">&times;</button>
+      </div>
+    </div>
+    
+    <!-- Wadah Preview Dokumen Kertas A4 -->
+    <div class="p-6 overflow-y-auto flex-1 bg-slate-200/50 flex justify-center">
+      <div id="printAreaMpi" class="bg-white shadow-xl relative" style="width: 210mm; max-width: 210mm; min-height: 297mm; box-sizing: border-box; padding: 0; font-family: Arial, sans-serif; color: #000000;">
+        <!-- Konten MPI dirender via renderKontenMpi() -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================== -->
+<!-- MODAL VIEWER ODONTOGRAM HISTORY PASIEN -->
+<!-- ========================================== -->
+<div id="modalOdontoHistoryPasien" class="hidden fixed inset-0 z-[70] flex items-center justify-center p-2 sm:p-4 bg-slate-950/80 backdrop-blur-sm transition-all print:hidden">
+  <div class="bg-white rounded-2xl w-full max-w-5xl max-h-[94vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden font-sans">
+    <div class="flex justify-between items-center px-6 py-4 border-b border-slate-200 bg-slate-50">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-sky-100 border border-sky-200 flex items-center justify-center text-xl text-sky-700">
+          🦷
+        </div>
+        <div>
+          <h3 class="text-sm font-black text-slate-800 flex items-center gap-2">
+            Visual Odontogram Pasien
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-sky-100 text-sky-800 border border-sky-300">PDGI Standard</span>
+          </h3>
+          <p class="text-[11px] text-slate-500 font-medium" id="lblSubOdontoPasien">Pemeriksaan kondisi 32 gigi dan kalkulasi DMF-T</p>
+        </div>
+      </div>
+      <button type="button" onclick="tutupModalOdontoHistoryPasien()" class="w-9 h-9 flex items-center justify-center text-slate-400 hover:text-rose-500 font-bold bg-white rounded-lg border border-slate-200 hover:bg-rose-50 text-xl transition-colors">&times;</button>
+    </div>
+    
+    <div class="p-5 overflow-y-auto bg-slate-100 flex-1 space-y-4">
+      <!-- DMFT Stat Cards -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3" id="odontoDmftCardsPasien">
+        <!-- Terisi via JS -->
+      </div>
+      
+      <!-- Visual Odontogram SVG Container -->
+      <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+        <div class="flex justify-between items-center mb-3">
+          <span class="text-xs font-black text-slate-700 uppercase tracking-wider">Bagan Odontogram Lengkap (32 Gigi)</span>
+          <span class="text-[10px] font-bold text-slate-400">Format Visual Rahang Atas & Rahang Bawah</span>
+        </div>
+        <div id="odontoVisualContainerPasien" class="overflow-x-auto flex justify-center py-2">
+          <!-- Terisi via JS -->
+        </div>
+      </div>
+
+      <!-- Detail Daftar Kelainan Gigi & Legenda -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+          <h4 class="text-xs font-black text-slate-700 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+            <span>📋</span> Rincian Kondisi Gigi Tercatat
+          </h4>
+          <div id="odontoListDiagnosaPasien" class="text-xs text-slate-600 max-h-48 overflow-y-auto pr-1 space-y-1">
+            <!-- Terisi via JS -->
+          </div>
+        </div>
+
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+          <h4 class="text-xs font-black text-slate-700 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+            <span>🎨</span> Legenda Warna Standar PDGI
+          </h4>
+          <div class="grid grid-cols-2 gap-1.5 text-[11px] text-slate-600">
+            <div class="flex items-center gap-2"><span class="w-3.5 h-3.5 rounded bg-rose-500 inline-block border"></span> Karies / Kavitasi</div>
+            <div class="flex items-center gap-2"><span class="w-3.5 h-3.5 rounded bg-emerald-500 inline-block border"></span> Tumpatan Komposit</div>
+            <div class="flex items-center gap-2"><span class="w-3.5 h-3.5 rounded bg-slate-700 inline-block border"></span> Tumpatan Amalgam</div>
+            <div class="flex items-center gap-2"><span class="w-3.5 h-3.5 rounded bg-amber-400 inline-block border"></span> Tumpatan GIC</div>
+            <div class="flex items-center gap-2"><span class="w-3.5 h-3.5 rounded bg-blue-500 inline-block border"></span> Mahkota Tiruan (Crown)</div>
+            <div class="flex items-center gap-2"><span class="w-3.5 h-3.5 rounded bg-slate-300 inline-block border text-[8px] text-center font-bold">X</span> Gigi Hilang (Missing)</div>
+            <div class="flex items-center gap-2"><span class="w-3.5 h-3.5 rounded bg-red-600 inline-block border text-[8px] text-white text-center font-bold">V</span> Sisa Akar (Radix)</div>
+            <div class="flex items-center gap-2"><span class="w-3.5 h-3.5 rounded bg-purple-600 inline-block border text-[8px] text-white text-center font-bold">NV</span> Gigi Non-Vital</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="px-6 py-3 border-t border-slate-200 bg-white flex justify-end">
+      <button type="button" onclick="tutupModalOdontoHistoryPasien()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition-colors">Tutup</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================== -->
+<!-- MODAL VIEWER PERIODONTAL CHARTING HISTORY PASIEN -->
+<!-- ========================================== -->
+<!-- ========================================== -->
+<!-- MODAL VIEWER PERIODONTAL CHARTING HISTORY PASIEN (DARK CLINICAL MODE) -->
+<!-- ========================================== -->
+<div id="modalPerioHistoryPasien" class="hidden fixed inset-0 z-[70] flex items-center justify-center p-2 sm:p-4 bg-slate-950/85 backdrop-blur-md transition-all print:hidden">
+  <div class="bg-[#0b0f19] text-slate-100 rounded-3xl w-full max-w-6xl max-h-[96vh] flex flex-col shadow-2xl border border-slate-800 overflow-hidden font-sans">
+    
+    <!-- HEADER MODAL -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center px-6 py-4 border-b border-slate-800 bg-[#0d1322] gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-xl text-blue-400">
+          🦷
+        </div>
+        <div>
+          <h3 class="text-base font-black text-white flex items-center gap-2">
+            Periodontal Charting History Pasien
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-950 text-blue-400 border border-blue-800">Clinical History View</span>
+          </h3>
+          <p class="text-[11px] text-slate-400" id="lblSubPerioPasien">Pemeriksaan Pocket Depth 6 Titik, Bleeding on Probing (BOP), Anatomi Gigi & Kedalaman Saku Gusi.</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+        <button type="button" onclick="tutupModalPerioHistoryPasien()" class="w-9 h-9 flex items-center justify-center text-slate-400 hover:text-white font-bold bg-slate-800 hover:bg-slate-700 rounded-xl border border-slate-700 text-xl transition-colors">&times;</button>
+      </div>
+    </div>
+
+    <!-- BODY AREA (SCROLLABLE) -->
+    <div class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5 bg-[#0b0f19]">
+
+      <!-- PETUNJUK BANNER TIP -->
+      <div class="bg-blue-950/40 border border-blue-800/40 rounded-2xl px-4 py-2.5 flex items-center justify-between text-xs text-blue-200 gap-2 flex-wrap">
+        <div class="flex items-center gap-2 text-[11px]">
+          <span class="text-base">📊</span>
+          <span><b>Catatan Riwayat Rekam Medis:</b> Grafik dan anatomi saku gusi di bawah ini dirender dari data pemeriksaan kunjungan pasien.</span>
+        </div>
+        <div class="flex items-center gap-3 text-[11px] font-semibold text-slate-400">
+          <span><span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-400 mr-1"></span>1-3mm Normal</span>
+          <span><span class="inline-block w-2.5 h-2.5 rounded-full bg-rose-500 mr-1"></span>&ge;4mm Deep Pocket</span>
+          <span><span class="inline-block w-2.5 h-2.5 rounded-full bg-rose-500 mr-1 shadow-[0_0_6px_red]"></span>Titik Merah: BOP</span>
+        </div>
+      </div>
+
+      <!-- VISUALISASI GRAFIS CHART GIGI (SVG REAL-TIME DIAGRAM LENGKAP) -->
+      <div class="bg-[#0f172a] border border-slate-800 rounded-2xl p-4 shadow-inner">
+        <div class="flex justify-between items-center mb-2 px-1">
+          <span class="text-[10px] font-black uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span> Visualisasi Anatomi & Kedalaman Saku Gusi
+          </span>
+          <span class="text-[10px] font-bold text-slate-400 font-mono" id="perioGraphicLabelPasien">Rahang Atas &bull; Tampilan Bukal/Fasial</span>
+        </div>
+        
+        <div class="overflow-x-auto pb-2">
+          <svg id="svgPerioChartPasien" class="w-full min-w-[760px] h-[190px] select-none" viewBox="0 0 1000 190">
+            <!-- Rendered dynamically via renderPerioGraphicPasien() -->
+          </svg>
+        </div>
+      </div>
+
+      <!-- SUMMARY METRIC & CONTROLS BAR -->
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+        <!-- 3 KARTU STATISTIK RINGKASAN -->
+        <div class="md:col-span-6 grid grid-cols-3 gap-3">
+          <div class="bg-[#111827] border border-slate-800 rounded-2xl p-3 text-center">
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Sites</p>
+            <p class="text-xl font-black text-white mt-0.5" id="metricTotalSitesPasien">0</p>
+          </div>
+          <div class="bg-[#111827] border border-slate-800 rounded-2xl p-3 text-center">
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Deep Pockets (&ge;4mm)</p>
+            <p class="text-xl font-black text-rose-400 mt-0.5" id="metricDeepPocketsPasien">0</p>
+          </div>
+          <div class="bg-[#111827] border border-slate-800 rounded-2xl p-3 text-center">
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Bleeding Index (BOP)</p>
+            <p class="text-xl font-black text-rose-400 mt-0.5" id="metricBopPercentPasien">0%</p>
+          </div>
+        </div>
+
+        <!-- CONTROL TABS SEGMEN & ASPEK -->
+        <div class="md:col-span-6 flex flex-col justify-center gap-2">
+          <div class="flex gap-2 bg-[#111827] p-1 rounded-xl border border-slate-800">
+            <button id="tabPerioRahangAtasPasien" type="button" onclick="switchPerioArchPasien('maxilla')" class="flex-1 py-1.5 rounded-lg font-bold text-xs bg-blue-600 text-white transition-all shadow">Rahang Atas (18-28)</button>
+            <button id="tabPerioRahangBawahPasien" type="button" onclick="switchPerioArchPasien('mandible')" class="flex-1 py-1.5 rounded-lg font-bold text-xs text-slate-400 hover:text-white hover:bg-slate-800 transition-all">Rahang Bawah (48-38)</button>
+            <div class="w-px bg-slate-700 my-1"></div>
+            <button id="tabPerioFacialPasien" type="button" onclick="switchPerioAspectPasien('facial')" class="px-3 py-1.5 rounded-lg font-bold text-xs bg-indigo-600 text-white transition-all">Fasial / Bukal</button>
+            <button id="tabPerioLingualPasien" type="button" onclick="switchPerioAspectPasien('lingual')" class="px-3 py-1.5 rounded-lg font-bold text-xs text-slate-400 hover:text-white hover:bg-slate-800 transition-all">Lingual / Palatal</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- KARTU GIGI PER SEGMEN (POCKET DEPTH 6 TITIK & BOP) -->
+      <div>
+        <div class="flex justify-between items-center mb-2 px-1">
+          <span class="text-[11px] font-black uppercase tracking-wider text-slate-400" id="perioGridHeaderPasien">Daftar Gigi Rahang Atas (Tampilan Fasial)</span>
+          <span class="text-[10px] text-slate-500">Nilai probe depth (mm) &amp; indikator perdarahan per titik</span>
+        </div>
+        <div id="perioCardsContainerPasien" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-8 gap-2.5 overflow-x-auto pb-2">
+          <!-- Injected via renderPerioCardsPasien() -->
+        </div>
+      </div>
+
+    </div>
+
+    <!-- FOOTER MODAL -->
+    <div class="px-6 py-4 border-t border-slate-800 bg-[#0d1322] flex flex-col sm:flex-row justify-between items-center gap-3">
+      <div class="text-[11px] text-slate-300 font-medium">
+        <span class="font-bold text-white">Ringkasan Klinis:</span>
+        <span id="perioFooterSummaryTextPasien" class="text-slate-400 ml-1">Belum ada titik yang tercatat.</span>
+      </div>
+      <div class="flex items-center gap-2.5 w-full sm:w-auto justify-end">
+        <button type="button" onclick="tutupModalPerioHistoryPasien()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl text-xs transition-colors border border-slate-700">
+          Tutup
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================== -->
+<!-- MODAL VIEWER OHI-S HISTORY PASIEN (DARK TEAL MODE) -->
+<!-- ========================================== -->
+<div id="modalOhisHistoryPasien" class="hidden fixed inset-0 z-[70] flex items-center justify-center p-2 sm:p-4 bg-slate-950/85 backdrop-blur-md transition-all print:hidden">
+  <div class="bg-[#0b1319] text-slate-100 rounded-3xl w-full max-w-5xl max-h-[96vh] flex flex-col shadow-2xl border border-teal-900/60 overflow-hidden font-sans">
+    
+    <!-- HEADER MODAL -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center px-6 py-4 border-b border-slate-800 bg-[#0d1c1a] gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-teal-500/20 border border-teal-500/30 flex items-center justify-center text-xl text-teal-400">
+          🪥
+        </div>
+        <div>
+          <h3 class="text-base font-black text-white flex items-center gap-2">
+            OHI-S Charting History Pasien
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-teal-950 text-teal-300 border border-teal-800">Greene &amp; Vermillion 1964</span>
+          </h3>
+          <p class="text-[11px] text-slate-400" id="lblSubOhisPasien">Pemeriksaan Debris Index (DI-S) &amp; Calculus Index (CI-S) pada 6 Gigi Indeks Standar.</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+        <button type="button" onclick="tutupModalOhisHistoryPasien()" class="w-9 h-9 flex items-center justify-center text-slate-400 hover:text-white font-bold bg-slate-800 hover:bg-slate-700 rounded-xl border border-slate-700 text-xl transition-colors">&times;</button>
+      </div>
+    </div>
+
+    <!-- BODY AREA (SCROLLABLE) -->
+    <div class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5 bg-[#0b1319]">
+
+      <!-- PETUNJUK PENILAIAN BANNER TIP -->
+      <div class="bg-teal-950/40 border border-teal-800/40 rounded-2xl px-4 py-3 text-xs text-teal-200 flex flex-col md:flex-row justify-between gap-3">
+        <div>
+          <div class="font-bold flex items-center gap-1.5 text-teal-300 mb-1">
+            <span>ℹ️</span> 6 Gigi Indeks &amp; Permukaan Pemeriksaan:
+          </div>
+          <div class="text-[11px] text-slate-300 space-y-0.5 font-mono">
+            <div>• Rahang Atas: <b class="text-teal-400">16 (Bukal)</b>, <b class="text-teal-400">11 (Labial)</b>, <b class="text-teal-400">26 (Bukal)</b></div>
+            <div>• Rahang Bawah: <b class="text-teal-400">46 (Lingual)</b>, <b class="text-teal-400">31 (Labial)</b>, <b class="text-teal-400">36 (Lingual)</b></div>
+          </div>
+        </div>
+        <div class="text-[11px] border-t md:border-t-0 md:border-l border-teal-900/60 md:pl-4 pt-2 md:pt-0">
+          <div class="font-bold text-teal-300 mb-1">Pedoman Skor (0 - 3):</div>
+          <div class="text-slate-300 space-y-0.5">
+            <div><b class="text-emerald-400 font-mono">0:</b> Bersih / Tidak ada debris &amp; karang gigi</div>
+            <div><b class="text-blue-400 font-mono">1:</b> Menutupi &le; 1/3 permukaan servikal</div>
+            <div><b class="text-amber-400 font-mono">2:</b> Menutupi &gt; 1/3 s.d. 2/3 permukaan servikal</div>
+            <div><b class="text-rose-400 font-mono">3:</b> Menutupi &gt; 2/3 permukaan servikal</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- KARTU GIGI INDEKS RAHANG ATAS -->
+      <div class="bg-[#0f1d24] border border-teal-900/40 rounded-2xl p-4 shadow-inner">
+        <div class="flex justify-between items-center mb-3">
+          <span class="text-xs font-black uppercase tracking-wider text-teal-400 flex items-center gap-2">
+            <span>🔺</span> Rahang Atas (Maxilla)
+          </span>
+          <span class="text-[11px] font-bold text-slate-400">3 Gigi Indeks: 16 (B), 11 (L), 26 (B)</span>
+        </div>
+        <div id="ohisGridMaxillaPasien" class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <!-- Rendered via renderOhisUIPasien() -->
+        </div>
+      </div>
+
+      <!-- KARTU GIGI INDEKS RAHANG BAWAH -->
+      <div class="bg-[#0f1d24] border border-teal-900/40 rounded-2xl p-4 shadow-inner">
+        <div class="flex justify-between items-center mb-3">
+          <span class="text-xs font-black uppercase tracking-wider text-teal-400 flex items-center gap-2">
+            <span>🔻</span> Rahang Bawah (Mandibula)
+          </span>
+          <span class="text-[11px] font-bold text-slate-400">3 Gigi Indeks: 46 (L), 31 (L), 36 (L)</span>
+        </div>
+        <div id="ohisGridMandiblePasien" class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <!-- Rendered via renderOhisUIPasien() -->
+        </div>
+      </div>
+
+      <!-- PANEL LIVE SKOR & STATUS KLINIS -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+        <div class="bg-[#0e2224] border border-teal-800/50 rounded-2xl p-3.5 text-center shadow">
+          <span class="text-[10px] font-bold text-teal-400 uppercase tracking-wider block">Debris Index (DI-S)</span>
+          <div class="text-2xl font-black text-white mt-1" id="ohisScoreDISPasien">0.00</div>
+          <span class="text-[10px] font-bold px-2 py-0.5 rounded-full inline-block mt-1 bg-emerald-950 text-emerald-300 border border-emerald-700" id="ohisBadgeDISPasien">Baik</span>
+        </div>
+        <div class="bg-[#0e2224] border border-teal-800/50 rounded-2xl p-3.5 text-center shadow">
+          <span class="text-[10px] font-bold text-teal-400 uppercase tracking-wider block">Calculus Index (CI-S)</span>
+          <div class="text-2xl font-black text-white mt-1" id="ohisScoreCISPasien">0.00</div>
+          <span class="text-[10px] font-bold px-2 py-0.5 rounded-full inline-block mt-1 bg-emerald-950 text-emerald-300 border border-emerald-700" id="ohisBadgeCISPasien">Baik</span>
+        </div>
+        <div class="bg-[#0e2224] border border-teal-800/50 rounded-2xl p-3.5 text-center shadow">
+          <span class="text-[10px] font-bold text-teal-400 uppercase tracking-wider block">Total Skor OHI-S</span>
+          <div class="text-2xl font-black text-white mt-1" id="ohisScoreTotalPasien">0.00</div>
+          <span class="text-[10px] text-slate-400 font-mono block mt-1">DI-S + CI-S</span>
+        </div>
+        <div class="bg-[#0e2224] border border-teal-800/50 rounded-2xl p-3.5 text-center shadow flex flex-col justify-center items-center">
+          <span class="text-[10px] font-bold text-teal-400 uppercase tracking-wider block">Kategori Klinis OHI-S</span>
+          <div id="ohisBadgeCategoryPasien" class="px-3 py-1 rounded-xl font-black text-xs mt-1.5 uppercase shadow bg-emerald-950 text-emerald-300 border border-emerald-600">
+            Baik (Good)
+          </div>
+          <span class="text-[9px] text-slate-400 mt-1" id="ohisRangeInfoPasien">Rentang: 0.0 - 1.2</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- FOOTER MODAL -->
+    <div class="px-6 py-4 border-t border-slate-800 bg-[#0d1c1a] flex justify-end">
+      <button type="button" onclick="tutupModalOhisHistoryPasien()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl text-xs transition-colors border border-slate-700">
+        Tutup
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,3 @@
+ID_Tagihan_Lab,Periode_Bulan,Nama_Vendor_Lab,Jumlah_Pekerjaan,Total_Biaya_Lab,Potongan_Retur,Total_Tagihan_Bersih,Status_Bayar,Tanggal_Bayar,Metode_Bayar,No_Faktur_Lab,Catatan,Waktu_Sistem
+LAB-BILL-202610-001,Oktober 2026,Dental Lab Padang Mandiri,3,1050000,0,1050000,Belum Lunas,-,Transfer Bank,FAK-LAB-8912,"Pekerjaan PFM Crown 2 unit, Valplast 1 unit",10-10-2026 10:00:00
+LAB-BILL-202610-002,Oktober 2026,Kencana Dental Lab Bukittinggi,1,350000,0,350000,Belum Lunas,-,Transfer Bank,FAK-KCN-4410,"Crown PFM Pasien Budi Santoso (INV 0001)",10-10-2026 10:00:00

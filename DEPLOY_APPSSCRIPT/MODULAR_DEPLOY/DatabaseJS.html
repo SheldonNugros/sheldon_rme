@@ -1,0 +1,908 @@
+<script>
+// ==========================================
+// VARIABLE GLOBAL DATABASE MASTER
+// ==========================================
+let listMasterKategori = [];
+let listMasterTindakan = [];
+let listMasterObat = [];
+let listMasterBmhp = [];
+
+// ==========================================
+// INISIALISASI
+// ==========================================
+document.addEventListener("KlinikDataReady", () => {
+   initDatabaseModule();
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+  setTimeout(() => {
+     if(window.KlinikData && window.KlinikData.statusLoad && window.KlinikData.statusLoad.master) {
+         initDatabaseModule();
+     }
+  }, 1000);
+});
+
+function initDatabaseModule() {
+   if (typeof google !== 'undefined' && google.script && google.script.run) {
+       // Tarik Kategori (Untuk Dropdown Tindakan)
+       google.script.run.withSuccessHandler(res => {
+           listMasterKategori = res || [];
+           populateKategoriDropdown();
+       }).getKategoriTindakan();
+
+       // Tarik Daftar Tindakan (Untuk Tabel dan Acuan Kode)
+       google.script.run.withSuccessHandler(res => {
+           listMasterTindakan = res || [];
+           renderTabelTindakan();
+       }).getDaftarTindakanLengkap();
+
+       // Tarik Master Obat
+       loadDaftarObatMaster();
+
+       // Tarik Master BMHP
+       loadDaftarBmhpMaster();
+   }
+}
+
+function loadDaftarObatMaster() {
+   if (typeof google !== 'undefined' && google.script && google.script.run) {
+       google.script.run.withSuccessHandler(res => {
+           listMasterObat = res || [];
+           renderTabelObat();
+           generateKodeObat();
+       }).getDaftarObatLengkap();
+   }
+}
+
+function loadDaftarBmhpMaster() {
+   if (typeof google !== 'undefined' && google.script && google.script.run) {
+       google.script.run.withSuccessHandler(res => {
+           listMasterBmhp = res || [];
+           renderTabelBmhp();
+           generateKodeBmhp();
+       }).getDaftarBMHPLengkap();
+   }
+}
+
+// ==========================================
+// LOGIKA TAMPILAN / MENU TAB
+// ==========================================
+function changeDBMenu(menu) {
+   ['panelDbTindakan', 'panelDbObat', 'panelDbBmhp'].forEach(id => {
+       const el = document.getElementById(id);
+       if (el) el.classList.add('hidden');
+   });
+   ['btnDbTindakan', 'btnDbObat', 'btnDbBmhp'].forEach(id => {
+       let btn = document.getElementById(id);
+       if (btn) {
+           btn.classList.remove('bg-indigo-50', 'text-indigo-700');
+           btn.classList.add('bg-white', 'text-slate-600');
+       }
+   });
+
+   if(menu === 'tindakan') {
+       const el = document.getElementById('panelDbTindakan');
+       if (el) el.classList.remove('hidden');
+       let btn = document.getElementById('btnDbTindakan');
+       if (btn) {
+           btn.classList.remove('bg-white', 'text-slate-600');
+           btn.classList.add('bg-indigo-50', 'text-indigo-700');
+       }
+   } else if(menu === 'obat') {
+       const el = document.getElementById('panelDbObat');
+       if (el) el.classList.remove('hidden');
+       let btn = document.getElementById('btnDbObat');
+       if (btn) {
+           btn.classList.remove('bg-white', 'text-slate-600');
+           btn.classList.add('bg-indigo-50', 'text-indigo-700');
+       }
+       if (listMasterObat.length === 0) {
+           loadDaftarObatMaster();
+       } else {
+           renderTabelObat();
+           generateKodeObat();
+       }
+   } else if(menu === 'bmhp') {
+       const el = document.getElementById('panelDbBmhp');
+       if (el) el.classList.remove('hidden');
+       let btn = document.getElementById('btnDbBmhp');
+       if (btn) {
+           btn.classList.remove('bg-white', 'text-slate-600');
+           btn.classList.add('bg-indigo-50', 'text-indigo-700');
+       }
+       if (listMasterBmhp.length === 0) {
+           loadDaftarBmhpMaster();
+       } else {
+           renderTabelBmhp();
+           generateKodeBmhp();
+       }
+   }
+}
+
+// ==========================================
+// AUTO-FORMATTER & AUTO-CODE GENERATOR
+// ==========================================
+function autoTitleCaseDB(el) {
+  let val = el.value;
+  if (!val) return;
+ 
+  let isAllCaps = val === val.toUpperCase() && val.match(/[a-zA-Z]/);
+  if (!isAllCaps) {
+      const start = el.selectionStart, end = el.selectionEnd;
+      el.value = val.replace(/(^|[\s\/\-\.\(\)])([a-z])/g, (m, p1, p2) => p1 + p2.toUpperCase());
+      el.setSelectionRange(start, end);
+  }
+}
+
+function formatRupiahInput(el) {
+   let val = el.value.replace(/[^0-9]/g, '');
+   if(val === "") { el.value = ""; return; }
+   el.value = parseInt(val, 10).toLocaleString('id-ID').replace(/,/g, '.');
+}
+
+function parseRupiahRaw(str) {
+   if (!str) return 0;
+   return parseInt(String(str).replace(/[^0-9]/g, ''), 10) || 0;
+}
+
+const fmtRpStr = (angka) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(angka || 0);
+
+function populateKategoriDropdown() {
+   let sel = document.getElementById('dbKategori');
+   if(!sel) return;
+  
+   sel.innerHTML = '<option value="" disabled selected>-- Pilih Kategori --</option>';
+   listMasterKategori.forEach(k => {
+       sel.innerHTML += `<option value="${k.kategori}" data-kode="${k.kode}">${k.kategori}</option>`;
+   });
+}
+
+function generateKodeTindakan() {
+   let sel = document.getElementById('dbKategori');
+   if (!sel) return;
+   let val = sel.value;
+   if(!val) return;
+  
+   let opt = sel.options[sel.selectedIndex];
+   let kodeKat = opt.getAttribute('data-kode');
+  
+   let maxNum = 0;
+   listMasterTindakan.forEach(t => {
+       if(t.kode && t.kode.startsWith(kodeKat + "-")) {
+           let parts = t.kode.split('-');
+           if(parts.length > 1) {
+               let num = parseInt(parts[1], 10);
+               if(!isNaN(num) && num > maxNum) maxNum = num;
+           }
+       }
+   });
+  
+   let nextNum = maxNum + 1;
+   let finalKode = kodeKat + "-" + String(nextNum).padStart(4, '0');
+   let inp = document.getElementById('dbKodeTindakan');
+   if (inp) inp.value = finalKode;
+}
+
+function generateKodeObat() {
+   let maxNum = 0;
+   listMasterObat.forEach(o => {
+       if (o.kode && o.kode.startsWith('OBT-')) {
+           let parts = o.kode.split('-');
+           if (parts.length > 1) {
+               let num = parseInt(parts[1], 10);
+               if (!isNaN(num) && num > maxNum) maxNum = num;
+           }
+       }
+   });
+   let nextNum = maxNum + 1;
+   let finalKode = 'OBT-' + String(nextNum).padStart(4, '0');
+   let inp = document.getElementById('dbKodeObat');
+   if (inp) inp.value = finalKode;
+}
+
+function generateKodeBmhp() {
+   let maxNum = 0;
+   listMasterBmhp.forEach(b => {
+       if (b.kode && b.kode.startsWith('BMH-')) {
+           let parts = b.kode.split('-');
+           if (parts.length > 1) {
+               let num = parseInt(parts[1], 10);
+               if (!isNaN(num) && num > maxNum) maxNum = num;
+           }
+       }
+   });
+   let nextNum = maxNum + 1;
+   let finalKode = 'BMH-' + String(nextNum).padStart(4, '0');
+   let inp = document.getElementById('dbKodeBmhp');
+   if (inp) inp.value = finalKode;
+}
+
+function hitungMarginObat() {
+   let hpp = parseRupiahRaw(document.getElementById('dbHppObat').value);
+   let jual = parseRupiahRaw(document.getElementById('dbHargaJualObat').value);
+   let el = document.getElementById('dbMarginObat');
+   if (!el) return;
+   if (hpp > 0 && jual > 0) {
+       let margin = ((jual - hpp) / hpp) * 100;
+       el.value = margin.toFixed(1) + '%';
+       if (margin < 0) {
+           el.classList.remove('text-emerald-600');
+           el.classList.add('text-rose-600');
+       } else {
+           el.classList.remove('text-rose-600');
+           el.classList.add('text-emerald-600');
+       }
+   } else {
+       el.value = '0%';
+   }
+}
+
+function hitungHppPcsOtomatis() {
+   let elHrg = document.getElementById('dbHargaBeliSatuanObat');
+   let elIsi = document.getElementById('dbIsiPerSatuanObat');
+   let elHpp = document.getElementById('dbHppObat');
+   if (!elHrg || !elIsi || !elHpp) return;
+   let hrg = parseRupiahRaw(elHrg.value);
+   let isi = parseFloat(elIsi.value) || 1;
+   if (hrg > 0 && isi > 0) {
+       let hppPcs = Math.round(hrg / isi);
+       elHpp.value = formatRibuan(hppPcs);
+       hitungMarginObat();
+   }
+}
+
+function hitungMarginBmhp() {
+   let hpp = parseRupiahRaw(document.getElementById('dbHppBmhp').value);
+   let jual = parseRupiahRaw(document.getElementById('dbHargaJualBmhp').value);
+   let el = document.getElementById('dbMarginBmhp');
+   if (!el) return;
+   if (hpp > 0 && jual > 0) {
+       let margin = ((jual - hpp) / hpp) * 100;
+       el.value = margin.toFixed(1) + '%';
+       if (margin < 0) {
+           el.classList.remove('text-emerald-600');
+           el.classList.add('text-rose-600');
+       } else {
+           el.classList.remove('text-rose-600');
+           el.classList.add('text-emerald-600');
+       }
+   } else {
+       el.value = '0%';
+   }
+}
+
+// ==========================================
+// SIMPAN KE DATABASE SPREADSHEET
+// ==========================================
+function simpanDbTindakan(e) {
+   e.preventDefault();
+   let mode = document.getElementById('dbTindakanMode') ? document.getElementById('dbTindakanMode').value : 'tambah';
+   let btn = document.getElementById('btnSimpanTindakan');
+   let originalBtnText = mode === 'edit' ? 'UPDATE TINDAKAN' : 'SIMPAN TINDAKAN';
+   btn.innerHTML = 'MENYIMPAN...'; btn.disabled = true;
+
+   let tarifRaw = document.getElementById('dbTarif').value.replace(/\./g, '');
+   let perluLabVal = document.getElementById('dbPerluLab') ? document.getElementById('dbPerluLab').value : 'Tidak';
+  
+   let payload = {
+       kode: document.getElementById('dbKodeTindakan').value,
+       nama: document.getElementById('dbNamaTindakan').value.trim(),
+       kategori: document.getElementById('dbKategori').value,
+       tarif: parseInt(tarifRaw, 10) || 0,
+       perluLab: perluLabVal,
+       currentUser: window.activeNamaAccount
+   };
+
+   if (mode === 'edit') {
+       google.script.run.withSuccessHandler(res => {
+           btn.innerHTML = originalBtnText; btn.disabled = false;
+           if (res.success) {
+               if (typeof showToast === 'function') showToast('success', res.message); else alert(res.message);
+               
+               let idx = listMasterTindakan.findIndex(x => x.kode === payload.kode);
+               if (idx !== -1) {
+                   listMasterTindakan[idx].nama = payload.nama;
+                   listMasterTindakan[idx].kategori = payload.kategori;
+                   listMasterTindakan[idx].harga = payload.tarif;
+                   listMasterTindakan[idx].perluLab = payload.perluLab;
+               }
+               if (window.KlinikData && Array.isArray(window.KlinikData.tindakan)) {
+                   let kIdx = window.KlinikData.tindakan.findIndex(x => x.kode === payload.kode);
+                   if (kIdx !== -1) {
+                       window.KlinikData.tindakan[kIdx].nama = payload.nama;
+                       window.KlinikData.tindakan[kIdx].kategori = payload.kategori;
+                       window.KlinikData.tindakan[kIdx].harga = payload.tarif;
+                       window.KlinikData.tindakan[kIdx].perluLab = payload.perluLab;
+                   }
+               }
+               batalEditDbTindakan();
+               renderTabelTindakan();
+           } else {
+               if (typeof showToast === 'function') showToast('error', res.message); else alert(res.message);
+           }
+       }).withFailureHandler(err => {
+           btn.innerHTML = originalBtnText; btn.disabled = false;
+           if (typeof showToast === 'function') showToast('error', err.message); else alert(err.message);
+       }).updateTindakan(payload);
+   } else {
+       google.script.run.withSuccessHandler(res => {
+           btn.innerHTML = originalBtnText; btn.disabled = false;
+           if (res.success) {
+               if (typeof showToast === 'function') showToast('success', res.message); else alert(res.message);
+              
+               document.getElementById('formDbTindakan').reset();
+               if (document.getElementById('dbPerluLab')) document.getElementById('dbPerluLab').value = '';
+              
+               let newItem = {
+                  kode: payload.kode,
+                  nama: payload.nama,
+                  kategori: payload.kategori,
+                  harga: payload.tarif,
+                  perluLab: payload.perluLab
+               };
+               listMasterTindakan.push(newItem);
+               if (window.KlinikData && Array.isArray(window.KlinikData.tindakan)) {
+                   window.KlinikData.tindakan.push(newItem);
+               }
+               renderTabelTindakan();
+               generateKodeTindakan();
+           } else {
+               if (typeof showToast === 'function') showToast('error', res.message); else alert(res.message);
+           }
+       }).withFailureHandler(err => {
+           btn.innerHTML = originalBtnText; btn.disabled = false;
+           if (typeof showToast === 'function') showToast('error', err.message); else alert(err.message);
+       }).simpanTindakanBaru(payload);
+   }
+}
+
+function editDbTindakan(kode) {
+   let item = listMasterTindakan.find(t => t.kode === kode);
+   if (!item) {
+       if (typeof showToast === 'function') showToast('error', 'Data tindakan tidak ditemukan.');
+       return;
+   }
+
+   document.getElementById('dbTindakanMode').value = 'edit';
+   document.getElementById('judulFormTindakan').innerText = 'Edit Tindakan: ' + (item.kode || '');
+   document.getElementById('btnSimpanTindakan').innerText = 'UPDATE TINDAKAN';
+   document.getElementById('btnSimpanTindakan').className = 'w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-xl shadow-md shadow-emerald-500/30 transition-all text-xs';
+   let btnBatal = document.getElementById('btnBatalEditTindakan');
+   if (btnBatal) btnBatal.classList.remove('hidden');
+
+   document.getElementById('dbKodeTindakan').value = item.kode || '';
+   document.getElementById('dbNamaTindakan').value = item.nama || '';
+   document.getElementById('dbKategori').value = item.kategori || '';
+   document.getElementById('dbTarif').value = (item.harga || item.tarif || 0).toLocaleString('id-ID').replace(/,/g, '.');
+   if (document.getElementById('dbPerluLab')) {
+       document.getElementById('dbPerluLab').value = item.perluLab === 'Ya' ? 'Ya' : 'Tidak';
+   }
+
+   document.getElementById('formDbTindakan').scrollIntoView({ behavior: 'smooth', block: 'center' });
+   document.getElementById('dbNamaTindakan').focus();
+}
+
+function batalEditDbTindakan() {
+   let form = document.getElementById('formDbTindakan');
+   if (form) form.reset();
+   document.getElementById('dbTindakanMode').value = 'tambah';
+   document.getElementById('judulFormTindakan').innerText = 'Tambah Tindakan Baru';
+   let btn = document.getElementById('btnSimpanTindakan');
+   btn.innerText = 'SIMPAN TINDAKAN';
+   btn.className = 'w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-black rounded-xl shadow-md shadow-indigo-500/30 transition-all text-xs';
+   let btnBatal = document.getElementById('btnBatalEditTindakan');
+   if (btnBatal) btnBatal.classList.add('hidden');
+   if (document.getElementById('dbPerluLab')) document.getElementById('dbPerluLab').value = '';
+   generateKodeTindakan();
+}
+
+function konfirmasiHapusDbTindakan(kode, nama) {
+   let konfirm = confirm(`PERINGATAN HAPUS TINDAKAN:\n\nApakah Anda yakin ingin menghapus tindakan:\n"${nama}" (${kode})?\n\nTindakan ini akan dihapus dari Database Master.`);
+   if (!konfirm) return;
+
+   google.script.run.withSuccessHandler(res => {
+       if (res.success) {
+           if (typeof showToast === 'function') showToast('success', res.message); else alert(res.message);
+           listMasterTindakan = listMasterTindakan.filter(t => t.kode !== kode);
+           if (window.KlinikData && Array.isArray(window.KlinikData.tindakan)) {
+               window.KlinikData.tindakan = window.KlinikData.tindakan.filter(t => t.kode !== kode);
+           }
+           renderTabelTindakan();
+           batalEditDbTindakan();
+       } else {
+           if (typeof showToast === 'function') showToast('error', res.message); else alert(res.message);
+       }
+   }).withFailureHandler(err => {
+       if (typeof showToast === 'function') showToast('error', 'Gagal: ' + err.message); else alert('Gagal: ' + err.message);
+   }).hapusTindakan({ kode: kode, currentUser: window.activeNamaAccount });
+}
+
+function simpanDbObat(e) {
+   e.preventDefault();
+   let btn = document.getElementById('btnSimpanObat');
+   btn.innerHTML = 'MENYIMPAN...'; btn.disabled = true;
+
+   let satBeli = document.getElementById('dbSatuanBeliObat') ? document.getElementById('dbSatuanBeliObat').value : "Box";
+   let isiPerSat = document.getElementById('dbIsiPerSatuanObat') ? parseFloat(document.getElementById('dbIsiPerSatuanObat').value) || 1 : 1;
+   let hrgBeliSat = document.getElementById('dbHargaBeliSatuanObat') ? parseRupiahRaw(document.getElementById('dbHargaBeliSatuanObat').value) : 0;
+   let hppVal = parseRupiahRaw(document.getElementById('dbHppObat').value);
+   if (hrgBeliSat === 0 && hppVal > 0) hrgBeliSat = hppVal * isiPerSat;
+
+   let payload = {
+       kode: document.getElementById('dbKodeObat').value,
+       nama: document.getElementById('dbNamaObat').value,
+       kandungan: document.getElementById('dbKandunganObat') ? document.getElementById('dbKandunganObat').value.trim() : "",
+       satuanBeli: satBeli,
+       isiPerSatuan: isiPerSat,
+       hargaBeliSatuan: hrgBeliSat,
+       satuan: document.getElementById('dbSatuanObat').value,
+       hpp: hppVal,
+       hargaJual: parseRupiahRaw(document.getElementById('dbHargaJualObat').value),
+       margin: document.getElementById('dbMarginObat') ? document.getElementById('dbMarginObat').value : "0%",
+       stok: parseFloat(document.getElementById('dbStokAwalObat').value) || 0,
+       stokMin: parseFloat(document.getElementById('dbStokMinObat').value) || 0,
+       expired: document.getElementById('dbExpiredObat').value || "",
+       supplier: document.getElementById('dbSupplierObat').value || "",
+       currentUser: window.activeNamaAccount
+   };
+
+   google.script.run.withSuccessHandler(res => {
+       btn.innerHTML = 'SIMPAN OBAT'; btn.disabled = false;
+       if (res.success) {
+           if (typeof showToast === 'function') showToast('success', res.message); else alert(res.message);
+           document.getElementById('formDbObat').reset();
+           document.getElementById('dbMarginObat').value = '0%';
+
+           listMasterObat.push({
+               kode: payload.kode,
+               idObat: payload.kode,
+               nama: payload.nama,
+               kandungan: payload.kandungan || "-",
+               satuanBeli: payload.satuanBeli,
+               isiPerSatuan: payload.isiPerSatuan,
+               satuan: payload.satuan,
+               hargaBeliSatuan: payload.hargaBeliSatuan,
+               hpp: payload.hpp,
+               hppPcs: payload.hpp,
+               margin: payload.margin,
+               harga: payload.hargaJual,
+               hargaJual: payload.hargaJual,
+               stok: payload.stok,
+               stokMin: payload.stokMin,
+               terjual: 0,
+               expired: payload.expired ? payload.expired : "-",
+               supplier: payload.supplier ? payload.supplier : "-",
+               kategori: "Obat"
+           });
+
+           if (window.KlinikData && Array.isArray(window.KlinikData.obat)) {
+               window.KlinikData.obat.push(payload.nama);
+           }
+
+           renderTabelObat();
+           generateKodeObat();
+       } else {
+           if (typeof showToast === 'function') showToast('error', res.message); else alert(res.message);
+       }
+   }).withFailureHandler(err => {
+       btn.innerHTML = 'SIMPAN OBAT'; btn.disabled = false;
+       if (typeof showToast === 'function') showToast('error', err.message); else alert(err.message);
+   }).simpanObatBaru(payload);
+}
+
+function simpanDbBmhp(e) {
+   e.preventDefault();
+   let btn = document.getElementById('btnSimpanBmhp');
+   btn.innerHTML = 'MENYIMPAN...'; btn.disabled = true;
+
+   let payload = {
+       kode: document.getElementById('dbKodeBmhp').value,
+       nama: document.getElementById('dbNamaBmhp').value,
+       satuan: document.getElementById('dbSatuanBmhp').value,
+       hpp: parseRupiahRaw(document.getElementById('dbHppBmhp').value),
+       hargaJual: parseRupiahRaw(document.getElementById('dbHargaJualBmhp').value),
+       stok: parseFloat(document.getElementById('dbStokAwalBmhp').value) || 0,
+       stokMin: parseFloat(document.getElementById('dbStokMinBmhp').value) || 0,
+       expired: document.getElementById('dbExpiredBmhp').value || "",
+       supplier: document.getElementById('dbSupplierBmhp').value || "",
+       currentUser: window.activeNamaAccount
+   };
+
+   google.script.run.withSuccessHandler(res => {
+       btn.innerHTML = 'SIMPAN BMHP'; btn.disabled = false;
+       if (res.success) {
+           if (typeof showToast === 'function') showToast('success', res.message); else alert(res.message);
+           document.getElementById('formDbBmhp').reset();
+           document.getElementById('dbMarginBmhp').value = '0%';
+
+           listMasterBmhp.push({
+               kode: payload.kode,
+               nama: payload.nama,
+               satuan: payload.satuan,
+               hpp: payload.hpp,
+               harga: payload.hargaJual,
+               hargaJual: payload.hargaJual,
+               stok: payload.stok,
+               stokMin: payload.stokMin,
+               expired: payload.expired ? payload.expired : "-",
+               supplier: payload.supplier ? payload.supplier : "-",
+               kategori: "BMHP"
+           });
+
+           if (window.KlinikData && Array.isArray(window.KlinikData.bmhp)) {
+               window.KlinikData.bmhp.push(payload.nama);
+           }
+
+           renderTabelBmhp();
+           generateKodeBmhp();
+       } else {
+           if (typeof showToast === 'function') showToast('error', res.message); else alert(res.message);
+       }
+   }).withFailureHandler(err => {
+       btn.innerHTML = 'SIMPAN BMHP'; btn.disabled = false;
+       if (typeof showToast === 'function') showToast('error', err.message); else alert(err.message);
+   }).simpanBmhpBaru(payload);
+}
+
+// ==========================================
+// RENDER TABEL MASTER
+// ==========================================
+function renderTabelTindakan() {
+   let tbody = document.getElementById('tbodyDbTindakan');
+   if (!tbody) return;
+   let inp = document.getElementById('cariDbTindakan');
+   let q = inp ? inp.value.toLowerCase().trim() : '';
+  
+   let filtered = listMasterTindakan;
+   if(q) {
+       filtered = filtered.filter(t => (t.nama && t.nama.toLowerCase().includes(q)) || (t.kode && t.kode.toLowerCase().includes(q)));
+   }
+  
+   filtered.sort((a, b) => (b.kode || "").localeCompare(a.kode || ""));
+
+   if (filtered.length === 0) {
+       tbody.innerHTML = '<tr><td colspan="6" class="text-center py-6 text-slate-400 font-bold">Data tindakan tidak ditemukan.</td></tr>';
+       return;
+   }
+
+   tbody.innerHTML = filtered.map(t => {
+       let isLab = (t.perluLab === 'Ya');
+       let labBadge = isLab 
+           ? '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">🧪 Ya</span>'
+           : '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-500">Tidak</span>';
+       let cleanNama = (t.nama || '').replace(/'/g, "\\'");
+
+       return `
+           <tr class="hover:bg-slate-50 transition-colors border-b border-slate-100">
+               <td class="p-3 font-mono font-bold text-indigo-600">${t.kode || '-'}</td>
+               <td class="p-3 font-bold text-slate-800">${t.nama || '-'}</td>
+               <td class="p-3 text-slate-600"><span class="bg-indigo-50 text-indigo-700 px-2 py-1 rounded font-bold text-[10px]">${t.kategori || '-'}</span></td>
+               <td class="p-3 text-right font-black text-slate-800">${fmtRpStr(t.harga || t.tarif || 0)}</td>
+               <td class="p-3 text-center">${labBadge}</td>
+               <td class="p-3 text-center">
+                   <div class="flex justify-center items-center gap-1.5">
+                       <button type="button" onclick="editDbTindakan('${t.kode}')" class="px-2.5 py-1 bg-white border border-slate-200 hover:bg-slate-100 text-slate-600 rounded-lg text-[10px] font-bold transition-all shadow-sm">✏️ Edit</button>
+                       <button type="button" onclick="konfirmasiHapusDbTindakan('${t.kode}', '${cleanNama}')" class="px-2.5 py-1 bg-rose-50 border border-rose-200 hover:bg-rose-500 hover:text-white text-rose-600 rounded-lg text-[10px] font-bold transition-all shadow-sm">🗑️ Hapus</button>
+                   </div>
+               </td>
+           </tr>
+       `;
+   }).join('');
+}
+
+function renderTabelObat() {
+   let tbody = document.getElementById('tbodyDbObat');
+   if (!tbody) return;
+   let inp = document.getElementById('cariDbObat');
+   let q = inp ? inp.value.toLowerCase().trim() : '';
+  
+   let filtered = listMasterObat;
+   if(q) {
+       filtered = filtered.filter(o => 
+           (o.nama && o.nama.toLowerCase().includes(q)) || 
+           (o.kandungan && o.kandungan.toLowerCase().includes(q)) || 
+           (o.kode && o.kode.toLowerCase().includes(q)) ||
+           (o.supplier && o.supplier.toLowerCase().includes(q))
+       );
+   }
+
+   filtered.sort((a, b) => (b.kode || "").localeCompare(a.kode || ""));
+
+   if (filtered.length === 0) {
+       tbody.innerHTML = '<tr><td colspan="10" class="text-center py-6 text-slate-400 font-bold">Data obat tidak ditemukan.</td></tr>';
+       return;
+   }
+
+   tbody.innerHTML = filtered.map(o => {
+       let stok = Number(o.stok) || 0;
+       let min = Number(o.stokMin) || 0;
+       let badgeStatus = '';
+       if (stok <= 0) {
+           badgeStatus = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-700">Habis</span>';
+       } else if (stok <= min) {
+           badgeStatus = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-700">Kritis</span>';
+       } else {
+           badgeStatus = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-700">Aman</span>';
+       }
+
+       return `
+           <tr class="hover:bg-slate-50 transition-colors border-b border-slate-100">
+               <td class="p-3 font-mono font-bold text-indigo-600">${o.kode || '-'}</td>
+               <td class="p-3 font-bold text-slate-800">${o.nama || '-'}${o.kandungan && o.kandungan !== '-' ? `<p class="text-[10px] text-indigo-600 font-semibold mt-0.5">🧪 ${o.kandungan}</p>` : ''}</td>
+               <td class="p-3 text-slate-600">${o.satuan || 'Unit'}</td>
+               <td class="p-3 text-right text-slate-600 font-semibold">${fmtRpStr(o.hpp || 0)}</td>
+               <td class="p-3 text-right font-black text-slate-800">${fmtRpStr(o.hargaJual || o.harga || 0)}</td>
+               <td class="p-3 text-center font-bold ${stok <= min ? 'text-rose-600' : 'text-slate-700'}">${stok}</td>
+               <td class="p-3 text-center text-slate-400">${min}</td>
+               <td class="p-3 text-slate-600 text-[11px]">${o.expired || '-'}</td>
+               <td class="p-3 text-slate-600 text-[11px]">${o.supplier || '-'}</td>
+               <td class="p-3 text-center">${badgeStatus}</td>
+           </tr>
+       `;
+   }).join('');
+}
+
+function renderTabelBmhp() {
+   let tbody = document.getElementById('tbodyDbBmhp');
+   if (!tbody) return;
+   let inp = document.getElementById('cariDbBmhp');
+   let q = inp ? inp.value.toLowerCase().trim() : '';
+  
+   let filtered = listMasterBmhp;
+   if(q) {
+       filtered = filtered.filter(b => 
+           (b.nama && b.nama.toLowerCase().includes(q)) || 
+           (b.kode && b.kode.toLowerCase().includes(q)) ||
+           (b.supplier && b.supplier.toLowerCase().includes(q))
+       );
+   }
+
+   filtered.sort((a, b) => (b.kode || "").localeCompare(a.kode || ""));
+
+   if (filtered.length === 0) {
+       tbody.innerHTML = '<tr><td colspan="10" class="text-center py-6 text-slate-400 font-bold">Data BMHP tidak ditemukan.</td></tr>';
+       return;
+   }
+
+   tbody.innerHTML = filtered.map(b => {
+       let stok = Number(b.stok) || 0;
+       let min = Number(b.stokMin) || 0;
+       let badgeStatus = '';
+       if (stok <= 0) {
+           badgeStatus = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-700">Habis</span>';
+       } else if (stok <= min) {
+           badgeStatus = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-700">Kritis</span>';
+       } else {
+           badgeStatus = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-700">Aman</span>';
+       }
+
+       return `
+           <tr class="hover:bg-slate-50 transition-colors border-b border-slate-100">
+               <td class="p-3 font-mono font-bold text-indigo-600">${b.kode || '-'}</td>
+               <td class="p-3 font-bold text-slate-800">${b.nama || '-'}</td>
+               <td class="p-3 text-slate-600">${b.satuan || 'Unit'}</td>
+               <td class="p-3 text-right text-slate-600 font-semibold">${fmtRpStr(b.hpp || 0)}</td>
+               <td class="p-3 text-right font-black text-slate-800">${fmtRpStr(b.hargaJual || b.harga || 0)}</td>
+               <td class="p-3 text-center font-bold ${stok <= min ? 'text-rose-600' : 'text-slate-700'}">${stok}</td>
+               <td class="p-3 text-center text-slate-400">${min}</td>
+               <td class="p-3 text-slate-600 text-[11px]">${b.expired || '-'}</td>
+               <td class="p-3 text-slate-600 text-[11px]">${b.supplier || '-'}</td>
+               <td class="p-3 text-center">${badgeStatus}</td>
+           </tr>
+       `;
+   }).join('');
+}
+
+// ==========================================
+// PENCADANGAN SISTEM (MULTI-DRIVE BACKUP)
+// ==========================================
+function triggerManualBackup() {
+  let btn = document.getElementById('btnBackupSekarang');
+  let originalHtml = btn ? btn.innerHTML : '';
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<span>⏳</span> Memproses Backup...';
+  }
+  showToast('info', 'Sedang membuat salinan snapshot database ke Google Drive...');
+
+  let watchdog = setTimeout(() => {
+    if (btn && btn.disabled) {
+      btn.disabled = false;
+      btn.innerHTML = originalHtml;
+      showToast('warning', 'Proses backup memakan waktu lebih lama di server. Silakan periksa folder BACKUP_RME_SHELDON di Google Drive.');
+    }
+  }, 45000);
+
+  if (typeof google !== 'undefined' && google.script && google.script.run) {
+    google.script.run
+      .withSuccessHandler(res => {
+        clearTimeout(watchdog);
+        if (btn) { btn.disabled = false; btn.innerHTML = originalHtml; }
+        if (res && res.success) {
+          showToast('success', `Backup Sukses! (${res.successCount} File tersalin ke ${res.folderNama})`);
+          if (res.folderUrl) {
+            alert(`✅ PROSES BACKUP BERHASIL!\n\n` +
+                  `• Status: Berhasil mencadangkan ${res.successCount} Spreadsheet\n` +
+                  `• Folder: ${res.folderNama}\n` +
+                  `• Akses Berbagi: ${res.targetEmail}\n` +
+                  `• Retensi: File cadangan > 6 hari otomatis dibersihkan\n\n` +
+                  `Folder dapat langsung dicek di Google Drive:\n${res.folderUrl}`);
+          }
+        } else {
+          showToast('warning', (res && res.message) ? res.message : 'Proses backup selesai dengan beberapa catatan.');
+        }
+      })
+      .withFailureHandler(err => {
+        clearTimeout(watchdog);
+        if (btn) { btn.disabled = false; btn.innerHTML = originalHtml; }
+        let errStr = (err && err.message) ? err.message : String(err);
+        showToast('error', 'Gagal melakukan backup: ' + errStr);
+        alert(`❌ GAGAL MEMPROSES BACKUP:\n\n${errStr}\n\nCatatan:\n1. Pastikan Anda telah menimpa file Code.gs terbaru di Apps Script editor.\n2. Pastikan izin akses Google Drive (DriveApp) telah diizinkan (klik Run 1x di editor jika diminta).`);
+      })
+      .jalankanBackupSekarang();
+  } else {
+    setTimeout(() => {
+      clearTimeout(watchdog);
+      if (btn) { btn.disabled = false; btn.innerHTML = originalHtml; }
+      showToast('success', 'Simulasi Backup Sukses: Seluruh database tersalin ke BACKUP_RME_SHELDON.');
+    }, 1500);
+  }
+}
+
+function aktifkanAutoBackupTrigger() {
+  let btn = document.getElementById('btnPasangTriggerBackup');
+  let originalHtml = btn ? btn.innerHTML : '';
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<span>⏳</span> Mengatur Jadwal...';
+  }
+
+  if (typeof google !== 'undefined' && google.script && google.script.run) {
+    google.script.run
+      .withSuccessHandler(res => {
+        if (btn) { btn.disabled = false; btn.innerHTML = originalHtml; }
+        showToast('success', res.message || 'Auto-Backup harian pukul 02.00 WIB berhasil aktif!');
+        alert(`⏰ JADWAL AUTO-BACKUP BERHASIL DIAKTIFKAN!\n\n` +
+              `• Waktu Eksekusi: Setiap hari pukul 02.00 Dini Hari WIB (Asia/Jakarta)\n` +
+              `• Tujuan 1: Google Drive Akun Utama (Folder: BACKUP_RME_SHELDON)\n` +
+              `• Tujuan 2: Google Drive vembrian@gmail.com\n` +
+              `• Retensi: File > 6 hari otomatis dihapus`);
+      })
+      .withFailureHandler(err => {
+        if (btn) { btn.disabled = false; btn.innerHTML = originalHtml; }
+        let errStr = (err && err.message) ? err.message : String(err);
+        showToast('error', 'Gagal mengatur jadwal backup: ' + errStr);
+        alert(`❌ GAGAL MENGATUR JADWAL TRIGGER:\n\n${errStr}\n\nSolusi Alternatif:\nBuka Apps Script Editor -> pilih fungsi 'pasangTriggerAutoBackupHarianJam02' -> klik tombol Run (Jalankan).`);
+      })
+      .pasangTriggerAutoBackupHarianJam02();
+  } else {
+    setTimeout(() => {
+      if (btn) { btn.disabled = false; btn.innerHTML = originalHtml; }
+      showToast('success', 'Simulasi Trigger: Auto-backup harian jam 02.00 WIB aktif.');
+    }, 1000);
+  }
+}
+
+function aktifkanArsipTahunanTrigger() {
+  let btn = document.getElementById("btnPasangTriggerArsip");
+  let originalHtml = btn ? btn.innerHTML : "";
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = "<span>⏳</span> Mengatur Jadwal...";
+  }
+
+  if (typeof google !== "undefined" && google.script && google.script.run) {
+    google.script.run
+      .withSuccessHandler(res => {
+        if (btn) { btn.disabled = false; btn.innerHTML = originalHtml; }
+        showToast("success", res.message || "Auto-Arsip tahunan 1 Januari pukul 01.00 WIB berhasil aktif!");
+        alert("📦 JADWAL AUTO-ARSIP TAHUNAN DIAKTIFKAN!\n\n" +
+              "• Tanggal Eksekusi: Setiap 1 Januari Pukul 01.00 WIB\n" +
+              "• File yang Diarsipkan: RME Sheldon - 02 Pembayaran, 03 Rekam Medis, 04 Surat, 07 Log\n" +
+              "• Target Spreadsheet: RME_Arsip_[TAHUN] di My Drive\n" +
+              "• Berbagi Akses: vembrian@gmail.com\n" +
+              "• Data lama dipindahkan ke arsip agar database operasional selalu cepat dan ringan.");
+      })
+      .withFailureHandler(err => {
+        if (btn) { btn.disabled = false; btn.innerHTML = originalHtml; }
+        let errStr = (err && err.message) ? err.message : String(err);
+        showToast("error", "Gagal mengatur jadwal arsip: " + errStr);
+        alert("❌ GAGAL MENGATUR JADWAL ARSIP:\n\n" + errStr + "\n\nSolusi:\nBuka Apps Script Editor -> pilih fungsi \x27pasangTriggerArsipTahunan1Januari\x27 -> klik Run.");
+      })
+      .pasangTriggerArsipTahunan1Januari();
+  } else {
+    setTimeout(() => {
+      if (btn) { btn.disabled = false; btn.innerHTML = originalHtml; }
+      showToast("success", "Simulasi Trigger: Auto-Arsip tahunan 1 Januari jam 01.00 WIB aktif.");
+    }, 1000);
+  }
+}
+
+// ==========================================
+// FITUR SINKRONISASI SEMUA SHEET OTOMATIS
+// ==========================================
+function triggerSinkronSemuaSheet() {
+  const btn = document.getElementById("btnSinkronSheet");
+  const originalHtml = btn ? btn.innerHTML : "<span>🔄</span> Sinkronkan Sheet";
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = "<span>⏳</span> Menyinkronkan...";
+  }
+
+  showToast("info", "Memeriksa dan membuat sheet yang belum ada pada seluruh spreadsheet...");
+
+  if (typeof google !== 'undefined' && google.script && google.script.run) {
+    google.script.run
+      .withSuccessHandler(res => {
+        if (btn) { btn.disabled = false; btn.innerHTML = originalHtml; }
+        if (res && res.success) {
+          showToast("success", "Sinkronisasi sheet selesai!");
+          alert("✅ SINKRONISASI SPREADSHEET BERHASIL:\n\n" + (res.message || "Semua sheet telah lengkap dan diperbarui."));
+        } else {
+          showToast("warning", res ? res.message : "Terjadi kendala saat sinkronisasi.");
+        }
+      })
+      .withFailureHandler(err => {
+        if (btn) { btn.disabled = false; btn.innerHTML = originalHtml; }
+        let errStr = (err && err.message) ? err.message : String(err);
+        showToast("error", "Gagal sinkronisasi: " + errStr);
+        alert("❌ GAGAL SINKRONISASI SHEET:\n\n" + errStr);
+      })
+      .sinkronkanSemuaSheetOtomatis();
+  } else {
+    setTimeout(() => {
+      if (btn) { btn.disabled = false; btn.innerHTML = originalHtml; }
+      showToast("success", "Simulasi: Seluruh sheet pada spreadsheet terverifikasi lengkap.");
+    }, 1200);
+  }
+}
+
+
+// ==========================================
+// FITUR OTOMATISASI PAYROLL & HONOR DOKTER
+// ==========================================
+function triggerSetupPayroll() {
+  const btn = document.getElementById("btnSetupPayroll");
+  const originalHtml = btn ? btn.innerHTML : "<span>💼</span> Setup Payroll Dokter";
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = "<span>⏳</span> Menyiapkan Payroll...";
+  }
+
+  showToast("info", "Membuat/menyiapkan Spreadsheet 11 Payroll & Honor Dokter di Google Drive...");
+
+  if (typeof google !== "undefined" && google.script && google.script.run) {
+    google.script.run
+      .withSuccessHandler(res => {
+        if (btn) { btn.disabled = false; btn.innerHTML = originalHtml; }
+        if (res && res.success) {
+          showToast("success", "Spreadsheet Payroll Dokter Berhasil Dibuat/Disinkronkan!");
+          alert("✅ SPREADSHEET PAYROLL DOKTER BERHASIL DISIAPKAN:\n\n" + 
+                (res.message || "Spreadsheet RME Sheldon - 11 Payroll & Honor Dokter telah siap.") +
+                (res.url ? "\n\nLink Google Spreadsheet:\n" + res.url : ""));
+        } else {
+          showToast("warning", res ? res.message : "Terjadi kendala saat setup payroll.");
+        }
+      })
+      .withFailureHandler(err => {
+        if (btn) { btn.disabled = false; btn.innerHTML = originalHtml; }
+        let errStr = (err && err.message) ? err.message : String(err);
+        showToast("error", "Gagal setup payroll: " + errStr);
+        alert("❌ GAGAL MEMBUAT SPREADSHEET PAYROLL:\n\n" + errStr);
+      })
+      .setupPayrollSpreadsheet();
+  } else {
+    setTimeout(() => {
+      if (btn) { btn.disabled = false; btn.innerHTML = originalHtml; }
+      showToast("success", "Simulasi: Spreadsheet 11 Payroll & Honor Dokter berhasil disiapkan!");
+      alert("✅ SPREADSHEET PAYROLL BERHASIL DISIAPKAN (SIMULASI):\n\n" +
+            "• Judul: RME Sheldon - 11 Payroll & Honor Dokter\n" +
+            "• Sheet 1: Penggajian_Dokter (Jasa Medis, PPh 21, THP)\n" +
+            "• Sheet 2: Honor_Perawat_Staff (Gaji Pokok + Fee Tindakan)\n" +
+            "• Sheet 3: Tagihan_Vendor_Lab (Biaya Laboratorium Eksternal)\n" +
+            "• Sheet 4: Slip_Gaji_Arsip (Riwayat Kirim Slip)");
+    }, 1200);
+  }
+}
+
+</script>

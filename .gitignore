@@ -1,0 +1,34 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+
+# Google Drive shortcut / sync artifacts
+*.gscript
+*.gsheet
+*.gdoc
+*.gslides
+copy/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+
+# Node / Web artifacts
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Backups & Temp files
+*.bak
+*.tmp
+*.swp
+*~

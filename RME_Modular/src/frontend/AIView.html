@@ -1,0 +1,296 @@
+<div class="space-y-6 text-xs text-slate-800">
+
+  <!-- HEADER MODUL -->
+  <div class="flex flex-wrap justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-slate-200 gap-4">
+    <div>
+      <div class="flex items-center gap-2">
+        <span class="text-2xl">✨</span>
+        <h2 class="text-lg font-black text-slate-900 tracking-tight">AI Insights & Analytics</h2>
+        <span id="aiRoleBadge" class="ml-2 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-cyan-100 text-cyan-800 uppercase tracking-widest">
+          SUPER USER
+        </span>
+      </div>
+      <p class="text-slate-500 mt-1">Asisten kecerdasan klinis odontogram, prediksi finansial, dan analitik operasional klinik.</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <!-- Selector Filter Role View (Hanya aktif untuk Super User agar bisa beralih mode) -->
+      <div id="aiRoleSwitchContainer" class="hidden flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
+        <button onclick="switchAIViewMode('all')" id="aiBtnModeAll" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-white text-indigo-700 shadow-sm">Semua</button>
+        <button onclick="switchAIViewMode('dokter')" id="aiBtnModeDokter" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-600 hover:text-slate-900">Klinis (Dokter)</button>
+        <button onclick="switchAIViewMode('superuser')" id="aiBtnModeSuper" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-600 hover:text-slate-900">Bisnis & Logistik</button>
+      </div>
+      <button id="btnRefreshAI" onclick="loadAIInsights(true)" class="px-4 py-2.5 bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white font-bold rounded-xl transition-all flex items-center gap-2 shadow-sm disabled:opacity-60 cursor-pointer">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+        <span>Refresh AI</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- PAPAN PERINGATAN LOGISTIK / STOK CERDAS (SUPER USER) -->
+  <div id="aiBannerStokContainer" class="ai-sec-superuser">
+    <div id="aiBannerStok" class="bg-amber-100 border border-amber-300 text-amber-900 p-4 rounded-2xl shadow-sm flex gap-3 items-center font-semibold transition-all">
+      <span class="text-2xl" id="aiIconStok">📦</span>
+      <div class="flex-1">
+        <p id="aiNotifStok" class="font-bold text-xs">Memeriksa ketersediaan stok & kecepatan penggunaan Obat/BMHP...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- KOTAK INDIKATOR UTAMA FINANSIAL & OPERASIONAL (SUPER USER) -->
+  <div id="aiSecKpiSuperuser" class="ai-sec-superuser grid grid-cols-1 md:grid-cols-3 gap-5">
+    <div class="bg-gradient-to-br from-slate-800 to-slate-900 p-6 rounded-2xl shadow-lg border border-slate-700 relative overflow-hidden">
+      <div class="absolute top-0 right-0 w-24 h-24 bg-white/5 rounded-full -mt-10 -mr-10"></div>
+      <p class="text-slate-400 font-bold uppercase tracking-wider mb-2 text-[10px]">Total Pasien Terdaftar</p>
+      <h3 id="aiTotalPasien" class="text-3xl font-black text-white">0</h3>
+      <p class="text-slate-400 mt-2 text-[11px]">Berdasarkan database aktif</p>
+    </div>
+    <div class="bg-gradient-to-br from-emerald-600 to-teal-700 p-6 rounded-2xl shadow-lg border border-emerald-500 relative overflow-hidden">
+      <div class="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -mt-10 -mr-10"></div>
+      <p class="text-emerald-100 font-bold uppercase tracking-wider mb-2 text-[10px]">Pendapatan Bulan Berjalan</p>
+      <h3 id="aiPendapatan" class="text-3xl font-black text-white">Rp 0</h3>
+      <p class="text-emerald-100 mt-2 text-[11px]">Total akumulasi transaksi kasir</p>
+    </div>
+    <div class="bg-gradient-to-br from-indigo-600 to-violet-700 p-6 rounded-2xl shadow-lg border border-indigo-500 relative overflow-hidden">
+      <div class="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -mt-10 -mr-10"></div>
+      <p class="text-indigo-100 font-bold uppercase tracking-wider mb-2 text-[10px]">Prediksi Bulan Depan (Forecast)</p>
+      <h3 id="aiForecastPendapatan" class="text-3xl font-black text-white">Rp 0</h3>
+      <p class="text-indigo-100 mt-2 text-[11px]">Estimasi tren pertumbuhan AI (+12%)</p>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- SEKSI 1: KLINIS & ODONTOGRAM (UNTUK DOKTER & KLINIS) -->
+  <!-- ========================================================================= -->
+  <div id="aiSecKlinis" class="ai-sec-dokter space-y-6">
+    <div class="flex items-center gap-2 border-b border-slate-200 pb-2">
+      <span class="w-2.5 h-2.5 rounded-full bg-cyan-500"></span>
+      <h3 class="font-black text-slate-900 text-sm uppercase tracking-wider">Clinical & Dental Intelligence (Khusus Dokter Gigi)</h3>
+    </div>
+
+    <!-- 1a. Analisis Indeks DMF-T Rata-rata Komunitas Pasien -->
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+      <div class="flex flex-wrap justify-between items-center gap-4 mb-4 pb-3 border-b border-slate-100">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-cyan-50 text-cyan-700 rounded-xl flex items-center justify-center font-bold text-lg">🦷</div>
+          <div>
+            <h4 class="font-extrabold text-slate-800 text-sm">Analisis Indeks DMF-T Rata-Rata Pasien</h4>
+            <p class="text-slate-500 text-[11px]">Rasio kerusakan gigi Decayed (D), Missing (M), Filled (F) populasi klinik.</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-3 bg-slate-50 px-4 py-2 rounded-xl border border-slate-200">
+          <span class="text-[11px] font-bold text-slate-600">Skor Rata-Rata:</span>
+          <span id="aiDmftTotalScore" class="text-lg font-black text-cyan-700">0.0</span>
+        </div>
+      </div>
+
+      <!-- Kartu Komponen DMF-T -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
+        <div class="p-4 bg-rose-50 border border-rose-100 rounded-xl">
+          <div class="flex justify-between items-center mb-1">
+            <span class="text-[11px] font-bold text-rose-700">Decayed (Gigi Karies Aktif)</span>
+            <span class="text-xs font-black text-rose-800" id="aiDmftDecayed">0</span>
+          </div>
+          <p class="text-[10px] text-rose-600">Rerata gigi berlubang per pasien</p>
+        </div>
+        <div class="p-4 bg-slate-100 border border-slate-200 rounded-xl">
+          <div class="flex justify-between items-center mb-1">
+            <span class="text-[11px] font-bold text-slate-700">Missing (Gigi Dicabut/Hilang)</span>
+            <span class="text-xs font-black text-slate-800" id="aiDmftMissing">0</span>
+          </div>
+          <p class="text-[10px] text-slate-600">Rerata gigi hilang per pasien</p>
+        </div>
+        <div class="p-4 bg-emerald-50 border border-emerald-100 rounded-xl">
+          <div class="flex justify-between items-center mb-1">
+            <span class="text-[11px] font-bold text-emerald-700">Filled (Gigi Ditambal/Restorasi)</span>
+            <span class="text-xs font-black text-emerald-800" id="aiDmftFilled">0</span>
+          </div>
+          <p class="text-[10px] text-emerald-600">Rerata restorasi tambalan per pasien</p>
+        </div>
+      </div>
+
+      <div class="p-4 bg-cyan-50/70 border border-cyan-200/60 rounded-xl flex items-start gap-3">
+        <span class="text-xl">💡</span>
+        <div>
+          <p class="text-[11px] font-bold text-cyan-900 uppercase tracking-wider mb-0.5">Kesimpulan Klinis & Rekomendasi Preventif:</p>
+          <p id="aiDmftKesimpulan" class="text-xs font-medium text-cyan-950 leading-relaxed">Menganalisis matriks odontogram seluruh rekam medis...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1b & 1c: Recall Treatment & Deteksi Kontraindikasi -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Rekomendasi Rencana Perawatan Lanjutan (Recall Treatment) -->
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-between">
+        <div>
+          <div class="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100">
+            <div class="w-8 h-8 bg-amber-100 text-amber-700 rounded-lg flex items-center justify-center font-bold">⏰</div>
+            <div>
+              <h4 class="font-bold text-slate-800 text-sm">Rekomendasi Recall Perawatan Lanjutan</h4>
+              <p class="text-slate-500 text-[10px]">Deteksi tambalan sementara / saluran akar &gt; 14 hari belum selesai.</p>
+            </div>
+          </div>
+          <div id="aiRecallList" class="space-y-3">
+            <p class="text-slate-400 italic">Menganalisis status odontogram pasien...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Deteksi Kontraindikasi & Polifarmasi Otomatis -->
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-between">
+        <div>
+          <div class="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100">
+            <div class="w-8 h-8 bg-rose-100 text-rose-700 rounded-lg flex items-center justify-center font-bold">🛡️</div>
+            <div>
+              <h4 class="font-bold text-slate-800 text-sm">Peringatan Kontraindikasi & Polifarmasi</h4>
+              <p class="text-slate-500 text-[10px]">Deteksi risiko komorbiditas hipertensi, diabetes, jantung, dan alergi.</p>
+            </div>
+          </div>
+          <div id="aiKontraindikasiList" class="space-y-3">
+            <p class="text-slate-400 italic">Menganalisis riwayat medis pasien...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- SEKSI 2: FINANSIAL & OPERASIONAL (UNTUK SUPER USER) -->
+  <!-- ========================================================================= -->
+  <div id="aiSecFinansial" class="ai-sec-superuser space-y-6">
+    <div class="flex items-center gap-2 border-b border-slate-200 pb-2">
+      <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+      <h3 class="font-black text-slate-900 text-sm uppercase tracking-wider">Financial & Practice Analytics (Khusus Super User)</h3>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Layanan Paling Menguntungkan (High-Margin vs Low-Margin) -->
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+        <div class="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100">
+          <div class="w-8 h-8 bg-emerald-100 text-emerald-700 rounded-lg flex items-center justify-center font-bold">💎</div>
+          <div>
+            <h4 class="font-bold text-slate-800 text-sm">Layanan Paling Menguntungkan (High-Margin)</h4>
+            <p class="text-slate-500 text-[10px]">Korelasi tarif tindakan terhadap estimasi konsumsi BMHP.</p>
+          </div>
+        </div>
+        <div id="aiMarginServicesList" class="space-y-3">
+          <p class="text-slate-400 italic">Memproses profit margin tindakan...</p>
+        </div>
+      </div>
+
+      <!-- Prediksi Jam & Hari Sibuk (Peak Hours & Peak Days Heatmap) -->
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+        <div class="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100">
+          <div class="w-8 h-8 bg-indigo-100 text-indigo-700 rounded-lg flex items-center justify-center font-bold">📅</div>
+          <div>
+            <h4 class="font-bold text-slate-800 text-sm">Prediksi Jam & Hari Sibuk (Peak Traffic)</h4>
+            <p class="text-slate-500 text-[10px]">Optimasi penjadwalan shift dokter & asisten klinik.</p>
+          </div>
+        </div>
+        <div class="space-y-4">
+          <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 flex justify-between items-center">
+            <span class="font-bold text-slate-600">Hari Terpadat:</span>
+            <span id="aiHariSibukText" class="font-black text-indigo-700 bg-indigo-50 px-3 py-1 rounded-lg">Menganalisis...</span>
+          </div>
+          <div>
+            <p class="text-[11px] font-bold text-slate-600 mb-2">Distribusi Jam Kunjungan (Heatmap):</p>
+            <div id="aiHeatmapHours" class="space-y-2">
+              <p class="text-slate-400 italic">Memproses histori waktu...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- SEKSI 3: LOGISTIK CERDAS & INVENTARIS (UNTUK SUPER USER) -->
+  <!-- ========================================================================= -->
+  <div id="aiSecLogistik" class="ai-sec-superuser space-y-6">
+    <div class="flex items-center gap-2 border-b border-slate-200 pb-2">
+      <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+      <h3 class="font-black text-slate-900 text-sm uppercase tracking-wider">Smart Inventory & Burn-Rate Prediction (Khusus Super User)</h3>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Burn-Rate & Restock Predictor -->
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 lg:col-span-2">
+        <div class="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100">
+          <div class="w-8 h-8 bg-amber-100 text-amber-700 rounded-lg flex items-center justify-center font-bold">⏳</div>
+          <div>
+            <h4 class="font-bold text-slate-800 text-sm">Burn-Rate & Restock Predictor (Estimasi Hari Habis)</h4>
+            <p class="text-slate-500 text-[10px]">Prediksi waktu habis bahan/obat berdasarkan laju pemakaian harian.</p>
+          </div>
+        </div>
+        <div id="aiBurnRateList" class="space-y-3">
+          <p class="text-slate-400 italic">Menghitung kecepatan konsumsi obat & BMHP...</p>
+        </div>
+      </div>
+
+      <!-- Slow-Moving & Near-Expiry Alert -->
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
+        <div>
+          <div class="flex items-center gap-2 mb-3 pb-2 border-b border-slate-100">
+            <div class="w-8 h-8 bg-rose-100 text-rose-700 rounded-lg flex items-center justify-center font-bold">⚠️</div>
+            <div>
+              <h4 class="font-bold text-slate-800 text-sm">Risiko Kadaluarsa</h4>
+              <p class="text-slate-500 text-[10px]">Item mendekati 3-6 bulan expired.</p>
+            </div>
+          </div>
+          <div id="aiExpiredList" class="space-y-2">
+            <p class="text-slate-400 italic">Mengecek masa berlaku...</p>
+          </div>
+        </div>
+        <div class="pt-2 border-t border-slate-100">
+          <div class="flex items-center gap-2 mb-3 pb-2 border-b border-slate-100">
+            <div class="w-8 h-8 bg-blue-100 text-blue-700 rounded-lg flex items-center justify-center font-bold">📦</div>
+            <div>
+              <h4 class="font-bold text-slate-800 text-sm">Item Slow-Moving</h4>
+              <p class="text-slate-500 text-[10px]">Stok mengendap & perputaran lambat.</p>
+            </div>
+          </div>
+          <div id="aiSlowMovingList" class="space-y-2">
+            <p class="text-slate-400 italic">Mengecek perputaran stok...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- SEKSI 4: TREN LAYANAN & PERFORMA DOKTER (UMUM / SHARED) -->
+  <!-- ========================================================================= -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+      <div class="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100">
+        <div class="w-8 h-8 bg-teal-100 text-teal-600 rounded-lg flex items-center justify-center font-bold">🛠️</div>
+        <h3 class="font-bold text-slate-800 text-sm">Tindakan Paling Sering</h3>
+      </div>
+      <div id="aiTopTindakan" class="space-y-3">
+        <p class="text-slate-400 italic">Memproses transaksi...</p>
+      </div>
+    </div>
+
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+      <div class="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100">
+        <div class="w-8 h-8 bg-amber-100 text-amber-600 rounded-lg flex items-center justify-center font-bold">💊</div>
+        <h3 class="font-bold text-slate-800 text-sm">Obat & BMHP Sering Keluar</h3>
+      </div>
+      <div id="aiTopObat" class="space-y-3">
+        <p class="text-slate-400 italic">Memproses transaksi...</p>
+      </div>
+    </div>
+
+    <div class="bg-gradient-to-b from-purple-50 to-white p-6 rounded-2xl shadow-sm border border-purple-200">
+      <div class="flex items-center gap-2 mb-4 pb-3 border-b border-purple-100">
+        <div class="w-8 h-8 bg-purple-600 text-white rounded-lg flex items-center justify-center font-bold">💡</div>
+        <h3 class="font-bold text-purple-900 text-sm">Rekomendasi Promosi AI</h3>
+      </div>
+      <p id="aiRekomendasi" class="leading-relaxed text-xs font-medium text-slate-700">Menganalisis strategi operasional klinik...</p>
+      <div class="mt-4 p-3 bg-purple-100/60 rounded-xl border border-purple-200/50">
+        <p class="text-[9px] font-black text-purple-800 uppercase tracking-widest mb-1">Target Prioritas Promosi:</p>
+        <p id="aiTargetPromo" class="text-purple-900 font-bold text-xs"></p>
+      </div>
+    </div>
+  </div>
+
+</div>

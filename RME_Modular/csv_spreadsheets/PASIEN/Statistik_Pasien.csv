@@ -1,0 +1,10 @@
+Metrik,Nilai,,No_RM,Nama_Pasien,Umur_Saat_Ini
+Total Pasien,=COUNTA(Data_Pasien!A2:A),,"={"""","""","""";ARRAYFORMULA(IF(Data_Pasien!A2:A="""","""",{Data_Pasien!C2:C,Data_Pasien!B2:B,IFERROR(DATEDIF(Data_Pasien!F2:F,TODAY(),""Y"")&"" Tahun"",""-"")}))}"
+Laki-Laki,"=COUNTIF(Data_Pasien!D2:D,""Laki-Laki"")"
+Perempuan,"=COUNTIF(Data_Pasien!D2:D,""Perempuan"")"
+Pasien Baru Bulan Ini,"=COUNTIFS(Data_Pasien!U2:U,"">=""&(EOMONTH(TODAY(),-1)+1),Data_Pasien!U2:U,""<=""&EOMONTH(TODAY(),0))"
+Rata-rata Umur (Tahun),"=IFERROR(ROUND(AVERAGE(FILTER(DATEDIF(Data_Pasien!F2:F,TODAY(),""Y""),ISNUMBER(Data_Pasien!F2:F))),1),""-"")"
+Anak (< 12 th),"=IFERROR(SUMPRODUCT(ISNUMBER(Data_Pasien!F2:F)*(IFERROR(DATEDIF(Data_Pasien!F2:F,TODAY(),""Y""),999)<12)),0)"
+Remaja (12-17 th),"=IFERROR(SUMPRODUCT(ISNUMBER(Data_Pasien!F2:F)*(IFERROR(DATEDIF(Data_Pasien!F2:F,TODAY(),""Y""),-1)>=12)*(IFERROR(DATEDIF(Data_Pasien!F2:F,TODAY(),""Y""),999)<18)),0)"
+Dewasa (18-59 th),"=IFERROR(SUMPRODUCT(ISNUMBER(Data_Pasien!F2:F)*(IFERROR(DATEDIF(Data_Pasien!F2:F,TODAY(),""Y""),-1)>=18)*(IFERROR(DATEDIF(Data_Pasien!F2:F,TODAY(),""Y""),999)<60)),0)"
+Lansia (>= 60 th),"=IFERROR(SUMPRODUCT(ISNUMBER(Data_Pasien!F2:F)*(IFERROR(DATEDIF(Data_Pasien!F2:F,TODAY(),""Y""),-1)>=60)),0)"

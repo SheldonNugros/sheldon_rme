@@ -1,0 +1,88 @@
+﻿<div class="space-y-4 text-xs relative text-slate-800">
+ <div class="flex items-center gap-3 mb-4 pb-3 border-b border-slate-200">
+   <div class="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center font-bold text-xl shadow-sm border border-indigo-100">📄</div>
+   <div>
+     <h2 class="text-lg font-black text-slate-900 tracking-tight">Data Invoice Tersimpan</h2>
+     <p class="text-[11px] text-slate-500 font-medium">Menampilkan riwayat cetak invoice (Terbaru ke Terlama)</p>
+   </div>
+ </div>
+
+
+ <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col h-[75vh]">
+  
+   <!-- AREA FILTER: PENCARIAN & KALENDER -->
+   <div class="flex flex-col md:flex-row gap-4 mb-4 items-end">
+     <div class="flex-1 w-full">
+       <label class="block font-bold text-slate-600 mb-1 text-[10px] uppercase">Pencarian</label>
+       <input type="text" id="inputCariRiwayat" oninput="resetPageAndSearch()" placeholder="🔍 Cari Nama Pasien atau Nomor Invoice..." class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-indigo-500 transition-all shadow-sm">
+     </div>
+     <div>
+       <label class="block font-bold text-slate-600 mb-1 text-[10px] uppercase">Dari Tanggal</label>
+       <input type="date" id="filterTglMulai" onchange="resetPageAndSearch()" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-indigo-500 transition-all shadow-sm">
+     </div>
+     <div>
+       <label class="block font-bold text-slate-600 mb-1 text-[10px] uppercase">Sampai Tanggal</label>
+       <input type="date" id="filterTglAkhir" onchange="resetPageAndSearch()" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-indigo-500 transition-all shadow-sm">
+     </div>
+   </div>
+  
+   <!-- INFO TOTAL INVOICE -->
+   <div class="mb-3 px-1 flex justify-between items-center">
+       <span class="font-bold text-slate-600 text-xs">Total Data Invoice: <span id="labelTotalInvoice" class="text-indigo-600 font-black text-sm">0</span></span>
+   </div>
+  
+   <!-- TABEL DATA INVOICE -->
+   <div class="flex-1 border border-slate-200 rounded-xl overflow-y-auto shadow-sm">
+     <table class="w-full text-left whitespace-nowrap">
+       <thead class="bg-slate-50 text-[10px] uppercase font-bold text-slate-500 border-b border-slate-200 sticky top-0 z-10">
+         <tr>
+           <th class="p-4">Tanggal & No Invoice</th>
+           <th class="p-4">Nama Pasien / RM</th>
+           <th class="p-4 text-right">Total Bayar (Rp)</th>
+           <th class="p-4 text-center">Metode & Status</th>
+           <th class="p-4">Catatan / Keterangan</th>
+           <th class="p-4 text-center">Aksi (View / WA)</th>
+         </tr>
+       </thead>
+       <tbody id="tbodyRiwayatInvoice" class="divide-y divide-slate-100">
+         <tr><td colspan="6" class="text-center text-slate-400 font-bold py-10 text-xs">Sedang memuat data histori...</td></tr>
+       </tbody>
+     </table>
+   </div>
+
+
+   <!-- PAGINATION (TOMBOL NEXT & BACK) -->
+   <div class="mt-4 flex justify-between items-center border-t border-slate-200 pt-4">
+       <button id="btnPrevPage" onclick="prevPageKSR()" class="px-5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-50 hover:text-indigo-600 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm">⬅️ Back</button>
+       <span class="text-xs font-bold text-slate-500">Halaman <span id="labelCurrentPage" class="text-indigo-600 font-black">1</span> dari <span id="labelTotalPage" class="text-slate-800 font-black">1</span></span>
+       <button id="btnNextPage" onclick="nextPageKSR()" class="px-5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-50 hover:text-indigo-600 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm">Next ➡️</button>
+   </div>
+ </div>
+</div>
+
+
+<!-- ========================================== -->
+<!-- MODAL PREVIEW INVOICE (DIKEMBALIKAN)       -->
+<!-- ========================================== -->
+<div id="modalKwitansi" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-all">
+ <div class="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+   <div class="flex justify-between items-center px-6 py-4 border-b border-slate-200 bg-slate-50">
+     <div>
+       <h3 class="text-sm font-black text-slate-800">Preview Invoice Kasir</h3>
+     </div>
+     <div class="flex gap-2">
+       <button type="button" onclick="actionCetakDanPDF(false)" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg text-xs shadow-sm transition-colors">🖨️ Cetak Invoice</button>
+       <button type="button" onclick="actionCetakDanPDF(true)" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-xs shadow-sm transition-colors">📄 Save PDF</button>
+       <button type="button" onclick="closeKwitansi()" class="w-9 h-9 flex items-center justify-center text-slate-400 hover:text-rose-500 font-bold bg-white rounded-lg border border-slate-200 hover:bg-rose-50 text-xl transition-colors">&times;</button>
+     </div>
+   </div>
+   <!-- WADAH CETAK INVOICE -->
+   <div class="p-6 overflow-y-auto flex-1 bg-slate-200/50 flex justify-center">
+     <div id="printAreaKwitansi" class="bg-white shadow-md relative overflow-hidden" style="width: 210mm; max-width: 210mm; padding: 0;"></div>
+   </div>
+ </div>
+</div>
+
+
+<!-- IFRAME MESIN PRINT -->
+<iframe id="printFrameBayar" class="hidden"></iframe>

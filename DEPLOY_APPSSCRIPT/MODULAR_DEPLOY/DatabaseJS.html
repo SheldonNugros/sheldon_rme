@@ -937,10 +937,14 @@ function togglePasswordVisibility(inputId, btn) {
 function handleRoleChange() {
   const roleEl = document.getElementById('dbUserRole');
   const wrapJM = document.getElementById('wrapperDokterJM');
+  const jmInput = document.getElementById('dbUserPersenJM');
   if (!roleEl || !wrapJM) return;
   const role = (roleEl.value || '').toLowerCase();
   if (role.includes('dokter')) {
     wrapJM.classList.remove('hidden');
+    if (jmInput && (jmInput.value === '40' || jmInput.value === '50' || !jmInput.value)) {
+      jmInput.value = role.includes('spesialis') ? '50' : '40';
+    }
   } else {
     wrapJM.classList.add('hidden');
   }
@@ -1154,7 +1158,26 @@ function editDbUser(username) {
   uInp.classList.add('bg-slate-200', 'text-slate-500');
   uInp.classList.remove('bg-slate-50');
 
-  document.getElementById('dbUserRole').value = user.role || 'Staff';
+  let userRole = (user.role || '').trim();
+  let roleSelect = document.getElementById('dbUserRole');
+  let matched = false;
+  for (let opt of roleSelect.options) {
+    if (opt.value.toLowerCase() === userRole.toLowerCase()) {
+      roleSelect.value = opt.value;
+      matched = true;
+      break;
+    }
+  }
+  if (!matched) {
+    let rLow = userRole.toLowerCase();
+    if (rLow.includes('spesialis')) roleSelect.value = 'dokter gigi spesialis';
+    else if (rLow.includes('dokter')) roleSelect.value = 'dokter gigi umum';
+    else if (rLow.includes('perawat gigi')) roleSelect.value = 'Perawat Gigi';
+    else if (rLow.includes('perawat')) roleSelect.value = 'Perawat Umum';
+    else if (rLow.includes('admin') || rLow.includes('kasir')) roleSelect.value = 'Admin';
+    else if (rLow.includes('owner')) roleSelect.value = 'Owner';
+    else roleSelect.value = 'Super User';
+  }
   document.getElementById('dbUserStatus').value = user.status || 'Aktif';
   document.getElementById('dbUserNoReg').value = user.noReg === '-' ? '' : (user.noReg || '');
   document.getElementById('dbUserNoHp').value = user.noHp || '';

@@ -87,15 +87,81 @@ const ROLE_RULES = {
 
 // >>>>>>>>>>>>>>> MODULE: 01_Utils.gs <<<<<<<<<<<<<<<
 // =========================================================================
-// FUNGSI DASAR WEB APP & UTILITIES
+// FUNGSI DASAR WEB APP & REST API GATEWAY (KONEKSI VERCEL & EXTERNAL CLIENT)
 // =========================================================================
 
 function doGet(e) {
+  // Jika dipanggil via API HTTP GET (misal dari Vercel / Web Browser)
+  if (e && e.parameter && (e.parameter.action || e.parameter.api === "true")) {
+    return handleApiRequest(e.parameter.action, e.parameter);
+  }
+
   return HtmlService.createTemplateFromFile('Index')
     .evaluate()
     .setTitle('Klinik Sheldon Enterprise - RME')
     .addMetaTag('viewport', 'width=device-width, initial-scale=1')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+}
+
+function doPost(e) {
+  try {
+    let body = {};
+    if (e && e.postData && e.postData.contents) {
+      body = JSON.parse(e.postData.contents);
+    }
+    const action = body.action || (e && e.parameter && e.parameter.action);
+    const params = body.params || (e && e.parameter ? e.parameter : {});
+    return handleApiRequest(action, params);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({ success: false, message: "Error API Post: " + err.message }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function handleApiRequest(action, params) {
+  try {
+    if (!action || action === "ping") {
+      return ContentService.createTextOutput(JSON.stringify({ 
+        success: true, 
+        message: "RME Sheldon Enterprise API Engine Online & Terhubung ke Google Sheets.",
+        timestamp: new Date().toISOString()
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    let args = [];
+    if (Array.isArray(params)) {
+      args = params;
+    } else if (params && typeof params === 'object') {
+      if (Array.isArray(params.args)) {
+        args = params.args;
+      } else if (action === "verifyLogin") {
+        args = [params.username || params.user, params.password || params.pin || params.pass];
+      } else if (action === "getRiwayatMedisByPasien") {
+        args = [params.noRm || params.norm || params[0]];
+      } else if (action === "simpanPasienBaru" || action === "simpanRekamMedis" || action === "simpanKasirInvoice" || action === "simpanItemObat" || action === "simpanItemBMHP") {
+        args = [params.payload || params];
+      } else {
+        args = [params];
+      }
+    }
+
+    const fn = this[action];
+    if (typeof fn === 'function') {
+      let result = fn.apply(this, args);
+      return ContentService.createTextOutput(JSON.stringify(result))
+        .setMimeType(ContentService.MimeType.JSON);
+    } else {
+      return ContentService.createTextOutput(JSON.stringify({ 
+        success: false, 
+        message: "Fungsi backend '" + action + "' tidak ditemukan di Apps Script." 
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({ 
+      success: false, 
+      message: "Eksekusi '" + action + "' gagal: " + err.message 
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
 }
 
 function include(filename) {

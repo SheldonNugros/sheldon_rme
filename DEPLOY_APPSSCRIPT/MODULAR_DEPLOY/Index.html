@@ -168,13 +168,17 @@
   <main class="flex-1 flex flex-col h-screen overflow-hidden relative">
     <header class="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between shadow-sm z-30">
       <h1 id="topbarTitle" class="text-lg font-black text-slate-800 tracking-tight">Dashboard Overview</h1>
-      <div class="flex items-center gap-4">
+      <div class="flex items-center gap-3">
+        <!-- Live Google Sheets Sync Status Badge -->
+        <button type="button" onclick="openGasSyncModal()" id="badgeGasSync" class="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 rounded-xl text-xs font-bold transition-all shadow-sm">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span>Google Sheets: Live Sinkron</span>
+          <span class="text-[10px] text-emerald-600 underline font-normal ml-1">Ubah URL</span>
+        </button>
+
         <div id="globalLoadingStatus" class="hidden flex items-center gap-2 px-3 py-1.5 bg-amber-50 border border-amber-200 text-amber-700 rounded-lg text-[10px] font-bold shadow-sm">
           <svg class="animate-spin h-3 w-3 text-amber-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
           SINKRONISASI DATABASE...
-        </div>
-        <div class="flex items-center gap-2 text-[10px] font-bold text-slate-500">
-          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> SYSTEM ONLINE
         </div>
       </div>
     </header>
@@ -526,5 +530,119 @@
 <?!= include('InventoryJS'); ?>
 <?!= include('InformasiJS'); ?>
 <?!= include('AIInsightsJS'); ?>
+<!-- MODAL SINKRONISASI GOOGLE APPS SCRIPT -->
+<div id="gasSyncModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[300] hidden flex items-center justify-center p-4 transition-opacity duration-300 opacity-0">
+  <div class="bg-white p-6 md:p-8 rounded-3xl shadow-2xl w-full max-w-lg border border-slate-100" id="gasSyncModalContent">
+    <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl font-bold border border-emerald-200 shadow-sm">⚡</div>
+        <div>
+          <h3 class="text-base font-black text-slate-800">Sinkronisasi Google Sheets & Apps Script</h3>
+          <p class="text-xs text-slate-500">Hubungkan Vercel langsung ke database Google Sheets Anda</p>
+        </div>
+      </div>
+      <button onclick="closeGasSyncModal()" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-black text-sm">✕</button>
+    </div>
+
+    <div class="space-y-4">
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1">URL Deployment Google Apps Script (Web App):</label>
+        <input type="url" id="inputGasUrl" class="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-300 rounded-xl font-mono text-slate-800 focus:bg-white focus:border-indigo-500" placeholder="https://script.google.com/macros/s/.../exec">
+        <p class="text-[11px] text-slate-500 mt-1">Dapatkan URL ini dari Apps Script &rarr; <b>Deploy</b> &rarr; <b>Manage Deployments</b> &rarr; <b>Web App URL</b>.</p>
+      </div>
+
+      <div id="gasPingResult" class="hidden p-3 rounded-xl text-xs font-semibold"></div>
+
+      <div class="flex items-center gap-2 pt-2">
+        <button type="button" onclick="testGasPing()" id="btnTestPing" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-all">
+          🔌 Tes Koneksi Live
+        </button>
+        <button type="button" onclick="saveGasUrl()" class="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-md transition-all">
+          💾 Simpan & Sinkronkan
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  window.openGasSyncModal = function() {
+    const modal = document.getElementById('gasSyncModal');
+    const input = document.getElementById('inputGasUrl');
+    if (input) input.value = window.GAS_WEB_APP_URL || '';
+    if (modal) {
+      modal.classList.remove('hidden');
+      setTimeout(() => { modal.classList.remove('opacity-0'); }, 10);
+    }
+  };
+
+  window.closeGasSyncModal = function() {
+    const modal = document.getElementById('gasSyncModal');
+    if (modal) {
+      modal.classList.add('opacity-0');
+      setTimeout(() => { modal.classList.add('hidden'); }, 300);
+    }
+  };
+
+  window.testGasPing = function() {
+    const input = document.getElementById('inputGasUrl');
+    const resBox = document.getElementById('gasPingResult');
+    const btn = document.getElementById('btnTestPing');
+    const url = input ? input.value.trim() : '';
+    if (!url) {
+      alert("Masukkan URL Web App terlebih dahulu!");
+      return;
+    }
+    btn.innerText = "Menguji..."; btn.disabled = true;
+    resBox.classList.remove('hidden', 'bg-emerald-50', 'text-emerald-700', 'bg-rose-50', 'text-rose-700');
+    resBox.innerText = "Menghubungi Google Apps Script...";
+    resBox.classList.add('bg-slate-100', 'text-slate-600');
+
+    fetch(url + (url.includes('?') ? '&' : '?') + "action=ping", { method: 'GET', mode: 'cors' })
+      .then(r => r.json())
+      .then(res => {
+        btn.innerText = "🔌 Tes Koneksi Live"; btn.disabled = false;
+        resBox.classList.remove('bg-slate-100', 'text-slate-600');
+        if (res && res.success) {
+          resBox.classList.add('bg-emerald-50', 'text-emerald-700');
+          resBox.innerText = "✅ TERHUBUNG: " + (res.message || "Google Sheets Aktif!");
+          if (window._updateGasBadge) window._updateGasBadge(true);
+        } else {
+          resBox.classList.add('bg-rose-50', 'text-rose-700');
+          resBox.innerText = "⚠️ Respons tidak sesuai: " + JSON.stringify(res);
+        }
+      })
+      .catch(err => {
+        btn.innerText = "🔌 Tes Koneksi Live"; btn.disabled = false;
+        resBox.classList.remove('bg-slate-100', 'text-slate-600');
+        resBox.classList.add('bg-rose-50', 'text-rose-700');
+        resBox.innerText = "❌ Gagal koneksi: Pastikan Anda telah men-deploy versi baru Code.gs dan mengatur 'Who has access' = 'Anyone'.";
+      });
+  };
+
+  window.saveGasUrl = function() {
+    const input = document.getElementById('inputGasUrl');
+    const url = input ? input.value.trim() : '';
+    if (url) {
+      localStorage.setItem("sheldon_gas_api_url", url);
+      window.GAS_WEB_APP_URL = url;
+      showToast('success', 'URL Google Apps Script berhasil disimpan & disinkronkan!');
+      closeGasSyncModal();
+      if (typeof startDataSync === 'function') startDataSync();
+    }
+  };
+
+  window._updateGasBadge = function(isLive) {
+    const badge = document.getElementById('badgeGasSync');
+    if (!badge) return;
+    if (isLive) {
+      badge.className = "flex items-center gap-2 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 rounded-xl text-xs font-bold transition-all shadow-sm";
+      badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span><span>Google Sheets: Live Sinkron</span><span class="text-[10px] text-emerald-600 underline font-normal ml-1">Ubah URL</span>';
+    } else {
+      badge.className = "flex items-center gap-2 px-3 py-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-700 rounded-xl text-xs font-bold transition-all shadow-sm";
+      badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-amber-500"></span><span>Mode Standalone (Lokal)</span><span class="text-[10px] text-amber-600 underline font-normal ml-1">Hubungkan</span>';
+    }
+  };
+</script>
 </body>
 </html>

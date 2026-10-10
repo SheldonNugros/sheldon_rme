@@ -568,31 +568,73 @@ mock_gas_script = '''
     }
   }
 
+  window.GAS_WEB_APP_URL = localStorage.getItem("sheldon_gas_api_url") || "https://script.google.com/macros/s/AKfycbw5M3rZsgXeDdaxYauRizWaA-vDb1eLzxutOzf_bRI-/exec";
+
+  function createScriptRunProxy() {
+    let runner = new ScriptRunMock();
+    let proxyRunner = new Proxy(runner, {
+      get(rTarget, rProp) {
+        if (rProp === 'withSuccessHandler' || rProp === 'withFailureHandler') {
+          return function(fn) {
+            rTarget[rProp](fn);
+            return proxyRunner;
+          };
+        }
+        
+        return function(...args) {
+          const gasUrl = window.GAS_WEB_APP_URL;
+          if (gasUrl) {
+            fetch(gasUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+              body: JSON.stringify({ action: rProp, params: args })
+            })
+            .then(res => {
+              if (!res.ok) throw new Error("HTTP Status " + res.status);
+              return res.json();
+            })
+            .then(data => {
+              console.log("⚡ Live Google Sheets synced for [" + rProp + "]:", data);
+              if (window._updateGasBadge) window._updateGasBadge(true);
+              rTarget._successHandler(data);
+            })
+            .catch(err => {
+              console.warn("⚠️ Live GAS sync failed for [" + rProp + "], fallback ke mock cache:", err);
+              if (window._updateGasBadge) window._updateGasBadge(false);
+              if (typeof rTarget[rProp] === 'function') {
+                rTarget[rProp].apply(rTarget, args);
+              } else {
+                rTarget._successHandler({ success: true, message: "OK (Offline Fallback)" });
+              }
+            });
+            return proxyRunner;
+          }
+
+          if (typeof rTarget[rProp] === 'function') {
+            rTarget[rProp].apply(rTarget, args);
+          } else {
+            rTarget._successHandler({ success: true, message: "OK (Mock)" });
+          }
+          return proxyRunner;
+        };
+      }
+    });
+    return proxyRunner;
+  }
+
   google.script.run = new Proxy({}, {
     get(target, prop) {
       return function(...args) {
-        let runner = new ScriptRunMock();
-        let proxyRunner = new Proxy(runner, {
-          get(rTarget, rProp) {
-            if (typeof rTarget[rProp] === 'function') {
-              return rTarget[rProp].bind(rTarget);
-            }
-            return function(...innerArgs) {
-              let res = { success: true, message: "OK" };
-              setTimeout(() => { rTarget._successHandler(res); }, 40);
-              return proxyRunner;
-            };
-          }
-        });
-        if (typeof runner[prop] === 'function') {
-          return runner[prop].apply(proxyRunner, args);
+        let p = createScriptRunProxy();
+        if (typeof p[prop] === 'function') {
+          return p[prop].apply(p, args);
         }
-        return proxyRunner;
+        return p;
       };
     }
   });
 
-  console.log("Mock Google Apps Script runtime initialized successfully.");
+  console.log("Dual-Engine Google Apps Script (Live Cloud + Offline Mock) initialized successfully.");
 })();
 </script>
 '''

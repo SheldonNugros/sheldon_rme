@@ -65,16 +65,22 @@ function verifyLogin(username, password) {
     }
     
     const inputPass = String(password || "").trim();
-    const inputHash = hashPassword(inputPass);
+    const inputHash = hashPassword(inputPass).toLowerCase();
+    const cleanUser = String(username || "").trim().toLowerCase();
     
     for (let i = 1; i < v.length; i++) {
       let r = v[i];
       if (!r[idxUser]) continue;
       
-      let uData = String(r[idxUser]).trim();
-      let pData = String(r[idxPass]).trim();
+      let uData = String(r[idxUser]).trim().toLowerCase();
+      let pData = String(r[idxPass] !== null && r[idxPass] !== undefined ? r[idxPass] : "").trim();
+      let pDataClean = pData.startsWith("'") ? pData.substring(1).trim() : pData;
+      let pDataLower = pDataClean.toLowerCase();
       
-      if (uData === username && (pData === inputPass || pData === inputHash)) {
+      // Cocokkan username (case-insensitive) dan password (plaintext ATAU hash SHA-256)
+      let isPassMatch = (pDataClean === inputPass) || (pDataLower === inputHash);
+      
+      if (uData === cleanUser && isPassMatch) {
         let rowStatus = idxStatus !== -1 && r[idxStatus] ? r[idxStatus].toString().trim().toLowerCase() : "aktif";
         if (rowStatus !== "aktif" && rowStatus !== "active") {
           return { success: false, message: "Akun Anda TIDAK AKTIF. Hubungi Administrator." };
@@ -84,14 +90,19 @@ function verifyLogin(username, password) {
         let namaAsli = (idxNama !== -1 && r[idxNama]) ? r[idxNama].toString().trim() : username;
         
         // Auto-upgrade password plaintext ke format hash SHA-256 jika belum ter-hash
-        if (pData === inputPass && pData !== inputHash && inputHash !== inputPass) {
+        if (pDataLower !== inputHash && inputHash !== "") {
           try {
             const ss = SpreadsheetApp.openById(DB_CONFIG.MASTER.trim());
             const sheet = ss.getSheetByName("Data");
             if (sheet) {
-              sheet.getRange(i + 1, idxPass + 1).setValue(inputHash);
+              // Tulis sebagai Plain Text dengan NumberFormat "@" agar tidak terpotong atau terkonversi oleh Google Sheets
+              let cellTarget = sheet.getRange(i + 1, idxPass + 1);
+              cellTarget.setNumberFormat("@");
+              cellTarget.setValue(inputHash);
             }
-          } catch (errUp) {}
+          } catch (errUp) {
+            Logger.log("Warning: Gagal upgrade hash password: " + errUp.message);
+          }
         }
         
         let token = "TK_" + new Date().getTime() + "_" + Math.floor(Math.random() * 10000);

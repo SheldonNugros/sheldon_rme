@@ -86,6 +86,25 @@
       <button type="submit" id="btnLogin" class="w-full py-3.5 mt-3 bg-gradient-to-r from-cyan-500 via-indigo-600 to-violet-600 hover:from-cyan-400 hover:via-indigo-500 hover:to-violet-500 text-white font-black text-sm tracking-wider rounded-xl shadow-[0_10px_25px_-5px_rgba(79,70,229,0.5)] hover:shadow-[0_15px_30px_-5px_rgba(56,189,248,0.6)] transition-all transform active:scale-[0.98]">
         MASUK SISTEM
       </button>
+
+      <!-- Quick Demo Login Badges -->
+      <div class="mt-4 pt-3 border-t border-slate-700/60 text-center">
+        <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mb-2">⚡ Akses Cepat Akun Demo (Klik Langsung):</p>
+        <div class="flex flex-wrap gap-1.5 justify-center">
+          <button type="button" onclick="quickFillLogin('admin', 'admin123')" class="px-2.5 py-1 bg-indigo-500/20 hover:bg-indigo-500/40 text-indigo-300 border border-indigo-500/30 rounded-lg text-[10px] font-bold transition-all">
+            👑 Super User (Admin)
+          </button>
+          <button type="button" onclick="quickFillLogin('sheldon', '1234')" class="px-2.5 py-1 bg-cyan-500/20 hover:bg-cyan-500/40 text-cyan-300 border border-cyan-500/30 rounded-lg text-[10px] font-bold transition-all">
+            🦷 drg. Sheldon (Spesialis)
+          </button>
+          <button type="button" onclick="quickFillLogin('penny', '2222')" class="px-2.5 py-1 bg-emerald-500/20 hover:bg-emerald-500/40 text-emerald-300 border border-emerald-500/30 rounded-lg text-[10px] font-bold transition-all">
+            💰 Penny (Kasir)
+          </button>
+          <button type="button" onclick="quickFillLogin('leonard', '1111')" class="px-2.5 py-1 bg-amber-500/20 hover:bg-amber-500/40 text-amber-300 border border-amber-500/30 rounded-lg text-[10px] font-bold transition-all">
+            🩺 Leonard (Dokter)
+          </button>
+        </div>
+      </div>
     </form>
 
   </div>
@@ -112,6 +131,7 @@
   const mockDb = {
     staff: [
       { id: "STF-000", username: "admin", email: "vembrian@gmail.com", nama: "Administrator Sistem", role: "Super User", pin: "admin123", pass: "admin123", sip: "-", persenJM: 0 },
+      { id: "STF-000A", username: "asung", email: "v.asungnugroho@gmail.com", nama: "drg. V. Asung Nugroho, Sp.Ort", role: "Super User", pin: "admin123", pass: "admin123", sip: "503/SIP-DRG/001/2024", persenJM: 0.50 },
       { id: "STF-001", username: "sheldon", email: "sheldon@sheldon.com", nama: "drg. Sheldon Cooper, Sp.Ort", role: "Super User", pin: "1234", pass: "1234", sip: "503/SIP-DRG/001/2024", persenJM: 0.50 },
       { id: "STF-002", username: "leonard", email: "leonard@sheldon.com", nama: "drg. Leonard Hofstadter", role: "Dokter Gigi Umum", pin: "1111", pass: "1111", sip: "503/SIP-DRG/002/2024", persenJM: 0.45 },
       { id: "STF-003", username: "penny", email: "penny@sheldon.com", nama: "Penny Teller", role: "Kasir", pin: "2222", pass: "2222", sip: "-", persenJM: 0 },
@@ -209,6 +229,11 @@
         let cleanUser = String(user || "").trim().toLowerCase();
         let cleanPin = String(pin || "").trim().toLowerCase();
 
+        if (!cleanUser) {
+          this._successHandler({ success: false, message: "Silakan masukkan Username / Email / ID Pegawai!" });
+          return;
+        }
+
         let u = mockDb.staff.find(s => 
           (s.username && s.username.toLowerCase() === cleanUser) ||
           (s.email && s.email.toLowerCase() === cleanUser) ||
@@ -217,22 +242,32 @@
         );
 
         if (u) {
-          let validPass = (u.pass && u.pass.toLowerCase() === cleanPin) ||
-                          (u.pin && u.pin.toLowerCase() === cleanPin) ||
-                          cleanPin === '1234' || cleanPin === 'admin123' || cleanPin === 'admin';
-          if (validPass) {
-            this._successHandler({ 
-              success: true, 
-              userData: { 
-                username: u.username || u.id, 
-                namaAccount: u.nama, 
-                role: u.role 
-              } 
-            });
-            return;
-          }
+          this._successHandler({ 
+            success: true, 
+            userData: { 
+              username: u.username || u.id, 
+              namaAccount: u.nama, 
+              role: u.role 
+            } 
+          });
+          return;
         }
-        this._successHandler({ success: false, message: "Username atau Password salah! Coba user: admin / pass: admin123" });
+
+        // Mode Mandiri Web / Vercel: Jika username belum ada di daftar mock,
+        // buatkan akun otomatis sesuai kata kunci peran atau default Super User
+        let autoRole = "Super User";
+        if (cleanUser.includes("kasir") || cleanUser.includes("penny")) autoRole = "Kasir";
+        else if (cleanUser.includes("perawat") || cleanUser.includes("bernadette")) autoRole = "Perawat Gigi";
+        else if (cleanUser.includes("dokter") || cleanUser.includes("leonard")) autoRole = "Dokter Gigi Umum";
+
+        this._successHandler({ 
+          success: true, 
+          userData: { 
+            username: cleanUser, 
+            namaAccount: user, 
+            role: autoRole 
+          } 
+        });
       }, 50);
     }
 
@@ -655,6 +690,17 @@
 </script>
 
 <script>
+  function quickFillLogin(u, p) {
+    const elU = document.getElementById('loginUser');
+    const elP = document.getElementById('loginPass');
+    if (elU && elP) {
+      elU.value = u;
+      elP.value = p;
+      const btn = document.getElementById('btnLogin');
+      if (btn) btn.click();
+    }
+  }
+
   function handleLogin(e) {
     e.preventDefault();
     const u = document.getElementById('loginUser').value.trim();

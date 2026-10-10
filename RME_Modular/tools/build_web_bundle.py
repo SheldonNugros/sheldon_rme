@@ -38,6 +38,7 @@ mock_gas_script = '''
   const mockDb = {
     staff: [
       { id: "STF-000", username: "admin", email: "vembrian@gmail.com", nama: "Administrator Sistem", role: "Super User", pin: "admin123", pass: "admin123", sip: "-", persenJM: 0 },
+      { id: "STF-000A", username: "asung", email: "v.asungnugroho@gmail.com", nama: "drg. V. Asung Nugroho, Sp.Ort", role: "Super User", pin: "admin123", pass: "admin123", sip: "503/SIP-DRG/001/2024", persenJM: 0.50 },
       { id: "STF-001", username: "sheldon", email: "sheldon@sheldon.com", nama: "drg. Sheldon Cooper, Sp.Ort", role: "Super User", pin: "1234", pass: "1234", sip: "503/SIP-DRG/001/2024", persenJM: 0.50 },
       { id: "STF-002", username: "leonard", email: "leonard@sheldon.com", nama: "drg. Leonard Hofstadter", role: "Dokter Gigi Umum", pin: "1111", pass: "1111", sip: "503/SIP-DRG/002/2024", persenJM: 0.45 },
       { id: "STF-003", username: "penny", email: "penny@sheldon.com", nama: "Penny Teller", role: "Kasir", pin: "2222", pass: "2222", sip: "-", persenJM: 0 },
@@ -135,6 +136,11 @@ mock_gas_script = '''
         let cleanUser = String(user || "").trim().toLowerCase();
         let cleanPin = String(pin || "").trim().toLowerCase();
 
+        if (!cleanUser) {
+          this._successHandler({ success: false, message: "Silakan masukkan Username / Email / ID Pegawai!" });
+          return;
+        }
+
         let u = mockDb.staff.find(s => 
           (s.username && s.username.toLowerCase() === cleanUser) ||
           (s.email && s.email.toLowerCase() === cleanUser) ||
@@ -143,22 +149,32 @@ mock_gas_script = '''
         );
 
         if (u) {
-          let validPass = (u.pass && u.pass.toLowerCase() === cleanPin) ||
-                          (u.pin && u.pin.toLowerCase() === cleanPin) ||
-                          cleanPin === '1234' || cleanPin === 'admin123' || cleanPin === 'admin';
-          if (validPass) {
-            this._successHandler({ 
-              success: true, 
-              userData: { 
-                username: u.username || u.id, 
-                namaAccount: u.nama, 
-                role: u.role 
-              } 
-            });
-            return;
-          }
+          this._successHandler({ 
+            success: true, 
+            userData: { 
+              username: u.username || u.id, 
+              namaAccount: u.nama, 
+              role: u.role 
+            } 
+          });
+          return;
         }
-        this._successHandler({ success: false, message: "Username atau Password salah! Coba user: admin / pass: admin123" });
+
+        // Mode Mandiri Web / Vercel: Jika username belum ada di daftar mock,
+        // buatkan akun otomatis sesuai kata kunci peran atau default Super User
+        let autoRole = "Super User";
+        if (cleanUser.includes("kasir") || cleanUser.includes("penny")) autoRole = "Kasir";
+        else if (cleanUser.includes("perawat") || cleanUser.includes("bernadette")) autoRole = "Perawat Gigi";
+        else if (cleanUser.includes("dokter") || cleanUser.includes("leonard")) autoRole = "Dokter Gigi Umum";
+
+        this._successHandler({ 
+          success: true, 
+          userData: { 
+            username: cleanUser, 
+            namaAccount: user, 
+            role: autoRole 
+          } 
+        });
       }, 50);
     }
 
@@ -588,4 +604,8 @@ output_file = os.path.join(dist_dir, 'index.html')
 with open(output_file, 'w', encoding='utf-8') as f:
     f.write(bundle)
 
-print(f"Bundled web app created at: {output_file} ({len(bundle)} bytes)")
+root_index = os.path.abspath(os.path.join(dist_dir, '../../index.html'))
+with open(root_index, 'w', encoding='utf-8') as f:
+    f.write(bundle)
+
+print(f"Bundled web app created at: {output_file} and {root_index} ({len(bundle)} bytes)")

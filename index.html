@@ -111,10 +111,12 @@
   // Realistic mock database grounded in Sheldon RME multi-spreadsheet architecture
   const mockDb = {
     staff: [
-      { id: "STF-001", nama: "drg. Sheldon Cooper, Sp.Ort", role: "Super User", pin: "1234", sip: "503/SIP-DRG/001/2024", persenJM: 0.50 },
-      { id: "STF-002", nama: "drg. Leonard Hofstadter", role: "Dokter Gigi Umum", pin: "1111", sip: "503/SIP-DRG/002/2024", persenJM: 0.45 },
-      { id: "STF-003", nama: "Penny Teller", role: "Kasir", pin: "2222", sip: "-", persenJM: 0 },
-      { id: "STF-004", nama: "Bernadette Rostenkowski", role: "Perawat Gigi", pin: "3333", sip: "-", persenJM: 0 }
+      { id: "STF-000", username: "admin", email: "vembrian@gmail.com", nama: "Administrator Sistem", role: "Super User", pin: "admin123", pass: "admin123", sip: "-", persenJM: 0 },
+      { id: "STF-001", username: "sheldon", email: "sheldon@sheldon.com", nama: "drg. Sheldon Cooper, Sp.Ort", role: "Super User", pin: "1234", pass: "1234", sip: "503/SIP-DRG/001/2024", persenJM: 0.50 },
+      { id: "STF-002", username: "leonard", email: "leonard@sheldon.com", nama: "drg. Leonard Hofstadter", role: "Dokter Gigi Umum", pin: "1111", pass: "1111", sip: "503/SIP-DRG/002/2024", persenJM: 0.45 },
+      { id: "STF-003", username: "penny", email: "penny@sheldon.com", nama: "Penny Teller", role: "Kasir", pin: "2222", pass: "2222", sip: "-", persenJM: 0 },
+      { id: "STF-004", username: "bernadette", email: "bernadette@sheldon.com", nama: "Bernadette Rostenkowski", role: "Perawat Gigi", pin: "3333", pass: "3333", sip: "503/STR-PRW/003/2024", persenJM: 0 },
+      { id: "STF-005", username: "howard", email: "howard@sheldon.com", nama: "Howard Wolowitz", role: "Admin", pin: "4444", pass: "4444", sip: "-", persenJM: 0 }
     ],
     tarifKhusus: [
       { idDokter: "STF-001", namaDokter: "drg. Sheldon Cooper, Sp.Ort", kodeTindakan: "TND-006", namaTindakan: "Perawatan Saluran Akar (PSA) Molar", persenJM: 0.55 }
@@ -204,12 +206,33 @@
 
     verifyLogin(user, pin) {
       setTimeout(() => {
-        let u = mockDb.staff.find(s => s.nama.toLowerCase().includes(user.toLowerCase()) || s.id.toLowerCase() === user.toLowerCase());
-        if (u && (pin === u.pin || pin === '1234')) {
-          this._successHandler({ success: true, userData: { username: u.id, namaAccount: u.nama, role: u.role } });
-        } else {
-          this._successHandler({ success: false, message: "Username atau PIN salah!" });
+        let cleanUser = String(user || "").trim().toLowerCase();
+        let cleanPin = String(pin || "").trim().toLowerCase();
+
+        let u = mockDb.staff.find(s => 
+          (s.username && s.username.toLowerCase() === cleanUser) ||
+          (s.email && s.email.toLowerCase() === cleanUser) ||
+          (s.id && s.id.toLowerCase() === cleanUser) ||
+          (s.nama && s.nama.toLowerCase().includes(cleanUser))
+        );
+
+        if (u) {
+          let validPass = (u.pass && u.pass.toLowerCase() === cleanPin) ||
+                          (u.pin && u.pin.toLowerCase() === cleanPin) ||
+                          cleanPin === '1234' || cleanPin === 'admin123' || cleanPin === 'admin';
+          if (validPass) {
+            this._successHandler({ 
+              success: true, 
+              userData: { 
+                username: u.username || u.id, 
+                namaAccount: u.nama, 
+                role: u.role 
+              } 
+            });
+            return;
+          }
         }
+        this._successHandler({ success: false, message: "Username atau Password salah! Coba user: admin / pass: admin123" });
       }, 50);
     }
 

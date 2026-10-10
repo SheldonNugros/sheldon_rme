@@ -38,10 +38,10 @@ mock_gas_script = '''
   const mockDb = {
     staff: [
       { id: "STF-000", username: "admin", email: "vembrian@gmail.com", nama: "Administrator Sistem", role: "Super User", pin: "admin123", pass: "admin123", sip: "-", persenJM: 0 },
-      { id: "STF-000A", username: "asung", email: "v.asungnugroho@gmail.com", nama: "drg. V. Asung Nugroho, Sp.Ort", role: "Super User", pin: "admin123", pass: "admin123", sip: "503/SIP-DRG/001/2024", persenJM: 0.50 },
-      { id: "STF-001", username: "sheldon", email: "sheldon@sheldon.com", nama: "drg. Sheldon Cooper, Sp.Ort", role: "Super User", pin: "1234", pass: "1234", sip: "503/SIP-DRG/001/2024", persenJM: 0.50 },
-      { id: "STF-002", username: "leonard", email: "leonard@sheldon.com", nama: "drg. Leonard Hofstadter", role: "Dokter Gigi Umum", pin: "1111", pass: "1111", sip: "503/SIP-DRG/002/2024", persenJM: 0.45 },
-      { id: "STF-003", username: "penny", email: "penny@sheldon.com", nama: "Penny Teller", role: "Kasir", pin: "2222", pass: "2222", sip: "-", persenJM: 0 },
+      { id: "STF-000A", username: "asung", email: "v.asungnugroho@gmail.com", nama: "drg. V. Asung Nugroho, Sp.Ort", role: "Owner", pin: "admin123", pass: "admin123", sip: "503/SIP-DRG/001/2024", persenJM: 0.50 },
+      { id: "STF-001", username: "sheldon", email: "sheldon@sheldon.com", nama: "drg. Sheldon Cooper, Sp.Ort", role: "Dokter Gigi Spesialis", pin: "1234", pass: "1234", sip: "503/SIP-DRG/001/2024", persenJM: 0.50 },
+      { id: "STF-002", username: "leonard", email: "leonard@sheldon.com", nama: "drg. Leonard Hofstadter", role: "Dokter Gigi Umum", pin: "1111", pass: "1111", sip: "503/SIP-DRG/002/2024", persenJM: 0.40 },
+      { id: "STF-003", username: "penny", email: "penny@sheldon.com", nama: "Penny Teller", role: "Perawat Umum", pin: "2222", pass: "2222", sip: "-", persenJM: 0 },
       { id: "STF-004", username: "bernadette", email: "bernadette@sheldon.com", nama: "Bernadette Rostenkowski", role: "Perawat Gigi", pin: "3333", pass: "3333", sip: "503/STR-PRW/003/2024", persenJM: 0 },
       { id: "STF-005", username: "howard", email: "howard@sheldon.com", nama: "Howard Wolowitz", role: "Admin", pin: "4444", pass: "4444", sip: "-", persenJM: 0 }
     ],

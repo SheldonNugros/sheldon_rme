@@ -131,10 +131,10 @@
   const mockDb = {
     staff: [
       { id: "STF-000", username: "admin", email: "vembrian@gmail.com", nama: "Administrator Sistem", role: "Super User", pin: "admin123", pass: "admin123", sip: "-", persenJM: 0 },
-      { id: "STF-000A", username: "asung", email: "v.asungnugroho@gmail.com", nama: "drg. V. Asung Nugroho, Sp.Ort", role: "Super User", pin: "admin123", pass: "admin123", sip: "503/SIP-DRG/001/2024", persenJM: 0.50 },
-      { id: "STF-001", username: "sheldon", email: "sheldon@sheldon.com", nama: "drg. Sheldon Cooper, Sp.Ort", role: "Super User", pin: "1234", pass: "1234", sip: "503/SIP-DRG/001/2024", persenJM: 0.50 },
-      { id: "STF-002", username: "leonard", email: "leonard@sheldon.com", nama: "drg. Leonard Hofstadter", role: "Dokter Gigi Umum", pin: "1111", pass: "1111", sip: "503/SIP-DRG/002/2024", persenJM: 0.45 },
-      { id: "STF-003", username: "penny", email: "penny@sheldon.com", nama: "Penny Teller", role: "Kasir", pin: "2222", pass: "2222", sip: "-", persenJM: 0 },
+      { id: "STF-000A", username: "asung", email: "v.asungnugroho@gmail.com", nama: "drg. V. Asung Nugroho, Sp.Ort", role: "Owner", pin: "admin123", pass: "admin123", sip: "503/SIP-DRG/001/2024", persenJM: 0.50 },
+      { id: "STF-001", username: "sheldon", email: "sheldon@sheldon.com", nama: "drg. Sheldon Cooper, Sp.Ort", role: "Dokter Gigi Spesialis", pin: "1234", pass: "1234", sip: "503/SIP-DRG/001/2024", persenJM: 0.50 },
+      { id: "STF-002", username: "leonard", email: "leonard@sheldon.com", nama: "drg. Leonard Hofstadter", role: "Dokter Gigi Umum", pin: "1111", pass: "1111", sip: "503/SIP-DRG/002/2024", persenJM: 0.40 },
+      { id: "STF-003", username: "penny", email: "penny@sheldon.com", nama: "Penny Teller", role: "Perawat Umum", pin: "2222", pass: "2222", sip: "-", persenJM: 0 },
       { id: "STF-004", username: "bernadette", email: "bernadette@sheldon.com", nama: "Bernadette Rostenkowski", role: "Perawat Gigi", pin: "3333", pass: "3333", sip: "503/STR-PRW/003/2024", persenJM: 0 },
       { id: "STF-005", username: "howard", email: "howard@sheldon.com", nama: "Howard Wolowitz", role: "Admin", pin: "4444", pass: "4444", sip: "-", persenJM: 0 }
     ],
@@ -945,6 +945,10 @@
           <span class="text-base group-hover:scale-110 transition-transform">🗄️</span>
           <span class="flex-1">Database Master</span>
         </button>
+        <button onclick="bukaMenuMasterUser()" id="nav-user-master" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-300 hover:text-white hover:bg-slate-800/90 transition-all text-left group">
+          <span class="text-base group-hover:scale-110 transition-transform">👥</span>
+          <span class="flex-1">Master User & Role</span>
+        </button>
       </div>
     </nav>
     
@@ -1712,7 +1716,7 @@
           <span class="p-2 bg-indigo-50 text-indigo-600 rounded-lg text-sm">👤</span>
           <div>
             <h3 id="judulFormUser" class="text-sm font-black text-slate-800">Tambah Pengguna Baru</h3>
-            <p class="text-[11px] text-slate-400 font-medium">Sinkron langsung dengan Spreadsheet RME Master User & Role</p>
+            <p class="text-[11px] text-slate-400 font-medium">Form Tambah User, Password, & Role (Spreadsheet: RME Sheldon - 06 Master User & Role)</p>
           </div>
         </div>
         <button type="button" id="btnBatalEditUser" onclick="batalEditDbUser()" class="hidden px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-xs font-bold transition-all">✖ Batal Edit</button>
@@ -1735,8 +1739,8 @@
             <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase">Kategori Role *</label>
             <select id="dbUserRole" required onchange="handleRoleChange()" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
               <option value="Super User">Super User</option>
-              <option value="dokter gigi umum">dokter gigi umum</option>
-              <option value="dokter gigi spesialis">dokter gigi spesialis</option>
+              <option value="Dokter Gigi Umum">Dokter Gigi Umum</option>
+              <option value="Dokter Gigi Spesialis">Dokter Gigi Spesialis</option>
               <option value="Perawat Umum">Perawat Umum</option>
               <option value="Perawat Gigi">Perawat Gigi</option>
               <option value="Admin">Admin</option>
@@ -4514,7 +4518,7 @@
     let r = role ? role.toString().toLowerCase() : '';
     
     // Reset semua navigasi ke hidden
-    ['nav-dashboard', 'nav-ai', 'nav-pasien', 'nav-rekam-medis', 'nav-surat', 'nav-database', 'nav-inventory', 'nav-informasi', 'nav-kasir', 'nav-riwayat-invoice'].forEach(id => {
+    ['nav-dashboard', 'nav-ai', 'nav-pasien', 'nav-rekam-medis', 'nav-surat', 'nav-database', 'nav-user-master', 'nav-inventory', 'nav-informasi', 'nav-kasir', 'nav-riwayat-invoice'].forEach(id => {
       let el = document.getElementById(id);
       if (el) el.classList.add('hidden');
     });
@@ -4528,7 +4532,7 @@
 
     // 1. SUPER USER: Bisa membuka, edit, dan delete semua modul
     if (r === 'super user' || r === 'owner') {
-      ['nav-dashboard', 'nav-ai', 'nav-pasien', 'nav-rekam-medis', 'nav-surat', 'nav-database', 'nav-inventory', 'nav-informasi', 'nav-kasir', 'nav-riwayat-invoice'].forEach(id => {
+      ['nav-dashboard', 'nav-ai', 'nav-pasien', 'nav-rekam-medis', 'nav-surat', 'nav-database', 'nav-user-master', 'nav-inventory', 'nav-informasi', 'nav-kasir', 'nav-riwayat-invoice'].forEach(id => {
         let el = document.getElementById(id); if (el) el.classList.remove('hidden');
       });
       document.getElementById('section-transaksi').classList.remove('hidden');
@@ -4646,6 +4650,24 @@
     if (menuId === 'surat' && typeof initSuratModule === 'function') initSuratModule();
   
     document.getElementById('mainContentScroll').scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function bukaMenuMasterUser() {
+    switchMenu('database');
+    if (typeof changeDBMenu === 'function') {
+      changeDBMenu('user');
+    }
+    let topTitle = document.getElementById('topbarTitle');
+    if (topTitle) topTitle.innerText = 'Master User & Role';
+    document.querySelectorAll('.nav-btn').forEach(el => {
+      el.classList.remove('bg-gradient-to-r', 'from-cyan-600', 'to-indigo-600', 'text-white', 'shadow-md', 'shadow-cyan-500/20', 'ring-1', 'ring-cyan-400/30', 'bg-indigo-600');
+      el.classList.add('text-slate-300', 'hover:bg-slate-800/90', 'hover:text-white');
+    });
+    let btnUserNav = document.getElementById('nav-user-master');
+    if (btnUserNav) {
+      btnUserNav.classList.remove('text-slate-300', 'hover:bg-slate-800/90');
+      btnUserNav.classList.add('bg-gradient-to-r', 'from-cyan-600', 'to-indigo-600', 'text-white', 'shadow-md', 'shadow-cyan-500/20', 'ring-1', 'ring-cyan-400/30');
+    }
   }
 
   function logout() {
@@ -12510,8 +12532,8 @@ function editDbUser(username) {
   }
   if (!matched) {
     let rLow = userRole.toLowerCase();
-    if (rLow.includes('spesialis')) roleSelect.value = 'dokter gigi spesialis';
-    else if (rLow.includes('dokter')) roleSelect.value = 'dokter gigi umum';
+    if (rLow.includes('spesialis')) roleSelect.value = 'Dokter Gigi Spesialis';
+    else if (rLow.includes('dokter')) roleSelect.value = 'Dokter Gigi Umum';
     else if (rLow.includes('perawat gigi')) roleSelect.value = 'Perawat Gigi';
     else if (rLow.includes('perawat')) roleSelect.value = 'Perawat Umum';
     else if (rLow.includes('admin') || rLow.includes('kasir')) roleSelect.value = 'Admin';

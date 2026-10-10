@@ -1170,8 +1170,8 @@ function editDbUser(username) {
   }
   if (!matched) {
     let rLow = userRole.toLowerCase();
-    if (rLow.includes('spesialis')) roleSelect.value = 'dokter gigi spesialis';
-    else if (rLow.includes('dokter')) roleSelect.value = 'dokter gigi umum';
+    if (rLow.includes('spesialis')) roleSelect.value = 'Dokter Gigi Spesialis';
+    else if (rLow.includes('dokter')) roleSelect.value = 'Dokter Gigi Umum';
     else if (rLow.includes('perawat gigi')) roleSelect.value = 'Perawat Gigi';
     else if (rLow.includes('perawat')) roleSelect.value = 'Perawat Umum';
     else if (rLow.includes('admin') || rLow.includes('kasir')) roleSelect.value = 'Admin';

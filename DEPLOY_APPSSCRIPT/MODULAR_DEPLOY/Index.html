@@ -277,6 +277,8 @@
 
     let btnTambahPasien = document.getElementById('btnTambahPasienBaru');
     let btnFilterDuplikat = document.getElementById('btnFilterDuplikat');
+    let btnDbUser = document.getElementById('btnDbUser');
+    if (btnDbUser) btnDbUser.classList.add('hidden');
 
     // 1. SUPER USER: Bisa membuka, edit, dan delete semua modul
     if (r === 'super user' || r === 'owner') {
@@ -286,6 +288,7 @@
       document.getElementById('section-transaksi').classList.remove('hidden');
       if (btnTambahPasien) btnTambahPasien.classList.remove('hidden');
       if (btnFilterDuplikat) btnFilterDuplikat.classList.remove('hidden');
+      if (btnDbUser) btnDbUser.classList.remove('hidden');
       switchMenu('dashboard');
     }
     // 2. DOKTER GIGI SPESIALIS / UMUM: Rekam Medis & Odontogram, Form & Surat, Informasi, view Database Pasien, AI Clinical Insights

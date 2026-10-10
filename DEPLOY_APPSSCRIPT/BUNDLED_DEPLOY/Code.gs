@@ -138,8 +138,10 @@ function handleApiRequest(action, params) {
         args = [params.username || params.user, params.password || params.pin || params.pass];
       } else if (action === "getRiwayatMedisByPasien") {
         args = [params.noRm || params.norm || params[0]];
-      } else if (action === "simpanPasienBaru" || action === "simpanRekamMedis" || action === "simpanKasirInvoice" || action === "simpanItemObat" || action === "simpanItemBMHP") {
+      } else if (action === "simpanPasienBaru" || action === "simpanRekamMedis" || action === "simpanKasirInvoice" || action === "simpanItemObat" || action === "simpanItemBMHP" || action === "simpanUserMaster") {
         args = [params.payload || params];
+      } else if (action === "hapusUserMaster") {
+        args = [params.username || params[0], params.isPermanent || params[1]];
       } else {
         args = [params];
       }
@@ -1943,6 +1945,169 @@ function getDaftarDokterSIP() {
     return result;
   } catch (e) {
     return [];
+  }
+}
+
+/**
+ * Mengambil seluruh data akun user dari Spreadsheet Master (Sheet: Data)
+ * Khusus Super User / Owner
+ */
+function getDaftarUserMaster() {
+  try {
+    const v = readFast(DB_CONFIG.MASTER, "Data");
+    if (v.length <= 1) return [];
+    let h = v[0];
+    let idNama = getColIdx(h, ['namapekerja', 'nama', 'namalengkap']); if (idNama === -1) idNama = 0;
+    let idUser = getColIdx(h, ['username', 'user']); if (idUser === -1) idUser = 1;
+    let idRole = getColIdx(h, ['kategorirole', 'role', 'kategori']); if (idRole === -1) idRole = 2;
+    let idPass = getColIdx(h, ['password', 'pass']); if (idPass === -1) idPass = 3;
+    let idStatus = getColIdx(h, ['status']); if (idStatus === -1) idStatus = 4;
+    let idSIP = getColIdx(h, ['noregistrasi', 'sip', 'noreg']); if (idSIP === -1) idSIP = 5;
+    let idHP = getColIdx(h, ['nohp', 'no_hp', 'telepon', 'wa']); if (idHP === -1) idHP = 6;
+    let idJM = getColIdx(h, ['persen_jm_dokter', 'persen_jm', 'persenjm']); if (idJM === -1) idJM = 7;
+
+    let users = [];
+    for (let i = 1; i < v.length; i++) {
+      let r = v[i];
+      if (!r[idUser] && !r[idNama]) continue;
+      let pVal = String(r[idPass] !== null && r[idPass] !== undefined ? r[idPass] : "").trim();
+      let hasPass = pVal.length > 0;
+      let isHashed = pVal.length === 64;
+      
+      users.push({
+        nama: String(r[idNama] || "").trim(),
+        username: String(r[idUser] || "").trim(),
+        role: String(r[idRole] || "Staff").trim(),
+        hasPassword: hasPass,
+        isHashed: isHashed,
+        status: String(r[idStatus] || "Aktif").trim(),
+        noReg: String(r[idSIP] || "-").trim(),
+        noHp: String(r[idHP] || "").trim(),
+        persenJM: (idJM !== -1 && r[idJM] !== "" && r[idJM] !== null && r[idJM] !== undefined) ? Number(r[idJM]) : 0
+      });
+    }
+    return users;
+  } catch (e) {
+    Logger.log("Error getDaftarUserMaster: " + e.message);
+    return [];
+  }
+}
+
+/**
+ * Menyimpan / Memperbarui Akun User ke Spreadsheet Master (Sheet: Data)
+ * Khusus Super User / Owner
+ */
+function simpanUserMaster(payload) {
+  try {
+    if (!payload || !payload.username || !payload.nama) {
+      return { success: false, message: "Nama Pekerja dan Username wajib diisi!" };
+    }
+
+    const ss = SpreadsheetApp.openById(DB_CONFIG.MASTER.trim());
+    const sheet = ss.getSheetByName("Data") || ss.insertSheet("Data");
+    const v = sheet.getDataRange().getValues();
+    if (v.length === 0) {
+      sheet.appendRow(["Nama_Pekerja", "Username", "Kategori_Role", "Password", "Status", "No_Registrasi", "No_HP", "Persen_JM_Dokter"]);
+    }
+
+    const h = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+    let idNama = getColIdx(h, ['namapekerja', 'nama']); if (idNama === -1) idNama = 0;
+    let idUser = getColIdx(h, ['username', 'user']); if (idUser === -1) idUser = 1;
+    let idRole = getColIdx(h, ['kategorirole', 'role', 'kategori']); if (idRole === -1) idRole = 2;
+    let idPass = getColIdx(h, ['password', 'pass']); if (idPass === -1) idPass = 3;
+    let idStatus = getColIdx(h, ['status']); if (idStatus === -1) idStatus = 4;
+    let idSIP = getColIdx(h, ['noregistrasi', 'sip', 'noreg']); if (idSIP === -1) idSIP = 5;
+    let idHP = getColIdx(h, ['nohp', 'no_hp', 'telepon', 'wa']); if (idHP === -1) idHP = 6;
+    let idJM = getColIdx(h, ['persen_jm_dokter', 'persen_jm', 'persenjm']); if (idJM === -1) idJM = 7;
+
+    let cleanUser = String(payload.username).trim().toLowerCase();
+    let rowIndex = -1;
+
+    for (let i = 1; i < v.length; i++) {
+      if (String(v[i][idUser] || "").trim().toLowerCase() === cleanUser) {
+        rowIndex = i + 1;
+        break;
+      }
+    }
+
+    let pjmVal = payload.persenJM !== undefined && payload.persenJM !== "" ? Number(payload.persenJM) : 0;
+    if (pjmVal > 1) pjmVal = pjmVal / 100;
+
+    if (rowIndex > 1) {
+      // MODE EDIT
+      sheet.getRange(rowIndex, idNama + 1).setValue(payload.nama.trim());
+      sheet.getRange(rowIndex, idRole + 1).setValue(payload.role.trim());
+      sheet.getRange(rowIndex, idStatus + 1).setValue(payload.status || "Aktif");
+      sheet.getRange(rowIndex, idSIP + 1).setValue(payload.noReg || "-");
+      sheet.getRange(rowIndex, idHP + 1).setValue(payload.noHp || "");
+      sheet.getRange(rowIndex, idJM + 1).setValue(pjmVal);
+
+      if (payload.password && String(payload.password).trim() !== "") {
+        let cellPass = sheet.getRange(rowIndex, idPass + 1);
+        cellPass.setNumberFormat("@");
+        cellPass.setValue(String(payload.password).trim());
+      }
+
+      catatLog("Master User", "Edit user: " + cleanUser + " (" + payload.role + ")", payload.currentUser || "Super User");
+      return { success: true, message: "Akun user '" + cleanUser + "' berhasil diperbarui!" };
+    } else {
+      // MODE TAMBAH BARU
+      if (!payload.password || String(payload.password).trim() === "") {
+        return { success: false, message: "Password wajib diisi untuk user baru!" };
+      }
+
+      let newRow = new Array(Math.max(8, h.length)).fill("");
+      newRow[idNama] = payload.nama.trim();
+      newRow[idUser] = cleanUser;
+      newRow[idRole] = payload.role.trim();
+      newRow[idPass] = String(payload.password).trim();
+      newRow[idStatus] = payload.status || "Aktif";
+      newRow[idSIP] = payload.noReg || "-";
+      newRow[idHP] = payload.noHp || "";
+      newRow[idJM] = pjmVal;
+
+      sheet.appendRow(newRow);
+      let lastRow = sheet.getLastRow();
+      sheet.getRange(lastRow, idPass + 1).setNumberFormat("@");
+      sheet.getRange(lastRow, idJM + 1).setNumberFormat("0.0%");
+
+      catatLog("Master User", "Tambah user baru: " + cleanUser + " (" + payload.role + ")", payload.currentUser || "Super User");
+      return { success: true, message: "User baru '" + cleanUser + "' berhasil ditambahkan ke Database Master!" };
+    }
+  } catch (e) {
+    return { success: false, message: "Gagal simpan user: " + e.message };
+  }
+}
+
+/**
+ * Menghapus atau menonaktifkan akun user di Database Master
+ */
+function hapusUserMaster(username, isPermanent) {
+  try {
+    const ss = SpreadsheetApp.openById(DB_CONFIG.MASTER.trim());
+    const sheet = ss.getSheetByName("Data");
+    if (!sheet) return { success: false, message: "Sheet Data tidak ditemukan!" };
+
+    const v = sheet.getDataRange().getValues();
+    const h = v[0];
+    let idUser = getColIdx(h, ['username', 'user']); if (idUser === -1) idUser = 1;
+    let idStatus = getColIdx(h, ['status']); if (idStatus === -1) idStatus = 4;
+
+    let cleanUser = String(username).trim().toLowerCase();
+    for (let i = 1; i < v.length; i++) {
+      if (String(v[i][idUser] || "").trim().toLowerCase() === cleanUser) {
+        if (isPermanent) {
+          sheet.deleteRow(i + 1);
+          return { success: true, message: "Akun '" + username + "' berhasil dihapus permanen." };
+        } else {
+          sheet.getRange(i + 1, idStatus + 1).setValue("Tidak Aktif");
+          return { success: true, message: "Status akun '" + username + "' diubah menjadi Tidak Aktif." };
+        }
+      }
+    }
+    return { success: false, message: "User '" + username + "' tidak ditemukan." };
+  } catch (e) {
+    return { success: false, message: "Gagal menghapus user: " + e.message };
   }
 }
 

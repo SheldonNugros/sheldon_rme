@@ -566,6 +566,67 @@ mock_gas_script = '''
     getSemuaRiwayatSurat() {
       setTimeout(() => { this._successHandler(mockDb.surat); }, 30);
     }
+
+    getDaftarUserMaster() {
+      setTimeout(() => {
+        let users = mockDb.staff.map(s => ({
+          nama: s.nama,
+          username: s.username,
+          role: s.role,
+          hasPassword: true,
+          isHashed: false,
+          status: s.status || "Aktif",
+          noReg: s.sip || "-",
+          noHp: s.noHp || "",
+          persenJM: s.persenJM || 0
+        }));
+        this._successHandler(users);
+      }, 30);
+    }
+
+    simpanUserMaster(payload) {
+      setTimeout(() => {
+        let cleanUser = String(payload.username || "").trim().toLowerCase();
+        let idx = mockDb.staff.findIndex(s => (s.username || "").toLowerCase() === cleanUser);
+        let pjmVal = payload.persenJM ? Number(payload.persenJM) : 0;
+        if (pjmVal > 1) pjmVal = pjmVal / 100;
+        let item = {
+          id: idx !== -1 ? mockDb.staff[idx].id : ("STF-" + String(mockDb.staff.length + 1).padStart(3, '0')),
+          username: cleanUser,
+          nama: payload.nama,
+          role: payload.role,
+          pass: payload.password || (idx !== -1 ? mockDb.staff[idx].pass : "1234"),
+          pin: payload.password || (idx !== -1 ? mockDb.staff[idx].pin : "1234"),
+          sip: payload.noReg || "-",
+          noHp: payload.noHp || "",
+          status: payload.status || "Aktif",
+          persenJM: pjmVal
+        };
+        if (idx !== -1) {
+          mockDb.staff[idx] = Object.assign(mockDb.staff[idx], item);
+        } else {
+          mockDb.staff.push(item);
+        }
+        this._successHandler({ success: true, message: "Pengguna '" + cleanUser + "' berhasil disimpan!" });
+      }, 50);
+    }
+
+    hapusUserMaster(username, isPermanent) {
+      setTimeout(() => {
+        let cleanUser = String(username || "").trim().toLowerCase();
+        let idx = mockDb.staff.findIndex(s => (s.username || "").toLowerCase() === cleanUser);
+        if (idx !== -1) {
+          if (isPermanent) {
+            mockDb.staff.splice(idx, 1);
+          } else {
+            mockDb.staff[idx].status = "Tidak Aktif";
+          }
+          this._successHandler({ success: true, message: "Pengguna '" + cleanUser + "' berhasil dinonaktifkan." });
+        } else {
+          this._successHandler({ success: false, message: "Pengguna tidak ditemukan." });
+        }
+      }, 50);
+    }
   }
 
   window.GAS_WEB_APP_URL = localStorage.getItem("sheldon_gas_api_url") || "https://script.google.com/macros/s/AKfycbw5M3rZsgXeDdaxYauRizWaA-vDb1eLzxutOzf_bRI-/exec";

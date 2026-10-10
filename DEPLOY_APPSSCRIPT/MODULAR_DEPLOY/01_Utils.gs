@@ -8,6 +8,14 @@ function doGet(e) {
     return handleApiRequest(e.parameter.action, e.parameter);
   }
 
+  // Jika dipanggil dengan parameter page=formUser, tampilkan Form Master User langsung
+  if (e && e.parameter && e.parameter.page === "formUser") {
+    return HtmlService.createHtmlOutput(getHtmlFormUserMasterContent())
+      .setTitle('Form Master User & Role - RME Sheldon')
+      .addMetaTag('viewport', 'width=device-width, initial-scale=1')
+      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+  }
+
   return HtmlService.createTemplateFromFile('Index')
     .evaluate()
     .setTitle('Klinik Sheldon Enterprise - RME')

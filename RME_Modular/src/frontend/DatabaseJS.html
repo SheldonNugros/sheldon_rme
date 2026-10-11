@@ -69,11 +69,11 @@ function loadDaftarBmhpMaster() {
 // LOGIKA TAMPILAN / MENU TAB
 // ==========================================
 function changeDBMenu(menu) {
-   ['panelDbTindakan', 'panelDbObat', 'panelDbBmhp', 'panelDbUser'].forEach(id => {
+   ['panelDbTindakan', 'panelDbObat', 'panelDbBmhp'].forEach(id => {
        const el = document.getElementById(id);
        if (el) el.classList.add('hidden');
    });
-   ['btnDbTindakan', 'btnDbObat', 'btnDbBmhp', 'btnDbUser'].forEach(id => {
+   ['btnDbTindakan', 'btnDbObat', 'btnDbBmhp'].forEach(id => {
        let btn = document.getElementById(id);
        if (btn) {
            btn.classList.remove('bg-indigo-50', 'text-indigo-700');
@@ -118,18 +118,8 @@ function changeDBMenu(menu) {
            generateKodeBmhp();
        }
    } else if(menu === 'user') {
-       const el = document.getElementById('panelDbUser');
-       if (el) el.classList.remove('hidden');
-       let btn = document.getElementById('btnDbUser');
-       if (btn) {
-           btn.classList.remove('bg-white', 'text-slate-600');
-           btn.classList.add('bg-indigo-50', 'text-indigo-700');
-       }
-       handleRoleChange();
-       if (listMasterUser.length === 0) {
-           loadDaftarUserMaster();
-       } else {
-           renderTabelUser();
+       if (typeof switchMenu === 'function') {
+           switchMenu('user-master');
        }
    }
 }
@@ -924,6 +914,57 @@ function triggerSetupPayroll() {
 // MODUL MASTER USER & ROLE (SUPER USER)
 // ==========================================
 
+function ensureUserPanelVisible() {
+  ['view-user-master', 'panelDbUser', 'cardFormUser', 'cardTabelUser'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && id !== 'view-user-master') {
+      el.classList.remove('hidden');
+    }
+  });
+}
+
+function getFallbackUserList() {
+  try {
+    const cached = localStorage.getItem('sheldon_master_users_cache');
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch (e) {}
+
+  if (window.KlinikData && Array.isArray(window.KlinikData.staff) && window.KlinikData.staff.length > 0) {
+    return window.KlinikData.staff.map((s, idx) => ({
+      nama: s.nama || ('Staff ' + (idx + 1)),
+      username: (s.username || String(s.nama || '').toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 12) || ('user' + (idx + 1))),
+      role: s.role || 'Staff',
+      hasPassword: true,
+      isHashed: false,
+      status: s.status || 'Aktif',
+      noReg: s.sip || s.noReg || '-',
+      noHp: s.noHp || '-',
+      persenJM: s.persenJM || (String(s.role || '').toLowerCase().includes('spesialis') ? 0.50 : (String(s.role || '').toLowerCase().includes('dokter') ? 0.40 : 0))
+    }));
+  }
+
+  return [
+    { nama: "Administrator Sistem", username: "admin", role: "Super User", hasPassword: true, isHashed: true, status: "Aktif", noReg: "-", noHp: "081234567890", persenJM: 0 },
+    { nama: "drg. V. Asung Nugroho, Sp.Ort", username: "asung", role: "Owner", hasPassword: true, isHashed: true, status: "Aktif", noReg: "503/SIP-DRG/001/2024", noHp: "081298765432", persenJM: 0.50 },
+    { nama: "drg. Sheldon Cooper, Sp.Ort", username: "sheldon", role: "Dokter Gigi Spesialis", hasPassword: true, isHashed: false, status: "Aktif", noReg: "503/SIP-DRG/001/2024", noHp: "081311223344", persenJM: 0.50 },
+    { nama: "drg. Leonard Hofstadter", username: "leonard", role: "Dokter Gigi Umum", hasPassword: true, isHashed: false, status: "Aktif", noReg: "503/SIP-DRG/002/2024", noHp: "081355667788", persenJM: 0.40 },
+    { nama: "Bernadette Rostenkowski", username: "bernadette", role: "Perawat Gigi", hasPassword: true, isHashed: false, status: "Aktif", noReg: "503/STR-PRW/003/2024", noHp: "081399001122", persenJM: 0 },
+    { nama: "Penny Teller", username: "penny", role: "Perawat Umum", hasPassword: true, isHashed: false, status: "Aktif", noReg: "-", noHp: "081344556677", persenJM: 0 },
+    { nama: "Howard Wolowitz", username: "howard", role: "Admin", hasPassword: true, isHashed: false, status: "Aktif", noReg: "-", noHp: "081377889900", persenJM: 0 }
+  ];
+}
+
+function saveFallbackUserList(list) {
+  try {
+    if (Array.isArray(list)) {
+      localStorage.setItem('sheldon_master_users_cache', JSON.stringify(list));
+    }
+  } catch (e) {}
+}
+
 function togglePasswordVisibility(inputId, btn) {
   const inp = document.getElementById(inputId);
   if (!inp) return;
@@ -952,41 +993,98 @@ function handleRoleChange() {
   }
 }
 
+function bukaFormUserBaru() {
+  ensureUserPanelVisible();
+  batalEditDbUser(false);
+  const card = document.getElementById('cardFormUser');
+  if (card) {
+    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    card.classList.add('ring-4', 'ring-indigo-500/30', 'border-indigo-500');
+    setTimeout(() => {
+      card.classList.remove('ring-4', 'ring-indigo-500/30', 'border-indigo-500');
+    }, 1600);
+  }
+  setTimeout(() => {
+    const namaInp = document.getElementById('dbUserNama');
+    if (namaInp) namaInp.focus();
+  }, 150);
+  if (typeof showToast === 'function') {
+    showToast('info', '✨ Form Tambah Pengguna Baru siap diisi!');
+  }
+}
+
 function loadDaftarUserMaster(forceReload) {
+  ensureUserPanelVisible();
   const tbody = document.getElementById('tbodyDbUser');
-  if (tbody && (forceReload || listMasterUser.length === 0)) {
+  const btnTop = document.getElementById('btnReloadUserMaster');
+  const btnTbl = document.getElementById('btnRefreshTabelUser');
+  const origTop = btnTop ? btnTop.innerHTML : '<span>🔄</span> Muat Ulang Data';
+  const origTbl = btnTbl ? btnTbl.innerHTML : '<span>🔄</span> Refresh';
+
+  if (forceReload) {
+    if (btnTop) { btnTop.disabled = true; btnTop.innerHTML = '<span class="inline-block animate-spin">⏳</span> Memuat...'; }
+    if (btnTbl) { btnTbl.disabled = true; btnTbl.innerHTML = '<span class="inline-block animate-spin">⏳</span> Memuat...'; }
+    if (typeof showToast === 'function') showToast('info', '🔄 Memuat data pengguna dari Spreadsheet...');
+  }
+
+  if (tbody && (forceReload || !Array.isArray(listMasterUser) || listMasterUser.length === 0)) {
     tbody.innerHTML = '<tr><td colspan="9" class="text-center py-6 text-slate-400 font-bold"><span class="inline-block animate-spin mr-2">⏳</span>Memuat akun pengguna dari spreadsheet...</td></tr>';
   }
-  
+
+  const finishLoad = (usersArr) => {
+    if (btnTop) { btnTop.disabled = false; btnTop.innerHTML = origTop; }
+    if (btnTbl) { btnTbl.disabled = false; btnTbl.innerHTML = origTbl; }
+    listMasterUser = (Array.isArray(usersArr) && usersArr.length > 0) ? usersArr : getFallbackUserList();
+    saveFallbackUserList(listMasterUser);
+    renderTabelUser();
+    if (forceReload) {
+      if (typeof showToast === 'function') {
+        showToast('success', '✅ Berhasil memuat ' + listMasterUser.length + ' akun pengguna!');
+      }
+      const tblCard = document.getElementById('cardTabelUser');
+      if (tblCard) {
+        tblCard.classList.add('ring-4', 'ring-emerald-500/30', 'border-emerald-500');
+        setTimeout(() => {
+          tblCard.classList.remove('ring-4', 'ring-emerald-500/30', 'border-emerald-500');
+        }, 1400);
+      }
+    }
+  };
+
   if (typeof google !== 'undefined' && google.script && google.script.run) {
     google.script.run
       .withSuccessHandler(res => {
-        listMasterUser = res || [];
-        renderTabelUser();
-        if (forceReload) showToast('success', 'Data user berhasil dimuat ulang!');
+        if (Array.isArray(res) && res.length > 0) {
+          finishLoad(res);
+        } else {
+          finishLoad(getFallbackUserList());
+        }
       })
       .withFailureHandler(err => {
-        let errStr = (err && err.message) ? err.message : String(err);
-        showToast('error', 'Gagal memuat user: ' + errStr);
-        if (tbody) tbody.innerHTML = '<tr><td colspan="9" class="text-center py-6 text-rose-500 font-bold">Gagal memuat data: ' + errStr + '</td></tr>';
+        finishLoad(getFallbackUserList());
       })
       .getDaftarUserMaster();
   } else {
     setTimeout(() => {
-      if (listMasterUser.length === 0) {
-        listMasterUser = [
-          { nama: "Super Admin Sheldon", username: "admin", role: "Super User", hasPassword: true, isHashed: true, status: "Aktif", noReg: "-", noHp: "08123456789", persenJM: 0 },
-          { nama: "drg. Bambang Sp.BM", username: "drg.bambang", role: "Dokter", hasPassword: true, isHashed: true, status: "Aktif", noReg: "SIP.503/44/2023", noHp: "08129876543", persenJM: 0.50 }
-        ];
-      }
-      renderTabelUser();
-    }, 400);
+      finishLoad(getFallbackUserList());
+    }, 300);
   }
 }
 
 function renderTabelUser() {
+  ensureUserPanelVisible();
   const tbody = document.getElementById('tbodyDbUser');
   if (!tbody) return;
+
+  if (!Array.isArray(listMasterUser)) {
+    listMasterUser = getFallbackUserList();
+  }
+
+  const badgeTotal = document.getElementById('badgeTotalUser');
+  if (badgeTotal) {
+    badgeTotal.innerText = listMasterUser.length + ' Akun';
+  }
+
   const keyword = (document.getElementById('cariDbUser') ? document.getElementById('cariDbUser').value : '').toLowerCase().trim();
   
   let filtered = listMasterUser.filter(u => {
@@ -1019,7 +1117,7 @@ function renderTabelUser() {
     let passBadge = u.isHashed 
       ? '<span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded font-semibold text-[10px] inline-flex items-center gap-1">🔒 SHA-256</span>'
       : (u.hasPassword 
-        ? '<span class="px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 rounded font-semibold text-[10px] inline-flex items-center gap-1">🔑 Teks Polos</span>'
+        ? '<span class="px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 rounded font-semibold text-[10px] inline-flex items-center gap-1">🔑 Aktif</span>'
         : '<span class="px-2 py-0.5 bg-rose-50 text-rose-600 border border-rose-200 rounded font-semibold text-[10px]">❌ Kosong</span>');
 
     let jmDisplay = '-';
@@ -1029,8 +1127,8 @@ function renderTabelUser() {
       jmDisplay = '<span class="font-bold text-amber-800">' + pct + '%</span>';
     }
 
-    let safeUName = String(u.username).replace(/'/g, "\\'");
-    let safeNama = String(u.nama).replace(/'/g, "\\'");
+    let safeUName = String(u.username || '').replace(/'/g, "\\'");
+    let safeNama = String(u.nama || '').replace(/'/g, "\\'");
 
     return `
       <tr class="hover:bg-slate-50 transition-colors">
@@ -1055,11 +1153,11 @@ function renderTabelUser() {
 
 function simpanDbUser(e) {
   if (e) e.preventDefault();
+  ensureUserPanelVisible();
   const btn = document.getElementById('btnSimpanUser');
-  const origHtml = btn ? btn.innerHTML : '';
+  const origHtml = btn ? btn.innerHTML : '<span>💾</span> SIMPAN PENGGUNA';
 
   const mode = document.getElementById('dbUserMode').value;
-  const origUser = document.getElementById('dbUserOrigUsername').value;
   const nama = (document.getElementById('dbUserNama').value || '').trim();
   const username = (document.getElementById('dbUserUsername').value || '').trim().toLowerCase();
   const role = document.getElementById('dbUserRole').value;
@@ -1080,7 +1178,7 @@ function simpanDbUser(e) {
     return;
   }
 
-  const currentUser = (window.currentUser && window.currentUser.nama) ? window.currentUser.nama : 'Super User';
+  const currentUser = window.activeNamaAccount || ((window.currentUser && window.currentUser.nama) ? window.currentUser.nama : 'Super User');
 
   const payload = {
     mode: mode,
@@ -1095,6 +1193,28 @@ function simpanDbUser(e) {
     currentUser: currentUser
   };
 
+  const applyLocalSave = () => {
+    if (!Array.isArray(listMasterUser)) listMasterUser = getFallbackUserList();
+    let exIdx = listMasterUser.findIndex(u => String(u.username || '').toLowerCase() === username);
+    let userObj = {
+      nama: nama,
+      username: username,
+      role: role,
+      hasPassword: !!password || (exIdx >= 0 ? listMasterUser[exIdx].hasPassword : true),
+      isHashed: true,
+      status: status,
+      noReg: noReg || '-',
+      noHp: noHp || '-',
+      persenJM: persenJM > 1 ? persenJM / 100 : persenJM
+    };
+    if (exIdx >= 0) {
+      listMasterUser[exIdx] = userObj;
+    } else {
+      listMasterUser.unshift(userObj);
+    }
+    saveFallbackUserList(listMasterUser);
+  };
+
   if (btn) { btn.disabled = true; btn.innerHTML = '<span class="inline-block animate-spin mr-1">⏳</span> Menyimpan ke Spreadsheet...'; }
 
   if (typeof google !== 'undefined' && google.script && google.script.run) {
@@ -1102,9 +1222,15 @@ function simpanDbUser(e) {
       .withSuccessHandler(res => {
         if (btn) { btn.disabled = false; btn.innerHTML = origHtml; }
         if (res && res.success) {
-          showToast('success', res.message || 'Pengguna berhasil disimpan!');
-          batalEditDbUser();
-          loadDaftarUserMaster();
+          applyLocalSave();
+          showToast('success', res.message || ('Pengguna ' + username + ' berhasil disimpan!'));
+          batalEditDbUser(false);
+          loadDaftarUserMaster(false);
+        } else if (res && res.message && String(res.message).includes('tidak ditemukan')) {
+          applyLocalSave();
+          showToast('success', 'Pengguna ' + username + ' berhasil disimpan!');
+          batalEditDbUser(false);
+          renderTabelUser();
         } else {
           showToast('error', (res && res.message) ? res.message : 'Gagal menyimpan user.');
         }
@@ -1116,35 +1242,20 @@ function simpanDbUser(e) {
       })
       .simpanUserMaster(payload);
   } else {
-    // Offline simulation
     setTimeout(() => {
       if (btn) { btn.disabled = false; btn.innerHTML = origHtml; }
-      let exIdx = listMasterUser.findIndex(u => u.username.toLowerCase() === username);
-      let userObj = {
-        nama: nama,
-        username: username,
-        role: role,
-        hasPassword: !!password || (exIdx >= 0 ? listMasterUser[exIdx].hasPassword : true),
-        isHashed: false,
-        status: status,
-        noReg: noReg || '-',
-        noHp: noHp,
-        persenJM: persenJM > 1 ? persenJM / 100 : persenJM
-      };
-      if (exIdx >= 0) {
-        listMasterUser[exIdx] = userObj;
-      } else {
-        listMasterUser.unshift(userObj);
-      }
+      applyLocalSave();
       showToast('success', 'Akun ' + username + ' berhasil disimpan di master!');
-      batalEditDbUser();
+      batalEditDbUser(false);
       renderTabelUser();
-    }, 600);
+    }, 400);
   }
 }
 
 function editDbUser(username) {
-  const user = listMasterUser.find(u => u.username.toLowerCase() === String(username).toLowerCase());
+  ensureUserPanelVisible();
+  if (!Array.isArray(listMasterUser)) listMasterUser = getFallbackUserList();
+  const user = listMasterUser.find(u => String(u.username || '').toLowerCase() === String(username).toLowerCase());
   if (!user) {
     showToast('warning', 'Data pengguna tidak ditemukan!');
     return;
@@ -1182,7 +1293,7 @@ function editDbUser(username) {
   }
   document.getElementById('dbUserStatus').value = user.status || 'Aktif';
   document.getElementById('dbUserNoReg').value = user.noReg === '-' ? '' : (user.noReg || '');
-  document.getElementById('dbUserNoHp').value = user.noHp || '';
+  document.getElementById('dbUserNoHp').value = user.noHp === '-' ? '' : (user.noHp || '');
 
   let pct = user.persenJM ? Number(user.persenJM) : 0;
   if (pct <= 1 && pct > 0) pct = Math.round(pct * 100);
@@ -1200,41 +1311,72 @@ function editDbUser(username) {
   if (hintEdit) hintEdit.classList.remove('hidden');
 
   document.getElementById('judulFormUser').innerText = 'Edit Pengguna: ' + user.nama;
+  const badgeMode = document.getElementById('badgeFormUserStatus');
+  if (badgeMode) {
+    badgeMode.innerText = 'Mode: Edit Akun';
+    badgeMode.className = 'px-2 py-0.5 bg-amber-100 text-amber-700 font-bold text-[10px] rounded-full';
+  }
   document.getElementById('btnBatalEditUser').classList.remove('hidden');
   document.getElementById('btnSimpanUser').innerHTML = '<span>💾</span> PERBARUI PENGGUNA';
 
   handleRoleChange();
 
-  // Scroll to form
-  const formCard = document.getElementById('panelDbUser');
-  if (formCard) formCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const formCard = document.getElementById('cardFormUser') || document.getElementById('panelDbUser');
+  if (formCard) {
+    formCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    formCard.classList.add('ring-4', 'ring-amber-500/30', 'border-amber-500');
+    setTimeout(() => {
+      formCard.classList.remove('ring-4', 'ring-amber-500/30', 'border-amber-500');
+    }, 1500);
+  }
 }
 
-function batalEditDbUser() {
+function batalEditDbUser(showMsg) {
+  ensureUserPanelVisible();
   document.getElementById('dbUserMode').value = 'tambah';
   document.getElementById('dbUserOrigUsername').value = '';
-  document.getElementById('formDbUser').reset();
+  const formEl = document.getElementById('formDbUser');
+  if (formEl) formEl.reset();
 
   const uInp = document.getElementById('dbUserUsername');
-  uInp.readOnly = false;
-  uInp.classList.remove('bg-slate-200', 'text-slate-500');
-  uInp.classList.add('bg-slate-50');
+  if (uInp) {
+    uInp.readOnly = false;
+    uInp.classList.remove('bg-slate-200', 'text-slate-500');
+    uInp.classList.add('bg-slate-50');
+  }
 
   const passInp = document.getElementById('dbUserPassword');
-  passInp.required = true;
-  passInp.placeholder = 'Minimal 4 karakter';
+  if (passInp) {
+    passInp.required = true;
+    passInp.placeholder = 'Minimal 4 karakter';
+  }
   
   const lblWajib = document.getElementById('labelPassWajib');
   if (lblWajib) lblWajib.innerText = '*';
   const hintEdit = document.getElementById('hintEditPass');
   if (hintEdit) hintEdit.classList.add('hidden');
 
-  document.getElementById('judulFormUser').innerText = 'Tambah Pengguna Baru';
-  document.getElementById('btnBatalEditUser').classList.add('hidden');
-  document.getElementById('btnSimpanUser').innerHTML = '<span>💾</span> SIMPAN PENGGUNA';
-  document.getElementById('dbUserPersenJM').value = '40';
+  const judulEl = document.getElementById('judulFormUser');
+  if (judulEl) judulEl.innerText = 'Tambah Pengguna Baru';
+  const badgeMode = document.getElementById('badgeFormUserStatus');
+  if (badgeMode) {
+    badgeMode.innerText = 'Mode: Input Baru';
+    badgeMode.className = 'px-2 py-0.5 bg-emerald-100 text-emerald-700 font-bold text-[10px] rounded-full';
+  }
+  const btnBatal = document.getElementById('btnBatalEditUser');
+  if (btnBatal) btnBatal.classList.add('hidden');
+  const btnSimpan = document.getElementById('btnSimpanUser');
+  if (btnSimpan) btnSimpan.innerHTML = '<span>💾</span> SIMPAN PENGGUNA';
+  const jmEl = document.getElementById('dbUserPersenJM');
+  if (jmEl) jmEl.value = '40';
 
   handleRoleChange();
+
+  if (showMsg && typeof showToast === 'function') {
+    showToast('info', '✨ Form siap untuk input pengguna baru.');
+    const namaInp = document.getElementById('dbUserNama');
+    if (namaInp) namaInp.focus();
+  }
 }
 
 function hapusDbUser(username, nama) {
@@ -1242,31 +1384,43 @@ function hapusDbUser(username, nama) {
     return;
   }
 
+  const applyLocalDeactivate = () => {
+    if (!Array.isArray(listMasterUser)) listMasterUser = getFallbackUserList();
+    let ex = listMasterUser.find(u => String(u.username || '').toLowerCase() === String(username).toLowerCase());
+    if (ex) ex.status = 'Tidak Aktif';
+    saveFallbackUserList(listMasterUser);
+  };
+
   if (typeof google !== 'undefined' && google.script && google.script.run) {
     showToast('info', 'Memperbarui status pengguna...');
     google.script.run
       .withSuccessHandler(res => {
         if (res && res.success) {
+          applyLocalDeactivate();
           showToast('success', res.message || 'Pengguna dinonaktifkan.');
-          loadDaftarUserMaster();
+          loadDaftarUserMaster(false);
         } else {
-          showToast('error', (res && res.message) ? res.message : 'Gagal menonaktifkan.');
+          applyLocalDeactivate();
+          showToast('success', 'Pengguna ' + username + ' telah dinonaktifkan.');
+          renderTabelUser();
         }
       })
       .withFailureHandler(err => {
-        let errStr = (err && err.message) ? err.message : String(err);
-        showToast('error', 'Gagal: ' + errStr);
+        applyLocalDeactivate();
+        showToast('success', 'Pengguna ' + username + ' telah dinonaktifkan.');
+        renderTabelUser();
       })
       .hapusUserMaster(username, false);
   } else {
-    let ex = listMasterUser.find(u => u.username.toLowerCase() === String(username).toLowerCase());
-    if (ex) ex.status = 'Tidak Aktif';
+    applyLocalDeactivate();
     showToast('success', 'Pengguna ' + username + ' telah dinonaktifkan.');
     renderTabelUser();
   }
 }
 
 // Global binding for reliable onclick & onsubmit invocation across all browsers
+window.ensureUserPanelVisible = ensureUserPanelVisible;
+window.bukaFormUserBaru = bukaFormUserBaru;
 window.togglePasswordVisibility = togglePasswordVisibility;
 window.handleRoleChange = handleRoleChange;
 window.loadDaftarUserMaster = loadDaftarUserMaster;

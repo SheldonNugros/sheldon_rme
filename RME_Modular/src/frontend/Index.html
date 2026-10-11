@@ -401,6 +401,9 @@
     if (menuId === 'ai' && typeof loadAIInsights === 'function') loadAIInsights();
     if (menuId === 'database' && typeof initDatabaseModule === 'function') initDatabaseModule();
     if (menuId === 'user-master') {
+      if (typeof ensureUserPanelVisible === 'function') ensureUserPanelVisible();
+      const pUser = document.getElementById('panelDbUser');
+      if (pUser) pUser.classList.remove('hidden');
       if (typeof handleRoleChange === 'function') handleRoleChange();
       if (typeof loadDaftarUserMaster === 'function') loadDaftarUserMaster();
     }

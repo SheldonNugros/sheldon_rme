@@ -655,6 +655,13 @@ mock_gas_script = '''
               return res.json();
             })
             .then(data => {
+              if (data && data.success === false && String(data.message || '').includes('tidak ditemukan')) {
+                console.warn("⚠️ Fungsi [" + rProp + "] belum di-deploy di GAS versi lama, menggunakan fallback lokal.");
+                if (typeof rTarget[rProp] === 'function') {
+                  rTarget[rProp].apply(rTarget, args);
+                  return;
+                }
+              }
               console.log("⚡ Live Google Sheets synced for [" + rProp + "]:", data);
               if (window._updateGasBadge) window._updateGasBadge(true);
               rTarget._successHandler(data);

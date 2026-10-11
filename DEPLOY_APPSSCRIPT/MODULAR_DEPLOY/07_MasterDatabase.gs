@@ -75,6 +75,7 @@ function getDaftarUserMaster() {
     let idSIP = getColIdx(h, ['noregistrasi', 'sip', 'noreg']); if (idSIP === -1) idSIP = 5;
     let idHP = getColIdx(h, ['nohp', 'no_hp', 'telepon', 'wa']); if (idHP === -1) idHP = 6;
     let idJM = getColIdx(h, ['persen_jm_dokter', 'persen_jm', 'persenjm']); if (idJM === -1) idJM = 7;
+    let idEmail = getColIdx(h, ['email', 'surel', 'e-mail']); if (idEmail === -1) idEmail = 8;
 
     let users = [];
     for (let i = 1; i < v.length; i++) {
@@ -93,7 +94,8 @@ function getDaftarUserMaster() {
         status: String(r[idStatus] || "Aktif").trim(),
         noReg: String(r[idSIP] || "-").trim(),
         noHp: String(r[idHP] || "").trim(),
-        persenJM: (idJM !== -1 && r[idJM] !== "" && r[idJM] !== null && r[idJM] !== undefined) ? Number(r[idJM]) : 0
+        persenJM: (idJM !== -1 && r[idJM] !== "" && r[idJM] !== null && r[idJM] !== undefined) ? Number(r[idJM]) : 0,
+        email: (idEmail !== -1 && r[idEmail] !== undefined && r[idEmail] !== null) ? String(r[idEmail]).trim() : ""
       });
     }
     return users;
@@ -117,10 +119,10 @@ function simpanUserMaster(payload) {
     const sheet = ss.getSheetByName("Data") || ss.insertSheet("Data");
     const v = sheet.getDataRange().getValues();
     if (v.length === 0) {
-      sheet.appendRow(["Nama_Pekerja", "Username", "Kategori_Role", "Password", "Status", "No_Registrasi", "No_HP", "Persen_JM_Dokter"]);
+      sheet.appendRow(["Nama_Pekerja", "Username", "Kategori_Role", "Password", "Status", "No_Registrasi", "No_HP", "Persen_JM_Dokter", "Email"]);
     }
 
-    const h = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+    let h = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
     let idNama = getColIdx(h, ['namapekerja', 'nama']); if (idNama === -1) idNama = 0;
     let idUser = getColIdx(h, ['username', 'user']); if (idUser === -1) idUser = 1;
     let idRole = getColIdx(h, ['kategorirole', 'role', 'kategori']); if (idRole === -1) idRole = 2;
@@ -129,8 +131,15 @@ function simpanUserMaster(payload) {
     let idSIP = getColIdx(h, ['noregistrasi', 'sip', 'noreg']); if (idSIP === -1) idSIP = 5;
     let idHP = getColIdx(h, ['nohp', 'no_hp', 'telepon', 'wa']); if (idHP === -1) idHP = 6;
     let idJM = getColIdx(h, ['persen_jm_dokter', 'persen_jm', 'persenjm']); if (idJM === -1) idJM = 7;
+    let idEmail = getColIdx(h, ['email', 'surel', 'e-mail']);
 
-    let cleanUser = String(payload.username).trim().toLowerCase();
+    if (idEmail === -1) {
+      idEmail = Math.max(8, h.length);
+      sheet.getRange(1, idEmail + 1).setValue("Email").setFontWeight("bold").setBackground("#e2e8f0");
+      h = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+    }
+
+    let cleanUser = String(payload.username).trim().toLowerCase().replace(/\s+/g, "");
     let rowIndex = -1;
 
     for (let i = 1; i < v.length; i++) {
@@ -151,6 +160,9 @@ function simpanUserMaster(payload) {
       sheet.getRange(rowIndex, idSIP + 1).setValue(payload.noReg || "-");
       sheet.getRange(rowIndex, idHP + 1).setValue(payload.noHp || "");
       sheet.getRange(rowIndex, idJM + 1).setValue(pjmVal);
+      if (payload.email !== undefined) {
+        sheet.getRange(rowIndex, idEmail + 1).setValue(String(payload.email || "").trim());
+      }
 
       if (payload.password && String(payload.password).trim() !== "") {
         let cellPass = sheet.getRange(rowIndex, idPass + 1);
@@ -166,7 +178,7 @@ function simpanUserMaster(payload) {
         return { success: false, message: "Password wajib diisi untuk user baru!" };
       }
 
-      let newRow = new Array(Math.max(8, h.length)).fill("");
+      let newRow = new Array(Math.max(9, h.length, idEmail + 1)).fill("");
       newRow[idNama] = payload.nama.trim();
       newRow[idUser] = cleanUser;
       newRow[idRole] = payload.role.trim();
@@ -175,6 +187,7 @@ function simpanUserMaster(payload) {
       newRow[idSIP] = payload.noReg || "-";
       newRow[idHP] = payload.noHp || "";
       newRow[idJM] = pjmVal;
+      newRow[idEmail] = String(payload.email || "").trim();
 
       sheet.appendRow(newRow);
       let lastRow = sheet.getLastRow();
@@ -186,6 +199,34 @@ function simpanUserMaster(payload) {
     }
   } catch (e) {
     return { success: false, message: "Gagal simpan user: " + e.message };
+  }
+}
+
+/**
+ * Mengaktifkan akun user yang berstatus Non Aktif / Tidak Aktif oleh Super Admin
+ */
+function aktifkanUserMaster(username, currentUser) {
+  try {
+    const ss = SpreadsheetApp.openById(DB_CONFIG.MASTER.trim());
+    const sheet = ss.getSheetByName("Data");
+    if (!sheet) return { success: false, message: "Sheet Data tidak ditemukan!" };
+
+    const v = sheet.getDataRange().getValues();
+    const h = v[0];
+    let idUser = getColIdx(h, ['username', 'user']); if (idUser === -1) idUser = 1;
+    let idStatus = getColIdx(h, ['status']); if (idStatus === -1) idStatus = 4;
+
+    let cleanUser = String(username || "").trim().toLowerCase();
+    for (let i = 1; i < v.length; i++) {
+      if (String(v[i][idUser] || "").trim().toLowerCase() === cleanUser) {
+        sheet.getRange(i + 1, idStatus + 1).setValue("Aktif");
+        catatLog("Master User", "Aktivasi akun user: " + cleanUser, currentUser || "Super Admin");
+        return { success: true, message: "Akun '" + username + "' berhasil diaktifkan! Pengguna kini dapat login ke sistem." };
+      }
+    }
+    return { success: false, message: "User '" + username + "' tidak ditemukan." };
+  } catch (e) {
+    return { success: false, message: "Gagal mengaktifkan user: " + e.message };
   }
 }
 
@@ -210,8 +251,8 @@ function hapusUserMaster(username, isPermanent) {
           sheet.deleteRow(i + 1);
           return { success: true, message: "Akun '" + username + "' berhasil dihapus permanen." };
         } else {
-          sheet.getRange(i + 1, idStatus + 1).setValue("Tidak Aktif");
-          return { success: true, message: "Status akun '" + username + "' diubah menjadi Tidak Aktif." };
+          sheet.getRange(i + 1, idStatus + 1).setValue("Non Aktif");
+          return { success: true, message: "Status akun '" + username + "' diubah menjadi Non Aktif." };
         }
       }
     }
@@ -266,7 +307,7 @@ function initFormatSheetUserMaster() {
     const ss = SpreadsheetApp.openById(DB_CONFIG.MASTER.trim());
     let sheet = ss.getSheetByName("Data") || ss.insertSheet("Data");
     
-    const headers = ["Nama_Pekerja", "Username", "Kategori_Role", "Password", "Status", "No_Registrasi", "No_HP", "Persen_JM_Dokter"];
+    const headers = ["Nama_Pekerja", "Username", "Kategori_Role", "Password", "Status", "No_Registrasi", "No_HP", "Persen_JM_Dokter", "Email"];
     sheet.getRange(1, 1, 1, headers.length).setValues([headers]).setFontWeight("bold").setBackground("#e2e8f0");
     sheet.setFrozenRows(1);
 
@@ -287,7 +328,7 @@ function initFormatSheetUserMaster() {
     sheet.getRange(2, 3, 100, 1).setDataValidation(ruleRole);
 
     const ruleStatus = SpreadsheetApp.newDataValidation()
-      .requireValueInList(["Aktif", "Tidak Aktif"], true)
+      .requireValueInList(["Aktif", "Non Aktif", "Tidak Aktif"], true)
       .setAllowInvalid(false)
       .build();
     sheet.getRange(2, 5, 100, 1).setDataValidation(ruleStatus);
@@ -295,7 +336,7 @@ function initFormatSheetUserMaster() {
     sheet.getRange(2, 4, 100, 1).setNumberFormat("@"); // Password plain text format
     sheet.getRange(2, 8, 100, 1).setNumberFormat("0.0%"); // Persen JM format
 
-    SpreadsheetApp.getUi().alert("✅ Berhasil menyiapkan format sheet 'Data' dan validasi 7 Kategori Role di Spreadsheet RME Sheldon - 06 Master User & Role!");
+    SpreadsheetApp.getUi().alert("✅ Berhasil menyiapkan format sheet 'Data' (termasuk kolom Email) dan validasi Kategori Role di Spreadsheet RME Sheldon - 06 Master User & Role!");
   } catch (e) {
     try {
       SpreadsheetApp.getUi().alert("Gagal format sheet: " + e.message);
@@ -360,7 +401,7 @@ function getHtmlFormUserMasterContent() {
 '            </select>' +
 '          </div>' +
 '        </div>' +
-'        <div class="grid grid-cols-1 md:grid-cols-4 gap-3">' +
+'        <div class="grid grid-cols-1 md:grid-cols-5 gap-3">' +
 '          <div>' +
 '            <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase">Password <span id="lblPassWajib" class="text-rose-500">*</span></label>' +
 '            <div class="relative">' +
@@ -373,6 +414,7 @@ function getHtmlFormUserMasterContent() {
 '            <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase">Status Akun *</label>' +
 '            <select id="inStatus" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">' +
 '              <option value="Aktif" selected>Aktif</option>' +
+'              <option value="Non Aktif">Non Aktif</option>' +
 '              <option value="Tidak Aktif">Tidak Aktif</option>' +
 '            </select>' +
 '          </div>' +
@@ -383,6 +425,10 @@ function getHtmlFormUserMasterContent() {
 '          <div>' +
 '            <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase">No. WhatsApp / HP</label>' +
 '            <input type="text" id="inNoHp" placeholder="081234567890" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500">' +
+'          </div>' +
+'          <div>' +
+'            <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase">Email</label>' +
+'            <input type="email" id="inEmail" placeholder="nama@email.com" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500">' +
 '          </div>' +
 '        </div>' +
 '        <div id="wrapJM" class="p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-center justify-between gap-3">' +
@@ -408,7 +454,7 @@ function getHtmlFormUserMasterContent() {
 '        <h2 class="text-xs font-black text-slate-800">Daftar Akun Pengguna Terdaftar</h2>' +
 '        <div class="flex items-center gap-2">' +
 '          <button type="button" onclick="muatUser()" title="Muat Ulang" class="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-xs font-bold">🔄</button>' +
-'          <input type="text" id="inCari" oninput="renderTabel()" placeholder="Cari nama/user/role..." class="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs outline-none focus:ring-2 focus:ring-indigo-500 w-48">' +
+'          <input type="text" id="inCari" oninput="renderTabel()" placeholder="Cari nama/user/role/email..." class="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs outline-none focus:ring-2 focus:ring-indigo-500 w-48">' +
 '        </div>' +
 '      </div>' +
 '      <div class="overflow-x-auto rounded-xl border border-slate-200 max-h-60">' +
@@ -421,12 +467,13 @@ function getHtmlFormUserMasterContent() {
 '              <th class="p-2.5 text-center">Status</th>' +
 '              <th class="p-2.5">No. Reg</th>' +
 '              <th class="p-2.5">No. HP</th>' +
+'              <th class="p-2.5">Email</th>' +
 '              <th class="p-2.5 text-center">JM</th>' +
 '              <th class="p-2.5 text-center">Aksi</th>' +
 '            </tr>' +
 '          </thead>' +
 '          <tbody id="tbodyUser" class="divide-y divide-slate-100">' +
-'            <tr><td colspan="8" class="text-center py-6 text-slate-400 font-bold">Memuat akun pengguna...</td></tr>' +
+'            <tr><td colspan="9" class="text-center py-6 text-slate-400 font-bold">Memuat akun pengguna...</td></tr>' +
 '          </tbody>' +
 '        </table>' +
 '      </div>' +
@@ -448,10 +495,10 @@ function getHtmlFormUserMasterContent() {
 '    }' +
 '    function muatUser() {' +
 '      const tbody = document.getElementById("tbodyUser");' +
-'      tbody.innerHTML = "<tr><td colspan=\'8\' class=\'text-center py-6 text-slate-400 font-bold\'>Memuat dari spreadsheet...</td></tr>";' +
+'      tbody.innerHTML = "<tr><td colspan=\'9\' class=\'text-center py-6 text-slate-400 font-bold\'>Memuat dari spreadsheet...</td></tr>";' +
 '      google.script.run' +
 '        .withSuccessHandler(function(res) { listUsers = res || []; renderTabel(); })' +
-'        .withFailureHandler(function(err) { tbody.innerHTML = "<tr><td colspan=\'8\' class=\'text-center py-6 text-rose-500 font-bold\'>Gagal: " + (err.message || err) + "</td></tr>"; })' +
+'        .withFailureHandler(function(err) { tbody.innerHTML = "<tr><td colspan=\'9\' class=\'text-center py-6 text-rose-500 font-bold\'>Gagal: " + (err.message || err) + "</td></tr>"; })' +
 '        .getDaftarUserMaster();' +
 '    }' +
 '    function renderTabel() {' +
@@ -459,9 +506,9 @@ function getHtmlFormUserMasterContent() {
 '      const q = (document.getElementById("inCari").value || "").toLowerCase().trim();' +
 '      let filtered = listUsers.filter(function(u) {' +
 '        if (!q) return true;' +
-'        return (u.nama || "").toLowerCase().indexOf(q) !== -1 || (u.username || "").toLowerCase().indexOf(q) !== -1 || (u.role || "").toLowerCase().indexOf(q) !== -1;' +
+'        return (u.nama || "").toLowerCase().indexOf(q) !== -1 || (u.username || "").toLowerCase().indexOf(q) !== -1 || (u.role || "").toLowerCase().indexOf(q) !== -1 || (u.email || "").toLowerCase().indexOf(q) !== -1;' +
 '      });' +
-'      if (filtered.length === 0) { tbody.innerHTML = "<tr><td colspan=\'8\' class=\'text-center py-6 text-slate-400 font-bold\'>Tidak ada data.</td></tr>"; return; }' +
+'      if (filtered.length === 0) { tbody.innerHTML = "<tr><td colspan=\'9\' class=\'text-center py-6 text-slate-400 font-bold\'>Tidak ada data.</td></tr>"; return; }' +
 '      tbody.innerHTML = filtered.map(function(u) {' +
 '        let badgeColor = "bg-slate-100 text-slate-700";' +
 '        let rLow = (u.role || "").toLowerCase();' +
@@ -469,10 +516,12 @@ function getHtmlFormUserMasterContent() {
 '        else if (rLow.indexOf("dokter") !== -1) badgeColor = "bg-blue-100 text-blue-700 font-bold";' +
 '        else if (rLow.indexOf("perawat") !== -1) badgeColor = "bg-teal-100 text-teal-700 font-bold";' +
 '        else if (rLow.indexOf("admin") !== -1) badgeColor = "bg-amber-100 text-amber-700 font-bold";' +
-'        let statusColor = (u.status === "Aktif" || !u.status) ? "bg-emerald-100 text-emerald-700" : "bg-rose-100 text-rose-700";' +
+'        let isAktif = (u.status === "Aktif" || !u.status);' +
+'        let statusColor = isAktif ? "bg-emerald-100 text-emerald-700" : "bg-rose-100 text-rose-700";' +
 '        let jmVal = (u.persenJM ? (Number(u.persenJM) <= 1 ? Math.round(Number(u.persenJM) * 100) : Number(u.persenJM)) : 0) + "%";' +
 '        if (rLow.indexOf("dokter") === -1) jmVal = "-";' +
 '        let safeUser = String(u.username).replace(/\'/g, "\\\\\'");' +
+'        let btnAktif = !isAktif ? "<button type=\'button\' onclick=\'aktifkanUser(\\\"" + safeUser + "\\\")\' class=\'px-2 py-0.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded text-[11px] font-bold\'>✅ Aktifkan</button>" : "";' +
 '        return "<tr class=\'hover:bg-slate-50 transition-colors\'>" +' +
 '          "<td class=\'p-2.5 font-bold text-slate-800\'>" + (u.nama || "-") + "</td>" +' +
 '          "<td class=\'p-2.5 font-mono text-slate-600\'>" + (u.username || "-") + "</td>" +' +
@@ -480,9 +529,11 @@ function getHtmlFormUserMasterContent() {
 '          "<td class=\'p-2.5 text-center\'><span class=\'px-2 py-0.5 rounded text-[10px] font-bold " + statusColor + "\'>" + (u.status || "Aktif") + "</span></td>" +' +
 '          "<td class=\'p-2.5 text-slate-500 text-[11px]\'>" + (u.noReg || "-") + "</td>" +' +
 '          "<td class=\'p-2.5 text-slate-500 text-[11px]\'>" + (u.noHp || "-") + "</td>" +' +
+'          "<td class=\'p-2.5 text-slate-500 text-[11px]\'>" + (u.email || "-") + "</td>" +' +
 '          "<td class=\'p-2.5 text-center font-bold text-amber-800 text-[11px]\'>" + jmVal + "</td>" +' +
 '          "<td class=\'p-2.5 text-center\'>" +' +
 '            "<div class=\'flex items-center justify-center gap-1\'>" +' +
+'              btnAktif +' +
 '              "<button type=\'button\' onclick=\'editUser(\\\"" + safeUser + "\\\")\' class=\'px-2 py-0.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded text-[11px] font-bold\'>✏️ Edit</button>" +' +
 '              "<button type=\'button\' onclick=\'hapusUser(\\\"" + safeUser + "\\\")\' class=\'px-2 py-0.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded text-[11px] font-bold\'>🗑️ Nonaktif</button>" +' +
 '            "</div>" +' +
@@ -504,6 +555,7 @@ function getHtmlFormUserMasterContent() {
 '        status: document.getElementById("inStatus").value,' +
 '        noReg: document.getElementById("inNoReg").value.trim(),' +
 '        noHp: document.getElementById("inNoHp").value.trim(),' +
+'        email: document.getElementById("inEmail").value.trim(),' +
 '        persenJM: Number(document.getElementById("inPersenJM").value) || 0' +
 '      };' +
 '      if (!payload.nama || !payload.username) {' +
@@ -557,6 +609,7 @@ function getHtmlFormUserMasterContent() {
 '      document.getElementById("inStatus").value = u.status || "Aktif";' +
 '      document.getElementById("inNoReg").value = u.noReg === "-" ? "" : (u.noReg || "");' +
 '      document.getElementById("inNoHp").value = u.noHp || "";' +
+'      document.getElementById("inEmail").value = u.email || "";' +
 '      let pct = u.persenJM ? Number(u.persenJM) : 0;' +
 '      if (pct <= 1 && pct > 0) pct = Math.round(pct * 100);' +
 '      document.getElementById("inPersenJM").value = pct;' +
@@ -584,6 +637,13 @@ function getHtmlFormUserMasterContent() {
 '      document.getElementById("btnBatalEdit").classList.add("hidden");' +
 '      document.getElementById("btnSubmit").innerHTML = "<span>💾</span> Simpan Pengguna";' +
 '      handleRoleChange();' +
+'    }' +
+'    function aktifkanUser(username) {' +
+'      google.script.run' +
+'        .withSuccessHandler(function(res) {' +
+'          if (res && res.success) { muatUser(); } else { alert(res ? res.message : "Gagal aktifkan"); }' +
+'        })' +
+'        .aktifkanUserMaster(username, "Super Admin");' +
 '    }' +
 '    function hapusUser(username) {' +
 '      if (!confirm("Yakin ingin menonaktifkan pengguna \'" + username + "\'?")) return;' +

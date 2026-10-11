@@ -149,6 +149,13 @@ mock_gas_script = '''
         );
 
         if (u) {
+          if (u.status && u.status.toLowerCase() !== "aktif" && u.status.toLowerCase() !== "active") {
+            this._successHandler({
+              success: false,
+              message: "Status akun Anda masih NON AKTIF. Silakan tunggu konfirmasi dari Super Admin untuk aktivasi akun."
+            });
+            return;
+          }
           this._successHandler({ 
             success: true, 
             userData: { 
@@ -578,6 +585,7 @@ mock_gas_script = '''
           status: s.status || "Aktif",
           noReg: s.sip || "-",
           noHp: s.noHp || "",
+          email: s.email || "",
           persenJM: s.persenJM || 0
         }));
         this._successHandler(users);
@@ -586,7 +594,7 @@ mock_gas_script = '''
 
     simpanUserMaster(payload) {
       setTimeout(() => {
-        let cleanUser = String(payload.username || "").trim().toLowerCase();
+        let cleanUser = String(payload.username || "").trim().toLowerCase().replace(/\\s+/g, "");
         let idx = mockDb.staff.findIndex(s => (s.username || "").toLowerCase() === cleanUser);
         let pjmVal = payload.persenJM ? Number(payload.persenJM) : 0;
         if (pjmVal > 1) pjmVal = pjmVal / 100;
@@ -599,6 +607,7 @@ mock_gas_script = '''
           pin: payload.password || (idx !== -1 ? mockDb.staff[idx].pin : "1234"),
           sip: payload.noReg || "-",
           noHp: payload.noHp || "",
+          email: payload.email || (idx !== -1 ? mockDb.staff[idx].email : ""),
           status: payload.status || "Aktif",
           persenJM: pjmVal
         };
@@ -611,6 +620,48 @@ mock_gas_script = '''
       }, 50);
     }
 
+    registrasiAkunBaru(payload) {
+      setTimeout(() => {
+        let cleanUser = String(payload.username || "").trim().toLowerCase().replace(/\\s+/g, "");
+        let idx = mockDb.staff.findIndex(s => (s.username || "").toLowerCase() === cleanUser);
+        if (idx !== -1) {
+          this._successHandler({ success: false, message: "Username '" + cleanUser + "' sudah terdaftar! Silakan pilih username lain." });
+          return;
+        }
+        let role = payload.role || "Admin";
+        let pjmVal = role === "Dokter Gigi Spesialis" ? 0.50 : (role === "Dokter Gigi Umum" ? 0.40 : 0);
+        let item = {
+          id: "STF-" + String(mockDb.staff.length + 1).padStart(3, '0'),
+          username: cleanUser,
+          nama: payload.nama,
+          role: role,
+          pass: payload.password,
+          pin: payload.password,
+          sip: payload.noSip || payload.noReg || "-",
+          noHp: payload.noWa || payload.noHp || "",
+          email: payload.email || "",
+          status: "Non Aktif",
+          persenJM: pjmVal
+        };
+        mockDb.staff.push(item);
+        this._successHandler({
+          success: true,
+          message: "Pendaftaran berhasil! Akun '" + cleanUser + "' telah tersimpan dengan status NON AKTIF. Silakan tunggu konfirmasi dari Super Admin untuk aktivasi akun."
+        });
+      }, 50);
+    }
+
+    aktifkanUserMaster(username, currentUser) {
+      setTimeout(() => {
+        let cleanUser = String(username || "").trim().toLowerCase();
+        let idx = mockDb.staff.findIndex(s => (s.username || "").toLowerCase() === cleanUser);
+        if (idx !== -1) {
+          mockDb.staff[idx].status = "Aktif";
+        }
+        this._successHandler({ success: true, message: "Akun '" + cleanUser + "' berhasil diaktifkan!" });
+      }, 50);
+    }
+
     hapusUserMaster(username, isPermanent) {
       setTimeout(() => {
         let cleanUser = String(username || "").trim().toLowerCase();
@@ -619,7 +670,7 @@ mock_gas_script = '''
           if (isPermanent) {
             mockDb.staff.splice(idx, 1);
           } else {
-            mockDb.staff[idx].status = "Tidak Aktif";
+            mockDb.staff[idx].status = "Non Aktif";
           }
           this._successHandler({ success: true, message: "Pengguna '" + cleanUser + "' berhasil dinonaktifkan." });
         } else {

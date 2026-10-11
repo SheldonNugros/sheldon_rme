@@ -83,7 +83,7 @@ function verifyLogin(username, password) {
       if (uData === cleanUser && isPassMatch) {
         let rowStatus = idxStatus !== -1 && r[idxStatus] ? r[idxStatus].toString().trim().toLowerCase() : "aktif";
         if (rowStatus !== "aktif" && rowStatus !== "active") {
-          return { success: false, message: "Akun Anda TIDAK AKTIF. Hubungi Administrator." };
+          return { success: false, message: "Status akun Anda masih NON AKTIF. Silakan tunggu konfirmasi dari Super Admin untuk aktivasi akun." };
         }
         
         let role = idxRole !== -1 && r[idxRole] ? r[idxRole].toString().trim() : "Admin";
@@ -135,3 +135,116 @@ function verifyLogin(username, password) {
     return { success: false, message: "Error Otentikasi: " + e.message };
   }
 }
+
+/**
+ * Pendaftaran Akun Baru Mandiri dari Halaman Login Awal
+ * Menyimpan ke RME Sheldon - 06 Master User & Role (Sheet: Data) dengan Status = "Non Aktif"
+ * dan memastikan kolom Email tersedia di spreadsheet.
+ */
+function registrasiAkunBaru(payload) {
+  try {
+    if (!payload || !payload.nama || !payload.username || !payload.password) {
+      return { success: false, message: "Nama, Username, dan Password wajib diisi!" };
+    }
+
+    const nama = String(payload.nama || "").trim();
+    const cleanUser = String(payload.username || "").trim().toLowerCase().replace(/\s+/g, "");
+    const password = String(payload.password || "").trim();
+    const noSip = String(payload.noSip || payload.noReg || "-").trim() || "-";
+    const noWa = String(payload.noWa || payload.noHp || "").trim();
+    const email = String(payload.email || "").trim();
+    let role = String(payload.role || "Admin").trim();
+
+    if (cleanUser.length < 3) {
+      return { success: false, message: "Username minimal 3 karakter (huruf kecil tanpa spasi)!" };
+    }
+    if (password.length < 4) {
+      return { success: false, message: "Password minimal 4 karakter!" };
+    }
+
+    const allowedRegisterRoles = [
+      "Dokter Gigi Spesialis",
+      "Dokter Gigi Umum",
+      "Perawat Gigi",
+      "Perawat Umum",
+      "Admin"
+    ];
+    let matchedRole = allowedRegisterRoles.find(r => r.toLowerCase() === role.toLowerCase());
+    if (!matchedRole) {
+      matchedRole = "Admin";
+    }
+    role = matchedRole;
+
+    const ss = SpreadsheetApp.openById(DB_CONFIG.MASTER.trim());
+    let sheet = ss.getSheetByName("Data") || ss.insertSheet("Data");
+    let v = sheet.getDataRange().getValues();
+
+    if (v.length === 0 || (v.length === 1 && !v[0][0])) {
+      const defaultHeaders = ["Nama_Pekerja", "Username", "Kategori_Role", "Password", "Status", "No_Registrasi", "No_HP", "Persen_JM_Dokter", "Email"];
+      sheet.getRange(1, 1, 1, defaultHeaders.length).setValues([defaultHeaders]).setFontWeight("bold").setBackground("#e2e8f0");
+      sheet.setFrozenRows(1);
+      v = sheet.getDataRange().getValues();
+    }
+
+    let h = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+    let idNama = getColIdx(h, ["namapekerja", "nama", "namalengkap"]); if (idNama === -1) idNama = 0;
+    let idUser = getColIdx(h, ["username", "user"]); if (idUser === -1) idUser = 1;
+    let idRole = getColIdx(h, ["kategorirole", "role", "kategori"]); if (idRole === -1) idRole = 2;
+    let idPass = getColIdx(h, ["password", "pass"]); if (idPass === -1) idPass = 3;
+    let idStatus = getColIdx(h, ["status"]); if (idStatus === -1) idStatus = 4;
+    let idSIP = getColIdx(h, ["noregistrasi", "sip", "noreg"]); if (idSIP === -1) idSIP = 5;
+    let idHP = getColIdx(h, ["nohp", "no_hp", "telepon", "wa"]); if (idHP === -1) idHP = 6;
+    let idJM = getColIdx(h, ["persen_jm_dokter", "persen_jm", "persenjm"]); if (idJM === -1) idJM = 7;
+    let idEmail = getColIdx(h, ["email", "surel", "e-mail"]);
+
+    // Tambahkan kolom Email secara otomatis jika belum ada di Sheet Data
+    if (idEmail === -1) {
+      idEmail = Math.max(8, h.length);
+      sheet.getRange(1, idEmail + 1).setValue("Email").setFontWeight("bold").setBackground("#e2e8f0");
+      h = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+    }
+
+    // Cek apakah username sudah dipakai
+    for (let i = 1; i < v.length; i++) {
+      if (String(v[i][idUser] || "").trim().toLowerCase() === cleanUser) {
+        return {
+          success: false,
+          message: "Username '" + cleanUser + "' sudah terdaftar! Silakan pilih username lain."
+        };
+      }
+    }
+
+    let pjmVal = "";
+    if (role === "Dokter Gigi Spesialis") pjmVal = 0.50;
+    else if (role === "Dokter Gigi Umum") pjmVal = 0.40;
+
+    let totalCols = Math.max(9, h.length, idEmail + 1);
+    let newRow = new Array(totalCols).fill("");
+    newRow[idNama] = nama;
+    newRow[idUser] = cleanUser;
+    newRow[idRole] = role;
+    newRow[idPass] = password;
+    newRow[idStatus] = "Non Aktif";
+    newRow[idSIP] = noSip;
+    newRow[idHP] = noWa;
+    newRow[idJM] = pjmVal;
+    newRow[idEmail] = email;
+
+    sheet.appendRow(newRow);
+    let lastRow = sheet.getLastRow();
+    sheet.getRange(lastRow, idPass + 1).setNumberFormat("@");
+    if (pjmVal !== "") {
+      sheet.getRange(lastRow, idJM + 1).setNumberFormat("0.0%");
+    }
+
+    catatLog("Registrasi Akun", "Pendaftaran akun baru (Status: Non Aktif): " + cleanUser + " (" + role + ")", nama);
+
+    return {
+      success: true,
+      message: "Pendaftaran berhasil! Akun '" + cleanUser + "' telah tersimpan dengan status NON AKTIF. Silakan tunggu konfirmasi dari Super Admin untuk aktivasi akun."
+    };
+  } catch (e) {
+    return { success: false, message: "Gagal mendaftarkan akun: " + e.message };
+  }
+}
+

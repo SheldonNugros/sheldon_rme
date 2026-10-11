@@ -942,18 +942,19 @@ function getFallbackUserList() {
       status: s.status || 'Aktif',
       noReg: s.sip || s.noReg || '-',
       noHp: s.noHp || '-',
+      email: s.email || '',
       persenJM: s.persenJM || (String(s.role || '').toLowerCase().includes('spesialis') ? 0.50 : (String(s.role || '').toLowerCase().includes('dokter') ? 0.40 : 0))
     }));
   }
 
   return [
-    { nama: "Administrator Sistem", username: "admin", role: "Super User", hasPassword: true, isHashed: true, status: "Aktif", noReg: "-", noHp: "081234567890", persenJM: 0 },
-    { nama: "drg. V. Asung Nugroho, Sp.Ort", username: "asung", role: "Owner", hasPassword: true, isHashed: true, status: "Aktif", noReg: "503/SIP-DRG/001/2024", noHp: "081298765432", persenJM: 0.50 },
-    { nama: "drg. Sheldon Cooper, Sp.Ort", username: "sheldon", role: "Dokter Gigi Spesialis", hasPassword: true, isHashed: false, status: "Aktif", noReg: "503/SIP-DRG/001/2024", noHp: "081311223344", persenJM: 0.50 },
-    { nama: "drg. Leonard Hofstadter", username: "leonard", role: "Dokter Gigi Umum", hasPassword: true, isHashed: false, status: "Aktif", noReg: "503/SIP-DRG/002/2024", noHp: "081355667788", persenJM: 0.40 },
-    { nama: "Bernadette Rostenkowski", username: "bernadette", role: "Perawat Gigi", hasPassword: true, isHashed: false, status: "Aktif", noReg: "503/STR-PRW/003/2024", noHp: "081399001122", persenJM: 0 },
-    { nama: "Penny Teller", username: "penny", role: "Perawat Umum", hasPassword: true, isHashed: false, status: "Aktif", noReg: "-", noHp: "081344556677", persenJM: 0 },
-    { nama: "Howard Wolowitz", username: "howard", role: "Admin", hasPassword: true, isHashed: false, status: "Aktif", noReg: "-", noHp: "081377889900", persenJM: 0 }
+    { nama: "Administrator Sistem", username: "admin", role: "Super User", hasPassword: true, isHashed: true, status: "Aktif", noReg: "-", noHp: "081234567890", email: "admin@sheldon.id", persenJM: 0 },
+    { nama: "drg. V. Asung Nugroho, Sp.Ort", username: "asung", role: "Owner", hasPassword: true, isHashed: true, status: "Aktif", noReg: "503/SIP-DRG/001/2024", noHp: "081298765432", email: "v.asungnugroho@gmail.com", persenJM: 0.50 },
+    { nama: "drg. Sheldon Cooper, Sp.Ort", username: "sheldon", role: "Dokter Gigi Spesialis", hasPassword: true, isHashed: false, status: "Aktif", noReg: "503/SIP-DRG/001/2024", noHp: "081311223344", email: "sheldon@sheldon.id", persenJM: 0.50 },
+    { nama: "drg. Leonard Hofstadter", username: "leonard", role: "Dokter Gigi Umum", hasPassword: true, isHashed: false, status: "Aktif", noReg: "503/SIP-DRG/002/2024", noHp: "081355667788", email: "leonard@sheldon.id", persenJM: 0.40 },
+    { nama: "Bernadette Rostenkowski", username: "bernadette", role: "Perawat Gigi", hasPassword: true, isHashed: false, status: "Aktif", noReg: "503/STR-PRW/003/2024", noHp: "081399001122", email: "bernadette@sheldon.id", persenJM: 0 },
+    { nama: "Penny Teller", username: "penny", role: "Perawat Umum", hasPassword: true, isHashed: false, status: "Aktif", noReg: "-", noHp: "081344556677", email: "penny@sheldon.id", persenJM: 0 },
+    { nama: "Howard Wolowitz", username: "howard", role: "Admin", hasPassword: true, isHashed: false, status: "Aktif", noReg: "-", noHp: "081377889900", email: "howard@sheldon.id", persenJM: 0 }
   ];
 }
 
@@ -1028,13 +1029,32 @@ function loadDaftarUserMaster(forceReload) {
   }
 
   if (tbody && (forceReload || !Array.isArray(listMasterUser) || listMasterUser.length === 0)) {
-    tbody.innerHTML = '<tr><td colspan="9" class="text-center py-6 text-slate-400 font-bold"><span class="inline-block animate-spin mr-2">⏳</span>Memuat akun pengguna dari spreadsheet...</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="10" class="text-center py-6 text-slate-400 font-bold"><span class="inline-block animate-spin mr-2">⏳</span>Memuat akun pengguna dari spreadsheet...</td></tr>';
   }
 
   const finishLoad = (usersArr) => {
     if (btnTop) { btnTop.disabled = false; btnTop.innerHTML = origTop; }
     if (btnTbl) { btnTbl.disabled = false; btnTbl.innerHTML = origTbl; }
-    listMasterUser = (Array.isArray(usersArr) && usersArr.length > 0) ? usersArr : getFallbackUserList();
+    let loaded = (Array.isArray(usersArr) && usersArr.length > 0) ? usersArr : getFallbackUserList();
+
+    // Gabungkan akun yang baru didaftarkan di browser lokal jika belum ada di respon server
+    try {
+      let localCache = JSON.parse(localStorage.getItem('sheldon_master_users_cache') || '[]');
+      if (Array.isArray(localCache)) {
+        localCache.forEach(lu => {
+          if (lu && lu.username) {
+            let ex = loaded.find(su => String(su.username || '').toLowerCase() === String(lu.username).toLowerCase());
+            if (!ex) {
+              loaded.unshift(lu);
+            } else if (!ex.email && lu.email) {
+              ex.email = lu.email;
+            }
+          }
+        });
+      }
+    } catch (eMerge) {}
+
+    listMasterUser = loaded;
     saveFallbackUserList(listMasterUser);
     renderTabelUser();
     if (forceReload) {
@@ -1093,11 +1113,13 @@ function renderTabelUser() {
            (u.username || '').toLowerCase().includes(keyword) ||
            (u.role || '').toLowerCase().includes(keyword) ||
            (u.noReg || '').toLowerCase().includes(keyword) ||
-           (u.noHp || '').toLowerCase().includes(keyword);
+           (u.noHp || '').toLowerCase().includes(keyword) ||
+           (u.email || '').toLowerCase().includes(keyword) ||
+           (u.status || '').toLowerCase().includes(keyword);
   });
 
   if (filtered.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="9" class="text-center py-6 text-slate-400 font-bold">' + (keyword ? 'Tidak ada pengguna cocok dengan pencarian "' + keyword + '"' : 'Belum ada pengguna terdaftar.') + '</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="10" class="text-center py-6 text-slate-400 font-bold">' + (keyword ? 'Tidak ada pengguna cocok dengan pencarian "' + keyword + '"' : 'Belum ada pengguna terdaftar.') + '</td></tr>';
     return;
   }
 
@@ -1110,9 +1132,11 @@ function renderTabelUser() {
     else if (rLow.includes('kasir')) roleBadge = 'bg-emerald-100 text-emerald-700 font-bold';
     else if (rLow.includes('admin')) roleBadge = 'bg-amber-100 text-amber-700 font-bold';
 
-    let statusBadge = (u.status === 'Aktif' || !u.status) 
-      ? '<span class="px-2 py-0.5 bg-emerald-100 text-emerald-700 font-bold rounded-full text-[10px]">Aktif</span>'
-      : '<span class="px-2 py-0.5 bg-rose-100 text-rose-700 font-bold rounded-full text-[10px]">Non-Aktif</span>';
+    let stRaw = (u.status || 'Aktif').trim();
+    let isAktif = (stRaw.toLowerCase() === 'aktif' || stRaw.toLowerCase() === 'active');
+    let statusBadge = isAktif
+      ? '<span class="px-2.5 py-0.5 bg-emerald-100 text-emerald-700 font-bold rounded-full text-[10px]">Aktif</span>'
+      : '<span class="px-2.5 py-0.5 bg-amber-100 text-amber-800 border border-amber-300 font-extrabold rounded-full text-[10px] inline-flex items-center gap-1">⏳ Non Aktif</span>';
 
     let passBadge = u.isHashed 
       ? '<span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded font-semibold text-[10px] inline-flex items-center gap-1">🔒 SHA-256</span>'
@@ -1130,8 +1154,12 @@ function renderTabelUser() {
     let safeUName = String(u.username || '').replace(/'/g, "\\'");
     let safeNama = String(u.nama || '').replace(/'/g, "\\'");
 
+    let btnAktivasi = !isAktif
+      ? `<button type="button" onclick="aktifkanDbUser('${safeUName}', '${safeNama}')" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-xs shadow-sm transition-all active:scale-95">✅ Aktifkan</button>`
+      : `<button type="button" onclick="hapusDbUser('${safeUName}', '${safeNama}')" class="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold rounded-lg text-xs transition-all">🗑️ Nonaktifkan</button>`;
+
     return `
-      <tr class="hover:bg-slate-50 transition-colors">
+      <tr class="hover:bg-slate-50 transition-colors ${!isAktif ? 'bg-amber-50/40' : ''}">
         <td class="p-3 font-bold text-slate-800">${u.nama || '-'}</td>
         <td class="p-3 font-mono text-slate-700 text-xs font-semibold">${u.username || '-'}</td>
         <td class="p-3"><span class="px-2.5 py-1 rounded-lg text-xs ${roleBadge}">${u.role || '-'}</span></td>
@@ -1139,16 +1167,83 @@ function renderTabelUser() {
         <td class="p-3 text-center">${statusBadge}</td>
         <td class="p-3 text-slate-600 text-xs">${u.noReg || '-'}</td>
         <td class="p-3 text-slate-600 text-xs">${u.noHp || '-'}</td>
+        <td class="p-3 text-slate-600 text-xs">${u.email || '-'}</td>
         <td class="p-3 text-center text-xs">${jmDisplay}</td>
         <td class="p-3 text-center">
           <div class="flex items-center justify-center gap-1.5">
+            ${btnAktivasi}
             <button type="button" onclick="editDbUser('${safeUName}')" class="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold rounded-lg text-xs transition-all">✏️ Edit</button>
-            <button type="button" onclick="hapusDbUser('${safeUName}', '${safeNama}')" class="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold rounded-lg text-xs transition-all">🗑️ Nonaktifkan</button>
           </div>
         </td>
       </tr>
     `;
   }).join('');
+}
+
+function aktifkanDbUser(username, nama) {
+  if (!confirm('Konfirmasi Aktivasi Account:\nAktifkan pengguna "' + (nama || username) + '" (' + username + ') agar dapat login ke sistem RME?')) {
+    return;
+  }
+
+  const currentUser = window.activeNamaAccount || 'Super Admin';
+  const applyLocalActivate = () => {
+    if (!Array.isArray(listMasterUser)) listMasterUser = getFallbackUserList();
+    let ex = listMasterUser.find(u => String(u.username || '').toLowerCase() === String(username).toLowerCase());
+    if (ex) ex.status = 'Aktif';
+    saveFallbackUserList(listMasterUser);
+    if (window._mockDb && Array.isArray(window._mockDb.staff)) {
+      let st = window._mockDb.staff.find(s => String(s.username || '').toLowerCase() === String(username).toLowerCase());
+      if (st) st.status = 'Aktif';
+    }
+  };
+
+  if (typeof google !== 'undefined' && google.script && google.script.run) {
+    if (typeof showToast === 'function') showToast('info', '⏳ Mengaktifkan akun ' + username + '...');
+    google.script.run
+      .withSuccessHandler(res => {
+        applyLocalActivate();
+        if (res && res.success) {
+          if (typeof showToast === 'function') showToast('success', res.message || ('✅ Akun ' + username + ' berhasil diaktifkan!'));
+          loadDaftarUserMaster(false);
+        } else {
+          // Fallback lewat simpanUserMaster jika aktifkanUserMaster belum di-deploy
+          let uObj = listMasterUser.find(u => String(u.username || '').toLowerCase() === String(username).toLowerCase());
+          if (uObj) {
+            google.script.run
+              .withSuccessHandler(() => {
+                if (typeof showToast === 'function') showToast('success', '✅ Akun ' + username + ' berhasil diaktifkan!');
+                renderTabelUser();
+              })
+              .simpanUserMaster({
+                mode: 'edit',
+                nama: uObj.nama,
+                username: uObj.username,
+                role: uObj.role,
+                password: '',
+                status: 'Aktif',
+                noReg: uObj.noReg,
+                noHp: uObj.noHp,
+                email: uObj.email || '',
+                persenJM: uObj.persenJM || 0,
+                currentUser: currentUser
+              });
+          } else {
+            if (typeof showToast === 'function') showToast('success', '✅ Akun ' + username + ' telah diaktifkan!');
+            renderTabelUser();
+          }
+        }
+      })
+      .withFailureHandler(() => {
+        applyLocalActivate();
+        if (typeof showToast === 'function') showToast('success', '✅ Akun ' + username + ' telah diaktifkan!');
+        renderTabelUser();
+      })
+      .aktifkanUserMaster(username, currentUser);
+  } else {
+    applyLocalActivate();
+    if (typeof showToast === 'function') showToast('success', '✅ Akun ' + username + ' telah diaktifkan!');
+    renderTabelUser();
+  }
 }
 
 function simpanDbUser(e) {
@@ -1165,6 +1260,7 @@ function simpanDbUser(e) {
   const status = document.getElementById('dbUserStatus').value;
   const noReg = (document.getElementById('dbUserNoReg').value || '').trim();
   const noHp = (document.getElementById('dbUserNoHp').value || '').trim();
+  const email = (document.getElementById('dbUserEmail') ? document.getElementById('dbUserEmail').value : '').trim();
   const persenJM = Number(document.getElementById('dbUserPersenJM').value) || 0;
 
   if (!nama || !username) {
@@ -1189,6 +1285,7 @@ function simpanDbUser(e) {
     status: status,
     noReg: noReg,
     noHp: noHp,
+    email: email,
     persenJM: persenJM,
     currentUser: currentUser
   };
@@ -1205,6 +1302,7 @@ function simpanDbUser(e) {
       status: status,
       noReg: noReg || '-',
       noHp: noHp || '-',
+      email: email || '',
       persenJM: persenJM > 1 ? persenJM / 100 : persenJM
     };
     if (exIdx >= 0) {
@@ -1294,6 +1392,8 @@ function editDbUser(username) {
   document.getElementById('dbUserStatus').value = user.status || 'Aktif';
   document.getElementById('dbUserNoReg').value = user.noReg === '-' ? '' : (user.noReg || '');
   document.getElementById('dbUserNoHp').value = user.noHp === '-' ? '' : (user.noHp || '');
+  const emailInp = document.getElementById('dbUserEmail');
+  if (emailInp) emailInp.value = user.email === '-' ? '' : (user.email || '');
 
   let pct = user.persenJM ? Number(user.persenJM) : 0;
   if (pct <= 1 && pct > 0) pct = Math.round(pct * 100);
@@ -1387,7 +1487,7 @@ function hapusDbUser(username, nama) {
   const applyLocalDeactivate = () => {
     if (!Array.isArray(listMasterUser)) listMasterUser = getFallbackUserList();
     let ex = listMasterUser.find(u => String(u.username || '').toLowerCase() === String(username).toLowerCase());
-    if (ex) ex.status = 'Tidak Aktif';
+    if (ex) ex.status = 'Non Aktif';
     saveFallbackUserList(listMasterUser);
   };
 
@@ -1425,6 +1525,7 @@ window.togglePasswordVisibility = togglePasswordVisibility;
 window.handleRoleChange = handleRoleChange;
 window.loadDaftarUserMaster = loadDaftarUserMaster;
 window.renderTabelUser = renderTabelUser;
+window.aktifkanDbUser = aktifkanDbUser;
 window.simpanDbUser = simpanDbUser;
 window.editDbUser = editDbUser;
 window.batalEditDbUser = batalEditDbUser;

@@ -162,19 +162,19 @@ const SPREADSHEET_DEFINITIONS = {
       "sheets": [
         {
           "name": "Data",
-          "headers": ["Nama_Pekerja", "Username", "Kategori_Role", "Password", "Status", "No_Registrasi", "No_HP", "Persen_JM_Dokter"],
+          "headers": ["Nama_Pekerja", "Username", "Kategori_Role", "Password", "Status", "No_Registrasi", "No_HP", "Persen_JM_Dokter", "Email"],
           "formats": { "H": "0.0%" },
           "seedRows": [
-            ["Administrator Sistem", "admin", "Super User", "admin123", "Aktif", "-", "08123456789", ""],
-            ["drg. Sheldon Cooper, Sp.Ort", "sheldon", "Dokter Gigi Spesialis", "1234", "Aktif", "503/SIP-DRG/001/2024", "081234567890", 0.50],
-            ["drg. Leonard Hofstadter", "leonard", "Dokter Gigi Umum", "1111", "Aktif", "503/SIP-DRG/002/2024", "081234567891", 0.45],
-            ["Penny Teller", "penny", "Kasir", "2222", "Aktif", "-", "081234567892", ""],
-            ["Bernadette Rostenkowski", "bernadette", "Perawat Gigi", "3333", "Aktif", "503/STR-PRW/003/2024", "081234567893", ""],
-            ["Howard Wolowitz", "howard", "Admin", "4444", "Aktif", "-", "081234567894", ""]
+            ["Administrator Sistem", "admin", "Super User", "admin123", "Aktif", "-", "08123456789", "", "admin@sheldon.id"],
+            ["drg. Sheldon Cooper, Sp.Ort", "sheldon", "Dokter Gigi Spesialis", "1234", "Aktif", "503/SIP-DRG/001/2024", "081234567890", 0.50, "sheldon@sheldon.id"],
+            ["drg. Leonard Hofstadter", "leonard", "Dokter Gigi Umum", "1111", "Aktif", "503/SIP-DRG/002/2024", "081234567891", 0.45, "leonard@sheldon.id"],
+            ["Penny Teller", "penny", "Kasir", "2222", "Aktif", "-", "081234567892", "", "penny@sheldon.id"],
+            ["Bernadette Rostenkowski", "bernadette", "Perawat Gigi", "3333", "Aktif", "503/STR-PRW/003/2024", "081234567893", "", "bernadette@sheldon.id"],
+            ["Howard Wolowitz", "howard", "Admin", "4444", "Aktif", "-", "081234567894", "", "howard@sheldon.id"]
           ],
           "validations": {
             "C": ["Super User", "Owner", "Dokter Gigi Umum", "Dokter Gigi Spesialis", "Perawat Gigi", "Perawat Umum", "Admin", "Kasir", "Staff"],
-            "E": ["Aktif", "Tidak Aktif"]
+            "E": ["Aktif", "Non Aktif", "Tidak Aktif"]
           }
         }
       ]

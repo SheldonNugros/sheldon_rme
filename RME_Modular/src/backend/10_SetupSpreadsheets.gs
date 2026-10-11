@@ -149,9 +149,9 @@ const SPREADSHEET_DEFINITIONS = {
           "headers": ["ID_Aturan", "Nama_Dokter", "Kode_Tindakan", "Nama_Tindakan", "Persen_JM_Dokter", "Keterangan"],
           "formats": { "E": "0.0%" },
           "seedRows": [
-            ["EXC-0001", "drg. Sheldon Cooper, Sp.Ort", "DGS-0001", "Perawatan Saluran Akar (PSA) Molar", 0.55, "Spesialis Konservasi: PSA rate khusus 55% (Default 50%)"],
-            ["EXC-0002", "drg. Sheldon Cooper, Sp.Ort", "DGS-0002", "Odontektomi Gigi Impaksi M3", 0.55, "Tindakan bedah minor: rate khusus 55% (Default 50%)"],
-            ["EXC-0003", "drg. Leonard Hofstadter", "DGU-0002", "Scaling Rahang Atas & Bawah", 0.50, "Reward scaling: rate 50% (Default 45%)"]
+            ["EXC-0001", "drg. Tia Ardhana R", "DGS-0001", "Perawatan Saluran Akar (PSA) Molar", 0.55, "drg. Tia Ardhana R: PSA Molar JM Khusus 55% (Default 50%)"],
+            ["EXC-0002", "drg. Tia Ardhana R", "DGS-0002", "Odontektomi Gigi Impaksi M3", 0.55, "drg. Tia Ardhana R: Bedah Minor JM Khusus 55% (Default 50%)"],
+            ["EXC-0003", "drg. Tia Ardhana R", "LAB-0001", "Pemasangan Mahkota PFM (Crown)", 0.55, "drg. Tia Ardhana R: Crown PFM JM Khusus 55% setelah potong Lab (Default 50%)"]
           ]
         }
       ]
@@ -166,9 +166,10 @@ const SPREADSHEET_DEFINITIONS = {
           "formats": { "H": "0.0%" },
           "seedRows": [
             ["Administrator Sistem", "admin", "Super User", "admin123", "Aktif", "-", "08123456789", "", "admin@sheldon.id"],
-            ["drg. Sheldon Cooper, Sp.Ort", "sheldon", "Dokter Gigi Spesialis", "1234", "Aktif", "503/SIP-DRG/001/2024", "081234567890", 0.50, "sheldon@sheldon.id"],
-            ["drg. Leonard Hofstadter", "leonard", "Dokter Gigi Umum", "1111", "Aktif", "503/SIP-DRG/002/2024", "081234567891", 0.45, "leonard@sheldon.id"],
-            ["Penny Teller", "penny", "Kasir", "2222", "Aktif", "-", "081234567892", "", "penny@sheldon.id"],
+            ["drg. Rahma Yulinda D, Sp. BMM", "rahma", "Dokter Gigi Spesialis", "1234", "Aktif", "503/SIP-DRG/001/2026", "081234567801", 0.65, "rahma@sheldon.id"],
+            ["drg. Regyana Oktavaria", "regyana", "Dokter Gigi Umum", "1234", "Aktif", "503/SIP-DRG/002/2026", "081234567802", 0.40, "regyana@sheldon.id"],
+            ["drg. Latifah Mulyana", "latifah", "Dokter Gigi Umum", "1234", "Aktif", "503/SIP-DRG/003/2026", "081234567803", 0.40, "latifah@sheldon.id"],
+            ["drg. Tia Ardhana R", "tia", "Dokter Gigi Umum", "1234", "Aktif", "503/SIP-DRG/004/2026", "081234567804", 0.50, "tia@sheldon.id"],
             ["Bernadette Rostenkowski", "bernadette", "Perawat Gigi", "3333", "Aktif", "503/STR-PRW/003/2024", "081234567893", "", "bernadette@sheldon.id"],
             ["Howard Wolowitz", "howard", "Admin", "4444", "Aktif", "-", "081234567894", "", "howard@sheldon.id"]
           ],
@@ -981,3 +982,199 @@ function generatePayrollPeriode(periodeBulan) {
     lock.releaseLock();
   }
 }
+
+/**
+ * =========================================================================
+ * FUNGSI SIMULASI OTOMATIS: ISI DATABASE PEMBAGIAN JM DOKTER KE SPREADSHEET
+ * =========================================================================
+ * Mengisi otomatis:
+ * 1. RME Sheldon - 06 Master User & Role (Sheet: Data) -> 4 Dokter + Persen_JM_Dokter (65%, 40%, 40%, 50%)
+ * 2. RME Sheldon - 05 Database Tindakan (Sheet: Tindakan) -> Foto Rontgen Periapikal Digital (Persen_JM_Default = 15% untuk semua dokter)
+ * 3. RME Sheldon - 05 Database Tindakan (Sheet: Tarif_Khusus_Dokter) -> Tindakan khusus drg. Tia Ardhana R (55%)
+ * 4. RME Sheldon - 02 Pembayaran (Sheet: Rekap_Jasa_Medis) -> Contoh simulasi perhitungan bagi hasil JM ke-4 dokter
+ */
+function isiSimulasiJMDokter() {
+  const lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(15000);
+    let ringkasan = [];
+
+    // -------------------------------------------------------------------------
+    // 1. ISI / UPDATE 4 DOKTER DI SPREADSHEET 06 MASTER USER & ROLE (Sheet: Data)
+    // -------------------------------------------------------------------------
+    const ssMaster = SpreadsheetApp.openById(DB_CONFIG.MASTER.trim());
+    let shMaster = ssMaster.getSheetByName("Data") || ssMaster.insertSheet("Data");
+    const masterHeaders = ["Nama_Pekerja", "Username", "Kategori_Role", "Password", "Status", "No_Registrasi", "No_HP", "Persen_JM_Dokter", "Email"];
+    if (shMaster.getLastRow() === 0) {
+      shMaster.appendRow(masterHeaders);
+    }
+    let hM = shMaster.getRange(1, 1, 1, Math.max(shMaster.getLastColumn(), masterHeaders.length)).getValues()[0];
+    masterHeaders.forEach((colName, idx) => {
+      if (!hM[idx] || String(hM[idx]).trim() === "") {
+        shMaster.getRange(1, idx + 1).setValue(colName);
+      }
+    });
+    shMaster.getRange(1, 1, 1, masterHeaders.length).setFontWeight("bold").setBackground("#1e293b").setFontColor("#ffffff");
+    shMaster.setFrozenRows(1);
+
+    const dokterSimulasi = [
+      ["drg. Rahma Yulinda D, Sp. BMM", "rahma", "Dokter Gigi Spesialis", "1234", "Aktif", "503/SIP-DRG/001/2026", "081234567801", 0.65, "rahma@sheldon.id"],
+      ["drg. Regyana Oktavaria", "regyana", "Dokter Gigi Umum", "1234", "Aktif", "503/SIP-DRG/002/2026", "081234567802", 0.40, "regyana@sheldon.id"],
+      ["drg. Latifah Mulyana", "latifah", "Dokter Gigi Umum", "1234", "Aktif", "503/SIP-DRG/003/2026", "081234567803", 0.40, "latifah@sheldon.id"],
+      ["drg. Tia Ardhana R", "tia", "Dokter Gigi Umum", "1234", "Aktif", "503/SIP-DRG/004/2026", "081234567804", 0.50, "tia@sheldon.id"]
+    ];
+
+    let dataM = shMaster.getDataRange().getValues();
+    dokterSimulasi.forEach(dok => {
+      let foundRow = -1;
+      for (let i = 1; i < dataM.length; i++) {
+        let existingUser = String(dataM[i][1] || "").trim().toLowerCase();
+        let existingNama = String(dataM[i][0] || "").trim().toLowerCase();
+        if (existingUser === dok[1].toLowerCase() || existingNama === dok[0].toLowerCase()) {
+          foundRow = i + 1;
+          break;
+        }
+      }
+      if (foundRow > 1) {
+        shMaster.getRange(foundRow, 1, 1, dok.length).setValues([dok]);
+      } else {
+        shMaster.appendRow(dok);
+        foundRow = shMaster.getLastRow();
+      }
+      shMaster.getRange(foundRow, 4).setNumberFormat("@");
+      shMaster.getRange(foundRow, 8).setNumberFormat("0.0%");
+    });
+    ringkasan.push("✅ [06 Master User & Role -> Sheet: Data]\n   • drg. Rahma Yulinda D, Sp. BMM = 65%\n   • drg. Regyana Oktavaria = 40%\n   • drg. Latifah Mulyana = 40%\n   • drg. Tia Ardhana R = 50% (Default)");
+
+    // -------------------------------------------------------------------------
+    // 2. ISI SPREADSHEET 05 DATABASE TINDAKAN (Sheet: Tindakan & Tarif_Khusus_Dokter)
+    // -------------------------------------------------------------------------
+    const ssDb = SpreadsheetApp.openById(DB_CONFIG.DATABASE.trim());
+    let shTindakan = ssDb.getSheetByName("Tindakan") || ssDb.insertSheet("Tindakan");
+    const headersTindakan = ["Kode_Tindakan", "Nama_Tindakan", "Kategori", "Tarif", "Labor", "Persen_JM_Default"];
+    if (shTindakan.getLastRow() === 0) {
+      shTindakan.appendRow(headersTindakan);
+    } else {
+      shTindakan.getRange(1, 1, 1, headersTindakan.length).setValues([headersTindakan]);
+    }
+    shTindakan.getRange(1, 1, 1, headersTindakan.length).setFontWeight("bold").setBackground("#1e293b").setFontColor("#ffffff");
+    shTindakan.setFrozenRows(1);
+
+    const sampelTindakan = [
+      ["UMM-0001", "Konsultasi Dokter Gigi", "Umum", 50000, "Tidak", ""],
+      ["UMM-0002", "Foto Rontgen Periapikal Digital", "Umum", 100000, "Tidak", 0.15],
+      ["UMM-0003", "Foto Rontgen Panoramik", "Umum", 200000, "Tidak", 0.15],
+      ["DGU-0001", "Penambalan Komposit Light-Cure", "Dokter Gigi Umum", 250000, "Tidak", ""],
+      ["DGU-0002", "Scaling Rahang Atas & Bawah", "Dokter Gigi Umum", 300000, "Tidak", ""],
+      ["DGU-0003", "Pencabutan Gigi Permanen Ringan", "Dokter Gigi Umum", 250000, "Tidak", ""],
+      ["DGS-0001", "Perawatan Saluran Akar (PSA) Molar", "Dokter Gigi Spesialis", 1500000, "Tidak", ""],
+      ["DGS-0002", "Odontektomi Gigi Impaksi M3", "Dokter Gigi Spesialis", 2500000, "Tidak", ""],
+      ["LAB-0001", "Pemasangan Mahkota PFM (Crown)", "Dokter Gigi Spesialis", 1500000, "Ya", ""]
+    ];
+
+    let dataT = shTindakan.getDataRange().getValues();
+    sampelTindakan.forEach(tRow => {
+      let foundIdx = -1;
+      for (let i = 1; i < dataT.length; i++) {
+        if (String(dataT[i][0] || "").trim().toUpperCase() === tRow[0] ||
+            String(dataT[i][1] || "").trim().toLowerCase() === tRow[1].toLowerCase()) {
+          foundIdx = i + 1;
+          break;
+        }
+      }
+      if (foundIdx > 1) {
+        shTindakan.getRange(foundIdx, 1, 1, tRow.length).setValues([tRow]);
+      } else {
+        shTindakan.appendRow(tRow);
+      }
+    });
+
+    // Pastikan setiap tindakan yang mengandung kata "Rontgen" / "Radiologi" otomatis terisi 15% di kolom F
+    let updatedT = shTindakan.getDataRange().getValues();
+    for (let i = 1; i < updatedT.length; i++) {
+      let nm = String(updatedT[i][1] || "").toLowerCase();
+      if (nm.includes("rontgen") || nm.includes("ronten") || nm.includes("radiologi") || nm.includes("x-ray")) {
+        shTindakan.getRange(i + 1, 6).setValue(0.15);
+      }
+    }
+    shTindakan.getRange("D2:D1000").setNumberFormat("#,##0");
+    shTindakan.getRange("F2:F1000").setNumberFormat("0.0%");
+    ringkasan.push("✅ [05 Database Tindakan -> Sheet: Tindakan]\n   • Kolom F (Persen_JM_Default) pada tindakan Rontgen diisi 15% (berlaku mengunci 15% untuk SEMUA dokter). Tindakan lain dikosongkan agar mengikuti % masing-masing dokter.");
+
+    // Sheet: Tarif_Khusus_Dokter (Untuk drg. Tia Ardhana R yang mendapat 55% di tindakan tertentu)
+    let shKhusus = ssDb.getSheetByName("Tarif_Khusus_Dokter") || ssDb.insertSheet("Tarif_Khusus_Dokter");
+    const headersKhusus = ["ID_Aturan", "Nama_Dokter", "Kode_Tindakan", "Nama_Tindakan", "Persen_JM_Dokter", "Keterangan"];
+    shKhusus.clearContents();
+    shKhusus.appendRow(headersKhusus);
+    shKhusus.getRange(1, 1, 1, headersKhusus.length).setFontWeight("bold").setBackground("#1e293b").setFontColor("#ffffff");
+    shKhusus.setFrozenRows(1);
+
+    const aturanKhususTia = [
+      ["EXC-0001", "drg. Tia Ardhana R", "DGS-0001", "Perawatan Saluran Akar (PSA) Molar", 0.55, "Simulasi: drg. Tia Ardhana R mendapat JM Khusus 55% (Default beliau 50%)"],
+      ["EXC-0002", "drg. Tia Ardhana R", "DGS-0002", "Odontektomi Gigi Impaksi M3", 0.55, "Simulasi: drg. Tia Ardhana R mendapat JM Khusus 55% (Default beliau 50%)"],
+      ["EXC-0003", "drg. Tia Ardhana R", "LAB-0001", "Pemasangan Mahkota PFM (Crown)", 0.55, "Simulasi: drg. Tia Ardhana R mendapat JM Khusus 55% setelah dikurangi Biaya Lab"]
+    ];
+    shKhusus.getRange(2, 1, aturanKhususTia.length, headersKhusus.length).setValues(aturanKhususTia);
+    shKhusus.getRange("E2:E100").setNumberFormat("0.0%");
+    ringkasan.push("✅ [05 Database Tindakan -> Sheet: Tarif_Khusus_Dokter]\n   • Diisi 3 tindakan khusus untuk drg. Tia Ardhana R dengan JM 55% (PSA Molar, Odontektomi M3, Crown PFM).");
+
+    // -------------------------------------------------------------------------
+    // 3. BUAT CONTOH HASIL PERHITUNGAN DI SPREADSHEET 02 PEMBAYARAN (Sheet: Rekap_Jasa_Medis)
+    // -------------------------------------------------------------------------
+    const ssBayar = SpreadsheetApp.openById(DB_CONFIG.PEMBAYARAN.trim());
+    let shJM = ssBayar.getSheetByName("Rekap_Jasa_Medis") || ssBayar.insertSheet("Rekap_Jasa_Medis");
+    const headersJM = [
+      "ID_Invoice", "Tanggal", "Dokter", "Perawat", "Kategori_Item", "Nama_Item",
+      "Tarif_Kotor", "Biaya_Lab", "Dasar_Bagi_Hasil", "Persen_JM", "Tipe_Aturan",
+      "JM_Dokter_Kotor", "Potongan_Perawat", "JM_Dokter_Bersih", "JM_Perawat",
+      "Bagian_Klinik", "Status_JM", "Waktu_Hitung"
+    ];
+    if (shJM.getLastRow() === 0) {
+      shJM.appendRow(headersJM);
+      shJM.getRange(1, 1, 1, headersJM.length).setFontWeight("bold").setBackground("#1e293b").setFontColor("#ffffff");
+      shJM.setFrozenRows(1);
+    }
+
+    // Hapus baris simulasi sebelumnya jika ada (INV-SIMULASI-JM-*)
+    let existingJM = shJM.getDataRange().getValues();
+    for (let r = existingJM.length - 1; r >= 1; r--) {
+      if (String(existingJM[r][0] || "").indexOf("INV/SIMULASI/") === 0) {
+        shJM.deleteRow(r + 1);
+      }
+    }
+
+    const tglSim = Utilities.formatDate(new Date(), "Asia/Jakarta", "dd-MM-yyyy");
+    const waktuSim = new Date();
+    const rowsSimulasiJM = [
+      // 1. drg. Rahma Yulinda D, Sp. BMM -> Tindakan Odontektomi (Default Dokter 65%) & Rontgen (Terkunci 15%)
+      ["INV/SIMULASI/001", tglSim, "drg. Rahma Yulinda D, Sp. BMM", "Bernadette Rostenkowski", "Tindakan", "Odontektomi Gigi Impaksi M3", 2500000, 0, 2500000, 0.65, "Default Dokter (65%)", 1625000, 0, 1625000, 0, 875000, "SIAP_CAIR", waktuSim],
+      ["INV/SIMULASI/001", tglSim, "drg. Rahma Yulinda D, Sp. BMM", "Bernadette Rostenkowski", "Tindakan", "Foto Rontgen Periapikal Digital", 100000, 0, 100000, 0.15, "Kunci Tindakan Global (15%)", 15000, 0, 15000, 0, 85000, "SIAP_CAIR", waktuSim],
+      // 2. drg. Regyana Oktavaria -> Scaling (Default Dokter 40%) & Rontgen (Terkunci 15%)
+      ["INV/SIMULASI/002", tglSim, "drg. Regyana Oktavaria", "Bernadette Rostenkowski", "Tindakan", "Scaling Rahang Atas & Bawah", 300000, 0, 300000, 0.40, "Default Dokter (40%)", 120000, 0, 120000, 0, 180000, "SIAP_CAIR", waktuSim],
+      ["INV/SIMULASI/002", tglSim, "drg. Regyana Oktavaria", "Bernadette Rostenkowski", "Tindakan", "Foto Rontgen Periapikal Digital", 100000, 0, 100000, 0.15, "Kunci Tindakan Global (15%)", 15000, 0, 15000, 0, 85000, "SIAP_CAIR", waktuSim],
+      // 3. drg. Latifah Mulyana -> Tambal Komposit (Default Dokter 40%)
+      ["INV/SIMULASI/003", tglSim, "drg. Latifah Mulyana", "Bernadette Rostenkowski", "Tindakan", "Penambalan Komposit Light-Cure", 250000, 0, 250000, 0.40, "Default Dokter (40%)", 100000, 0, 100000, 0, 150000, "SIAP_CAIR", waktuSim],
+      // 4. drg. Tia Ardhana R -> Scaling (Default Dokter 50%), PSA Molar (Tarif Khusus 55%), & Rontgen (Terkunci 15%)
+      ["INV/SIMULASI/004", tglSim, "drg. Tia Ardhana R", "Bernadette Rostenkowski", "Tindakan", "Scaling Rahang Atas & Bawah", 300000, 0, 300000, 0.50, "Default Dokter (50%)", 150000, 0, 150000, 0, 150000, "SIAP_CAIR", waktuSim],
+      ["INV/SIMULASI/004", tglSim, "drg. Tia Ardhana R", "Bernadette Rostenkowski", "Tindakan", "Perawatan Saluran Akar (PSA) Molar", 1500000, 0, 1500000, 0.55, "Tarif Khusus Dokter (55%)", 825000, 0, 825000, 0, 675000, "SIAP_CAIR", waktuSim],
+      ["INV/SIMULASI/004", tglSim, "drg. Tia Ardhana R", "Bernadette Rostenkowski", "Tindakan", "Foto Rontgen Periapikal Digital", 100000, 0, 100000, 0.15, "Kunci Tindakan Global (15%)", 15000, 0, 15000, 0, 85000, "SIAP_CAIR", waktuSim]
+    ];
+
+    shJM.getRange(shJM.getLastRow() + 1, 1, rowsSimulasiJM.length, headersJM.length).setValues(rowsSimulasiJM);
+    shJM.getRange("G2:I1000").setNumberFormat("#,##0");
+    shJM.getRange("J2:J1000").setNumberFormat("0.0%");
+    shJM.getRange("L2:P1000").setNumberFormat("#,##0");
+    ringkasan.push("✅ [02 Pembayaran -> Sheet: Rekap_Jasa_Medis]\n   • Ditambahkan 8 baris contoh perhitungan simulasi (INV/SIMULASI/001 s.d. 004) yang bisa Anda cek & hapus kapan saja.");
+
+    SpreadsheetApp.flush();
+    return {
+      success: true,
+      message: "SIMULASI PEMBAGIAN JM DOKTER BERHASIL DIISI KE SPREADSHEET!\n\n" + ringkasan.join("\n\n")
+    };
+  } catch (err) {
+    return { success: false, message: "Gagal mengisi simulasi JM Dokter: " + err.message };
+  } finally {
+    lock.releaseLock();
+  }
+}
+

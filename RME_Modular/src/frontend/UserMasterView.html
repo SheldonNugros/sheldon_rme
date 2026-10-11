@@ -26,6 +26,9 @@
 
     <!-- TOMBOL SISTEM, SINKRONISASI, & BACKUP (KHUSUS SUPER USER) -->
     <div class="pt-3.5 border-t border-slate-100 flex items-center gap-2.5 flex-wrap">
+      <button id="btnSimulasiJM" type="button" onclick="triggerSimulasiJMDokter()" class="px-3.5 py-2.5 bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-300 font-extrabold rounded-xl text-xs transition-all flex items-center gap-1.5 shadow-sm" title="Otomatis isi contoh data JM 4 Dokter (65%, 40%, 40%, 50%/55%) + Rontgen 15% ke Spreadsheet Anda">
+        <span>🧪</span> Isi Simulasi JM Dokter
+      </button>
       <button id="btnSinkronSheet" type="button" onclick="triggerSinkronSemuaSheet()" class="px-3.5 py-2.5 bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 font-bold rounded-xl text-xs transition-all flex items-center gap-1.5" title="Otomatis buat & perbarui seluruh sheet yang kurang pada database spreadsheet">
         <span>🔄</span> Sinkronkan Sheet
       </button>

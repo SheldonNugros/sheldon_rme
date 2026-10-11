@@ -910,6 +910,79 @@ function triggerSetupPayroll() {
   }
 }
 
+function triggerSimulasiJMDokter() {
+  const btn = document.getElementById("btnSimulasiJM");
+  const originalHtml = btn ? btn.innerHTML : "<span>🧪</span> Isi Simulasi JM Dokter";
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = "<span>⏳</span> Mengisi Simulasi JM...";
+  }
+
+  showToast("info", "Mengisi simulasi pembagian JM 4 Dokter + Rontgen 15% ke Spreadsheet Anda...");
+
+  const updateLocalSimulatedUsers = () => {
+    const simDocs = [
+      { nama: "drg. Rahma Yulinda D, Sp. BMM", username: "rahma", role: "Dokter Gigi Spesialis", hasPassword: true, isHashed: false, status: "Aktif", noReg: "503/SIP-DRG/001/2026", noHp: "081234567801", email: "rahma@sheldon.id", persenJM: 0.65 },
+      { nama: "drg. Regyana Oktavaria", username: "regyana", role: "Dokter Gigi Umum", hasPassword: true, isHashed: false, status: "Aktif", noReg: "503/SIP-DRG/002/2026", noHp: "081234567802", email: "regyana@sheldon.id", persenJM: 0.40 },
+      { nama: "drg. Latifah Mulyana", username: "latifah", role: "Dokter Gigi Umum", hasPassword: true, isHashed: false, status: "Aktif", noReg: "503/SIP-DRG/003/2026", noHp: "081234567803", email: "latifah@sheldon.id", persenJM: 0.40 },
+      { nama: "drg. Tia Ardhana R", username: "tia", role: "Dokter Gigi Umum", hasPassword: true, isHashed: false, status: "Aktif", noReg: "503/SIP-DRG/004/2026", noHp: "081234567804", email: "tia@sheldon.id", persenJM: 0.50 }
+    ];
+    if (!Array.isArray(listMasterUser) || listMasterUser.length === 0) {
+      listMasterUser = getFallbackUserList();
+    }
+    simDocs.forEach(sd => {
+      let ex = listMasterUser.find(u => String(u.username || '').toLowerCase() === sd.username || String(u.nama || '').toLowerCase() === sd.nama.toLowerCase());
+      if (ex) {
+        Object.assign(ex, sd);
+      } else {
+        listMasterUser.push(sd);
+      }
+    });
+    saveFallbackUserList(listMasterUser);
+    renderTabelUser();
+  };
+
+  if (typeof google !== "undefined" && google.script && google.script.run) {
+    google.script.run
+      .withSuccessHandler(res => {
+        if (btn) { btn.disabled = false; btn.innerHTML = originalHtml; }
+        updateLocalSimulatedUsers();
+        if (res && res.success) {
+          showToast("success", "Simulasi JM 4 Dokter + Rontgen 15% berhasil diisi ke Spreadsheet!");
+          alert(res.message);
+          loadDaftarUserMaster(false);
+        } else {
+          showToast("warning", res ? res.message : "Terjadi kendala saat mengisi simulasi.");
+        }
+      })
+      .withFailureHandler(err => {
+        if (btn) { btn.disabled = false; btn.innerHTML = originalHtml; }
+        let errStr = (err && err.message) ? err.message : String(err);
+        showToast("error", "Gagal mengisi simulasi: " + errStr);
+        alert("❌ GAGAL MENGISI SIMULASI JM:\n\n" + errStr);
+      })
+      .isiSimulasiJMDokter();
+  } else {
+    setTimeout(() => {
+      if (btn) { btn.disabled = false; btn.innerHTML = originalHtml; }
+      updateLocalSimulatedUsers();
+      showToast("success", "Simulasi JM 4 Dokter berhasil diterapkan!");
+      alert("✅ SIMULASI PEMBAGIAN JM DOKTER BERHASIL DIISI:\n\n" +
+            "1. [06 Master User & Role -> Sheet: Data]\n" +
+            "   • drg. Rahma Yulinda D, Sp. BMM = 65%\n" +
+            "   • drg. Regyana Oktavaria = 40%\n" +
+            "   • drg. Latifah Mulyana = 40%\n" +
+            "   • drg. Tia Ardhana R = 50% (Default)\n\n" +
+            "2. [05 Database Tindakan -> Sheet: Tindakan]\n" +
+            "   • Kolom F (Persen_JM_Default) pada Rontgen diisi 15% (berlaku untuk SEMUA dokter)\n\n" +
+            "3. [05 Database Tindakan -> Sheet: Tarif_Khusus_Dokter]\n" +
+            "   • drg. Tia Ardhana R mendapat JM 55% pada PSA Molar, Odontektomi M3, dan Crown PFM\n\n" +
+            "4. [02 Pembayaran -> Sheet: Rekap_Jasa_Medis]\n" +
+            "   • Ditambahkan 8 baris contoh perhitungan simulasi (INV/SIMULASI/001 s.d. 004)");
+    }, 800);
+  }
+}
+
 // ==========================================
 // MODUL MASTER USER & ROLE (SUPER USER)
 // ==========================================
@@ -943,17 +1016,18 @@ function getFallbackUserList() {
       noReg: s.sip || s.noReg || '-',
       noHp: s.noHp || '-',
       email: s.email || '',
-      persenJM: s.persenJM || (String(s.role || '').toLowerCase().includes('spesialis') ? 0.50 : (String(s.role || '').toLowerCase().includes('dokter') ? 0.40 : 0))
+      persenJM: s.persenJM || (String(s.role || '').toLowerCase().includes('spesialis') ? 0.65 : (String(s.role || '').toLowerCase().includes('dokter') ? 0.40 : 0))
     }));
   }
 
   return [
     { nama: "Administrator Sistem", username: "admin", role: "Super User", hasPassword: true, isHashed: true, status: "Aktif", noReg: "-", noHp: "081234567890", email: "admin@sheldon.id", persenJM: 0 },
     { nama: "drg. V. Asung Nugroho, Sp.Ort", username: "asung", role: "Owner", hasPassword: true, isHashed: true, status: "Aktif", noReg: "503/SIP-DRG/001/2024", noHp: "081298765432", email: "v.asungnugroho@gmail.com", persenJM: 0.50 },
-    { nama: "drg. Sheldon Cooper, Sp.Ort", username: "sheldon", role: "Dokter Gigi Spesialis", hasPassword: true, isHashed: false, status: "Aktif", noReg: "503/SIP-DRG/001/2024", noHp: "081311223344", email: "sheldon@sheldon.id", persenJM: 0.50 },
-    { nama: "drg. Leonard Hofstadter", username: "leonard", role: "Dokter Gigi Umum", hasPassword: true, isHashed: false, status: "Aktif", noReg: "503/SIP-DRG/002/2024", noHp: "081355667788", email: "leonard@sheldon.id", persenJM: 0.40 },
+    { nama: "drg. Rahma Yulinda D, Sp. BMM", username: "rahma", role: "Dokter Gigi Spesialis", hasPassword: true, isHashed: false, status: "Aktif", noReg: "503/SIP-DRG/001/2026", noHp: "081234567801", email: "rahma@sheldon.id", persenJM: 0.65 },
+    { nama: "drg. Regyana Oktavaria", username: "regyana", role: "Dokter Gigi Umum", hasPassword: true, isHashed: false, status: "Aktif", noReg: "503/SIP-DRG/002/2026", noHp: "081234567802", email: "regyana@sheldon.id", persenJM: 0.40 },
+    { nama: "drg. Latifah Mulyana", username: "latifah", role: "Dokter Gigi Umum", hasPassword: true, isHashed: false, status: "Aktif", noReg: "503/SIP-DRG/003/2026", noHp: "081234567803", email: "latifah@sheldon.id", persenJM: 0.40 },
+    { nama: "drg. Tia Ardhana R", username: "tia", role: "Dokter Gigi Umum", hasPassword: true, isHashed: false, status: "Aktif", noReg: "503/SIP-DRG/004/2026", noHp: "081234567804", email: "tia@sheldon.id", persenJM: 0.50 },
     { nama: "Bernadette Rostenkowski", username: "bernadette", role: "Perawat Gigi", hasPassword: true, isHashed: false, status: "Aktif", noReg: "503/STR-PRW/003/2024", noHp: "081399001122", email: "bernadette@sheldon.id", persenJM: 0 },
-    { nama: "Penny Teller", username: "penny", role: "Perawat Umum", hasPassword: true, isHashed: false, status: "Aktif", noReg: "-", noHp: "081344556677", email: "penny@sheldon.id", persenJM: 0 },
     { nama: "Howard Wolowitz", username: "howard", role: "Admin", hasPassword: true, isHashed: false, status: "Aktif", noReg: "-", noHp: "081377889900", email: "howard@sheldon.id", persenJM: 0 }
   ];
 }
@@ -1531,6 +1605,7 @@ window.editDbUser = editDbUser;
 window.batalEditDbUser = batalEditDbUser;
 window.hapusDbUser = hapusDbUser;
 window.changeDBMenu = changeDBMenu;
+window.triggerSimulasiJMDokter = triggerSimulasiJMDokter;
 window.triggerSinkronSemuaSheet = triggerSinkronSemuaSheet;
 window.triggerSetupPayroll = triggerSetupPayroll;
 window.triggerManualBackup = triggerManualBackup;

@@ -4118,33 +4118,190 @@ const SPREADSHEET_DEFINITIONS = {
   };
 
 /**
+ * Helper: Mendapatkan folder tempat kumpulan Spreadsheet RME berada
+ * (mengambil parent folder dari Spreadsheet MASTER / PASIEN / PEMBAYARAN yang sudah ada).
+ */
+function _getDatabaseParentFolder() {
+  const refKeys = ["MASTER", "PASIEN", "PEMBAYARAN", "DATABASE", "REKAM_MEDIS", "OBAT"];
+  for (let i = 0; i < refKeys.length; i++) {
+    let k = refKeys[i];
+    let id = (DB_CONFIG && DB_CONFIG[k]) ? String(DB_CONFIG[k]).trim() : "";
+    if (!id) continue;
+    try {
+      let file = DriveApp.getFileById(id);
+      let parents = file.getParents();
+      while (parents.hasNext()) {
+        let folder = parents.next();
+        // Prioritaskan folder khusus (bukan Root Drive यदि ada sub-folder)
+        if (folder.getId() !== DriveApp.getRootFolder().getId()) {
+          return folder;
+        }
+      }
+      // Fallback ke parent pertama
+      let parents2 = file.getParents();
+      if (parents2.hasNext()) return parents2.next();
+    } catch (e) {}
+  }
+  return null;
+}
+
+/**
+ * Helper: Memindahkan file Spreadsheet ke dalam folder database RME (bukan di Root Drive).
+ */
+function _moveFileToDatabaseFolder(fileId, targetFolder) {
+  try {
+    let folder = targetFolder || _getDatabaseParentFolder();
+    if (!folder) return false;
+    if (folder.getId() === DriveApp.getRootFolder().getId()) return false;
+    let file = DriveApp.getFileById(fileId);
+    let alreadyInFolder = false;
+    let parents = file.getParents();
+    while (parents.hasNext()) {
+      let p = parents.next();
+      if (p.getId() === folder.getId()) {
+        alreadyInFolder = true;
+        break;
+      }
+    }
+    if (!alreadyInFolder) {
+      file.moveTo(folder);
+      return true;
+    }
+  } catch (e) {
+    Logger.log("Info _moveFileToDatabaseFolder: " + e.message);
+  }
+  return false;
+}
+
+/**
+ * Helper: Mencari Spreadsheet yang sudah ada (berdasarkan ID di DB_CONFIG, ScriptProperties,
+ * atau nama file di dalam folder database yang sama maupun di Drive), lalu memindahkannya
+ * ke folder yang sama jika masih berada di Root. Hanya membuat baru jika benar-benar belum ada.
+ */
+function _findOrCreateSpreadsheetInFolder(key, title) {
+  let folder = _getDatabaseParentFolder();
+  let prop = PropertiesService.getScriptProperties();
+  let propKey = "RME_SS_ID_" + key;
+  let ss = null;
+  let ssId = "";
+  let isBaru = false;
+
+  // 1. Cek dari DB_CONFIG[key]
+  if (DB_CONFIG && DB_CONFIG[key] && String(DB_CONFIG[key]).trim() !== "") {
+    let candidateId = String(DB_CONFIG[key]).trim();
+    try {
+      let f = DriveApp.getFileById(candidateId);
+      if (!f.isTrashed()) {
+        ss = SpreadsheetApp.openById(candidateId);
+        ssId = candidateId;
+      }
+    } catch (e) {
+      ss = null;
+    }
+  }
+
+  // 2. Cek dari ScriptProperties
+  if (!ss) {
+    let savedId = prop.getProperty(propKey) || (key === "PAYROLL" ? prop.getProperty("RME_PAYROLL_SS_ID") : "");
+    if (savedId && savedId.trim() !== "") {
+      try {
+        let f = DriveApp.getFileById(savedId.trim());
+        if (!f.isTrashed()) {
+          ss = SpreadsheetApp.openById(savedId.trim());
+          ssId = savedId.trim();
+        }
+      } catch (e) {
+        ss = null;
+      }
+    }
+  }
+
+  // 3. Cari berdasarkan nama di dalam folder yang sama terlebih dahulu
+  if (!ss && folder) {
+    try {
+      let filesInFolder = folder.getFilesByName(title);
+      while (filesInFolder.hasNext()) {
+        let f = filesInFolder.next();
+        if (!f.isTrashed()) {
+          ss = SpreadsheetApp.openById(f.getId());
+          ssId = f.getId();
+          break;
+        }
+      }
+    } catch (e) {}
+  }
+
+  // 4. Cari berdasarkan nama di seluruh Google Drive (jika sebelumnya terbuat di Root)
+  if (!ss) {
+    try {
+      let allFiles = DriveApp.getFilesByName(title);
+      while (allFiles.hasNext()) {
+        let f = allFiles.next();
+        if (!f.isTrashed()) {
+          ss = SpreadsheetApp.openById(f.getId());
+          ssId = f.getId();
+          break;
+        }
+      }
+    } catch (e) {}
+  }
+
+  // 5. Jika benar-benar belum ada, baru buat Spreadsheet baru
+  if (!ss) {
+    ss = SpreadsheetApp.create(title);
+    ssId = ss.getId();
+    isBaru = true;
+  }
+
+  // Pastikan file berada di dalam folder database yang sama (bukan di Root)
+  if (ssId && folder) {
+    _moveFileToDatabaseFolder(ssId, folder);
+  }
+
+  // Simpan ID ke memori & ScriptProperties
+  try {
+    if (DB_CONFIG) DB_CONFIG[key] = ssId;
+    prop.setProperty(propKey, ssId);
+    if (key === "PAYROLL") prop.setProperty("RME_PAYROLL_SS_ID", ssId);
+  } catch (e) {}
+
+  return { ss: ss, ssId: ssId, isBaru: isBaru, folderName: folder ? folder.getName() : "Root" };
+}
+
+/**
  * Buka Apps Script Editor -> Pilih fungsi `setupAllSpreadsheets` -> Klik RUN.
- * Script ini akan otomatis membuat 10 Spreadsheet terpisah di Google Drive Anda,
- * menyusun semua nama sheet, header, format angka, data validation dropdown,
- * formula rekap, dan mengembalikan objek `DB_CONFIG` baru siap pakai.
+ * Jika Spreadsheet sudah ada, fungsi ini akan MENG-UPDATE spreadsheet yang sudah ada
+ * dan menempatkannya di dalam folder yang sama (tidak membuat duplikat di Root).
  */
 function setupAllSpreadsheets() {
-  Logger.log("=== MEMULAI INSIALISASI 10 SPREADSHEET RME SHELDON ===");
+  Logger.log("=== MEMULAI SINKRONISASI / SETUP SPREADSHEET RME SHELDON ===");
   let newConfig = {};
 
   Object.keys(SPREADSHEET_DEFINITIONS).forEach(key => {
     let def = SPREADSHEET_DEFINITIONS[key];
-    let ss = SpreadsheetApp.create(def.title);
-    newConfig[key] = ss.getId();
-    Logger.log("✅ Berhasil Membuat Spreadsheet: " + def.title + " (ID: " + ss.getId() + ")");
+    let found = _findOrCreateSpreadsheetInFolder(key, def.title);
+    let ss = found.ss;
+    newConfig[key] = found.ssId;
+    Logger.log((found.isBaru ? "✅ Membuat Baru: " : "🔄 Mengupdate yang Sudah Ada: ") + def.title + " (ID: " + found.ssId + " | Folder: " + found.folderName + ")");
 
     def.sheets.forEach((shDef, idx) => {
-      let sheet;
-      if (idx === 0) {
-        sheet = ss.getSheets()[0];
-        sheet.setName(shDef.name);
-      } else {
-        sheet = ss.insertSheet(shDef.name);
+      let sheet = ss.getSheetByName(shDef.name);
+      if (!sheet) {
+        if (idx === 0 && found.isBaru && ss.getSheets().length === 1) {
+          sheet = ss.getSheets()[0];
+          sheet.setName(shDef.name);
+        } else {
+          sheet = ss.insertSheet(shDef.name);
+        }
       }
 
       // 1. Headers
       if (shDef.headers) {
-        sheet.appendRow(shDef.headers);
+        if (sheet.getLastRow() === 0) {
+          sheet.appendRow(shDef.headers);
+        } else {
+          sheet.getRange(1, 1, 1, shDef.headers.length).setValues([shDef.headers]);
+        }
         sheet.getRange(1, 1, 1, shDef.headers.length)
           .setFontWeight("bold")
           .setBackground("#1e293b")
@@ -4152,8 +4309,8 @@ function setupAllSpreadsheets() {
         sheet.setFrozenRows(1);
       }
 
-      // 2. Seed Rows
-      if (shDef.seedRows && shDef.seedRows.length > 0) {
+      // 2. Seed Rows (hanya jika sheet masih kosong agar data lama tidak tertimpa)
+      if (shDef.seedRows && shDef.seedRows.length > 0 && sheet.getLastRow() <= 1) {
         sheet.getRange(2, 1, shDef.seedRows.length, shDef.seedRows[0].length).setValues(shDef.seedRows);
       }
 
@@ -4402,18 +4559,29 @@ function sinkronkanSemuaSheetOtomatis() {
 
   for (let key in SPREADSHEET_DEFINITIONS) {
     let def = SPREADSHEET_DEFINITIONS[key];
-    let ssId = DB_CONFIG[key];
-    if (!ssId || ssId.trim() === "") continue;
 
     try {
-      let ss = SpreadsheetApp.openById(ssId.trim());
-      def.sheets.forEach(shDef => {
+      // Gunakan _findOrCreateSpreadsheetInFolder agar:
+      // 1) Jika spreadsheet sudah ada di folder yang sama / di Drive, langsung di-update (TIDAK buat baru)
+      // 2) Jika file berada di Root Drive, otomatis dipindahkan ke dalam folder database RME yang sama
+      let found = _findOrCreateSpreadsheetInFolder(key, def.title);
+      let ss = found.ss;
+      if (found.isBaru) {
+        laporan.push("🆕 Dibuat Spreadsheet di Folder [" + found.folderName + "]: " + def.title);
+      }
+
+      def.sheets.forEach((shDef, idx) => {
         let sheet = ss.getSheetByName(shDef.name) || 
                     ss.getSheetByName(shDef.name.replace(/\s+/g, '_')) || 
                     ss.getSheetByName("Data_" + shDef.name);
 
         if (!sheet) {
-          sheet = ss.insertSheet(shDef.name);
+          if (idx === 0 && found.isBaru && ss.getSheets().length === 1) {
+            sheet = ss.getSheets()[0];
+            sheet.setName(shDef.name);
+          } else {
+            sheet = ss.insertSheet(shDef.name);
+          }
           laporan.push("➕ Ditambahkan Sheet Baru: [" + def.title + " -> " + shDef.name + "]");
         }
 
@@ -4444,9 +4612,18 @@ function sinkronkanSemuaSheetOtomatis() {
           }
         }
 
-        // Seed Rows
+        // Seed Rows (jika sheet masih kosong / hanya berisi header)
         if (shDef.seedRows && shDef.seedRows.length > 0 && sheet.getLastRow() <= 1) {
           sheet.getRange(2, 1, shDef.seedRows.length, shDef.seedRows[0].length).setValues(shDef.seedRows);
+        }
+
+        // Validations
+        if (shDef.validations) {
+          Object.keys(shDef.validations).forEach(colLetter => {
+            let listValues = shDef.validations[colLetter];
+            let rule = SpreadsheetApp.newDataValidation().requireValueInList(listValues, true).build();
+            sheet.getRange(colLetter + "2:" + colLetter + "1000").setDataValidation(rule);
+          });
         }
 
         // Formats
@@ -4461,19 +4638,11 @@ function sinkronkanSemuaSheetOtomatis() {
     }
   }
 
-  // Juga pastikan Spreadsheet 11 Payroll & Honor Dokter ikut tersinkronisasi (lengkap dengan Pengaturan_Tarif_Shift & Presensi_Shift_Harian)
-  try {
-    let payRes = setupPayrollSpreadsheet();
-    if (payRes && payRes.success) {
-      laporan.push("✅ Disinkronkan: [RME Sheldon - 11 Payroll & Honor Dokter -> Pengaturan_Tarif_Shift, Presensi_Shift_Harian, Penggajian_Dokter, Honor_Perawat_Staff]");
-    }
-  } catch (ePay) {}
-
   SpreadsheetApp.flush();
   Logger.log("Laporan Sinkronisasi:\n" + laporan.join("\n"));
   return {
     success: true,
-    message: laporan.length > 0 ? ("Sinkronisasi selesai:\n" + laporan.join("\n")) : "Semua sheet sudah lengkap dan sinkron!"
+    message: laporan.length > 0 ? ("Sinkronisasi selesai (semua file ditempatkan di folder yang sama & di-update):\n" + laporan.join("\n")) : "Semua spreadsheet & sheet sudah lengkap dan sinkron di dalam folder yang sama!"
   };
 }
 
@@ -4489,10 +4658,10 @@ function sinkronkanSemuaSheetOtomatis() {
  */
 function _sinkronkanShiftKeMasterUser() {
   try {
-    if (!DB_CONFIG || !DB_CONFIG.MASTER) return;
-    const ssMaster = SpreadsheetApp.openById(DB_CONFIG.MASTER.trim());
     const defMaster = SPREADSHEET_DEFINITIONS["MASTER"];
     if (!defMaster || !defMaster.sheets) return;
+    let foundMaster = _findOrCreateSpreadsheetInFolder("MASTER", defMaster.title);
+    const ssMaster = foundMaster.ss;
 
     defMaster.sheets.forEach(shDef => {
       if (shDef.name !== "Pengaturan_Tarif_Shift" && shDef.name !== "Presensi_Shift_Harian") return;
@@ -4538,8 +4707,9 @@ function _sinkronkanShiftKeMasterUser() {
 }
 
 /**
- * Otomatis membuat / memperbarui Spreadsheet "RME Sheldon - 11 Payroll & Honor Dokter"
- * lengkap dengan 6 sheet:
+ * Otomatis meng-update atau membuat Spreadsheet "RME Sheldon - 11 Payroll & Honor Dokter"
+ * di dalam FOLDER YANG SAMA dengan spreadsheet RME lainnya (bukan di Root Drive).
+ * Lengkap dengan 6 sheet:
  * 1. Pengaturan_Tarif_Shift
  * 2. Presensi_Shift_Harian
  * 3. Penggajian_Dokter
@@ -4552,49 +4722,12 @@ function setupPayrollSpreadsheet() {
   try {
     lock.waitLock(15000);
     const def = SPREADSHEET_DEFINITIONS["PAYROLL"];
-    let prop = PropertiesService.getScriptProperties();
-    let ssId = (DB_CONFIG && DB_CONFIG.PAYROLL && DB_CONFIG.PAYROLL.trim() !== "")
-      ? DB_CONFIG.PAYROLL.trim()
-      : (prop.getProperty("RME_PAYROLL_SS_ID") || "");
-    let ss = null;
-    let isBaru = false;
+    let found = _findOrCreateSpreadsheetInFolder("PAYROLL", def.title);
+    let ss = found.ss;
+    let ssId = found.ssId;
+    let isBaru = found.isBaru;
 
-    if (ssId && ssId !== "") {
-      try {
-        ss = SpreadsheetApp.openById(ssId);
-      } catch (e) {
-        ss = null;
-      }
-    }
-
-    // Jika belum ada ID tersimpan, cari file bernama "RME Sheldon - 11 Payroll & Honor Dokter" di Google Drive agar tidak duplikat
-    if (!ss) {
-      try {
-        let files = DriveApp.getFilesByName(def.title);
-        while (files.hasNext()) {
-          let f = files.next();
-          if (!f.isTrashed()) {
-            ss = SpreadsheetApp.openById(f.getId());
-            ssId = f.getId();
-            break;
-          }
-        }
-      } catch (eDrive) {}
-    }
-
-    if (!ss) {
-      ss = SpreadsheetApp.create(def.title);
-      ssId = ss.getId();
-      isBaru = true;
-      Logger.log("✅ Berhasil membuat Spreadsheet baru: " + def.title + " (ID: " + ssId + ")");
-    }
-
-    try {
-      prop.setProperty("RME_PAYROLL_SS_ID", ssId);
-      DB_CONFIG.PAYROLL = ssId;
-    } catch (eProp) {}
-
-    // Bangun seluruh sheet berdasarkan nama (sehingga spreadsheet lama yang belum punya Pengaturan_Tarif_Shift & Presensi_Shift_Harian otomatis dibuatkan!)
+    // Bangun seluruh sheet berdasarkan nama (sehingga spreadsheet yang sudah ada langsung di-update)
     let firstSheet = ss.getSheets()[0];
     def.sheets.forEach((shDef, idx) => {
       let sheet = ss.getSheetByName(shDef.name);
@@ -4654,12 +4787,12 @@ function setupPayrollSpreadsheet() {
       success: true,
       spreadsheetId: ssId,
       url: ss.getUrl(),
-      message: (isBaru ? "Spreadsheet baru berhasil dibuat: " : "Spreadsheet berhasil disinkronkan: ") + def.title + " (ID: " + ssId + ")\n\n" +
-               "• Sheet 1 (Pengaturan_Tarif_Shift) & Sheet 2 (Presensi_Shift_Harian) juga telah ditambahkan ke [RME Sheldon - 06 Master User & Role] dan [RME Sheldon - 11 Payroll & Honor Dokter]!\n" +
+      message: (isBaru ? "Spreadsheet baru berhasil dibuat di folder [" + found.folderName + "]: " : "Spreadsheet yang sudah ada berhasil di-update di folder [" + found.folderName + "]: ") + def.title + " (ID: " + ssId + ")\n\n" +
+               "• Sheet 1 (Pengaturan_Tarif_Shift) & Sheet 2 (Presensi_Shift_Harian) telah di-update di [RME Sheldon - 06 Master User & Role] dan [RME Sheldon - 11 Payroll & Honor Dokter]!\n" +
                "• Dokter: Rp 55.000/shift (2 shift), Perawat: Rp 45.000/shift (2 shift), Admin: Rp 1.200.000/bulan (Non-Shift)"
     };
   } catch (err) {
-    return { success: false, message: "Gagal membuat spreadsheet Payroll: " + err.message };
+    return { success: false, message: "Gagal membuat/mengupdate spreadsheet Payroll: " + err.message };
   } finally {
     lock.releaseLock();
   }
@@ -4866,7 +4999,8 @@ function isiSimulasiJMDokter() {
     // -------------------------------------------------------------------------
     // 1. ISI / UPDATE 4 DOKTER DI SPREADSHEET 06 MASTER USER & ROLE (Sheet: Data)
     // -------------------------------------------------------------------------
-    const ssMaster = SpreadsheetApp.openById(DB_CONFIG.MASTER.trim());
+    const foundMaster = _findOrCreateSpreadsheetInFolder("MASTER", "RME Sheldon - 06 Master User & Role");
+    const ssMaster = foundMaster.ss;
     let shMaster = ssMaster.getSheetByName("Data") || ssMaster.insertSheet("Data");
     const masterHeaders = ["Nama_Pekerja", "Username", "Kategori_Role", "Password", "Status", "No_Registrasi", "No_HP", "Persen_JM_Dokter", "Email"];
     if (shMaster.getLastRow() === 0) {
@@ -4913,7 +5047,8 @@ function isiSimulasiJMDokter() {
     // -------------------------------------------------------------------------
     // 2. ISI SPREADSHEET 05 DATABASE TINDAKAN (Sheet: Tindakan & Tarif_Khusus_Dokter)
     // -------------------------------------------------------------------------
-    const ssDb = SpreadsheetApp.openById(DB_CONFIG.DATABASE.trim());
+    const foundDb = _findOrCreateSpreadsheetInFolder("DATABASE", "RME Sheldon - 05 Database Tindakan");
+    const ssDb = foundDb.ss;
     let shTindakan = ssDb.getSheetByName("Tindakan") || ssDb.insertSheet("Tindakan");
     const headersTindakan = ["Kode_Tindakan", "Nama_Tindakan", "Kategori", "Tarif", "Labor", "Persen_JM_Default"];
     if (shTindakan.getLastRow() === 0) {
@@ -4985,7 +5120,8 @@ function isiSimulasiJMDokter() {
     // -------------------------------------------------------------------------
     // 3. BUAT CONTOH HASIL PERHITUNGAN DI SPREADSHEET 02 PEMBAYARAN (Sheet: Rekap_Jasa_Medis)
     // -------------------------------------------------------------------------
-    const ssBayar = SpreadsheetApp.openById(DB_CONFIG.PEMBAYARAN.trim());
+    const foundBayar = _findOrCreateSpreadsheetInFolder("PEMBAYARAN", "RME Sheldon - 02 Pembayaran");
+    const ssBayar = foundBayar.ss;
     let shJM = ssBayar.getSheetByName("Rekap_Jasa_Medis") || ssBayar.insertSheet("Rekap_Jasa_Medis");
     const headersJM = [
       "ID_Invoice", "Tanggal", "Dokter", "Perawat", "Kategori_Item", "Nama_Item",

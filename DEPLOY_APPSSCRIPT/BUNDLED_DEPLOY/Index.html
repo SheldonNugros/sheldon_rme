@@ -40,8 +40,26 @@
   /* CSS Print Global */
   @media print {
     html, body { background: white !important; height: auto !important; margin: 0 !important; padding: 0 !important; }
-    #appContainer aside, #appContainer nav, #toastContainer, .print\:hidden { display: none !important; }
+    #appContainer aside, #appContainer nav, #toastContainer, #dbSyncOverlay, .print\:hidden { display: none !important; }
     #appContainer main { margin-left: 0 !important; padding: 0 !important; width: 100% !important; }
+  }
+
+  /* Animasi Loading & Sinkronisasi Database (Model 2: Dual-Ring Radar Minimalis) */
+  @keyframes spinReverse {
+    0% { transform: rotate(360deg); }
+    100% { transform: rotate(0deg); }
+  }
+  @keyframes shimmerBar {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  .spin-reverse {
+    animation: spinReverse 3s linear infinite;
+  }
+  .shimmer-progress {
+    background: linear-gradient(90deg, #06b6d4, #6366f1, #8b5cf6, #06b6d4);
+    background-size: 200% 100%;
+    animation: shimmerBar 2s linear infinite;
   }
 </style>
 </head>
@@ -465,6 +483,42 @@
   window.handleLogin = handleLogin;
 </script>
 
+
+<!-- MODAL ANIMASI LOADING & SYNC DATABASE (MODEL 2: DUAL-RING RADAR MINIMALIS) -->
+<div id="dbSyncOverlay" class="fixed inset-0 z-[280] hidden flex items-center justify-center p-4 bg-slate-950/75 backdrop-blur-md transition-opacity duration-300 opacity-0">
+  <div id="dbSyncCard" class="w-full max-w-xs bg-slate-900/90 backdrop-blur-2xl border border-white/15 rounded-3xl p-7 text-center shadow-[0_25px_70px_-15px_rgba(0,0,0,0.85)] transform scale-95 transition-all duration-300 relative overflow-hidden">
+    <div class="absolute -top-16 -right-16 w-36 h-36 bg-cyan-500/20 rounded-full blur-2xl pointer-events-none"></div>
+    <div class="absolute -bottom-16 -left-16 w-36 h-36 bg-indigo-600/25 rounded-full blur-2xl pointer-events-none"></div>
+
+    <!-- Dual-Ring Radar Spinner -->
+    <div class="relative w-28 h-28 mx-auto mb-5 flex items-center justify-center">
+      <div class="absolute inset-0 rounded-full border-4 border-slate-800"></div>
+      <div id="dbSyncRingOuter" class="absolute inset-0 rounded-full border-4 border-t-cyan-400 border-r-indigo-500 border-b-transparent border-l-transparent animate-spin"></div>
+      <div id="dbSyncRingInner" class="absolute inset-3 rounded-full border-2 border-dashed border-violet-400/60 spin-reverse"></div>
+      <div class="text-center relative z-10">
+        <span id="dbSyncPercent" class="text-2xl font-black text-white tracking-tight">0%</span>
+        <span id="dbSyncSubLabel" class="block text-[9px] font-extrabold uppercase tracking-widest text-cyan-400 mt-0.5">SYNCING</span>
+      </div>
+    </div>
+
+    <h3 id="dbSyncTitle" class="text-base font-black text-white mb-1">Memuat Database Klinik</h3>
+    <p id="dbSyncStatus" class="text-xs font-bold text-cyan-300 mb-4 min-h-[18px]">🔄 Menghubungkan ke Cloud Sheets...</p>
+
+    <!-- Progress Bar -->
+    <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden mb-3.5 border border-slate-700/70">
+      <div id="dbSyncProgressBar" class="h-full shimmer-progress rounded-full transition-all duration-300" style="width: 10%"></div>
+    </div>
+
+    <!-- Animated Dots -->
+    <div class="flex justify-center gap-1.5 mb-2">
+      <span class="w-2 h-2 rounded-full bg-cyan-400 animate-bounce" style="animation-delay:0ms"></span>
+      <span class="w-2 h-2 rounded-full bg-indigo-400 animate-bounce" style="animation-delay:150ms"></span>
+      <span class="w-2 h-2 rounded-full bg-violet-400 animate-bounce" style="animation-delay:300ms"></span>
+    </div>
+
+    <p class="text-[10px] text-slate-400 font-semibold">Sheldon Dental Care • Cloud Sheets</p>
+  </div>
+</div>
 
 <!-- MODAL LOGOUT -->
 <div id="logoutModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[300] hidden flex items-center justify-center p-4 transition-opacity duration-300 opacity-0">
@@ -4365,46 +4419,145 @@
     return split[1] != undefined ? rupiah + ',' + split[1] : rupiah;
   }
 
+  let _dbSyncTicker = null;
+
+  function showDbSyncOverlay(initialStatus) {
+    const overlay = document.getElementById('dbSyncOverlay');
+    const card = document.getElementById('dbSyncCard');
+    const pctEl = document.getElementById('dbSyncPercent');
+    const subEl = document.getElementById('dbSyncSubLabel');
+    const titleEl = document.getElementById('dbSyncTitle');
+    const statusEl = document.getElementById('dbSyncStatus');
+    const barEl = document.getElementById('dbSyncProgressBar');
+
+    if (pctEl) pctEl.innerText = '15%';
+    if (subEl) subEl.innerText = 'SYNCING';
+    if (titleEl) titleEl.innerText = 'Memuat Database Klinik';
+    if (statusEl) statusEl.innerText = initialStatus || '🔄 Menyinkronkan Master Data & Pasien...';
+    if (barEl) barEl.style.width = '15%';
+
+    if (overlay) {
+      overlay.classList.remove('hidden');
+      setTimeout(() => {
+        overlay.classList.remove('opacity-0');
+        if (card) {
+          card.classList.remove('scale-95');
+          card.classList.add('scale-100');
+        }
+      }, 15);
+    }
+  }
+
+  function updateDbSyncOverlay(pct, statusText, subLabel) {
+    const pctEl = document.getElementById('dbSyncPercent');
+    const subEl = document.getElementById('dbSyncSubLabel');
+    const statusEl = document.getElementById('dbSyncStatus');
+    const barEl = document.getElementById('dbSyncProgressBar');
+    if (pctEl) pctEl.innerText = pct + '%';
+    if (barEl) barEl.style.width = pct + '%';
+    if (statusText && statusEl) statusEl.innerText = statusText;
+    if (subLabel && subEl) subEl.innerText = subLabel;
+  }
+
+  function hideDbSyncOverlay() {
+    if (_dbSyncTicker) {
+      clearInterval(_dbSyncTicker);
+      _dbSyncTicker = null;
+    }
+    const overlay = document.getElementById('dbSyncOverlay');
+    const card = document.getElementById('dbSyncCard');
+    if (!overlay) return;
+    overlay.classList.add('opacity-0');
+    if (card) {
+      card.classList.remove('scale-100');
+      card.classList.add('scale-95');
+    }
+    setTimeout(() => {
+      overlay.classList.add('hidden');
+    }, 300);
+  }
+
   function startDataSync() {
-    const loadUI = document.getElementById('globalLoadingStatus'); if (loadUI) loadUI.classList.remove('hidden');
-    let step = 0;
-    const checkDone = () => {
-      step++;
-      if (step >= 3) {
+    const loadUI = document.getElementById('globalLoadingStatus');
+    if (loadUI) {
+      loadUI.classList.remove('hidden');
+      loadUI.innerHTML = '🔄 Memuat Database...';
+    }
+
+    const syncStartTime = Date.now();
+    showDbSyncOverlay('🔄 Menyinkronkan Master User, Tindakan & Obat...');
+
+    let completedTasks = 0; // total 4 tasks: master, pasien, rekamMedis, pembayaran
+    const onTaskComplete = (taskName) => {
+      completedTasks++;
+      if (completedTasks === 1) {
+        updateDbSyncOverlay(35, '🔄 Menyinkronkan Master Pasien & Rekam Medis...');
+        if (loadUI) loadUI.innerHTML = '🔄 Pasien & EMR...';
+      } else if (completedTasks === 2) {
+        updateDbSyncOverlay(65, '🔄 Menyinkronkan Rekam Medis & Odontogram...');
+        if (loadUI) loadUI.innerHTML = '🔄 Rekam Medis...';
+      } else if (completedTasks === 3) {
+        updateDbSyncOverlay(85, '🔄 Menyinkronkan Transaksi Kasir & Invoice...');
+        if (loadUI) loadUI.innerHTML = '🔄 Kasir & Invoice...';
+      } else if (completedTasks >= 4) {
+        updateDbSyncOverlay(100, '✅ Database Klinik Tersinkronisasi!', 'READY');
         if (loadUI) loadUI.classList.add('hidden');
-        showToast('success', 'Database tersinkronisasi');
         updateDashboardNumbers();
         document.dispatchEvent(new Event('KlinikDataReady'));
+
+        const elapsed = Date.now() - syncStartTime;
+        const minDisplayMs = 650;
+        const remainMs = Math.max(250, minDisplayMs - elapsed);
+        setTimeout(() => {
+          hideDbSyncOverlay();
+          showToast('success', 'Database tersinkronisasi');
+        }, remainMs);
       }
     };
-    if (loadUI) loadUI.innerHTML = '🔄 Master Data...';
+
     google.script.run.withSuccessHandler(res => {
-      window.KlinikData.staff = res.staff || [];
-      window.KlinikData.tindakan = res.tindakan || [];
-      window.KlinikData.obat = res.obat || [];
-      window.KlinikData.bmhp = res.bmhp || [];
+      window.KlinikData.staff = (res && res.staff) ? res.staff : [];
+      window.KlinikData.tindakan = (res && res.tindakan) ? res.tindakan : [];
+      window.KlinikData.obat = (res && res.obat) ? res.obat : [];
+      window.KlinikData.bmhp = (res && res.bmhp) ? res.bmhp : [];
       window.KlinikData.statusLoad.master = true;
-      checkDone();
+      onTaskComplete('master');
+    }).withFailureHandler(() => {
+      onTaskComplete('master');
     }).getInitMaster();
 
-    if (loadUI) loadUI.innerHTML = '🔄 Pasien...';
     google.script.run.withSuccessHandler(res => {
       window.KlinikData.pasien = res || [];
       window.KlinikData.statusLoad.pasien = true;
-      checkDone();
+      onTaskComplete('pasien');
+    }).withFailureHandler(() => {
+      onTaskComplete('pasien');
     }).getInitPasien();
 
-    if (loadUI) loadUI.innerHTML = '🔄 EMR & Kasir...';
     let stepEmrKasir = 0;
     function checkEmrKasirDone() {
       stepEmrKasir++;
       if (stepEmrKasir >= 2) {
         window.KlinikData.statusLoad.emr = true;
-        checkDone();
       }
     }
-    google.script.run.withSuccessHandler(res => { window.KlinikData.rekamMedis = res || []; checkEmrKasirDone(); }).getDaftarRekamMedis();
-    google.script.run.withSuccessHandler(res => { window.KlinikData.pembayaran = res || []; checkEmrKasirDone(); }).getDaftarPembayaran();
+    google.script.run.withSuccessHandler(res => {
+      window.KlinikData.rekamMedis = res || [];
+      checkEmrKasirDone();
+      onTaskComplete('emr');
+    }).withFailureHandler(() => {
+      checkEmrKasirDone();
+      onTaskComplete('emr');
+    }).getDaftarRekamMedis();
+
+    google.script.run.withSuccessHandler(res => {
+      window.KlinikData.pembayaran = res || [];
+      checkEmrKasirDone();
+      onTaskComplete('pembayaran');
+    }).withFailureHandler(() => {
+      checkEmrKasirDone();
+      onTaskComplete('pembayaran');
+    }).getDaftarPembayaran();
   }
 
   function updateDashboardNumbers() {

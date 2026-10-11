@@ -11992,16 +11992,19 @@ function triggerSimulasiJMDokter() {
       if (btn) { btn.disabled = false; btn.innerHTML = originalHtml; }
       updateLocalSimulatedUsers();
       showToast("success", "Simulasi JM 4 Dokter berhasil diterapkan!");
-      alert("✅ SIMULASI PEMBAGIAN JM DOKTER BERHASIL DIISI:\n\n" +
+      alert("✅ SIMULASI PEMBAGIAN JM, SHIFT & GAJI BERHASIL DIISI:\n\n" +
             "1. [06 Master User & Role -> Sheet: Data]\n" +
             "   • drg. Rahma Yulinda D, Sp. BMM = 65%\n" +
             "   • drg. Regyana Oktavaria = 40%\n" +
             "   • drg. Latifah Mulyana = 40%\n" +
             "   • drg. Tia Ardhana R = 50% (Default)\n\n" +
-            "2. [05 Database Tindakan -> Sheet: Tindakan]\n" +
-            "   • Kolom F (Persen_JM_Default) pada Rontgen diisi 15% (berlaku untuk SEMUA dokter)\n\n" +
-            "3. [05 Database Tindakan -> Sheet: Tarif_Khusus_Dokter]\n" +
-            "   • drg. Tia Ardhana R mendapat JM 55% pada PSA Molar, Odontektomi M3, dan Crown PFM\n\n" +
+            "2. [05 Database Tindakan -> Sheet: Tindakan & Tarif_Khusus_Dokter]\n" +
+            "   • Rontgen terkunci 15% untuk SEMUA dokter\n" +
+            "   • drg. Tia Ardhana R mendapat 55% pada PSA Molar, Odontektomi M3, dan Crown PFM\n\n" +
+            "3. [11 Payroll & Honor Dokter -> Pengaturan_Tarif_Shift & Presensi_Shift_Harian]\n" +
+            "   • Dokter (2 Shift): Rp 55.000 / shift (dihitung dari absensi)\n" +
+            "   • Perawat (2 Shift): Rp 45.000 / shift (dihitung dari absensi)\n" +
+            "   • Admin (Non-Shift): Rp 1.200.000 / bulan tetap\n\n" +
             "4. [02 Pembayaran -> Sheet: Rekap_Jasa_Medis]\n" +
             "   • Ditambahkan 8 baris contoh perhitungan simulasi (INV/SIMULASI/001 s.d. 004)");
     }, 800);

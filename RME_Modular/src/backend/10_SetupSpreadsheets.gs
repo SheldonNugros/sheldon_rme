@@ -287,15 +287,16 @@ const SPREADSHEET_DEFINITIONS = {
           "headers": ["ID_Aturan", "Role", "Nama_Pekerja", "Tipe_Kompensasi", "Tarif_Shift_1", "Tarif_Shift_2", "Gaji_Pokok_Bulanan", "Keterangan"],
           "formats": { "E": "#,##0", "F": "#,##0", "G": "#,##0" },
           "validations": {
-            "B": ["Dokter Gigi Spesialis", "Dokter Gigi Umum", "Perawat Gigi", "Admin / Kasir"],
+            "B": ["Dokter Gigi Spesialis", "Dokter Gigi Umum", "Perawat Gigi", "Perawat Umum", "Admin"],
             "D": ["Uang Harian Shift", "Gaji Bulanan Tetap", "Kombinasi Shift & Tindakan"]
           },
           "seedRows": [
-            ["TARIF-001", "Dokter Gigi Spesialis", "drg. Sheldon Cooper, Sp.Ort", "Kombinasi Shift & Tindakan", 150000, 200000, 0, "Shift 1 Rp 150rb, Shift 2 Rp 200rb + JM Tindakan (50%/55%)"],
-            ["TARIF-002", "Dokter Gigi Umum", "drg. Leonard Hofstadter", "Kombinasi Shift & Tindakan", 100000, 120000, 0, "Shift 1 Rp 100rb, Shift 2 Rp 120rb + JM Tindakan"],
-            ["TARIF-003", "Perawat Gigi", "Bernadette Rostenkowski", "Uang Harian Shift", 50000, 60000, 0, "Shift 1 Rp 50rb, Shift 2 Rp 60rb + Fee Tindakan"],
-            ["TARIF-004", "Admin / Kasir", "Penny Teller", "Gaji Bulanan Tetap", 0, 0, 2500000, "Gaji Tetap Rp 2.500.000/bulan"],
-            ["TARIF-005", "Admin / Kasir", "Howard Wolowitz", "Gaji Bulanan Tetap", 0, 0, 2500000, "Gaji Tetap Rp 2.500.000/bulan"]
+            ["TARIF-001", "Dokter Gigi Spesialis", "drg. Rahma Yulinda D, Sp. BMM", "Kombinasi Shift & Tindakan", 55000, 55000, 0, "2 Shift: Rp 55.000/shift (berdasarkan absensi) + JM 65% (Rontgen 15%)"],
+            ["TARIF-002", "Dokter Gigi Umum", "drg. Regyana Oktavaria", "Kombinasi Shift & Tindakan", 55000, 55000, 0, "2 Shift: Rp 55.000/shift (berdasarkan absensi) + JM 40% (Rontgen 15%)"],
+            ["TARIF-003", "Dokter Gigi Umum", "drg. Latifah Mulyana", "Kombinasi Shift & Tindakan", 55000, 55000, 0, "2 Shift: Rp 55.000/shift (berdasarkan absensi) + JM 40% (Rontgen 15%)"],
+            ["TARIF-004", "Dokter Gigi Umum", "drg. Tia Ardhana R", "Kombinasi Shift & Tindakan", 55000, 55000, 0, "2 Shift: Rp 55.000/shift (berdasarkan absensi) + JM 50% / 55% (Rontgen 15%)"],
+            ["TARIF-005", "Perawat Gigi", "Bernadette Rostenkowski", "Uang Harian Shift", 45000, 45000, 0, "2 Shift: Rp 45.000/shift (dihitung berdasarkan absensi kehadiran)"],
+            ["TARIF-006", "Admin", "Howard Wolowitz", "Gaji Bulanan Tetap", 0, 0, 1200000, "Gaji Bulanan Tetap Rp 1.200.000/bulan (Non-Shift)"]
           ]
         },
         {
@@ -303,16 +304,19 @@ const SPREADSHEET_DEFINITIONS = {
           "headers": ["ID_Presensi", "Tanggal", "ID_Pekerja", "Nama_Pekerja", "Role", "Shift", "Jam_Masuk", "Jam_Pulang", "Status_Kehadiran", "Uang_Harian_Didapat", "Verifikator", "Waktu_Sistem"],
           "formats": { "B": "dd-mm-yyyy", "J": "#,##0", "L": "dd-mm-yyyy hh:mm:ss" },
           "validations": {
-            "E": ["Dokter Gigi Spesialis", "Dokter Gigi Umum", "Perawat Gigi", "Admin / Kasir"],
+            "E": ["Dokter Gigi Spesialis", "Dokter Gigi Umum", "Perawat Gigi", "Perawat Umum", "Admin"],
             "F": ["Shift 1", "Shift 2", "Non-Shift"],
             "I": ["Hadir", "Izin", "Sakit", "Cuti"]
           },
           "seedRows": [
-            ["ATT-202610-001", "01-10-2026", "STF-001", "drg. Sheldon Cooper, Sp.Ort", "Dokter Gigi Spesialis", "Shift 1", "08:55", "15:05", "Hadir", 150000, "Penny Teller", "01-10-2026 15:10:00"],
-            ["ATT-202610-002", "01-10-2026", "STF-004", "Bernadette Rostenkowski", "Perawat Gigi", "Shift 1", "08:45", "15:15", "Hadir", 50000, "Penny Teller", "01-10-2026 15:10:00"],
-            ["ATT-202610-003", "01-10-2026", "STF-002", "drg. Leonard Hofstadter", "Dokter Gigi Umum", "Shift 2", "14:55", "21:05", "Hadir", 120000, "Howard Wolowitz", "01-10-2026 21:10:00"],
-            ["ATT-202610-004", "01-10-2026", "STF-004", "Bernadette Rostenkowski", "Perawat Gigi", "Shift 2", "14:50", "21:10", "Hadir", 60000, "Howard Wolowitz", "01-10-2026 21:10:00"],
-            ["ATT-202610-005", "02-10-2026", "STF-001", "drg. Sheldon Cooper, Sp.Ort", "Dokter Gigi Spesialis", "Shift 2", "14:50", "21:15", "Hadir", 200000, "Howard Wolowitz", "02-10-2026 21:20:00"]
+            ["ATT-202610-001", "01-10-2026", "DOK-001", "drg. Rahma Yulinda D, Sp. BMM", "Dokter Gigi Spesialis", "Shift 1", "08:55", "15:00", "Hadir", "=IF(I2=\"Hadir\",IF(F2=\"Shift 1\",IFERROR(VLOOKUP(D2,Pengaturan_Tarif_Shift!C:F,3,FALSE),55000),IF(F2=\"Shift 2\",IFERROR(VLOOKUP(D2,Pengaturan_Tarif_Shift!C:F,4,FALSE),55000),0)),0)", "Admin", "01-10-2026 15:05:00"],
+            ["ATT-202610-002", "01-10-2026", "DOK-001", "drg. Rahma Yulinda D, Sp. BMM", "Dokter Gigi Spesialis", "Shift 2", "15:00", "21:00", "Hadir", "=IF(I3=\"Hadir\",IF(F3=\"Shift 1\",IFERROR(VLOOKUP(D3,Pengaturan_Tarif_Shift!C:F,3,FALSE),55000),IF(F3=\"Shift 2\",IFERROR(VLOOKUP(D3,Pengaturan_Tarif_Shift!C:F,4,FALSE),55000),0)),0)", "Admin", "01-10-2026 21:05:00"],
+            ["ATT-202610-003", "01-10-2026", "DOK-002", "drg. Regyana Oktavaria", "Dokter Gigi Umum", "Shift 1", "08:50", "15:00", "Hadir", "=IF(I4=\"Hadir\",IF(F4=\"Shift 1\",IFERROR(VLOOKUP(D4,Pengaturan_Tarif_Shift!C:F,3,FALSE),55000),IF(F4=\"Shift 2\",IFERROR(VLOOKUP(D4,Pengaturan_Tarif_Shift!C:F,4,FALSE),55000),0)),0)", "Admin", "01-10-2026 15:05:00"],
+            ["ATT-202610-004", "01-10-2026", "DOK-003", "drg. Latifah Mulyana", "Dokter Gigi Umum", "Shift 2", "14:55", "21:00", "Hadir", "=IF(I5=\"Hadir\",IF(F5=\"Shift 1\",IFERROR(VLOOKUP(D5,Pengaturan_Tarif_Shift!C:F,3,FALSE),55000),IF(F5=\"Shift 2\",IFERROR(VLOOKUP(D5,Pengaturan_Tarif_Shift!C:F,4,FALSE),55000),0)),0)", "Admin", "01-10-2026 21:05:00"],
+            ["ATT-202610-005", "01-10-2026", "DOK-004", "drg. Tia Ardhana R", "Dokter Gigi Umum", "Shift 1", "08:55", "15:00", "Hadir", "=IF(I6=\"Hadir\",IF(F6=\"Shift 1\",IFERROR(VLOOKUP(D6,Pengaturan_Tarif_Shift!C:F,3,FALSE),55000),IF(F6=\"Shift 2\",IFERROR(VLOOKUP(D6,Pengaturan_Tarif_Shift!C:F,4,FALSE),55000),0)),0)", "Admin", "01-10-2026 15:05:00"],
+            ["ATT-202610-006", "01-10-2026", "DOK-004", "drg. Tia Ardhana R", "Dokter Gigi Umum", "Shift 2", "15:00", "21:00", "Hadir", "=IF(I7=\"Hadir\",IF(F7=\"Shift 1\",IFERROR(VLOOKUP(D7,Pengaturan_Tarif_Shift!C:F,3,FALSE),55000),IF(F7=\"Shift 2\",IFERROR(VLOOKUP(D7,Pengaturan_Tarif_Shift!C:F,4,FALSE),55000),0)),0)", "Admin", "01-10-2026 21:05:00"],
+            ["ATT-202610-007", "01-10-2026", "PRW-001", "Bernadette Rostenkowski", "Perawat Gigi", "Shift 1", "08:45", "15:00", "Hadir", "=IF(I8=\"Hadir\",IF(F8=\"Shift 1\",IFERROR(VLOOKUP(D8,Pengaturan_Tarif_Shift!C:F,3,FALSE),45000),IF(F8=\"Shift 2\",IFERROR(VLOOKUP(D8,Pengaturan_Tarif_Shift!C:F,4,FALSE),45000),0)),0)", "Admin", "01-10-2026 15:05:00"],
+            ["ATT-202610-008", "01-10-2026", "PRW-001", "Bernadette Rostenkowski", "Perawat Gigi", "Shift 2", "15:00", "21:05", "Hadir", "=IF(I9=\"Hadir\",IF(F9=\"Shift 1\",IFERROR(VLOOKUP(D9,Pengaturan_Tarif_Shift!C:F,3,FALSE),45000),IF(F9=\"Shift 2\",IFERROR(VLOOKUP(D9,Pengaturan_Tarif_Shift!C:F,4,FALSE),45000),0)),0)", "Admin", "01-10-2026 21:10:00"]
           ]
         },
         {
@@ -323,8 +327,10 @@ const SPREADSHEET_DEFINITIONS = {
             "S": ["Draft", "Approved", "Paid"]
           },
           "seedRows": [
-            ["PAY-DR-202610-001", "Oktober 2026", "STF-001", "drg. Sheldon Cooper, Sp.Ort", 18, 24500000, 1200000, 23300000, 12150000, 10, 8, 3100000, 500000, 350000, 0, 15400000, "BCA", "8270192831", "Draft", "", "Uang Harian: 10x Shift 1 (150rb) + 8x Shift 2 (200rb) = 3.1jt + JM", "10-10-2026 10:00:00"],
-            ["PAY-DR-202610-002", "Oktober 2026", "STF-002", "drg. Leonard Hofstadter", 15, 12800000, 0, 12800000, 5760000, 8, 10, 2000000, 250000, 175000, 0, 7835000, "Mandiri", "1310029102912", "Draft", "", "Uang Harian: 8x Shift 1 (100rb) + 10x Shift 2 (120rb) = 2.0jt + JM", "10-10-2026 10:00:00"]
+            ["PAY-DR-202610-001", "Oktober 2026", "DOK-001", "drg. Rahma Yulinda D, Sp. BMM", 2, 2600000, 0, 2600000, 1640000, "=COUNTIFS(Presensi_Shift_Harian!D:D,D2,Presensi_Shift_Harian!F:F,\"Shift 1\",Presensi_Shift_Harian!I:I,\"Hadir\")", "=COUNTIFS(Presensi_Shift_Harian!D:D,D2,Presensi_Shift_Harian!F:F,\"Shift 2\",Presensi_Shift_Harian!I:I,\"Hadir\")", "=SUMIFS(Presensi_Shift_Harian!J:J,Presensi_Shift_Harian!D:D,D2,Presensi_Shift_Harian!I:I,\"Hadir\")", 0, 0, 0, "=(I2+L2+M2)-(N2+O2)", "BCA", "-", "Draft", "", "Otomatis dari Absensi Shift (Rp 55.000/shift) + JM 65% (Rontgen 15%)", "10-10-2026 10:00:00"],
+            ["PAY-DR-202610-002", "Oktober 2026", "DOK-002", "drg. Regyana Oktavaria", 2, 400000, 0, 400000, 135000, "=COUNTIFS(Presensi_Shift_Harian!D:D,D3,Presensi_Shift_Harian!F:F,\"Shift 1\",Presensi_Shift_Harian!I:I,\"Hadir\")", "=COUNTIFS(Presensi_Shift_Harian!D:D,D3,Presensi_Shift_Harian!F:F,\"Shift 2\",Presensi_Shift_Harian!I:I,\"Hadir\")", "=SUMIFS(Presensi_Shift_Harian!J:J,Presensi_Shift_Harian!D:D,D3,Presensi_Shift_Harian!I:I,\"Hadir\")", 0, 0, 0, "=(I3+L3+M3)-(N3+O3)", "Mandiri", "-", "Draft", "", "Otomatis dari Absensi Shift (Rp 55.000/shift) + JM 40% (Rontgen 15%)", "10-10-2026 10:00:00"],
+            ["PAY-DR-202610-003", "Oktober 2026", "DOK-003", "drg. Latifah Mulyana", 1, 250000, 0, 250000, 100000, "=COUNTIFS(Presensi_Shift_Harian!D:D,D4,Presensi_Shift_Harian!F:F,\"Shift 1\",Presensi_Shift_Harian!I:I,\"Hadir\")", "=COUNTIFS(Presensi_Shift_Harian!D:D,D4,Presensi_Shift_Harian!F:F,\"Shift 2\",Presensi_Shift_Harian!I:I,\"Hadir\")", "=SUMIFS(Presensi_Shift_Harian!J:J,Presensi_Shift_Harian!D:D,D4,Presensi_Shift_Harian!I:I,\"Hadir\")", 0, 0, 0, "=(I4+L4+M4)-(N4+O4)", "BRI", "-", "Draft", "", "Otomatis dari Absensi Shift (Rp 55.000/shift) + JM 40% (Rontgen 15%)", "10-10-2026 10:00:00"],
+            ["PAY-DR-202610-004", "Oktober 2026", "DOK-004", "drg. Tia Ardhana R", 3, 1900000, 0, 1900000, 990000, "=COUNTIFS(Presensi_Shift_Harian!D:D,D5,Presensi_Shift_Harian!F:F,\"Shift 1\",Presensi_Shift_Harian!I:I,\"Hadir\")", "=COUNTIFS(Presensi_Shift_Harian!D:D,D5,Presensi_Shift_Harian!F:F,\"Shift 2\",Presensi_Shift_Harian!I:I,\"Hadir\")", "=SUMIFS(Presensi_Shift_Harian!J:J,Presensi_Shift_Harian!D:D,D5,Presensi_Shift_Harian!I:I,\"Hadir\")", 0, 0, 0, "=(I5+L5+M5)-(N5+O5)", "BNI", "-", "Draft", "", "Otomatis dari Absensi Shift (Rp 55.000/shift) + JM 50%/55% (Rontgen 15%)", "10-10-2026 10:00:00"]
           ]
         },
         {
@@ -335,9 +341,8 @@ const SPREADSHEET_DEFINITIONS = {
             "Q": ["Draft", "Approved", "Paid"]
           },
           "seedRows": [
-            ["PAY-STF-202610-001", "Oktober 2026", "STF-004", "Bernadette Rostenkowski", "Perawat Gigi", 0, 14, 12, 1420000, 450000, 500000, 150000, 0, 2520000, "BSI", "7109281923", "Draft", "", "Perawat: 14x Shift 1 (50rb) + 12x Shift 2 (60rb) + Fee Tindakan", "10-10-2026 10:00:00"],
-            ["PAY-STF-202610-002", "Oktober 2026", "STF-003", "Penny Teller", "Admin / Kasir", 2500000, 0, 0, 0, 0, 500000, 100000, 0, 3100000, "BCA", "8271029381", "Draft", "", "Admin: Gaji Pokok Bulanan Tetap 2.5jt + Makan/Transport 500rb", "10-10-2026 10:00:00"],
-            ["PAY-STF-202610-003", "Oktober 2026", "STF-005", "Howard Wolowitz", "Admin / Kasir", 2500000, 0, 0, 0, 0, 500000, 0, 0, 3000000, "Mandiri", "1310091827361", "Draft", "", "Admin: Gaji Pokok Bulanan Tetap 2.5jt + Makan/Transport 500rb", "10-10-2026 10:00:00"]
+            ["PAY-STF-202610-001", "Oktober 2026", "PRW-001", "Bernadette Rostenkowski", "Perawat Gigi", 0, "=COUNTIFS(Presensi_Shift_Harian!D:D,D2,Presensi_Shift_Harian!F:F,\"Shift 1\",Presensi_Shift_Harian!I:I,\"Hadir\")", "=COUNTIFS(Presensi_Shift_Harian!D:D,D2,Presensi_Shift_Harian!F:F,\"Shift 2\",Presensi_Shift_Harian!I:I,\"Hadir\")", "=SUMIFS(Presensi_Shift_Harian!J:J,Presensi_Shift_Harian!D:D,D2,Presensi_Shift_Harian!I:I,\"Hadir\")", 0, 0, 0, 0, "=(F2+I2+J2+K2+L2)-M2", "BSI", "-", "Draft", "", "Perawat (2 Shift): Rp 45.000/shift dihitung otomatis dari Absensi Kehadiran", "10-10-2026 10:00:00"],
+            ["PAY-STF-202610-002", "Oktober 2026", "ADM-001", "Howard Wolowitz", "Admin", "=IFERROR(VLOOKUP(D3,Pengaturan_Tarif_Shift!C:G,5,FALSE),1200000)", 0, 0, 0, 0, 0, 0, 0, "=(F3+I3+J3+K3+L3)-M3", "Mandiri", "-", "Draft", "", "Admin (Non-Shift): Gaji Pokok Bulanan Tetap Rp 1.200.000/bulan", "10-10-2026 10:00:00"]
           ]
         },
         {
@@ -348,8 +353,7 @@ const SPREADSHEET_DEFINITIONS = {
             "H": ["Belum Lunas", "Lunas", "Dibatalkan"]
           },
           "seedRows": [
-            ["LAB-BILL-202610-001", "Oktober 2026", "Dental Lab Padang Mandiri", 3, 1050000, 0, 1050000, "Belum Lunas", "", "Transfer Bank", "FAK-LAB-8912", "Pekerjaan PFM Crown 2 unit, Valplast 1 unit", "10-10-2026 10:00:00"],
-            ["LAB-BILL-202610-002", "Oktober 2026", "Kencana Dental Lab Bukittinggi", 1, 350000, 0, 350000, "Belum Lunas", "", "Transfer Bank", "FAK-KCN-4410", "Crown PFM Pasien Budi Santoso (INV 0001)", "10-10-2026 10:00:00"]
+            ["LAB-BILL-202610-001", "Oktober 2026", "Dental Lab Padang Mandiri", 3, 1050000, 0, 1050000, "Belum Lunas", "", "Transfer Bank", "FAK-LAB-8912", "Pekerjaan PFM Crown 2 unit, Valplast 1 unit", "10-10-2026 10:00:00"]
           ]
         },
         {
@@ -357,13 +361,13 @@ const SPREADSHEET_DEFINITIONS = {
           "headers": ["No_Slip", "Tanggal_Terbit", "Penerima", "Kategori", "Periode", "Total_THP", "File_PDF_Url", "Dikirim_Ke", "Status_Kirim", "Waktu_Sistem"],
           "formats": { "B": "dd-mm-yyyy", "F": "#,##0", "J": "dd-mm-yyyy hh:mm:ss" },
           "validations": {
-            "D": ["Dokter", "Perawat", "Staff"],
+            "D": ["Dokter", "Perawat", "Admin", "Staff"],
             "I": ["Draft", "Terkirim", "Gagal"]
           },
           "seedRows": [
-            ["SLIP/DR/202610/001", "31-10-2026", "drg. Sheldon Cooper, Sp.Ort", "Dokter", "Oktober 2026", 15400000, "https://drive.google.com/file/d/slip-sheldon-okt-2026", "081234567890", "Terkirim", "31-10-2026 17:00:00"],
-            ["SLIP/DR/202610/002", "31-10-2026", "drg. Leonard Hofstadter", "Dokter", "Oktober 2026", 7835000, "https://drive.google.com/file/d/slip-leonard-okt-2026", "081234567891", "Terkirim", "31-10-2026 17:00:00"],
-            ["SLIP/STF/202610/001", "31-10-2026", "Bernadette Rostenkowski", "Perawat", "Oktober 2026", 2520000, "https://drive.google.com/file/d/slip-bernadette-okt-2026", "081234567893", "Terkirim", "31-10-2026 17:00:00"]
+            ["SLIP/DR/202610/001", "31-10-2026", "drg. Rahma Yulinda D, Sp. BMM", "Dokter", "Oktober 2026", 1750000, "https://drive.google.com/file/d/slip-rahma-okt-2026", "081234567801", "Draft", "31-10-2026 17:00:00"],
+            ["SLIP/STF/202610/001", "31-10-2026", "Bernadette Rostenkowski", "Perawat", "Oktober 2026", 90000, "https://drive.google.com/file/d/slip-bernadette-okt-2026", "081234567893", "Draft", "31-10-2026 17:00:00"],
+            ["SLIP/ADM/202610/001", "31-10-2026", "Howard Wolowitz", "Admin", "Oktober 2026", 1200000, "https://drive.google.com/file/d/slip-howard-okt-2026", "081234567894", "Draft", "31-10-2026 17:00:00"]
           ]
         }
       ]
@@ -766,8 +770,12 @@ function setupPayrollSpreadsheet() {
       }
 
       // Headers
-      if (shDef.headers && sheet.getLastRow() === 0) {
-        sheet.appendRow(shDef.headers);
+      if (shDef.headers) {
+        if (sheet.getLastRow() === 0) {
+          sheet.appendRow(shDef.headers);
+        } else {
+          sheet.getRange(1, 1, 1, shDef.headers.length).setValues([shDef.headers]);
+        }
         sheet.getRange(1, 1, 1, shDef.headers.length)
           .setFontWeight("bold")
           .setBackground("#1e293b")
@@ -775,9 +783,21 @@ function setupPayrollSpreadsheet() {
         sheet.setFrozenRows(1);
       }
 
-      // Seed Rows jika kosong
-      if (shDef.seedRows && sheet.getLastRow() <= 1) {
+      // Seed Rows (Tulis / perbarui contoh aturan shift 55rb Dokter, 45rb Perawat, 1,2jt Admin)
+      if (shDef.seedRows && shDef.seedRows.length > 0) {
+        if (sheet.getLastRow() > 1) {
+          sheet.getRange(2, 1, sheet.getLastRow() - 1, sheet.getLastColumn()).clearContent();
+        }
         sheet.getRange(2, 1, shDef.seedRows.length, shDef.seedRows[0].length).setValues(shDef.seedRows);
+      }
+
+      // Validasi Dropdown
+      if (shDef.validations) {
+        Object.keys(shDef.validations).forEach(colLetter => {
+          let listValues = shDef.validations[colLetter];
+          let rule = SpreadsheetApp.newDataValidation().requireValueInList(listValues, true).build();
+          sheet.getRange(colLetter + "2:" + colLetter + "1000").setDataValidation(rule);
+        });
       }
 
       // Format Rupiah & Tanggal
@@ -793,7 +813,10 @@ function setupPayrollSpreadsheet() {
       success: true,
       spreadsheetId: ssId,
       url: ss.getUrl(),
-      message: (isBaru ? "Spreadsheet baru berhasil dibuat: " : "Spreadsheet berhasil disinkronkan: ") + def.title + " (ID: " + ssId + ")"
+      message: (isBaru ? "Spreadsheet baru berhasil dibuat: " : "Spreadsheet berhasil disinkronkan: ") + def.title + " (ID: " + ssId + ")\n\n" +
+               "• Pengaturan_Tarif_Shift: Dokter Rp 55.000/shift (2 shift), Perawat Rp 45.000/shift (2 shift), Admin Rp 1.200.000/bulan (Non-Shift)\n" +
+               "• Presensi_Shift_Harian: Rumus otomatis membaca kehadiran Shift 1 & Shift 2\n" +
+               "• Penggajian_Dokter & Honor_Perawat_Staff: Rekap otomatis berdasarkan absensi kehadiran!"
     };
   } catch (err) {
     return { success: false, message: "Gagal membuat spreadsheet Payroll: " + err.message };
@@ -985,13 +1008,14 @@ function generatePayrollPeriode(periodeBulan) {
 
 /**
  * =========================================================================
- * FUNGSI SIMULASI OTOMATIS: ISI DATABASE PEMBAGIAN JM DOKTER KE SPREADSHEET
+ * FUNGSI SIMULASI OTOMATIS: ISI DATABASE PEMBAGIAN JM DOKTER & SHIFT KE SPREADSHEET
  * =========================================================================
  * Mengisi otomatis:
  * 1. RME Sheldon - 06 Master User & Role (Sheet: Data) -> 4 Dokter + Persen_JM_Dokter (65%, 40%, 40%, 50%)
  * 2. RME Sheldon - 05 Database Tindakan (Sheet: Tindakan) -> Foto Rontgen Periapikal Digital (Persen_JM_Default = 15% untuk semua dokter)
  * 3. RME Sheldon - 05 Database Tindakan (Sheet: Tarif_Khusus_Dokter) -> Tindakan khusus drg. Tia Ardhana R (55%)
  * 4. RME Sheldon - 02 Pembayaran (Sheet: Rekap_Jasa_Medis) -> Contoh simulasi perhitungan bagi hasil JM ke-4 dokter
+ * 5. RME Sheldon - 11 Payroll & Honor Dokter -> Pengaturan_Tarif_Shift (Dokter 55.000/shift, Perawat 45.000/shift, Admin 1.200.000/bln), Presensi_Shift_Harian, Penggajian_Dokter, & Honor_Perawat_Staff
  */
 function isiSimulasiJMDokter() {
   const lock = LockService.getScriptLock();
@@ -1099,7 +1123,7 @@ function isiSimulasiJMDokter() {
     }
     shTindakan.getRange("D2:D1000").setNumberFormat("#,##0");
     shTindakan.getRange("F2:F1000").setNumberFormat("0.0%");
-    ringkasan.push("✅ [05 Database Tindakan -> Sheet: Tindakan]\n   • Kolom F (Persen_JM_Default) pada tindakan Rontgen diisi 15% (berlaku mengunci 15% untuk SEMUA dokter). Tindakan lain dikosongkan agar mengikuti % masing-masing dokter.");
+    ringkasan.push("✅ [05 Database Tindakan -> Sheet: Tindakan]\n   • Kolom F (Persen_JM_Default) pada tindakan Rontgen diisi 15% (berlaku mengunci 15% untuk SEMUA dokter).");
 
     // Sheet: Tarif_Khusus_Dokter (Untuk drg. Tia Ardhana R yang mendapat 55% di tindakan tertentu)
     let shKhusus = ssDb.getSheetByName("Tarif_Khusus_Dokter") || ssDb.insertSheet("Tarif_Khusus_Dokter");
@@ -1135,7 +1159,7 @@ function isiSimulasiJMDokter() {
       shJM.setFrozenRows(1);
     }
 
-    // Hapus baris simulasi sebelumnya jika ada (INV-SIMULASI-JM-*)
+    // Hapus baris simulasi sebelumnya jika ada (INV/SIMULASI/*)
     let existingJM = shJM.getDataRange().getValues();
     for (let r = existingJM.length - 1; r >= 1; r--) {
       if (String(existingJM[r][0] || "").indexOf("INV/SIMULASI/") === 0) {
@@ -1146,15 +1170,11 @@ function isiSimulasiJMDokter() {
     const tglSim = Utilities.formatDate(new Date(), "Asia/Jakarta", "dd-MM-yyyy");
     const waktuSim = new Date();
     const rowsSimulasiJM = [
-      // 1. drg. Rahma Yulinda D, Sp. BMM -> Tindakan Odontektomi (Default Dokter 65%) & Rontgen (Terkunci 15%)
       ["INV/SIMULASI/001", tglSim, "drg. Rahma Yulinda D, Sp. BMM", "Bernadette Rostenkowski", "Tindakan", "Odontektomi Gigi Impaksi M3", 2500000, 0, 2500000, 0.65, "Default Dokter (65%)", 1625000, 0, 1625000, 0, 875000, "SIAP_CAIR", waktuSim],
       ["INV/SIMULASI/001", tglSim, "drg. Rahma Yulinda D, Sp. BMM", "Bernadette Rostenkowski", "Tindakan", "Foto Rontgen Periapikal Digital", 100000, 0, 100000, 0.15, "Kunci Tindakan Global (15%)", 15000, 0, 15000, 0, 85000, "SIAP_CAIR", waktuSim],
-      // 2. drg. Regyana Oktavaria -> Scaling (Default Dokter 40%) & Rontgen (Terkunci 15%)
       ["INV/SIMULASI/002", tglSim, "drg. Regyana Oktavaria", "Bernadette Rostenkowski", "Tindakan", "Scaling Rahang Atas & Bawah", 300000, 0, 300000, 0.40, "Default Dokter (40%)", 120000, 0, 120000, 0, 180000, "SIAP_CAIR", waktuSim],
       ["INV/SIMULASI/002", tglSim, "drg. Regyana Oktavaria", "Bernadette Rostenkowski", "Tindakan", "Foto Rontgen Periapikal Digital", 100000, 0, 100000, 0.15, "Kunci Tindakan Global (15%)", 15000, 0, 15000, 0, 85000, "SIAP_CAIR", waktuSim],
-      // 3. drg. Latifah Mulyana -> Tambal Komposit (Default Dokter 40%)
       ["INV/SIMULASI/003", tglSim, "drg. Latifah Mulyana", "Bernadette Rostenkowski", "Tindakan", "Penambalan Komposit Light-Cure", 250000, 0, 250000, 0.40, "Default Dokter (40%)", 100000, 0, 100000, 0, 150000, "SIAP_CAIR", waktuSim],
-      // 4. drg. Tia Ardhana R -> Scaling (Default Dokter 50%), PSA Molar (Tarif Khusus 55%), & Rontgen (Terkunci 15%)
       ["INV/SIMULASI/004", tglSim, "drg. Tia Ardhana R", "Bernadette Rostenkowski", "Tindakan", "Scaling Rahang Atas & Bawah", 300000, 0, 300000, 0.50, "Default Dokter (50%)", 150000, 0, 150000, 0, 150000, "SIAP_CAIR", waktuSim],
       ["INV/SIMULASI/004", tglSim, "drg. Tia Ardhana R", "Bernadette Rostenkowski", "Tindakan", "Perawatan Saluran Akar (PSA) Molar", 1500000, 0, 1500000, 0.55, "Tarif Khusus Dokter (55%)", 825000, 0, 825000, 0, 675000, "SIAP_CAIR", waktuSim],
       ["INV/SIMULASI/004", tglSim, "drg. Tia Ardhana R", "Bernadette Rostenkowski", "Tindakan", "Foto Rontgen Periapikal Digital", 100000, 0, 100000, 0.15, "Kunci Tindakan Global (15%)", 15000, 0, 15000, 0, 85000, "SIAP_CAIR", waktuSim]
@@ -1164,15 +1184,24 @@ function isiSimulasiJMDokter() {
     shJM.getRange("G2:I1000").setNumberFormat("#,##0");
     shJM.getRange("J2:J1000").setNumberFormat("0.0%");
     shJM.getRange("L2:P1000").setNumberFormat("#,##0");
-    ringkasan.push("✅ [02 Pembayaran -> Sheet: Rekap_Jasa_Medis]\n   • Ditambahkan 8 baris contoh perhitungan simulasi (INV/SIMULASI/001 s.d. 004) yang bisa Anda cek & hapus kapan saja.");
+    ringkasan.push("✅ [02 Pembayaran -> Sheet: Rekap_Jasa_Medis]\n   • Ditambahkan 8 baris contoh perhitungan simulasi (INV/SIMULASI/001 s.d. 004).");
+
+    // -------------------------------------------------------------------------
+    // 4. SINKRONKAN SPREADSHEET 11 PAYROLL & HONOR DOKTER (SHIFT 55RB, PERAWAT 45RB, ADMIN 1,2JT)
+    // -------------------------------------------------------------------------
+    let resPay = setupPayrollSpreadsheet();
+    if (resPay && resPay.success) {
+      ringkasan.push("✅ [11 Payroll & Honor Dokter]\n   • Pengaturan_Tarif_Shift: Dokter Rp 55.000/shift (2 shift), Perawat Rp 45.000/shift (2 shift), Admin Rp 1.200.000/bulan (Non-Shift)\n   • Presensi_Shift_Harian, Penggajian_Dokter & Honor_Perawat_Staff terisi rumus otomatis dari absensi!" + (resPay.url ? "\n   • Link Payroll: " + resPay.url : ""));
+    }
 
     SpreadsheetApp.flush();
     return {
       success: true,
-      message: "SIMULASI PEMBAGIAN JM DOKTER BERHASIL DIISI KE SPREADSHEET!\n\n" + ringkasan.join("\n\n")
+      urlPayroll: resPay ? resPay.url : "",
+      message: "SIMULASI JM DOKTER, SHIFT, & GAJI BERHASIL DIISI KE SPREADSHEET!\n\n" + ringkasan.join("\n\n")
     };
   } catch (err) {
-    return { success: false, message: "Gagal mengisi simulasi JM Dokter: " + err.message };
+    return { success: false, message: "Gagal mengisi simulasi JM Dokter & Shift: " + err.message };
   } finally {
     lock.releaseLock();
   }

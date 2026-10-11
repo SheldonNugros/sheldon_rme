@@ -177,6 +177,43 @@ const SPREADSHEET_DEFINITIONS = {
             "C": ["Super User", "Owner", "Dokter Gigi Umum", "Dokter Gigi Spesialis", "Perawat Gigi", "Perawat Umum", "Admin", "Kasir", "Staff"],
             "E": ["Aktif", "Non Aktif", "Tidak Aktif"]
           }
+        },
+        {
+          "name": "Pengaturan_Tarif_Shift",
+          "headers": ["ID_Aturan", "Role", "Nama_Pekerja", "Tipe_Kompensasi", "Tarif_Shift_1", "Tarif_Shift_2", "Gaji_Pokok_Bulanan", "Keterangan"],
+          "formats": { "E": "#,##0", "F": "#,##0", "G": "#,##0" },
+          "validations": {
+            "B": ["Dokter Gigi Spesialis", "Dokter Gigi Umum", "Perawat Gigi", "Perawat Umum", "Admin"],
+            "D": ["Uang Harian Shift", "Gaji Bulanan Tetap", "Kombinasi Shift & Tindakan"]
+          },
+          "seedRows": [
+            ["TARIF-001", "Dokter Gigi Spesialis", "drg. Rahma Yulinda D, Sp. BMM", "Kombinasi Shift & Tindakan", 55000, 55000, 0, "2 Shift: Rp 55.000/shift (berdasarkan absensi) + JM 65% (Rontgen 15%)"],
+            ["TARIF-002", "Dokter Gigi Umum", "drg. Regyana Oktavaria", "Kombinasi Shift & Tindakan", 55000, 55000, 0, "2 Shift: Rp 55.000/shift (berdasarkan absensi) + JM 40% (Rontgen 15%)"],
+            ["TARIF-003", "Dokter Gigi Umum", "drg. Latifah Mulyana", "Kombinasi Shift & Tindakan", 55000, 55000, 0, "2 Shift: Rp 55.000/shift (berdasarkan absensi) + JM 40% (Rontgen 15%)"],
+            ["TARIF-004", "Dokter Gigi Umum", "drg. Tia Ardhana R", "Kombinasi Shift & Tindakan", 55000, 55000, 0, "2 Shift: Rp 55.000/shift (berdasarkan absensi) + JM 50% / 55% (Rontgen 15%)"],
+            ["TARIF-005", "Perawat Gigi", "Bernadette Rostenkowski", "Uang Harian Shift", 45000, 45000, 0, "2 Shift: Rp 45.000/shift (dihitung berdasarkan absensi kehadiran)"],
+            ["TARIF-006", "Admin", "Howard Wolowitz", "Gaji Bulanan Tetap", 0, 0, 1200000, "Gaji Bulanan Tetap Rp 1.200.000/bulan (Non-Shift)"]
+          ]
+        },
+        {
+          "name": "Presensi_Shift_Harian",
+          "headers": ["ID_Presensi", "Tanggal", "ID_Pekerja", "Nama_Pekerja", "Role", "Shift", "Jam_Masuk", "Jam_Pulang", "Status_Kehadiran", "Uang_Harian_Didapat", "Verifikator", "Waktu_Sistem"],
+          "formats": { "B": "dd-mm-yyyy", "J": "#,##0", "L": "dd-mm-yyyy hh:mm:ss" },
+          "validations": {
+            "E": ["Dokter Gigi Spesialis", "Dokter Gigi Umum", "Perawat Gigi", "Perawat Umum", "Admin"],
+            "F": ["Shift 1", "Shift 2", "Non-Shift"],
+            "I": ["Hadir", "Izin", "Sakit", "Cuti"]
+          },
+          "seedRows": [
+            ["ATT-202610-001", "01-10-2026", "DOK-001", "drg. Rahma Yulinda D, Sp. BMM", "Dokter Gigi Spesialis", "Shift 1", "08:55", "15:00", "Hadir", "=IF(I2=\"Hadir\",IF(F2=\"Shift 1\",IFERROR(VLOOKUP(D2,Pengaturan_Tarif_Shift!C:F,3,FALSE),55000),IF(F2=\"Shift 2\",IFERROR(VLOOKUP(D2,Pengaturan_Tarif_Shift!C:F,4,FALSE),55000),0)),0)", "Admin", "01-10-2026 15:05:00"],
+            ["ATT-202610-002", "01-10-2026", "DOK-001", "drg. Rahma Yulinda D, Sp. BMM", "Dokter Gigi Spesialis", "Shift 2", "15:00", "21:00", "Hadir", "=IF(I3=\"Hadir\",IF(F3=\"Shift 1\",IFERROR(VLOOKUP(D3,Pengaturan_Tarif_Shift!C:F,3,FALSE),55000),IF(F3=\"Shift 2\",IFERROR(VLOOKUP(D3,Pengaturan_Tarif_Shift!C:F,4,FALSE),55000),0)),0)", "Admin", "01-10-2026 21:05:00"],
+            ["ATT-202610-003", "01-10-2026", "DOK-002", "drg. Regyana Oktavaria", "Dokter Gigi Umum", "Shift 1", "08:50", "15:00", "Hadir", "=IF(I4=\"Hadir\",IF(F4=\"Shift 1\",IFERROR(VLOOKUP(D4,Pengaturan_Tarif_Shift!C:F,3,FALSE),55000),IF(F4=\"Shift 2\",IFERROR(VLOOKUP(D4,Pengaturan_Tarif_Shift!C:F,4,FALSE),55000),0)),0)", "Admin", "01-10-2026 15:05:00"],
+            ["ATT-202610-004", "01-10-2026", "DOK-003", "drg. Latifah Mulyana", "Dokter Gigi Umum", "Shift 2", "14:55", "21:00", "Hadir", "=IF(I5=\"Hadir\",IF(F5=\"Shift 1\",IFERROR(VLOOKUP(D5,Pengaturan_Tarif_Shift!C:F,3,FALSE),55000),IF(F5=\"Shift 2\",IFERROR(VLOOKUP(D5,Pengaturan_Tarif_Shift!C:F,4,FALSE),55000),0)),0)", "Admin", "01-10-2026 21:05:00"],
+            ["ATT-202610-005", "01-10-2026", "DOK-004", "drg. Tia Ardhana R", "Dokter Gigi Umum", "Shift 1", "08:55", "15:00", "Hadir", "=IF(I6=\"Hadir\",IF(F6=\"Shift 1\",IFERROR(VLOOKUP(D6,Pengaturan_Tarif_Shift!C:F,3,FALSE),55000),IF(F6=\"Shift 2\",IFERROR(VLOOKUP(D6,Pengaturan_Tarif_Shift!C:F,4,FALSE),55000),0)),0)", "Admin", "01-10-2026 15:05:00"],
+            ["ATT-202610-006", "01-10-2026", "DOK-004", "drg. Tia Ardhana R", "Dokter Gigi Umum", "Shift 2", "15:00", "21:00", "Hadir", "=IF(I7=\"Hadir\",IF(F7=\"Shift 1\",IFERROR(VLOOKUP(D7,Pengaturan_Tarif_Shift!C:F,3,FALSE),55000),IF(F7=\"Shift 2\",IFERROR(VLOOKUP(D7,Pengaturan_Tarif_Shift!C:F,4,FALSE),55000),0)),0)", "Admin", "01-10-2026 21:05:00"],
+            ["ATT-202610-007", "01-10-2026", "PRW-001", "Bernadette Rostenkowski", "Perawat Gigi", "Shift 1", "08:45", "15:00", "Hadir", "=IF(I8=\"Hadir\",IF(F8=\"Shift 1\",IFERROR(VLOOKUP(D8,Pengaturan_Tarif_Shift!C:F,3,FALSE),45000),IF(F8=\"Shift 2\",IFERROR(VLOOKUP(D8,Pengaturan_Tarif_Shift!C:F,4,FALSE),45000),0)),0)", "Admin", "01-10-2026 15:05:00"],
+            ["ATT-202610-008", "01-10-2026", "PRW-001", "Bernadette Rostenkowski", "Perawat Gigi", "Shift 2", "15:00", "21:05", "Hadir", "=IF(I9=\"Hadir\",IF(F9=\"Shift 1\",IFERROR(VLOOKUP(D9,Pengaturan_Tarif_Shift!C:F,3,FALSE),45000),IF(F9=\"Shift 2\",IFERROR(VLOOKUP(D9,Pengaturan_Tarif_Shift!C:F,4,FALSE),45000),0)),0)", "Admin", "01-10-2026 21:10:00"]
+          ]
         }
       ]
     },
@@ -718,6 +755,14 @@ function sinkronkanSemuaSheetOtomatis() {
     }
   }
 
+  // Juga pastikan Spreadsheet 11 Payroll & Honor Dokter ikut tersinkronisasi (lengkap dengan Pengaturan_Tarif_Shift & Presensi_Shift_Harian)
+  try {
+    let payRes = setupPayrollSpreadsheet();
+    if (payRes && payRes.success) {
+      laporan.push("✅ Disinkronkan: [RME Sheldon - 11 Payroll & Honor Dokter -> Pengaturan_Tarif_Shift, Presensi_Shift_Harian, Penggajian_Dokter, Honor_Perawat_Staff]");
+    }
+  } catch (ePay) {}
+
   SpreadsheetApp.flush();
   Logger.log("Laporan Sinkronisasi:\n" + laporan.join("\n"));
   return {
@@ -732,16 +777,80 @@ function sinkronkanSemuaSheetOtomatis() {
 // =========================================================================
 
 /**
- * Otomatis membuat Spreadsheet "RME Sheldon - 11 Payroll & Honor Dokter"
- * lengkap dengan 4 sheet: Penggajian_Dokter, Honor_Perawat_Staff, Tagihan_Vendor_Lab, dan Slip_Gaji_Arsip.
+ * Helper privat: Memastikan 2 sheet (Pengaturan_Tarif_Shift & Presensi_Shift_Harian)
+ * juga dibuat & diisi di dalam Spreadsheet "RME Sheldon - 06 Master User & Role"
+ * agar pengguna yang membuka Master User & Role langsung melihatnya.
+ */
+function _sinkronkanShiftKeMasterUser() {
+  try {
+    if (!DB_CONFIG || !DB_CONFIG.MASTER) return;
+    const ssMaster = SpreadsheetApp.openById(DB_CONFIG.MASTER.trim());
+    const defMaster = SPREADSHEET_DEFINITIONS["MASTER"];
+    if (!defMaster || !defMaster.sheets) return;
+
+    defMaster.sheets.forEach(shDef => {
+      if (shDef.name !== "Pengaturan_Tarif_Shift" && shDef.name !== "Presensi_Shift_Harian") return;
+      let sheet = ssMaster.getSheetByName(shDef.name) || ssMaster.insertSheet(shDef.name);
+
+      if (shDef.headers) {
+        if (sheet.getLastRow() === 0) {
+          sheet.appendRow(shDef.headers);
+        } else {
+          sheet.getRange(1, 1, 1, shDef.headers.length).setValues([shDef.headers]);
+        }
+        sheet.getRange(1, 1, 1, shDef.headers.length)
+          .setFontWeight("bold")
+          .setBackground("#1e293b")
+          .setFontColor("#ffffff");
+        sheet.setFrozenRows(1);
+      }
+
+      if (shDef.seedRows && shDef.seedRows.length > 0) {
+        if (sheet.getLastRow() > 1) {
+          sheet.getRange(2, 1, sheet.getLastRow() - 1, sheet.getLastColumn()).clearContent();
+        }
+        sheet.getRange(2, 1, shDef.seedRows.length, shDef.seedRows[0].length).setValues(shDef.seedRows);
+      }
+
+      if (shDef.validations) {
+        Object.keys(shDef.validations).forEach(colLetter => {
+          let listValues = shDef.validations[colLetter];
+          let rule = SpreadsheetApp.newDataValidation().requireValueInList(listValues, true).build();
+          sheet.getRange(colLetter + "2:" + colLetter + "1000").setDataValidation(rule);
+        });
+      }
+
+      if (shDef.formats) {
+        Object.keys(shDef.formats).forEach(colLetter => {
+          sheet.getRange(colLetter + "2:" + colLetter + "1000").setNumberFormat(shDef.formats[colLetter]);
+        });
+      }
+    });
+  } catch (e) {
+    Logger.log("Info _sinkronkanShiftKeMasterUser: " + e.message);
+  }
+}
+
+/**
+ * Otomatis membuat / memperbarui Spreadsheet "RME Sheldon - 11 Payroll & Honor Dokter"
+ * lengkap dengan 6 sheet:
+ * 1. Pengaturan_Tarif_Shift
+ * 2. Presensi_Shift_Harian
+ * 3. Penggajian_Dokter
+ * 4. Honor_Perawat_Staff
+ * 5. Tagihan_Vendor_Lab
+ * 6. Slip_Gaji_Arsip
  */
 function setupPayrollSpreadsheet() {
   const lock = LockService.getScriptLock();
   try {
     lock.waitLock(15000);
     const def = SPREADSHEET_DEFINITIONS["PAYROLL"];
-    let ssId = (DB_CONFIG && DB_CONFIG.PAYROLL) ? DB_CONFIG.PAYROLL.trim() : "";
-    let ss;
+    let prop = PropertiesService.getScriptProperties();
+    let ssId = (DB_CONFIG && DB_CONFIG.PAYROLL && DB_CONFIG.PAYROLL.trim() !== "")
+      ? DB_CONFIG.PAYROLL.trim()
+      : (prop.getProperty("RME_PAYROLL_SS_ID") || "");
+    let ss = null;
     let isBaru = false;
 
     if (ssId && ssId !== "") {
@@ -752,6 +861,21 @@ function setupPayrollSpreadsheet() {
       }
     }
 
+    // Jika belum ada ID tersimpan, cari file bernama "RME Sheldon - 11 Payroll & Honor Dokter" di Google Drive agar tidak duplikat
+    if (!ss) {
+      try {
+        let files = DriveApp.getFilesByName(def.title);
+        while (files.hasNext()) {
+          let f = files.next();
+          if (!f.isTrashed()) {
+            ss = SpreadsheetApp.openById(f.getId());
+            ssId = f.getId();
+            break;
+          }
+        }
+      } catch (eDrive) {}
+    }
+
     if (!ss) {
       ss = SpreadsheetApp.create(def.title);
       ssId = ss.getId();
@@ -759,14 +883,22 @@ function setupPayrollSpreadsheet() {
       Logger.log("✅ Berhasil membuat Spreadsheet baru: " + def.title + " (ID: " + ssId + ")");
     }
 
-    // Bangun seluruh sheet
+    try {
+      prop.setProperty("RME_PAYROLL_SS_ID", ssId);
+      DB_CONFIG.PAYROLL = ssId;
+    } catch (eProp) {}
+
+    // Bangun seluruh sheet berdasarkan nama (sehingga spreadsheet lama yang belum punya Pengaturan_Tarif_Shift & Presensi_Shift_Harian otomatis dibuatkan!)
+    let firstSheet = ss.getSheets()[0];
     def.sheets.forEach((shDef, idx) => {
-      let sheet;
-      if (idx === 0) {
-        sheet = ss.getSheets()[0];
-        sheet.setName(shDef.name);
-      } else {
-        sheet = ss.getSheetByName(shDef.name) || ss.insertSheet(shDef.name);
+      let sheet = ss.getSheetByName(shDef.name);
+      if (!sheet) {
+        if (idx === 0 && isBaru && firstSheet) {
+          sheet = firstSheet;
+          sheet.setName(shDef.name);
+        } else {
+          sheet = ss.insertSheet(shDef.name, idx);
+        }
       }
 
       // Headers
@@ -808,15 +940,17 @@ function setupPayrollSpreadsheet() {
       }
     });
 
+    // Pastikan juga terbuat di "RME Sheldon - 06 Master User & Role"
+    _sinkronkanShiftKeMasterUser();
+
     SpreadsheetApp.flush();
     return {
       success: true,
       spreadsheetId: ssId,
       url: ss.getUrl(),
       message: (isBaru ? "Spreadsheet baru berhasil dibuat: " : "Spreadsheet berhasil disinkronkan: ") + def.title + " (ID: " + ssId + ")\n\n" +
-               "• Pengaturan_Tarif_Shift: Dokter Rp 55.000/shift (2 shift), Perawat Rp 45.000/shift (2 shift), Admin Rp 1.200.000/bulan (Non-Shift)\n" +
-               "• Presensi_Shift_Harian: Rumus otomatis membaca kehadiran Shift 1 & Shift 2\n" +
-               "• Penggajian_Dokter & Honor_Perawat_Staff: Rekap otomatis berdasarkan absensi kehadiran!"
+               "• Sheet 1 (Pengaturan_Tarif_Shift) & Sheet 2 (Presensi_Shift_Harian) juga telah ditambahkan ke [RME Sheldon - 06 Master User & Role] dan [RME Sheldon - 11 Payroll & Honor Dokter]!\n" +
+               "• Dokter: Rp 55.000/shift (2 shift), Perawat: Rp 45.000/shift (2 shift), Admin: Rp 1.200.000/bulan (Non-Shift)"
     };
   } catch (err) {
     return { success: false, message: "Gagal membuat spreadsheet Payroll: " + err.message };

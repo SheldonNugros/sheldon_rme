@@ -12659,11 +12659,13 @@ function triggerSetupPayroll() {
       if (btn) { btn.disabled = false; btn.innerHTML = originalHtml; }
       showToast("success", "Simulasi: Spreadsheet 11 Payroll & Honor Dokter berhasil disiapkan!");
       alert("✅ SPREADSHEET PAYROLL BERHASIL DISIAPKAN (SIMULASI):\n\n" +
-            "• Judul: RME Sheldon - 11 Payroll & Honor Dokter\n" +
-            "• Sheet 1: Penggajian_Dokter (Jasa Medis, PPh 21, THP)\n" +
-            "• Sheet 2: Honor_Perawat_Staff (Gaji Pokok + Fee Tindakan)\n" +
-            "• Sheet 3: Tagihan_Vendor_Lab (Biaya Laboratorium Eksternal)\n" +
-            "• Sheet 4: Slip_Gaji_Arsip (Riwayat Kirim Slip)");
+            "• Judul: RME Sheldon - 11 Payroll & Honor Dokter (dan disinkronkan ke 06 Master User & Role)\n" +
+            "• Sheet 1: Pengaturan_Tarif_Shift (Dokter Rp 55.000/shift, Perawat Rp 45.000/shift, Admin Rp 1.200.000/bln)\n" +
+            "• Sheet 2: Presensi_Shift_Harian (Absensi Kehadiran Shift 1 & Shift 2)\n" +
+            "• Sheet 3: Penggajian_Dokter (Jasa Medis + Uang Shift Absensi)\n" +
+            "• Sheet 4: Honor_Perawat_Staff (Uang Shift Perawat + Gaji Bulanan Admin)\n" +
+            "• Sheet 5: Tagihan_Vendor_Lab (Biaya Laboratorium Eksternal)\n" +
+            "• Sheet 6: Slip_Gaji_Arsip (Riwayat Kirim Slip)");
     }, 1200);
   }
 }

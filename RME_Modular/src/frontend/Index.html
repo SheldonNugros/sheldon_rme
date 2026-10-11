@@ -153,7 +153,7 @@
           <span class="text-base group-hover:scale-110 transition-transform">🗄️</span>
           <span class="flex-1">Database Master</span>
         </button>
-        <button onclick="bukaMenuMasterUser()" id="nav-user-master" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-300 hover:text-white hover:bg-slate-800/90 transition-all text-left group">
+        <button onclick="switchMenu('user-master')" id="nav-user-master" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-300 hover:text-white hover:bg-slate-800/90 transition-all text-left group">
           <span class="text-base group-hover:scale-110 transition-transform">👥</span>
           <span class="flex-1">Master User & Role</span>
         </button>
@@ -248,6 +248,7 @@
       <!-- INJECT MODUL VIEW HTML -->
       <div id="view-ai" class="module-view hidden"><?!= include('AIView'); ?></div>
       <div id="view-database" class="module-view hidden"><?!= include('DatabaseView'); ?></div>
+      <div id="view-user-master" class="module-view hidden"><?!= include('UserMasterView'); ?></div>
       <div id="view-inventory" class="module-view hidden"><?!= include('InventoryView'); ?></div>
       <div id="view-informasi" class="module-view hidden"><?!= include('InformasiView'); ?></div>
       <div id="view-pasien" class="module-view hidden"><?!= include('PasienView'); ?></div>
@@ -399,6 +400,10 @@
   
     if (menuId === 'ai' && typeof loadAIInsights === 'function') loadAIInsights();
     if (menuId === 'database' && typeof initDatabaseModule === 'function') initDatabaseModule();
+    if (menuId === 'user-master') {
+      if (typeof handleRoleChange === 'function') handleRoleChange();
+      if (typeof loadDaftarUserMaster === 'function') loadDaftarUserMaster();
+    }
     if (menuId === 'inventory' && typeof initInventoryModule === 'function') initInventoryModule();
     if (menuId === 'informasi' && typeof initInformasiModule === 'function') initInformasiModule();
     if (menuId === 'surat' && typeof initSuratModule === 'function') initSuratModule();
@@ -407,21 +412,7 @@
   }
 
   function bukaMenuMasterUser() {
-    switchMenu('database');
-    if (typeof changeDBMenu === 'function') {
-      changeDBMenu('user');
-    }
-    let topTitle = document.getElementById('topbarTitle');
-    if (topTitle) topTitle.innerText = 'Master User & Role';
-    document.querySelectorAll('.nav-btn').forEach(el => {
-      el.classList.remove('bg-gradient-to-r', 'from-cyan-600', 'to-indigo-600', 'text-white', 'shadow-md', 'shadow-cyan-500/20', 'ring-1', 'ring-cyan-400/30', 'bg-indigo-600');
-      el.classList.add('text-slate-300', 'hover:bg-slate-800/90', 'hover:text-white');
-    });
-    let btnUserNav = document.getElementById('nav-user-master');
-    if (btnUserNav) {
-      btnUserNav.classList.remove('text-slate-300', 'hover:bg-slate-800/90');
-      btnUserNav.classList.add('bg-gradient-to-r', 'from-cyan-600', 'to-indigo-600', 'text-white', 'shadow-md', 'shadow-cyan-500/20', 'ring-1', 'ring-cyan-400/30');
-    }
+    switchMenu('user-master');
   }
 
   function logout() {

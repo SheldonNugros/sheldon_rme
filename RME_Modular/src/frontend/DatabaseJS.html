@@ -918,6 +918,8 @@ function triggerSetupPayroll() {
             "• Sheet 4: Slip_Gaji_Arsip (Riwayat Kirim Slip)");
     }, 1200);
   }
+}
+
 // ==========================================
 // MODUL MASTER USER & ROLE (SUPER USER)
 // ==========================================
@@ -1263,5 +1265,28 @@ function hapusDbUser(username, nama) {
     renderTabelUser();
   }
 }
+
+// Global binding for reliable onclick & onsubmit invocation across all browsers
+window.togglePasswordVisibility = togglePasswordVisibility;
+window.handleRoleChange = handleRoleChange;
+window.loadDaftarUserMaster = loadDaftarUserMaster;
+window.renderTabelUser = renderTabelUser;
+window.simpanDbUser = simpanDbUser;
+window.editDbUser = editDbUser;
+window.batalEditDbUser = batalEditDbUser;
+window.hapusDbUser = hapusDbUser;
+window.changeDBMenu = changeDBMenu;
+window.triggerSinkronSemuaSheet = triggerSinkronSemuaSheet;
+window.triggerSetupPayroll = triggerSetupPayroll;
+window.triggerManualBackup = triggerManualBackup;
+window.aktifkanAutoBackupTrigger = aktifkanAutoBackupTrigger;
+window.aktifkanArsipTahunanTrigger = aktifkanArsipTahunanTrigger;
+window.simpanDbTindakan = simpanDbTindakan;
+window.simpanDbObat = simpanDbObat;
+window.simpanDbBmhp = simpanDbBmhp;
+window.batalEditDbTindakan = (typeof batalEditDbTindakan === 'function') ? batalEditDbTindakan : window.batalEditDbTindakan;
+window.renderTabelTindakan = (typeof renderTabelTindakan === 'function') ? renderTabelTindakan : window.renderTabelTindakan;
+window.renderTabelObat = (typeof renderTabelObat === 'function') ? renderTabelObat : window.renderTabelObat;
+window.renderTabelBmhp = (typeof renderTabelBmhp === 'function') ? renderTabelBmhp : window.renderTabelBmhp;
 
 </script>

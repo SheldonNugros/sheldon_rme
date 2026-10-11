@@ -173,8 +173,8 @@
     <header class="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between shadow-sm z-30">
       <h1 id="topbarTitle" class="text-lg font-black text-slate-800 tracking-tight">Dashboard Overview</h1>
       <div class="flex items-center gap-3">
-        <!-- Live Google Sheets Sync Status Badge -->
-        <button type="button" onclick="openGasSyncModal()" id="badgeGasSync" class="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 rounded-xl text-xs font-bold transition-all shadow-sm">
+        <!-- Live Google Sheets Sync Status Badge (Khusus Super User & Menu Master User & Role) -->
+        <button type="button" onclick="openGasSyncModal()" id="badgeGasSync" class="hidden items-center gap-2 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 rounded-xl text-xs font-bold transition-all shadow-sm">
           <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
           <span>Google Sheets: Live Sinkron</span>
           <span class="text-[10px] text-emerald-600 underline font-normal ml-1">Ubah URL</span>
@@ -285,15 +285,19 @@
     let btnDbUser = document.getElementById('btnDbUser');
     if (btnDbUser) btnDbUser.classList.add('hidden');
 
-    // 1. SUPER USER: Bisa membuka, edit, dan delete semua modul
+    // 1. SUPER USER / OWNER: Bisa membuka, edit, dan delete modul utama (Master User & Role khusus Super User)
     if (r === 'super user' || r === 'owner') {
-      ['nav-dashboard', 'nav-ai', 'nav-pasien', 'nav-rekam-medis', 'nav-surat', 'nav-database', 'nav-user-master', 'nav-inventory', 'nav-informasi', 'nav-kasir', 'nav-riwayat-invoice'].forEach(id => {
+      ['nav-dashboard', 'nav-ai', 'nav-pasien', 'nav-rekam-medis', 'nav-surat', 'nav-database', 'nav-inventory', 'nav-informasi', 'nav-kasir', 'nav-riwayat-invoice'].forEach(id => {
         let el = document.getElementById(id); if (el) el.classList.remove('hidden');
       });
+      if (r === 'super user') {
+        let navUM = document.getElementById('nav-user-master');
+        if (navUM) navUM.classList.remove('hidden');
+        if (btnDbUser) btnDbUser.classList.remove('hidden');
+      }
       document.getElementById('section-transaksi').classList.remove('hidden');
       if (btnTambahPasien) btnTambahPasien.classList.remove('hidden');
       if (btnFilterDuplikat) btnFilterDuplikat.classList.remove('hidden');
-      if (btnDbUser) btnDbUser.classList.remove('hidden');
       switchMenu('dashboard');
     }
     // 2. DOKTER GIGI SPESIALIS / UMUM: Rekam Medis & Odontogram, Form & Surat, Informasi, view Database Pasien, AI Clinical Insights
@@ -336,6 +340,7 @@
       if (btnFilterDuplikat) btnFilterDuplikat.classList.add('hidden');
       switchMenu('pasien');
     }
+    if (typeof window.syncGasBadgeVisibility === 'function') window.syncGasBadgeVisibility();
   }
 
   document.addEventListener("DOMContentLoaded", () => {
@@ -383,6 +388,7 @@
   }
 
   function switchMenu(menuId) {
+    window.activeMenuId = menuId;
     document.querySelectorAll('.module-view').forEach(el => el.classList.add('hidden'));
     document.querySelectorAll('.nav-btn').forEach(el => {
       el.classList.remove('bg-gradient-to-r', 'from-cyan-600', 'to-indigo-600', 'text-white', 'shadow-md', 'shadow-cyan-500/20', 'ring-1', 'ring-cyan-400/30', 'bg-indigo-600');
@@ -397,6 +403,8 @@
       targetNav.classList.add('bg-gradient-to-r', 'from-cyan-600', 'to-indigo-600', 'text-white', 'shadow-md', 'shadow-cyan-500/20', 'ring-1', 'ring-cyan-400/30');
       document.getElementById('topbarTitle').innerText = targetNav.innerText.replace(/[^a-zA-Z0-9\s&]/gi, '').trim();
     }
+
+    if (typeof window.syncGasBadgeVisibility === 'function') window.syncGasBadgeVisibility();
   
     if (menuId === 'ai' && typeof loadAIInsights === 'function') loadAIInsights();
     if (menuId === 'database' && typeof initDatabaseModule === 'function') initDatabaseModule();
@@ -651,16 +659,32 @@
     }
   };
 
+  window.syncGasBadgeVisibility = function() {
+    const badge = document.getElementById('badgeGasSync');
+    if (!badge) return;
+    const isSuperUser = String(window.activeUserRole || '').trim().toLowerCase() === 'super user';
+    const viewUserMaster = document.getElementById('view-user-master');
+    const isUserMasterVisible = (window.activeMenuId === 'user-master') || (viewUserMaster && !viewUserMaster.classList.contains('hidden'));
+    if (isSuperUser && isUserMasterVisible) {
+      badge.classList.remove('hidden');
+      badge.classList.add('flex');
+    } else {
+      badge.classList.add('hidden');
+      badge.classList.remove('flex');
+    }
+  };
+
   window._updateGasBadge = function(isLive) {
     const badge = document.getElementById('badgeGasSync');
     if (!badge) return;
     if (isLive) {
-      badge.className = "flex items-center gap-2 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 rounded-xl text-xs font-bold transition-all shadow-sm";
+      badge.className = "hidden items-center gap-2 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 rounded-xl text-xs font-bold transition-all shadow-sm";
       badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span><span>Google Sheets: Live Sinkron</span><span class="text-[10px] text-emerald-600 underline font-normal ml-1">Ubah URL</span>';
     } else {
-      badge.className = "flex items-center gap-2 px-3 py-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-700 rounded-xl text-xs font-bold transition-all shadow-sm";
+      badge.className = "hidden items-center gap-2 px-3 py-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-700 rounded-xl text-xs font-bold transition-all shadow-sm";
       badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-amber-500"></span><span>Mode Standalone (Lokal)</span><span class="text-[10px] text-amber-600 underline font-normal ml-1">Hubungkan</span>';
     }
+    window.syncGasBadgeVisibility();
   };
 </script>
 </body>

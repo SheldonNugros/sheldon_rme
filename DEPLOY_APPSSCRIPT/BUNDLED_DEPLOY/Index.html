@@ -966,24 +966,7 @@
      <h2 class="text-lg font-black text-slate-900 flex items-center gap-2">
        <span class="text-2xl">🗄️</span> Database Master
      </h2>
-     <p class="text-slate-500 mt-1 text-xs">Pusat pengaturan data Tindakan, Obat, BMHP, dan Pencadangan Sistem.</p>
-   </div>
-   <div class="flex items-center gap-2.5 flex-wrap">
-     <button id="btnSinkronSheet" type="button" onclick="triggerSinkronSemuaSheet()" class="px-3.5 py-2.5 bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 font-bold rounded-xl text-xs transition-all flex items-center gap-1.5" title="Otomatis buat & perbarui seluruh sheet yang kurang pada database spreadsheet">
-       <span>🔄</span> Sinkronkan Sheet
-     </button>
-     <button id="btnSetupPayroll" type="button" onclick="triggerSetupPayroll()" class="px-3.5 py-2.5 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 font-bold rounded-xl text-xs transition-all flex items-center gap-1.5" title="Otomatis buat & sinkronkan Spreadsheet Payroll & Honor Dokter">
-       <span>💼</span> Setup Payroll Dokter
-     </button>
-     <button id="btnBackupSekarang" type="button" onclick="triggerManualBackup()" class="px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl text-xs shadow-md shadow-blue-500/20 transition-all flex items-center gap-2">
-       <span>💾</span> Backup Sekarang
-     </button>
-     <button id="btnPasangTriggerBackup" type="button" onclick="aktifkanAutoBackupTrigger()" class="px-3.5 py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 font-bold rounded-xl text-xs transition-all flex items-center gap-1.5" title="Aktifkan Jadwal Auto-Backup 02.00 Dini Hari">
-       <span>⏰</span> Auto-Backup (02.00 WIB)
-     </button>
-     <button id="btnPasangTriggerArsip" type="button" onclick="aktifkanArsipTahunanTrigger()" class="px-3.5 py-2.5 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 font-bold rounded-xl text-xs transition-all flex items-center gap-1.5" title="Aktifkan Jadwal Arsip Tahunan 1 Januari Pukul 01.00 WIB">
-       <span>📦</span> Auto-Arsip (1 Jan)
-     </button>
+     <p class="text-slate-500 mt-1 text-xs">Pusat pengaturan data Tindakan, Obat, dan BMHP Klinik.</p>
    </div>
  </div>
 
@@ -1334,25 +1317,46 @@
 </div>
       <div id="view-user-master" class="module-view hidden"><div class="space-y-6 text-xs relative text-slate-800">
   <!-- HEADER MODUL MASTER USER & ROLE -->
-  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-6 rounded-2xl shadow-sm border border-slate-200 gap-4">
-    <div class="flex items-center gap-3.5">
-      <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center text-2xl font-black border border-indigo-100 shadow-sm">
-        👥
-      </div>
-      <div>
-        <div class="flex items-center gap-2 flex-wrap">
-          <h2 class="text-lg font-black text-slate-900">Master User & Role</h2>
-          <span class="px-2.5 py-0.5 bg-purple-100 text-purple-700 font-extrabold text-[10px] rounded-full uppercase tracking-wider border border-purple-200">Khusus Super User</span>
+  <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div class="flex items-center gap-3.5">
+        <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center text-2xl font-black border border-indigo-100 shadow-sm">
+          👥
         </div>
-        <p class="text-slate-500 mt-1 text-xs">Pusat manajemen akun pengguna, password login, dan hak akses staf klinik (<span class="font-bold text-slate-700">Spreadsheet: RME Sheldon - 06 Master User & Role</span>).</p>
+        <div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <h2 class="text-lg font-black text-slate-900">Master User & Role</h2>
+            <span class="px-2.5 py-0.5 bg-purple-100 text-purple-700 font-extrabold text-[10px] rounded-full uppercase tracking-wider border border-purple-200">Khusus Super User</span>
+          </div>
+          <p class="text-slate-500 mt-1 text-xs">Pusat manajemen akun pengguna, hak akses staf, dan pemeliharaan sistem (<span class="font-bold text-slate-700">Spreadsheet: RME Sheldon - 06 Master User & Role</span>).</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2.5 flex-wrap">
+        <button type="button" id="btnReloadUserMaster" onclick="loadDaftarUserMaster(true)" class="px-3.5 py-2.5 bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 font-bold rounded-xl text-xs transition-all flex items-center gap-1.5 shadow-sm active:scale-95" title="Muat ulang seluruh daftar pengguna dari Spreadsheet">
+          <span>🔄</span> Muat Ulang Data
+        </button>
+        <button type="button" id="btnOpenFormUserBaru" onclick="bukaFormUserBaru()" class="px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold rounded-xl text-xs shadow-md shadow-indigo-500/20 transition-all flex items-center gap-2 active:scale-95">
+          <span>➕</span> Form User Baru
+        </button>
       </div>
     </div>
-    <div class="flex items-center gap-2.5 flex-wrap">
-      <button type="button" id="btnReloadUserMaster" onclick="loadDaftarUserMaster(true)" class="px-3.5 py-2.5 bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 font-bold rounded-xl text-xs transition-all flex items-center gap-1.5 shadow-sm active:scale-95" title="Muat ulang seluruh daftar pengguna dari Spreadsheet">
-        <span>🔄</span> Muat Ulang Data
+
+    <!-- TOMBOL SISTEM, SINKRONISASI, & BACKUP (KHUSUS SUPER USER) -->
+    <div class="pt-3.5 border-t border-slate-100 flex items-center gap-2.5 flex-wrap">
+      <button id="btnSinkronSheet" type="button" onclick="triggerSinkronSemuaSheet()" class="px-3.5 py-2.5 bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 font-bold rounded-xl text-xs transition-all flex items-center gap-1.5" title="Otomatis buat & perbarui seluruh sheet yang kurang pada database spreadsheet">
+        <span>🔄</span> Sinkronkan Sheet
       </button>
-      <button type="button" id="btnOpenFormUserBaru" onclick="bukaFormUserBaru()" class="px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold rounded-xl text-xs shadow-md shadow-indigo-500/20 transition-all flex items-center gap-2 active:scale-95">
-        <span>➕</span> Form User Baru
+      <button id="btnSetupPayroll" type="button" onclick="triggerSetupPayroll()" class="px-3.5 py-2.5 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 font-bold rounded-xl text-xs transition-all flex items-center gap-1.5" title="Otomatis buat & sinkronkan Spreadsheet Payroll & Honor Dokter">
+        <span>💼</span> Setup Payroll Dokter
+      </button>
+      <button id="btnBackupSekarang" type="button" onclick="triggerManualBackup()" class="px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl text-xs shadow-md shadow-blue-500/20 transition-all flex items-center gap-2">
+        <span>💾</span> Backup Sekarang
+      </button>
+      <button id="btnPasangTriggerBackup" type="button" onclick="aktifkanAutoBackupTrigger()" class="px-3.5 py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 font-bold rounded-xl text-xs transition-all flex items-center gap-1.5" title="Aktifkan Jadwal Auto-Backup 02.00 Dini Hari">
+        <span>⏰</span> Auto-Backup (02.00 WIB)
+      </button>
+      <button id="btnPasangTriggerArsip" type="button" onclick="aktifkanArsipTahunanTrigger()" class="px-3.5 py-2.5 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 font-bold rounded-xl text-xs transition-all flex items-center gap-1.5" title="Aktifkan Jadwal Arsip Tahunan 1 Januari Pukul 01.00 WIB">
+        <span>📦</span> Auto-Arsip (1 Jan)
       </button>
     </div>
   </div>

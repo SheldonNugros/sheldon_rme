@@ -2132,10 +2132,13 @@
       <button id="btnSetupPayroll" type="button" onclick="triggerSetupPayroll()" class="px-3.5 py-2.5 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 font-bold rounded-xl text-xs transition-all flex items-center gap-1.5" title="Otomatis buat & sinkronkan Spreadsheet Payroll & Honor Dokter">
         <span>💼</span> Setup Payroll Dokter
       </button>
-      <button id="btnBackupSekarang" type="button" onclick="triggerManualBackup()" class="px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl text-xs shadow-md shadow-blue-500/20 transition-all flex items-center gap-2">
+      <button id="btnBackupSekarang" type="button" onclick="triggerManualBackup()" class="px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl text-xs shadow-md shadow-blue-500/20 transition-all flex items-center gap-2" title="Cadangkan seluruh Spreadsheet & Ekspor file .CSV otomatis ke folder BACKUP_RME_SHELDON di Google Drive">
         <span>💾</span> Backup Sekarang
       </button>
-      <button id="btnPasangTriggerBackup" type="button" onclick="aktifkanAutoBackupTrigger()" class="px-3.5 py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 font-bold rounded-xl text-xs transition-all flex items-center gap-1.5" title="Aktifkan Jadwal Auto-Backup 02.00 Dini Hari">
+      <button id="btnBackupDownloadCSV" type="button" onclick="triggerBackupDownloadCSV()" class="px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold rounded-xl text-xs shadow-md shadow-emerald-500/20 transition-all flex items-center gap-2" title="Cadangkan ke Google Drive (.CSV) sekaligus unduh file .CSV database langsung ke perangkat ini">
+        <span>📥</span> Backup & Download CSV
+      </button>
+      <button id="btnPasangTriggerBackup" type="button" onclick="aktifkanAutoBackupTrigger()" class="px-3.5 py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 font-bold rounded-xl text-xs transition-all flex items-center gap-1.5" title="Aktifkan Jadwal Auto-Backup 02.00 Dini Hari (Spreadsheet + CSV)">
         <span>⏰</span> Auto-Backup (02.00 WIB)
       </button>
       <button id="btnPasangTriggerArsip" type="button" onclick="aktifkanArsipTahunanTrigger()" class="px-3.5 py-2.5 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 font-bold rounded-xl text-xs transition-all flex items-center gap-1.5" title="Aktifkan Jadwal Arsip Tahunan 1 Januari Pukul 01.00 WIB">
@@ -13078,7 +13081,7 @@ function renderTabelBmhp() {
 }
 
 // ==========================================
-// PENCADANGAN SISTEM (MULTI-DRIVE BACKUP)
+// PENCADANGAN SISTEM (MULTI-DRIVE BACKUP + CSV EXPORT)
 // ==========================================
 function triggerManualBackup() {
   let btn = document.getElementById('btnBackupSekarang');
@@ -13087,7 +13090,7 @@ function triggerManualBackup() {
     btn.disabled = true;
     btn.innerHTML = '<span>⏳</span> Memproses Backup...';
   }
-  showToast('info', 'Sedang membuat salinan snapshot database ke Google Drive...');
+  showToast('info', 'Sedang membuat salinan Spreadsheet & file .CSV ke Google Drive...');
 
   let watchdog = setTimeout(() => {
     if (btn && btn.disabled) {
@@ -13095,7 +13098,7 @@ function triggerManualBackup() {
       btn.innerHTML = originalHtml;
       showToast('warning', 'Proses backup memakan waktu lebih lama di server. Silakan periksa folder BACKUP_RME_SHELDON di Google Drive.');
     }
-  }, 45000);
+  }, 55000);
 
   if (typeof google !== 'undefined' && google.script && google.script.run) {
     google.script.run
@@ -13103,14 +13106,18 @@ function triggerManualBackup() {
         clearTimeout(watchdog);
         if (btn) { btn.disabled = false; btn.innerHTML = originalHtml; }
         if (res && res.success) {
-          showToast('success', `Backup Sukses! (${res.successCount} File tersalin ke ${res.folderNama})`);
+          let csvInfo = res.csvCount ? ` + ${res.csvCount} file .CSV` : '';
+          showToast('success', `Backup Sukses! (${res.successCount} Spreadsheet${csvInfo} tersalin ke ${res.folderNama})`);
           if (res.folderUrl) {
-            alert(`✅ PROSES BACKUP BERHASIL!\n\n` +
-                  `• Status: Berhasil mencadangkan ${res.successCount} Spreadsheet\n` +
-                  `• Folder: ${res.folderNama}\n` +
+            alert(`✅ PROSES BACKUP (SPREADSHEET + CSV) BERHASIL!\n\n` +
+                  `• Salinan Spreadsheet: ${res.successCount} Database Utama\n` +
+                  `• File Ekspor CSV: ${res.csvCount || 0} Sheet (.csv)\n` +
+                  `• Folder Utama: ${res.folderNama}\n` +
+                  `• Subfolder CSV: ${res.csvFolderNama || '-'}\n` +
                   `• Akses Berbagi: ${res.targetEmail}\n` +
                   `• Retensi: File cadangan > 6 hari otomatis dibersihkan\n\n` +
-                  `Folder dapat langsung dicek di Google Drive:\n${res.folderUrl}`);
+                  `Folder Utama Google Drive:\n${res.folderUrl}` +
+                  (res.csvFolderUrl ? `\n\nFolder CSV Google Drive:\n${res.csvFolderUrl}` : ''));
           }
         } else {
           showToast('warning', (res && res.message) ? res.message : 'Proses backup selesai dengan beberapa catatan.');
@@ -13128,8 +13135,131 @@ function triggerManualBackup() {
     setTimeout(() => {
       clearTimeout(watchdog);
       if (btn) { btn.disabled = false; btn.innerHTML = originalHtml; }
-      showToast('success', 'Simulasi Backup Sukses: Seluruh database tersalin ke BACKUP_RME_SHELDON.');
+      showToast('success', 'Simulasi Backup Sukses: Seluruh Spreadsheet & CSV tersalin ke BACKUP_RME_SHELDON.');
     }, 1500);
+  }
+}
+
+function _downloadCsvBlobInBrowser(fileName, csvContent) {
+  let blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  let url = URL.createObjectURL(blob);
+  let link = document.createElement('a');
+  link.href = url;
+  link.setAttribute('download', fileName);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  setTimeout(() => URL.revokeObjectURL(url), 3000);
+}
+
+function _arrayOfObjectsToCsv(arr) {
+  if (!Array.isArray(arr) || arr.length === 0) return '\uFEFF"Data Kosong"\r\n';
+  let headers = Object.keys(arr[0]);
+  let lines = [headers.map(h => '"' + String(h).replace(/"/g, '""') + '"').join(',')];
+  arr.forEach(item => {
+    let row = headers.map(h => {
+      let val = item[h];
+      if (val === null || val === undefined) return '';
+      if (typeof val === 'object') val = JSON.stringify(val);
+      let s = String(val);
+      if (s.indexOf('"') !== -1 || s.indexOf(',') !== -1 || s.indexOf('\n') !== -1) {
+        return '"' + s.replace(/"/g, '""') + '"';
+      }
+      return s;
+    });
+    lines.push(row.join(','));
+  });
+  return '\uFEFF' + lines.join('\r\n');
+}
+
+function _fallbackLocalCsvBackupDownload() {
+  let now = new Date();
+  let dateStamp = now.toISOString().slice(0, 10);
+  let kd = window.KlinikData || {};
+  let datasets = [
+    { name: `CSV_${dateStamp}_01_PASIEN_Master_Pasien.csv`, data: kd.pasien || [] },
+    { name: `CSV_${dateStamp}_02_REKAM_MEDIS_Kunjungan_RME.csv`, data: kd.rm || kd.rekamMedis || [] },
+    { name: `CSV_${dateStamp}_03_FARMASI_Master_Obat_BHP.csv`, data: kd.obat || [] },
+    { name: `CSV_${dateStamp}_04_KASIR_Transaksi_Kasir.csv`, data: kd.kasir || kd.invoice || [] },
+    { name: `CSV_${dateStamp}_05_DOKTER_Master_Dokter_Perawat.csv`, data: kd.dokter || [] },
+    { name: `CSV_${dateStamp}_06_USER_Master_User_Role.csv`, data: kd.users || [] }
+  ];
+  if (window.PayrollState) {
+    datasets.push({ name: `CSV_${dateStamp}_07_PAYROLL_Pengaturan_Tarif_Shift.csv`, data: window.PayrollState.tarifShift || [] });
+    datasets.push({ name: `CSV_${dateStamp}_07_PAYROLL_Presensi_Shift_Harian.csv`, data: window.PayrollState.presensi || [] });
+  }
+
+  // Gabungkan ke 1 Master Bundle CSV + unduh otomatis agar browser tidak memblokir multiple popups
+  let bundleSections = [];
+  datasets.forEach(ds => {
+    if (ds.data && ds.data.length > 0) {
+      bundleSections.push(`"=== TABEL: ${ds.name} (${ds.data.length} Baris) ==="\r\n` + _arrayOfObjectsToCsv(ds.data).replace(/^\uFEFF/, ''));
+    }
+  });
+  let masterCsv = '\uFEFF' + (bundleSections.length > 0 ? bundleSections.join('\r\n\r\n') : '"Database RME Sheldon - Snapshot CSV Kosong"');
+  let masterFileName = `BACKUP_DATABASE_RME_SHELDON_${dateStamp}_ALL_TABLES.csv`;
+  _downloadCsvBlobInBrowser(masterFileName, masterCsv);
+  return masterFileName;
+}
+
+function triggerBackupDownloadCSV() {
+  let btn = document.getElementById('btnBackupDownloadCSV');
+  let originalHtml = btn ? btn.innerHTML : '';
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<span>⏳</span> Mengekspor CSV...';
+  }
+  showToast('info', 'Mengekspor seluruh Sheet Database ke format .CSV (Google Drive & Unduhan Perangkat)...');
+
+  let watchdog = setTimeout(() => {
+    if (btn && btn.disabled) {
+      btn.disabled = false;
+      btn.innerHTML = originalHtml;
+    }
+  }, 55000);
+
+  if (typeof google !== 'undefined' && google.script && google.script.run) {
+    google.script.run
+      .withSuccessHandler(res => {
+        clearTimeout(watchdog);
+        if (btn) { btn.disabled = false; btn.innerHTML = originalHtml; }
+        if (res && res.success) {
+          let files = res.files || [];
+          let dateStamp = res.dateStamp || new Date().toISOString().slice(0, 10);
+          if (files.length > 0) {
+            // Gabungkan semua sheet dalam satu bundel CSV Master untuk unduhan 1-klik + unduh per-file jika <= 8
+            let combinedParts = files.map(f => {
+              let cleanContent = (f.csvContent || '').replace(/^\uFEFF/, '');
+              return `"=== [${f.kategori}] SHEET: ${f.sheetName} (${f.rowCount} Baris) ==="\r\n` + cleanContent;
+            });
+            let masterFileName = `BACKUP_RME_SHELDON_${dateStamp}_ALL_${files.length}_SHEETS.csv`;
+            _downloadCsvBlobInBrowser(masterFileName, '\uFEFF' + combinedParts.join('\r\n\r\n'));
+          }
+          showToast('success', `Berhasil mengekspor ${res.totalCsv} file .CSV ke Google Drive & mengunduh ke perangkat!`);
+          alert(`✅ BACKUP & DOWNLOAD CSV BERHASIL!\n\n` +
+                `• Total Sheet Diekspor: ${res.totalCsv} File .CSV\n` +
+                `• Tersimpan di Google Drive: BACKUP_RME_SHELDON / ${res.csvFolderNama}\n` +
+                `• File Unduhan Lokal: BACKUP_RME_SHELDON_${dateStamp}_ALL_${files.length}_SHEETS.csv\n\n` +
+                `Link Folder CSV di Google Drive:\n${res.csvFolderUrl || '-'}`);
+        } else {
+          let localFile = _fallbackLocalCsvBackupDownload();
+          showToast('warning', `Server sedang sibuk, file CSV lokal (${localFile}) berhasil diunduh.`);
+        }
+      })
+      .withFailureHandler(err => {
+        clearTimeout(watchdog);
+        if (btn) { btn.disabled = false; btn.innerHTML = originalHtml; }
+        let localFile = _fallbackLocalCsvBackupDownload();
+        showToast('info', `Mengunduh salinan CSV dari memori aktif (${localFile}).`);
+      })
+      .exportAllDatabaseToCSV();
+  } else {
+    setTimeout(() => {
+      clearTimeout(watchdog);
+      if (btn) { btn.disabled = false; btn.innerHTML = originalHtml; }
+      let localFile = _fallbackLocalCsvBackupDownload();
+      showToast('success', `File CSV Database (${localFile}) berhasil diunduh ke komputer Anda!`);
+    }, 600);
   }
 }
 

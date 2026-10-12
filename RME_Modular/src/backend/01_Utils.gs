@@ -58,8 +58,10 @@ function handleApiRequest(action, params) {
         args = [params.username || params.user, params.password || params.pin || params.pass];
       } else if (action === "getRiwayatMedisByPasien") {
         args = [params.noRm || params.norm || params[0]];
-      } else if (action === "simpanPasienBaru" || action === "simpanRekamMedis" || action === "simpanKasirInvoice" || action === "simpanItemObat" || action === "simpanItemBMHP" || action === "simpanUserMaster" || action === "registrasiAkunBaru") {
+      } else if (action === "simpanPasienBaru" || action === "simpanRekamMedis" || action === "simpanKasirInvoice" || action === "simpanItemObat" || action === "simpanItemBMHP" || action === "simpanUserMaster" || action === "registrasiAkunBaru" || action === "simpanPresensiShift" || action === "simpanTarifShift" || action === "updateStatusPayroll") {
         args = [params.payload || params];
+      } else if (action === "generatePayrollPeriode") {
+        args = [params.periodeBulan || params[0] || ""];
       } else if (action === "hapusUserMaster" || action === "aktifkanUserMaster") {
         args = [params.username || params[0], params.isPermanent || params.currentUser || params[1]];
       } else {

@@ -195,6 +195,10 @@
           <span class="text-base group-hover:scale-110 transition-transform">📄</span>
           <span class="flex-1">Riwayat Invoice</span>
         </button>
+        <button onclick="switchMenu('payroll')" id="nav-payroll" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-300 hover:text-white hover:bg-slate-800/90 transition-all text-left group">
+          <span class="text-base group-hover:scale-110 transition-transform">💰</span>
+          <span class="flex-1">Payroll & Honor</span>
+        </button>
         <button onclick="switchMenu('informasi')" id="nav-informasi" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-300 hover:text-white hover:bg-slate-800/90 transition-all text-left group">
           <span class="text-base group-hover:scale-110 transition-transform">ℹ️</span>
           <span class="flex-1">Informasi Tarif & Stok</span>
@@ -310,6 +314,7 @@
       <div id="view-surat" class="module-view hidden"><?!= include('SuratView'); ?></div>
       <div id="view-kasir" class="module-view hidden"><?!= include('PembayaranView'); ?></div>
       <div id="view-riwayat-invoice" class="module-view hidden"><?!= include('RiwayatInvoiceView'); ?></div>
+      <div id="view-payroll" class="module-view hidden"><?!= include('PayrollView'); ?></div>
     </div>
   </main>
 </div>
@@ -327,7 +332,7 @@
     let r = role ? role.toString().toLowerCase() : '';
     
     // Reset semua navigasi ke hidden
-    ['nav-dashboard', 'nav-ai', 'nav-pasien', 'nav-rekam-medis', 'nav-surat', 'nav-database', 'nav-user-master', 'nav-inventory', 'nav-informasi', 'nav-kasir', 'nav-riwayat-invoice'].forEach(id => {
+    ['nav-dashboard', 'nav-ai', 'nav-pasien', 'nav-rekam-medis', 'nav-surat', 'nav-database', 'nav-user-master', 'nav-inventory', 'nav-informasi', 'nav-kasir', 'nav-riwayat-invoice', 'nav-payroll'].forEach(id => {
       let el = document.getElementById(id);
       if (el) el.classList.add('hidden');
     });
@@ -341,7 +346,7 @@
 
     // 1. SUPER USER / OWNER: Bisa membuka, edit, dan delete modul utama (Master User & Role khusus Super User)
     if (r === 'super user' || r === 'owner') {
-      ['nav-dashboard', 'nav-ai', 'nav-pasien', 'nav-rekam-medis', 'nav-surat', 'nav-database', 'nav-inventory', 'nav-informasi', 'nav-kasir', 'nav-riwayat-invoice'].forEach(id => {
+      ['nav-dashboard', 'nav-ai', 'nav-pasien', 'nav-rekam-medis', 'nav-surat', 'nav-database', 'nav-inventory', 'nav-informasi', 'nav-kasir', 'nav-riwayat-invoice', 'nav-payroll'].forEach(id => {
         let el = document.getElementById(id); if (el) el.classList.remove('hidden');
       });
       if (r === 'super user') {
@@ -365,9 +370,9 @@
       if (btnFilterDuplikat) btnFilterDuplikat.classList.add('hidden');
       switchMenu('rekam-medis');
     }
-    // 3. ADMIN: Database Pasien, Form & Surat, Informasi, Kasir & Billing, Riwayat Invoice
+    // 3. ADMIN: Database Pasien, Form & Surat, Informasi, Kasir & Billing, Riwayat Invoice, Payroll
     else if (r.includes('admin') || r.includes('perawat') || r.includes('kasir')) {
-      ['nav-pasien', 'nav-surat', 'nav-informasi', 'nav-kasir', 'nav-riwayat-invoice'].forEach(id => {
+      ['nav-pasien', 'nav-surat', 'nav-informasi', 'nav-kasir', 'nav-riwayat-invoice', 'nav-payroll'].forEach(id => {
         let el = document.getElementById(id); if (el) el.classList.remove('hidden');
       });
       document.getElementById('section-transaksi').classList.remove('hidden');
@@ -472,6 +477,7 @@
     if (menuId === 'inventory' && typeof initInventoryModule === 'function') initInventoryModule();
     if (menuId === 'informasi' && typeof initInformasiModule === 'function') initInformasiModule();
     if (menuId === 'surat' && typeof initSuratModule === 'function') initSuratModule();
+    if (menuId === 'payroll' && typeof initPayrollModule === 'function') initPayrollModule();
   
     document.getElementById('mainContentScroll').scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -710,6 +716,7 @@
 <?!= include('InventoryJS'); ?>
 <?!= include('InformasiJS'); ?>
 <?!= include('AIInsightsJS'); ?>
+<?!= include('PayrollJS'); ?>
 <!-- MODAL SINKRONISASI GOOGLE APPS SCRIPT -->
 <div id="gasSyncModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[300] hidden flex items-center justify-center p-4 transition-opacity duration-300 opacity-0">
   <div class="bg-white p-6 md:p-8 rounded-3xl shadow-2xl w-full max-w-lg border border-slate-100" id="gasSyncModalContent">

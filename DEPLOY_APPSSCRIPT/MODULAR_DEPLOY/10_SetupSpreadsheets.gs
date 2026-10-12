@@ -1477,3 +1477,301 @@ function isiSimulasiJMDokter() {
   }
 }
 
+/**
+ * =========================================================================
+ * FUNGSI API MODUL VIEW PAYROLL & PRESENSI SHIFT (FRONTEND <-> SHEETS)
+ * =========================================================================
+ */
+
+/**
+ * Mengambil seluruh data Payroll untuk ditampilkan di PayrollView:
+ * - Pengaturan_Tarif_Shift
+ * - Presensi_Shift_Harian
+ * - Penggajian_Dokter
+ * - Honor_Perawat_Staff
+ * - Rekap_Jasa_Medis (dari Spreadsheet 02 Pembayaran)
+ */
+function getPayrollModuleData() {
+  try {
+    const def = SPREADSHEET_DEFINITIONS["PAYROLL"];
+    const found = _findOrCreateSpreadsheetInFolder("PAYROLL", def.title);
+    const ss = found.ss;
+    const ssId = found.ssId;
+
+    const readSheetRows = (sheetName) => {
+      let sh = ss.getSheetByName(sheetName);
+      if (!sh || sh.getLastRow() <= 1) return [];
+      return sh.getRange(2, 1, sh.getLastRow() - 1, sh.getLastColumn()).getValues();
+    };
+
+    const tarifShift = readSheetRows("Pengaturan_Tarif_Shift").map(r => ({
+      idAturan: String(r[0] || ""),
+      role: String(r[1] || ""),
+      namaPekerja: String(r[2] || ""),
+      tipeKompensasi: String(r[3] || ""),
+      tarifShift1: Number(r[4]) || 0,
+      tarifShift2: Number(r[5]) || 0,
+      gajiPokokBulanan: Number(r[6]) || 0,
+      keterangan: String(r[7] || "")
+    })).filter(x => x.namaPekerja !== "");
+
+    const presensiHarian = readSheetRows("Presensi_Shift_Harian").map(r => ({
+      idPresensi: String(r[0] || ""),
+      tanggal: fDate(r[1]),
+      idPekerja: String(r[2] || ""),
+      namaPekerja: String(r[3] || ""),
+      role: String(r[4] || ""),
+      shift: String(r[5] || ""),
+      jamMasuk: String(r[6] || ""),
+      jamPulang: String(r[7] || ""),
+      statusKehadiran: String(r[8] || "Hadir"),
+      uangHarianDidapat: Number(r[9]) || 0,
+      verifikator: String(r[10] || "")
+    })).filter(x => x.namaPekerja !== "");
+
+    const penggajianDokter = readSheetRows("Penggajian_Dokter").map(r => ({
+      idPayroll: String(r[0] || ""),
+      periodeBulan: String(r[1] || ""),
+      idDokter: String(r[2] || ""),
+      namaDokter: String(r[3] || ""),
+      totalPasien: Number(r[4]) || 0,
+      totalTindakanBruto: Number(r[5]) || 0,
+      totalBiayaLab: Number(r[6]) || 0,
+      dasarJMBersih: Number(r[7]) || 0,
+      totalJMDokter: Number(r[8]) || 0,
+      hadirShift1: Number(r[9]) || 0,
+      hadirShift2: Number(r[10]) || 0,
+      totalUangHarianShift: Number(r[11]) || 0,
+      bonusInsentif: Number(r[12]) || 0,
+      potonganPPh21: Number(r[13]) || 0,
+      potonganKasbon: Number(r[14]) || 0,
+      totalDiterimaTHP: Number(r[15]) || 0,
+      bankTujuan: String(r[16] || "-"),
+      noRekening: String(r[17] || "-"),
+      statusTransfer: String(r[18] || "Draft"),
+      tanggalTransfer: fDate(r[19]),
+      catatan: String(r[20] || "")
+    })).filter(x => x.namaDokter !== "");
+
+    const honorStaff = readSheetRows("Honor_Perawat_Staff").map(r => ({
+      idPayrollStaff: String(r[0] || ""),
+      periodeBulan: String(r[1] || ""),
+      idStaff: String(r[2] || ""),
+      namaStaff: String(r[3] || ""),
+      role: String(r[4] || ""),
+      gajiPokokBulanan: Number(r[5]) || 0,
+      hadirShift1: Number(r[6]) || 0,
+      hadirShift2: Number(r[7]) || 0,
+      totalUangHarianShift: Number(r[8]) || 0,
+      totalFeeTindakan: Number(r[9]) || 0,
+      uangMakanTransport: Number(r[10]) || 0,
+      lembur: Number(r[11]) || 0,
+      potonganKasbon: Number(r[12]) || 0,
+      totalDiterimaTHP: Number(r[13]) || 0,
+      bankTujuan: String(r[14] || "-"),
+      noRekening: String(r[15] || "-"),
+      statusTransfer: String(r[16] || "Draft"),
+      tanggalTransfer: fDate(r[17]),
+      catatan: String(r[18] || "")
+    })).filter(x => x.namaStaff !== "");
+
+    let rekapJM = [];
+    try {
+      const rawJM = readFast(DB_CONFIG.PEMBAYARAN, "Rekap_Jasa_Medis");
+      for (let i = 1; i < rawJM.length; i++) {
+        let r = rawJM[i];
+        if (!r[0] && !r[2]) continue;
+        rekapJM.push({
+          idInvoice: String(r[0] || ""),
+          tanggal: fDate(r[1]),
+          dokter: String(r[2] || ""),
+          perawat: String(r[3] || ""),
+          kategoriItem: String(r[4] || ""),
+          namaItem: String(r[5] || ""),
+          tarifKotor: Number(r[6]) || 0,
+          biayaLab: Number(r[7]) || 0,
+          dasarBagiHasil: Number(r[8]) || 0,
+          persenJM: Number(r[9]) || 0,
+          tipeAturan: String(r[10] || ""),
+          jmDokterBersih: Number(r[13]) || Number(r[11]) || 0,
+          bagianKlinik: Number(r[15]) || 0,
+          statusJM: String(r[16] || "SIAP_CAIR")
+        });
+      }
+    } catch (eJM) {}
+
+    return {
+      success: true,
+      spreadsheetId: ssId,
+      spreadsheetUrl: ss.getUrl(),
+      tarifShift: tarifShift,
+      presensiHarian: presensiHarian,
+      penggajianDokter: penggajianDokter,
+      honorStaff: honorStaff,
+      rekapJM: rekapJM
+    };
+  } catch (err) {
+    return { success: false, message: "Gagal memuat data Payroll: " + err.message };
+  }
+}
+
+/**
+ * Menyimpan presensi kehadiran shift baru ke Presensi_Shift_Harian
+ * (baik di Spreadsheet 11 Payroll maupun 06 Master User & Role).
+ */
+function simpanPresensiShift(payload) {
+  const lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(10000);
+    const def = SPREADSHEET_DEFINITIONS["PAYROLL"];
+    const found = _findOrCreateSpreadsheetInFolder("PAYROLL", def.title);
+    const ss = found.ss;
+    let sh = ss.getSheetByName("Presensi_Shift_Harian") || ss.insertSheet("Presensi_Shift_Harian");
+
+    const nextRow = sh.getLastRow() + 1;
+    const idPresensi = payload.idPresensi || ("ATT-" + Utilities.formatDate(new Date(), "Asia/Jakarta", "yyyyMMdd") + "-" + String(nextRow - 1).padStart(3, '0'));
+    const tanggal = payload.tanggal || Utilities.formatDate(new Date(), "Asia/Jakarta", "dd-MM-yyyy");
+    const idPekerja = payload.idPekerja || "STF-001";
+    const namaPekerja = String(payload.namaPekerja || "").trim();
+    const role = String(payload.role || "Dokter Gigi Umum").trim();
+    const shift = String(payload.shift || "Shift 1").trim();
+    const jamMasuk = String(payload.jamMasuk || "09:00").trim();
+    const jamPulang = String(payload.jamPulang || "15:00").trim();
+    const status = String(payload.statusKehadiran || "Hadir").trim();
+    const defaultTarif = role.toLowerCase().includes("dokter") ? 55000 : (role.toLowerCase().includes("perawat") ? 45000 : 0);
+    const formulaUang = `=IF(I${nextRow}="Hadir",IF(F${nextRow}="Shift 1",IFERROR(VLOOKUP(D${nextRow},Pengaturan_Tarif_Shift!C:F,3,FALSE),${defaultTarif}),IF(F${nextRow}="Shift 2",IFERROR(VLOOKUP(D${nextRow},Pengaturan_Tarif_Shift!C:F,4,FALSE),${defaultTarif}),0)),0)`;
+    const verifikator = String(payload.verifikator || "Admin").trim();
+    const waktu = Utilities.formatDate(new Date(), "Asia/Jakarta", "dd-MM-yyyy HH:mm:ss");
+
+    const rowData = [idPresensi, tanggal, idPekerja, namaPekerja, role, shift, jamMasuk, jamPulang, status, formulaUang, verifikator, waktu];
+    sh.appendRow(rowData);
+
+    // Sinkronkan juga ke 06 Master User & Role
+    try {
+      const foundM = _findOrCreateSpreadsheetInFolder("MASTER", "RME Sheldon - 06 Master User & Role");
+      let shM = foundM.ss.getSheetByName("Presensi_Shift_Harian");
+      if (shM) shM.appendRow(rowData);
+    } catch (eSyncM) {}
+
+    SpreadsheetApp.flush();
+    return {
+      success: true,
+      message: "Presensi kehadiran " + namaPekerja + " (" + shift + " - " + status + ") berhasil disimpan!"
+    };
+  } catch (err) {
+    return { success: false, message: "Gagal menyimpan presensi shift: " + err.message };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+/**
+ * Menyimpan atau memperbarui aturan tarif shift / gaji pokok di Pengaturan_Tarif_Shift.
+ */
+function simpanTarifShift(payload) {
+  const lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(10000);
+    const def = SPREADSHEET_DEFINITIONS["PAYROLL"];
+    const found = _findOrCreateSpreadsheetInFolder("PAYROLL", def.title);
+    const ss = found.ss;
+    let sh = ss.getSheetByName("Pengaturan_Tarif_Shift") || ss.insertSheet("Pengaturan_Tarif_Shift");
+
+    const namaPekerja = String(payload.namaPekerja || "").trim();
+    const role = String(payload.role || "Dokter Gigi Umum").trim();
+    const tipe = String(payload.tipeKompensasi || "Kombinasi Shift & Tindakan").trim();
+    const s1 = Number(payload.tarifShift1) || 0;
+    const s2 = Number(payload.tarifShift2) || 0;
+    const gp = Number(payload.gajiPokokBulanan) || 0;
+    const ket = String(payload.keterangan || "").trim();
+
+    let data = sh.getDataRange().getValues();
+    let foundRow = -1;
+    for (let i = 1; i < data.length; i++) {
+      if (String(data[i][2] || "").trim().toLowerCase() === namaPekerja.toLowerCase()) {
+        foundRow = i + 1;
+        break;
+      }
+    }
+
+    const idAturan = foundRow > 1 ? String(data[foundRow - 1][0]) : ("TARIF-" + String(data.length).padStart(3, '0'));
+    const rowValues = [idAturan, role, namaPekerja, tipe, s1, s2, gp, ket];
+
+    if (foundRow > 1) {
+      sh.getRange(foundRow, 1, 1, rowValues.length).setValues([rowValues]);
+    } else {
+      sh.appendRow(rowValues);
+    }
+
+    // Sinkronkan juga ke 06 Master User & Role
+    try {
+      const foundM = _findOrCreateSpreadsheetInFolder("MASTER", "RME Sheldon - 06 Master User & Role");
+      let shM = foundM.ss.getSheetByName("Pengaturan_Tarif_Shift");
+      if (shM) {
+        let dataM = shM.getDataRange().getValues();
+        let fRowM = -1;
+        for (let j = 1; j < dataM.length; j++) {
+          if (String(dataM[j][2] || "").trim().toLowerCase() === namaPekerja.toLowerCase()) {
+            fRowM = j + 1;
+            break;
+          }
+        }
+        if (fRowM > 1) shM.getRange(fRowM, 1, 1, rowValues.length).setValues([rowValues]);
+        else shM.appendRow(rowValues);
+      }
+    } catch (eSyncM) {}
+
+    SpreadsheetApp.flush();
+    return {
+      success: true,
+      message: "Pengaturan tarif shift & gaji untuk " + namaPekerja + " berhasil disimpan!"
+    };
+  } catch (err) {
+    return { success: false, message: "Gagal menyimpan pengaturan tarif shift: " + err.message };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+/**
+ * Mengubah status pembayaran payroll (Draft / Approved / Paid) di Penggajian_Dokter atau Honor_Perawat_Staff.
+ */
+function updateStatusPayroll(payload) {
+  const lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(10000);
+    const def = SPREADSHEET_DEFINITIONS["PAYROLL"];
+    const found = _findOrCreateSpreadsheetInFolder("PAYROLL", def.title);
+    const ss = found.ss;
+
+    const targetSheet = payload.kategori === "staff" ? "Honor_Perawat_Staff" : "Penggajian_Dokter";
+    const idTarget = String(payload.idPayroll || "").trim();
+    const statusBaru = String(payload.statusTransfer || "Paid").trim();
+    const tglTransfer = Utilities.formatDate(new Date(), "Asia/Jakarta", "dd-MM-yyyy");
+
+    let sh = ss.getSheetByName(targetSheet);
+    if (!sh) return { success: false, message: "Sheet " + targetSheet + " tidak ditemukan." };
+
+    let data = sh.getDataRange().getValues();
+    let colStatus = payload.kategori === "staff" ? 17 : 19; // 1-indexed
+    let colTgl = payload.kategori === "staff" ? 18 : 20;
+
+    for (let i = 1; i < data.length; i++) {
+      if (String(data[i][0] || "").trim() === idTarget) {
+        sh.getRange(i + 1, colStatus).setValue(statusBaru);
+        if (statusBaru === "Paid") {
+          sh.getRange(i + 1, colTgl).setValue(tglTransfer);
+        }
+        SpreadsheetApp.flush();
+        return { success: true, message: "Status Payroll [" + idTarget + "] berhasil diubah menjadi " + statusBaru + "!" };
+      }
+    }
+    return { success: false, message: "ID Payroll tidak ditemukan." };
+  } catch (err) {
+    return { success: false, message: "Gagal update status payroll: " + err.message };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+

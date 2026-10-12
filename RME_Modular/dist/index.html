@@ -1344,6 +1344,10 @@
           <span class="text-base group-hover:scale-110 transition-transform">📄</span>
           <span class="flex-1">Riwayat Invoice</span>
         </button>
+        <button onclick="switchMenu('payroll')" id="nav-payroll" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-300 hover:text-white hover:bg-slate-800/90 transition-all text-left group">
+          <span class="text-base group-hover:scale-110 transition-transform">💰</span>
+          <span class="flex-1">Payroll & Honor</span>
+        </button>
         <button onclick="switchMenu('informasi')" id="nav-informasi" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-300 hover:text-white hover:bg-slate-800/90 transition-all text-left group">
           <span class="text-base group-hover:scale-110 transition-transform">ℹ️</span>
           <span class="flex-1">Informasi Tarif & Stok</span>
@@ -4950,6 +4954,469 @@
 
 <!-- IFRAME MESIN PRINT -->
 <iframe id="printFrameBayar" class="hidden"></iframe></div>
+      <div id="view-payroll" class="module-view hidden"><!-- ======================================================================= -->
+<!-- MODUL PAYROLL, PRESENSI SHIFT, & JASA MEDIS (RME SHELDON - 11 PAYROLL) -->
+<!-- ======================================================================= -->
+<div class="space-y-6 pb-10">
+
+  <!-- HEADER BANNER & TOMBOL AKSI CEPAT -->
+  <div class="bg-gradient-to-r from-[#0f172a] via-[#1e1b4b] to-[#0f172a] rounded-3xl p-6 text-white shadow-xl border border-indigo-500/20 relative overflow-hidden">
+    <div class="absolute -top-20 -right-20 w-72 h-72 bg-cyan-500/15 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute -bottom-20 -left-20 w-72 h-72 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none"></div>
+
+    <div class="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+      <div>
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/15 border border-cyan-400/30 text-cyan-300 text-[10px] font-extrabold uppercase tracking-widest mb-2">
+          <span>💰 RME Sheldon - 11 Payroll & Honor Dokter</span>
+        </div>
+        <h2 class="text-xl md:text-2xl font-black tracking-tight text-white">Manajemen Payroll, Presensi Shift & Bagi Hasil JM</h2>
+        <p class="text-xs text-slate-300 mt-1 max-w-2xl">
+          Terintegrasi langsung dengan <b class="text-cyan-300">Pengaturan_Tarif_Shift</b> (Dokter Rp 55.000/shift • Perawat Rp 45.000/shift • Admin Rp 1.200.000/bln), <b class="text-cyan-300">Presensi_Shift_Harian</b>, dan <b class="text-cyan-300">Rekap_Jasa_Medis</b>.
+        </p>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2.5">
+        <div class="flex items-center bg-slate-900/80 border border-slate-700 rounded-xl px-3 py-1.5">
+          <span class="text-[10px] font-bold text-slate-400 mr-2 uppercase">Periode:</span>
+          <input type="text" id="payrollPeriodeInput" value="Oktober 2026" class="bg-transparent text-xs font-black text-white w-28 focus:outline-none" placeholder="Oktober 2026">
+        </div>
+        <button type="button" onclick="loadPayrollModuleData(true)" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 rounded-xl text-xs font-extrabold transition-all flex items-center gap-1.5 shadow-sm">
+          <span>🔄</span> Refresh Data
+        </button>
+        <button type="button" onclick="triggerGeneratePayrollPeriode()" id="btnGeneratePayrollView" class="px-4 py-2.5 bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white rounded-xl text-xs font-black transition-all flex items-center gap-1.5 shadow-lg shadow-cyan-500/20">
+          <span>⚡</span> Hitung & Generate Slip Periode
+        </button>
+        <a id="btnOpenPayrollSheet" href="#" target="_blank" class="hidden px-3.5 py-2.5 bg-emerald-600/90 hover:bg-emerald-500 text-white rounded-xl text-xs font-extrabold transition-all items-center gap-1.5 shadow-md">
+          <span>📊</span> Buka Spreadsheet
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4 KARTU RINGKASAN KPI PAYROLL -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4">
+      <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-2xl font-black border border-indigo-100">🩺</div>
+      <div>
+        <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Total THP Dokter (JM + Shift)</p>
+        <h3 class="text-xl font-black text-slate-800 mt-0.5" id="kpiTotalThpDokter">Rp 0</h3>
+        <p class="text-[10px] font-bold text-indigo-600 mt-0.5" id="kpiCountDokter">0 Dokter Aktif</p>
+      </div>
+    </div>
+
+    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4">
+      <div class="w-12 h-12 rounded-2xl bg-cyan-50 text-cyan-600 flex items-center justify-center text-2xl font-black border border-cyan-100">👩‍⚕️</div>
+      <div>
+        <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Total Honor Perawat & Admin</p>
+        <h3 class="text-xl font-black text-slate-800 mt-0.5" id="kpiTotalThpStaff">Rp 0</h3>
+        <p class="text-[10px] font-bold text-cyan-600 mt-0.5" id="kpiCountStaff">0 Perawat & Staff</p>
+      </div>
+    </div>
+
+    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4">
+      <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-2xl font-black border border-amber-100">📅</div>
+      <div>
+        <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Total Uang Harian Shift</p>
+        <h3 class="text-xl font-black text-slate-800 mt-0.5" id="kpiTotalUangShift">Rp 0</h3>
+        <p class="text-[10px] font-bold text-amber-600 mt-0.5" id="kpiCountPresensi">0 Kehadiran Shift</p>
+      </div>
+    </div>
+
+    <div class="bg-gradient-to-br from-emerald-600 to-teal-700 p-5 rounded-2xl shadow-md text-white flex items-center gap-4">
+      <div class="w-12 h-12 rounded-2xl bg-white/15 flex items-center justify-center text-2xl font-black">🏦</div>
+      <div>
+        <p class="text-[10px] font-extrabold text-emerald-100 uppercase tracking-wider">Grand Total Payroll Klinik</p>
+        <h3 class="text-xl font-black text-white mt-0.5" id="kpiGrandTotalPayroll">Rp 0</h3>
+        <p class="text-[10px] font-bold text-emerald-100 mt-0.5">Dokter + Perawat + Admin</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB NAVIGATION PAYROLL -->
+  <div class="bg-white p-2 rounded-2xl shadow-sm border border-slate-200 flex flex-wrap gap-2">
+    <button type="button" onclick="switchPayrollTab('dokter')" id="tabBtnPay-dokter" class="payroll-tab-btn px-4 py-2.5 rounded-xl text-xs font-black bg-indigo-600 text-white shadow-sm transition-all flex items-center gap-2">
+      <span>🩺</span> 1. Penggajian & JM Dokter
+    </button>
+    <button type="button" onclick="switchPayrollTab('staff')" id="tabBtnPay-staff" class="payroll-tab-btn px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition-all flex items-center gap-2">
+      <span>👩‍⚕️</span> 2. Honor Perawat & Gaji Admin
+    </button>
+    <button type="button" onclick="switchPayrollTab('presensi')" id="tabBtnPay-presensi" class="payroll-tab-btn px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition-all flex items-center gap-2">
+      <span>📅</span> 3. Presensi Shift Harian (Absensi)
+    </button>
+    <button type="button" onclick="switchPayrollTab('tarif')" id="tabBtnPay-tarif" class="payroll-tab-btn px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition-all flex items-center gap-2">
+      <span>⚙️</span> 4. Pengaturan Tarif Shift & Gaji
+    </button>
+    <button type="button" onclick="switchPayrollTab('rincian-jm')" id="tabBtnPay-rincian-jm" class="payroll-tab-btn px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition-all flex items-center gap-2">
+      <span>📋</span> 5. Rincian Bagi Hasil JM Tindakan
+    </button>
+  </div>
+
+  <!-- ======================================================================= -->
+  <!-- TAB 1: PENGGAJIAN & JM DOKTER                                           -->
+  <!-- ======================================================================= -->
+  <div id="panelPay-dokter" class="payroll-tab-panel space-y-4">
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+      <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/60">
+        <div>
+          <h3 class="text-sm font-black text-slate-800">Daftar Penggajian & Bagi Hasil Jasa Medis (JM) Dokter</h3>
+          <p class="text-[11px] text-slate-500">Rumus THP: <b>Total JM Dokter Bersih + Total Uang Harian Shift (Rp 55.000/shift) + Bonus - Potongan</b></p>
+        </div>
+        <span class="px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 text-[11px] font-extrabold">
+          Sheet: Penggajian_Dokter
+        </span>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-slate-900 text-white text-[10px] font-extrabold uppercase tracking-wider">
+              <th class="py-3.5 px-4">ID & Periode</th>
+              <th class="py-3.5 px-4">Nama Dokter</th>
+              <th class="py-3.5 px-3 text-center">Pasien</th>
+              <th class="py-3.5 px-4 text-right">Bruto Tindakan</th>
+              <th class="py-3.5 px-4 text-right">Total JM Bersih</th>
+              <th class="py-3.5 px-3 text-center">Hadir Shift (S1 / S2)</th>
+              <th class="py-3.5 px-4 text-right">Uang Shift (55rb)</th>
+              <th class="py-3.5 px-4 text-right">Potongan</th>
+              <th class="py-3.5 px-4 text-right bg-indigo-950">Total Diterima (THP)</th>
+              <th class="py-3.5 px-3 text-center">Status</th>
+              <th class="py-3.5 px-4 text-center">Aksi / Slip</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyPayrollDokter" class="divide-y divide-slate-200 text-xs">
+            <tr><td colspan="11" class="py-8 text-center text-slate-400 font-bold">Memuat data penggajian dokter...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================================= -->
+  <!-- TAB 2: HONOR PERAWAT & GAJI ADMIN                                       -->
+  <!-- ======================================================================= -->
+  <div id="panelPay-staff" class="payroll-tab-panel hidden space-y-4">
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+      <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/60">
+        <div>
+          <h3 class="text-sm font-black text-slate-800">Daftar Honor Perawat (Berbasis Shift) & Gaji Bulanan Admin</h3>
+          <p class="text-[11px] text-slate-500">Perawat: <b>Rp 45.000 / shift hadir</b> (2 shift) • Admin: <b>Gaji Pokok Tetap Rp 1.200.000 / bulan</b> (Non-Shift)</p>
+        </div>
+        <span class="px-3 py-1 rounded-full bg-cyan-50 text-cyan-700 border border-cyan-200 text-[11px] font-extrabold">
+          Sheet: Honor_Perawat_Staff
+        </span>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-slate-900 text-white text-[10px] font-extrabold uppercase tracking-wider">
+              <th class="py-3.5 px-4">ID & Periode</th>
+              <th class="py-3.5 px-4">Nama Pekerja</th>
+              <th class="py-3.5 px-3">Role / Jabatan</th>
+              <th class="py-3.5 px-4 text-right">Gaji Pokok Tetap</th>
+              <th class="py-3.5 px-3 text-center">Hadir Shift (S1 / S2)</th>
+              <th class="py-3.5 px-4 text-right">Total Uang Shift</th>
+              <th class="py-3.5 px-4 text-right">Tunjangan / Lembur</th>
+              <th class="py-3.5 px-4 text-right">Potongan Kasbon</th>
+              <th class="py-3.5 px-4 text-right bg-cyan-950">Total Diterima (THP)</th>
+              <th class="py-3.5 px-3 text-center">Status</th>
+              <th class="py-3.5 px-4 text-center">Aksi / Slip</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyPayrollStaff" class="divide-y divide-slate-200 text-xs">
+            <tr><td colspan="11" class="py-8 text-center text-slate-400 font-bold">Memuat data honor perawat & admin...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================================= -->
+  <!-- TAB 3: PRESENSI SHIFT HARIAN (INPUT & TABEL ABSENSI)                    -->
+  <!-- ======================================================================= -->
+  <div id="panelPay-presensi" class="payroll-tab-panel hidden space-y-6">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Form Input Presensi Kehadiran Shift -->
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+        <div class="flex items-center gap-2.5 mb-4 pb-3 border-b border-slate-100">
+          <span class="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg font-black border border-amber-200">📝</span>
+          <div>
+            <h3 class="text-sm font-black text-slate-800">Catat Presensi Shift Harian</h3>
+            <p class="text-[11px] text-slate-500">Otomatis menghitung uang shift berdasarkan kehadiran</p>
+          </div>
+        </div>
+
+        <form onsubmit="handleSimpanPresensiShift(event)" class="space-y-3.5">
+          <div>
+            <label class="block text-[11px] font-extrabold text-slate-700 mb-1">Tanggal Kehadiran *</label>
+            <input type="date" id="presTanggal" required class="w-full px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-800">
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-extrabold text-slate-700 mb-1">Pilih Pekerja (Dokter / Perawat) *</label>
+            <select id="presNamaPekerja" onchange="handlePresPekerjaChange()" required class="w-full px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-800">
+              <option value="drg. Rahma Yulinda D, Sp. BMM" data-role="Dokter Gigi Spesialis" data-id="DOK-001">drg. Rahma Yulinda D, Sp. BMM (Dokter Spesialis)</option>
+              <option value="drg. Regyana Oktavaria" data-role="Dokter Gigi Umum" data-id="DOK-002">drg. Regyana Oktavaria (Dokter Umum)</option>
+              <option value="drg. Latifah Mulyana" data-role="Dokter Gigi Umum" data-id="DOK-003">drg. Latifah Mulyana (Dokter Umum)</option>
+              <option value="drg. Tia Ardhana R" data-role="Dokter Gigi Umum" data-id="DOK-004">drg. Tia Ardhana R (Dokter Umum)</option>
+              <option value="Bernadette Rostenkowski" data-role="Perawat Gigi" data-id="PRW-001">Bernadette Rostenkowski (Perawat Gigi)</option>
+            </select>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[11px] font-extrabold text-slate-700 mb-1">Role Jabatan</label>
+              <input type="text" id="presRole" value="Dokter Gigi Spesialis" readonly class="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl text-xs font-bold text-slate-600">
+            </div>
+            <div>
+              <label class="block text-[11px] font-extrabold text-slate-700 mb-1">Shift Kerja *</label>
+              <select id="presShift" onchange="updatePreviewUangShift()" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-800">
+                <option value="Shift 1">Shift 1 (Pagi)</option>
+                <option value="Shift 2">Shift 2 (Sore/Malam)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[11px] font-extrabold text-slate-700 mb-1">Jam Masuk</label>
+              <input type="time" id="presJamMasuk" value="08:55" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-800">
+            </div>
+            <div>
+              <label class="block text-[11px] font-extrabold text-slate-700 mb-1">Jam Pulang</label>
+              <input type="time" id="presJamPulang" value="15:00" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-800">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[11px] font-extrabold text-slate-700 mb-1">Status Kehadiran *</label>
+              <select id="presStatus" onchange="updatePreviewUangShift()" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-800">
+                <option value="Hadir">Hadir</option>
+                <option value="Izin">Izin</option>
+                <option value="Sakit">Sakit</option>
+                <option value="Cuti">Cuti</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[11px] font-extrabold text-slate-700 mb-1">Uang Harian Shift</label>
+              <input type="text" id="presPreviewUang" value="Rp 55.000" readonly class="w-full px-3 py-2 bg-emerald-50 border border-emerald-200 rounded-xl text-xs font-black text-emerald-700">
+            </div>
+          </div>
+
+          <button type="submit" id="btnSubmitPresensi" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs rounded-xl shadow-md shadow-indigo-500/20 transition-all">
+            💾 SIMPAN PRESENSI KEHADIRAN SHIFT
+          </button>
+        </form>
+      </div>
+
+      <!-- Tabel Log Presensi Shift Harian -->
+      <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
+        <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/60">
+          <div>
+            <h3 class="text-sm font-black text-slate-800">Riwayat Presensi Shift Harian (Dokter & Perawat)</h3>
+            <p class="text-[11px] text-slate-500">Setiap baris <b>Hadir</b> otomatis menambah hitungan shift & uang harian di rekap gaji</p>
+          </div>
+          <span class="px-3 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200 text-[11px] font-extrabold">
+            Sheet: Presensi_Shift_Harian
+          </span>
+        </div>
+
+        <div class="overflow-x-auto flex-1">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-slate-900 text-white text-[10px] font-extrabold uppercase tracking-wider">
+                <th class="py-3 px-4">ID Presensi</th>
+                <th class="py-3 px-3">Tanggal</th>
+                <th class="py-3 px-4">Nama Pekerja</th>
+                <th class="py-3 px-3">Role</th>
+                <th class="py-3 px-3 text-center">Shift</th>
+                <th class="py-3 px-3 text-center">Jam Kerja</th>
+                <th class="py-3 px-3 text-center">Status</th>
+                <th class="py-3 px-4 text-right">Uang Shift Didapat</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyPresensiHarian" class="divide-y divide-slate-200 text-xs">
+              <tr><td colspan="8" class="py-8 text-center text-slate-400 font-bold">Memuat data presensi shift...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================================= -->
+  <!-- TAB 4: PENGATURAN TARIF SHIFT & GAJI POKOK                              -->
+  <!-- ======================================================================= -->
+  <div id="panelPay-tarif" class="payroll-tab-panel hidden space-y-6">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Form Update Tarif Shift / Gaji Pokok -->
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+        <div class="flex items-center gap-2.5 mb-4 pb-3 border-b border-slate-100">
+          <span class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg font-black border border-indigo-200">⚙️</span>
+          <div>
+            <h3 class="text-sm font-black text-slate-800">Atur Tarif Shift & Gaji Pokok</h3>
+            <p class="text-[11px] text-slate-500">Tersinkron ke Master User & Payroll</p>
+          </div>
+        </div>
+
+        <form onsubmit="handleSimpanTarifShift(event)" class="space-y-3.5">
+          <div>
+            <label class="block text-[11px] font-extrabold text-slate-700 mb-1">Nama Pekerja *</label>
+            <input type="text" id="tarifNamaPekerja" required placeholder="Contoh: drg. Rahma Yulinda D, Sp. BMM" class="w-full px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-800">
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[11px] font-extrabold text-slate-700 mb-1">Role Jabatan *</label>
+              <select id="tarifRole" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-800">
+                <option value="Dokter Gigi Spesialis">Dokter Gigi Spesialis</option>
+                <option value="Dokter Gigi Umum">Dokter Gigi Umum</option>
+                <option value="Perawat Gigi">Perawat Gigi</option>
+                <option value="Perawat Umum">Perawat Umum</option>
+                <option value="Admin">Admin</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[11px] font-extrabold text-slate-700 mb-1">Tipe Kompensasi *</label>
+              <select id="tarifTipe" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-800">
+                <option value="Kombinasi Shift & Tindakan">Kombinasi Shift & Tindakan</option>
+                <option value="Uang Harian Shift">Uang Harian Shift</option>
+                <option value="Gaji Bulanan Tetap">Gaji Bulanan Tetap</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[11px] font-extrabold text-slate-700 mb-1">Tarif Shift 1 (Rp)</label>
+              <input type="number" id="tarifShift1" value="55000" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-800">
+            </div>
+            <div>
+              <label class="block text-[11px] font-extrabold text-slate-700 mb-1">Tarif Shift 2 (Rp)</label>
+              <input type="number" id="tarifShift2" value="55000" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-800">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-extrabold text-slate-700 mb-1">Gaji Pokok Bulanan Tetap (Khusus Admin Non-Shift)</label>
+            <input type="number" id="tarifGajiPokok" value="0" class="w-full px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-800">
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-extrabold text-slate-700 mb-1">Keterangan Aturan</label>
+            <input type="text" id="tarifKeterangan" placeholder="Contoh: 2 Shift Rp 55.000/shift + JM" class="w-full px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-800">
+          </div>
+
+          <button type="submit" id="btnSubmitTarifShift" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs rounded-xl shadow-md shadow-emerald-500/20 transition-all">
+            💾 SIMPAN ATURAN TARIF SHIFT & GAJI
+          </button>
+        </form>
+      </div>
+
+      <!-- Tabel Master Pengaturan Tarif Shift -->
+      <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
+        <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/60">
+          <div>
+            <h3 class="text-sm font-black text-slate-800">Tabel Master Pengaturan Tarif Shift & Gaji Pokok</h3>
+            <p class="text-[11px] text-slate-500">Klik tombol <b>Pilih</b> pada baris untuk mengedit tarif pekerja</p>
+          </div>
+          <span class="px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] font-extrabold">
+            Sheet: Pengaturan_Tarif_Shift
+          </span>
+        </div>
+
+        <div class="overflow-x-auto flex-1">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-slate-900 text-white text-[10px] font-extrabold uppercase tracking-wider">
+                <th class="py-3 px-4">ID</th>
+                <th class="py-3 px-4">Nama Pekerja</th>
+                <th class="py-3 px-3">Role</th>
+                <th class="py-3 px-3">Tipe Kompensasi</th>
+                <th class="py-3 px-3 text-right">Tarif Shift 1</th>
+                <th class="py-3 px-3 text-right">Tarif Shift 2</th>
+                <th class="py-3 px-4 text-right">Gaji Bulanan</th>
+                <th class="py-3 px-4">Keterangan</th>
+                <th class="py-3 px-3 text-center">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyTarifShift" class="divide-y divide-slate-200 text-xs">
+              <tr><td colspan="9" class="py-8 text-center text-slate-400 font-bold">Memuat pengaturan tarif shift...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================================= -->
+  <!-- TAB 5: RINCIAN BAGI HASIL JM TINDAKAN (REKAP_JASA_MEDIS)                -->
+  <!-- ======================================================================= -->
+  <div id="panelPay-rincian-jm" class="payroll-tab-panel hidden space-y-4">
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+      <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/60">
+        <div>
+          <h3 class="text-sm font-black text-slate-800">Rincian Perhitungan Bagi Hasil Jasa Medis (JM) Per Invoice Tindakan</h3>
+          <p class="text-[11px] text-slate-500">Menampilkan 3 hirarki otomatis: <b>Tarif Khusus Dokter (55%)</b> &rarr; <b>Kunci Tindakan Rontgen (15%)</b> &rarr; <b>Default Dokter (65% / 50% / 40%)</b></p>
+        </div>
+        <span class="px-3 py-1 rounded-full bg-violet-50 text-violet-700 border border-violet-200 text-[11px] font-extrabold">
+          02 Pembayaran &rarr; Sheet: Rekap_Jasa_Medis
+        </span>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-slate-900 text-white text-[10px] font-extrabold uppercase tracking-wider">
+              <th class="py-3.5 px-4">No. Invoice & Tgl</th>
+              <th class="py-3.5 px-4">Dokter Pemeriksa</th>
+              <th class="py-3.5 px-4">Nama Tindakan Medis</th>
+              <th class="py-3.5 px-4 text-right">Tarif Kotor</th>
+              <th class="py-3.5 px-4 text-right">Biaya Lab</th>
+              <th class="py-3.5 px-4 text-right">Dasar Bagi Hasil</th>
+              <th class="py-3.5 px-3 text-center">% JM</th>
+              <th class="py-3.5 px-4">Tipe Aturan JM</th>
+              <th class="py-3.5 px-4 text-right bg-emerald-950">JM Dokter Bersih</th>
+              <th class="py-3.5 px-4 text-right">Bagian Klinik</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyRincianJM" class="divide-y divide-slate-200 text-xs">
+            <tr><td colspan="10" class="py-8 text-center text-slate-400 font-bold">Memuat rincian bagi hasil JM...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- MODAL CETAK SLIP GAJI & RINCIAN PAYROLL -->
+<div id="slipGajiModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[290] hidden flex items-center justify-center p-4">
+  <div class="bg-white rounded-3xl shadow-2xl w-full max-w-xl border border-slate-200 overflow-hidden">
+    <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
+      <div>
+        <span class="text-[10px] font-extrabold uppercase tracking-widest text-cyan-400">Slip Gaji & Honor Resmi</span>
+        <h3 class="text-base font-black" id="slipModalHeaderTitle">Sheldon Dental Care - Slip Payroll</h3>
+      </div>
+      <button type="button" onclick="closeSlipGajiModal()" class="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-black text-sm">✕</button>
+    </div>
+
+    <div id="slipGajiPrintableArea" class="p-6 space-y-4 text-xs text-slate-800">
+      <!-- Diisi dinamis oleh PayrollJS -->
+    </div>
+
+    <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-2.5">
+      <button type="button" onclick="closeSlipGajiModal()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs rounded-xl">
+        Tutup
+      </button>
+      <button type="button" onclick="downloadSlipGajiPDF()" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs rounded-xl shadow-md flex items-center gap-1.5">
+        <span>🖨️</span> Download PDF / Cetak Slip
+      </button>
+    </div>
+  </div>
+</div>
+</div>
     </div>
   </main>
 </div>
@@ -4967,7 +5434,7 @@
     let r = role ? role.toString().toLowerCase() : '';
     
     // Reset semua navigasi ke hidden
-    ['nav-dashboard', 'nav-ai', 'nav-pasien', 'nav-rekam-medis', 'nav-surat', 'nav-database', 'nav-user-master', 'nav-inventory', 'nav-informasi', 'nav-kasir', 'nav-riwayat-invoice'].forEach(id => {
+    ['nav-dashboard', 'nav-ai', 'nav-pasien', 'nav-rekam-medis', 'nav-surat', 'nav-database', 'nav-user-master', 'nav-inventory', 'nav-informasi', 'nav-kasir', 'nav-riwayat-invoice', 'nav-payroll'].forEach(id => {
       let el = document.getElementById(id);
       if (el) el.classList.add('hidden');
     });
@@ -4981,7 +5448,7 @@
 
     // 1. SUPER USER / OWNER: Bisa membuka, edit, dan delete modul utama (Master User & Role khusus Super User)
     if (r === 'super user' || r === 'owner') {
-      ['nav-dashboard', 'nav-ai', 'nav-pasien', 'nav-rekam-medis', 'nav-surat', 'nav-database', 'nav-inventory', 'nav-informasi', 'nav-kasir', 'nav-riwayat-invoice'].forEach(id => {
+      ['nav-dashboard', 'nav-ai', 'nav-pasien', 'nav-rekam-medis', 'nav-surat', 'nav-database', 'nav-inventory', 'nav-informasi', 'nav-kasir', 'nav-riwayat-invoice', 'nav-payroll'].forEach(id => {
         let el = document.getElementById(id); if (el) el.classList.remove('hidden');
       });
       if (r === 'super user') {
@@ -5005,9 +5472,9 @@
       if (btnFilterDuplikat) btnFilterDuplikat.classList.add('hidden');
       switchMenu('rekam-medis');
     }
-    // 3. ADMIN: Database Pasien, Form & Surat, Informasi, Kasir & Billing, Riwayat Invoice
+    // 3. ADMIN: Database Pasien, Form & Surat, Informasi, Kasir & Billing, Riwayat Invoice, Payroll
     else if (r.includes('admin') || r.includes('perawat') || r.includes('kasir')) {
-      ['nav-pasien', 'nav-surat', 'nav-informasi', 'nav-kasir', 'nav-riwayat-invoice'].forEach(id => {
+      ['nav-pasien', 'nav-surat', 'nav-informasi', 'nav-kasir', 'nav-riwayat-invoice', 'nav-payroll'].forEach(id => {
         let el = document.getElementById(id); if (el) el.classList.remove('hidden');
       });
       document.getElementById('section-transaksi').classList.remove('hidden');
@@ -5112,6 +5579,7 @@
     if (menuId === 'inventory' && typeof initInventoryModule === 'function') initInventoryModule();
     if (menuId === 'informasi' && typeof initInformasiModule === 'function') initInformasiModule();
     if (menuId === 'surat' && typeof initSuratModule === 'function') initSuratModule();
+    if (menuId === 'payroll' && typeof initPayrollModule === 'function') initPayrollModule();
   
     document.getElementById('mainContentScroll').scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -14290,6 +14758,805 @@ function renderInfoBmhp() {
     }).getAIInsightsData(window.activeUserRole, window.authToken);
   }
 </script>
+<script>
+  // =========================================================================
+  // PAYROLL, PRESENSI SHIFT & JASA MEDIS FRONTEND CONTROLLER (PayrollJS.html)
+  // =========================================================================
+
+  window.PayrollState = {
+    spreadsheetUrl: "",
+    tarifShift: [],
+    presensiHarian: [],
+    penggajianDokter: [],
+    honorStaff: [],
+    rekapJM: []
+  };
+
+  function getDefaultPayrollSeed() {
+    return {
+      tarifShift: [
+        { idAturan: "TARIF-001", role: "Dokter Gigi Spesialis", namaPekerja: "drg. Rahma Yulinda D, Sp. BMM", tipeKompensasi: "Kombinasi Shift & Tindakan", tarifShift1: 55000, tarifShift2: 55000, gajiPokokBulanan: 0, keterangan: "2 Shift: Rp 55.000/shift (berdasarkan absensi) + JM 65% (Rontgen 15%)" },
+        { idAturan: "TARIF-002", role: "Dokter Gigi Umum", namaPekerja: "drg. Regyana Oktavaria", tipeKompensasi: "Kombinasi Shift & Tindakan", tarifShift1: 55000, tarifShift2: 55000, gajiPokokBulanan: 0, keterangan: "2 Shift: Rp 55.000/shift (berdasarkan absensi) + JM 40% (Rontgen 15%)" },
+        { idAturan: "TARIF-003", role: "Dokter Gigi Umum", namaPekerja: "drg. Latifah Mulyana", tipeKompensasi: "Kombinasi Shift & Tindakan", tarifShift1: 55000, tarifShift2: 55000, gajiPokokBulanan: 0, keterangan: "2 Shift: Rp 55.000/shift (berdasarkan absensi) + JM 40% (Rontgen 15%)" },
+        { idAturan: "TARIF-004", role: "Dokter Gigi Umum", namaPekerja: "drg. Tia Ardhana R", tipeKompensasi: "Kombinasi Shift & Tindakan", tarifShift1: 55000, tarifShift2: 55000, gajiPokokBulanan: 0, keterangan: "2 Shift: Rp 55.000/shift (berdasarkan absensi) + JM 50% / 55% (Rontgen 15%)" },
+        { idAturan: "TARIF-005", role: "Perawat Gigi", namaPekerja: "Bernadette Rostenkowski", tipeKompensasi: "Uang Harian Shift", tarifShift1: 45000, tarifShift2: 45000, gajiPokokBulanan: 0, keterangan: "2 Shift: Rp 45.000/shift (dihitung berdasarkan absensi kehadiran)" },
+        { idAturan: "TARIF-006", role: "Admin", namaPekerja: "Howard Wolowitz", tipeKompensasi: "Gaji Bulanan Tetap", tarifShift1: 0, tarifShift2: 0, gajiPokokBulanan: 1200000, keterangan: "Gaji Bulanan Tetap Rp 1.200.000/bulan (Non-Shift)" }
+      ],
+      presensiHarian: [
+        { idPresensi: "ATT-202610-001", tanggal: "01-10-2026", idPekerja: "DOK-001", namaPekerja: "drg. Rahma Yulinda D, Sp. BMM", role: "Dokter Gigi Spesialis", shift: "Shift 1", jamMasuk: "08:55", jamPulang: "15:00", statusKehadiran: "Hadir", uangHarianDidapat: 55000, verifikator: "Admin" },
+        { idPresensi: "ATT-202610-002", tanggal: "01-10-2026", idPekerja: "DOK-001", namaPekerja: "drg. Rahma Yulinda D, Sp. BMM", role: "Dokter Gigi Spesialis", shift: "Shift 2", jamMasuk: "15:00", jamPulang: "21:00", statusKehadiran: "Hadir", uangHarianDidapat: 55000, verifikator: "Admin" },
+        { idPresensi: "ATT-202610-003", tanggal: "01-10-2026", idPekerja: "DOK-002", namaPekerja: "drg. Regyana Oktavaria", role: "Dokter Gigi Umum", shift: "Shift 1", jamMasuk: "08:50", jamPulang: "15:00", statusKehadiran: "Hadir", uangHarianDidapat: 55000, verifikator: "Admin" },
+        { idPresensi: "ATT-202610-004", tanggal: "01-10-2026", idPekerja: "DOK-003", namaPekerja: "drg. Latifah Mulyana", role: "Dokter Gigi Umum", shift: "Shift 2", jamMasuk: "14:55", jamPulang: "21:00", statusKehadiran: "Hadir", uangHarianDidapat: 55000, verifikator: "Admin" },
+        { idPresensi: "ATT-202610-005", tanggal: "01-10-2026", idPekerja: "DOK-004", namaPekerja: "drg. Tia Ardhana R", role: "Dokter Gigi Umum", shift: "Shift 1", jamMasuk: "08:55", jamPulang: "15:00", statusKehadiran: "Hadir", uangHarianDidapat: 55000, verifikator: "Admin" },
+        { idPresensi: "ATT-202610-006", tanggal: "01-10-2026", idPekerja: "DOK-004", namaPekerja: "drg. Tia Ardhana R", role: "Dokter Gigi Umum", shift: "Shift 2", jamMasuk: "15:00", jamPulang: "21:00", statusKehadiran: "Hadir", uangHarianDidapat: 55000, verifikator: "Admin" },
+        { idPresensi: "ATT-202610-007", tanggal: "01-10-2026", idPekerja: "PRW-001", namaPekerja: "Bernadette Rostenkowski", role: "Perawat Gigi", shift: "Shift 1", jamMasuk: "08:45", jamPulang: "15:00", statusKehadiran: "Hadir", uangHarianDidapat: 45000, verifikator: "Admin" },
+        { idPresensi: "ATT-202610-008", tanggal: "01-10-2026", idPekerja: "PRW-001", namaPekerja: "Bernadette Rostenkowski", role: "Perawat Gigi", shift: "Shift 2", jamMasuk: "15:00", jamPulang: "21:05", statusKehadiran: "Hadir", uangHarianDidapat: 45000, verifikator: "Admin" }
+      ],
+      penggajianDokter: [
+        { idPayroll: "PAY-DR-202610-001", periodeBulan: "Oktober 2026", idDokter: "DOK-001", namaDokter: "drg. Rahma Yulinda D, Sp. BMM", totalPasien: 2, totalTindakanBruto: 2600000, totalBiayaLab: 0, dasarJMBersih: 2600000, totalJMDokter: 1640000, hadirShift1: 1, hadirShift2: 1, totalUangHarianShift: 110000, bonusInsentif: 0, potonganPPh21: 0, potonganKasbon: 0, totalDiterimaTHP: 1750000, bankTujuan: "BCA", noRekening: "-", statusTransfer: "Draft", tanggalTransfer: "", catatan: "Otomatis dari Absensi Shift (Rp 55.000/shift) + JM 65% (Rontgen 15%)" },
+        { idPayroll: "PAY-DR-202610-002", periodeBulan: "Oktober 2026", idDokter: "DOK-002", namaDokter: "drg. Regyana Oktavaria", totalPasien: 2, totalTindakanBruto: 400000, totalBiayaLab: 0, dasarJMBersih: 400000, totalJMDokter: 135000, hadirShift1: 1, hadirShift2: 0, totalUangHarianShift: 55000, bonusInsentif: 0, potonganPPh21: 0, potonganKasbon: 0, totalDiterimaTHP: 190000, bankTujuan: "Mandiri", noRekening: "-", statusTransfer: "Draft", tanggalTransfer: "", catatan: "Otomatis dari Absensi Shift (Rp 55.000/shift) + JM 40% (Rontgen 15%)" },
+        { idPayroll: "PAY-DR-202610-003", periodeBulan: "Oktober 2026", idDokter: "DOK-003", namaDokter: "drg. Latifah Mulyana", totalPasien: 1, totalTindakanBruto: 250000, totalBiayaLab: 0, dasarJMBersih: 250000, totalJMDokter: 100000, hadirShift1: 0, hadirShift2: 1, totalUangHarianShift: 55000, bonusInsentif: 0, potonganPPh21: 0, potonganKasbon: 0, totalDiterimaTHP: 155000, bankTujuan: "BRI", noRekening: "-", statusTransfer: "Draft", tanggalTransfer: "", catatan: "Otomatis dari Absensi Shift (Rp 55.000/shift) + JM 40% (Rontgen 15%)" },
+        { idPayroll: "PAY-DR-202610-004", periodeBulan: "Oktober 2026", idDokter: "DOK-004", namaDokter: "drg. Tia Ardhana R", totalPasien: 3, totalTindakanBruto: 1900000, totalBiayaLab: 0, dasarJMBersih: 1900000, totalJMDokter: 990000, hadirShift1: 1, hadirShift2: 1, totalUangHarianShift: 110000, bonusInsentif: 0, potonganPPh21: 0, potonganKasbon: 0, totalDiterimaTHP: 1100000, bankTujuan: "BNI", noRekening: "-", statusTransfer: "Draft", tanggalTransfer: "", catatan: "Otomatis dari Absensi Shift (Rp 55.000/shift) + JM 50%/55% (Rontgen 15%)" }
+      ],
+      honorStaff: [
+        { idPayrollStaff: "PAY-STF-202610-001", periodeBulan: "Oktober 2026", idStaff: "PRW-001", namaStaff: "Bernadette Rostenkowski", role: "Perawat Gigi", gajiPokokBulanan: 0, hadirShift1: 1, hadirShift2: 1, totalUangHarianShift: 90000, totalFeeTindakan: 0, uangMakanTransport: 0, lembur: 0, potonganKasbon: 0, totalDiterimaTHP: 90000, bankTujuan: "BSI", noRekening: "-", statusTransfer: "Draft", tanggalTransfer: "", catatan: "Perawat (2 Shift): Rp 45.000/shift dihitung otomatis dari Absensi Kehadiran" },
+        { idPayrollStaff: "PAY-STF-202610-002", periodeBulan: "Oktober 2026", idStaff: "ADM-001", namaStaff: "Howard Wolowitz", role: "Admin", gajiPokokBulanan: 1200000, hadirShift1: 0, hadirShift2: 0, totalUangHarianShift: 0, totalFeeTindakan: 0, uangMakanTransport: 0, lembur: 0, potonganKasbon: 0, totalDiterimaTHP: 1200000, bankTujuan: "Mandiri", noRekening: "-", statusTransfer: "Draft", tanggalTransfer: "", catatan: "Admin (Non-Shift): Gaji Pokok Bulanan Tetap Rp 1.200.000/bulan" }
+      ],
+      rekapJM: [
+        { idInvoice: "INV/SIMULASI/001", tanggal: "10-10-2026", dokter: "drg. Rahma Yulinda D, Sp. BMM", perawat: "Bernadette Rostenkowski", kategoriItem: "Tindakan", namaItem: "Odontektomi Gigi Impaksi M3", tarifKotor: 2500000, biayaLab: 0, dasarBagiHasil: 2500000, persenJM: 0.65, tipeAturan: "Default Dokter (65%)", jmDokterBersih: 1625000, bagianKlinik: 875000, statusJM: "SIAP_CAIR" },
+        { idInvoice: "INV/SIMULASI/001", tanggal: "10-10-2026", dokter: "drg. Rahma Yulinda D, Sp. BMM", perawat: "Bernadette Rostenkowski", kategoriItem: "Tindakan", namaItem: "Foto Rontgen Periapikal Digital", tarifKotor: 100000, biayaLab: 0, dasarBagiHasil: 100000, persenJM: 0.15, tipeAturan: "Kunci Tindakan Global (15%)", jmDokterBersih: 15000, bagianKlinik: 85000, statusJM: "SIAP_CAIR" },
+        { idInvoice: "INV/SIMULASI/002", tanggal: "10-10-2026", dokter: "drg. Regyana Oktavaria", perawat: "Bernadette Rostenkowski", kategoriItem: "Tindakan", namaItem: "Scaling Rahang Atas & Bawah", tarifKotor: 300000, biayaLab: 0, dasarBagiHasil: 300000, persenJM: 0.40, tipeAturan: "Default Dokter (40%)", jmDokterBersih: 120000, bagianKlinik: 180000, statusJM: "SIAP_CAIR" },
+        { idInvoice: "INV/SIMULASI/002", tanggal: "10-10-2026", dokter: "drg. Regyana Oktavaria", perawat: "Bernadette Rostenkowski", kategoriItem: "Tindakan", namaItem: "Foto Rontgen Periapikal Digital", tarifKotor: 100000, biayaLab: 0, dasarBagiHasil: 100000, persenJM: 0.15, tipeAturan: "Kunci Tindakan Global (15%)", jmDokterBersih: 15000, bagianKlinik: 85000, statusJM: "SIAP_CAIR" },
+        { idInvoice: "INV/SIMULASI/003", tanggal: "10-10-2026", dokter: "drg. Latifah Mulyana", perawat: "Bernadette Rostenkowski", kategoriItem: "Tindakan", namaItem: "Penambalan Komposit Light-Cure", tarifKotor: 250000, biayaLab: 0, dasarBagiHasil: 250000, persenJM: 0.40, tipeAturan: "Default Dokter (40%)", jmDokterBersih: 100000, bagianKlinik: 150000, statusJM: "SIAP_CAIR" },
+        { idInvoice: "INV/SIMULASI/004", tanggal: "10-10-2026", dokter: "drg. Tia Ardhana R", perawat: "Bernadette Rostenkowski", kategoriItem: "Tindakan", namaItem: "Scaling Rahang Atas & Bawah", tarifKotor: 300000, biayaLab: 0, dasarBagiHasil: 300000, persenJM: 0.50, tipeAturan: "Default Dokter (50%)", jmDokterBersih: 150000, bagianKlinik: 150000, statusJM: "SIAP_CAIR" },
+        { idInvoice: "INV/SIMULASI/004", tanggal: "10-10-2026", dokter: "drg. Tia Ardhana R", perawat: "Bernadette Rostenkowski", kategoriItem: "Tindakan", namaItem: "Perawatan Saluran Akar (PSA) Molar", tarifKotor: 1500000, biayaLab: 0, dasarBagiHasil: 1500000, persenJM: 0.55, tipeAturan: "Tarif Khusus Dokter (55%)", jmDokterBersih: 825000, bagianKlinik: 675000, statusJM: "SIAP_CAIR" },
+        { idInvoice: "INV/SIMULASI/004", tanggal: "10-10-2026", dokter: "drg. Tia Ardhana R", perawat: "Bernadette Rostenkowski", kategoriItem: "Tindakan", namaItem: "Foto Rontgen Periapikal Digital", tarifKotor: 100000, biayaLab: 0, dasarBagiHasil: 100000, persenJM: 0.15, tipeAturan: "Kunci Tindakan Global (15%)", jmDokterBersih: 15000, bagianKlinik: 85000, statusJM: "SIAP_CAIR" }
+      ]
+    };
+  }
+
+  function fmtRpPayroll(num) {
+    let n = Math.round(Number(num) || 0);
+    return 'Rp ' + n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  }
+
+  function initPayrollModule() {
+    const presTgl = document.getElementById('presTanggal');
+    if (presTgl && !presTgl.value) {
+      const d = new Date();
+      presTgl.value = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    }
+    loadPayrollModuleData(false);
+  }
+
+  function switchPayrollTab(tabKey) {
+    document.querySelectorAll('.payroll-tab-panel').forEach(el => el.classList.add('hidden'));
+    document.querySelectorAll('.payroll-tab-btn').forEach(btn => {
+      btn.classList.remove('bg-indigo-600', 'text-white', 'shadow-sm', 'font-black');
+      btn.classList.add('text-slate-600', 'hover:bg-slate-100', 'font-bold');
+    });
+
+    const panel = document.getElementById('panelPay-' + tabKey);
+    const activeBtn = document.getElementById('tabBtnPay-' + tabKey);
+    if (panel) panel.classList.remove('hidden');
+    if (activeBtn) {
+      activeBtn.classList.remove('text-slate-600', 'hover:bg-slate-100', 'font-bold');
+      activeBtn.classList.add('bg-indigo-600', 'text-white', 'shadow-sm', 'font-black');
+    }
+  }
+
+  function loadPayrollModuleData(showOverlay) {
+    if (showOverlay && typeof showDbSyncOverlay === 'function') {
+      showDbSyncOverlay('🔄 Menyinkronkan Data Payroll, Presensi Shift & JM...');
+    }
+
+    const seed = getDefaultPayrollSeed();
+
+    if (typeof google !== 'undefined' && google.script && google.script.run) {
+      google.script.run
+        .withSuccessHandler(res => {
+          if (showOverlay && typeof hideDbSyncOverlay === 'function') hideDbSyncOverlay();
+          if (res && res.success) {
+            window.PayrollState.spreadsheetUrl = res.spreadsheetUrl || "";
+            window.PayrollState.tarifShift = (res.tarifShift && res.tarifShift.length > 0) ? res.tarifShift : seed.tarifShift;
+            window.PayrollState.presensiHarian = (res.presensiHarian && res.presensiHarian.length > 0) ? res.presensiHarian : seed.presensiHarian;
+            window.PayrollState.penggajianDokter = (res.penggajianDokter && res.penggajianDokter.length > 0) ? res.penggajianDokter : seed.penggajianDokter;
+            window.PayrollState.honorStaff = (res.honorStaff && res.honorStaff.length > 0) ? res.honorStaff : seed.honorStaff;
+            window.PayrollState.rekapJM = (res.rekapJM && res.rekapJM.length > 0) ? res.rekapJM : seed.rekapJM;
+
+            const btnSheet = document.getElementById('btnOpenPayrollSheet');
+            if (btnSheet && res.spreadsheetUrl) {
+              btnSheet.href = res.spreadsheetUrl;
+              btnSheet.classList.remove('hidden');
+              btnSheet.classList.add('inline-flex');
+            }
+            renderAllPayrollTables();
+            if (showOverlay && typeof showToast === 'function') {
+              showToast('success', 'Data Payroll & Presensi Shift berhasil dimuat!');
+            }
+          } else {
+            applyPayrollFallbackSeed(seed);
+          }
+        })
+        .withFailureHandler(() => {
+          if (showOverlay && typeof hideDbSyncOverlay === 'function') hideDbSyncOverlay();
+          applyPayrollFallbackSeed(seed);
+        })
+        .getPayrollModuleData();
+    } else {
+      if (showOverlay && typeof hideDbSyncOverlay === 'function') hideDbSyncOverlay();
+      applyPayrollFallbackSeed(seed);
+    }
+  }
+
+  function applyPayrollFallbackSeed(seed) {
+    let cached = null;
+    try {
+      let raw = localStorage.getItem('sheldon_payroll_cache');
+      if (raw) cached = JSON.parse(raw);
+    } catch (e) {}
+
+    window.PayrollState.tarifShift = (cached && cached.tarifShift && cached.tarifShift.length) ? cached.tarifShift : seed.tarifShift;
+    window.PayrollState.presensiHarian = (cached && cached.presensiHarian && cached.presensiHarian.length) ? cached.presensiHarian : seed.presensiHarian;
+    window.PayrollState.penggajianDokter = (cached && cached.penggajianDokter && cached.penggajianDokter.length) ? cached.penggajianDokter : seed.penggajianDokter;
+    window.PayrollState.honorStaff = (cached && cached.honorStaff && cached.honorStaff.length) ? cached.honorStaff : seed.honorStaff;
+    window.PayrollState.rekapJM = (cached && cached.rekapJM && cached.rekapJM.length) ? cached.rekapJM : seed.rekapJM;
+    renderAllPayrollTables();
+  }
+
+  function savePayrollCacheLocal() {
+    try {
+      localStorage.setItem('sheldon_payroll_cache', JSON.stringify(window.PayrollState));
+    } catch (e) {}
+  }
+
+  function recalculateShiftTotalsFromPresensi() {
+    const presList = window.PayrollState.presensiHarian || [];
+    const tarifList = window.PayrollState.tarifShift || [];
+
+    const getRate = (nama, shiftStr, defaultVal) => {
+      let t = tarifList.find(x => String(x.namaPekerja || '').toLowerCase() === String(nama || '').toLowerCase());
+      if (!t) return defaultVal;
+      return String(shiftStr).includes('2') ? (Number(t.tarifShift2) || defaultVal) : (Number(t.tarifShift1) || defaultVal);
+    };
+
+    // Hitung ulang per pekerja
+    let mapShift = {};
+    presList.forEach(p => {
+      if (String(p.statusKehadiran || '').toLowerCase() !== 'hadir') return;
+      let nm = String(p.namaPekerja || '').trim();
+      if (!mapShift[nm]) mapShift[nm] = { s1: 0, s2: 0, uang: 0 };
+      let isS2 = String(p.shift || '').includes('2');
+      if (isS2) mapShift[nm].s2 += 1;
+      else mapShift[nm].s1 += 1;
+      let nominal = Number(p.uangHarianDidapat) || getRate(nm, p.shift, String(p.role).toLowerCase().includes('dokter') ? 55000 : 45000);
+      p.uangHarianDidapat = nominal;
+      mapShift[nm].uang += nominal;
+    });
+
+    (window.PayrollState.penggajianDokter || []).forEach(d => {
+      let st = mapShift[d.namaDokter];
+      if (st) {
+        d.hadirShift1 = st.s1;
+        d.hadirShift2 = st.s2;
+        d.totalUangHarianShift = st.uang;
+      }
+      let potongan = (Number(d.potonganPPh21) || 0) + (Number(d.potonganKasbon) || 0);
+      d.totalDiterimaTHP = (Number(d.totalJMDokter) || 0) + (Number(d.totalUangHarianShift) || 0) + (Number(d.bonusInsentif) || 0) - potongan;
+    });
+
+    (window.PayrollState.honorStaff || []).forEach(s => {
+      let st = mapShift[s.namaStaff];
+      if (st && !String(s.role || '').toLowerCase().includes('admin')) {
+        s.hadirShift1 = st.s1;
+        s.hadirShift2 = st.s2;
+        s.totalUangHarianShift = st.uang;
+      }
+      let tunjangan = (Number(s.totalFeeTindakan) || 0) + (Number(s.uangMakanTransport) || 0) + (Number(s.lembur) || 0);
+      s.totalDiterimaTHP = (Number(s.gajiPokokBulanan) || 0) + (Number(s.totalUangHarianShift) || 0) + tunjangan - (Number(s.potonganKasbon) || 0);
+    });
+  }
+
+  function renderAllPayrollTables() {
+    recalculateShiftTotalsFromPresensi();
+
+    // 1. Update KPI Cards
+    let totDokter = 0;
+    (window.PayrollState.penggajianDokter || []).forEach(d => { totDokter += Number(d.totalDiterimaTHP) || 0; });
+
+    let totStaff = 0;
+    (window.PayrollState.honorStaff || []).forEach(s => { totStaff += Number(s.totalDiterimaTHP) || 0; });
+
+    let totShift = 0;
+    let countHadir = 0;
+    (window.PayrollState.presensiHarian || []).forEach(p => {
+      if (String(p.statusKehadiran || '').toLowerCase() === 'hadir') {
+        countHadir++;
+        totShift += Number(p.uangHarianDidapat) || 0;
+      }
+    });
+
+    const elKpiDok = document.getElementById('kpiTotalThpDokter');
+    const elCntDok = document.getElementById('kpiCountDokter');
+    const elKpiStf = document.getElementById('kpiTotalThpStaff');
+    const elCntStf = document.getElementById('kpiCountStaff');
+    const elKpiShf = document.getElementById('kpiTotalUangShift');
+    const elCntPrs = document.getElementById('kpiCountPresensi');
+    const elGrand = document.getElementById('kpiGrandTotalPayroll');
+
+    if (elKpiDok) elKpiDok.innerText = fmtRpPayroll(totDokter);
+    if (elCntDok) elCntDok.innerText = (window.PayrollState.penggajianDokter || []).length + ' Dokter Aktif';
+    if (elKpiStf) elKpiStf.innerText = fmtRpPayroll(totStaff);
+    if (elCntStf) elCntStf.innerText = (window.PayrollState.honorStaff || []).length + ' Perawat & Admin';
+    if (elKpiShf) elKpiShf.innerText = fmtRpPayroll(totShift);
+    if (elCntPrs) elCntPrs.innerText = countHadir + ' Shift Kehadiran Tercatat';
+    if (elGrand) elGrand.innerText = fmtRpPayroll(totDokter + totStaff);
+
+    // 2. Render Tabel Penggajian Dokter
+    const tbDok = document.getElementById('tbodyPayrollDokter');
+    if (tbDok) {
+      const listDok = window.PayrollState.penggajianDokter || [];
+      if (listDok.length === 0) {
+        tbDok.innerHTML = '<tr><td colspan="11" class="py-8 text-center text-slate-400 font-bold">Belum ada data penggajian dokter.</td></tr>';
+      } else {
+        tbDok.innerHTML = listDok.map((d, idx) => {
+          let pot = (Number(d.potonganPPh21) || 0) + (Number(d.potonganKasbon) || 0);
+          let stColor = d.statusTransfer === 'Paid'
+            ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+            : (d.statusTransfer === 'Approved' ? 'bg-blue-100 text-blue-800 border-blue-300' : 'bg-amber-100 text-amber-800 border-amber-300');
+          return `
+            <tr class="hover:bg-indigo-50/40 transition-colors">
+              <td class="py-3 px-4">
+                <div class="font-mono font-black text-indigo-700 text-[11px]">${d.idPayroll}</div>
+                <div class="text-[10px] font-bold text-slate-500">${d.periodeBulan}</div>
+              </td>
+              <td class="py-3 px-4">
+                <div class="font-black text-slate-800">${d.namaDokter}</div>
+                <div class="text-[10px] text-slate-500">${d.catatan || ''}</div>
+              </td>
+              <td class="py-3 px-3 text-center font-black text-slate-700">${d.totalPasien}</td>
+              <td class="py-3 px-4 text-right font-bold text-slate-700">${fmtRpPayroll(d.totalTindakanBruto)}</td>
+              <td class="py-3 px-4 text-right font-black text-emerald-700">${fmtRpPayroll(d.totalJMDokter)}</td>
+              <td class="py-3 px-3 text-center">
+                <span class="px-2 py-0.5 rounded-lg bg-slate-100 border border-slate-200 font-extrabold text-[11px] text-slate-700">
+                  S1: ${d.hadirShift1}x • S2: ${d.hadirShift2}x
+                </span>
+              </td>
+              <td class="py-3 px-4 text-right font-bold text-cyan-700">${fmtRpPayroll(d.totalUangHarianShift)}</td>
+              <td class="py-3 px-4 text-right font-bold text-rose-600">${fmtRpPayroll(pot)}</td>
+              <td class="py-3 px-4 text-right font-black text-indigo-900 bg-indigo-50/60 text-sm">${fmtRpPayroll(d.totalDiterimaTHP)}</td>
+              <td class="py-3 px-3 text-center">
+                <span class="px-2.5 py-1 rounded-full text-[10px] font-black border ${stColor}">${d.statusTransfer}</span>
+              </td>
+              <td class="py-3 px-4 text-center">
+                <div class="flex items-center justify-center gap-1.5">
+                  <button type="button" onclick="openSlipGajiModal('dokter', ${idx})" class="px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-[10px] font-extrabold shadow-sm">
+                    🖨️ Slip
+                  </button>
+                  <button type="button" onclick="togglePayrollPaidStatus('dokter', ${idx})" class="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[10px] font-extrabold shadow-sm" title="Tandai Lunas / Paid">
+                    ✓ Paid
+                  </button>
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+    }
+
+    // 3. Render Tabel Honor Perawat & Admin
+    const tbStf = document.getElementById('tbodyPayrollStaff');
+    if (tbStf) {
+      const listStf = window.PayrollState.honorStaff || [];
+      if (listStf.length === 0) {
+        tbStf.innerHTML = '<tr><td colspan="11" class="py-8 text-center text-slate-400 font-bold">Belum ada data honor perawat & admin.</td></tr>';
+      } else {
+        tbStf.innerHTML = listStf.map((s, idx) => {
+          let tunj = (Number(s.totalFeeTindakan) || 0) + (Number(s.uangMakanTransport) || 0) + (Number(s.lembur) || 0);
+          let stColor = s.statusTransfer === 'Paid'
+            ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+            : 'bg-amber-100 text-amber-800 border-amber-300';
+          let isNonShift = String(s.role || '').toLowerCase().includes('admin');
+          return `
+            <tr class="hover:bg-cyan-50/40 transition-colors">
+              <td class="py-3 px-4">
+                <div class="font-mono font-black text-cyan-700 text-[11px]">${s.idPayrollStaff}</div>
+                <div class="text-[10px] font-bold text-slate-500">${s.periodeBulan}</div>
+              </td>
+              <td class="py-3 px-4">
+                <div class="font-black text-slate-800">${s.namaStaff}</div>
+                <div class="text-[10px] text-slate-500">${s.catatan || ''}</div>
+              </td>
+              <td class="py-3 px-3">
+                <span class="px-2.5 py-1 rounded-lg bg-slate-100 font-extrabold text-[11px] text-slate-700">${s.role}</span>
+              </td>
+              <td class="py-3 px-4 text-right font-black text-slate-800">${fmtRpPayroll(s.gajiPokokBulanan)}</td>
+              <td class="py-3 px-3 text-center">
+                ${isNonShift
+                  ? '<span class="px-2 py-0.5 rounded-lg bg-purple-50 text-purple-700 border border-purple-200 font-extrabold text-[10px]">Non-Shift (Bulanan)</span>'
+                  : `<span class="px-2 py-0.5 rounded-lg bg-slate-100 border border-slate-200 font-extrabold text-[11px] text-slate-700">S1: ${s.hadirShift1}x • S2: ${s.hadirShift2}x</span>`
+                }
+              </td>
+              <td class="py-3 px-4 text-right font-bold text-cyan-700">${fmtRpPayroll(s.totalUangHarianShift)}</td>
+              <td class="py-3 px-4 text-right font-bold text-slate-700">${fmtRpPayroll(tunj)}</td>
+              <td class="py-3 px-4 text-right font-bold text-rose-600">${fmtRpPayroll(s.potonganKasbon)}</td>
+              <td class="py-3 px-4 text-right font-black text-cyan-950 bg-cyan-50/60 text-sm">${fmtRpPayroll(s.totalDiterimaTHP)}</td>
+              <td class="py-3 px-3 text-center">
+                <span class="px-2.5 py-1 rounded-full text-[10px] font-black border ${stColor}">${s.statusTransfer}</span>
+              </td>
+              <td class="py-3 px-4 text-center">
+                <div class="flex items-center justify-center gap-1.5">
+                  <button type="button" onclick="openSlipGajiModal('staff', ${idx})" class="px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-[10px] font-extrabold shadow-sm">
+                    🖨️ Slip
+                  </button>
+                  <button type="button" onclick="togglePayrollPaidStatus('staff', ${idx})" class="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[10px] font-extrabold shadow-sm">
+                    ✓ Paid
+                  </button>
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+    }
+
+    // 4. Render Tabel Presensi Shift Harian
+    const tbPres = document.getElementById('tbodyPresensiHarian');
+    if (tbPres) {
+      const listPres = window.PayrollState.presensiHarian || [];
+      if (listPres.length === 0) {
+        tbPres.innerHTML = '<tr><td colspan="8" class="py-8 text-center text-slate-400 font-bold">Belum ada data presensi shift harian.</td></tr>';
+      } else {
+        tbPres.innerHTML = listPres.map(p => {
+          let isHadir = String(p.statusKehadiran || '').toLowerCase() === 'hadir';
+          let badgeSt = isHadir
+            ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+            : 'bg-rose-100 text-rose-800 border-rose-300';
+          return `
+            <tr>
+              <td class="py-2.5 px-4 font-mono font-bold text-slate-600 text-[11px]">${p.idPresensi}</td>
+              <td class="py-2.5 px-3 font-bold text-slate-700">${p.tanggal}</td>
+              <td class="py-2.5 px-4 font-black text-slate-800">${p.namaPekerja}</td>
+              <td class="py-2.5 px-3 text-slate-600 font-semibold">${p.role}</td>
+              <td class="py-2.5 px-3 text-center">
+                <span class="px-2.5 py-0.5 rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-200 font-extrabold text-[11px]">${p.shift}</span>
+              </td>
+              <td class="py-2.5 px-3 text-center font-mono text-[11px] text-slate-600">${p.jamMasuk} - ${p.jamPulang}</td>
+              <td class="py-2.5 px-3 text-center">
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black border ${badgeSt}">${p.statusKehadiran}</span>
+              </td>
+              <td class="py-2.5 px-4 text-right font-black text-emerald-700">${fmtRpPayroll(p.uangHarianDidapat)}</td>
+            </tr>
+          `;
+        }).join('');
+      }
+    }
+
+    // 5. Render Tabel Pengaturan Tarif Shift & Gaji Pokok
+    const tbTarif = document.getElementById('tbodyTarifShift');
+    if (tbTarif) {
+      const listTarif = window.PayrollState.tarifShift || [];
+      tbTarif.innerHTML = listTarif.map((t, idx) => `
+        <tr>
+          <td class="py-3 px-4 font-mono font-bold text-slate-500 text-[11px]">${t.idAturan}</td>
+          <td class="py-3 px-4 font-black text-slate-800">${t.namaPekerja}</td>
+          <td class="py-3 px-3 font-bold text-slate-600">${t.role}</td>
+          <td class="py-3 px-3">
+            <span class="px-2.5 py-0.5 rounded-lg bg-slate-100 border border-slate-200 font-bold text-[10px] text-slate-700">${t.tipeKompensasi}</span>
+          </td>
+          <td class="py-3 px-3 text-right font-black text-indigo-700">${fmtRpPayroll(t.tarifShift1)}</td>
+          <td class="py-3 px-3 text-right font-black text-indigo-700">${fmtRpPayroll(t.tarifShift2)}</td>
+          <td class="py-3 px-4 text-right font-black text-emerald-700">${fmtRpPayroll(t.gajiPokokBulanan)}</td>
+          <td class="py-3 px-4 text-[11px] text-slate-500">${t.keterangan || '-'}</td>
+          <td class="py-3 px-3 text-center">
+            <button type="button" onclick="pilihTarifShiftToEdit(${idx})" class="px-2.5 py-1 bg-slate-100 hover:bg-indigo-100 text-indigo-700 font-extrabold rounded-lg text-[10px] border border-slate-200">
+              ✏️ Pilih
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // 6. Render Tabel Rincian Bagi Hasil JM Tindakan
+    const tbJM = document.getElementById('tbodyRincianJM');
+    if (tbJM) {
+      const listJM = window.PayrollState.rekapJM || [];
+      if (listJM.length === 0) {
+        tbJM.innerHTML = '<tr><td colspan="10" class="py-8 text-center text-slate-400 font-bold">Belum ada rincian bagi hasil JM.</td></tr>';
+      } else {
+        tbJM.innerHTML = listJM.map(item => {
+          let pctDisplay = (Number(item.persenJM) <= 1 ? Math.round(Number(item.persenJM) * 100) : Math.round(Number(item.persenJM))) + '%';
+          let badgeAturan = String(item.tipeAturan || '').includes('Khusus')
+            ? 'bg-violet-100 text-violet-800 border-violet-300'
+            : (String(item.tipeAturan || '').includes('Kunci') || String(item.namaItem || '').toLowerCase().includes('rontgen')
+              ? 'bg-amber-100 text-amber-800 border-amber-300'
+              : 'bg-blue-100 text-blue-800 border-blue-300');
+          return `
+            <tr>
+              <td class="py-3 px-4">
+                <div class="font-mono font-black text-slate-800 text-[11px]">${item.idInvoice}</div>
+                <div class="text-[10px] text-slate-500 font-bold">${item.tanggal}</div>
+              </td>
+              <td class="py-3 px-4 font-black text-slate-800">${item.dokter}</td>
+              <td class="py-3 px-4 font-bold text-slate-700">${item.namaItem}</td>
+              <td class="py-3 px-4 text-right font-bold text-slate-700">${fmtRpPayroll(item.tarifKotor)}</td>
+              <td class="py-3 px-4 text-right font-semibold text-rose-600">${fmtRpPayroll(item.biayaLab)}</td>
+              <td class="py-3 px-4 text-right font-bold text-slate-800">${fmtRpPayroll(item.dasarBagiHasil)}</td>
+              <td class="py-3 px-3 text-center">
+                <span class="px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 font-black text-xs border border-indigo-200">${pctDisplay}</span>
+              </td>
+              <td class="py-3 px-4">
+                <span class="px-2.5 py-0.5 rounded-lg text-[10px] font-extrabold border ${badgeAturan}">${item.tipeAturan}</span>
+              </td>
+              <td class="py-3 px-4 text-right font-black text-emerald-800 bg-emerald-50/60">${fmtRpPayroll(item.jmDokterBersih)}</td>
+              <td class="py-3 px-4 text-right font-bold text-slate-600">${fmtRpPayroll(item.bagianKlinik)}</td>
+            </tr>
+          `;
+        }).join('');
+      }
+    }
+  }
+
+  function handlePresPekerjaChange() {
+    const sel = document.getElementById('presNamaPekerja');
+    const roleEl = document.getElementById('presRole');
+    if (!sel || !roleEl) return;
+    const opt = sel.options[sel.selectedIndex];
+    const role = opt ? (opt.getAttribute('data-role') || 'Dokter Gigi Umum') : 'Dokter Gigi Umum';
+    roleEl.value = role;
+    updatePreviewUangShift();
+  }
+
+  function updatePreviewUangShift() {
+    const sel = document.getElementById('presNamaPekerja');
+    const roleEl = document.getElementById('presRole');
+    const statusEl = document.getElementById('presStatus');
+    const previewEl = document.getElementById('presPreviewUang');
+    if (!previewEl) return;
+
+    const status = statusEl ? statusEl.value : 'Hadir';
+    if (status !== 'Hadir') {
+      previewEl.value = 'Rp 0 (Tidak Hadir)';
+      return;
+    }
+
+    const nama = sel ? sel.value : '';
+    const role = roleEl ? roleEl.value : '';
+    const shift = (document.getElementById('presShift') || {}).value || 'Shift 1';
+
+    let foundTarif = (window.PayrollState.tarifShift || []).find(t => String(t.namaPekerja || '').toLowerCase() === nama.toLowerCase());
+    let nominal = 0;
+    if (foundTarif) {
+      nominal = shift.includes('2') ? (Number(foundTarif.tarifShift2) || 0) : (Number(foundTarif.tarifShift1) || 0);
+    } else {
+      nominal = role.toLowerCase().includes('dokter') ? 55000 : (role.toLowerCase().includes('perawat') ? 45000 : 0);
+    }
+    previewEl.value = fmtRpPayroll(nominal);
+  }
+
+  function handleSimpanPresensiShift(e) {
+    if (e) e.preventDefault();
+    const rawDate = (document.getElementById('presTanggal') || {}).value || '';
+    let formattedDate = rawDate;
+    if (rawDate && rawDate.includes('-')) {
+      let p = rawDate.split('-');
+      if (p[0].length === 4) formattedDate = p[2] + '-' + p[1] + '-' + p[0];
+    }
+
+    const sel = document.getElementById('presNamaPekerja');
+    const opt = sel ? sel.options[sel.selectedIndex] : null;
+    const namaPekerja = sel ? sel.value : '';
+    const idPekerja = opt ? (opt.getAttribute('data-id') || 'STF-001') : 'STF-001';
+    const role = (document.getElementById('presRole') || {}).value || 'Dokter Gigi Umum';
+    const shift = (document.getElementById('presShift') || {}).value || 'Shift 1';
+    const jamMasuk = (document.getElementById('presJamMasuk') || {}).value || '09:00';
+    const jamPulang = (document.getElementById('presJamPulang') || {}).value || '15:00';
+    const statusKehadiran = (document.getElementById('presStatus') || {}).value || 'Hadir';
+
+    let nominal = 0;
+    if (statusKehadiran === 'Hadir') {
+      let foundT = (window.PayrollState.tarifShift || []).find(t => String(t.namaPekerja || '').toLowerCase() === namaPekerja.toLowerCase());
+      if (foundT) {
+        nominal = shift.includes('2') ? (Number(foundT.tarifShift2) || 0) : (Number(foundT.tarifShift1) || 0);
+      } else {
+        nominal = role.toLowerCase().includes('dokter') ? 55000 : 45000;
+      }
+    }
+
+    const payload = {
+      idPresensi: 'ATT-' + Date.now().toString().slice(-6),
+      tanggal: formattedDate,
+      idPekerja: idPekerja,
+      namaPekerja: namaPekerja,
+      role: role,
+      shift: shift,
+      jamMasuk: jamMasuk,
+      jamPulang: jamPulang,
+      statusKehadiran: statusKehadiran,
+      uangHarianDidapat: nominal,
+      verifikator: window.activeNamaAccount || 'Admin'
+    };
+
+    const btn = document.getElementById('btnSubmitPresensi');
+    const orig = btn ? btn.innerHTML : '';
+    if (btn) { btn.disabled = true; btn.innerHTML = '⏳ MENYIMPAN PRESENSI...'; }
+
+    // Update state langsung
+    window.PayrollState.presensiHarian.unshift(payload);
+    savePayrollCacheLocal();
+    renderAllPayrollTables();
+
+    if (typeof google !== 'undefined' && google.script && google.script.run) {
+      google.script.run
+        .withSuccessHandler(res => {
+          if (btn) { btn.disabled = false; btn.innerHTML = orig; }
+          if (typeof showToast === 'function') showToast('success', (res && res.message) ? res.message : 'Presensi shift berhasil disimpan!');
+        })
+        .withFailureHandler(() => {
+          if (btn) { btn.disabled = false; btn.innerHTML = orig; }
+          if (typeof showToast === 'function') showToast('success', 'Presensi shift tersimpan & dihitung otomatis!');
+        })
+        .simpanPresensiShift(payload);
+    } else {
+      if (btn) { btn.disabled = false; btn.innerHTML = orig; }
+      if (typeof showToast === 'function') showToast('success', 'Presensi shift tersimpan & dihitung otomatis!');
+    }
+  }
+
+  function pilihTarifShiftToEdit(idx) {
+    const item = (window.PayrollState.tarifShift || [])[idx];
+    if (!item) return;
+    document.getElementById('tarifNamaPekerja').value = item.namaPekerja || '';
+    document.getElementById('tarifRole').value = item.role || 'Dokter Gigi Umum';
+    document.getElementById('tarifTipe').value = item.tipeKompensasi || 'Kombinasi Shift & Tindakan';
+    document.getElementById('tarifShift1').value = Number(item.tarifShift1) || 0;
+    document.getElementById('tarifShift2').value = Number(item.tarifShift2) || 0;
+    document.getElementById('tarifGajiPokok').value = Number(item.gajiPokokBulanan) || 0;
+    document.getElementById('tarifKeterangan').value = item.keterangan || '';
+  }
+
+  function handleSimpanTarifShift(e) {
+    if (e) e.preventDefault();
+    const payload = {
+      namaPekerja: (document.getElementById('tarifNamaPekerja') || {}).value.trim(),
+      role: (document.getElementById('tarifRole') || {}).value,
+      tipeKompensasi: (document.getElementById('tarifTipe') || {}).value,
+      tarifShift1: Number((document.getElementById('tarifShift1') || {}).value) || 0,
+      tarifShift2: Number((document.getElementById('tarifShift2') || {}).value) || 0,
+      gajiPokokBulanan: Number((document.getElementById('tarifGajiPokok') || {}).value) || 0,
+      keterangan: (document.getElementById('tarifKeterangan') || {}).value.trim()
+    };
+
+    if (!payload.namaPekerja) return;
+
+    let exIdx = (window.PayrollState.tarifShift || []).findIndex(x => String(x.namaPekerja || '').toLowerCase() === payload.namaPekerja.toLowerCase());
+    if (exIdx >= 0) {
+      window.PayrollState.tarifShift[exIdx] = Object.assign(window.PayrollState.tarifShift[exIdx], payload);
+    } else {
+      payload.idAturan = 'TARIF-00' + ((window.PayrollState.tarifShift || []).length + 1);
+      window.PayrollState.tarifShift.push(payload);
+    }
+    savePayrollCacheLocal();
+    renderAllPayrollTables();
+
+    const btn = document.getElementById('btnSubmitTarifShift');
+    const orig = btn ? btn.innerHTML : '';
+    if (btn) { btn.disabled = true; btn.innerHTML = '⏳ MENYIMPAN...'; }
+
+    if (typeof google !== 'undefined' && google.script && google.script.run) {
+      google.script.run
+        .withSuccessHandler(res => {
+          if (btn) { btn.disabled = false; btn.innerHTML = orig; }
+          if (typeof showToast === 'function') showToast('success', (res && res.message) ? res.message : 'Aturan tarif shift disimpan!');
+        })
+        .withFailureHandler(() => {
+          if (btn) { btn.disabled = false; btn.innerHTML = orig; }
+          if (typeof showToast === 'function') showToast('success', 'Aturan tarif shift & gaji berhasil diperbarui!');
+        })
+        .simpanTarifShift(payload);
+    } else {
+      if (btn) { btn.disabled = false; btn.innerHTML = orig; }
+      if (typeof showToast === 'function') showToast('success', 'Aturan tarif shift & gaji berhasil diperbarui!');
+    }
+  }
+
+  function togglePayrollPaidStatus(kategori, idx) {
+    const list = kategori === 'staff' ? window.PayrollState.honorStaff : window.PayrollState.penggajianDokter;
+    const item = (list || [])[idx];
+    if (!item) return;
+
+    const nextStatus = item.statusTransfer === 'Paid' ? 'Draft' : 'Paid';
+    item.statusTransfer = nextStatus;
+    savePayrollCacheLocal();
+    renderAllPayrollTables();
+
+    const idPayroll = kategori === 'staff' ? item.idPayrollStaff : item.idPayroll;
+    if (typeof google !== 'undefined' && google.script && google.script.run) {
+      google.script.run
+        .withSuccessHandler(res => {
+          if (typeof showToast === 'function') showToast('success', (res && res.message) ? res.message : ('Status diubah menjadi ' + nextStatus));
+        })
+        .updateStatusPayroll({ kategori: kategori, idPayroll: idPayroll, statusTransfer: nextStatus });
+    } else {
+      if (typeof showToast === 'function') showToast('success', 'Status Payroll [' + idPayroll + '] diubah menjadi ' + nextStatus);
+    }
+  }
+
+  function triggerGeneratePayrollPeriode() {
+    const periode = (document.getElementById('payrollPeriodeInput') || {}).value || 'Oktober 2026';
+    const btn = document.getElementById('btnGeneratePayrollView');
+    const orig = btn ? btn.innerHTML : '';
+    if (btn) { btn.disabled = true; btn.innerHTML = '⏳ MENGHITUNG PAYROLL...'; }
+
+    if (typeof google !== 'undefined' && google.script && google.script.run) {
+      google.script.run
+        .withSuccessHandler(res => {
+          if (btn) { btn.disabled = false; btn.innerHTML = orig; }
+          if (res && res.success) {
+            if (typeof showToast === 'function') showToast('success', res.message);
+            loadPayrollModuleData(false);
+          } else {
+            recalculateShiftTotalsFromPresensi();
+            renderAllPayrollTables();
+            if (typeof showToast === 'function') showToast('info', (res && res.message) ? res.message : 'Perhitungan Payroll diperbarui.');
+          }
+        })
+        .withFailureHandler(() => {
+          if (btn) { btn.disabled = false; btn.innerHTML = orig; }
+          recalculateShiftTotalsFromPresensi();
+          renderAllPayrollTables();
+          if (typeof showToast === 'function') showToast('success', 'Rekap Payroll periode ' + periode + ' berhasil dihitung!');
+        })
+        .generatePayrollPeriode(periode);
+    } else {
+      if (btn) { btn.disabled = false; btn.innerHTML = orig; }
+      recalculateShiftTotalsFromPresensi();
+      renderAllPayrollTables();
+      if (typeof showToast === 'function') showToast('success', 'Rekap Payroll periode ' + periode + ' berhasil dihitung!');
+    }
+  }
+
+  function openSlipGajiModal(kategori, idx) {
+    const modal = document.getElementById('slipGajiModal');
+    const area = document.getElementById('slipGajiPrintableArea');
+    if (!modal || !area) return;
+
+    if (kategori === 'dokter') {
+      const d = (window.PayrollState.penggajianDokter || [])[idx];
+      if (!d) return;
+      area.innerHTML = `
+        <div class="border-b-2 border-slate-800 pb-3 flex items-center justify-between">
+          <div>
+            <h4 class="text-base font-black text-slate-900">KLINIK GIGI SHELDON DENTAL CARE</h4>
+            <p class="text-[11px] text-slate-500 font-semibold">Slip Honorarium Jasa Medis & Uang Harian Shift Dokter</p>
+          </div>
+          <div class="text-right">
+            <span class="px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-700 font-mono font-black text-[11px] border border-indigo-200">${d.idPayroll}</span>
+            <p class="text-[10px] font-bold text-slate-500 mt-1">Periode: ${d.periodeBulan}</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 bg-slate-50 p-3.5 rounded-xl border border-slate-200 text-xs">
+          <div><span class="text-slate-500 font-semibold">Nama Dokter:</span> <b class="text-slate-900 block">${d.namaDokter}</b></div>
+          <div><span class="text-slate-500 font-semibold">Total Pasien Ditangani:</span> <b class="text-slate-900 block">${d.totalPasien} Pasien</b></div>
+          <div><span class="text-slate-500 font-semibold">Kehadiran Shift:</span> <b class="text-slate-900 block">Shift 1: ${d.hadirShift1}x • Shift 2: ${d.hadirShift2}x</b></div>
+          <div><span class="text-slate-500 font-semibold">Status Pembayaran:</span> <b class="text-emerald-700 block">${d.statusTransfer}</b></div>
+        </div>
+
+        <div class="space-y-2 border border-slate-200 rounded-xl p-4">
+          <div class="flex justify-between py-1 border-b border-slate-100">
+            <span class="text-slate-600 font-semibold">Total Tindakan Bruto</span>
+            <span class="font-bold text-slate-800">${fmtRpPayroll(d.totalTindakanBruto)}</span>
+          </div>
+          <div class="flex justify-between py-1 border-b border-slate-100">
+            <span class="text-slate-600 font-bold">1. Total Bagi Hasil Jasa Medis (JM Bersih)</span>
+            <span class="font-black text-emerald-700">${fmtRpPayroll(d.totalJMDokter)}</span>
+          </div>
+          <div class="flex justify-between py-1 border-b border-slate-100">
+            <span class="text-slate-600 font-bold">2. Total Uang Harian Shift (${d.hadirShift1 + d.hadirShift2}x Shift @ Rp 55.000)</span>
+            <span class="font-black text-cyan-700">${fmtRpPayroll(d.totalUangHarianShift)}</span>
+          </div>
+          <div class="flex justify-between py-1 border-b border-slate-100">
+            <span class="text-slate-600 font-semibold">3. Bonus / Insentif Tambahan</span>
+            <span class="font-bold text-slate-800">${fmtRpPayroll(d.bonusInsentif)}</span>
+          </div>
+          <div class="flex justify-between py-1 border-b border-slate-100 text-rose-600">
+            <span class="font-semibold">4. Potongan (PPh21 / Kasbon)</span>
+            <span class="font-bold">- ${fmtRpPayroll((Number(d.potonganPPh21) || 0) + (Number(d.potonganKasbon) || 0))}</span>
+          </div>
+          <div class="flex justify-between pt-2.5 text-sm font-black text-indigo-950">
+            <span>TOTAL TAKE HOME PAY (DITERIMA BERSIH)</span>
+            <span class="text-base text-indigo-700">${fmtRpPayroll(d.totalDiterimaTHP)}</span>
+          </div>
+        </div>
+        <p class="text-[10px] text-slate-400 italic">Catatan: ${d.catatan || '-'}</p>
+      `;
+    } else {
+      const s = (window.PayrollState.honorStaff || [])[idx];
+      if (!s) return;
+      area.innerHTML = `
+        <div class="border-b-2 border-slate-800 pb-3 flex items-center justify-between">
+          <div>
+            <h4 class="text-base font-black text-slate-900">KLINIK GIGI SHELDON DENTAL CARE</h4>
+            <p class="text-[11px] text-slate-500 font-semibold">Slip Gaji & Honorarium Perawat / Staff Administrasi</p>
+          </div>
+          <div class="text-right">
+            <span class="px-2.5 py-1 rounded-lg bg-cyan-50 text-cyan-700 font-mono font-black text-[11px] border border-cyan-200">${s.idPayrollStaff}</span>
+            <p class="text-[10px] font-bold text-slate-500 mt-1">Periode: ${s.periodeBulan}</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 bg-slate-50 p-3.5 rounded-xl border border-slate-200 text-xs">
+          <div><span class="text-slate-500 font-semibold">Nama Pekerja:</span> <b class="text-slate-900 block">${s.namaStaff}</b></div>
+          <div><span class="text-slate-500 font-semibold">Role Jabatan:</span> <b class="text-slate-900 block">${s.role}</b></div>
+          <div><span class="text-slate-500 font-semibold">Kehadiran Shift:</span> <b class="text-slate-900 block">Shift 1: ${s.hadirShift1}x • Shift 2: ${s.hadirShift2}x</b></div>
+          <div><span class="text-slate-500 font-semibold">Status Pembayaran:</span> <b class="text-emerald-700 block">${s.statusTransfer}</b></div>
+        </div>
+
+        <div class="space-y-2 border border-slate-200 rounded-xl p-4">
+          <div class="flex justify-between py-1 border-b border-slate-100">
+            <span class="text-slate-600 font-bold">1. Gaji Pokok Bulanan Tetap</span>
+            <span class="font-black text-slate-800">${fmtRpPayroll(s.gajiPokokBulanan)}</span>
+          </div>
+          <div class="flex justify-between py-1 border-b border-slate-100">
+            <span class="text-slate-600 font-bold">2. Uang Harian Shift (${s.hadirShift1 + s.hadirShift2}x Shift @ Rp 45.000)</span>
+            <span class="font-black text-cyan-700">${fmtRpPayroll(s.totalUangHarianShift)}</span>
+          </div>
+          <div class="flex justify-between py-1 border-b border-slate-100">
+            <span class="text-slate-600 font-semibold">3. Fee Asistensi / Tunjangan / Lembur</span>
+            <span class="font-bold text-slate-800">${fmtRpPayroll((Number(s.totalFeeTindakan) || 0) + (Number(s.uangMakanTransport) || 0) + (Number(s.lembur) || 0))}</span>
+          </div>
+          <div class="flex justify-between py-1 border-b border-slate-100 text-rose-600">
+            <span class="font-semibold">4. Potongan Kasbon</span>
+            <span class="font-bold">- ${fmtRpPayroll(s.potonganKasbon)}</span>
+          </div>
+          <div class="flex justify-between pt-2.5 text-sm font-black text-cyan-950">
+            <span>TOTAL TAKE HOME PAY (DITERIMA BERSIH)</span>
+            <span class="text-base text-cyan-700">${fmtRpPayroll(s.totalDiterimaTHP)}</span>
+          </div>
+        </div>
+        <p class="text-[10px] text-slate-400 italic">Catatan: ${s.catatan || '-'}</p>
+      `;
+    }
+
+    modal.classList.remove('hidden');
+  }
+
+  function closeSlipGajiModal() {
+    const modal = document.getElementById('slipGajiModal');
+    if (modal) modal.classList.add('hidden');
+  }
+
+  function downloadSlipGajiPDF() {
+    const el = document.getElementById('slipGajiPrintableArea');
+    if (!el) return;
+    if (typeof html2pdf !== 'undefined') {
+      html2pdf().set({
+        margin: 10,
+        filename: 'Slip_Payroll_Sheldon_' + Date.now() + '.pdf',
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'mm', format: 'a5', orientation: 'landscape' }
+      }).from(el).save();
+    } else {
+      window.print();
+    }
+  }
+
+  window.initPayrollModule = initPayrollModule;
+  window.switchPayrollTab = switchPayrollTab;
+  window.loadPayrollModuleData = loadPayrollModuleData;
+  window.handlePresPekerjaChange = handlePresPekerjaChange;
+  window.updatePreviewUangShift = updatePreviewUangShift;
+  window.handleSimpanPresensiShift = handleSimpanPresensiShift;
+  window.pilihTarifShiftToEdit = pilihTarifShiftToEdit;
+  window.handleSimpanTarifShift = handleSimpanTarifShift;
+  window.togglePayrollPaidStatus = togglePayrollPaidStatus;
+  window.triggerGeneratePayrollPeriode = triggerGeneratePayrollPeriode;
+  window.openSlipGajiModal = openSlipGajiModal;
+  window.closeSlipGajiModal = closeSlipGajiModal;
+  window.downloadSlipGajiPDF = downloadSlipGajiPDF;
+</script>
+
 <!-- MODAL SINKRONISASI GOOGLE APPS SCRIPT -->
 <div id="gasSyncModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[300] hidden flex items-center justify-center p-4 transition-opacity duration-300 opacity-0">
   <div class="bg-white p-6 md:p-8 rounded-3xl shadow-2xl w-full max-w-lg border border-slate-100" id="gasSyncModalContent">

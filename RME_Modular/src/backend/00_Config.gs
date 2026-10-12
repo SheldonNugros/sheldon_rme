@@ -52,7 +52,7 @@ const ARCHIVE_CONFIG = {
 const ROLE_RULES = {
   "SUPER_USER": {
     roles: ["super user", "owner"],
-    allowedMenus: ["dashboard", "ai", "pasien", "rekam-medis", "surat", "database", "inventory", "informasi", "kasir", "riwayat-invoice"],
+    allowedMenus: ["dashboard", "ai", "pasien", "rekam-medis", "surat", "database", "inventory", "informasi", "kasir", "riwayat-invoice", "payroll"],
     defaultMenu: "dashboard"
   },
   "DOKTER_SPESIALIS": {
@@ -67,7 +67,7 @@ const ROLE_RULES = {
   },
   "ADMIN": {
     roles: ["admin", "perawat umum", "perawat gigi", "kasir"],
-    allowedMenus: ["pasien", "surat", "informasi", "kasir", "riwayat-invoice"],
+    allowedMenus: ["pasien", "surat", "informasi", "kasir", "riwayat-invoice", "payroll"],
     defaultMenu: "pasien"
   },
   "STAFF": {

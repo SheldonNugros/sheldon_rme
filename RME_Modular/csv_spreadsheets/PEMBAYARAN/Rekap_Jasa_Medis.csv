@@ -1,5 +1,166 @@
 ID_Invoice,Tanggal,Dokter,Perawat,Kategori_Item,Nama_Item,Tarif_Kotor,Biaya_Lab,Dasar_Bagi_Hasil,Persen_JM,Tipe_Aturan,JM_Dokter_Kotor,Potongan_Perawat,JM_Dokter_Bersih,JM_Perawat,Bagian_Klinik,Status_JM,Waktu_Hitung
-INV/SHELDON/0001/1026,10-10-2026,drg. Sheldon Cooper, Sp.Ort,-,Tindakan,Pemasangan Mahkota PFM (Crown),1500000,350000,1150000,50%,Default Dokter,575000,0,575000,0,575000,Pending Pelunasan,10-10-2026 10:15:05
-INV/SHELDON/0002/1026,10-10-2026,drg. Leonard Hofstadter,-,Tindakan,Foto Rontgen Periapikal Digital,100000,0,100000,15%,Default Tindakan (Flat),15000,0,15000,0,85000,Siap Cair,10-10-2026 11:20:05
-INV/SHELDON/0003/1026,10-10-2026,drg. Sheldon Cooper, Sp.Ort,-,Tindakan,Perawatan Saluran Akar (PSA) Molar,1500000,0,1500000,55%,Tarif Khusus Dokter,825000,0,825000,0,675000,Siap Cair,10-10-2026 14:05:05
-INV/SHELDON/0004/1026,10-10-2026,drg. Sheldon Cooper, Sp.Ort,Bernadette Rostenkowski,Tindakan,Pemasangan Behel Standar (Include Scaling),5000000,0,5000000,50%,Default Dokter,2500000,50000,2450000,50000,2500000,Siap Cair,10-10-2026 16:30:05
+INV/SHELDON/0001/1026,05-10-2026,"drg. Sheldon Cooper, Sp.Ort",Bernadette Rostenkowski,Tindakan,Pemasangan Mahkota PFM (Crown),1500000,350000,1150000,0.50,Default Dokter (50%),575000,0,575000,0,575000,Siap Cair,05-10-2026 10:15:05
+INV/SHELDON/0001/1026,05-10-2026,"drg. Sheldon Cooper, Sp.Ort",Bernadette Rostenkowski,Obat,Amoxicillin 500 mg,15000,0,15000,0,Non-JM (Obat/BMHP),0,0,0,0,15000,Final,05-10-2026 10:15:05
+INV/SHELDON/0002/1026,05-10-2026,drg. Leonard Hofstadter,Bernadette Rostenkowski,Tindakan,Foto Rontgen Periapikal Digital,100000,0,100000,0.15,Tarif Rontgen (15%),15000,0,15000,0,85000,Siap Cair,05-10-2026 11:20:05
+INV/SHELDON/0003/1026,05-10-2026,"drg. Sheldon Cooper, Sp.Ort",Bernadette Rostenkowski,Tindakan,Perawatan Saluran Akar (PSA) Molar,1500000,0,1500000,0.55,Tarif Khusus Dokter (55%),825000,0,825000,0,675000,Siap Cair,05-10-2026 14:05:05
+INV/SHELDON/0004/1026,05-10-2026,"drg. Sheldon Cooper, Sp.Ort",Bernadette Rostenkowski,Tindakan,Pemasangan Behel Standar (Include Scaling),5000000,0,5000000,0.50,Default Dokter (50%),2500000,50000,2450000,50000,2500000,Siap Cair,05-10-2026 16:30:05
+INV/SHELDON/0005/0126,01-01-2026,drg. Danny,Wulan,Tindakan,Tumpat Komposit Sedang,300000,0,300000,0.65,Persentase Dokter (65%),195000,0,195000,0,105000,Siap Cair,01-01-2026 15:30:05
+INV/SHELDON/0005/0126,01-01-2026,drg. Danny,Wulan,Obat,Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg),35000,0,35000,0,Non-JM (Obat/BMHP),0,0,0,0,35000,Final,01-01-2026 15:30:05
+INV/SHELDON/0006/0126,02-01-2026,drg. Astri,Dina,Tindakan,Scalling Sedang,250000,0,250000,0.65,Persentase Dokter (65%),162500,0,162500,0,87500,Siap Cair,02-01-2026 15:30:05
+INV/SHELDON/0007/0126,03-01-2026,drg. Rizka,Bernadette Rostenkowski,Tindakan,Exo Dewasa Ringan (Akar Tunggal),250000,0,250000,0.65,Persentase Dokter (65%),162500,0,162500,0,87500,Siap Cair,03-01-2026 15:30:05
+INV/SHELDON/0008/0126,04-01-2026,drg. Nanda,Wulan,Tindakan,Kontrol Ortho Rutin (Ganti Karet/Power O),150000,0,150000,0.65,Persentase Dokter (65%),97500,0,97500,0,52500,Siap Cair,04-01-2026 15:30:05
+INV/SHELDON/0008/0126,04-01-2026,drg. Nanda,Wulan,Obat,Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg),35000,0,35000,0,Non-JM (Obat/BMHP),0,0,0,0,35000,Final,04-01-2026 15:30:05
+INV/SHELDON/0009/0126,05-01-2026,drg. Aviva,Dina,Tindakan,Rontgen Periapikal Digital,100000,0,100000,0.15,Tarif Rontgen (15%),15000,0,15000,0,85000,Siap Cair,05-01-2026 15:30:05
+INV/SHELDON/0010/0126,06-01-2026,drg. Erien,Bernadette Rostenkowski,Tindakan,Scalling Perawat,150000,0,150000,0.5,Persentase Dokter (50%),75000,25000,50000,25000,75000,Siap Cair,06-01-2026 15:30:05
+INV/SHELDON/0011/0126,07-01-2026,drg.g.p Dinda,Wulan,Tindakan,Crown PFM (Porcelain Fused to Metal),1500000,350000,1150000,0.55,Persentase Dokter (55%),632500,0,632500,0,517500,Siap Cair,07-01-2026 15:30:05
+INV/SHELDON/0011/0126,07-01-2026,drg.g.p Dinda,Wulan,Obat,Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg),35000,0,35000,0,Non-JM (Obat/BMHP),0,0,0,0,35000,Final,07-01-2026 15:30:05
+INV/SHELDON/0012/0126,08-01-2026,drg.g.p Fathya,Dina,Tindakan,PSA 1x Kunjungan (One Visit Endodontic),1500000,0,1500000,0.4,Persentase Dokter (40%),600000,0,600000,0,900000,Siap Cair,08-01-2026 15:30:05
+INV/SHELDON/0013/0126,09-01-2026,drg.g.p Belinda,Bernadette Rostenkowski,Tindakan,Odontektomi Kelas I Ringan,1800000,0,1800000,0.4,Persentase Dokter (40%),720000,0,720000,0,1080000,Siap Cair,09-01-2026 15:30:05
+INV/SHELDON/0014/0126,10-01-2026,"drg. Rahma Yulinda D, Sp. BMM",Wulan,Tindakan,Tumpat GIC Sedang,250000,0,250000,0.65,Persentase Dokter (65%),162500,0,162500,0,87500,Siap Cair,10-01-2026 15:30:05
+INV/SHELDON/0014/0126,10-01-2026,"drg. Rahma Yulinda D, Sp. BMM",Wulan,Obat,Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg),35000,0,35000,0,Non-JM (Obat/BMHP),0,0,0,0,35000,Final,10-01-2026 15:30:05
+INV/SHELDON/0015/0126,11-01-2026,drg. Tia Ardhana R,Dina,Tindakan,Tumpat Komposit Sedang,300000,0,300000,0.5,Persentase Dokter (50%),150000,0,150000,0,150000,Siap Cair,11-01-2026 15:30:05
+INV/SHELDON/0016/0126,12-01-2026,drg. Danny,Bernadette Rostenkowski,Tindakan,Scalling Sedang,250000,0,250000,0.65,Persentase Dokter (65%),162500,0,162500,0,87500,Siap Cair,12-01-2026 15:30:05
+INV/SHELDON/0017/0226,13-02-2026,drg. Astri,Wulan,Tindakan,Exo Dewasa Ringan (Akar Tunggal),250000,0,250000,0.65,Persentase Dokter (65%),162500,0,162500,0,87500,Siap Cair,13-02-2026 15:30:05
+INV/SHELDON/0017/0226,13-02-2026,drg. Astri,Wulan,Obat,Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg),35000,0,35000,0,Non-JM (Obat/BMHP),0,0,0,0,35000,Final,13-02-2026 15:30:05
+INV/SHELDON/0018/0226,14-02-2026,drg. Rizka,Dina,Tindakan,Kontrol Ortho Rutin (Ganti Karet/Power O),150000,0,150000,0.65,Persentase Dokter (65%),97500,0,97500,0,52500,Siap Cair,14-02-2026 15:30:05
+INV/SHELDON/0019/0226,15-02-2026,drg. Nanda,Bernadette Rostenkowski,Tindakan,Rontgen Periapikal Digital,100000,0,100000,0.15,Tarif Rontgen (15%),15000,0,15000,0,85000,Siap Cair,15-02-2026 15:30:05
+INV/SHELDON/0020/0226,16-02-2026,drg. Aviva,Wulan,Tindakan,Scalling Perawat,150000,0,150000,0.65,Persentase Dokter (65%),97500,25000,72500,25000,52500,Siap Cair,16-02-2026 15:30:05
+INV/SHELDON/0020/0226,16-02-2026,drg. Aviva,Wulan,Obat,Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg),35000,0,35000,0,Non-JM (Obat/BMHP),0,0,0,0,35000,Final,16-02-2026 15:30:05
+INV/SHELDON/0021/0226,17-02-2026,drg. Erien,Dina,Tindakan,Crown PFM (Porcelain Fused to Metal),1500000,350000,1150000,0.5,Persentase Dokter (50%),575000,0,575000,0,575000,Siap Cair,17-02-2026 15:30:05
+INV/SHELDON/0022/0226,18-02-2026,drg.g.p Dinda,Bernadette Rostenkowski,Tindakan,PSA 1x Kunjungan (One Visit Endodontic),1500000,0,1500000,0.55,Persentase Dokter (55%),825000,0,825000,0,675000,Siap Cair,18-02-2026 15:30:05
+INV/SHELDON/0023/0226,19-02-2026,drg.g.p Fathya,Wulan,Tindakan,Odontektomi Kelas I Ringan,1800000,0,1800000,0.4,Persentase Dokter (40%),720000,0,720000,0,1080000,Siap Cair,19-02-2026 15:30:05
+INV/SHELDON/0023/0226,19-02-2026,drg.g.p Fathya,Wulan,Obat,Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg),35000,0,35000,0,Non-JM (Obat/BMHP),0,0,0,0,35000,Final,19-02-2026 15:30:05
+INV/SHELDON/0024/0226,20-02-2026,drg.g.p Belinda,Dina,Tindakan,Tumpat GIC Sedang,250000,0,250000,0.4,Persentase Dokter (40%),100000,0,100000,0,150000,Siap Cair,20-02-2026 15:30:05
+INV/SHELDON/0025/0226,21-02-2026,"drg. Rahma Yulinda D, Sp. BMM",Bernadette Rostenkowski,Tindakan,Tumpat Komposit Sedang,300000,0,300000,0.65,Persentase Dokter (65%),195000,0,195000,0,105000,Siap Cair,21-02-2026 15:30:05
+INV/SHELDON/0026/0226,22-02-2026,drg. Tia Ardhana R,Wulan,Tindakan,Scalling Sedang,250000,0,250000,0.5,Persentase Dokter (50%),125000,0,125000,0,125000,Siap Cair,22-02-2026 15:30:05
+INV/SHELDON/0026/0226,22-02-2026,drg. Tia Ardhana R,Wulan,Obat,Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg),35000,0,35000,0,Non-JM (Obat/BMHP),0,0,0,0,35000,Final,22-02-2026 15:30:05
+INV/SHELDON/0027/0226,23-02-2026,drg. Danny,Dina,Tindakan,Exo Dewasa Ringan (Akar Tunggal),250000,0,250000,0.65,Persentase Dokter (65%),162500,0,162500,0,87500,Siap Cair,23-02-2026 15:30:05
+INV/SHELDON/0028/0226,24-02-2026,drg. Astri,Bernadette Rostenkowski,Tindakan,Kontrol Ortho Rutin (Ganti Karet/Power O),150000,0,150000,0.65,Persentase Dokter (65%),97500,0,97500,0,52500,Siap Cair,24-02-2026 15:30:05
+INV/SHELDON/0029/0326,25-03-2026,drg. Rizka,Wulan,Tindakan,Rontgen Periapikal Digital,100000,0,100000,0.15,Tarif Rontgen (15%),15000,0,15000,0,85000,Siap Cair,25-03-2026 15:30:05
+INV/SHELDON/0029/0326,25-03-2026,drg. Rizka,Wulan,Obat,Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg),35000,0,35000,0,Non-JM (Obat/BMHP),0,0,0,0,35000,Final,25-03-2026 15:30:05
+INV/SHELDON/0030/0326,26-03-2026,drg. Nanda,Dina,Tindakan,Scalling Perawat,150000,0,150000,0.65,Persentase Dokter (65%),97500,25000,72500,25000,52500,Siap Cair,26-03-2026 15:30:05
+INV/SHELDON/0031/0326,27-03-2026,drg. Aviva,Bernadette Rostenkowski,Tindakan,Crown PFM (Porcelain Fused to Metal),1500000,350000,1150000,0.65,Persentase Dokter (65%),747500,0,747500,0,402500,Siap Cair,27-03-2026 15:30:05
+INV/SHELDON/0032/0326,28-03-2026,drg. Erien,Wulan,Tindakan,PSA 1x Kunjungan (One Visit Endodontic),1500000,0,1500000,0.5,Persentase Dokter (50%),750000,0,750000,0,750000,Siap Cair,28-03-2026 15:30:05
+INV/SHELDON/0032/0326,28-03-2026,drg. Erien,Wulan,Obat,Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg),35000,0,35000,0,Non-JM (Obat/BMHP),0,0,0,0,35000,Final,28-03-2026 15:30:05
+INV/SHELDON/0033/0326,01-03-2026,drg.g.p Dinda,Dina,Tindakan,Odontektomi Kelas I Ringan,1800000,0,1800000,0.55,Persentase Dokter (55%),990000,0,990000,0,810000,Siap Cair,01-03-2026 15:30:05
+INV/SHELDON/0034/0326,02-03-2026,drg.g.p Fathya,Bernadette Rostenkowski,Tindakan,Tumpat GIC Sedang,250000,0,250000,0.4,Persentase Dokter (40%),100000,0,100000,0,150000,Siap Cair,02-03-2026 15:30:05
+INV/SHELDON/0035/0326,03-03-2026,drg.g.p Belinda,Wulan,Tindakan,Tumpat Komposit Sedang,300000,0,300000,0.4,Persentase Dokter (40%),120000,0,120000,0,180000,Siap Cair,03-03-2026 15:30:05
+INV/SHELDON/0035/0326,03-03-2026,drg.g.p Belinda,Wulan,Obat,Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg),35000,0,35000,0,Non-JM (Obat/BMHP),0,0,0,0,35000,Final,03-03-2026 15:30:05
+INV/SHELDON/0036/0326,04-03-2026,"drg. Rahma Yulinda D, Sp. BMM",Dina,Tindakan,Scalling Sedang,250000,0,250000,0.65,Persentase Dokter (65%),162500,0,162500,0,87500,Siap Cair,04-03-2026 15:30:05
+INV/SHELDON/0037/0326,05-03-2026,drg. Tia Ardhana R,Bernadette Rostenkowski,Tindakan,Exo Dewasa Ringan (Akar Tunggal),250000,0,250000,0.5,Persentase Dokter (50%),125000,0,125000,0,125000,Siap Cair,05-03-2026 15:30:05
+INV/SHELDON/0038/0326,06-03-2026,drg. Danny,Wulan,Tindakan,Kontrol Ortho Rutin (Ganti Karet/Power O),150000,0,150000,0.65,Persentase Dokter (65%),97500,0,97500,0,52500,Siap Cair,06-03-2026 15:30:05
+INV/SHELDON/0038/0326,06-03-2026,drg. Danny,Wulan,Obat,Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg),35000,0,35000,0,Non-JM (Obat/BMHP),0,0,0,0,35000,Final,06-03-2026 15:30:05
+INV/SHELDON/0039/0326,07-03-2026,drg. Astri,Dina,Tindakan,Rontgen Periapikal Digital,100000,0,100000,0.15,Tarif Rontgen (15%),15000,0,15000,0,85000,Siap Cair,07-03-2026 15:30:05
+INV/SHELDON/0040/0326,08-03-2026,drg. Rizka,Bernadette Rostenkowski,Tindakan,Scalling Perawat,150000,0,150000,0.65,Persentase Dokter (65%),97500,25000,72500,25000,52500,Siap Cair,08-03-2026 15:30:05
+INV/SHELDON/0041/0426,09-04-2026,drg. Nanda,Wulan,Tindakan,Crown PFM (Porcelain Fused to Metal),1500000,350000,1150000,0.65,Persentase Dokter (65%),747500,0,747500,0,402500,Siap Cair,09-04-2026 15:30:05
+INV/SHELDON/0041/0426,09-04-2026,drg. Nanda,Wulan,Obat,Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg),35000,0,35000,0,Non-JM (Obat/BMHP),0,0,0,0,35000,Final,09-04-2026 15:30:05
+INV/SHELDON/0042/0426,10-04-2026,drg. Aviva,Dina,Tindakan,PSA 1x Kunjungan (One Visit Endodontic),1500000,0,1500000,0.65,Persentase Dokter (65%),975000,0,975000,0,525000,Siap Cair,10-04-2026 15:30:05
+INV/SHELDON/0043/0426,11-04-2026,drg. Erien,Bernadette Rostenkowski,Tindakan,Odontektomi Kelas I Ringan,1800000,0,1800000,0.5,Persentase Dokter (50%),900000,0,900000,0,900000,Siap Cair,11-04-2026 15:30:05
+INV/SHELDON/0044/0426,12-04-2026,drg.g.p Dinda,Wulan,Tindakan,Tumpat GIC Sedang,250000,0,250000,0.55,Persentase Dokter (55%),137500,0,137500,0,112500,Siap Cair,12-04-2026 15:30:05
+INV/SHELDON/0044/0426,12-04-2026,drg.g.p Dinda,Wulan,Obat,Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg),35000,0,35000,0,Non-JM (Obat/BMHP),0,0,0,0,35000,Final,12-04-2026 15:30:05
+INV/SHELDON/0045/0426,13-04-2026,drg.g.p Fathya,Dina,Tindakan,Tumpat Komposit Sedang,300000,0,300000,0.4,Persentase Dokter (40%),120000,0,120000,0,180000,Siap Cair,13-04-2026 15:30:05
+INV/SHELDON/0046/0426,14-04-2026,drg.g.p Belinda,Bernadette Rostenkowski,Tindakan,Scalling Sedang,250000,0,250000,0.4,Persentase Dokter (40%),100000,0,100000,0,150000,Siap Cair,14-04-2026 15:30:05
+INV/SHELDON/0047/0426,15-04-2026,"drg. Rahma Yulinda D, Sp. BMM",Wulan,Tindakan,Exo Dewasa Ringan (Akar Tunggal),250000,0,250000,0.65,Persentase Dokter (65%),162500,0,162500,0,87500,Siap Cair,15-04-2026 15:30:05
+INV/SHELDON/0047/0426,15-04-2026,"drg. Rahma Yulinda D, Sp. BMM",Wulan,Obat,Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg),35000,0,35000,0,Non-JM (Obat/BMHP),0,0,0,0,35000,Final,15-04-2026 15:30:05
+INV/SHELDON/0048/0426,16-04-2026,drg. Tia Ardhana R,Dina,Tindakan,Kontrol Ortho Rutin (Ganti Karet/Power O),150000,0,150000,0.5,Persentase Dokter (50%),75000,0,75000,0,75000,Siap Cair,16-04-2026 15:30:05
+INV/SHELDON/0049/0426,17-04-2026,drg. Danny,Bernadette Rostenkowski,Tindakan,Rontgen Periapikal Digital,100000,0,100000,0.15,Tarif Rontgen (15%),15000,0,15000,0,85000,Siap Cair,17-04-2026 15:30:05
+INV/SHELDON/0050/0426,18-04-2026,drg. Astri,Wulan,Tindakan,Scalling Perawat,150000,0,150000,0.65,Persentase Dokter (65%),97500,25000,72500,25000,52500,Siap Cair,18-04-2026 15:30:05
+INV/SHELDON/0050/0426,18-04-2026,drg. Astri,Wulan,Obat,Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg),35000,0,35000,0,Non-JM (Obat/BMHP),0,0,0,0,35000,Final,18-04-2026 15:30:05
+INV/SHELDON/0051/0426,19-04-2026,drg. Rizka,Dina,Tindakan,Crown PFM (Porcelain Fused to Metal),1500000,350000,1150000,0.65,Persentase Dokter (65%),747500,0,747500,0,402500,Siap Cair,19-04-2026 15:30:05
+INV/SHELDON/0052/0426,20-04-2026,drg. Nanda,Bernadette Rostenkowski,Tindakan,PSA 1x Kunjungan (One Visit Endodontic),1500000,0,1500000,0.65,Persentase Dokter (65%),975000,0,975000,0,525000,Siap Cair,20-04-2026 15:30:05
+INV/SHELDON/0053/0526,21-05-2026,drg. Aviva,Wulan,Tindakan,Odontektomi Kelas I Ringan,1800000,0,1800000,0.65,Persentase Dokter (65%),1170000,0,1170000,0,630000,Siap Cair,21-05-2026 15:30:05
+INV/SHELDON/0053/0526,21-05-2026,drg. Aviva,Wulan,Obat,Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg),35000,0,35000,0,Non-JM (Obat/BMHP),0,0,0,0,35000,Final,21-05-2026 15:30:05
+INV/SHELDON/0054/0526,22-05-2026,drg. Erien,Dina,Tindakan,Tumpat GIC Sedang,250000,0,250000,0.5,Persentase Dokter (50%),125000,0,125000,0,125000,Siap Cair,22-05-2026 15:30:05
+INV/SHELDON/0055/0526,23-05-2026,drg.g.p Dinda,Bernadette Rostenkowski,Tindakan,Tumpat Komposit Sedang,300000,0,300000,0.55,Persentase Dokter (55%),165000,0,165000,0,135000,Siap Cair,23-05-2026 15:30:05
+INV/SHELDON/0056/0526,24-05-2026,drg.g.p Fathya,Wulan,Tindakan,Scalling Sedang,250000,0,250000,0.4,Persentase Dokter (40%),100000,0,100000,0,150000,Siap Cair,24-05-2026 15:30:05
+INV/SHELDON/0056/0526,24-05-2026,drg.g.p Fathya,Wulan,Obat,Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg),35000,0,35000,0,Non-JM (Obat/BMHP),0,0,0,0,35000,Final,24-05-2026 15:30:05
+INV/SHELDON/0057/0526,25-05-2026,drg.g.p Belinda,Dina,Tindakan,Exo Dewasa Ringan (Akar Tunggal),250000,0,250000,0.4,Persentase Dokter (40%),100000,0,100000,0,150000,Siap Cair,25-05-2026 15:30:05
+INV/SHELDON/0058/0526,26-05-2026,"drg. Rahma Yulinda D, Sp. BMM",Bernadette Rostenkowski,Tindakan,Kontrol Ortho Rutin (Ganti Karet/Power O),150000,0,150000,0.65,Persentase Dokter (65%),97500,0,97500,0,52500,Siap Cair,26-05-2026 15:30:05
+INV/SHELDON/0059/0526,27-05-2026,drg. Tia Ardhana R,Wulan,Tindakan,Rontgen Periapikal Digital,100000,0,100000,0.15,Tarif Rontgen (15%),15000,0,15000,0,85000,Siap Cair,27-05-2026 15:30:05
+INV/SHELDON/0059/0526,27-05-2026,drg. Tia Ardhana R,Wulan,Obat,Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg),35000,0,35000,0,Non-JM (Obat/BMHP),0,0,0,0,35000,Final,27-05-2026 15:30:05
+INV/SHELDON/0060/0526,28-05-2026,drg. Danny,Dina,Tindakan,Scalling Perawat,150000,0,150000,0.65,Persentase Dokter (65%),97500,25000,72500,25000,52500,Siap Cair,28-05-2026 15:30:05
+INV/SHELDON/0061/0526,01-05-2026,drg. Astri,Bernadette Rostenkowski,Tindakan,Crown PFM (Porcelain Fused to Metal),1500000,350000,1150000,0.65,Persentase Dokter (65%),747500,0,747500,0,402500,Siap Cair,01-05-2026 15:30:05
+INV/SHELDON/0062/0526,02-05-2026,drg. Rizka,Wulan,Tindakan,PSA 1x Kunjungan (One Visit Endodontic),1500000,0,1500000,0.65,Persentase Dokter (65%),975000,0,975000,0,525000,Siap Cair,02-05-2026 15:30:05
+INV/SHELDON/0062/0526,02-05-2026,drg. Rizka,Wulan,Obat,Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg),35000,0,35000,0,Non-JM (Obat/BMHP),0,0,0,0,35000,Final,02-05-2026 15:30:05
+INV/SHELDON/0063/0526,03-05-2026,drg. Nanda,Dina,Tindakan,Odontektomi Kelas I Ringan,1800000,0,1800000,0.65,Persentase Dokter (65%),1170000,0,1170000,0,630000,Siap Cair,03-05-2026 15:30:05
+INV/SHELDON/0064/0526,04-05-2026,drg. Aviva,Bernadette Rostenkowski,Tindakan,Tumpat GIC Sedang,250000,0,250000,0.65,Persentase Dokter (65%),162500,0,162500,0,87500,Siap Cair,04-05-2026 15:30:05
+INV/SHELDON/0065/0626,05-06-2026,drg. Erien,Wulan,Tindakan,Tumpat Komposit Sedang,300000,0,300000,0.5,Persentase Dokter (50%),150000,0,150000,0,150000,Siap Cair,05-06-2026 15:30:05
+INV/SHELDON/0065/0626,05-06-2026,drg. Erien,Wulan,Obat,Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg),35000,0,35000,0,Non-JM (Obat/BMHP),0,0,0,0,35000,Final,05-06-2026 15:30:05
+INV/SHELDON/0066/0626,06-06-2026,drg.g.p Dinda,Dina,Tindakan,Scalling Sedang,250000,0,250000,0.55,Persentase Dokter (55%),137500,0,137500,0,112500,Siap Cair,06-06-2026 15:30:05
+INV/SHELDON/0067/0626,07-06-2026,drg.g.p Fathya,Bernadette Rostenkowski,Tindakan,Exo Dewasa Ringan (Akar Tunggal),250000,0,250000,0.4,Persentase Dokter (40%),100000,0,100000,0,150000,Siap Cair,07-06-2026 15:30:05
+INV/SHELDON/0068/0626,08-06-2026,drg.g.p Belinda,Wulan,Tindakan,Kontrol Ortho Rutin (Ganti Karet/Power O),150000,0,150000,0.4,Persentase Dokter (40%),60000,0,60000,0,90000,Siap Cair,08-06-2026 15:30:05
+INV/SHELDON/0068/0626,08-06-2026,drg.g.p Belinda,Wulan,Obat,Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg),35000,0,35000,0,Non-JM (Obat/BMHP),0,0,0,0,35000,Final,08-06-2026 15:30:05
+INV/SHELDON/0069/0626,09-06-2026,"drg. Rahma Yulinda D, Sp. BMM",Dina,Tindakan,Rontgen Periapikal Digital,100000,0,100000,0.15,Tarif Rontgen (15%),15000,0,15000,0,85000,Siap Cair,09-06-2026 15:30:05
+INV/SHELDON/0070/0626,10-06-2026,drg. Tia Ardhana R,Bernadette Rostenkowski,Tindakan,Scalling Perawat,150000,0,150000,0.5,Persentase Dokter (50%),75000,25000,50000,25000,75000,Siap Cair,10-06-2026 15:30:05
+INV/SHELDON/0071/0626,11-06-2026,drg. Danny,Wulan,Tindakan,Crown PFM (Porcelain Fused to Metal),1500000,350000,1150000,0.65,Persentase Dokter (65%),747500,0,747500,0,402500,Siap Cair,11-06-2026 15:30:05
+INV/SHELDON/0071/0626,11-06-2026,drg. Danny,Wulan,Obat,Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg),35000,0,35000,0,Non-JM (Obat/BMHP),0,0,0,0,35000,Final,11-06-2026 15:30:05
+INV/SHELDON/0072/0626,12-06-2026,drg. Astri,Dina,Tindakan,PSA 1x Kunjungan (One Visit Endodontic),1500000,0,1500000,0.65,Persentase Dokter (65%),975000,0,975000,0,525000,Siap Cair,12-06-2026 15:30:05
+INV/SHELDON/0073/0626,13-06-2026,drg. Rizka,Bernadette Rostenkowski,Tindakan,Odontektomi Kelas I Ringan,1800000,0,1800000,0.65,Persentase Dokter (65%),1170000,0,1170000,0,630000,Siap Cair,13-06-2026 15:30:05
+INV/SHELDON/0074/0626,14-06-2026,drg. Nanda,Wulan,Tindakan,Tumpat GIC Sedang,250000,0,250000,0.65,Persentase Dokter (65%),162500,0,162500,0,87500,Siap Cair,14-06-2026 15:30:05
+INV/SHELDON/0074/0626,14-06-2026,drg. Nanda,Wulan,Obat,Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg),35000,0,35000,0,Non-JM (Obat/BMHP),0,0,0,0,35000,Final,14-06-2026 15:30:05
+INV/SHELDON/0075/0626,15-06-2026,drg. Aviva,Dina,Tindakan,Tumpat Komposit Sedang,300000,0,300000,0.65,Persentase Dokter (65%),195000,0,195000,0,105000,Siap Cair,15-06-2026 15:30:05
+INV/SHELDON/0076/0626,16-06-2026,drg. Erien,Bernadette Rostenkowski,Tindakan,Scalling Sedang,250000,0,250000,0.5,Persentase Dokter (50%),125000,0,125000,0,125000,Siap Cair,16-06-2026 15:30:05
+INV/SHELDON/0077/0726,17-07-2026,drg.g.p Dinda,Wulan,Tindakan,Exo Dewasa Ringan (Akar Tunggal),250000,0,250000,0.55,Persentase Dokter (55%),137500,0,137500,0,112500,Siap Cair,17-07-2026 15:30:05
+INV/SHELDON/0077/0726,17-07-2026,drg.g.p Dinda,Wulan,Obat,Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg),35000,0,35000,0,Non-JM (Obat/BMHP),0,0,0,0,35000,Final,17-07-2026 15:30:05
+INV/SHELDON/0078/0726,18-07-2026,drg.g.p Fathya,Dina,Tindakan,Kontrol Ortho Rutin (Ganti Karet/Power O),150000,0,150000,0.4,Persentase Dokter (40%),60000,0,60000,0,90000,Siap Cair,18-07-2026 15:30:05
+INV/SHELDON/0079/0726,19-07-2026,drg.g.p Belinda,Bernadette Rostenkowski,Tindakan,Rontgen Periapikal Digital,100000,0,100000,0.15,Tarif Rontgen (15%),15000,0,15000,0,85000,Siap Cair,19-07-2026 15:30:05
+INV/SHELDON/0080/0726,20-07-2026,"drg. Rahma Yulinda D, Sp. BMM",Wulan,Tindakan,Scalling Perawat,150000,0,150000,0.65,Persentase Dokter (65%),97500,25000,72500,25000,52500,Siap Cair,20-07-2026 15:30:05
+INV/SHELDON/0080/0726,20-07-2026,"drg. Rahma Yulinda D, Sp. BMM",Wulan,Obat,Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg),35000,0,35000,0,Non-JM (Obat/BMHP),0,0,0,0,35000,Final,20-07-2026 15:30:05
+INV/SHELDON/0081/0726,21-07-2026,drg. Tia Ardhana R,Dina,Tindakan,Crown PFM (Porcelain Fused to Metal),1500000,350000,1150000,0.5,Persentase Dokter (50%),575000,0,575000,0,575000,Siap Cair,21-07-2026 15:30:05
+INV/SHELDON/0082/0726,22-07-2026,drg. Danny,Bernadette Rostenkowski,Tindakan,PSA 1x Kunjungan (One Visit Endodontic),1500000,0,1500000,0.65,Persentase Dokter (65%),975000,0,975000,0,525000,Siap Cair,22-07-2026 15:30:05
+INV/SHELDON/0083/0726,23-07-2026,drg. Astri,Wulan,Tindakan,Odontektomi Kelas I Ringan,1800000,0,1800000,0.65,Persentase Dokter (65%),1170000,0,1170000,0,630000,Siap Cair,23-07-2026 15:30:05
+INV/SHELDON/0083/0726,23-07-2026,drg. Astri,Wulan,Obat,Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg),35000,0,35000,0,Non-JM (Obat/BMHP),0,0,0,0,35000,Final,23-07-2026 15:30:05
+INV/SHELDON/0084/0726,24-07-2026,drg. Rizka,Dina,Tindakan,Tumpat GIC Sedang,250000,0,250000,0.65,Persentase Dokter (65%),162500,0,162500,0,87500,Siap Cair,24-07-2026 15:30:05
+INV/SHELDON/0085/0726,25-07-2026,drg. Nanda,Bernadette Rostenkowski,Tindakan,Tumpat Komposit Sedang,300000,0,300000,0.65,Persentase Dokter (65%),195000,0,195000,0,105000,Siap Cair,25-07-2026 15:30:05
+INV/SHELDON/0086/0726,26-07-2026,drg. Aviva,Wulan,Tindakan,Scalling Sedang,250000,0,250000,0.65,Persentase Dokter (65%),162500,0,162500,0,87500,Siap Cair,26-07-2026 15:30:05
+INV/SHELDON/0086/0726,26-07-2026,drg. Aviva,Wulan,Obat,Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg),35000,0,35000,0,Non-JM (Obat/BMHP),0,0,0,0,35000,Final,26-07-2026 15:30:05
+INV/SHELDON/0087/0726,27-07-2026,drg. Erien,Dina,Tindakan,Exo Dewasa Ringan (Akar Tunggal),250000,0,250000,0.5,Persentase Dokter (50%),125000,0,125000,0,125000,Siap Cair,27-07-2026 15:30:05
+INV/SHELDON/0088/0726,28-07-2026,drg.g.p Dinda,Bernadette Rostenkowski,Tindakan,Kontrol Ortho Rutin (Ganti Karet/Power O),150000,0,150000,0.55,Persentase Dokter (55%),82500,0,82500,0,67500,Siap Cair,28-07-2026 15:30:05
+INV/SHELDON/0089/0826,01-08-2026,drg.g.p Fathya,Wulan,Tindakan,Rontgen Periapikal Digital,100000,0,100000,0.15,Tarif Rontgen (15%),15000,0,15000,0,85000,Siap Cair,01-08-2026 15:30:05
+INV/SHELDON/0089/0826,01-08-2026,drg.g.p Fathya,Wulan,Obat,Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg),35000,0,35000,0,Non-JM (Obat/BMHP),0,0,0,0,35000,Final,01-08-2026 15:30:05
+INV/SHELDON/0090/0826,02-08-2026,drg.g.p Belinda,Dina,Tindakan,Scalling Perawat,150000,0,150000,0.4,Persentase Dokter (40%),60000,25000,35000,25000,90000,Siap Cair,02-08-2026 15:30:05
+INV/SHELDON/0091/0826,03-08-2026,"drg. Rahma Yulinda D, Sp. BMM",Bernadette Rostenkowski,Tindakan,Crown PFM (Porcelain Fused to Metal),1500000,350000,1150000,0.65,Persentase Dokter (65%),747500,0,747500,0,402500,Siap Cair,03-08-2026 15:30:05
+INV/SHELDON/0092/0826,04-08-2026,drg. Tia Ardhana R,Wulan,Tindakan,PSA 1x Kunjungan (One Visit Endodontic),1500000,0,1500000,0.5,Persentase Dokter (50%),750000,0,750000,0,750000,Siap Cair,04-08-2026 15:30:05
+INV/SHELDON/0092/0826,04-08-2026,drg. Tia Ardhana R,Wulan,Obat,Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg),35000,0,35000,0,Non-JM (Obat/BMHP),0,0,0,0,35000,Final,04-08-2026 15:30:05
+INV/SHELDON/0093/0826,05-08-2026,drg. Danny,Dina,Tindakan,Odontektomi Kelas I Ringan,1800000,0,1800000,0.65,Persentase Dokter (65%),1170000,0,1170000,0,630000,Siap Cair,05-08-2026 15:30:05
+INV/SHELDON/0094/0826,06-08-2026,drg. Astri,Bernadette Rostenkowski,Tindakan,Tumpat GIC Sedang,250000,0,250000,0.65,Persentase Dokter (65%),162500,0,162500,0,87500,Siap Cair,06-08-2026 15:30:05
+INV/SHELDON/0095/0826,07-08-2026,drg. Rizka,Wulan,Tindakan,Tumpat Komposit Sedang,300000,0,300000,0.65,Persentase Dokter (65%),195000,0,195000,0,105000,Siap Cair,07-08-2026 15:30:05
+INV/SHELDON/0095/0826,07-08-2026,drg. Rizka,Wulan,Obat,Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg),35000,0,35000,0,Non-JM (Obat/BMHP),0,0,0,0,35000,Final,07-08-2026 15:30:05
+INV/SHELDON/0096/0826,08-08-2026,drg. Nanda,Dina,Tindakan,Scalling Sedang,250000,0,250000,0.65,Persentase Dokter (65%),162500,0,162500,0,87500,Siap Cair,08-08-2026 15:30:05
+INV/SHELDON/0097/0826,09-08-2026,drg. Aviva,Bernadette Rostenkowski,Tindakan,Exo Dewasa Ringan (Akar Tunggal),250000,0,250000,0.65,Persentase Dokter (65%),162500,0,162500,0,87500,Siap Cair,09-08-2026 15:30:05
+INV/SHELDON/0098/0826,10-08-2026,drg. Erien,Wulan,Tindakan,Kontrol Ortho Rutin (Ganti Karet/Power O),150000,0,150000,0.5,Persentase Dokter (50%),75000,0,75000,0,75000,Siap Cair,10-08-2026 15:30:05
+INV/SHELDON/0098/0826,10-08-2026,drg. Erien,Wulan,Obat,Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg),35000,0,35000,0,Non-JM (Obat/BMHP),0,0,0,0,35000,Final,10-08-2026 15:30:05
+INV/SHELDON/0099/0826,11-08-2026,drg.g.p Dinda,Dina,Tindakan,Rontgen Periapikal Digital,100000,0,100000,0.15,Tarif Rontgen (15%),15000,0,15000,0,85000,Siap Cair,11-08-2026 15:30:05
+INV/SHELDON/0100/0826,12-08-2026,drg.g.p Fathya,Bernadette Rostenkowski,Tindakan,Scalling Perawat,150000,0,150000,0.4,Persentase Dokter (40%),60000,25000,35000,25000,90000,Siap Cair,12-08-2026 15:30:05
+INV/SHELDON/0101/0926,13-09-2026,drg.g.p Belinda,Wulan,Tindakan,Crown PFM (Porcelain Fused to Metal),1500000,350000,1150000,0.4,Persentase Dokter (40%),460000,0,460000,0,690000,Siap Cair,13-09-2026 15:30:05
+INV/SHELDON/0101/0926,13-09-2026,drg.g.p Belinda,Wulan,Obat,Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg),35000,0,35000,0,Non-JM (Obat/BMHP),0,0,0,0,35000,Final,13-09-2026 15:30:05
+INV/SHELDON/0102/0926,14-09-2026,"drg. Rahma Yulinda D, Sp. BMM",Dina,Tindakan,PSA 1x Kunjungan (One Visit Endodontic),1500000,0,1500000,0.65,Persentase Dokter (65%),975000,0,975000,0,525000,Siap Cair,14-09-2026 15:30:05
+INV/SHELDON/0103/0926,15-09-2026,drg. Tia Ardhana R,Bernadette Rostenkowski,Tindakan,Odontektomi Kelas I Ringan,1800000,0,1800000,0.5,Persentase Dokter (50%),900000,0,900000,0,900000,Siap Cair,15-09-2026 15:30:05
+INV/SHELDON/0104/0926,16-09-2026,drg. Danny,Wulan,Tindakan,Tumpat GIC Sedang,250000,0,250000,0.65,Persentase Dokter (65%),162500,0,162500,0,87500,Siap Cair,16-09-2026 15:30:05
+INV/SHELDON/0104/0926,16-09-2026,drg. Danny,Wulan,Obat,Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg),35000,0,35000,0,Non-JM (Obat/BMHP),0,0,0,0,35000,Final,16-09-2026 15:30:05
+INV/SHELDON/0105/0926,17-09-2026,drg. Astri,Dina,Tindakan,Tumpat Komposit Sedang,300000,0,300000,0.65,Persentase Dokter (65%),195000,0,195000,0,105000,Siap Cair,17-09-2026 15:30:05
+INV/SHELDON/0106/0926,18-09-2026,drg. Rizka,Bernadette Rostenkowski,Tindakan,Scalling Sedang,250000,0,250000,0.65,Persentase Dokter (65%),162500,0,162500,0,87500,Siap Cair,18-09-2026 15:30:05
+INV/SHELDON/0107/0926,19-09-2026,drg. Nanda,Wulan,Tindakan,Exo Dewasa Ringan (Akar Tunggal),250000,0,250000,0.65,Persentase Dokter (65%),162500,0,162500,0,87500,Siap Cair,19-09-2026 15:30:05
+INV/SHELDON/0107/0926,19-09-2026,drg. Nanda,Wulan,Obat,Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg),35000,0,35000,0,Non-JM (Obat/BMHP),0,0,0,0,35000,Final,19-09-2026 15:30:05
+INV/SHELDON/0108/0926,20-09-2026,drg. Aviva,Dina,Tindakan,Kontrol Ortho Rutin (Ganti Karet/Power O),150000,0,150000,0.65,Persentase Dokter (65%),97500,0,97500,0,52500,Siap Cair,20-09-2026 15:30:05
+INV/SHELDON/0109/0926,21-09-2026,drg. Erien,Bernadette Rostenkowski,Tindakan,Rontgen Periapikal Digital,100000,0,100000,0.15,Tarif Rontgen (15%),15000,0,15000,0,85000,Siap Cair,21-09-2026 15:30:05
+INV/SHELDON/0110/0926,22-09-2026,drg.g.p Dinda,Wulan,Tindakan,Scalling Perawat,150000,0,150000,0.55,Persentase Dokter (55%),82500,25000,57500,25000,67500,Siap Cair,22-09-2026 15:30:05
+INV/SHELDON/0110/0926,22-09-2026,drg.g.p Dinda,Wulan,Obat,Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg),35000,0,35000,0,Non-JM (Obat/BMHP),0,0,0,0,35000,Final,22-09-2026 15:30:05
+INV/SHELDON/0111/0926,23-09-2026,drg.g.p Fathya,Dina,Tindakan,Crown PFM (Porcelain Fused to Metal),1500000,350000,1150000,0.4,Persentase Dokter (40%),460000,0,460000,0,690000,Siap Cair,23-09-2026 15:30:05
+INV/SHELDON/0112/0926,24-09-2026,drg.g.p Belinda,Bernadette Rostenkowski,Tindakan,PSA 1x Kunjungan (One Visit Endodontic),1500000,0,1500000,0.4,Persentase Dokter (40%),600000,0,600000,0,900000,Siap Cair,24-09-2026 15:30:05
+INV/SHELDON/0113/1026,25-10-2026,"drg. Rahma Yulinda D, Sp. BMM",Wulan,Tindakan,Odontektomi Kelas I Ringan,1800000,0,1800000,0.65,Persentase Dokter (65%),1170000,0,1170000,0,630000,Siap Cair,25-10-2026 15:30:05
+INV/SHELDON/0113/1026,25-10-2026,"drg. Rahma Yulinda D, Sp. BMM",Wulan,Obat,Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg),35000,0,35000,0,Non-JM (Obat/BMHP),0,0,0,0,35000,Final,25-10-2026 15:30:05
+INV/SHELDON/0114/1026,26-10-2026,drg. Tia Ardhana R,Dina,Tindakan,Tumpat GIC Sedang,250000,0,250000,0.5,Persentase Dokter (50%),125000,0,125000,0,125000,Siap Cair,26-10-2026 15:30:05
+INV/SHELDON/0115/1026,27-10-2026,drg. Danny,Bernadette Rostenkowski,Tindakan,Tumpat Komposit Sedang,300000,0,300000,0.65,Persentase Dokter (65%),195000,0,195000,0,105000,Siap Cair,27-10-2026 15:30:05
+INV/SHELDON/0116/1026,28-10-2026,drg. Astri,Wulan,Tindakan,Scalling Sedang,250000,0,250000,0.65,Persentase Dokter (65%),162500,0,162500,0,87500,Siap Cair,28-10-2026 15:30:05
+INV/SHELDON/0116/1026,28-10-2026,drg. Astri,Wulan,Obat,Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg),35000,0,35000,0,Non-JM (Obat/BMHP),0,0,0,0,35000,Final,28-10-2026 15:30:05
+INV/SHELDON/0117/1026,01-10-2026,drg. Rizka,Dina,Tindakan,Exo Dewasa Ringan (Akar Tunggal),250000,0,250000,0.65,Persentase Dokter (65%),162500,0,162500,0,87500,Siap Cair,01-10-2026 15:30:05
+INV/SHELDON/0118/1026,02-10-2026,drg. Nanda,Bernadette Rostenkowski,Tindakan,Kontrol Ortho Rutin (Ganti Karet/Power O),150000,0,150000,0.65,Persentase Dokter (65%),97500,0,97500,0,52500,Siap Cair,02-10-2026 15:30:05
+INV/SHELDON/0119/1026,03-10-2026,drg. Aviva,Wulan,Tindakan,Rontgen Periapikal Digital,100000,0,100000,0.15,Tarif Rontgen (15%),15000,0,15000,0,85000,Siap Cair,03-10-2026 15:30:05
+INV/SHELDON/0119/1026,03-10-2026,drg. Aviva,Wulan,Obat,Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg),35000,0,35000,0,Non-JM (Obat/BMHP),0,0,0,0,35000,Final,03-10-2026 15:30:05
+INV/SHELDON/0120/1026,04-10-2026,drg. Erien,Dina,Tindakan,Scalling Perawat,150000,0,150000,0.5,Persentase Dokter (50%),75000,25000,50000,25000,75000,Siap Cair,04-10-2026 15:30:05
+INV/SHELDON/0121/1026,05-10-2026,drg.g.p Dinda,Bernadette Rostenkowski,Tindakan,Crown PFM (Porcelain Fused to Metal),1500000,350000,1150000,0.55,Persentase Dokter (55%),632500,0,632500,0,517500,Siap Cair,05-10-2026 15:30:05
+INV/SHELDON/0122/1026,06-10-2026,drg.g.p Fathya,Wulan,Tindakan,PSA 1x Kunjungan (One Visit Endodontic),1500000,0,1500000,0.4,Persentase Dokter (40%),600000,0,600000,0,900000,Siap Cair,06-10-2026 15:30:05
+INV/SHELDON/0122/1026,06-10-2026,drg.g.p Fathya,Wulan,Obat,Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg),35000,0,35000,0,Non-JM (Obat/BMHP),0,0,0,0,35000,Final,06-10-2026 15:30:05
+INV/SHELDON/0123/1026,07-10-2026,drg.g.p Belinda,Dina,Tindakan,Odontektomi Kelas I Ringan,1800000,0,1800000,0.4,Persentase Dokter (40%),720000,0,720000,0,1080000,Siap Cair,07-10-2026 15:30:05
+INV/SHELDON/0124/1026,08-10-2026,"drg. Rahma Yulinda D, Sp. BMM",Bernadette Rostenkowski,Tindakan,Tumpat GIC Sedang,250000,0,250000,0.65,Persentase Dokter (65%),162500,0,162500,0,87500,Siap Cair,08-10-2026 15:30:05

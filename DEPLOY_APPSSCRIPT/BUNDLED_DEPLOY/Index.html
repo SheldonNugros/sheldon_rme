@@ -1390,6 +1390,9 @@
 
     <!-- TOMBOL SISTEM, SINKRONISASI, & BACKUP (KHUSUS SUPER USER) -->
     <div class="pt-3.5 border-t border-slate-100 flex items-center gap-2.5 flex-wrap">
+      <button id="btnImportBulk2026" type="button" onclick="triggerImportBulkSheldon2026()" class="px-4 py-2.5 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-extrabold rounded-xl text-xs shadow-md shadow-amber-500/20 transition-all flex items-center gap-1.5 active:scale-95" title="Agent Nadhif: Impor & Sinkronkan Bulk Data dari Copy of SHELDON 2026 (Folder Antigravity RME) ke 11 Spreadsheet Database">
+        <span>📥</span> Import Bulk Data (SHELDON 2026)
+      </button>
       <button id="btnSimulasiJM" type="button" onclick="triggerSimulasiJMDokter()" class="px-3.5 py-2.5 bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-300 font-extrabold rounded-xl text-xs transition-all flex items-center gap-1.5 shadow-sm" title="Otomatis isi contoh data JM 4 Dokter (65%, 40%, 40%, 50%/55%) + Rontgen 15% ke Spreadsheet Anda">
         <span>🧪</span> Isi Simulasi JM Dokter
       </button>
@@ -12444,16 +12447,20 @@ function _fallbackLocalCsvBackupDownload() {
   let dateStamp = now.toISOString().slice(0, 10);
   let kd = window.KlinikData || {};
   let datasets = [
-    { name: `CSV_${dateStamp}_01_PASIEN_Master_Pasien.csv`, data: kd.pasien || [] },
-    { name: `CSV_${dateStamp}_02_REKAM_MEDIS_Kunjungan_RME.csv`, data: kd.rm || kd.rekamMedis || [] },
-    { name: `CSV_${dateStamp}_03_FARMASI_Master_Obat_BHP.csv`, data: kd.obat || [] },
-    { name: `CSV_${dateStamp}_04_KASIR_Transaksi_Kasir.csv`, data: kd.kasir || kd.invoice || [] },
-    { name: `CSV_${dateStamp}_05_DOKTER_Master_Dokter_Perawat.csv`, data: kd.dokter || [] },
-    { name: `CSV_${dateStamp}_06_USER_Master_User_Role.csv`, data: kd.users || [] }
+    { name: `CSV_${dateStamp}_01_PASIEN_Data_Pasien.csv`, data: kd.pasien || [] },
+    { name: `CSV_${dateStamp}_02_PEMBAYARAN_Data_Pembayaran.csv`, data: kd.pembayaran || kd.kasir || kd.invoice || [] },
+    { name: `CSV_${dateStamp}_03_REKAM_MEDIS_Data_Rekam_Medis.csv`, data: kd.rekamMedis || kd.rm || [] },
+    { name: `CSV_${dateStamp}_05_DATABASE_Master_Tindakan.csv`, data: kd.tindakan || [] },
+    { name: `CSV_${dateStamp}_06_MASTER_User_Dan_Staff.csv`, data: kd.staff || kd.users || [] },
+    { name: `CSV_${dateStamp}_08_OBAT_Master_Obat.csv`, data: kd.obat || [] },
+    { name: `CSV_${dateStamp}_09_BMHP_Master_BMHP.csv`, data: kd.bmhp || [] }
   ];
   if (window.PayrollState) {
-    datasets.push({ name: `CSV_${dateStamp}_07_PAYROLL_Pengaturan_Tarif_Shift.csv`, data: window.PayrollState.tarifShift || [] });
-    datasets.push({ name: `CSV_${dateStamp}_07_PAYROLL_Presensi_Shift_Harian.csv`, data: window.PayrollState.presensi || [] });
+    datasets.push({ name: `CSV_${dateStamp}_11_PAYROLL_Pengaturan_Tarif_Shift.csv`, data: window.PayrollState.tarifShift || [] });
+    datasets.push({ name: `CSV_${dateStamp}_11_PAYROLL_Presensi_Shift_Harian.csv`, data: window.PayrollState.presensiHarian || window.PayrollState.presensi || [] });
+    datasets.push({ name: `CSV_${dateStamp}_11_PAYROLL_Penggajian_Dokter.csv`, data: window.PayrollState.penggajianDokter || [] });
+    datasets.push({ name: `CSV_${dateStamp}_11_PAYROLL_Honor_Perawat_Staff.csv`, data: window.PayrollState.honorStaff || [] });
+    datasets.push({ name: `CSV_${dateStamp}_02_PEMBAYARAN_Rekap_Jasa_Medis.csv`, data: window.PayrollState.rekapJM || [] });
   }
 
   // Gabungkan ke 1 Master Bundle CSV + unduh otomatis agar browser tidak memblokir multiple popups
@@ -13373,6 +13380,56 @@ function hapusDbUser(username, nama) {
   }
 }
 
+function triggerImportBulkSheldon2026() {
+  const btn = document.getElementById('btnImportBulk2026');
+  const origHtml = btn ? btn.innerHTML : '<span>📥</span> Import Bulk Data (SHELDON 2026)';
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<span class="animate-spin inline-block">⏳</span> Mengimpor Bulk Data SHELDON 2026...';
+  }
+  if (typeof showToast === 'function') {
+    showToast('info', 'Agent Nadhif sedang membaca Copy of SHELDON 2026 (Antigravity RME) & menyinkronkan ke 11 Spreadsheet...');
+  }
+
+  if (typeof google !== 'undefined' && google.script && google.script.run) {
+    google.script.run
+      .withSuccessHandler(res => {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = origHtml;
+        }
+        if (res && res.success) {
+          let st = res.stats || {};
+          let summaryMsg = (res.message || 'Import Bulk Data selesai!') +
+            (st.pasienImported ? ` (${st.pasienImported} Pasien, ${st.pembayaranImported || 0} Transaksi, ${st.tindakanImported || 0} Tindakan, ${st.emrGenerated || 0} EMR)` : '');
+          if (typeof showToast === 'function') showToast('success', summaryMsg);
+          if (typeof startDataSync === 'function') {
+            startDataSync();
+          }
+          if (typeof loadDaftarUserMaster === 'function') {
+            loadDaftarUserMaster(false);
+          }
+        } else {
+          if (typeof showToast === 'function') showToast('error', (res && res.message) ? res.message : 'Gagal mengimpor bulk data.');
+        }
+      })
+      .withFailureHandler(err => {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = origHtml;
+        }
+        if (typeof showToast === 'function') showToast('error', 'Error Import Bulk: ' + (err.message || err));
+      })
+      .importBulkDataSheldon2026({});
+  } else {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = origHtml;
+    }
+    if (typeof showToast === 'function') showToast('warning', 'Koneksi Google Script tidak tersedia.');
+  }
+}
+
 // Global binding for reliable onclick & onsubmit invocation across all browsers
 window.ensureUserPanelVisible = ensureUserPanelVisible;
 window.bukaFormUserBaru = bukaFormUserBaru;
@@ -13386,6 +13443,7 @@ window.editDbUser = editDbUser;
 window.batalEditDbUser = batalEditDbUser;
 window.hapusDbUser = hapusDbUser;
 window.changeDBMenu = changeDBMenu;
+window.triggerImportBulkSheldon2026 = triggerImportBulkSheldon2026;
 window.triggerSimulasiJMDokter = triggerSimulasiJMDokter;
 window.triggerSinkronSemuaSheet = triggerSinkronSemuaSheet;
 window.triggerSetupPayroll = triggerSetupPayroll;

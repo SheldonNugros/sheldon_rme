@@ -1,4 +1,5 @@
 ID_Aturan,Nama_Dokter,Kode_Tindakan,Nama_Tindakan,Persen_JM_Dokter,Keterangan
-EXC-0001,drg. Sheldon Cooper, Sp.Ort,DGS-0001,Perawatan Saluran Akar (PSA) Molar,55%,Spesialis Konservasi: PSA rate khusus 55% (Default 50%)
-EXC-0002,drg. Sheldon Cooper, Sp.Ort,DGS-0002,Odontektomi Gigi Impaksi M3,55%,Tindakan bedah minor: rate khusus 55% (Default 50%)
-EXC-0003,drg. Leonard Hofstadter,DGU-0002,Scaling Rahang Atas & Bawah,50%,Reward kebersihan gigi: rate 50% (Default 45%)
+EXC-0001,"drg. Sheldon Cooper, Sp.Ort",TND-006,Perawatan Saluran Akar (PSA) Molar,0.55,Tarif Khusus PSA Molar 55%
+EXC-0002,drg. Tia Ardhana R,TND-006,Perawatan Saluran Akar (PSA) Molar,0.55,drg. Tia Ardhana R: PSA Molar JM Khusus 55%
+EXC-0003,drg. Tia Ardhana R,DGS-0030,Odontektomi Kelas II/III Impaksi,0.55,drg. Tia Ardhana R: Bedah Minor JM Khusus 55%
+EXC-0004,drg. Tia Ardhana R,TND-007,Pemasangan Mahkota PFM (Crown),0.55,drg. Tia Ardhana R: Crown PFM JM Khusus 55% setelah potong Lab

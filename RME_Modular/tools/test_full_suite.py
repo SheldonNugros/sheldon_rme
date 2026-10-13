@@ -1189,6 +1189,25 @@ eksekusiResetPerio();
 assert("PERIO-8: Eksekusi Reset Mengembalikan Data ke Default", perioTeethData[48].dl === 0);
 assert("PERIO-8: Modal Reset Tertutup Setelah Eksekusi", modalResetPerio.classList.contains("hidden"));
 
+// ==================================================
+// PENGUJIAN BULK DATA SHELDON 2026 & SCHEMA ALIGNMENT
+// ==================================================
+print("\n--- TEST: Bulk Data Sheldon 2026 & Schema Verification ---");
+assert("BULK-1: Total Pasien Bulk >= 120", window.KlinikData.pasien.length >= 120, "Count: " + window.KlinikData.pasien.length);
+assert("BULK-2: Total Katalog Tindakan >= 60", window.KlinikData.tindakan.length >= 60, "Count: " + window.KlinikData.tindakan.length);
+assert("BULK-3: Total Rekam Medis (SOAP + Odontogram) >= 120", window.KlinikData.rekamMedis.length >= 120, "Count: " + window.KlinikData.rekamMedis.length);
+assert("BULK-4: Total Transaksi Pembayaran >= 150", window.KlinikData.pembayaran.length >= 150, "Count: " + window.KlinikData.pembayaran.length);
+assert("BULK-5: Total Master Staff >= 20", window.KlinikData.staff.length >= 20, "Count: " + window.KlinikData.staff.length);
+var sampleBulkPasien = window.KlinikData.pasien.find(function(p) { return p.idPasien === "P-0005"; });
+assert("BULK-6: Sample Bulk Pasien P-0005 Valid Schema & Normalized Gender", sampleBulkPasien && (sampleBulkPasien.jenisKelamin === "Laki-Laki" || sampleBulkPasien.jenisKelamin === "Perempuan") && /^\d{2}-\d{2}-\d{4}$/.test(sampleBulkPasien.tanggalLahir));
+assert("BULK-7: Fungsi triggerImportBulkSheldon2026 Tersedia", typeof triggerImportBulkSheldon2026 === "function");
+window.confirm = function() { return true; };
+window.alert = function() {};
+triggerImportBulkSheldon2026();
+runAllTimers();
+var allToastArr = (document.getElementById('toastContainer') && document.getElementById('toastContainer').allToasts) || [];
+assert("BULK-8: Eksekusi triggerImportBulkSheldon2026 Berhasil", allToastArr.some(function(t) { return String(t).includes("Copy of SHELDON 2026"); }));
+
 // SUMMARY REPORT
 print("=================================================");
 var passedTotal = results.filter(r => r.passed).length;

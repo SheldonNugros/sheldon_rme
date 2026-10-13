@@ -58,7 +58,7 @@ function handleApiRequest(action, params) {
         args = [params.username || params.user, params.password || params.pin || params.pass];
       } else if (action === "getRiwayatMedisByPasien") {
         args = [params.noRm || params.norm || params[0]];
-      } else if (action === "simpanPasienBaru" || action === "simpanRekamMedis" || action === "simpanKasirInvoice" || action === "simpanItemObat" || action === "simpanItemBMHP" || action === "simpanUserMaster" || action === "registrasiAkunBaru" || action === "simpanPresensiShift" || action === "simpanTarifShift" || action === "updateStatusPayroll") {
+      } else if (action === "simpanPasienBaru" || action === "simpanRekamMedis" || action === "simpanKasirInvoice" || action === "simpanItemObat" || action === "simpanItemBMHP" || action === "simpanUserMaster" || action === "registrasiAkunBaru" || action === "simpanPresensiShift" || action === "simpanTarifShift" || action === "updateStatusPayroll" || action === "importBulkDataSheldon2026") {
         args = [params.payload || params];
       } else if (action === "generatePayrollPeriode") {
         args = [params.periodeBulan || params[0] || ""];

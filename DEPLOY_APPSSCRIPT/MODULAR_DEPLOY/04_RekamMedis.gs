@@ -90,6 +90,31 @@ function getDaftarRekamMedis() {
         wStr = String(wStr || "");
       }
       
+      let anaRaw = r[idAna] ? String(r[idAna]).trim() : "";
+      let fisRaw = r[idFis] ? String(r[idFis]).trim() : "";
+      let tinRaw = r[idTin] ? String(r[idTin]).trim() : "";
+      let obtRaw = r[idObat] ? String(r[idObat]).trim() : "";
+
+      let ccVal = "", piVal = "", icdVal = "", penunjangVal = "Pemeriksaan Klinis Intraoral", tindVal = "", resepVal = "";
+      try {
+        let anaObj = JSON.parse(anaRaw);
+        ccVal = anaObj.cc || anaObj.keluhanUtama || "";
+        piVal = anaObj.pi || anaObj.riwayatPenyakit || "";
+        if (Array.isArray(anaObj.diagnosaICD)) icdVal = anaObj.diagnosaICD.join(", ");
+      } catch (eA) { ccVal = anaRaw; }
+      try {
+        let tinArr = JSON.parse(tinRaw);
+        if (Array.isArray(tinArr)) {
+          tindVal = tinArr.map(t => (typeof t === "object" ? (t.nama || "") : String(t))).join(", ");
+        }
+      } catch (eT) { tindVal = tinRaw; }
+      try {
+        let obtArr = JSON.parse(obtRaw);
+        if (Array.isArray(obtArr)) {
+          resepVal = obtArr.map(o => (typeof o === "object" ? ((o.obat || o.nama || "") + (o.ket ? " (" + o.ket + ")" : "")) : String(o))).join(", ");
+        }
+      } catch (eO) { resepVal = obtRaw; }
+
       result.push({
         idRmKlinis: r[idRM] ? String(r[idRM]).trim() : ("RM_LAMA_" + i),
         waktuSimpan: wStr,
@@ -98,12 +123,18 @@ function getDaftarRekamMedis() {
         namaPasien: r[idNama] ? String(r[idNama]).trim() : "",
         tanggalPeriksa: fDate(r[idTgl]),
         dokterPemeriksa: r[idDok] ? String(r[idDok]).trim() : "",
-        anamnesisStr: r[idAna] ? String(r[idAna]).trim() : "",
-        fisikStr: r[idFis] ? String(r[idFis]).trim() : "",
+        anamnesisStr: anaRaw,
+        fisikStr: fisRaw,
         odontogramStr: r[idOdo] ? String(r[idOdo]).trim() : "",
-        tindakanStr: r[idTin] ? String(r[idTin]).trim() : "",
-        obatStr: r[idObat] ? String(r[idObat]).trim() : "",
-        catatanEdukasi: r[idEdu] ? String(r[idEdu]).trim() : ""
+        tindakanStr: tinRaw,
+        obatStr: obtRaw,
+        catatanEdukasi: r[idEdu] ? String(r[idEdu]).trim() : "",
+        chiefComplaint: ccVal,
+        presentIllness: piVal,
+        pemeriksaanPenunjang: penunjangVal,
+        assessmentICD: icdVal,
+        tindakanHariIni: tindVal,
+        resepObat: resepVal
       });
     }
     return result;

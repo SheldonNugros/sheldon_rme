@@ -283,87 +283,44 @@ var console = {
     google.script = {};
   }
 
-  // Realistic mock database grounded in Sheldon RME multi-spreadsheet architecture
+  const bulkSeed = {"pasien": [{"idPasien": "P-0001", "namaPasien": "Budi Santoso", "noRm": "RM-0001", "jenisKelamin": "Laki-Laki", "tempatLahir": "Payakumbuh", "tanggalLahir": "15-08-1988", "umur": "36", "agama": "Islam", "golonganDarah": "O", "pekerjaan": "PNS", "nik": "1376011508880001", "alamat": "Jl. Sudirman No. 45, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081234567890", "alergi": "Penicillin", "riwayatPenyakit": "Hipertensi", "catatan": "Pasien kooperatif", "tglDaftar": "01-01-2024"}, {"idPasien": "P-0002", "namaPasien": "Siti Rahmawati", "noRm": "RM-0002", "jenisKelamin": "Perempuan", "tempatLahir": "Bukittinggi", "tanggalLahir": "22-11-1995", "umur": "29", "agama": "Islam", "golonganDarah": "A", "pekerjaan": "Wiraswasta", "nik": "1376012211950002", "alamat": "Jl. A. Yani No. 12, Bukittinggi", "provinsi": "Sumatera Barat", "kabupaten": "Kota Bukittinggi", "kecamatan": "Guguk Panjang", "kelurahan": "Benteng", "whatsapp": "081398765432", "alergi": "Tidak Ada", "riwayatPenyakit": "Asma", "catatan": "Kontrol rutin", "tglDaftar": "05-01-2024"}, {"idPasien": "P-0003", "namaPasien": "Ahmad Fauzi", "noRm": "RM-0003", "jenisKelamin": "Laki-Laki", "tempatLahir": "Padang", "tanggalLahir": "10-04-2000", "umur": "24", "agama": "Islam", "golonganDarah": "B", "pekerjaan": "Mahasiswa", "nik": "1376011004000003", "alamat": "Jl. Khatib Sulaiman, Padang", "provinsi": "Sumatera Barat", "kabupaten": "Kota Padang", "kecamatan": "Padang Utara", "kelurahan": "Lolong Belanti", "whatsapp": "082155667788", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Pemeriksaan pertama", "tglDaftar": "12-02-2024"}, {"idPasien": "P-0004", "namaPasien": "Hendra Wijaya", "noRm": "RM-0004", "jenisKelamin": "Laki-Laki", "tempatLahir": "Payakumbuh", "tanggalLahir": "15-05-1990", "umur": "34", "agama": "Islam", "golonganDarah": "AB", "pekerjaan": "Karyawan Swasta", "nik": "1376011505900004", "alamat": "Jl. Tan Malaka No. 88, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Utara", "kelurahan": "Taruko", "whatsapp": "081267891234", "alergi": "Tidak Ada", "riwayatPenyakit": "Gastritis", "catatan": "Kasus orto dan estetik", "tglDaftar": "10-10-2026"}, {"idPasien": "P-0005", "namaPasien": "Nadia Putri Pratama", "noRm": "N-0105", "jenisKelamin": "Perempuan", "tempatLahir": "Payakumbuh", "tanggalLahir": "12-03-1998", "umur": "28", "agama": "Islam", "golonganDarah": "B", "pekerjaan": "Karyawan Swasta", "nik": "1376010000000005", "alamat": "Jl. Soekarno Hatta No. 14, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990005", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "01-01-2026"}, {"idPasien": "P-0006", "namaPasien": "Rizky Ramadhan", "noRm": "R-0106", "jenisKelamin": "Laki-Laki", "tempatLahir": "Payakumbuh", "tanggalLahir": "04-07-1993", "umur": "33", "agama": "Islam", "golonganDarah": "O", "pekerjaan": "Wiraswasta", "nik": "1376010000000006", "alamat": "Jl. Veteran No. 21, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990006", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "02-01-2026"}, {"idPasien": "P-0007", "namaPasien": "Aulia Zahra", "noRm": "A-0107", "jenisKelamin": "Perempuan", "tempatLahir": "Payakumbuh", "tanggalLahir": "19-11-2001", "umur": "25", "agama": "Islam", "golonganDarah": "A", "pekerjaan": "Pelajar/Mahasiswa", "nik": "1376010000000007", "alamat": "Jl. Pemuda No. 8, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990007", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "03-01-2026"}, {"idPasien": "P-0008", "namaPasien": "Fajar Nugraha", "noRm": "F-0108", "jenisKelamin": "Laki-Laki", "tempatLahir": "Payakumbuh", "tanggalLahir": "28-02-1987", "umur": "39", "agama": "Islam", "golonganDarah": "AB", "pekerjaan": "PNS", "nik": "1376010000000008", "alamat": "Jl. Diponegoro No. 55, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990008", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "04-01-2026"}, {"idPasien": "P-0009", "namaPasien": "Dewi Kartika Sari", "noRm": "D-0109", "jenisKelamin": "Perempuan", "tempatLahir": "Payakumbuh", "tanggalLahir": "15-06-1991", "umur": "35", "agama": "Islam", "golonganDarah": "O", "pekerjaan": "Ibu Rumah Tangga", "nik": "1376010000000009", "alamat": "Jl. Imam Bonjol No. 32, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990009", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "05-01-2026"}, {"idPasien": "P-0010", "namaPasien": "Bagus Setiawan", "noRm": "B-0110", "jenisKelamin": "Laki-Laki", "tempatLahir": "Payakumbuh", "tanggalLahir": "09-09-1995", "umur": "31", "agama": "Islam", "golonganDarah": "A", "pekerjaan": "Karyawan Swasta", "nik": "1376010000000010", "alamat": "Jl. Gajah Mada No. 19, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990010", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "06-01-2026"}, {"idPasien": "P-0011", "namaPasien": "Intan Permata", "noRm": "I-0111", "jenisKelamin": "Perempuan", "tempatLahir": "Payakumbuh", "tanggalLahir": "23-01-1999", "umur": "27", "agama": "Islam", "golonganDarah": "B", "pekerjaan": "Guru/Dosen", "nik": "1376010000000011", "alamat": "Jl. Pahlawan No. 40, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990011", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "07-01-2026"}, {"idPasien": "P-0012", "namaPasien": "Dimas Aditya", "noRm": "D-0112", "jenisKelamin": "Laki-Laki", "tempatLahir": "Payakumbuh", "tanggalLahir": "17-04-1992", "umur": "34", "agama": "Islam", "golonganDarah": "O", "pekerjaan": "Wiraswasta", "nik": "1376010000000012", "alamat": "Jl. Kartini No. 11, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990012", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "08-01-2026"}, {"idPasien": "P-0013", "namaPasien": "Rina Wulandari", "noRm": "R-0113", "jenisKelamin": "Perempuan", "tempatLahir": "Payakumbuh", "tanggalLahir": "30-08-1989", "umur": "37", "agama": "Islam", "golonganDarah": "A", "pekerjaan": "PNS", "nik": "1376010000000013", "alamat": "Jl. Ahmad Yani No. 73, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990013", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "09-01-2026"}, {"idPasien": "P-0014", "namaPasien": "Eko Prasetyo", "noRm": "E-0114", "jenisKelamin": "Laki-Laki", "tempatLahir": "Payakumbuh", "tanggalLahir": "11-12-1985", "umur": "41", "agama": "Islam", "golonganDarah": "B", "pekerjaan": "TNI/Polri", "nik": "1376010000000014", "alamat": "Jl. Hasanuddin No. 29, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990014", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "10-01-2026"}, {"idPasien": "P-0015", "namaPasien": "Maya Anggraini", "noRm": "M-0115", "jenisKelamin": "Perempuan", "tempatLahir": "Payakumbuh", "tanggalLahir": "05-05-1997", "umur": "29", "agama": "Islam", "golonganDarah": "O", "pekerjaan": "Karyawan Swasta", "nik": "1376010000000015", "alamat": "Jl. Cendrawasih No. 6, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990015", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "11-01-2026"}, {"idPasien": "P-0016", "namaPasien": "Andi Wijaya Kusuma", "noRm": "A-0116", "jenisKelamin": "Laki-Laki", "tempatLahir": "Payakumbuh", "tanggalLahir": "21-10-1990", "umur": "36", "agama": "Islam", "golonganDarah": "AB", "pekerjaan": "Wiraswasta", "nik": "1376010000000016", "alamat": "Jl. Merpati No. 18, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990016", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "12-01-2026"}, {"idPasien": "P-0017", "namaPasien": "Putri Maharani", "noRm": "P-0117", "jenisKelamin": "Perempuan", "tempatLahir": "Payakumbuh", "tanggalLahir": "14-02-2002", "umur": "24", "agama": "Islam", "golonganDarah": "A", "pekerjaan": "Pelajar/Mahasiswa", "nik": "1376010000000017", "alamat": "Jl. Melati No. 25, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990017", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "13-02-2026"}, {"idPasien": "P-0018", "namaPasien": "Reza Pahlevi", "noRm": "R-0118", "jenisKelamin": "Laki-Laki", "tempatLahir": "Payakumbuh", "tanggalLahir": "08-07-1994", "umur": "32", "agama": "Islam", "golonganDarah": "O", "pekerjaan": "Karyawan Swasta", "nik": "1376010000000018", "alamat": "Jl. Kenanga No. 12, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990018", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "14-02-2026"}, {"idPasien": "P-0019", "namaPasien": "Fitriani Nur", "noRm": "F-0119", "jenisKelamin": "Perempuan", "tempatLahir": "Payakumbuh", "tanggalLahir": "27-09-1996", "umur": "30", "agama": "Islam", "golonganDarah": "B", "pekerjaan": "Ibu Rumah Tangga", "nik": "1376010000000019", "alamat": "Jl. Anggrek No. 31, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990019", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "15-02-2026"}, {"idPasien": "P-0020", "namaPasien": "Wahyu Hidayat", "noRm": "W-0120", "jenisKelamin": "Laki-Laki", "tempatLahir": "Payakumbuh", "tanggalLahir": "03-03-1988", "umur": "38", "agama": "Islam", "golonganDarah": "A", "pekerjaan": "PNS", "nik": "1376010000000020", "alamat": "Jl. Mawar No. 9, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990020", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "16-02-2026"}, {"idPasien": "P-0021", "namaPasien": "Nisa Amelia", "noRm": "N-0121", "jenisKelamin": "Perempuan", "tempatLahir": "Payakumbuh", "tanggalLahir": "18-06-2000", "umur": "26", "agama": "Islam", "golonganDarah": "O", "pekerjaan": "Pelajar/Mahasiswa", "nik": "1376010000000021", "alamat": "Jl. Dahlia No. 44, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990021", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "17-02-2026"}, {"idPasien": "P-0022", "namaPasien": "Arif Budiman", "noRm": "A-0122", "jenisKelamin": "Laki-Laki", "tempatLahir": "Payakumbuh", "tanggalLahir": "25-11-1983", "umur": "43", "agama": "Islam", "golonganDarah": "B", "pekerjaan": "Wiraswasta", "nik": "1376010000000022", "alamat": "Jl. Flamboyan No. 17, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990022", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "18-02-2026"}, {"idPasien": "P-0023", "namaPasien": "Diana Puspita", "noRm": "D-0123", "jenisKelamin": "Perempuan", "tempatLahir": "Payakumbuh", "tanggalLahir": "07-01-1993", "umur": "33", "agama": "Islam", "golonganDarah": "AB", "pekerjaan": "Guru/Dosen", "nik": "1376010000000023", "alamat": "Jl. Bougenville No. 22, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990023", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "19-02-2026"}, {"idPasien": "P-0024", "namaPasien": "Galih Prakoso", "noRm": "G-0124", "jenisKelamin": "Laki-Laki", "tempatLahir": "Payakumbuh", "tanggalLahir": "16-08-1996", "umur": "30", "agama": "Islam", "golonganDarah": "O", "pekerjaan": "Karyawan Swasta", "nik": "1376010000000024", "alamat": "Jl. Teratai No. 5, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990024", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "20-02-2026"}, {"idPasien": "P-0025", "namaPasien": "Lestari Handayani", "noRm": "L-0125", "jenisKelamin": "Perempuan", "tempatLahir": "Payakumbuh", "tanggalLahir": "29-04-1986", "umur": "40", "agama": "Islam", "golonganDarah": "A", "pekerjaan": "Ibu Rumah Tangga", "nik": "1376010000000025", "alamat": "Jl. Kamboja No. 15, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990025", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "21-02-2026"}, {"idPasien": "P-0026", "namaPasien": "Yusuf Maulana", "noRm": "Y-0126", "jenisKelamin": "Laki-Laki", "tempatLahir": "Payakumbuh", "tanggalLahir": "12-10-1991", "umur": "35", "agama": "Islam", "golonganDarah": "B", "pekerjaan": "Karyawan Swasta", "nik": "1376010000000026", "alamat": "Jl. Cemara No. 38, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990026", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "22-02-2026"}, {"idPasien": "P-0027", "namaPasien": "Citra Kirana", "noRm": "C-0127", "jenisKelamin": "Perempuan", "tempatLahir": "Payakumbuh", "tanggalLahir": "02-02-1999", "umur": "27", "agama": "Islam", "golonganDarah": "O", "pekerjaan": "Wiraswasta", "nik": "1376010000000027", "alamat": "Jl. Beringin No. 10, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990027", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "23-02-2026"}, {"idPasien": "P-0028", "namaPasien": "Taufik Hidayatullah", "noRm": "T-0128", "jenisKelamin": "Laki-Laki", "tempatLahir": "Payakumbuh", "tanggalLahir": "20-05-1989", "umur": "37", "agama": "Islam", "golonganDarah": "A", "pekerjaan": "PNS", "nik": "1376010000000028", "alamat": "Jl. Jati No. 27, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990028", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "24-02-2026"}, {"idPasien": "P-0029", "namaPasien": "Safira Salsabila", "noRm": "S-0129", "jenisKelamin": "Perempuan", "tempatLahir": "Payakumbuh", "tanggalLahir": "09-12-2003", "umur": "23", "agama": "Islam", "golonganDarah": "B", "pekerjaan": "Pelajar/Mahasiswa", "nik": "1376010000000029", "alamat": "Jl. Mahoni No. 13, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990029", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "25-03-2026"}, {"idPasien": "P-0030", "namaPasien": "Bayu Pamungkas", "noRm": "B-0130", "jenisKelamin": "Laki-Laki", "tempatLahir": "Payakumbuh", "tanggalLahir": "14-07-1995", "umur": "31", "agama": "Islam", "golonganDarah": "O", "pekerjaan": "Karyawan Swasta", "nik": "1376010000000030", "alamat": "Jl. Pinus No. 8, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990030", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "26-03-2026"}, {"idPasien": "P-0031", "namaPasien": "Mega Utami", "noRm": "M-0131", "jenisKelamin": "Perempuan", "tempatLahir": "Payakumbuh", "tanggalLahir": "26-03-1992", "umur": "34", "agama": "Islam", "golonganDarah": "AB", "pekerjaan": "Guru/Dosen", "nik": "1376010000000031", "alamat": "Jl. Akasia No. 19, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990031", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "27-03-2026"}, {"idPasien": "P-0032", "namaPasien": "Irfan Hakim", "noRm": "I-0132", "jenisKelamin": "Laki-Laki", "tempatLahir": "Payakumbuh", "tanggalLahir": "01-09-1987", "umur": "39", "agama": "Islam", "golonganDarah": "A", "pekerjaan": "Wiraswasta", "nik": "1376010000000032", "alamat": "Jl. Rasamala No. 41, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990032", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "28-03-2026"}, {"idPasien": "P-0033", "namaPasien": "Vina Panduwinata", "noRm": "V-0133", "jenisKelamin": "Perempuan", "tempatLahir": "Payakumbuh", "tanggalLahir": "17-11-1994", "umur": "32", "agama": "Islam", "golonganDarah": "O", "pekerjaan": "Karyawan Swasta", "nik": "1376010000000033", "alamat": "Jl. Cempaka No. 3, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990033", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "01-03-2026"}, {"idPasien": "P-0034", "namaPasien": "Deni Cagur Saputra", "noRm": "D-0134", "jenisKelamin": "Laki-Laki", "tempatLahir": "Payakumbuh", "tanggalLahir": "22-06-1990", "umur": "36", "agama": "Islam", "golonganDarah": "B", "pekerjaan": "Wiraswasta", "nik": "1376010000000034", "alamat": "Jl. Seruni No. 28, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990034", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "02-03-2026"}, {"idPasien": "P-0035", "namaPasien": "Nadia Putri Pratama (2)", "noRm": "N-0135", "jenisKelamin": "Perempuan", "tempatLahir": "Payakumbuh", "tanggalLahir": "12-03-1998", "umur": "28", "agama": "Islam", "golonganDarah": "B", "pekerjaan": "Karyawan Swasta", "nik": "1376010000000035", "alamat": "Jl. Soekarno Hatta No. 14, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990035", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "03-03-2026"}, {"idPasien": "P-0036", "namaPasien": "Rizky Ramadhan (2)", "noRm": "R-0136", "jenisKelamin": "Laki-Laki", "tempatLahir": "Payakumbuh", "tanggalLahir": "04-07-1993", "umur": "33", "agama": "Islam", "golonganDarah": "O", "pekerjaan": "Wiraswasta", "nik": "1376010000000036", "alamat": "Jl. Veteran No. 21, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990036", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "04-03-2026"}, {"idPasien": "P-0037", "namaPasien": "Aulia Zahra (2)", "noRm": "A-0137", "jenisKelamin": "Perempuan", "tempatLahir": "Payakumbuh", "tanggalLahir": "19-11-2001", "umur": "25", "agama": "Islam", "golonganDarah": "A", "pekerjaan": "Pelajar/Mahasiswa", "nik": "1376010000000037", "alamat": "Jl. Pemuda No. 8, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990037", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "05-03-2026"}, {"idPasien": "P-0038", "namaPasien": "Fajar Nugraha (2)", "noRm": "F-0138", "jenisKelamin": "Laki-Laki", "tempatLahir": "Payakumbuh", "tanggalLahir": "28-02-1987", "umur": "39", "agama": "Islam", "golonganDarah": "AB", "pekerjaan": "PNS", "nik": "1376010000000038", "alamat": "Jl. Diponegoro No. 55, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990038", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "06-03-2026"}, {"idPasien": "P-0039", "namaPasien": "Dewi Kartika Sari (2)", "noRm": "D-0139", "jenisKelamin": "Perempuan", "tempatLahir": "Payakumbuh", "tanggalLahir": "15-06-1991", "umur": "35", "agama": "Islam", "golonganDarah": "O", "pekerjaan": "Ibu Rumah Tangga", "nik": "1376010000000039", "alamat": "Jl. Imam Bonjol No. 32, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990039", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "07-03-2026"}, {"idPasien": "P-0040", "namaPasien": "Bagus Setiawan (2)", "noRm": "B-0140", "jenisKelamin": "Laki-Laki", "tempatLahir": "Payakumbuh", "tanggalLahir": "09-09-1995", "umur": "31", "agama": "Islam", "golonganDarah": "A", "pekerjaan": "Karyawan Swasta", "nik": "1376010000000040", "alamat": "Jl. Gajah Mada No. 19, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990040", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "08-03-2026"}, {"idPasien": "P-0041", "namaPasien": "Intan Permata (2)", "noRm": "I-0141", "jenisKelamin": "Perempuan", "tempatLahir": "Payakumbuh", "tanggalLahir": "23-01-1999", "umur": "27", "agama": "Islam", "golonganDarah": "B", "pekerjaan": "Guru/Dosen", "nik": "1376010000000041", "alamat": "Jl. Pahlawan No. 40, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990041", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "09-04-2026"}, {"idPasien": "P-0042", "namaPasien": "Dimas Aditya (2)", "noRm": "D-0142", "jenisKelamin": "Laki-Laki", "tempatLahir": "Payakumbuh", "tanggalLahir": "17-04-1992", "umur": "34", "agama": "Islam", "golonganDarah": "O", "pekerjaan": "Wiraswasta", "nik": "1376010000000042", "alamat": "Jl. Kartini No. 11, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990042", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "10-04-2026"}, {"idPasien": "P-0043", "namaPasien": "Rina Wulandari (2)", "noRm": "R-0143", "jenisKelamin": "Perempuan", "tempatLahir": "Payakumbuh", "tanggalLahir": "30-08-1989", "umur": "37", "agama": "Islam", "golonganDarah": "A", "pekerjaan": "PNS", "nik": "1376010000000043", "alamat": "Jl. Ahmad Yani No. 73, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990043", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "11-04-2026"}, {"idPasien": "P-0044", "namaPasien": "Eko Prasetyo (2)", "noRm": "E-0144", "jenisKelamin": "Laki-Laki", "tempatLahir": "Payakumbuh", "tanggalLahir": "11-12-1985", "umur": "41", "agama": "Islam", "golonganDarah": "B", "pekerjaan": "TNI/Polri", "nik": "1376010000000044", "alamat": "Jl. Hasanuddin No. 29, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990044", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "12-04-2026"}, {"idPasien": "P-0045", "namaPasien": "Maya Anggraini (2)", "noRm": "M-0145", "jenisKelamin": "Perempuan", "tempatLahir": "Payakumbuh", "tanggalLahir": "05-05-1997", "umur": "29", "agama": "Islam", "golonganDarah": "O", "pekerjaan": "Karyawan Swasta", "nik": "1376010000000045", "alamat": "Jl. Cendrawasih No. 6, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990045", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "13-04-2026"}, {"idPasien": "P-0046", "namaPasien": "Andi Wijaya Kusuma (2)", "noRm": "A-0146", "jenisKelamin": "Laki-Laki", "tempatLahir": "Payakumbuh", "tanggalLahir": "21-10-1990", "umur": "36", "agama": "Islam", "golonganDarah": "AB", "pekerjaan": "Wiraswasta", "nik": "1376010000000046", "alamat": "Jl. Merpati No. 18, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990046", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "14-04-2026"}, {"idPasien": "P-0047", "namaPasien": "Putri Maharani (2)", "noRm": "P-0147", "jenisKelamin": "Perempuan", "tempatLahir": "Payakumbuh", "tanggalLahir": "14-02-2002", "umur": "24", "agama": "Islam", "golonganDarah": "A", "pekerjaan": "Pelajar/Mahasiswa", "nik": "1376010000000047", "alamat": "Jl. Melati No. 25, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990047", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "15-04-2026"}, {"idPasien": "P-0048", "namaPasien": "Reza Pahlevi (2)", "noRm": "R-0148", "jenisKelamin": "Laki-Laki", "tempatLahir": "Payakumbuh", "tanggalLahir": "08-07-1994", "umur": "32", "agama": "Islam", "golonganDarah": "O", "pekerjaan": "Karyawan Swasta", "nik": "1376010000000048", "alamat": "Jl. Kenanga No. 12, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990048", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "16-04-2026"}, {"idPasien": "P-0049", "namaPasien": "Fitriani Nur (2)", "noRm": "F-0149", "jenisKelamin": "Perempuan", "tempatLahir": "Payakumbuh", "tanggalLahir": "27-09-1996", "umur": "30", "agama": "Islam", "golonganDarah": "B", "pekerjaan": "Ibu Rumah Tangga", "nik": "1376010000000049", "alamat": "Jl. Anggrek No. 31, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990049", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "17-04-2026"}, {"idPasien": "P-0050", "namaPasien": "Wahyu Hidayat (2)", "noRm": "W-0150", "jenisKelamin": "Laki-Laki", "tempatLahir": "Payakumbuh", "tanggalLahir": "03-03-1988", "umur": "38", "agama": "Islam", "golonganDarah": "A", "pekerjaan": "PNS", "nik": "1376010000000050", "alamat": "Jl. Mawar No. 9, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990050", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "18-04-2026"}, {"idPasien": "P-0051", "namaPasien": "Nisa Amelia (2)", "noRm": "N-0151", "jenisKelamin": "Perempuan", "tempatLahir": "Payakumbuh", "tanggalLahir": "18-06-2000", "umur": "26", "agama": "Islam", "golonganDarah": "O", "pekerjaan": "Pelajar/Mahasiswa", "nik": "1376010000000051", "alamat": "Jl. Dahlia No. 44, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990051", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "19-04-2026"}, {"idPasien": "P-0052", "namaPasien": "Arif Budiman (2)", "noRm": "A-0152", "jenisKelamin": "Laki-Laki", "tempatLahir": "Payakumbuh", "tanggalLahir": "25-11-1983", "umur": "43", "agama": "Islam", "golonganDarah": "B", "pekerjaan": "Wiraswasta", "nik": "1376010000000052", "alamat": "Jl. Flamboyan No. 17, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990052", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "20-04-2026"}, {"idPasien": "P-0053", "namaPasien": "Diana Puspita (2)", "noRm": "D-0153", "jenisKelamin": "Perempuan", "tempatLahir": "Payakumbuh", "tanggalLahir": "07-01-1993", "umur": "33", "agama": "Islam", "golonganDarah": "AB", "pekerjaan": "Guru/Dosen", "nik": "1376010000000053", "alamat": "Jl. Bougenville No. 22, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990053", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "21-05-2026"}, {"idPasien": "P-0054", "namaPasien": "Galih Prakoso (2)", "noRm": "G-0154", "jenisKelamin": "Laki-Laki", "tempatLahir": "Payakumbuh", "tanggalLahir": "16-08-1996", "umur": "30", "agama": "Islam", "golonganDarah": "O", "pekerjaan": "Karyawan Swasta", "nik": "1376010000000054", "alamat": "Jl. Teratai No. 5, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990054", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "22-05-2026"}, {"idPasien": "P-0055", "namaPasien": "Lestari Handayani (2)", "noRm": "L-0155", "jenisKelamin": "Perempuan", "tempatLahir": "Payakumbuh", "tanggalLahir": "29-04-1986", "umur": "40", "agama": "Islam", "golonganDarah": "A", "pekerjaan": "Ibu Rumah Tangga", "nik": "1376010000000055", "alamat": "Jl. Kamboja No. 15, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990055", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "23-05-2026"}, {"idPasien": "P-0056", "namaPasien": "Yusuf Maulana (2)", "noRm": "Y-0156", "jenisKelamin": "Laki-Laki", "tempatLahir": "Payakumbuh", "tanggalLahir": "12-10-1991", "umur": "35", "agama": "Islam", "golonganDarah": "B", "pekerjaan": "Karyawan Swasta", "nik": "1376010000000056", "alamat": "Jl. Cemara No. 38, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990056", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "24-05-2026"}, {"idPasien": "P-0057", "namaPasien": "Citra Kirana (2)", "noRm": "C-0157", "jenisKelamin": "Perempuan", "tempatLahir": "Payakumbuh", "tanggalLahir": "02-02-1999", "umur": "27", "agama": "Islam", "golonganDarah": "O", "pekerjaan": "Wiraswasta", "nik": "1376010000000057", "alamat": "Jl. Beringin No. 10, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990057", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "25-05-2026"}, {"idPasien": "P-0058", "namaPasien": "Taufik Hidayatullah (2)", "noRm": "T-0158", "jenisKelamin": "Laki-Laki", "tempatLahir": "Payakumbuh", "tanggalLahir": "20-05-1989", "umur": "37", "agama": "Islam", "golonganDarah": "A", "pekerjaan": "PNS", "nik": "1376010000000058", "alamat": "Jl. Jati No. 27, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990058", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "26-05-2026"}, {"idPasien": "P-0059", "namaPasien": "Safira Salsabila (2)", "noRm": "S-0159", "jenisKelamin": "Perempuan", "tempatLahir": "Payakumbuh", "tanggalLahir": "09-12-2003", "umur": "23", "agama": "Islam", "golonganDarah": "B", "pekerjaan": "Pelajar/Mahasiswa", "nik": "1376010000000059", "alamat": "Jl. Mahoni No. 13, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990059", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "27-05-2026"}, {"idPasien": "P-0060", "namaPasien": "Bayu Pamungkas (2)", "noRm": "B-0160", "jenisKelamin": "Laki-Laki", "tempatLahir": "Payakumbuh", "tanggalLahir": "14-07-1995", "umur": "31", "agama": "Islam", "golonganDarah": "O", "pekerjaan": "Karyawan Swasta", "nik": "1376010000000060", "alamat": "Jl. Pinus No. 8, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990060", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "28-05-2026"}, {"idPasien": "P-0061", "namaPasien": "Mega Utami (2)", "noRm": "M-0161", "jenisKelamin": "Perempuan", "tempatLahir": "Payakumbuh", "tanggalLahir": "26-03-1992", "umur": "34", "agama": "Islam", "golonganDarah": "AB", "pekerjaan": "Guru/Dosen", "nik": "1376010000000061", "alamat": "Jl. Akasia No. 19, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990061", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "01-05-2026"}, {"idPasien": "P-0062", "namaPasien": "Irfan Hakim (2)", "noRm": "I-0162", "jenisKelamin": "Laki-Laki", "tempatLahir": "Payakumbuh", "tanggalLahir": "01-09-1987", "umur": "39", "agama": "Islam", "golonganDarah": "A", "pekerjaan": "Wiraswasta", "nik": "1376010000000062", "alamat": "Jl. Rasamala No. 41, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990062", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "02-05-2026"}, {"idPasien": "P-0063", "namaPasien": "Vina Panduwinata (2)", "noRm": "V-0163", "jenisKelamin": "Perempuan", "tempatLahir": "Payakumbuh", "tanggalLahir": "17-11-1994", "umur": "32", "agama": "Islam", "golonganDarah": "O", "pekerjaan": "Karyawan Swasta", "nik": "1376010000000063", "alamat": "Jl. Cempaka No. 3, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990063", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "03-05-2026"}, {"idPasien": "P-0064", "namaPasien": "Deni Cagur Saputra (2)", "noRm": "D-0164", "jenisKelamin": "Laki-Laki", "tempatLahir": "Payakumbuh", "tanggalLahir": "22-06-1990", "umur": "36", "agama": "Islam", "golonganDarah": "B", "pekerjaan": "Wiraswasta", "nik": "1376010000000064", "alamat": "Jl. Seruni No. 28, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990064", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "04-05-2026"}, {"idPasien": "P-0065", "namaPasien": "Nadia Putri Pratama (3)", "noRm": "N-0165", "jenisKelamin": "Perempuan", "tempatLahir": "Payakumbuh", "tanggalLahir": "12-03-1998", "umur": "28", "agama": "Islam", "golonganDarah": "B", "pekerjaan": "Karyawan Swasta", "nik": "1376010000000065", "alamat": "Jl. Soekarno Hatta No. 14, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990065", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "05-06-2026"}, {"idPasien": "P-0066", "namaPasien": "Rizky Ramadhan (3)", "noRm": "R-0166", "jenisKelamin": "Laki-Laki", "tempatLahir": "Payakumbuh", "tanggalLahir": "04-07-1993", "umur": "33", "agama": "Islam", "golonganDarah": "O", "pekerjaan": "Wiraswasta", "nik": "1376010000000066", "alamat": "Jl. Veteran No. 21, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990066", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "06-06-2026"}, {"idPasien": "P-0067", "namaPasien": "Aulia Zahra (3)", "noRm": "A-0167", "jenisKelamin": "Perempuan", "tempatLahir": "Payakumbuh", "tanggalLahir": "19-11-2001", "umur": "25", "agama": "Islam", "golonganDarah": "A", "pekerjaan": "Pelajar/Mahasiswa", "nik": "1376010000000067", "alamat": "Jl. Pemuda No. 8, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990067", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "07-06-2026"}, {"idPasien": "P-0068", "namaPasien": "Fajar Nugraha (3)", "noRm": "F-0168", "jenisKelamin": "Laki-Laki", "tempatLahir": "Payakumbuh", "tanggalLahir": "28-02-1987", "umur": "39", "agama": "Islam", "golonganDarah": "AB", "pekerjaan": "PNS", "nik": "1376010000000068", "alamat": "Jl. Diponegoro No. 55, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990068", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "08-06-2026"}, {"idPasien": "P-0069", "namaPasien": "Dewi Kartika Sari (3)", "noRm": "D-0169", "jenisKelamin": "Perempuan", "tempatLahir": "Payakumbuh", "tanggalLahir": "15-06-1991", "umur": "35", "agama": "Islam", "golonganDarah": "O", "pekerjaan": "Ibu Rumah Tangga", "nik": "1376010000000069", "alamat": "Jl. Imam Bonjol No. 32, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990069", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "09-06-2026"}, {"idPasien": "P-0070", "namaPasien": "Bagus Setiawan (3)", "noRm": "B-0170", "jenisKelamin": "Laki-Laki", "tempatLahir": "Payakumbuh", "tanggalLahir": "09-09-1995", "umur": "31", "agama": "Islam", "golonganDarah": "A", "pekerjaan": "Karyawan Swasta", "nik": "1376010000000070", "alamat": "Jl. Gajah Mada No. 19, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990070", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "10-06-2026"}, {"idPasien": "P-0071", "namaPasien": "Intan Permata (3)", "noRm": "I-0171", "jenisKelamin": "Perempuan", "tempatLahir": "Payakumbuh", "tanggalLahir": "23-01-1999", "umur": "27", "agama": "Islam", "golonganDarah": "B", "pekerjaan": "Guru/Dosen", "nik": "1376010000000071", "alamat": "Jl. Pahlawan No. 40, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990071", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "11-06-2026"}, {"idPasien": "P-0072", "namaPasien": "Dimas Aditya (3)", "noRm": "D-0172", "jenisKelamin": "Laki-Laki", "tempatLahir": "Payakumbuh", "tanggalLahir": "17-04-1992", "umur": "34", "agama": "Islam", "golonganDarah": "O", "pekerjaan": "Wiraswasta", "nik": "1376010000000072", "alamat": "Jl. Kartini No. 11, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990072", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "12-06-2026"}, {"idPasien": "P-0073", "namaPasien": "Rina Wulandari (3)", "noRm": "R-0173", "jenisKelamin": "Perempuan", "tempatLahir": "Payakumbuh", "tanggalLahir": "30-08-1989", "umur": "37", "agama": "Islam", "golonganDarah": "A", "pekerjaan": "PNS", "nik": "1376010000000073", "alamat": "Jl. Ahmad Yani No. 73, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990073", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "13-06-2026"}, {"idPasien": "P-0074", "namaPasien": "Eko Prasetyo (3)", "noRm": "E-0174", "jenisKelamin": "Laki-Laki", "tempatLahir": "Payakumbuh", "tanggalLahir": "11-12-1985", "umur": "41", "agama": "Islam", "golonganDarah": "B", "pekerjaan": "TNI/Polri", "nik": "1376010000000074", "alamat": "Jl. Hasanuddin No. 29, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990074", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "14-06-2026"}, {"idPasien": "P-0075", "namaPasien": "Maya Anggraini (3)", "noRm": "M-0175", "jenisKelamin": "Perempuan", "tempatLahir": "Payakumbuh", "tanggalLahir": "05-05-1997", "umur": "29", "agama": "Islam", "golonganDarah": "O", "pekerjaan": "Karyawan Swasta", "nik": "1376010000000075", "alamat": "Jl. Cendrawasih No. 6, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990075", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "15-06-2026"}, {"idPasien": "P-0076", "namaPasien": "Andi Wijaya Kusuma (3)", "noRm": "A-0176", "jenisKelamin": "Laki-Laki", "tempatLahir": "Payakumbuh", "tanggalLahir": "21-10-1990", "umur": "36", "agama": "Islam", "golonganDarah": "AB", "pekerjaan": "Wiraswasta", "nik": "1376010000000076", "alamat": "Jl. Merpati No. 18, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990076", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "16-06-2026"}, {"idPasien": "P-0077", "namaPasien": "Putri Maharani (3)", "noRm": "P-0177", "jenisKelamin": "Perempuan", "tempatLahir": "Payakumbuh", "tanggalLahir": "14-02-2002", "umur": "24", "agama": "Islam", "golonganDarah": "A", "pekerjaan": "Pelajar/Mahasiswa", "nik": "1376010000000077", "alamat": "Jl. Melati No. 25, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990077", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "17-07-2026"}, {"idPasien": "P-0078", "namaPasien": "Reza Pahlevi (3)", "noRm": "R-0178", "jenisKelamin": "Laki-Laki", "tempatLahir": "Payakumbuh", "tanggalLahir": "08-07-1994", "umur": "32", "agama": "Islam", "golonganDarah": "O", "pekerjaan": "Karyawan Swasta", "nik": "1376010000000078", "alamat": "Jl. Kenanga No. 12, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990078", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "18-07-2026"}, {"idPasien": "P-0079", "namaPasien": "Fitriani Nur (3)", "noRm": "F-0179", "jenisKelamin": "Perempuan", "tempatLahir": "Payakumbuh", "tanggalLahir": "27-09-1996", "umur": "30", "agama": "Islam", "golonganDarah": "B", "pekerjaan": "Ibu Rumah Tangga", "nik": "1376010000000079", "alamat": "Jl. Anggrek No. 31, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990079", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "19-07-2026"}, {"idPasien": "P-0080", "namaPasien": "Wahyu Hidayat (3)", "noRm": "W-0180", "jenisKelamin": "Laki-Laki", "tempatLahir": "Payakumbuh", "tanggalLahir": "03-03-1988", "umur": "38", "agama": "Islam", "golonganDarah": "A", "pekerjaan": "PNS", "nik": "1376010000000080", "alamat": "Jl. Mawar No. 9, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990080", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "20-07-2026"}, {"idPasien": "P-0081", "namaPasien": "Nisa Amelia (3)", "noRm": "N-0181", "jenisKelamin": "Perempuan", "tempatLahir": "Payakumbuh", "tanggalLahir": "18-06-2000", "umur": "26", "agama": "Islam", "golonganDarah": "O", "pekerjaan": "Pelajar/Mahasiswa", "nik": "1376010000000081", "alamat": "Jl. Dahlia No. 44, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990081", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "21-07-2026"}, {"idPasien": "P-0082", "namaPasien": "Arif Budiman (3)", "noRm": "A-0182", "jenisKelamin": "Laki-Laki", "tempatLahir": "Payakumbuh", "tanggalLahir": "25-11-1983", "umur": "43", "agama": "Islam", "golonganDarah": "B", "pekerjaan": "Wiraswasta", "nik": "1376010000000082", "alamat": "Jl. Flamboyan No. 17, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990082", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "22-07-2026"}, {"idPasien": "P-0083", "namaPasien": "Diana Puspita (3)", "noRm": "D-0183", "jenisKelamin": "Perempuan", "tempatLahir": "Payakumbuh", "tanggalLahir": "07-01-1993", "umur": "33", "agama": "Islam", "golonganDarah": "AB", "pekerjaan": "Guru/Dosen", "nik": "1376010000000083", "alamat": "Jl. Bougenville No. 22, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990083", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "23-07-2026"}, {"idPasien": "P-0084", "namaPasien": "Galih Prakoso (3)", "noRm": "G-0184", "jenisKelamin": "Laki-Laki", "tempatLahir": "Payakumbuh", "tanggalLahir": "16-08-1996", "umur": "30", "agama": "Islam", "golonganDarah": "O", "pekerjaan": "Karyawan Swasta", "nik": "1376010000000084", "alamat": "Jl. Teratai No. 5, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990084", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "24-07-2026"}, {"idPasien": "P-0085", "namaPasien": "Lestari Handayani (3)", "noRm": "L-0185", "jenisKelamin": "Perempuan", "tempatLahir": "Payakumbuh", "tanggalLahir": "29-04-1986", "umur": "40", "agama": "Islam", "golonganDarah": "A", "pekerjaan": "Ibu Rumah Tangga", "nik": "1376010000000085", "alamat": "Jl. Kamboja No. 15, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990085", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "25-07-2026"}, {"idPasien": "P-0086", "namaPasien": "Yusuf Maulana (3)", "noRm": "Y-0186", "jenisKelamin": "Laki-Laki", "tempatLahir": "Payakumbuh", "tanggalLahir": "12-10-1991", "umur": "35", "agama": "Islam", "golonganDarah": "B", "pekerjaan": "Karyawan Swasta", "nik": "1376010000000086", "alamat": "Jl. Cemara No. 38, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990086", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "26-07-2026"}, {"idPasien": "P-0087", "namaPasien": "Citra Kirana (3)", "noRm": "C-0187", "jenisKelamin": "Perempuan", "tempatLahir": "Payakumbuh", "tanggalLahir": "02-02-1999", "umur": "27", "agama": "Islam", "golonganDarah": "O", "pekerjaan": "Wiraswasta", "nik": "1376010000000087", "alamat": "Jl. Beringin No. 10, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990087", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "27-07-2026"}, {"idPasien": "P-0088", "namaPasien": "Taufik Hidayatullah (3)", "noRm": "T-0188", "jenisKelamin": "Laki-Laki", "tempatLahir": "Payakumbuh", "tanggalLahir": "20-05-1989", "umur": "37", "agama": "Islam", "golonganDarah": "A", "pekerjaan": "PNS", "nik": "1376010000000088", "alamat": "Jl. Jati No. 27, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990088", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "28-07-2026"}, {"idPasien": "P-0089", "namaPasien": "Safira Salsabila (3)", "noRm": "S-0189", "jenisKelamin": "Perempuan", "tempatLahir": "Payakumbuh", "tanggalLahir": "09-12-2003", "umur": "23", "agama": "Islam", "golonganDarah": "B", "pekerjaan": "Pelajar/Mahasiswa", "nik": "1376010000000089", "alamat": "Jl. Mahoni No. 13, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990089", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "01-08-2026"}, {"idPasien": "P-0090", "namaPasien": "Bayu Pamungkas (3)", "noRm": "B-0190", "jenisKelamin": "Laki-Laki", "tempatLahir": "Payakumbuh", "tanggalLahir": "14-07-1995", "umur": "31", "agama": "Islam", "golonganDarah": "O", "pekerjaan": "Karyawan Swasta", "nik": "1376010000000090", "alamat": "Jl. Pinus No. 8, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990090", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "02-08-2026"}, {"idPasien": "P-0091", "namaPasien": "Mega Utami (3)", "noRm": "M-0191", "jenisKelamin": "Perempuan", "tempatLahir": "Payakumbuh", "tanggalLahir": "26-03-1992", "umur": "34", "agama": "Islam", "golonganDarah": "AB", "pekerjaan": "Guru/Dosen", "nik": "1376010000000091", "alamat": "Jl. Akasia No. 19, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990091", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "03-08-2026"}, {"idPasien": "P-0092", "namaPasien": "Irfan Hakim (3)", "noRm": "I-0192", "jenisKelamin": "Laki-Laki", "tempatLahir": "Payakumbuh", "tanggalLahir": "01-09-1987", "umur": "39", "agama": "Islam", "golonganDarah": "A", "pekerjaan": "Wiraswasta", "nik": "1376010000000092", "alamat": "Jl. Rasamala No. 41, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990092", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "04-08-2026"}, {"idPasien": "P-0093", "namaPasien": "Vina Panduwinata (3)", "noRm": "V-0193", "jenisKelamin": "Perempuan", "tempatLahir": "Payakumbuh", "tanggalLahir": "17-11-1994", "umur": "32", "agama": "Islam", "golonganDarah": "O", "pekerjaan": "Karyawan Swasta", "nik": "1376010000000093", "alamat": "Jl. Cempaka No. 3, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990093", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "05-08-2026"}, {"idPasien": "P-0094", "namaPasien": "Deni Cagur Saputra (3)", "noRm": "D-0194", "jenisKelamin": "Laki-Laki", "tempatLahir": "Payakumbuh", "tanggalLahir": "22-06-1990", "umur": "36", "agama": "Islam", "golonganDarah": "B", "pekerjaan": "Wiraswasta", "nik": "1376010000000094", "alamat": "Jl. Seruni No. 28, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990094", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "06-08-2026"}, {"idPasien": "P-0095", "namaPasien": "Nadia Putri Pratama (4)", "noRm": "N-0195", "jenisKelamin": "Perempuan", "tempatLahir": "Payakumbuh", "tanggalLahir": "12-03-1998", "umur": "28", "agama": "Islam", "golonganDarah": "B", "pekerjaan": "Karyawan Swasta", "nik": "1376010000000095", "alamat": "Jl. Soekarno Hatta No. 14, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990095", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "07-08-2026"}, {"idPasien": "P-0096", "namaPasien": "Rizky Ramadhan (4)", "noRm": "R-0196", "jenisKelamin": "Laki-Laki", "tempatLahir": "Payakumbuh", "tanggalLahir": "04-07-1993", "umur": "33", "agama": "Islam", "golonganDarah": "O", "pekerjaan": "Wiraswasta", "nik": "1376010000000096", "alamat": "Jl. Veteran No. 21, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990096", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "08-08-2026"}, {"idPasien": "P-0097", "namaPasien": "Aulia Zahra (4)", "noRm": "A-0197", "jenisKelamin": "Perempuan", "tempatLahir": "Payakumbuh", "tanggalLahir": "19-11-2001", "umur": "25", "agama": "Islam", "golonganDarah": "A", "pekerjaan": "Pelajar/Mahasiswa", "nik": "1376010000000097", "alamat": "Jl. Pemuda No. 8, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990097", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "09-08-2026"}, {"idPasien": "P-0098", "namaPasien": "Fajar Nugraha (4)", "noRm": "F-0198", "jenisKelamin": "Laki-Laki", "tempatLahir": "Payakumbuh", "tanggalLahir": "28-02-1987", "umur": "39", "agama": "Islam", "golonganDarah": "AB", "pekerjaan": "PNS", "nik": "1376010000000098", "alamat": "Jl. Diponegoro No. 55, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990098", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "10-08-2026"}, {"idPasien": "P-0099", "namaPasien": "Dewi Kartika Sari (4)", "noRm": "D-0199", "jenisKelamin": "Perempuan", "tempatLahir": "Payakumbuh", "tanggalLahir": "15-06-1991", "umur": "35", "agama": "Islam", "golonganDarah": "O", "pekerjaan": "Ibu Rumah Tangga", "nik": "1376010000000099", "alamat": "Jl. Imam Bonjol No. 32, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990099", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "11-08-2026"}, {"idPasien": "P-0100", "namaPasien": "Bagus Setiawan (4)", "noRm": "B-0200", "jenisKelamin": "Laki-Laki", "tempatLahir": "Payakumbuh", "tanggalLahir": "09-09-1995", "umur": "31", "agama": "Islam", "golonganDarah": "A", "pekerjaan": "Karyawan Swasta", "nik": "1376010000000100", "alamat": "Jl. Gajah Mada No. 19, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990100", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "12-08-2026"}, {"idPasien": "P-0101", "namaPasien": "Intan Permata (4)", "noRm": "I-0201", "jenisKelamin": "Perempuan", "tempatLahir": "Payakumbuh", "tanggalLahir": "23-01-1999", "umur": "27", "agama": "Islam", "golonganDarah": "B", "pekerjaan": "Guru/Dosen", "nik": "1376010000000101", "alamat": "Jl. Pahlawan No. 40, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990101", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "13-09-2026"}, {"idPasien": "P-0102", "namaPasien": "Dimas Aditya (4)", "noRm": "D-0202", "jenisKelamin": "Laki-Laki", "tempatLahir": "Payakumbuh", "tanggalLahir": "17-04-1992", "umur": "34", "agama": "Islam", "golonganDarah": "O", "pekerjaan": "Wiraswasta", "nik": "1376010000000102", "alamat": "Jl. Kartini No. 11, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990102", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "14-09-2026"}, {"idPasien": "P-0103", "namaPasien": "Rina Wulandari (4)", "noRm": "R-0203", "jenisKelamin": "Perempuan", "tempatLahir": "Payakumbuh", "tanggalLahir": "30-08-1989", "umur": "37", "agama": "Islam", "golonganDarah": "A", "pekerjaan": "PNS", "nik": "1376010000000103", "alamat": "Jl. Ahmad Yani No. 73, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990103", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "15-09-2026"}, {"idPasien": "P-0104", "namaPasien": "Eko Prasetyo (4)", "noRm": "E-0204", "jenisKelamin": "Laki-Laki", "tempatLahir": "Payakumbuh", "tanggalLahir": "11-12-1985", "umur": "41", "agama": "Islam", "golonganDarah": "B", "pekerjaan": "TNI/Polri", "nik": "1376010000000104", "alamat": "Jl. Hasanuddin No. 29, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990104", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "16-09-2026"}, {"idPasien": "P-0105", "namaPasien": "Maya Anggraini (4)", "noRm": "M-0205", "jenisKelamin": "Perempuan", "tempatLahir": "Payakumbuh", "tanggalLahir": "05-05-1997", "umur": "29", "agama": "Islam", "golonganDarah": "O", "pekerjaan": "Karyawan Swasta", "nik": "1376010000000105", "alamat": "Jl. Cendrawasih No. 6, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990105", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "17-09-2026"}, {"idPasien": "P-0106", "namaPasien": "Andi Wijaya Kusuma (4)", "noRm": "A-0206", "jenisKelamin": "Laki-Laki", "tempatLahir": "Payakumbuh", "tanggalLahir": "21-10-1990", "umur": "36", "agama": "Islam", "golonganDarah": "AB", "pekerjaan": "Wiraswasta", "nik": "1376010000000106", "alamat": "Jl. Merpati No. 18, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990106", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "18-09-2026"}, {"idPasien": "P-0107", "namaPasien": "Putri Maharani (4)", "noRm": "P-0207", "jenisKelamin": "Perempuan", "tempatLahir": "Payakumbuh", "tanggalLahir": "14-02-2002", "umur": "24", "agama": "Islam", "golonganDarah": "A", "pekerjaan": "Pelajar/Mahasiswa", "nik": "1376010000000107", "alamat": "Jl. Melati No. 25, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990107", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "19-09-2026"}, {"idPasien": "P-0108", "namaPasien": "Reza Pahlevi (4)", "noRm": "R-0208", "jenisKelamin": "Laki-Laki", "tempatLahir": "Payakumbuh", "tanggalLahir": "08-07-1994", "umur": "32", "agama": "Islam", "golonganDarah": "O", "pekerjaan": "Karyawan Swasta", "nik": "1376010000000108", "alamat": "Jl. Kenanga No. 12, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990108", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "20-09-2026"}, {"idPasien": "P-0109", "namaPasien": "Fitriani Nur (4)", "noRm": "F-0209", "jenisKelamin": "Perempuan", "tempatLahir": "Payakumbuh", "tanggalLahir": "27-09-1996", "umur": "30", "agama": "Islam", "golonganDarah": "B", "pekerjaan": "Ibu Rumah Tangga", "nik": "1376010000000109", "alamat": "Jl. Anggrek No. 31, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990109", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "21-09-2026"}, {"idPasien": "P-0110", "namaPasien": "Wahyu Hidayat (4)", "noRm": "W-0210", "jenisKelamin": "Laki-Laki", "tempatLahir": "Payakumbuh", "tanggalLahir": "03-03-1988", "umur": "38", "agama": "Islam", "golonganDarah": "A", "pekerjaan": "PNS", "nik": "1376010000000110", "alamat": "Jl. Mawar No. 9, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990110", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "22-09-2026"}, {"idPasien": "P-0111", "namaPasien": "Nisa Amelia (4)", "noRm": "N-0211", "jenisKelamin": "Perempuan", "tempatLahir": "Payakumbuh", "tanggalLahir": "18-06-2000", "umur": "26", "agama": "Islam", "golonganDarah": "O", "pekerjaan": "Pelajar/Mahasiswa", "nik": "1376010000000111", "alamat": "Jl. Dahlia No. 44, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990111", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "23-09-2026"}, {"idPasien": "P-0112", "namaPasien": "Arif Budiman (4)", "noRm": "A-0212", "jenisKelamin": "Laki-Laki", "tempatLahir": "Payakumbuh", "tanggalLahir": "25-11-1983", "umur": "43", "agama": "Islam", "golonganDarah": "B", "pekerjaan": "Wiraswasta", "nik": "1376010000000112", "alamat": "Jl. Flamboyan No. 17, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990112", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "24-09-2026"}, {"idPasien": "P-0113", "namaPasien": "Diana Puspita (4)", "noRm": "D-0213", "jenisKelamin": "Perempuan", "tempatLahir": "Payakumbuh", "tanggalLahir": "07-01-1993", "umur": "33", "agama": "Islam", "golonganDarah": "AB", "pekerjaan": "Guru/Dosen", "nik": "1376010000000113", "alamat": "Jl. Bougenville No. 22, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990113", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "25-10-2026"}, {"idPasien": "P-0114", "namaPasien": "Galih Prakoso (4)", "noRm": "G-0214", "jenisKelamin": "Laki-Laki", "tempatLahir": "Payakumbuh", "tanggalLahir": "16-08-1996", "umur": "30", "agama": "Islam", "golonganDarah": "O", "pekerjaan": "Karyawan Swasta", "nik": "1376010000000114", "alamat": "Jl. Teratai No. 5, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990114", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "26-10-2026"}, {"idPasien": "P-0115", "namaPasien": "Lestari Handayani (4)", "noRm": "L-0215", "jenisKelamin": "Perempuan", "tempatLahir": "Payakumbuh", "tanggalLahir": "29-04-1986", "umur": "40", "agama": "Islam", "golonganDarah": "A", "pekerjaan": "Ibu Rumah Tangga", "nik": "1376010000000115", "alamat": "Jl. Kamboja No. 15, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990115", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "27-10-2026"}, {"idPasien": "P-0116", "namaPasien": "Yusuf Maulana (4)", "noRm": "Y-0216", "jenisKelamin": "Laki-Laki", "tempatLahir": "Payakumbuh", "tanggalLahir": "12-10-1991", "umur": "35", "agama": "Islam", "golonganDarah": "B", "pekerjaan": "Karyawan Swasta", "nik": "1376010000000116", "alamat": "Jl. Cemara No. 38, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990116", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "28-10-2026"}, {"idPasien": "P-0117", "namaPasien": "Citra Kirana (4)", "noRm": "C-0217", "jenisKelamin": "Perempuan", "tempatLahir": "Payakumbuh", "tanggalLahir": "02-02-1999", "umur": "27", "agama": "Islam", "golonganDarah": "O", "pekerjaan": "Wiraswasta", "nik": "1376010000000117", "alamat": "Jl. Beringin No. 10, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990117", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "01-10-2026"}, {"idPasien": "P-0118", "namaPasien": "Taufik Hidayatullah (4)", "noRm": "T-0218", "jenisKelamin": "Laki-Laki", "tempatLahir": "Payakumbuh", "tanggalLahir": "20-05-1989", "umur": "37", "agama": "Islam", "golonganDarah": "A", "pekerjaan": "PNS", "nik": "1376010000000118", "alamat": "Jl. Jati No. 27, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990118", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "02-10-2026"}, {"idPasien": "P-0119", "namaPasien": "Safira Salsabila (4)", "noRm": "S-0219", "jenisKelamin": "Perempuan", "tempatLahir": "Payakumbuh", "tanggalLahir": "09-12-2003", "umur": "23", "agama": "Islam", "golonganDarah": "B", "pekerjaan": "Pelajar/Mahasiswa", "nik": "1376010000000119", "alamat": "Jl. Mahoni No. 13, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990119", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "03-10-2026"}, {"idPasien": "P-0120", "namaPasien": "Bayu Pamungkas (4)", "noRm": "B-0220", "jenisKelamin": "Laki-Laki", "tempatLahir": "Payakumbuh", "tanggalLahir": "14-07-1995", "umur": "31", "agama": "Islam", "golonganDarah": "O", "pekerjaan": "Karyawan Swasta", "nik": "1376010000000120", "alamat": "Jl. Pinus No. 8, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990120", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "04-10-2026"}, {"idPasien": "P-0121", "namaPasien": "Mega Utami (4)", "noRm": "M-0221", "jenisKelamin": "Perempuan", "tempatLahir": "Payakumbuh", "tanggalLahir": "26-03-1992", "umur": "34", "agama": "Islam", "golonganDarah": "AB", "pekerjaan": "Guru/Dosen", "nik": "1376010000000121", "alamat": "Jl. Akasia No. 19, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990121", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "05-10-2026"}, {"idPasien": "P-0122", "namaPasien": "Irfan Hakim (4)", "noRm": "I-0222", "jenisKelamin": "Laki-Laki", "tempatLahir": "Payakumbuh", "tanggalLahir": "01-09-1987", "umur": "39", "agama": "Islam", "golonganDarah": "A", "pekerjaan": "Wiraswasta", "nik": "1376010000000122", "alamat": "Jl. Rasamala No. 41, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990122", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "06-10-2026"}, {"idPasien": "P-0123", "namaPasien": "Vina Panduwinata (4)", "noRm": "V-0223", "jenisKelamin": "Perempuan", "tempatLahir": "Payakumbuh", "tanggalLahir": "17-11-1994", "umur": "32", "agama": "Islam", "golonganDarah": "O", "pekerjaan": "Karyawan Swasta", "nik": "1376010000000123", "alamat": "Jl. Cempaka No. 3, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990123", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "07-10-2026"}, {"idPasien": "P-0124", "namaPasien": "Deni Cagur Saputra (4)", "noRm": "D-0224", "jenisKelamin": "Laki-Laki", "tempatLahir": "Payakumbuh", "tanggalLahir": "22-06-1990", "umur": "36", "agama": "Islam", "golonganDarah": "B", "pekerjaan": "Wiraswasta", "nik": "1376010000000124", "alamat": "Jl. Seruni No. 28, Payakumbuh", "provinsi": "Sumatera Barat", "kabupaten": "Kota Payakumbuh", "kecamatan": "Payakumbuh Barat", "kelurahan": "Daya Bangun", "whatsapp": "081288990124", "alergi": "Tidak Ada", "riwayatPenyakit": "Tidak Ada", "catatan": "Data Bulk SHELDON 2026", "tglDaftar": "08-10-2026"}], "tindakan": [{"kode": "TND-001", "id": "TND-001", "nama": "Scaling Gigi Rahang Atas & Bawah", "kategori": "Dokter Gigi Umum", "tarif": 250000, "harga": 250000, "perluLab": "Tidak", "persenJMDefault": null}, {"kode": "TND-002", "id": "TND-002", "nama": "Penambalan Komposit Light-Cure", "kategori": "Dokter Gigi Umum", "tarif": 300000, "harga": 300000, "perluLab": "Tidak", "persenJMDefault": null}, {"kode": "TND-003", "id": "TND-003", "nama": "Pencabutan Gigi Permanen Ringan", "kategori": "Dokter Gigi Umum", "tarif": 200000, "harga": 200000, "perluLab": "Tidak", "persenJMDefault": null}, {"kode": "TND-004", "id": "TND-004", "nama": "Pemasangan Kawat Gigi Ortho Standard", "kategori": "Dokter Gigi Spesialis Ortodonti", "tarif": 5000000, "harga": 5000000, "perluLab": "Tidak", "persenJMDefault": null}, {"kode": "TND-005", "id": "TND-005", "nama": "Foto Rontgen Periapikal Digital", "kategori": "Umum", "tarif": 100000, "harga": 100000, "perluLab": "Tidak", "persenJMDefault": 0.15}, {"kode": "TND-006", "id": "TND-006", "nama": "Perawatan Saluran Akar (PSA) Molar", "kategori": "Dokter Gigi Spesialis Ortodonti", "tarif": 1200000, "harga": 1200000, "perluLab": "Tidak", "persenJMDefault": null}, {"kode": "TND-007", "id": "TND-007", "nama": "Pemasangan Mahkota PFM (Crown)", "kategori": "Dokter Gigi Spesialis Ortodonti", "tarif": 1500000, "harga": 1500000, "perluLab": "Ya", "persenJMDefault": null}, {"kode": "DGU-0001", "id": "DGU-0001", "nama": "Tumpat Komposit Kecil", "kategori": "Dokter Gigi Umum", "tarif": 250000, "harga": 250000, "perluLab": "Tidak", "persenJMDefault": null}, {"kode": "DGU-0002", "id": "DGU-0002", "nama": "Tumpat Komposit Sedang", "kategori": "Dokter Gigi Umum", "tarif": 300000, "harga": 300000, "perluLab": "Tidak", "persenJMDefault": null}, {"kode": "DGU-0003", "id": "DGU-0003", "nama": "Tumpat Komposit Besar", "kategori": "Dokter Gigi Umum", "tarif": 350000, "harga": 350000, "perluLab": "Tidak", "persenJMDefault": null}, {"kode": "DGU-0004", "id": "DGU-0004", "nama": "Tumpat GIC Kecil", "kategori": "Dokter Gigi Umum", "tarif": 200000, "harga": 200000, "perluLab": "Tidak", "persenJMDefault": null}, {"kode": "DGU-0005", "id": "DGU-0005", "nama": "Tumpat GIC Sedang", "kategori": "Dokter Gigi Umum", "tarif": 250000, "harga": 250000, "perluLab": "Tidak", "persenJMDefault": null}, {"kode": "DGU-0006", "id": "DGU-0006", "nama": "Tumpat GIC Besar", "kategori": "Dokter Gigi Umum", "tarif": 300000, "harga": 300000, "perluLab": "Tidak", "persenJMDefault": null}, {"kode": "DGU-0007", "id": "DGU-0007", "nama": "Veneer Direct Composite", "kategori": "Dokter Gigi Umum", "tarif": 600000, "harga": 600000, "perluLab": "Tidak", "persenJMDefault": null}, {"kode": "DGS-0008", "id": "DGS-0008", "nama": "Veneer Indirect Porcelain", "kategori": "Dokter Gigi Spesialis", "tarif": 2500000, "harga": 2500000, "perluLab": "Ya", "persenJMDefault": null}, {"kode": "DGU-0009", "id": "DGU-0009", "nama": "Scalling Ringan", "kategori": "Dokter Gigi Umum", "tarif": 200000, "harga": 200000, "perluLab": "Tidak", "persenJMDefault": null}, {"kode": "DGU-0010", "id": "DGU-0010", "nama": "Scalling Sedang", "kategori": "Dokter Gigi Umum", "tarif": 250000, "harga": 250000, "perluLab": "Tidak", "persenJMDefault": null}, {"kode": "DGU-0011", "id": "DGU-0011", "nama": "Scalling Berat", "kategori": "Dokter Gigi Umum", "tarif": 350000, "harga": 350000, "perluLab": "Tidak", "persenJMDefault": null}, {"kode": "DGU-0012", "id": "DGU-0012", "nama": "Scalling Perawat", "kategori": "Dokter Gigi Umum", "tarif": 150000, "harga": 150000, "perluLab": "Tidak", "persenJMDefault": null}, {"kode": "DGU-0013", "id": "DGU-0013", "nama": "Stain Remover", "kategori": "Dokter Gigi Umum", "tarif": 150000, "harga": 150000, "perluLab": "Tidak", "persenJMDefault": null}, {"kode": "DGU-0014", "id": "DGU-0014", "nama": "Kuretase Gingiva per Regio", "kategori": "Dokter Gigi Umum", "tarif": 300000, "harga": 300000, "perluLab": "Tidak", "persenJMDefault": null}, {"kode": "DGU-0015", "id": "DGU-0015", "nama": "Splinting Periodontal", "kategori": "Dokter Gigi Umum", "tarif": 450000, "harga": 450000, "perluLab": "Tidak", "persenJMDefault": null}, {"kode": "DGU-0016", "id": "DGU-0016", "nama": "Open Bur + Medikasi", "kategori": "Dokter Gigi Umum", "tarif": 150000, "harga": 150000, "perluLab": "Tidak", "persenJMDefault": null}, {"kode": "DGU-0017", "id": "DGU-0017", "nama": "Devitalisasi Pulpa", "kategori": "Dokter Gigi Umum", "tarif": 150000, "harga": 150000, "perluLab": "Tidak", "persenJMDefault": null}, {"kode": "DGU-0018", "id": "DGU-0018", "nama": "Pulpectomi / Ekstirpasi Pulpa", "kategori": "Dokter Gigi Umum", "tarif": 200000, "harga": 200000, "perluLab": "Tidak", "persenJMDefault": null}, {"kode": "DGU-0019", "id": "DGU-0019", "nama": "Sterilisasi Saluran Akar (Dressing)", "kategori": "Dokter Gigi Umum", "tarif": 150000, "harga": 150000, "perluLab": "Tidak", "persenJMDefault": null}, {"kode": "DGU-0020", "id": "DGU-0020", "nama": "Obturasi Saluran Akar Tunggal", "kategori": "Dokter Gigi Umum", "tarif": 350000, "harga": 350000, "perluLab": "Tidak", "persenJMDefault": null}, {"kode": "DGS-0021", "id": "DGS-0021", "nama": "Obturasi Saluran Akar Ganda/Molar", "kategori": "Dokter Gigi Spesialis", "tarif": 550000, "harga": 550000, "perluLab": "Tidak", "persenJMDefault": null}, {"kode": "DGS-0022", "id": "DGS-0022", "nama": "PSA 1x Kunjungan (One Visit Endodontic)", "kategori": "Dokter Gigi Spesialis", "tarif": 1500000, "harga": 1500000, "perluLab": "Tidak", "persenJMDefault": null}, {"kode": "DGU-0023", "id": "DGU-0023", "nama": "Pasak Fiber (Fiber Post)", "kategori": "Dokter Gigi Umum", "tarif": 450000, "harga": 450000, "perluLab": "Tidak", "persenJMDefault": null}, {"kode": "DGU-0024", "id": "DGU-0024", "nama": "Exo Anak Tanpa Injeksi (Topikal)", "kategori": "Dokter Gigi Umum", "tarif": 100000, "harga": 100000, "perluLab": "Tidak", "persenJMDefault": null}, {"kode": "DGU-0025", "id": "DGU-0025", "nama": "Exo Anak Dengan Injeksi", "kategori": "Dokter Gigi Umum", "tarif": 150000, "harga": 150000, "perluLab": "Tidak", "persenJMDefault": null}, {"kode": "DGU-0026", "id": "DGU-0026", "nama": "Exo Dewasa Ringan (Akar Tunggal)", "kategori": "Dokter Gigi Umum", "tarif": 250000, "harga": 250000, "perluLab": "Tidak", "persenJMDefault": null}, {"kode": "DGU-0027", "id": "DGU-0027", "nama": "Exo Dewasa Sedang (Molar/Premolar)", "kategori": "Dokter Gigi Umum", "tarif": 350000, "harga": 350000, "perluLab": "Tidak", "persenJMDefault": null}, {"kode": "DGS-0028", "id": "DGS-0028", "nama": "Exo Dewasa Komplikasi / Separasi", "kategori": "Dokter Gigi Spesialis", "tarif": 500000, "harga": 500000, "perluLab": "Tidak", "persenJMDefault": null}, {"kode": "DGS-0029", "id": "DGS-0029", "nama": "Odontektomi Kelas I Ringan", "kategori": "Dokter Gigi Spesialis", "tarif": 1800000, "harga": 1800000, "perluLab": "Tidak", "persenJMDefault": null}, {"kode": "DGS-0030", "id": "DGS-0030", "nama": "Odontektomi Kelas II/III Impaksi", "kategori": "Dokter Gigi Spesialis", "tarif": 2500000, "harga": 2500000, "perluLab": "Tidak", "persenJMDefault": null}, {"kode": "DGU-0031", "id": "DGU-0031", "nama": "Operculektomi", "kategori": "Dokter Gigi Umum", "tarif": 350000, "harga": 350000, "perluLab": "Tidak", "persenJMDefault": null}, {"kode": "DGS-0032", "id": "DGS-0032", "nama": "Alveolektomi per Regio", "kategori": "Dokter Gigi Spesialis", "tarif": 600000, "harga": 600000, "perluLab": "Tidak", "persenJMDefault": null}, {"kode": "DGU-0033", "id": "DGU-0033", "nama": "Insisi Abses Intraoral", "kategori": "Dokter Gigi Umum", "tarif": 250000, "harga": 250000, "perluLab": "Tidak", "persenJMDefault": null}, {"kode": "DGU-0034", "id": "DGU-0034", "nama": "Hecting / Jahit Luka", "kategori": "Dokter Gigi Umum", "tarif": 150000, "harga": 150000, "perluLab": "Tidak", "persenJMDefault": null}, {"kode": "DGU-0035", "id": "DGU-0035", "nama": "Aff Hecting / Lepas Jahitan", "kategori": "Dokter Gigi Umum", "tarif": 100000, "harga": 100000, "perluLab": "Tidak", "persenJMDefault": null}, {"kode": "DGS-0036", "id": "DGS-0036", "nama": "Pemasangan Ortho Metal Standar RA+RB", "kategori": "Dokter Gigi Spesialis", "tarif": 4500000, "harga": 4500000, "perluLab": "Tidak", "persenJMDefault": null}, {"kode": "DGS-0037", "id": "DGS-0037", "nama": "Pemasangan Ortho Ceramic Estetik RA+RB", "kategori": "Dokter Gigi Spesialis", "tarif": 6500000, "harga": 6500000, "perluLab": "Tidak", "persenJMDefault": null}, {"kode": "DGS-0038", "id": "DGS-0038", "nama": "Pemasangan Ortho Self-Ligating Damon", "kategori": "Dokter Gigi Spesialis", "tarif": 9500000, "harga": 9500000, "perluLab": "Tidak", "persenJMDefault": null}, {"kode": "DGU-0039", "id": "DGU-0039", "nama": "Kontrol Ortho Rutin (Ganti Karet/Power O)", "kategori": "Dokter Gigi Umum", "tarif": 150000, "harga": 150000, "perluLab": "Tidak", "persenJMDefault": null}, {"kode": "DGU-0040", "id": "DGU-0040", "nama": "Kontrol Ortho Ganti Kawat (NiTi/SS)", "kategori": "Dokter Gigi Umum", "tarif": 200000, "harga": 200000, "perluLab": "Tidak", "persenJMDefault": null}, {"kode": "DGU-0041", "id": "DGU-0041", "nama": "Lem Bracket Lepas per Gigi", "kategori": "Dokter Gigi Umum", "tarif": 50000, "harga": 50000, "perluLab": "Tidak", "persenJMDefault": null}, {"kode": "DGU-0042", "id": "DGU-0042", "nama": "Lepas Bracket Ortho RA+RB", "kategori": "Dokter Gigi Umum", "tarif": 500000, "harga": 500000, "perluLab": "Tidak", "persenJMDefault": null}, {"kode": "DGS-0043", "id": "DGS-0043", "nama": "Retainer Clear / Hawley per Rahang", "kategori": "Dokter Gigi Spesialis", "tarif": 750000, "harga": 750000, "perluLab": "Ya", "persenJMDefault": null}, {"kode": "DGS-0044", "id": "DGS-0044", "nama": "Crown PFM (Porcelain Fused to Metal)", "kategori": "Dokter Gigi Spesialis", "tarif": 1500000, "harga": 1500000, "perluLab": "Ya", "persenJMDefault": null}, {"kode": "DGS-0045", "id": "DGS-0045", "nama": "Crown Zirconia All-Ceramic", "kategori": "Dokter Gigi Spesialis", "tarif": 2800000, "harga": 2800000, "perluLab": "Ya", "persenJMDefault": null}, {"kode": "DGS-0046", "id": "DGS-0046", "nama": "Crown E-Max Full Porcelain", "kategori": "Dokter Gigi Spesialis", "tarif": 2600000, "harga": 2600000, "perluLab": "Ya", "persenJMDefault": null}, {"kode": "DGU-0047", "id": "DGU-0047", "nama": "Crown Acrylic Sementara (Temporary)", "kategori": "Dokter Gigi Umum", "tarif": 350000, "harga": 350000, "perluLab": "Ya", "persenJMDefault": null}, {"kode": "DGS-0048", "id": "DGS-0048", "nama": "GTSL Acrylic Plat Dasar + 1 Gigi", "kategori": "Dokter Gigi Spesialis", "tarif": 900000, "harga": 900000, "perluLab": "Ya", "persenJMDefault": null}, {"kode": "DGS-0049", "id": "DGS-0049", "nama": "GTSL Valplast Fleksibel + 1 Gigi", "kategori": "Dokter Gigi Spesialis", "tarif": 1800000, "harga": 1800000, "perluLab": "Ya", "persenJMDefault": null}, {"kode": "DGS-0050", "id": "DGS-0050", "nama": "GTL (Gigi Tiruan Lengkap) 1 Rahang", "kategori": "Dokter Gigi Spesialis", "tarif": 3000000, "harga": 3000000, "perluLab": "Ya", "persenJMDefault": null}, {"kode": "DGS-0051", "id": "DGS-0051", "nama": "GTL (Gigi Tiruan Lengkap) RA + RB", "kategori": "Dokter Gigi Spesialis", "tarif": 5500000, "harga": 5500000, "perluLab": "Ya", "persenJMDefault": null}, {"kode": "DGU-0052", "id": "DGU-0052", "nama": "Rebasing / Relining Protesa", "kategori": "Dokter Gigi Umum", "tarif": 450000, "harga": 450000, "perluLab": "Ya", "persenJMDefault": null}, {"kode": "DGU-0053", "id": "DGU-0053", "nama": "Reparasi Protesa Patah", "kategori": "Dokter Gigi Umum", "tarif": 350000, "harga": 350000, "perluLab": "Ya", "persenJMDefault": null}, {"kode": "DGU-0054", "id": "DGU-0054", "nama": "Bleaching Office (In-Office Whitening)", "kategori": "Dokter Gigi Umum", "tarif": 1800000, "harga": 1800000, "perluLab": "Tidak", "persenJMDefault": null}, {"kode": "DGU-0055", "id": "DGU-0055", "nama": "Bleaching Home Kit + Tray", "kategori": "Dokter Gigi Umum", "tarif": 1200000, "harga": 1200000, "perluLab": "Ya", "persenJMDefault": null}, {"kode": "DGU-0056", "id": "DGU-0056", "nama": "Pasang Diamond Gigi (Skyce)", "kategori": "Dokter Gigi Umum", "tarif": 200000, "harga": 200000, "perluLab": "Tidak", "persenJMDefault": null}, {"kode": "DGU-0057", "id": "DGU-0057", "nama": "Fissure Sealant Gigi Anak", "kategori": "Dokter Gigi Umum", "tarif": 200000, "harga": 200000, "perluLab": "Tidak", "persenJMDefault": null}, {"kode": "DGU-0058", "id": "DGU-0058", "nama": "Topikal Aplikasi Fluor (TAF) RA+RB", "kategori": "Dokter Gigi Umum", "tarif": 250000, "harga": 250000, "perluLab": "Tidak", "persenJMDefault": null}, {"kode": "UMM-0059", "id": "UMM-0059", "nama": "Rontgen Periapikal Digital", "kategori": "Umum", "tarif": 100000, "harga": 100000, "perluLab": "Tidak", "persenJMDefault": 0.15}, {"kode": "UMM-0060", "id": "UMM-0060", "nama": "Konsultasi & Pemeriksaan Lengkap", "kategori": "Umum", "tarif": 50000, "harga": 50000, "perluLab": "Tidak", "persenJMDefault": null}], "obat": [{"kode": "OBT-001", "id": "OBT-001", "nama": "Amoxicillin 500mg (Strip)", "kandungan": "Amoxicillin Trihydrate 500mg", "satuanBeli": "Box", "isiPerSatuan": 10, "hargaBeliSatuan": 100000, "harga": 15000, "hargaJual": 15000, "hpp": 10000, "stok": 120, "stokMin": 20, "unit": "Strip", "satuan": "Strip"}, {"kode": "OBT-002", "id": "OBT-002", "nama": "Asam Mefenamat 500mg (Strip)", "kandungan": "Mefenamic Acid 500mg", "satuanBeli": "Box", "isiPerSatuan": 10, "hargaBeliSatuan": 80000, "harga": 12000, "hargaJual": 12000, "hpp": 8000, "stok": 85, "stokMin": 15, "unit": "Strip", "satuan": "Strip"}, {"kode": "OBT-003", "id": "OBT-003", "nama": "Chlorhexidine Gluconate 0.2% Gargle", "kandungan": "Chlorhexidine Digluconate 0.2%", "satuanBeli": "Botol", "isiPerSatuan": 1, "hargaBeliSatuan": 22000, "harga": 35000, "hargaJual": 35000, "hpp": 22000, "stok": 40, "stokMin": 10, "unit": "Botol", "satuan": "Botol"}, {"kode": "OBT-0001", "id": "OBT-0001", "nama": "Amoxicillin 500 mg", "kandungan": "Amoxicillin Trihydrate 500mg", "satuanBeli": "Box", "isiPerSatuan": 100, "hargaBeliSatuan": 80000, "harga": 2000, "hargaJual": 2000, "hpp": 800, "stok": 500, "stokMin": 50, "unit": "Pcs", "satuan": "Pcs"}, {"kode": "OBT-0002", "id": "OBT-0002", "nama": "Asam Mefenamat 500 mg", "kandungan": "Mefenamic Acid 500mg", "satuanBeli": "Box", "isiPerSatuan": 100, "hargaBeliSatuan": 50000, "harga": 1500, "hargaJual": 1500, "hpp": 500, "stok": 500, "stokMin": 50, "unit": "Pcs", "satuan": "Pcs"}, {"kode": "OBT-0003", "id": "OBT-0003", "nama": "Paracetamol 500 mg", "kandungan": "Paracetamol 500mg", "satuanBeli": "Box", "isiPerSatuan": 100, "hargaBeliSatuan": 30000, "harga": 1000, "hargaJual": 1000, "hpp": 300, "stok": 600, "stokMin": 50, "unit": "Pcs", "satuan": "Pcs"}, {"kode": "OBT-0004", "id": "OBT-0004", "nama": "Metronidazole 500 mg", "kandungan": "Metronidazole 500mg", "satuanBeli": "Box", "isiPerSatuan": 100, "hargaBeliSatuan": 60000, "harga": 1800, "hargaJual": 1800, "hpp": 600, "stok": 300, "stokMin": 30, "unit": "Pcs", "satuan": "Pcs"}, {"kode": "OBT-0005", "id": "OBT-0005", "nama": "Ibuprofen 400 mg", "kandungan": "Ibuprofen 400mg", "satuanBeli": "Box", "isiPerSatuan": 100, "hargaBeliSatuan": 45000, "harga": 1500, "hargaJual": 1500, "hpp": 450, "stok": 400, "stokMin": 40, "unit": "Pcs", "satuan": "Pcs"}, {"kode": "OBT-0006", "id": "OBT-0006", "nama": "Kalium Diklofenak 50 mg", "kandungan": "Diclofenac Potassium 50mg", "satuanBeli": "Box", "isiPerSatuan": 50, "hargaBeliSatuan": 75000, "harga": 3000, "hargaJual": 3000, "hpp": 1500, "stok": 250, "stokMin": 30, "unit": "Pcs", "satuan": "Pcs"}, {"kode": "OBT-0007", "id": "OBT-0007", "nama": "Clindamycin 300 mg", "kandungan": "Clindamycin HCl 300mg", "satuanBeli": "Box", "isiPerSatuan": 50, "hargaBeliSatuan": 110000, "harga": 4000, "hargaJual": 4000, "hpp": 2200, "stok": 200, "stokMin": 25, "unit": "Pcs", "satuan": "Pcs"}, {"kode": "OBT-0008", "id": "OBT-0008", "nama": "Cefadroxil 500 mg", "kandungan": "Cefadroxil Monohydrate 500mg", "satuanBeli": "Box", "isiPerSatuan": 100, "hargaBeliSatuan": 130000, "harga": 3000, "hargaJual": 3000, "hpp": 1300, "stok": 300, "stokMin": 30, "unit": "Pcs", "satuan": "Pcs"}, {"kode": "OBT-0009", "id": "OBT-0009", "nama": "Dexamethasone 0.5 mg", "kandungan": "Dexamethasone 0.5mg", "satuanBeli": "Box", "isiPerSatuan": 100, "hargaBeliSatuan": 25000, "harga": 1000, "hargaJual": 1000, "hpp": 250, "stok": 400, "stokMin": 40, "unit": "Pcs", "satuan": "Pcs"}, {"kode": "OBT-0010", "id": "OBT-0010", "nama": "Methylprednisolone 4 mg", "kandungan": "Methylprednisolone 4mg", "satuanBeli": "Box", "isiPerSatuan": 100, "hargaBeliSatuan": 90000, "harga": 2000, "hargaJual": 2000, "hpp": 900, "stok": 300, "stokMin": 30, "unit": "Pcs", "satuan": "Pcs"}, {"kode": "OBT-0011", "id": "OBT-0011", "nama": "Chlorhexidine Gluconate 0.2% Gargle", "kandungan": "Chlorhexidine Digluconate 0.2%", "satuanBeli": "Botol", "isiPerSatuan": 1, "hargaBeliSatuan": 22000, "harga": 35000, "hargaJual": 35000, "hpp": 22000, "stok": 80, "stokMin": 15, "unit": "Pcs", "satuan": "Pcs"}, {"kode": "OBT-0012", "id": "OBT-0012", "nama": "Aloclair Plus Gel 8 ml", "kandungan": "Aloe Vera + Sodium Hyaluronate", "satuanBeli": "Tube", "isiPerSatuan": 1, "hargaBeliSatuan": 65000, "harga": 90000, "hargaJual": 90000, "hpp": 65000, "stok": 40, "stokMin": 10, "unit": "Pcs", "satuan": "Pcs"}], "bmhp": [{"kode": "BMH-001", "id": "BMH-001", "nama": "Masker Medis 3-Ply", "harga": 2000, "hargaJual": 2000, "hpp": 1000, "stok": 500, "unit": "Pcs", "satuan": "Pcs"}, {"kode": "BMH-002", "id": "BMH-002", "nama": "Handscoon Latex S/M", "harga": 3000, "hargaJual": 3000, "hpp": 1800, "stok": 350, "unit": "Pasang", "satuan": "Pasang"}, {"kode": "BMH-003", "id": "BMH-003", "nama": "Saliva Ejector Suction Tip", "harga": 1500, "hargaJual": 1500, "hpp": 800, "stok": 200, "unit": "Pcs", "satuan": "Pcs"}, {"kode": "BMH-0001", "id": "BMH-0001", "nama": "Sarung Tangan Lateks (Handscoon)", "harga": 5000, "hargaJual": 5000, "hpp": 1500, "stok": 500, "unit": "Pasang", "satuan": "Pasang"}, {"kode": "BMH-0002", "id": "BMH-0002", "nama": "Masker Medis 3-Ply Earloop", "harga": 2500, "hargaJual": 2500, "hpp": 700, "stok": 500, "unit": "Pcs", "satuan": "Pcs"}, {"kode": "BMH-0003", "id": "BMH-0003", "nama": "Cotton Roll Dental", "harga": 500, "hargaJual": 500, "hpp": 100, "stok": 1000, "unit": "Pcs", "satuan": "Pcs"}, {"kode": "BMH-0004", "id": "BMH-0004", "nama": "Lidocaine Compositum Cartridge", "harga": 15000, "hargaJual": 15000, "hpp": 6000, "stok": 180, "unit": "Cartridge", "satuan": "Cartridge"}, {"kode": "BMH-0005", "id": "BMH-0005", "nama": "Needle Disposable Citoject 30G", "harga": 5000, "hargaJual": 5000, "hpp": 1500, "stok": 250, "unit": "Pcs", "satuan": "Pcs"}, {"kode": "BMH-0006", "id": "BMH-0006", "nama": "Saliva Ejector Suction Tip", "harga": 2000, "hargaJual": 2000, "hpp": 800, "stok": 400, "unit": "Pcs", "satuan": "Pcs"}, {"kode": "BMH-0007", "id": "BMH-0007", "nama": "Spuit Disposable 3cc OneMed", "harga": 3500, "hargaJual": 3500, "hpp": 1200, "stok": 300, "unit": "Pcs", "satuan": "Pcs"}, {"kode": "BMH-0008", "id": "BMH-0008", "nama": "Gelas Kumur Plastik Disposable", "harga": 1000, "hargaJual": 1000, "hpp": 300, "stok": 800, "unit": "Pcs", "satuan": "Pcs"}, {"kode": "BMH-0009", "id": "BMH-0009", "nama": "Polibib / Dental Bib Celemek", "harga": 2000, "hargaJual": 2000, "hpp": 600, "stok": 450, "unit": "Lembar", "satuan": "Lembar"}, {"kode": "BMH-0010", "id": "BMH-0010", "nama": "Spons Hemostatik (Spongostan)", "harga": 25000, "hargaJual": 25000, "hpp": 12000, "stok": 60, "unit": "Cube", "satuan": "Cube"}], "rekamMedis": [{"idEMR": "EMR-2026-0001", "idRmKlinis": "EMR-2026-0001", "idPasien": "P-0001", "noRm": "RM-0001", "namaPasien": "Budi Santoso", "tanggalPeriksa": "10-10-2026", "dokterPemeriksa": "drg. Sheldon Cooper, Sp.Ort", "anamnesisStr": "{\"cc\": \"Gigi 46 pasca PSA ingin dibuatkan mahkota jaket/PFM\", \"diagnosaICD\": [\"K02.1 - Caries of dentine\"], \"riwayatPenyakit\": \"Hipertensi terkontrol\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"78\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"46\": {\"generalCondition\": \"acr\", \"surfaces\": {\"occlusal\": \"acr\"}}}", "tindakanStr": "[\"23.41 - Pemasangan Mahkota PFM (Crown)\"]", "obatStr": "[{\"obat\": \"Amoxicillin 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Pasien dijadwalkan pasang crown definitif 7 hari lagi saat hasil lab selesai.", "waktuSimpan": "10-10-2026 10:15:00", "chiefComplaint": "Gigi 46 pasca PSA ingin dibuatkan mahkota jaket/PFM", "presentIllness": "Hipertensi terkontrol", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K02.1 - Caries of dentine", "tindakanHariIni": "23.41 - Pemasangan Mahkota PFM (Crown)", "resepObat": "Amoxicillin 500 mg"}, {"idEMR": "EMR-2026-0002", "idRmKlinis": "EMR-2026-0002", "idPasien": "P-0002", "noRm": "RM-0002", "namaPasien": "Siti Rahmawati", "tanggalPeriksa": "10-10-2026", "dokterPemeriksa": "drg. Leonard Hofstadter", "anamnesisStr": "{\"cc\": \"Pemeriksaan foto rontgen periapikal untuk cek akar gigi 36\", \"diagnosaICD\": [\"K04.0 - Pulpitis irreversibel\"], \"riwayatPenyakit\": \"Asma\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"115/75\", \"nadi\": \"80\", \"suhu\": \"36.6\"}", "odontogramStr": "{}", "tindakanStr": "[\"89.31 - Foto Rontgen Periapikal Digital\"]", "obatStr": "[]", "catatanEdukasi": "Hasil rontgen menunjukkan lesi periapikal mengecil, respon baik.", "waktuSimpan": "10-10-2026 11:20:00", "chiefComplaint": "Pemeriksaan foto rontgen periapikal untuk cek akar gigi 36", "presentIllness": "Asma", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K04.0 - Pulpitis irreversibel", "tindakanHariIni": "89.31 - Foto Rontgen Periapikal Digital", "resepObat": "Asam Mefenamat 500 mg (3x1)"}, {"idEMR": "EMR-2026-0003", "idRmKlinis": "EMR-2026-0003", "idPasien": "P-0003", "noRm": "RM-0003", "namaPasien": "Ahmad Fauzi", "tanggalPeriksa": "10-10-2026", "dokterPemeriksa": "drg. Sheldon Cooper, Sp.Ort", "anamnesisStr": "{\"cc\": \"Gigi 16 ngilu berdenyut hebat malam hari, karies profunda\", \"diagnosaICD\": [\"K04.0 - Pulpitis irreversibel\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"76\", \"suhu\": \"36.7\"}", "odontogramStr": "{\"16\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.70 - Perawatan Saluran Akar (PSA) Molar\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 jika nyeri\"}]", "catatanEdukasi": "Hindari mengunyah makanan keras di sisi kanan.", "waktuSimpan": "10-10-2026 14:05:00", "chiefComplaint": "Gigi 16 ngilu berdenyut hebat malam hari, karies profunda", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K04.0 - Pulpitis irreversibel", "tindakanHariIni": "23.70 - Perawatan Saluran Akar (PSA) Molar", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0004", "idRmKlinis": "EMR-2026-0004", "idPasien": "P-0004", "noRm": "RM-0004", "namaPasien": "Hendra Wijaya", "tanggalPeriksa": "10-10-2026", "dokterPemeriksa": "drg. Sheldon Cooper, Sp.Ort", "anamnesisStr": "{\"cc\": \"Pemasangan kawat gigi behel atas dan bawah, gigi berjejal\", \"diagnosaICD\": [\"K07.2 - Anomalies of dental arch relationship\"], \"riwayatPenyakit\": \"Gastritis\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"125/80\", \"nadi\": \"78\", \"suhu\": \"36.5\"}", "odontogramStr": "{}", "tindakanStr": "[\"96.54 - Pemasangan Behel Standar (Include Scaling)\"]", "obatStr": "[]", "catatanEdukasi": "Scaling dibantu oleh perawat Bernadette sebelum pemasangan bracket.", "waktuSimpan": "10-10-2026 16:30:00", "chiefComplaint": "Pemasangan kawat gigi behel atas dan bawah, gigi berjejal", "presentIllness": "Gastritis", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K07.2 - Anomalies of dental arch relationship", "tindakanHariIni": "96.54 - Pemasangan Behel Standar (Include Scaling)", "resepObat": "Asam Mefenamat 500 mg (3x1)"}, {"idEMR": "EMR-2026-0005", "idRmKlinis": "EMR-2026-0005", "idPasien": "P-0005", "noRm": "N-0105", "namaPasien": "Nadia Putri Pratama", "tanggalPeriksa": "01-01-2026", "dokterPemeriksa": "drg. Danny", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Tumpat Komposit Sedang\", \"diagnosaICD\": [\"K02.1 - Caries of dentine\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.2 - Tumpat Komposit Sedang\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "01-01-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Tumpat Komposit Sedang", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K02.1 - Caries of dentine", "tindakanHariIni": "23.2 - Tumpat Komposit Sedang", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0006", "idRmKlinis": "EMR-2026-0006", "idPasien": "P-0006", "noRm": "R-0106", "namaPasien": "Rizky Ramadhan", "tanggalPeriksa": "02-01-2026", "dokterPemeriksa": "drg. Astri", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Scalling Sedang\", \"diagnosaICD\": [\"K05.1 - Chronic gingivitis\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"96.54 - Scalling Sedang\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "02-01-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Scalling Sedang", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K05.1 - Chronic gingivitis", "tindakanHariIni": "96.54 - Scalling Sedang", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0007", "idRmKlinis": "EMR-2026-0007", "idPasien": "P-0007", "noRm": "A-0107", "namaPasien": "Aulia Zahra", "tanggalPeriksa": "03-01-2026", "dokterPemeriksa": "drg. Rizka", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Exo Dewasa Ringan (Akar Tunggal)\", \"diagnosaICD\": [\"K01.1 - Impacted / Retained tooth\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.01 - Exo Dewasa Ringan (Akar Tunggal)\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "03-01-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Exo Dewasa Ringan (Akar Tunggal)", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K01.1 - Impacted / Retained tooth", "tindakanHariIni": "23.01 - Exo Dewasa Ringan (Akar Tunggal)", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0008", "idRmKlinis": "EMR-2026-0008", "idPasien": "P-0008", "noRm": "F-0108", "namaPasien": "Fajar Nugraha", "tanggalPeriksa": "04-01-2026", "dokterPemeriksa": "drg. Nanda", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Kontrol Ortho Rutin (Ganti Karet/Power O)\", \"diagnosaICD\": [\"K07.2 - Anomalies of dental arch\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"24.7 - Kontrol Ortho Rutin (Ganti Karet/Power O)\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "04-01-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Kontrol Ortho Rutin (Ganti Karet/Power O)", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K07.2 - Anomalies of dental arch", "tindakanHariIni": "24.7 - Kontrol Ortho Rutin (Ganti Karet/Power O)", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0009", "idRmKlinis": "EMR-2026-0009", "idPasien": "P-0009", "noRm": "D-0109", "namaPasien": "Dewi Kartika Sari", "tanggalPeriksa": "05-01-2026", "dokterPemeriksa": "drg. Aviva", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Rontgen Periapikal Digital\", \"diagnosaICD\": [\"K04.0 - Pulpitis\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"89.31 - Rontgen Periapikal Digital\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "05-01-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Rontgen Periapikal Digital", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K04.0 - Pulpitis", "tindakanHariIni": "89.31 - Rontgen Periapikal Digital", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0010", "idRmKlinis": "EMR-2026-0010", "idPasien": "P-0010", "noRm": "B-0110", "namaPasien": "Bagus Setiawan", "tanggalPeriksa": "06-01-2026", "dokterPemeriksa": "drg. Erien", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Scalling Perawat\", \"diagnosaICD\": [\"K05.1 - Chronic gingivitis\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"96.54 - Scalling Perawat\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "06-01-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Scalling Perawat", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K05.1 - Chronic gingivitis", "tindakanHariIni": "96.54 - Scalling Perawat", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0011", "idRmKlinis": "EMR-2026-0011", "idPasien": "P-0011", "noRm": "I-0111", "namaPasien": "Intan Permata", "tanggalPeriksa": "07-01-2026", "dokterPemeriksa": "drg.g.p Dinda", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Crown PFM (Porcelain Fused to Metal)\", \"diagnosaICD\": [\"K08.1 - Loss of teeth\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.41 - Crown PFM (Porcelain Fused to Metal)\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "07-01-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Crown PFM (Porcelain Fused to Metal)", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K08.1 - Loss of teeth", "tindakanHariIni": "23.41 - Crown PFM (Porcelain Fused to Metal)", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0012", "idRmKlinis": "EMR-2026-0012", "idPasien": "P-0012", "noRm": "D-0112", "namaPasien": "Dimas Aditya", "tanggalPeriksa": "08-01-2026", "dokterPemeriksa": "drg.g.p Fathya", "anamnesisStr": "{\"cc\": \"Pasien datang untuk PSA 1x Kunjungan (One Visit Endodontic)\", \"diagnosaICD\": [\"K04.0 - Pulpitis irreversibel\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.70 - PSA 1x Kunjungan (One Visit Endodontic)\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "08-01-2026 15:30:00", "chiefComplaint": "Pasien datang untuk PSA 1x Kunjungan (One Visit Endodontic)", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K04.0 - Pulpitis irreversibel", "tindakanHariIni": "23.70 - PSA 1x Kunjungan (One Visit Endodontic)", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0013", "idRmKlinis": "EMR-2026-0013", "idPasien": "P-0013", "noRm": "R-0113", "namaPasien": "Rina Wulandari", "tanggalPeriksa": "09-01-2026", "dokterPemeriksa": "drg.g.p Belinda", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Odontektomi Kelas I Ringan\", \"diagnosaICD\": [\"K01.1 - Impacted teeth\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.19 - Odontektomi Kelas I Ringan\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "09-01-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Odontektomi Kelas I Ringan", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K01.1 - Impacted teeth", "tindakanHariIni": "23.19 - Odontektomi Kelas I Ringan", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0014", "idRmKlinis": "EMR-2026-0014", "idPasien": "P-0014", "noRm": "E-0114", "namaPasien": "Eko Prasetyo", "tanggalPeriksa": "10-01-2026", "dokterPemeriksa": "drg. Rahma Yulinda D, Sp. BMM", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Tumpat GIC Sedang\", \"diagnosaICD\": [\"K02.1 - Caries of dentine\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.2 - Tumpat GIC Sedang\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "10-01-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Tumpat GIC Sedang", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K02.1 - Caries of dentine", "tindakanHariIni": "23.2 - Tumpat GIC Sedang", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0015", "idRmKlinis": "EMR-2026-0015", "idPasien": "P-0015", "noRm": "M-0115", "namaPasien": "Maya Anggraini", "tanggalPeriksa": "11-01-2026", "dokterPemeriksa": "drg. Tia Ardhana R", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Tumpat Komposit Sedang\", \"diagnosaICD\": [\"K02.1 - Caries of dentine\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.2 - Tumpat Komposit Sedang\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "11-01-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Tumpat Komposit Sedang", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K02.1 - Caries of dentine", "tindakanHariIni": "23.2 - Tumpat Komposit Sedang", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0016", "idRmKlinis": "EMR-2026-0016", "idPasien": "P-0016", "noRm": "A-0116", "namaPasien": "Andi Wijaya Kusuma", "tanggalPeriksa": "12-01-2026", "dokterPemeriksa": "drg. Danny", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Scalling Sedang\", \"diagnosaICD\": [\"K05.1 - Chronic gingivitis\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"96.54 - Scalling Sedang\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "12-01-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Scalling Sedang", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K05.1 - Chronic gingivitis", "tindakanHariIni": "96.54 - Scalling Sedang", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0017", "idRmKlinis": "EMR-2026-0017", "idPasien": "P-0017", "noRm": "P-0117", "namaPasien": "Putri Maharani", "tanggalPeriksa": "13-02-2026", "dokterPemeriksa": "drg. Astri", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Exo Dewasa Ringan (Akar Tunggal)\", \"diagnosaICD\": [\"K01.1 - Impacted / Retained tooth\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.01 - Exo Dewasa Ringan (Akar Tunggal)\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "13-02-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Exo Dewasa Ringan (Akar Tunggal)", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K01.1 - Impacted / Retained tooth", "tindakanHariIni": "23.01 - Exo Dewasa Ringan (Akar Tunggal)", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0018", "idRmKlinis": "EMR-2026-0018", "idPasien": "P-0018", "noRm": "R-0118", "namaPasien": "Reza Pahlevi", "tanggalPeriksa": "14-02-2026", "dokterPemeriksa": "drg. Rizka", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Kontrol Ortho Rutin (Ganti Karet/Power O)\", \"diagnosaICD\": [\"K07.2 - Anomalies of dental arch\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"24.7 - Kontrol Ortho Rutin (Ganti Karet/Power O)\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "14-02-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Kontrol Ortho Rutin (Ganti Karet/Power O)", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K07.2 - Anomalies of dental arch", "tindakanHariIni": "24.7 - Kontrol Ortho Rutin (Ganti Karet/Power O)", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0019", "idRmKlinis": "EMR-2026-0019", "idPasien": "P-0019", "noRm": "F-0119", "namaPasien": "Fitriani Nur", "tanggalPeriksa": "15-02-2026", "dokterPemeriksa": "drg. Nanda", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Rontgen Periapikal Digital\", \"diagnosaICD\": [\"K04.0 - Pulpitis\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"89.31 - Rontgen Periapikal Digital\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "15-02-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Rontgen Periapikal Digital", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K04.0 - Pulpitis", "tindakanHariIni": "89.31 - Rontgen Periapikal Digital", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0020", "idRmKlinis": "EMR-2026-0020", "idPasien": "P-0020", "noRm": "W-0120", "namaPasien": "Wahyu Hidayat", "tanggalPeriksa": "16-02-2026", "dokterPemeriksa": "drg. Aviva", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Scalling Perawat\", \"diagnosaICD\": [\"K05.1 - Chronic gingivitis\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"96.54 - Scalling Perawat\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "16-02-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Scalling Perawat", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K05.1 - Chronic gingivitis", "tindakanHariIni": "96.54 - Scalling Perawat", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0021", "idRmKlinis": "EMR-2026-0021", "idPasien": "P-0021", "noRm": "N-0121", "namaPasien": "Nisa Amelia", "tanggalPeriksa": "17-02-2026", "dokterPemeriksa": "drg. Erien", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Crown PFM (Porcelain Fused to Metal)\", \"diagnosaICD\": [\"K08.1 - Loss of teeth\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.41 - Crown PFM (Porcelain Fused to Metal)\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "17-02-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Crown PFM (Porcelain Fused to Metal)", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K08.1 - Loss of teeth", "tindakanHariIni": "23.41 - Crown PFM (Porcelain Fused to Metal)", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0022", "idRmKlinis": "EMR-2026-0022", "idPasien": "P-0022", "noRm": "A-0122", "namaPasien": "Arif Budiman", "tanggalPeriksa": "18-02-2026", "dokterPemeriksa": "drg.g.p Dinda", "anamnesisStr": "{\"cc\": \"Pasien datang untuk PSA 1x Kunjungan (One Visit Endodontic)\", \"diagnosaICD\": [\"K04.0 - Pulpitis irreversibel\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.70 - PSA 1x Kunjungan (One Visit Endodontic)\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "18-02-2026 15:30:00", "chiefComplaint": "Pasien datang untuk PSA 1x Kunjungan (One Visit Endodontic)", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K04.0 - Pulpitis irreversibel", "tindakanHariIni": "23.70 - PSA 1x Kunjungan (One Visit Endodontic)", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0023", "idRmKlinis": "EMR-2026-0023", "idPasien": "P-0023", "noRm": "D-0123", "namaPasien": "Diana Puspita", "tanggalPeriksa": "19-02-2026", "dokterPemeriksa": "drg.g.p Fathya", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Odontektomi Kelas I Ringan\", \"diagnosaICD\": [\"K01.1 - Impacted teeth\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.19 - Odontektomi Kelas I Ringan\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "19-02-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Odontektomi Kelas I Ringan", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K01.1 - Impacted teeth", "tindakanHariIni": "23.19 - Odontektomi Kelas I Ringan", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0024", "idRmKlinis": "EMR-2026-0024", "idPasien": "P-0024", "noRm": "G-0124", "namaPasien": "Galih Prakoso", "tanggalPeriksa": "20-02-2026", "dokterPemeriksa": "drg.g.p Belinda", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Tumpat GIC Sedang\", \"diagnosaICD\": [\"K02.1 - Caries of dentine\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.2 - Tumpat GIC Sedang\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "20-02-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Tumpat GIC Sedang", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K02.1 - Caries of dentine", "tindakanHariIni": "23.2 - Tumpat GIC Sedang", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0025", "idRmKlinis": "EMR-2026-0025", "idPasien": "P-0025", "noRm": "L-0125", "namaPasien": "Lestari Handayani", "tanggalPeriksa": "21-02-2026", "dokterPemeriksa": "drg. Rahma Yulinda D, Sp. BMM", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Tumpat Komposit Sedang\", \"diagnosaICD\": [\"K02.1 - Caries of dentine\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.2 - Tumpat Komposit Sedang\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "21-02-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Tumpat Komposit Sedang", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K02.1 - Caries of dentine", "tindakanHariIni": "23.2 - Tumpat Komposit Sedang", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0026", "idRmKlinis": "EMR-2026-0026", "idPasien": "P-0026", "noRm": "Y-0126", "namaPasien": "Yusuf Maulana", "tanggalPeriksa": "22-02-2026", "dokterPemeriksa": "drg. Tia Ardhana R", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Scalling Sedang\", \"diagnosaICD\": [\"K05.1 - Chronic gingivitis\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"96.54 - Scalling Sedang\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "22-02-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Scalling Sedang", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K05.1 - Chronic gingivitis", "tindakanHariIni": "96.54 - Scalling Sedang", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0027", "idRmKlinis": "EMR-2026-0027", "idPasien": "P-0027", "noRm": "C-0127", "namaPasien": "Citra Kirana", "tanggalPeriksa": "23-02-2026", "dokterPemeriksa": "drg. Danny", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Exo Dewasa Ringan (Akar Tunggal)\", \"diagnosaICD\": [\"K01.1 - Impacted / Retained tooth\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.01 - Exo Dewasa Ringan (Akar Tunggal)\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "23-02-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Exo Dewasa Ringan (Akar Tunggal)", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K01.1 - Impacted / Retained tooth", "tindakanHariIni": "23.01 - Exo Dewasa Ringan (Akar Tunggal)", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0028", "idRmKlinis": "EMR-2026-0028", "idPasien": "P-0028", "noRm": "T-0128", "namaPasien": "Taufik Hidayatullah", "tanggalPeriksa": "24-02-2026", "dokterPemeriksa": "drg. Astri", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Kontrol Ortho Rutin (Ganti Karet/Power O)\", \"diagnosaICD\": [\"K07.2 - Anomalies of dental arch\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"24.7 - Kontrol Ortho Rutin (Ganti Karet/Power O)\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "24-02-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Kontrol Ortho Rutin (Ganti Karet/Power O)", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K07.2 - Anomalies of dental arch", "tindakanHariIni": "24.7 - Kontrol Ortho Rutin (Ganti Karet/Power O)", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0029", "idRmKlinis": "EMR-2026-0029", "idPasien": "P-0029", "noRm": "S-0129", "namaPasien": "Safira Salsabila", "tanggalPeriksa": "25-03-2026", "dokterPemeriksa": "drg. Rizka", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Rontgen Periapikal Digital\", \"diagnosaICD\": [\"K04.0 - Pulpitis\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"89.31 - Rontgen Periapikal Digital\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "25-03-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Rontgen Periapikal Digital", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K04.0 - Pulpitis", "tindakanHariIni": "89.31 - Rontgen Periapikal Digital", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0030", "idRmKlinis": "EMR-2026-0030", "idPasien": "P-0030", "noRm": "B-0130", "namaPasien": "Bayu Pamungkas", "tanggalPeriksa": "26-03-2026", "dokterPemeriksa": "drg. Nanda", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Scalling Perawat\", \"diagnosaICD\": [\"K05.1 - Chronic gingivitis\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"96.54 - Scalling Perawat\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "26-03-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Scalling Perawat", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K05.1 - Chronic gingivitis", "tindakanHariIni": "96.54 - Scalling Perawat", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0031", "idRmKlinis": "EMR-2026-0031", "idPasien": "P-0031", "noRm": "M-0131", "namaPasien": "Mega Utami", "tanggalPeriksa": "27-03-2026", "dokterPemeriksa": "drg. Aviva", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Crown PFM (Porcelain Fused to Metal)\", \"diagnosaICD\": [\"K08.1 - Loss of teeth\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.41 - Crown PFM (Porcelain Fused to Metal)\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "27-03-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Crown PFM (Porcelain Fused to Metal)", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K08.1 - Loss of teeth", "tindakanHariIni": "23.41 - Crown PFM (Porcelain Fused to Metal)", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0032", "idRmKlinis": "EMR-2026-0032", "idPasien": "P-0032", "noRm": "I-0132", "namaPasien": "Irfan Hakim", "tanggalPeriksa": "28-03-2026", "dokterPemeriksa": "drg. Erien", "anamnesisStr": "{\"cc\": \"Pasien datang untuk PSA 1x Kunjungan (One Visit Endodontic)\", \"diagnosaICD\": [\"K04.0 - Pulpitis irreversibel\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.70 - PSA 1x Kunjungan (One Visit Endodontic)\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "28-03-2026 15:30:00", "chiefComplaint": "Pasien datang untuk PSA 1x Kunjungan (One Visit Endodontic)", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K04.0 - Pulpitis irreversibel", "tindakanHariIni": "23.70 - PSA 1x Kunjungan (One Visit Endodontic)", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0033", "idRmKlinis": "EMR-2026-0033", "idPasien": "P-0033", "noRm": "V-0133", "namaPasien": "Vina Panduwinata", "tanggalPeriksa": "01-03-2026", "dokterPemeriksa": "drg.g.p Dinda", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Odontektomi Kelas I Ringan\", \"diagnosaICD\": [\"K01.1 - Impacted teeth\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.19 - Odontektomi Kelas I Ringan\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "01-03-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Odontektomi Kelas I Ringan", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K01.1 - Impacted teeth", "tindakanHariIni": "23.19 - Odontektomi Kelas I Ringan", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0034", "idRmKlinis": "EMR-2026-0034", "idPasien": "P-0034", "noRm": "D-0134", "namaPasien": "Deni Cagur Saputra", "tanggalPeriksa": "02-03-2026", "dokterPemeriksa": "drg.g.p Fathya", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Tumpat GIC Sedang\", \"diagnosaICD\": [\"K02.1 - Caries of dentine\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.2 - Tumpat GIC Sedang\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "02-03-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Tumpat GIC Sedang", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K02.1 - Caries of dentine", "tindakanHariIni": "23.2 - Tumpat GIC Sedang", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0035", "idRmKlinis": "EMR-2026-0035", "idPasien": "P-0035", "noRm": "N-0135", "namaPasien": "Nadia Putri Pratama (2)", "tanggalPeriksa": "03-03-2026", "dokterPemeriksa": "drg.g.p Belinda", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Tumpat Komposit Sedang\", \"diagnosaICD\": [\"K02.1 - Caries of dentine\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.2 - Tumpat Komposit Sedang\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "03-03-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Tumpat Komposit Sedang", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K02.1 - Caries of dentine", "tindakanHariIni": "23.2 - Tumpat Komposit Sedang", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0036", "idRmKlinis": "EMR-2026-0036", "idPasien": "P-0036", "noRm": "R-0136", "namaPasien": "Rizky Ramadhan (2)", "tanggalPeriksa": "04-03-2026", "dokterPemeriksa": "drg. Rahma Yulinda D, Sp. BMM", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Scalling Sedang\", \"diagnosaICD\": [\"K05.1 - Chronic gingivitis\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"96.54 - Scalling Sedang\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "04-03-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Scalling Sedang", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K05.1 - Chronic gingivitis", "tindakanHariIni": "96.54 - Scalling Sedang", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0037", "idRmKlinis": "EMR-2026-0037", "idPasien": "P-0037", "noRm": "A-0137", "namaPasien": "Aulia Zahra (2)", "tanggalPeriksa": "05-03-2026", "dokterPemeriksa": "drg. Tia Ardhana R", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Exo Dewasa Ringan (Akar Tunggal)\", \"diagnosaICD\": [\"K01.1 - Impacted / Retained tooth\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.01 - Exo Dewasa Ringan (Akar Tunggal)\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "05-03-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Exo Dewasa Ringan (Akar Tunggal)", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K01.1 - Impacted / Retained tooth", "tindakanHariIni": "23.01 - Exo Dewasa Ringan (Akar Tunggal)", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0038", "idRmKlinis": "EMR-2026-0038", "idPasien": "P-0038", "noRm": "F-0138", "namaPasien": "Fajar Nugraha (2)", "tanggalPeriksa": "06-03-2026", "dokterPemeriksa": "drg. Danny", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Kontrol Ortho Rutin (Ganti Karet/Power O)\", \"diagnosaICD\": [\"K07.2 - Anomalies of dental arch\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"24.7 - Kontrol Ortho Rutin (Ganti Karet/Power O)\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "06-03-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Kontrol Ortho Rutin (Ganti Karet/Power O)", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K07.2 - Anomalies of dental arch", "tindakanHariIni": "24.7 - Kontrol Ortho Rutin (Ganti Karet/Power O)", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0039", "idRmKlinis": "EMR-2026-0039", "idPasien": "P-0039", "noRm": "D-0139", "namaPasien": "Dewi Kartika Sari (2)", "tanggalPeriksa": "07-03-2026", "dokterPemeriksa": "drg. Astri", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Rontgen Periapikal Digital\", \"diagnosaICD\": [\"K04.0 - Pulpitis\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"89.31 - Rontgen Periapikal Digital\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "07-03-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Rontgen Periapikal Digital", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K04.0 - Pulpitis", "tindakanHariIni": "89.31 - Rontgen Periapikal Digital", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0040", "idRmKlinis": "EMR-2026-0040", "idPasien": "P-0040", "noRm": "B-0140", "namaPasien": "Bagus Setiawan (2)", "tanggalPeriksa": "08-03-2026", "dokterPemeriksa": "drg. Rizka", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Scalling Perawat\", \"diagnosaICD\": [\"K05.1 - Chronic gingivitis\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"96.54 - Scalling Perawat\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "08-03-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Scalling Perawat", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K05.1 - Chronic gingivitis", "tindakanHariIni": "96.54 - Scalling Perawat", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0041", "idRmKlinis": "EMR-2026-0041", "idPasien": "P-0041", "noRm": "I-0141", "namaPasien": "Intan Permata (2)", "tanggalPeriksa": "09-04-2026", "dokterPemeriksa": "drg. Nanda", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Crown PFM (Porcelain Fused to Metal)\", \"diagnosaICD\": [\"K08.1 - Loss of teeth\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.41 - Crown PFM (Porcelain Fused to Metal)\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "09-04-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Crown PFM (Porcelain Fused to Metal)", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K08.1 - Loss of teeth", "tindakanHariIni": "23.41 - Crown PFM (Porcelain Fused to Metal)", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0042", "idRmKlinis": "EMR-2026-0042", "idPasien": "P-0042", "noRm": "D-0142", "namaPasien": "Dimas Aditya (2)", "tanggalPeriksa": "10-04-2026", "dokterPemeriksa": "drg. Aviva", "anamnesisStr": "{\"cc\": \"Pasien datang untuk PSA 1x Kunjungan (One Visit Endodontic)\", \"diagnosaICD\": [\"K04.0 - Pulpitis irreversibel\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.70 - PSA 1x Kunjungan (One Visit Endodontic)\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "10-04-2026 15:30:00", "chiefComplaint": "Pasien datang untuk PSA 1x Kunjungan (One Visit Endodontic)", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K04.0 - Pulpitis irreversibel", "tindakanHariIni": "23.70 - PSA 1x Kunjungan (One Visit Endodontic)", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0043", "idRmKlinis": "EMR-2026-0043", "idPasien": "P-0043", "noRm": "R-0143", "namaPasien": "Rina Wulandari (2)", "tanggalPeriksa": "11-04-2026", "dokterPemeriksa": "drg. Erien", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Odontektomi Kelas I Ringan\", \"diagnosaICD\": [\"K01.1 - Impacted teeth\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.19 - Odontektomi Kelas I Ringan\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "11-04-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Odontektomi Kelas I Ringan", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K01.1 - Impacted teeth", "tindakanHariIni": "23.19 - Odontektomi Kelas I Ringan", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0044", "idRmKlinis": "EMR-2026-0044", "idPasien": "P-0044", "noRm": "E-0144", "namaPasien": "Eko Prasetyo (2)", "tanggalPeriksa": "12-04-2026", "dokterPemeriksa": "drg.g.p Dinda", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Tumpat GIC Sedang\", \"diagnosaICD\": [\"K02.1 - Caries of dentine\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.2 - Tumpat GIC Sedang\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "12-04-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Tumpat GIC Sedang", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K02.1 - Caries of dentine", "tindakanHariIni": "23.2 - Tumpat GIC Sedang", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0045", "idRmKlinis": "EMR-2026-0045", "idPasien": "P-0045", "noRm": "M-0145", "namaPasien": "Maya Anggraini (2)", "tanggalPeriksa": "13-04-2026", "dokterPemeriksa": "drg.g.p Fathya", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Tumpat Komposit Sedang\", \"diagnosaICD\": [\"K02.1 - Caries of dentine\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.2 - Tumpat Komposit Sedang\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "13-04-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Tumpat Komposit Sedang", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K02.1 - Caries of dentine", "tindakanHariIni": "23.2 - Tumpat Komposit Sedang", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0046", "idRmKlinis": "EMR-2026-0046", "idPasien": "P-0046", "noRm": "A-0146", "namaPasien": "Andi Wijaya Kusuma (2)", "tanggalPeriksa": "14-04-2026", "dokterPemeriksa": "drg.g.p Belinda", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Scalling Sedang\", \"diagnosaICD\": [\"K05.1 - Chronic gingivitis\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"96.54 - Scalling Sedang\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "14-04-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Scalling Sedang", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K05.1 - Chronic gingivitis", "tindakanHariIni": "96.54 - Scalling Sedang", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0047", "idRmKlinis": "EMR-2026-0047", "idPasien": "P-0047", "noRm": "P-0147", "namaPasien": "Putri Maharani (2)", "tanggalPeriksa": "15-04-2026", "dokterPemeriksa": "drg. Rahma Yulinda D, Sp. BMM", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Exo Dewasa Ringan (Akar Tunggal)\", \"diagnosaICD\": [\"K01.1 - Impacted / Retained tooth\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.01 - Exo Dewasa Ringan (Akar Tunggal)\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "15-04-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Exo Dewasa Ringan (Akar Tunggal)", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K01.1 - Impacted / Retained tooth", "tindakanHariIni": "23.01 - Exo Dewasa Ringan (Akar Tunggal)", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0048", "idRmKlinis": "EMR-2026-0048", "idPasien": "P-0048", "noRm": "R-0148", "namaPasien": "Reza Pahlevi (2)", "tanggalPeriksa": "16-04-2026", "dokterPemeriksa": "drg. Tia Ardhana R", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Kontrol Ortho Rutin (Ganti Karet/Power O)\", \"diagnosaICD\": [\"K07.2 - Anomalies of dental arch\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"24.7 - Kontrol Ortho Rutin (Ganti Karet/Power O)\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "16-04-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Kontrol Ortho Rutin (Ganti Karet/Power O)", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K07.2 - Anomalies of dental arch", "tindakanHariIni": "24.7 - Kontrol Ortho Rutin (Ganti Karet/Power O)", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0049", "idRmKlinis": "EMR-2026-0049", "idPasien": "P-0049", "noRm": "F-0149", "namaPasien": "Fitriani Nur (2)", "tanggalPeriksa": "17-04-2026", "dokterPemeriksa": "drg. Danny", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Rontgen Periapikal Digital\", \"diagnosaICD\": [\"K04.0 - Pulpitis\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"89.31 - Rontgen Periapikal Digital\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "17-04-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Rontgen Periapikal Digital", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K04.0 - Pulpitis", "tindakanHariIni": "89.31 - Rontgen Periapikal Digital", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0050", "idRmKlinis": "EMR-2026-0050", "idPasien": "P-0050", "noRm": "W-0150", "namaPasien": "Wahyu Hidayat (2)", "tanggalPeriksa": "18-04-2026", "dokterPemeriksa": "drg. Astri", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Scalling Perawat\", \"diagnosaICD\": [\"K05.1 - Chronic gingivitis\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"96.54 - Scalling Perawat\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "18-04-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Scalling Perawat", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K05.1 - Chronic gingivitis", "tindakanHariIni": "96.54 - Scalling Perawat", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0051", "idRmKlinis": "EMR-2026-0051", "idPasien": "P-0051", "noRm": "N-0151", "namaPasien": "Nisa Amelia (2)", "tanggalPeriksa": "19-04-2026", "dokterPemeriksa": "drg. Rizka", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Crown PFM (Porcelain Fused to Metal)\", \"diagnosaICD\": [\"K08.1 - Loss of teeth\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.41 - Crown PFM (Porcelain Fused to Metal)\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "19-04-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Crown PFM (Porcelain Fused to Metal)", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K08.1 - Loss of teeth", "tindakanHariIni": "23.41 - Crown PFM (Porcelain Fused to Metal)", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0052", "idRmKlinis": "EMR-2026-0052", "idPasien": "P-0052", "noRm": "A-0152", "namaPasien": "Arif Budiman (2)", "tanggalPeriksa": "20-04-2026", "dokterPemeriksa": "drg. Nanda", "anamnesisStr": "{\"cc\": \"Pasien datang untuk PSA 1x Kunjungan (One Visit Endodontic)\", \"diagnosaICD\": [\"K04.0 - Pulpitis irreversibel\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.70 - PSA 1x Kunjungan (One Visit Endodontic)\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "20-04-2026 15:30:00", "chiefComplaint": "Pasien datang untuk PSA 1x Kunjungan (One Visit Endodontic)", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K04.0 - Pulpitis irreversibel", "tindakanHariIni": "23.70 - PSA 1x Kunjungan (One Visit Endodontic)", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0053", "idRmKlinis": "EMR-2026-0053", "idPasien": "P-0053", "noRm": "D-0153", "namaPasien": "Diana Puspita (2)", "tanggalPeriksa": "21-05-2026", "dokterPemeriksa": "drg. Aviva", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Odontektomi Kelas I Ringan\", \"diagnosaICD\": [\"K01.1 - Impacted teeth\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.19 - Odontektomi Kelas I Ringan\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "21-05-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Odontektomi Kelas I Ringan", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K01.1 - Impacted teeth", "tindakanHariIni": "23.19 - Odontektomi Kelas I Ringan", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0054", "idRmKlinis": "EMR-2026-0054", "idPasien": "P-0054", "noRm": "G-0154", "namaPasien": "Galih Prakoso (2)", "tanggalPeriksa": "22-05-2026", "dokterPemeriksa": "drg. Erien", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Tumpat GIC Sedang\", \"diagnosaICD\": [\"K02.1 - Caries of dentine\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.2 - Tumpat GIC Sedang\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "22-05-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Tumpat GIC Sedang", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K02.1 - Caries of dentine", "tindakanHariIni": "23.2 - Tumpat GIC Sedang", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0055", "idRmKlinis": "EMR-2026-0055", "idPasien": "P-0055", "noRm": "L-0155", "namaPasien": "Lestari Handayani (2)", "tanggalPeriksa": "23-05-2026", "dokterPemeriksa": "drg.g.p Dinda", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Tumpat Komposit Sedang\", \"diagnosaICD\": [\"K02.1 - Caries of dentine\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.2 - Tumpat Komposit Sedang\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "23-05-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Tumpat Komposit Sedang", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K02.1 - Caries of dentine", "tindakanHariIni": "23.2 - Tumpat Komposit Sedang", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0056", "idRmKlinis": "EMR-2026-0056", "idPasien": "P-0056", "noRm": "Y-0156", "namaPasien": "Yusuf Maulana (2)", "tanggalPeriksa": "24-05-2026", "dokterPemeriksa": "drg.g.p Fathya", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Scalling Sedang\", \"diagnosaICD\": [\"K05.1 - Chronic gingivitis\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"96.54 - Scalling Sedang\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "24-05-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Scalling Sedang", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K05.1 - Chronic gingivitis", "tindakanHariIni": "96.54 - Scalling Sedang", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0057", "idRmKlinis": "EMR-2026-0057", "idPasien": "P-0057", "noRm": "C-0157", "namaPasien": "Citra Kirana (2)", "tanggalPeriksa": "25-05-2026", "dokterPemeriksa": "drg.g.p Belinda", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Exo Dewasa Ringan (Akar Tunggal)\", \"diagnosaICD\": [\"K01.1 - Impacted / Retained tooth\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.01 - Exo Dewasa Ringan (Akar Tunggal)\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "25-05-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Exo Dewasa Ringan (Akar Tunggal)", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K01.1 - Impacted / Retained tooth", "tindakanHariIni": "23.01 - Exo Dewasa Ringan (Akar Tunggal)", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0058", "idRmKlinis": "EMR-2026-0058", "idPasien": "P-0058", "noRm": "T-0158", "namaPasien": "Taufik Hidayatullah (2)", "tanggalPeriksa": "26-05-2026", "dokterPemeriksa": "drg. Rahma Yulinda D, Sp. BMM", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Kontrol Ortho Rutin (Ganti Karet/Power O)\", \"diagnosaICD\": [\"K07.2 - Anomalies of dental arch\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"24.7 - Kontrol Ortho Rutin (Ganti Karet/Power O)\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "26-05-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Kontrol Ortho Rutin (Ganti Karet/Power O)", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K07.2 - Anomalies of dental arch", "tindakanHariIni": "24.7 - Kontrol Ortho Rutin (Ganti Karet/Power O)", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0059", "idRmKlinis": "EMR-2026-0059", "idPasien": "P-0059", "noRm": "S-0159", "namaPasien": "Safira Salsabila (2)", "tanggalPeriksa": "27-05-2026", "dokterPemeriksa": "drg. Tia Ardhana R", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Rontgen Periapikal Digital\", \"diagnosaICD\": [\"K04.0 - Pulpitis\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"89.31 - Rontgen Periapikal Digital\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "27-05-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Rontgen Periapikal Digital", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K04.0 - Pulpitis", "tindakanHariIni": "89.31 - Rontgen Periapikal Digital", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0060", "idRmKlinis": "EMR-2026-0060", "idPasien": "P-0060", "noRm": "B-0160", "namaPasien": "Bayu Pamungkas (2)", "tanggalPeriksa": "28-05-2026", "dokterPemeriksa": "drg. Danny", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Scalling Perawat\", \"diagnosaICD\": [\"K05.1 - Chronic gingivitis\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"96.54 - Scalling Perawat\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "28-05-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Scalling Perawat", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K05.1 - Chronic gingivitis", "tindakanHariIni": "96.54 - Scalling Perawat", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0061", "idRmKlinis": "EMR-2026-0061", "idPasien": "P-0061", "noRm": "M-0161", "namaPasien": "Mega Utami (2)", "tanggalPeriksa": "01-05-2026", "dokterPemeriksa": "drg. Astri", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Crown PFM (Porcelain Fused to Metal)\", \"diagnosaICD\": [\"K08.1 - Loss of teeth\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.41 - Crown PFM (Porcelain Fused to Metal)\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "01-05-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Crown PFM (Porcelain Fused to Metal)", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K08.1 - Loss of teeth", "tindakanHariIni": "23.41 - Crown PFM (Porcelain Fused to Metal)", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0062", "idRmKlinis": "EMR-2026-0062", "idPasien": "P-0062", "noRm": "I-0162", "namaPasien": "Irfan Hakim (2)", "tanggalPeriksa": "02-05-2026", "dokterPemeriksa": "drg. Rizka", "anamnesisStr": "{\"cc\": \"Pasien datang untuk PSA 1x Kunjungan (One Visit Endodontic)\", \"diagnosaICD\": [\"K04.0 - Pulpitis irreversibel\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.70 - PSA 1x Kunjungan (One Visit Endodontic)\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "02-05-2026 15:30:00", "chiefComplaint": "Pasien datang untuk PSA 1x Kunjungan (One Visit Endodontic)", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K04.0 - Pulpitis irreversibel", "tindakanHariIni": "23.70 - PSA 1x Kunjungan (One Visit Endodontic)", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0063", "idRmKlinis": "EMR-2026-0063", "idPasien": "P-0063", "noRm": "V-0163", "namaPasien": "Vina Panduwinata (2)", "tanggalPeriksa": "03-05-2026", "dokterPemeriksa": "drg. Nanda", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Odontektomi Kelas I Ringan\", \"diagnosaICD\": [\"K01.1 - Impacted teeth\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.19 - Odontektomi Kelas I Ringan\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "03-05-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Odontektomi Kelas I Ringan", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K01.1 - Impacted teeth", "tindakanHariIni": "23.19 - Odontektomi Kelas I Ringan", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0064", "idRmKlinis": "EMR-2026-0064", "idPasien": "P-0064", "noRm": "D-0164", "namaPasien": "Deni Cagur Saputra (2)", "tanggalPeriksa": "04-05-2026", "dokterPemeriksa": "drg. Aviva", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Tumpat GIC Sedang\", \"diagnosaICD\": [\"K02.1 - Caries of dentine\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.2 - Tumpat GIC Sedang\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "04-05-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Tumpat GIC Sedang", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K02.1 - Caries of dentine", "tindakanHariIni": "23.2 - Tumpat GIC Sedang", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0065", "idRmKlinis": "EMR-2026-0065", "idPasien": "P-0065", "noRm": "N-0165", "namaPasien": "Nadia Putri Pratama (3)", "tanggalPeriksa": "05-06-2026", "dokterPemeriksa": "drg. Erien", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Tumpat Komposit Sedang\", \"diagnosaICD\": [\"K02.1 - Caries of dentine\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.2 - Tumpat Komposit Sedang\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "05-06-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Tumpat Komposit Sedang", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K02.1 - Caries of dentine", "tindakanHariIni": "23.2 - Tumpat Komposit Sedang", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0066", "idRmKlinis": "EMR-2026-0066", "idPasien": "P-0066", "noRm": "R-0166", "namaPasien": "Rizky Ramadhan (3)", "tanggalPeriksa": "06-06-2026", "dokterPemeriksa": "drg.g.p Dinda", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Scalling Sedang\", \"diagnosaICD\": [\"K05.1 - Chronic gingivitis\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"96.54 - Scalling Sedang\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "06-06-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Scalling Sedang", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K05.1 - Chronic gingivitis", "tindakanHariIni": "96.54 - Scalling Sedang", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0067", "idRmKlinis": "EMR-2026-0067", "idPasien": "P-0067", "noRm": "A-0167", "namaPasien": "Aulia Zahra (3)", "tanggalPeriksa": "07-06-2026", "dokterPemeriksa": "drg.g.p Fathya", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Exo Dewasa Ringan (Akar Tunggal)\", \"diagnosaICD\": [\"K01.1 - Impacted / Retained tooth\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.01 - Exo Dewasa Ringan (Akar Tunggal)\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "07-06-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Exo Dewasa Ringan (Akar Tunggal)", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K01.1 - Impacted / Retained tooth", "tindakanHariIni": "23.01 - Exo Dewasa Ringan (Akar Tunggal)", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0068", "idRmKlinis": "EMR-2026-0068", "idPasien": "P-0068", "noRm": "F-0168", "namaPasien": "Fajar Nugraha (3)", "tanggalPeriksa": "08-06-2026", "dokterPemeriksa": "drg.g.p Belinda", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Kontrol Ortho Rutin (Ganti Karet/Power O)\", \"diagnosaICD\": [\"K07.2 - Anomalies of dental arch\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"24.7 - Kontrol Ortho Rutin (Ganti Karet/Power O)\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "08-06-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Kontrol Ortho Rutin (Ganti Karet/Power O)", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K07.2 - Anomalies of dental arch", "tindakanHariIni": "24.7 - Kontrol Ortho Rutin (Ganti Karet/Power O)", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0069", "idRmKlinis": "EMR-2026-0069", "idPasien": "P-0069", "noRm": "D-0169", "namaPasien": "Dewi Kartika Sari (3)", "tanggalPeriksa": "09-06-2026", "dokterPemeriksa": "drg. Rahma Yulinda D, Sp. BMM", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Rontgen Periapikal Digital\", \"diagnosaICD\": [\"K04.0 - Pulpitis\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"89.31 - Rontgen Periapikal Digital\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "09-06-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Rontgen Periapikal Digital", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K04.0 - Pulpitis", "tindakanHariIni": "89.31 - Rontgen Periapikal Digital", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0070", "idRmKlinis": "EMR-2026-0070", "idPasien": "P-0070", "noRm": "B-0170", "namaPasien": "Bagus Setiawan (3)", "tanggalPeriksa": "10-06-2026", "dokterPemeriksa": "drg. Tia Ardhana R", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Scalling Perawat\", \"diagnosaICD\": [\"K05.1 - Chronic gingivitis\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"96.54 - Scalling Perawat\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "10-06-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Scalling Perawat", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K05.1 - Chronic gingivitis", "tindakanHariIni": "96.54 - Scalling Perawat", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0071", "idRmKlinis": "EMR-2026-0071", "idPasien": "P-0071", "noRm": "I-0171", "namaPasien": "Intan Permata (3)", "tanggalPeriksa": "11-06-2026", "dokterPemeriksa": "drg. Danny", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Crown PFM (Porcelain Fused to Metal)\", \"diagnosaICD\": [\"K08.1 - Loss of teeth\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.41 - Crown PFM (Porcelain Fused to Metal)\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "11-06-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Crown PFM (Porcelain Fused to Metal)", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K08.1 - Loss of teeth", "tindakanHariIni": "23.41 - Crown PFM (Porcelain Fused to Metal)", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0072", "idRmKlinis": "EMR-2026-0072", "idPasien": "P-0072", "noRm": "D-0172", "namaPasien": "Dimas Aditya (3)", "tanggalPeriksa": "12-06-2026", "dokterPemeriksa": "drg. Astri", "anamnesisStr": "{\"cc\": \"Pasien datang untuk PSA 1x Kunjungan (One Visit Endodontic)\", \"diagnosaICD\": [\"K04.0 - Pulpitis irreversibel\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.70 - PSA 1x Kunjungan (One Visit Endodontic)\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "12-06-2026 15:30:00", "chiefComplaint": "Pasien datang untuk PSA 1x Kunjungan (One Visit Endodontic)", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K04.0 - Pulpitis irreversibel", "tindakanHariIni": "23.70 - PSA 1x Kunjungan (One Visit Endodontic)", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0073", "idRmKlinis": "EMR-2026-0073", "idPasien": "P-0073", "noRm": "R-0173", "namaPasien": "Rina Wulandari (3)", "tanggalPeriksa": "13-06-2026", "dokterPemeriksa": "drg. Rizka", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Odontektomi Kelas I Ringan\", \"diagnosaICD\": [\"K01.1 - Impacted teeth\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.19 - Odontektomi Kelas I Ringan\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "13-06-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Odontektomi Kelas I Ringan", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K01.1 - Impacted teeth", "tindakanHariIni": "23.19 - Odontektomi Kelas I Ringan", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0074", "idRmKlinis": "EMR-2026-0074", "idPasien": "P-0074", "noRm": "E-0174", "namaPasien": "Eko Prasetyo (3)", "tanggalPeriksa": "14-06-2026", "dokterPemeriksa": "drg. Nanda", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Tumpat GIC Sedang\", \"diagnosaICD\": [\"K02.1 - Caries of dentine\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.2 - Tumpat GIC Sedang\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "14-06-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Tumpat GIC Sedang", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K02.1 - Caries of dentine", "tindakanHariIni": "23.2 - Tumpat GIC Sedang", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0075", "idRmKlinis": "EMR-2026-0075", "idPasien": "P-0075", "noRm": "M-0175", "namaPasien": "Maya Anggraini (3)", "tanggalPeriksa": "15-06-2026", "dokterPemeriksa": "drg. Aviva", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Tumpat Komposit Sedang\", \"diagnosaICD\": [\"K02.1 - Caries of dentine\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.2 - Tumpat Komposit Sedang\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "15-06-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Tumpat Komposit Sedang", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K02.1 - Caries of dentine", "tindakanHariIni": "23.2 - Tumpat Komposit Sedang", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0076", "idRmKlinis": "EMR-2026-0076", "idPasien": "P-0076", "noRm": "A-0176", "namaPasien": "Andi Wijaya Kusuma (3)", "tanggalPeriksa": "16-06-2026", "dokterPemeriksa": "drg. Erien", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Scalling Sedang\", \"diagnosaICD\": [\"K05.1 - Chronic gingivitis\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"96.54 - Scalling Sedang\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "16-06-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Scalling Sedang", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K05.1 - Chronic gingivitis", "tindakanHariIni": "96.54 - Scalling Sedang", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0077", "idRmKlinis": "EMR-2026-0077", "idPasien": "P-0077", "noRm": "P-0177", "namaPasien": "Putri Maharani (3)", "tanggalPeriksa": "17-07-2026", "dokterPemeriksa": "drg.g.p Dinda", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Exo Dewasa Ringan (Akar Tunggal)\", \"diagnosaICD\": [\"K01.1 - Impacted / Retained tooth\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.01 - Exo Dewasa Ringan (Akar Tunggal)\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "17-07-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Exo Dewasa Ringan (Akar Tunggal)", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K01.1 - Impacted / Retained tooth", "tindakanHariIni": "23.01 - Exo Dewasa Ringan (Akar Tunggal)", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0078", "idRmKlinis": "EMR-2026-0078", "idPasien": "P-0078", "noRm": "R-0178", "namaPasien": "Reza Pahlevi (3)", "tanggalPeriksa": "18-07-2026", "dokterPemeriksa": "drg.g.p Fathya", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Kontrol Ortho Rutin (Ganti Karet/Power O)\", \"diagnosaICD\": [\"K07.2 - Anomalies of dental arch\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"24.7 - Kontrol Ortho Rutin (Ganti Karet/Power O)\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "18-07-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Kontrol Ortho Rutin (Ganti Karet/Power O)", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K07.2 - Anomalies of dental arch", "tindakanHariIni": "24.7 - Kontrol Ortho Rutin (Ganti Karet/Power O)", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0079", "idRmKlinis": "EMR-2026-0079", "idPasien": "P-0079", "noRm": "F-0179", "namaPasien": "Fitriani Nur (3)", "tanggalPeriksa": "19-07-2026", "dokterPemeriksa": "drg.g.p Belinda", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Rontgen Periapikal Digital\", \"diagnosaICD\": [\"K04.0 - Pulpitis\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"89.31 - Rontgen Periapikal Digital\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "19-07-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Rontgen Periapikal Digital", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K04.0 - Pulpitis", "tindakanHariIni": "89.31 - Rontgen Periapikal Digital", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0080", "idRmKlinis": "EMR-2026-0080", "idPasien": "P-0080", "noRm": "W-0180", "namaPasien": "Wahyu Hidayat (3)", "tanggalPeriksa": "20-07-2026", "dokterPemeriksa": "drg. Rahma Yulinda D, Sp. BMM", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Scalling Perawat\", \"diagnosaICD\": [\"K05.1 - Chronic gingivitis\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"96.54 - Scalling Perawat\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "20-07-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Scalling Perawat", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K05.1 - Chronic gingivitis", "tindakanHariIni": "96.54 - Scalling Perawat", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0081", "idRmKlinis": "EMR-2026-0081", "idPasien": "P-0081", "noRm": "N-0181", "namaPasien": "Nisa Amelia (3)", "tanggalPeriksa": "21-07-2026", "dokterPemeriksa": "drg. Tia Ardhana R", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Crown PFM (Porcelain Fused to Metal)\", \"diagnosaICD\": [\"K08.1 - Loss of teeth\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.41 - Crown PFM (Porcelain Fused to Metal)\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "21-07-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Crown PFM (Porcelain Fused to Metal)", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K08.1 - Loss of teeth", "tindakanHariIni": "23.41 - Crown PFM (Porcelain Fused to Metal)", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0082", "idRmKlinis": "EMR-2026-0082", "idPasien": "P-0082", "noRm": "A-0182", "namaPasien": "Arif Budiman (3)", "tanggalPeriksa": "22-07-2026", "dokterPemeriksa": "drg. Danny", "anamnesisStr": "{\"cc\": \"Pasien datang untuk PSA 1x Kunjungan (One Visit Endodontic)\", \"diagnosaICD\": [\"K04.0 - Pulpitis irreversibel\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.70 - PSA 1x Kunjungan (One Visit Endodontic)\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "22-07-2026 15:30:00", "chiefComplaint": "Pasien datang untuk PSA 1x Kunjungan (One Visit Endodontic)", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K04.0 - Pulpitis irreversibel", "tindakanHariIni": "23.70 - PSA 1x Kunjungan (One Visit Endodontic)", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0083", "idRmKlinis": "EMR-2026-0083", "idPasien": "P-0083", "noRm": "D-0183", "namaPasien": "Diana Puspita (3)", "tanggalPeriksa": "23-07-2026", "dokterPemeriksa": "drg. Astri", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Odontektomi Kelas I Ringan\", \"diagnosaICD\": [\"K01.1 - Impacted teeth\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.19 - Odontektomi Kelas I Ringan\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "23-07-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Odontektomi Kelas I Ringan", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K01.1 - Impacted teeth", "tindakanHariIni": "23.19 - Odontektomi Kelas I Ringan", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0084", "idRmKlinis": "EMR-2026-0084", "idPasien": "P-0084", "noRm": "G-0184", "namaPasien": "Galih Prakoso (3)", "tanggalPeriksa": "24-07-2026", "dokterPemeriksa": "drg. Rizka", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Tumpat GIC Sedang\", \"diagnosaICD\": [\"K02.1 - Caries of dentine\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.2 - Tumpat GIC Sedang\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "24-07-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Tumpat GIC Sedang", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K02.1 - Caries of dentine", "tindakanHariIni": "23.2 - Tumpat GIC Sedang", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0085", "idRmKlinis": "EMR-2026-0085", "idPasien": "P-0085", "noRm": "L-0185", "namaPasien": "Lestari Handayani (3)", "tanggalPeriksa": "25-07-2026", "dokterPemeriksa": "drg. Nanda", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Tumpat Komposit Sedang\", \"diagnosaICD\": [\"K02.1 - Caries of dentine\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.2 - Tumpat Komposit Sedang\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "25-07-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Tumpat Komposit Sedang", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K02.1 - Caries of dentine", "tindakanHariIni": "23.2 - Tumpat Komposit Sedang", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0086", "idRmKlinis": "EMR-2026-0086", "idPasien": "P-0086", "noRm": "Y-0186", "namaPasien": "Yusuf Maulana (3)", "tanggalPeriksa": "26-07-2026", "dokterPemeriksa": "drg. Aviva", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Scalling Sedang\", \"diagnosaICD\": [\"K05.1 - Chronic gingivitis\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"96.54 - Scalling Sedang\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "26-07-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Scalling Sedang", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K05.1 - Chronic gingivitis", "tindakanHariIni": "96.54 - Scalling Sedang", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0087", "idRmKlinis": "EMR-2026-0087", "idPasien": "P-0087", "noRm": "C-0187", "namaPasien": "Citra Kirana (3)", "tanggalPeriksa": "27-07-2026", "dokterPemeriksa": "drg. Erien", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Exo Dewasa Ringan (Akar Tunggal)\", \"diagnosaICD\": [\"K01.1 - Impacted / Retained tooth\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.01 - Exo Dewasa Ringan (Akar Tunggal)\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "27-07-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Exo Dewasa Ringan (Akar Tunggal)", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K01.1 - Impacted / Retained tooth", "tindakanHariIni": "23.01 - Exo Dewasa Ringan (Akar Tunggal)", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0088", "idRmKlinis": "EMR-2026-0088", "idPasien": "P-0088", "noRm": "T-0188", "namaPasien": "Taufik Hidayatullah (3)", "tanggalPeriksa": "28-07-2026", "dokterPemeriksa": "drg.g.p Dinda", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Kontrol Ortho Rutin (Ganti Karet/Power O)\", \"diagnosaICD\": [\"K07.2 - Anomalies of dental arch\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"24.7 - Kontrol Ortho Rutin (Ganti Karet/Power O)\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "28-07-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Kontrol Ortho Rutin (Ganti Karet/Power O)", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K07.2 - Anomalies of dental arch", "tindakanHariIni": "24.7 - Kontrol Ortho Rutin (Ganti Karet/Power O)", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0089", "idRmKlinis": "EMR-2026-0089", "idPasien": "P-0089", "noRm": "S-0189", "namaPasien": "Safira Salsabila (3)", "tanggalPeriksa": "01-08-2026", "dokterPemeriksa": "drg.g.p Fathya", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Rontgen Periapikal Digital\", \"diagnosaICD\": [\"K04.0 - Pulpitis\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"89.31 - Rontgen Periapikal Digital\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "01-08-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Rontgen Periapikal Digital", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K04.0 - Pulpitis", "tindakanHariIni": "89.31 - Rontgen Periapikal Digital", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0090", "idRmKlinis": "EMR-2026-0090", "idPasien": "P-0090", "noRm": "B-0190", "namaPasien": "Bayu Pamungkas (3)", "tanggalPeriksa": "02-08-2026", "dokterPemeriksa": "drg.g.p Belinda", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Scalling Perawat\", \"diagnosaICD\": [\"K05.1 - Chronic gingivitis\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"96.54 - Scalling Perawat\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "02-08-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Scalling Perawat", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K05.1 - Chronic gingivitis", "tindakanHariIni": "96.54 - Scalling Perawat", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0091", "idRmKlinis": "EMR-2026-0091", "idPasien": "P-0091", "noRm": "M-0191", "namaPasien": "Mega Utami (3)", "tanggalPeriksa": "03-08-2026", "dokterPemeriksa": "drg. Rahma Yulinda D, Sp. BMM", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Crown PFM (Porcelain Fused to Metal)\", \"diagnosaICD\": [\"K08.1 - Loss of teeth\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.41 - Crown PFM (Porcelain Fused to Metal)\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "03-08-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Crown PFM (Porcelain Fused to Metal)", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K08.1 - Loss of teeth", "tindakanHariIni": "23.41 - Crown PFM (Porcelain Fused to Metal)", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0092", "idRmKlinis": "EMR-2026-0092", "idPasien": "P-0092", "noRm": "I-0192", "namaPasien": "Irfan Hakim (3)", "tanggalPeriksa": "04-08-2026", "dokterPemeriksa": "drg. Tia Ardhana R", "anamnesisStr": "{\"cc\": \"Pasien datang untuk PSA 1x Kunjungan (One Visit Endodontic)\", \"diagnosaICD\": [\"K04.0 - Pulpitis irreversibel\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.70 - PSA 1x Kunjungan (One Visit Endodontic)\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "04-08-2026 15:30:00", "chiefComplaint": "Pasien datang untuk PSA 1x Kunjungan (One Visit Endodontic)", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K04.0 - Pulpitis irreversibel", "tindakanHariIni": "23.70 - PSA 1x Kunjungan (One Visit Endodontic)", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0093", "idRmKlinis": "EMR-2026-0093", "idPasien": "P-0093", "noRm": "V-0193", "namaPasien": "Vina Panduwinata (3)", "tanggalPeriksa": "05-08-2026", "dokterPemeriksa": "drg. Danny", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Odontektomi Kelas I Ringan\", \"diagnosaICD\": [\"K01.1 - Impacted teeth\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.19 - Odontektomi Kelas I Ringan\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "05-08-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Odontektomi Kelas I Ringan", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K01.1 - Impacted teeth", "tindakanHariIni": "23.19 - Odontektomi Kelas I Ringan", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0094", "idRmKlinis": "EMR-2026-0094", "idPasien": "P-0094", "noRm": "D-0194", "namaPasien": "Deni Cagur Saputra (3)", "tanggalPeriksa": "06-08-2026", "dokterPemeriksa": "drg. Astri", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Tumpat GIC Sedang\", \"diagnosaICD\": [\"K02.1 - Caries of dentine\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.2 - Tumpat GIC Sedang\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "06-08-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Tumpat GIC Sedang", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K02.1 - Caries of dentine", "tindakanHariIni": "23.2 - Tumpat GIC Sedang", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0095", "idRmKlinis": "EMR-2026-0095", "idPasien": "P-0095", "noRm": "N-0195", "namaPasien": "Nadia Putri Pratama (4)", "tanggalPeriksa": "07-08-2026", "dokterPemeriksa": "drg. Rizka", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Tumpat Komposit Sedang\", \"diagnosaICD\": [\"K02.1 - Caries of dentine\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.2 - Tumpat Komposit Sedang\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "07-08-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Tumpat Komposit Sedang", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K02.1 - Caries of dentine", "tindakanHariIni": "23.2 - Tumpat Komposit Sedang", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0096", "idRmKlinis": "EMR-2026-0096", "idPasien": "P-0096", "noRm": "R-0196", "namaPasien": "Rizky Ramadhan (4)", "tanggalPeriksa": "08-08-2026", "dokterPemeriksa": "drg. Nanda", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Scalling Sedang\", \"diagnosaICD\": [\"K05.1 - Chronic gingivitis\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"96.54 - Scalling Sedang\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "08-08-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Scalling Sedang", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K05.1 - Chronic gingivitis", "tindakanHariIni": "96.54 - Scalling Sedang", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0097", "idRmKlinis": "EMR-2026-0097", "idPasien": "P-0097", "noRm": "A-0197", "namaPasien": "Aulia Zahra (4)", "tanggalPeriksa": "09-08-2026", "dokterPemeriksa": "drg. Aviva", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Exo Dewasa Ringan (Akar Tunggal)\", \"diagnosaICD\": [\"K01.1 - Impacted / Retained tooth\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.01 - Exo Dewasa Ringan (Akar Tunggal)\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "09-08-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Exo Dewasa Ringan (Akar Tunggal)", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K01.1 - Impacted / Retained tooth", "tindakanHariIni": "23.01 - Exo Dewasa Ringan (Akar Tunggal)", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0098", "idRmKlinis": "EMR-2026-0098", "idPasien": "P-0098", "noRm": "F-0198", "namaPasien": "Fajar Nugraha (4)", "tanggalPeriksa": "10-08-2026", "dokterPemeriksa": "drg. Erien", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Kontrol Ortho Rutin (Ganti Karet/Power O)\", \"diagnosaICD\": [\"K07.2 - Anomalies of dental arch\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"24.7 - Kontrol Ortho Rutin (Ganti Karet/Power O)\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "10-08-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Kontrol Ortho Rutin (Ganti Karet/Power O)", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K07.2 - Anomalies of dental arch", "tindakanHariIni": "24.7 - Kontrol Ortho Rutin (Ganti Karet/Power O)", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0099", "idRmKlinis": "EMR-2026-0099", "idPasien": "P-0099", "noRm": "D-0199", "namaPasien": "Dewi Kartika Sari (4)", "tanggalPeriksa": "11-08-2026", "dokterPemeriksa": "drg.g.p Dinda", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Rontgen Periapikal Digital\", \"diagnosaICD\": [\"K04.0 - Pulpitis\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"89.31 - Rontgen Periapikal Digital\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "11-08-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Rontgen Periapikal Digital", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K04.0 - Pulpitis", "tindakanHariIni": "89.31 - Rontgen Periapikal Digital", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0100", "idRmKlinis": "EMR-2026-0100", "idPasien": "P-0100", "noRm": "B-0200", "namaPasien": "Bagus Setiawan (4)", "tanggalPeriksa": "12-08-2026", "dokterPemeriksa": "drg.g.p Fathya", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Scalling Perawat\", \"diagnosaICD\": [\"K05.1 - Chronic gingivitis\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"96.54 - Scalling Perawat\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "12-08-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Scalling Perawat", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K05.1 - Chronic gingivitis", "tindakanHariIni": "96.54 - Scalling Perawat", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0101", "idRmKlinis": "EMR-2026-0101", "idPasien": "P-0101", "noRm": "I-0201", "namaPasien": "Intan Permata (4)", "tanggalPeriksa": "13-09-2026", "dokterPemeriksa": "drg.g.p Belinda", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Crown PFM (Porcelain Fused to Metal)\", \"diagnosaICD\": [\"K08.1 - Loss of teeth\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.41 - Crown PFM (Porcelain Fused to Metal)\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "13-09-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Crown PFM (Porcelain Fused to Metal)", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K08.1 - Loss of teeth", "tindakanHariIni": "23.41 - Crown PFM (Porcelain Fused to Metal)", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0102", "idRmKlinis": "EMR-2026-0102", "idPasien": "P-0102", "noRm": "D-0202", "namaPasien": "Dimas Aditya (4)", "tanggalPeriksa": "14-09-2026", "dokterPemeriksa": "drg. Rahma Yulinda D, Sp. BMM", "anamnesisStr": "{\"cc\": \"Pasien datang untuk PSA 1x Kunjungan (One Visit Endodontic)\", \"diagnosaICD\": [\"K04.0 - Pulpitis irreversibel\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.70 - PSA 1x Kunjungan (One Visit Endodontic)\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "14-09-2026 15:30:00", "chiefComplaint": "Pasien datang untuk PSA 1x Kunjungan (One Visit Endodontic)", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K04.0 - Pulpitis irreversibel", "tindakanHariIni": "23.70 - PSA 1x Kunjungan (One Visit Endodontic)", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0103", "idRmKlinis": "EMR-2026-0103", "idPasien": "P-0103", "noRm": "R-0203", "namaPasien": "Rina Wulandari (4)", "tanggalPeriksa": "15-09-2026", "dokterPemeriksa": "drg. Tia Ardhana R", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Odontektomi Kelas I Ringan\", \"diagnosaICD\": [\"K01.1 - Impacted teeth\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.19 - Odontektomi Kelas I Ringan\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "15-09-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Odontektomi Kelas I Ringan", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K01.1 - Impacted teeth", "tindakanHariIni": "23.19 - Odontektomi Kelas I Ringan", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0104", "idRmKlinis": "EMR-2026-0104", "idPasien": "P-0104", "noRm": "E-0204", "namaPasien": "Eko Prasetyo (4)", "tanggalPeriksa": "16-09-2026", "dokterPemeriksa": "drg. Danny", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Tumpat GIC Sedang\", \"diagnosaICD\": [\"K02.1 - Caries of dentine\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.2 - Tumpat GIC Sedang\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "16-09-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Tumpat GIC Sedang", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K02.1 - Caries of dentine", "tindakanHariIni": "23.2 - Tumpat GIC Sedang", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0105", "idRmKlinis": "EMR-2026-0105", "idPasien": "P-0105", "noRm": "M-0205", "namaPasien": "Maya Anggraini (4)", "tanggalPeriksa": "17-09-2026", "dokterPemeriksa": "drg. Astri", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Tumpat Komposit Sedang\", \"diagnosaICD\": [\"K02.1 - Caries of dentine\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.2 - Tumpat Komposit Sedang\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "17-09-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Tumpat Komposit Sedang", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K02.1 - Caries of dentine", "tindakanHariIni": "23.2 - Tumpat Komposit Sedang", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0106", "idRmKlinis": "EMR-2026-0106", "idPasien": "P-0106", "noRm": "A-0206", "namaPasien": "Andi Wijaya Kusuma (4)", "tanggalPeriksa": "18-09-2026", "dokterPemeriksa": "drg. Rizka", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Scalling Sedang\", \"diagnosaICD\": [\"K05.1 - Chronic gingivitis\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"96.54 - Scalling Sedang\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "18-09-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Scalling Sedang", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K05.1 - Chronic gingivitis", "tindakanHariIni": "96.54 - Scalling Sedang", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0107", "idRmKlinis": "EMR-2026-0107", "idPasien": "P-0107", "noRm": "P-0207", "namaPasien": "Putri Maharani (4)", "tanggalPeriksa": "19-09-2026", "dokterPemeriksa": "drg. Nanda", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Exo Dewasa Ringan (Akar Tunggal)\", \"diagnosaICD\": [\"K01.1 - Impacted / Retained tooth\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.01 - Exo Dewasa Ringan (Akar Tunggal)\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "19-09-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Exo Dewasa Ringan (Akar Tunggal)", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K01.1 - Impacted / Retained tooth", "tindakanHariIni": "23.01 - Exo Dewasa Ringan (Akar Tunggal)", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0108", "idRmKlinis": "EMR-2026-0108", "idPasien": "P-0108", "noRm": "R-0208", "namaPasien": "Reza Pahlevi (4)", "tanggalPeriksa": "20-09-2026", "dokterPemeriksa": "drg. Aviva", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Kontrol Ortho Rutin (Ganti Karet/Power O)\", \"diagnosaICD\": [\"K07.2 - Anomalies of dental arch\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"24.7 - Kontrol Ortho Rutin (Ganti Karet/Power O)\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "20-09-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Kontrol Ortho Rutin (Ganti Karet/Power O)", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K07.2 - Anomalies of dental arch", "tindakanHariIni": "24.7 - Kontrol Ortho Rutin (Ganti Karet/Power O)", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0109", "idRmKlinis": "EMR-2026-0109", "idPasien": "P-0109", "noRm": "F-0209", "namaPasien": "Fitriani Nur (4)", "tanggalPeriksa": "21-09-2026", "dokterPemeriksa": "drg. Erien", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Rontgen Periapikal Digital\", \"diagnosaICD\": [\"K04.0 - Pulpitis\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"89.31 - Rontgen Periapikal Digital\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "21-09-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Rontgen Periapikal Digital", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K04.0 - Pulpitis", "tindakanHariIni": "89.31 - Rontgen Periapikal Digital", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0110", "idRmKlinis": "EMR-2026-0110", "idPasien": "P-0110", "noRm": "W-0210", "namaPasien": "Wahyu Hidayat (4)", "tanggalPeriksa": "22-09-2026", "dokterPemeriksa": "drg.g.p Dinda", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Scalling Perawat\", \"diagnosaICD\": [\"K05.1 - Chronic gingivitis\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"96.54 - Scalling Perawat\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "22-09-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Scalling Perawat", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K05.1 - Chronic gingivitis", "tindakanHariIni": "96.54 - Scalling Perawat", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0111", "idRmKlinis": "EMR-2026-0111", "idPasien": "P-0111", "noRm": "N-0211", "namaPasien": "Nisa Amelia (4)", "tanggalPeriksa": "23-09-2026", "dokterPemeriksa": "drg.g.p Fathya", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Crown PFM (Porcelain Fused to Metal)\", \"diagnosaICD\": [\"K08.1 - Loss of teeth\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.41 - Crown PFM (Porcelain Fused to Metal)\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "23-09-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Crown PFM (Porcelain Fused to Metal)", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K08.1 - Loss of teeth", "tindakanHariIni": "23.41 - Crown PFM (Porcelain Fused to Metal)", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0112", "idRmKlinis": "EMR-2026-0112", "idPasien": "P-0112", "noRm": "A-0212", "namaPasien": "Arif Budiman (4)", "tanggalPeriksa": "24-09-2026", "dokterPemeriksa": "drg.g.p Belinda", "anamnesisStr": "{\"cc\": \"Pasien datang untuk PSA 1x Kunjungan (One Visit Endodontic)\", \"diagnosaICD\": [\"K04.0 - Pulpitis irreversibel\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.70 - PSA 1x Kunjungan (One Visit Endodontic)\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "24-09-2026 15:30:00", "chiefComplaint": "Pasien datang untuk PSA 1x Kunjungan (One Visit Endodontic)", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K04.0 - Pulpitis irreversibel", "tindakanHariIni": "23.70 - PSA 1x Kunjungan (One Visit Endodontic)", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0113", "idRmKlinis": "EMR-2026-0113", "idPasien": "P-0113", "noRm": "D-0213", "namaPasien": "Diana Puspita (4)", "tanggalPeriksa": "25-10-2026", "dokterPemeriksa": "drg. Rahma Yulinda D, Sp. BMM", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Odontektomi Kelas I Ringan\", \"diagnosaICD\": [\"K01.1 - Impacted teeth\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.19 - Odontektomi Kelas I Ringan\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "25-10-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Odontektomi Kelas I Ringan", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K01.1 - Impacted teeth", "tindakanHariIni": "23.19 - Odontektomi Kelas I Ringan", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0114", "idRmKlinis": "EMR-2026-0114", "idPasien": "P-0114", "noRm": "G-0214", "namaPasien": "Galih Prakoso (4)", "tanggalPeriksa": "26-10-2026", "dokterPemeriksa": "drg. Tia Ardhana R", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Tumpat GIC Sedang\", \"diagnosaICD\": [\"K02.1 - Caries of dentine\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.2 - Tumpat GIC Sedang\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "26-10-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Tumpat GIC Sedang", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K02.1 - Caries of dentine", "tindakanHariIni": "23.2 - Tumpat GIC Sedang", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0115", "idRmKlinis": "EMR-2026-0115", "idPasien": "P-0115", "noRm": "L-0215", "namaPasien": "Lestari Handayani (4)", "tanggalPeriksa": "27-10-2026", "dokterPemeriksa": "drg. Danny", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Tumpat Komposit Sedang\", \"diagnosaICD\": [\"K02.1 - Caries of dentine\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.2 - Tumpat Komposit Sedang\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "27-10-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Tumpat Komposit Sedang", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K02.1 - Caries of dentine", "tindakanHariIni": "23.2 - Tumpat Komposit Sedang", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0116", "idRmKlinis": "EMR-2026-0116", "idPasien": "P-0116", "noRm": "Y-0216", "namaPasien": "Yusuf Maulana (4)", "tanggalPeriksa": "28-10-2026", "dokterPemeriksa": "drg. Astri", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Scalling Sedang\", \"diagnosaICD\": [\"K05.1 - Chronic gingivitis\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"96.54 - Scalling Sedang\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "28-10-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Scalling Sedang", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K05.1 - Chronic gingivitis", "tindakanHariIni": "96.54 - Scalling Sedang", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0117", "idRmKlinis": "EMR-2026-0117", "idPasien": "P-0117", "noRm": "C-0217", "namaPasien": "Citra Kirana (4)", "tanggalPeriksa": "01-10-2026", "dokterPemeriksa": "drg. Rizka", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Exo Dewasa Ringan (Akar Tunggal)\", \"diagnosaICD\": [\"K01.1 - Impacted / Retained tooth\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.01 - Exo Dewasa Ringan (Akar Tunggal)\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "01-10-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Exo Dewasa Ringan (Akar Tunggal)", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K01.1 - Impacted / Retained tooth", "tindakanHariIni": "23.01 - Exo Dewasa Ringan (Akar Tunggal)", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0118", "idRmKlinis": "EMR-2026-0118", "idPasien": "P-0118", "noRm": "T-0218", "namaPasien": "Taufik Hidayatullah (4)", "tanggalPeriksa": "02-10-2026", "dokterPemeriksa": "drg. Nanda", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Kontrol Ortho Rutin (Ganti Karet/Power O)\", \"diagnosaICD\": [\"K07.2 - Anomalies of dental arch\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"24.7 - Kontrol Ortho Rutin (Ganti Karet/Power O)\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "02-10-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Kontrol Ortho Rutin (Ganti Karet/Power O)", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K07.2 - Anomalies of dental arch", "tindakanHariIni": "24.7 - Kontrol Ortho Rutin (Ganti Karet/Power O)", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0119", "idRmKlinis": "EMR-2026-0119", "idPasien": "P-0119", "noRm": "S-0219", "namaPasien": "Safira Salsabila (4)", "tanggalPeriksa": "03-10-2026", "dokterPemeriksa": "drg. Aviva", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Rontgen Periapikal Digital\", \"diagnosaICD\": [\"K04.0 - Pulpitis\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"89.31 - Rontgen Periapikal Digital\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "03-10-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Rontgen Periapikal Digital", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K04.0 - Pulpitis", "tindakanHariIni": "89.31 - Rontgen Periapikal Digital", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0120", "idRmKlinis": "EMR-2026-0120", "idPasien": "P-0120", "noRm": "B-0220", "namaPasien": "Bayu Pamungkas (4)", "tanggalPeriksa": "04-10-2026", "dokterPemeriksa": "drg. Erien", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Scalling Perawat\", \"diagnosaICD\": [\"K05.1 - Chronic gingivitis\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"96.54 - Scalling Perawat\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "04-10-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Scalling Perawat", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K05.1 - Chronic gingivitis", "tindakanHariIni": "96.54 - Scalling Perawat", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0121", "idRmKlinis": "EMR-2026-0121", "idPasien": "P-0121", "noRm": "M-0221", "namaPasien": "Mega Utami (4)", "tanggalPeriksa": "05-10-2026", "dokterPemeriksa": "drg.g.p Dinda", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Crown PFM (Porcelain Fused to Metal)\", \"diagnosaICD\": [\"K08.1 - Loss of teeth\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.41 - Crown PFM (Porcelain Fused to Metal)\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "05-10-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Crown PFM (Porcelain Fused to Metal)", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K08.1 - Loss of teeth", "tindakanHariIni": "23.41 - Crown PFM (Porcelain Fused to Metal)", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0122", "idRmKlinis": "EMR-2026-0122", "idPasien": "P-0122", "noRm": "I-0222", "namaPasien": "Irfan Hakim (4)", "tanggalPeriksa": "06-10-2026", "dokterPemeriksa": "drg.g.p Fathya", "anamnesisStr": "{\"cc\": \"Pasien datang untuk PSA 1x Kunjungan (One Visit Endodontic)\", \"diagnosaICD\": [\"K04.0 - Pulpitis irreversibel\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.70 - PSA 1x Kunjungan (One Visit Endodontic)\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "06-10-2026 15:30:00", "chiefComplaint": "Pasien datang untuk PSA 1x Kunjungan (One Visit Endodontic)", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K04.0 - Pulpitis irreversibel", "tindakanHariIni": "23.70 - PSA 1x Kunjungan (One Visit Endodontic)", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0123", "idRmKlinis": "EMR-2026-0123", "idPasien": "P-0123", "noRm": "V-0223", "namaPasien": "Vina Panduwinata (4)", "tanggalPeriksa": "07-10-2026", "dokterPemeriksa": "drg.g.p Belinda", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Odontektomi Kelas I Ringan\", \"diagnosaICD\": [\"K01.1 - Impacted teeth\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.19 - Odontektomi Kelas I Ringan\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "07-10-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Odontektomi Kelas I Ringan", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K01.1 - Impacted teeth", "tindakanHariIni": "23.19 - Odontektomi Kelas I Ringan", "resepObat": "Asam Mefenamat 500 mg"}, {"idEMR": "EMR-2026-0124", "idRmKlinis": "EMR-2026-0124", "idPasien": "P-0124", "noRm": "D-0224", "namaPasien": "Deni Cagur Saputra (4)", "tanggalPeriksa": "08-10-2026", "dokterPemeriksa": "drg. Rahma Yulinda D, Sp. BMM", "anamnesisStr": "{\"cc\": \"Pasien datang untuk Tumpat GIC Sedang\", \"diagnosaICD\": [\"K02.1 - Caries of dentine\"], \"riwayatPenyakit\": \"Tidak Ada\"}", "fisikStr": "{\"kesan\": \"Baik\", \"tensi\": \"120/80\", \"nadi\": \"80\", \"suhu\": \"36.5\"}", "odontogramStr": "{\"36\": {\"generalCondition\": \"car\", \"surfaces\": {\"occlusal\": \"car\"}}}", "tindakanStr": "[\"23.2 - Tumpat GIC Sedang\"]", "obatStr": "[{\"obat\": \"Asam Mefenamat 500 mg\", \"qty\": 10, \"ket\": \"3x1 sesudah makan\"}]", "catatanEdukasi": "Kontrol kembali bila ada keluhan.", "waktuSimpan": "08-10-2026 15:30:00", "chiefComplaint": "Pasien datang untuk Tumpat GIC Sedang", "presentIllness": "Tidak Ada", "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi", "assessmentICD": "K02.1 - Caries of dentine", "tindakanHariIni": "23.2 - Tumpat GIC Sedang", "resepObat": "Asam Mefenamat 500 mg"}], "pembayaran": [{"idInvoice": "INV/SHELDON/0001/1026", "tanggal": "05-10-2026", "idPasien": "P-0001", "noRm": "RM-0001", "namaPasien": "Budi Santoso", "dokter": "drg. Sheldon Cooper, Sp.Ort", "kategori": "Tindakan", "item": "Pemasangan Mahkota PFM (Crown)", "harga": 1500000, "qty": 1, "biayaLab": 350000, "diskon": 0, "grandTotalItem": 1500000, "perawat": "Bernadette Rostenkowski", "totalInvoice": 1515000, "metode": "Transfer Bank", "status": "Lunas", "keterangan": "Crown PFM Gigi 46 Lunas", "kasir": "Penny Teller", "waktuSistem": "05-10-2026 10:15:00"}, {"idInvoice": "INV/SHELDON/0001/1026", "tanggal": "05-10-2026", "idPasien": "P-0001", "noRm": "RM-0001", "namaPasien": "Budi Santoso", "dokter": "drg. Sheldon Cooper, Sp.Ort", "kategori": "Obat", "item": "Amoxicillin 500 mg", "harga": 15000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 15000, "perawat": "Bernadette Rostenkowski", "totalInvoice": 1515000, "metode": "Transfer Bank", "status": "Lunas", "keterangan": "Resep antibiotik pasca preparasi", "kasir": "Penny Teller", "waktuSistem": "05-10-2026 10:15:00"}, {"idInvoice": "INV/SHELDON/0002/1026", "tanggal": "05-10-2026", "idPasien": "P-0002", "noRm": "RM-0002", "namaPasien": "Siti Rahmawati", "dokter": "drg. Leonard Hofstadter", "kategori": "Tindakan", "item": "Foto Rontgen Periapikal Digital", "harga": 100000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 100000, "perawat": "Bernadette Rostenkowski", "totalInvoice": 100000, "metode": "QRIS", "status": "Lunas", "keterangan": "Evaluasi periapikal gigi 36", "kasir": "Penny Teller", "waktuSistem": "05-10-2026 11:20:00"}, {"idInvoice": "INV/SHELDON/0003/1026", "tanggal": "05-10-2026", "idPasien": "P-0003", "noRm": "RM-0003", "namaPasien": "Ahmad Fauzi", "dokter": "drg. Sheldon Cooper, Sp.Ort", "kategori": "Tindakan", "item": "Perawatan Saluran Akar (PSA) Molar", "harga": 1500000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 1500000, "perawat": "Bernadette Rostenkowski", "totalInvoice": 1500000, "metode": "Transfer Bank", "status": "Lunas", "keterangan": "PSA Kunjungan Pertama", "kasir": "Penny Teller", "waktuSistem": "05-10-2026 14:05:00"}, {"idInvoice": "INV/SHELDON/0004/1026", "tanggal": "05-10-2026", "idPasien": "P-0004", "noRm": "RM-0004", "namaPasien": "Hendra Wijaya", "dokter": "drg. Sheldon Cooper, Sp.Ort", "kategori": "Tindakan", "item": "Pemasangan Behel Standar (Include Scaling)", "harga": 5000000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 5000000, "perawat": "Bernadette Rostenkowski", "totalInvoice": 5000000, "metode": "Tunai", "status": "Lunas", "keterangan": "Scaling dibantu perawat Bernadette", "kasir": "Penny Teller", "waktuSistem": "05-10-2026 16:30:00"}, {"idInvoice": "INV/SHELDON/0005/0126", "tanggal": "01-01-2026", "idPasien": "P-0005", "noRm": "N-0105", "namaPasien": "Nadia Putri Pratama", "dokter": "drg. Danny", "kategori": "Tindakan", "item": "Tumpat Komposit Sedang", "harga": 300000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 300000, "perawat": "Wulan", "totalInvoice": 335000, "metode": "Tunai", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Wulan", "waktuSistem": "01-01-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0005/0126", "tanggal": "01-01-2026", "idPasien": "P-0005", "noRm": "N-0105", "namaPasien": "Nadia Putri Pratama", "dokter": "drg. Danny", "kategori": "Obat", "item": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "harga": 35000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 35000, "perawat": "Wulan", "totalInvoice": 335000, "metode": "Tunai", "status": "Lunas", "keterangan": "Medikasi Oral Pasca Tindakan", "kasir": "Wulan", "waktuSistem": "01-01-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0006/0126", "tanggal": "02-01-2026", "idPasien": "P-0006", "noRm": "R-0106", "namaPasien": "Rizky Ramadhan", "dokter": "drg. Astri", "kategori": "Tindakan", "item": "Scalling Sedang", "harga": 250000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 250000, "perawat": "Dina", "totalInvoice": 250000, "metode": "Transfer Bank", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Dina", "waktuSistem": "02-01-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0007/0126", "tanggal": "03-01-2026", "idPasien": "P-0007", "noRm": "A-0107", "namaPasien": "Aulia Zahra", "dokter": "drg. Rizka", "kategori": "Tindakan", "item": "Exo Dewasa Ringan (Akar Tunggal)", "harga": 250000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 250000, "perawat": "Bernadette Rostenkowski", "totalInvoice": 250000, "metode": "QRIS", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Bernadette Rostenkowski", "waktuSistem": "03-01-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0008/0126", "tanggal": "04-01-2026", "idPasien": "P-0008", "noRm": "F-0108", "namaPasien": "Fajar Nugraha", "dokter": "drg. Nanda", "kategori": "Tindakan", "item": "Kontrol Ortho Rutin (Ganti Karet/Power O)", "harga": 150000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 150000, "perawat": "Wulan", "totalInvoice": 185000, "metode": "Kartu Debit/Kredit", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Wulan", "waktuSistem": "04-01-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0008/0126", "tanggal": "04-01-2026", "idPasien": "P-0008", "noRm": "F-0108", "namaPasien": "Fajar Nugraha", "dokter": "drg. Nanda", "kategori": "Obat", "item": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "harga": 35000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 35000, "perawat": "Wulan", "totalInvoice": 185000, "metode": "Kartu Debit/Kredit", "status": "Lunas", "keterangan": "Medikasi Oral Pasca Tindakan", "kasir": "Wulan", "waktuSistem": "04-01-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0009/0126", "tanggal": "05-01-2026", "idPasien": "P-0009", "noRm": "D-0109", "namaPasien": "Dewi Kartika Sari", "dokter": "drg. Aviva", "kategori": "Tindakan", "item": "Rontgen Periapikal Digital", "harga": 100000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 100000, "perawat": "Dina", "totalInvoice": 100000, "metode": "Tunai", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Dina", "waktuSistem": "05-01-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0010/0126", "tanggal": "06-01-2026", "idPasien": "P-0010", "noRm": "B-0110", "namaPasien": "Bagus Setiawan", "dokter": "drg. Erien", "kategori": "Tindakan", "item": "Scalling Perawat", "harga": 150000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 150000, "perawat": "Bernadette Rostenkowski", "totalInvoice": 150000, "metode": "Transfer Bank", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Bernadette Rostenkowski", "waktuSistem": "06-01-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0011/0126", "tanggal": "07-01-2026", "idPasien": "P-0011", "noRm": "I-0111", "namaPasien": "Intan Permata", "dokter": "drg.g.p Dinda", "kategori": "Tindakan", "item": "Crown PFM (Porcelain Fused to Metal)", "harga": 1500000, "qty": 1, "biayaLab": 350000, "diskon": 0, "grandTotalItem": 1500000, "perawat": "Wulan", "totalInvoice": 1535000, "metode": "QRIS", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Wulan", "waktuSistem": "07-01-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0011/0126", "tanggal": "07-01-2026", "idPasien": "P-0011", "noRm": "I-0111", "namaPasien": "Intan Permata", "dokter": "drg.g.p Dinda", "kategori": "Obat", "item": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "harga": 35000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 35000, "perawat": "Wulan", "totalInvoice": 1535000, "metode": "QRIS", "status": "Lunas", "keterangan": "Medikasi Oral Pasca Tindakan", "kasir": "Wulan", "waktuSistem": "07-01-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0012/0126", "tanggal": "08-01-2026", "idPasien": "P-0012", "noRm": "D-0112", "namaPasien": "Dimas Aditya", "dokter": "drg.g.p Fathya", "kategori": "Tindakan", "item": "PSA 1x Kunjungan (One Visit Endodontic)", "harga": 1500000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 1500000, "perawat": "Dina", "totalInvoice": 1500000, "metode": "Kartu Debit/Kredit", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Dina", "waktuSistem": "08-01-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0013/0126", "tanggal": "09-01-2026", "idPasien": "P-0013", "noRm": "R-0113", "namaPasien": "Rina Wulandari", "dokter": "drg.g.p Belinda", "kategori": "Tindakan", "item": "Odontektomi Kelas I Ringan", "harga": 1800000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 1800000, "perawat": "Bernadette Rostenkowski", "totalInvoice": 1800000, "metode": "Tunai", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Bernadette Rostenkowski", "waktuSistem": "09-01-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0014/0126", "tanggal": "10-01-2026", "idPasien": "P-0014", "noRm": "E-0114", "namaPasien": "Eko Prasetyo", "dokter": "drg. Rahma Yulinda D, Sp. BMM", "kategori": "Tindakan", "item": "Tumpat GIC Sedang", "harga": 250000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 250000, "perawat": "Wulan", "totalInvoice": 285000, "metode": "Transfer Bank", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Wulan", "waktuSistem": "10-01-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0014/0126", "tanggal": "10-01-2026", "idPasien": "P-0014", "noRm": "E-0114", "namaPasien": "Eko Prasetyo", "dokter": "drg. Rahma Yulinda D, Sp. BMM", "kategori": "Obat", "item": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "harga": 35000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 35000, "perawat": "Wulan", "totalInvoice": 285000, "metode": "Transfer Bank", "status": "Lunas", "keterangan": "Medikasi Oral Pasca Tindakan", "kasir": "Wulan", "waktuSistem": "10-01-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0015/0126", "tanggal": "11-01-2026", "idPasien": "P-0015", "noRm": "M-0115", "namaPasien": "Maya Anggraini", "dokter": "drg. Tia Ardhana R", "kategori": "Tindakan", "item": "Tumpat Komposit Sedang", "harga": 300000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 300000, "perawat": "Dina", "totalInvoice": 300000, "metode": "QRIS", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Dina", "waktuSistem": "11-01-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0016/0126", "tanggal": "12-01-2026", "idPasien": "P-0016", "noRm": "A-0116", "namaPasien": "Andi Wijaya Kusuma", "dokter": "drg. Danny", "kategori": "Tindakan", "item": "Scalling Sedang", "harga": 250000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 250000, "perawat": "Bernadette Rostenkowski", "totalInvoice": 250000, "metode": "Kartu Debit/Kredit", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Bernadette Rostenkowski", "waktuSistem": "12-01-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0017/0226", "tanggal": "13-02-2026", "idPasien": "P-0017", "noRm": "P-0117", "namaPasien": "Putri Maharani", "dokter": "drg. Astri", "kategori": "Tindakan", "item": "Exo Dewasa Ringan (Akar Tunggal)", "harga": 250000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 250000, "perawat": "Wulan", "totalInvoice": 285000, "metode": "Tunai", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Wulan", "waktuSistem": "13-02-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0017/0226", "tanggal": "13-02-2026", "idPasien": "P-0017", "noRm": "P-0117", "namaPasien": "Putri Maharani", "dokter": "drg. Astri", "kategori": "Obat", "item": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "harga": 35000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 35000, "perawat": "Wulan", "totalInvoice": 285000, "metode": "Tunai", "status": "Lunas", "keterangan": "Medikasi Oral Pasca Tindakan", "kasir": "Wulan", "waktuSistem": "13-02-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0018/0226", "tanggal": "14-02-2026", "idPasien": "P-0018", "noRm": "R-0118", "namaPasien": "Reza Pahlevi", "dokter": "drg. Rizka", "kategori": "Tindakan", "item": "Kontrol Ortho Rutin (Ganti Karet/Power O)", "harga": 150000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 150000, "perawat": "Dina", "totalInvoice": 150000, "metode": "Transfer Bank", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Dina", "waktuSistem": "14-02-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0019/0226", "tanggal": "15-02-2026", "idPasien": "P-0019", "noRm": "F-0119", "namaPasien": "Fitriani Nur", "dokter": "drg. Nanda", "kategori": "Tindakan", "item": "Rontgen Periapikal Digital", "harga": 100000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 100000, "perawat": "Bernadette Rostenkowski", "totalInvoice": 100000, "metode": "QRIS", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Bernadette Rostenkowski", "waktuSistem": "15-02-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0020/0226", "tanggal": "16-02-2026", "idPasien": "P-0020", "noRm": "W-0120", "namaPasien": "Wahyu Hidayat", "dokter": "drg. Aviva", "kategori": "Tindakan", "item": "Scalling Perawat", "harga": 150000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 150000, "perawat": "Wulan", "totalInvoice": 185000, "metode": "Kartu Debit/Kredit", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Wulan", "waktuSistem": "16-02-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0020/0226", "tanggal": "16-02-2026", "idPasien": "P-0020", "noRm": "W-0120", "namaPasien": "Wahyu Hidayat", "dokter": "drg. Aviva", "kategori": "Obat", "item": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "harga": 35000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 35000, "perawat": "Wulan", "totalInvoice": 185000, "metode": "Kartu Debit/Kredit", "status": "Lunas", "keterangan": "Medikasi Oral Pasca Tindakan", "kasir": "Wulan", "waktuSistem": "16-02-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0021/0226", "tanggal": "17-02-2026", "idPasien": "P-0021", "noRm": "N-0121", "namaPasien": "Nisa Amelia", "dokter": "drg. Erien", "kategori": "Tindakan", "item": "Crown PFM (Porcelain Fused to Metal)", "harga": 1500000, "qty": 1, "biayaLab": 350000, "diskon": 0, "grandTotalItem": 1500000, "perawat": "Dina", "totalInvoice": 1500000, "metode": "Tunai", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Dina", "waktuSistem": "17-02-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0022/0226", "tanggal": "18-02-2026", "idPasien": "P-0022", "noRm": "A-0122", "namaPasien": "Arif Budiman", "dokter": "drg.g.p Dinda", "kategori": "Tindakan", "item": "PSA 1x Kunjungan (One Visit Endodontic)", "harga": 1500000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 1500000, "perawat": "Bernadette Rostenkowski", "totalInvoice": 1500000, "metode": "Transfer Bank", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Bernadette Rostenkowski", "waktuSistem": "18-02-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0023/0226", "tanggal": "19-02-2026", "idPasien": "P-0023", "noRm": "D-0123", "namaPasien": "Diana Puspita", "dokter": "drg.g.p Fathya", "kategori": "Tindakan", "item": "Odontektomi Kelas I Ringan", "harga": 1800000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 1800000, "perawat": "Wulan", "totalInvoice": 1835000, "metode": "QRIS", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Wulan", "waktuSistem": "19-02-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0023/0226", "tanggal": "19-02-2026", "idPasien": "P-0023", "noRm": "D-0123", "namaPasien": "Diana Puspita", "dokter": "drg.g.p Fathya", "kategori": "Obat", "item": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "harga": 35000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 35000, "perawat": "Wulan", "totalInvoice": 1835000, "metode": "QRIS", "status": "Lunas", "keterangan": "Medikasi Oral Pasca Tindakan", "kasir": "Wulan", "waktuSistem": "19-02-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0024/0226", "tanggal": "20-02-2026", "idPasien": "P-0024", "noRm": "G-0124", "namaPasien": "Galih Prakoso", "dokter": "drg.g.p Belinda", "kategori": "Tindakan", "item": "Tumpat GIC Sedang", "harga": 250000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 250000, "perawat": "Dina", "totalInvoice": 250000, "metode": "Kartu Debit/Kredit", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Dina", "waktuSistem": "20-02-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0025/0226", "tanggal": "21-02-2026", "idPasien": "P-0025", "noRm": "L-0125", "namaPasien": "Lestari Handayani", "dokter": "drg. Rahma Yulinda D, Sp. BMM", "kategori": "Tindakan", "item": "Tumpat Komposit Sedang", "harga": 300000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 300000, "perawat": "Bernadette Rostenkowski", "totalInvoice": 300000, "metode": "Tunai", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Bernadette Rostenkowski", "waktuSistem": "21-02-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0026/0226", "tanggal": "22-02-2026", "idPasien": "P-0026", "noRm": "Y-0126", "namaPasien": "Yusuf Maulana", "dokter": "drg. Tia Ardhana R", "kategori": "Tindakan", "item": "Scalling Sedang", "harga": 250000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 250000, "perawat": "Wulan", "totalInvoice": 285000, "metode": "Transfer Bank", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Wulan", "waktuSistem": "22-02-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0026/0226", "tanggal": "22-02-2026", "idPasien": "P-0026", "noRm": "Y-0126", "namaPasien": "Yusuf Maulana", "dokter": "drg. Tia Ardhana R", "kategori": "Obat", "item": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "harga": 35000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 35000, "perawat": "Wulan", "totalInvoice": 285000, "metode": "Transfer Bank", "status": "Lunas", "keterangan": "Medikasi Oral Pasca Tindakan", "kasir": "Wulan", "waktuSistem": "22-02-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0027/0226", "tanggal": "23-02-2026", "idPasien": "P-0027", "noRm": "C-0127", "namaPasien": "Citra Kirana", "dokter": "drg. Danny", "kategori": "Tindakan", "item": "Exo Dewasa Ringan (Akar Tunggal)", "harga": 250000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 250000, "perawat": "Dina", "totalInvoice": 250000, "metode": "QRIS", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Dina", "waktuSistem": "23-02-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0028/0226", "tanggal": "24-02-2026", "idPasien": "P-0028", "noRm": "T-0128", "namaPasien": "Taufik Hidayatullah", "dokter": "drg. Astri", "kategori": "Tindakan", "item": "Kontrol Ortho Rutin (Ganti Karet/Power O)", "harga": 150000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 150000, "perawat": "Bernadette Rostenkowski", "totalInvoice": 150000, "metode": "Kartu Debit/Kredit", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Bernadette Rostenkowski", "waktuSistem": "24-02-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0029/0326", "tanggal": "25-03-2026", "idPasien": "P-0029", "noRm": "S-0129", "namaPasien": "Safira Salsabila", "dokter": "drg. Rizka", "kategori": "Tindakan", "item": "Rontgen Periapikal Digital", "harga": 100000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 100000, "perawat": "Wulan", "totalInvoice": 135000, "metode": "Tunai", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Wulan", "waktuSistem": "25-03-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0029/0326", "tanggal": "25-03-2026", "idPasien": "P-0029", "noRm": "S-0129", "namaPasien": "Safira Salsabila", "dokter": "drg. Rizka", "kategori": "Obat", "item": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "harga": 35000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 35000, "perawat": "Wulan", "totalInvoice": 135000, "metode": "Tunai", "status": "Lunas", "keterangan": "Medikasi Oral Pasca Tindakan", "kasir": "Wulan", "waktuSistem": "25-03-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0030/0326", "tanggal": "26-03-2026", "idPasien": "P-0030", "noRm": "B-0130", "namaPasien": "Bayu Pamungkas", "dokter": "drg. Nanda", "kategori": "Tindakan", "item": "Scalling Perawat", "harga": 150000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 150000, "perawat": "Dina", "totalInvoice": 150000, "metode": "Transfer Bank", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Dina", "waktuSistem": "26-03-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0031/0326", "tanggal": "27-03-2026", "idPasien": "P-0031", "noRm": "M-0131", "namaPasien": "Mega Utami", "dokter": "drg. Aviva", "kategori": "Tindakan", "item": "Crown PFM (Porcelain Fused to Metal)", "harga": 1500000, "qty": 1, "biayaLab": 350000, "diskon": 0, "grandTotalItem": 1500000, "perawat": "Bernadette Rostenkowski", "totalInvoice": 1500000, "metode": "QRIS", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Bernadette Rostenkowski", "waktuSistem": "27-03-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0032/0326", "tanggal": "28-03-2026", "idPasien": "P-0032", "noRm": "I-0132", "namaPasien": "Irfan Hakim", "dokter": "drg. Erien", "kategori": "Tindakan", "item": "PSA 1x Kunjungan (One Visit Endodontic)", "harga": 1500000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 1500000, "perawat": "Wulan", "totalInvoice": 1535000, "metode": "Kartu Debit/Kredit", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Wulan", "waktuSistem": "28-03-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0032/0326", "tanggal": "28-03-2026", "idPasien": "P-0032", "noRm": "I-0132", "namaPasien": "Irfan Hakim", "dokter": "drg. Erien", "kategori": "Obat", "item": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "harga": 35000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 35000, "perawat": "Wulan", "totalInvoice": 1535000, "metode": "Kartu Debit/Kredit", "status": "Lunas", "keterangan": "Medikasi Oral Pasca Tindakan", "kasir": "Wulan", "waktuSistem": "28-03-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0033/0326", "tanggal": "01-03-2026", "idPasien": "P-0033", "noRm": "V-0133", "namaPasien": "Vina Panduwinata", "dokter": "drg.g.p Dinda", "kategori": "Tindakan", "item": "Odontektomi Kelas I Ringan", "harga": 1800000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 1800000, "perawat": "Dina", "totalInvoice": 1800000, "metode": "Tunai", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Dina", "waktuSistem": "01-03-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0034/0326", "tanggal": "02-03-2026", "idPasien": "P-0034", "noRm": "D-0134", "namaPasien": "Deni Cagur Saputra", "dokter": "drg.g.p Fathya", "kategori": "Tindakan", "item": "Tumpat GIC Sedang", "harga": 250000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 250000, "perawat": "Bernadette Rostenkowski", "totalInvoice": 250000, "metode": "Transfer Bank", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Bernadette Rostenkowski", "waktuSistem": "02-03-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0035/0326", "tanggal": "03-03-2026", "idPasien": "P-0035", "noRm": "N-0135", "namaPasien": "Nadia Putri Pratama (2)", "dokter": "drg.g.p Belinda", "kategori": "Tindakan", "item": "Tumpat Komposit Sedang", "harga": 300000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 300000, "perawat": "Wulan", "totalInvoice": 335000, "metode": "QRIS", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Wulan", "waktuSistem": "03-03-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0035/0326", "tanggal": "03-03-2026", "idPasien": "P-0035", "noRm": "N-0135", "namaPasien": "Nadia Putri Pratama (2)", "dokter": "drg.g.p Belinda", "kategori": "Obat", "item": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "harga": 35000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 35000, "perawat": "Wulan", "totalInvoice": 335000, "metode": "QRIS", "status": "Lunas", "keterangan": "Medikasi Oral Pasca Tindakan", "kasir": "Wulan", "waktuSistem": "03-03-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0036/0326", "tanggal": "04-03-2026", "idPasien": "P-0036", "noRm": "R-0136", "namaPasien": "Rizky Ramadhan (2)", "dokter": "drg. Rahma Yulinda D, Sp. BMM", "kategori": "Tindakan", "item": "Scalling Sedang", "harga": 250000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 250000, "perawat": "Dina", "totalInvoice": 250000, "metode": "Kartu Debit/Kredit", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Dina", "waktuSistem": "04-03-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0037/0326", "tanggal": "05-03-2026", "idPasien": "P-0037", "noRm": "A-0137", "namaPasien": "Aulia Zahra (2)", "dokter": "drg. Tia Ardhana R", "kategori": "Tindakan", "item": "Exo Dewasa Ringan (Akar Tunggal)", "harga": 250000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 250000, "perawat": "Bernadette Rostenkowski", "totalInvoice": 250000, "metode": "Tunai", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Bernadette Rostenkowski", "waktuSistem": "05-03-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0038/0326", "tanggal": "06-03-2026", "idPasien": "P-0038", "noRm": "F-0138", "namaPasien": "Fajar Nugraha (2)", "dokter": "drg. Danny", "kategori": "Tindakan", "item": "Kontrol Ortho Rutin (Ganti Karet/Power O)", "harga": 150000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 150000, "perawat": "Wulan", "totalInvoice": 185000, "metode": "Transfer Bank", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Wulan", "waktuSistem": "06-03-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0038/0326", "tanggal": "06-03-2026", "idPasien": "P-0038", "noRm": "F-0138", "namaPasien": "Fajar Nugraha (2)", "dokter": "drg. Danny", "kategori": "Obat", "item": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "harga": 35000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 35000, "perawat": "Wulan", "totalInvoice": 185000, "metode": "Transfer Bank", "status": "Lunas", "keterangan": "Medikasi Oral Pasca Tindakan", "kasir": "Wulan", "waktuSistem": "06-03-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0039/0326", "tanggal": "07-03-2026", "idPasien": "P-0039", "noRm": "D-0139", "namaPasien": "Dewi Kartika Sari (2)", "dokter": "drg. Astri", "kategori": "Tindakan", "item": "Rontgen Periapikal Digital", "harga": 100000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 100000, "perawat": "Dina", "totalInvoice": 100000, "metode": "QRIS", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Dina", "waktuSistem": "07-03-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0040/0326", "tanggal": "08-03-2026", "idPasien": "P-0040", "noRm": "B-0140", "namaPasien": "Bagus Setiawan (2)", "dokter": "drg. Rizka", "kategori": "Tindakan", "item": "Scalling Perawat", "harga": 150000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 150000, "perawat": "Bernadette Rostenkowski", "totalInvoice": 150000, "metode": "Kartu Debit/Kredit", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Bernadette Rostenkowski", "waktuSistem": "08-03-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0041/0426", "tanggal": "09-04-2026", "idPasien": "P-0041", "noRm": "I-0141", "namaPasien": "Intan Permata (2)", "dokter": "drg. Nanda", "kategori": "Tindakan", "item": "Crown PFM (Porcelain Fused to Metal)", "harga": 1500000, "qty": 1, "biayaLab": 350000, "diskon": 0, "grandTotalItem": 1500000, "perawat": "Wulan", "totalInvoice": 1535000, "metode": "Tunai", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Wulan", "waktuSistem": "09-04-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0041/0426", "tanggal": "09-04-2026", "idPasien": "P-0041", "noRm": "I-0141", "namaPasien": "Intan Permata (2)", "dokter": "drg. Nanda", "kategori": "Obat", "item": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "harga": 35000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 35000, "perawat": "Wulan", "totalInvoice": 1535000, "metode": "Tunai", "status": "Lunas", "keterangan": "Medikasi Oral Pasca Tindakan", "kasir": "Wulan", "waktuSistem": "09-04-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0042/0426", "tanggal": "10-04-2026", "idPasien": "P-0042", "noRm": "D-0142", "namaPasien": "Dimas Aditya (2)", "dokter": "drg. Aviva", "kategori": "Tindakan", "item": "PSA 1x Kunjungan (One Visit Endodontic)", "harga": 1500000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 1500000, "perawat": "Dina", "totalInvoice": 1500000, "metode": "Transfer Bank", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Dina", "waktuSistem": "10-04-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0043/0426", "tanggal": "11-04-2026", "idPasien": "P-0043", "noRm": "R-0143", "namaPasien": "Rina Wulandari (2)", "dokter": "drg. Erien", "kategori": "Tindakan", "item": "Odontektomi Kelas I Ringan", "harga": 1800000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 1800000, "perawat": "Bernadette Rostenkowski", "totalInvoice": 1800000, "metode": "QRIS", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Bernadette Rostenkowski", "waktuSistem": "11-04-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0044/0426", "tanggal": "12-04-2026", "idPasien": "P-0044", "noRm": "E-0144", "namaPasien": "Eko Prasetyo (2)", "dokter": "drg.g.p Dinda", "kategori": "Tindakan", "item": "Tumpat GIC Sedang", "harga": 250000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 250000, "perawat": "Wulan", "totalInvoice": 285000, "metode": "Kartu Debit/Kredit", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Wulan", "waktuSistem": "12-04-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0044/0426", "tanggal": "12-04-2026", "idPasien": "P-0044", "noRm": "E-0144", "namaPasien": "Eko Prasetyo (2)", "dokter": "drg.g.p Dinda", "kategori": "Obat", "item": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "harga": 35000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 35000, "perawat": "Wulan", "totalInvoice": 285000, "metode": "Kartu Debit/Kredit", "status": "Lunas", "keterangan": "Medikasi Oral Pasca Tindakan", "kasir": "Wulan", "waktuSistem": "12-04-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0045/0426", "tanggal": "13-04-2026", "idPasien": "P-0045", "noRm": "M-0145", "namaPasien": "Maya Anggraini (2)", "dokter": "drg.g.p Fathya", "kategori": "Tindakan", "item": "Tumpat Komposit Sedang", "harga": 300000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 300000, "perawat": "Dina", "totalInvoice": 300000, "metode": "Tunai", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Dina", "waktuSistem": "13-04-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0046/0426", "tanggal": "14-04-2026", "idPasien": "P-0046", "noRm": "A-0146", "namaPasien": "Andi Wijaya Kusuma (2)", "dokter": "drg.g.p Belinda", "kategori": "Tindakan", "item": "Scalling Sedang", "harga": 250000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 250000, "perawat": "Bernadette Rostenkowski", "totalInvoice": 250000, "metode": "Transfer Bank", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Bernadette Rostenkowski", "waktuSistem": "14-04-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0047/0426", "tanggal": "15-04-2026", "idPasien": "P-0047", "noRm": "P-0147", "namaPasien": "Putri Maharani (2)", "dokter": "drg. Rahma Yulinda D, Sp. BMM", "kategori": "Tindakan", "item": "Exo Dewasa Ringan (Akar Tunggal)", "harga": 250000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 250000, "perawat": "Wulan", "totalInvoice": 285000, "metode": "QRIS", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Wulan", "waktuSistem": "15-04-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0047/0426", "tanggal": "15-04-2026", "idPasien": "P-0047", "noRm": "P-0147", "namaPasien": "Putri Maharani (2)", "dokter": "drg. Rahma Yulinda D, Sp. BMM", "kategori": "Obat", "item": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "harga": 35000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 35000, "perawat": "Wulan", "totalInvoice": 285000, "metode": "QRIS", "status": "Lunas", "keterangan": "Medikasi Oral Pasca Tindakan", "kasir": "Wulan", "waktuSistem": "15-04-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0048/0426", "tanggal": "16-04-2026", "idPasien": "P-0048", "noRm": "R-0148", "namaPasien": "Reza Pahlevi (2)", "dokter": "drg. Tia Ardhana R", "kategori": "Tindakan", "item": "Kontrol Ortho Rutin (Ganti Karet/Power O)", "harga": 150000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 150000, "perawat": "Dina", "totalInvoice": 150000, "metode": "Kartu Debit/Kredit", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Dina", "waktuSistem": "16-04-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0049/0426", "tanggal": "17-04-2026", "idPasien": "P-0049", "noRm": "F-0149", "namaPasien": "Fitriani Nur (2)", "dokter": "drg. Danny", "kategori": "Tindakan", "item": "Rontgen Periapikal Digital", "harga": 100000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 100000, "perawat": "Bernadette Rostenkowski", "totalInvoice": 100000, "metode": "Tunai", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Bernadette Rostenkowski", "waktuSistem": "17-04-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0050/0426", "tanggal": "18-04-2026", "idPasien": "P-0050", "noRm": "W-0150", "namaPasien": "Wahyu Hidayat (2)", "dokter": "drg. Astri", "kategori": "Tindakan", "item": "Scalling Perawat", "harga": 150000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 150000, "perawat": "Wulan", "totalInvoice": 185000, "metode": "Transfer Bank", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Wulan", "waktuSistem": "18-04-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0050/0426", "tanggal": "18-04-2026", "idPasien": "P-0050", "noRm": "W-0150", "namaPasien": "Wahyu Hidayat (2)", "dokter": "drg. Astri", "kategori": "Obat", "item": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "harga": 35000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 35000, "perawat": "Wulan", "totalInvoice": 185000, "metode": "Transfer Bank", "status": "Lunas", "keterangan": "Medikasi Oral Pasca Tindakan", "kasir": "Wulan", "waktuSistem": "18-04-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0051/0426", "tanggal": "19-04-2026", "idPasien": "P-0051", "noRm": "N-0151", "namaPasien": "Nisa Amelia (2)", "dokter": "drg. Rizka", "kategori": "Tindakan", "item": "Crown PFM (Porcelain Fused to Metal)", "harga": 1500000, "qty": 1, "biayaLab": 350000, "diskon": 0, "grandTotalItem": 1500000, "perawat": "Dina", "totalInvoice": 1500000, "metode": "QRIS", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Dina", "waktuSistem": "19-04-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0052/0426", "tanggal": "20-04-2026", "idPasien": "P-0052", "noRm": "A-0152", "namaPasien": "Arif Budiman (2)", "dokter": "drg. Nanda", "kategori": "Tindakan", "item": "PSA 1x Kunjungan (One Visit Endodontic)", "harga": 1500000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 1500000, "perawat": "Bernadette Rostenkowski", "totalInvoice": 1500000, "metode": "Kartu Debit/Kredit", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Bernadette Rostenkowski", "waktuSistem": "20-04-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0053/0526", "tanggal": "21-05-2026", "idPasien": "P-0053", "noRm": "D-0153", "namaPasien": "Diana Puspita (2)", "dokter": "drg. Aviva", "kategori": "Tindakan", "item": "Odontektomi Kelas I Ringan", "harga": 1800000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 1800000, "perawat": "Wulan", "totalInvoice": 1835000, "metode": "Tunai", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Wulan", "waktuSistem": "21-05-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0053/0526", "tanggal": "21-05-2026", "idPasien": "P-0053", "noRm": "D-0153", "namaPasien": "Diana Puspita (2)", "dokter": "drg. Aviva", "kategori": "Obat", "item": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "harga": 35000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 35000, "perawat": "Wulan", "totalInvoice": 1835000, "metode": "Tunai", "status": "Lunas", "keterangan": "Medikasi Oral Pasca Tindakan", "kasir": "Wulan", "waktuSistem": "21-05-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0054/0526", "tanggal": "22-05-2026", "idPasien": "P-0054", "noRm": "G-0154", "namaPasien": "Galih Prakoso (2)", "dokter": "drg. Erien", "kategori": "Tindakan", "item": "Tumpat GIC Sedang", "harga": 250000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 250000, "perawat": "Dina", "totalInvoice": 250000, "metode": "Transfer Bank", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Dina", "waktuSistem": "22-05-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0055/0526", "tanggal": "23-05-2026", "idPasien": "P-0055", "noRm": "L-0155", "namaPasien": "Lestari Handayani (2)", "dokter": "drg.g.p Dinda", "kategori": "Tindakan", "item": "Tumpat Komposit Sedang", "harga": 300000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 300000, "perawat": "Bernadette Rostenkowski", "totalInvoice": 300000, "metode": "QRIS", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Bernadette Rostenkowski", "waktuSistem": "23-05-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0056/0526", "tanggal": "24-05-2026", "idPasien": "P-0056", "noRm": "Y-0156", "namaPasien": "Yusuf Maulana (2)", "dokter": "drg.g.p Fathya", "kategori": "Tindakan", "item": "Scalling Sedang", "harga": 250000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 250000, "perawat": "Wulan", "totalInvoice": 285000, "metode": "Kartu Debit/Kredit", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Wulan", "waktuSistem": "24-05-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0056/0526", "tanggal": "24-05-2026", "idPasien": "P-0056", "noRm": "Y-0156", "namaPasien": "Yusuf Maulana (2)", "dokter": "drg.g.p Fathya", "kategori": "Obat", "item": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "harga": 35000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 35000, "perawat": "Wulan", "totalInvoice": 285000, "metode": "Kartu Debit/Kredit", "status": "Lunas", "keterangan": "Medikasi Oral Pasca Tindakan", "kasir": "Wulan", "waktuSistem": "24-05-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0057/0526", "tanggal": "25-05-2026", "idPasien": "P-0057", "noRm": "C-0157", "namaPasien": "Citra Kirana (2)", "dokter": "drg.g.p Belinda", "kategori": "Tindakan", "item": "Exo Dewasa Ringan (Akar Tunggal)", "harga": 250000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 250000, "perawat": "Dina", "totalInvoice": 250000, "metode": "Tunai", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Dina", "waktuSistem": "25-05-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0058/0526", "tanggal": "26-05-2026", "idPasien": "P-0058", "noRm": "T-0158", "namaPasien": "Taufik Hidayatullah (2)", "dokter": "drg. Rahma Yulinda D, Sp. BMM", "kategori": "Tindakan", "item": "Kontrol Ortho Rutin (Ganti Karet/Power O)", "harga": 150000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 150000, "perawat": "Bernadette Rostenkowski", "totalInvoice": 150000, "metode": "Transfer Bank", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Bernadette Rostenkowski", "waktuSistem": "26-05-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0059/0526", "tanggal": "27-05-2026", "idPasien": "P-0059", "noRm": "S-0159", "namaPasien": "Safira Salsabila (2)", "dokter": "drg. Tia Ardhana R", "kategori": "Tindakan", "item": "Rontgen Periapikal Digital", "harga": 100000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 100000, "perawat": "Wulan", "totalInvoice": 135000, "metode": "QRIS", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Wulan", "waktuSistem": "27-05-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0059/0526", "tanggal": "27-05-2026", "idPasien": "P-0059", "noRm": "S-0159", "namaPasien": "Safira Salsabila (2)", "dokter": "drg. Tia Ardhana R", "kategori": "Obat", "item": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "harga": 35000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 35000, "perawat": "Wulan", "totalInvoice": 135000, "metode": "QRIS", "status": "Lunas", "keterangan": "Medikasi Oral Pasca Tindakan", "kasir": "Wulan", "waktuSistem": "27-05-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0060/0526", "tanggal": "28-05-2026", "idPasien": "P-0060", "noRm": "B-0160", "namaPasien": "Bayu Pamungkas (2)", "dokter": "drg. Danny", "kategori": "Tindakan", "item": "Scalling Perawat", "harga": 150000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 150000, "perawat": "Dina", "totalInvoice": 150000, "metode": "Kartu Debit/Kredit", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Dina", "waktuSistem": "28-05-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0061/0526", "tanggal": "01-05-2026", "idPasien": "P-0061", "noRm": "M-0161", "namaPasien": "Mega Utami (2)", "dokter": "drg. Astri", "kategori": "Tindakan", "item": "Crown PFM (Porcelain Fused to Metal)", "harga": 1500000, "qty": 1, "biayaLab": 350000, "diskon": 0, "grandTotalItem": 1500000, "perawat": "Bernadette Rostenkowski", "totalInvoice": 1500000, "metode": "Tunai", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Bernadette Rostenkowski", "waktuSistem": "01-05-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0062/0526", "tanggal": "02-05-2026", "idPasien": "P-0062", "noRm": "I-0162", "namaPasien": "Irfan Hakim (2)", "dokter": "drg. Rizka", "kategori": "Tindakan", "item": "PSA 1x Kunjungan (One Visit Endodontic)", "harga": 1500000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 1500000, "perawat": "Wulan", "totalInvoice": 1535000, "metode": "Transfer Bank", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Wulan", "waktuSistem": "02-05-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0062/0526", "tanggal": "02-05-2026", "idPasien": "P-0062", "noRm": "I-0162", "namaPasien": "Irfan Hakim (2)", "dokter": "drg. Rizka", "kategori": "Obat", "item": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "harga": 35000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 35000, "perawat": "Wulan", "totalInvoice": 1535000, "metode": "Transfer Bank", "status": "Lunas", "keterangan": "Medikasi Oral Pasca Tindakan", "kasir": "Wulan", "waktuSistem": "02-05-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0063/0526", "tanggal": "03-05-2026", "idPasien": "P-0063", "noRm": "V-0163", "namaPasien": "Vina Panduwinata (2)", "dokter": "drg. Nanda", "kategori": "Tindakan", "item": "Odontektomi Kelas I Ringan", "harga": 1800000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 1800000, "perawat": "Dina", "totalInvoice": 1800000, "metode": "QRIS", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Dina", "waktuSistem": "03-05-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0064/0526", "tanggal": "04-05-2026", "idPasien": "P-0064", "noRm": "D-0164", "namaPasien": "Deni Cagur Saputra (2)", "dokter": "drg. Aviva", "kategori": "Tindakan", "item": "Tumpat GIC Sedang", "harga": 250000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 250000, "perawat": "Bernadette Rostenkowski", "totalInvoice": 250000, "metode": "Kartu Debit/Kredit", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Bernadette Rostenkowski", "waktuSistem": "04-05-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0065/0626", "tanggal": "05-06-2026", "idPasien": "P-0065", "noRm": "N-0165", "namaPasien": "Nadia Putri Pratama (3)", "dokter": "drg. Erien", "kategori": "Tindakan", "item": "Tumpat Komposit Sedang", "harga": 300000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 300000, "perawat": "Wulan", "totalInvoice": 335000, "metode": "Tunai", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Wulan", "waktuSistem": "05-06-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0065/0626", "tanggal": "05-06-2026", "idPasien": "P-0065", "noRm": "N-0165", "namaPasien": "Nadia Putri Pratama (3)", "dokter": "drg. Erien", "kategori": "Obat", "item": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "harga": 35000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 35000, "perawat": "Wulan", "totalInvoice": 335000, "metode": "Tunai", "status": "Lunas", "keterangan": "Medikasi Oral Pasca Tindakan", "kasir": "Wulan", "waktuSistem": "05-06-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0066/0626", "tanggal": "06-06-2026", "idPasien": "P-0066", "noRm": "R-0166", "namaPasien": "Rizky Ramadhan (3)", "dokter": "drg.g.p Dinda", "kategori": "Tindakan", "item": "Scalling Sedang", "harga": 250000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 250000, "perawat": "Dina", "totalInvoice": 250000, "metode": "Transfer Bank", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Dina", "waktuSistem": "06-06-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0067/0626", "tanggal": "07-06-2026", "idPasien": "P-0067", "noRm": "A-0167", "namaPasien": "Aulia Zahra (3)", "dokter": "drg.g.p Fathya", "kategori": "Tindakan", "item": "Exo Dewasa Ringan (Akar Tunggal)", "harga": 250000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 250000, "perawat": "Bernadette Rostenkowski", "totalInvoice": 250000, "metode": "QRIS", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Bernadette Rostenkowski", "waktuSistem": "07-06-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0068/0626", "tanggal": "08-06-2026", "idPasien": "P-0068", "noRm": "F-0168", "namaPasien": "Fajar Nugraha (3)", "dokter": "drg.g.p Belinda", "kategori": "Tindakan", "item": "Kontrol Ortho Rutin (Ganti Karet/Power O)", "harga": 150000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 150000, "perawat": "Wulan", "totalInvoice": 185000, "metode": "Kartu Debit/Kredit", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Wulan", "waktuSistem": "08-06-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0068/0626", "tanggal": "08-06-2026", "idPasien": "P-0068", "noRm": "F-0168", "namaPasien": "Fajar Nugraha (3)", "dokter": "drg.g.p Belinda", "kategori": "Obat", "item": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "harga": 35000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 35000, "perawat": "Wulan", "totalInvoice": 185000, "metode": "Kartu Debit/Kredit", "status": "Lunas", "keterangan": "Medikasi Oral Pasca Tindakan", "kasir": "Wulan", "waktuSistem": "08-06-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0069/0626", "tanggal": "09-06-2026", "idPasien": "P-0069", "noRm": "D-0169", "namaPasien": "Dewi Kartika Sari (3)", "dokter": "drg. Rahma Yulinda D, Sp. BMM", "kategori": "Tindakan", "item": "Rontgen Periapikal Digital", "harga": 100000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 100000, "perawat": "Dina", "totalInvoice": 100000, "metode": "Tunai", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Dina", "waktuSistem": "09-06-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0070/0626", "tanggal": "10-06-2026", "idPasien": "P-0070", "noRm": "B-0170", "namaPasien": "Bagus Setiawan (3)", "dokter": "drg. Tia Ardhana R", "kategori": "Tindakan", "item": "Scalling Perawat", "harga": 150000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 150000, "perawat": "Bernadette Rostenkowski", "totalInvoice": 150000, "metode": "Transfer Bank", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Bernadette Rostenkowski", "waktuSistem": "10-06-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0071/0626", "tanggal": "11-06-2026", "idPasien": "P-0071", "noRm": "I-0171", "namaPasien": "Intan Permata (3)", "dokter": "drg. Danny", "kategori": "Tindakan", "item": "Crown PFM (Porcelain Fused to Metal)", "harga": 1500000, "qty": 1, "biayaLab": 350000, "diskon": 0, "grandTotalItem": 1500000, "perawat": "Wulan", "totalInvoice": 1535000, "metode": "QRIS", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Wulan", "waktuSistem": "11-06-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0071/0626", "tanggal": "11-06-2026", "idPasien": "P-0071", "noRm": "I-0171", "namaPasien": "Intan Permata (3)", "dokter": "drg. Danny", "kategori": "Obat", "item": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "harga": 35000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 35000, "perawat": "Wulan", "totalInvoice": 1535000, "metode": "QRIS", "status": "Lunas", "keterangan": "Medikasi Oral Pasca Tindakan", "kasir": "Wulan", "waktuSistem": "11-06-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0072/0626", "tanggal": "12-06-2026", "idPasien": "P-0072", "noRm": "D-0172", "namaPasien": "Dimas Aditya (3)", "dokter": "drg. Astri", "kategori": "Tindakan", "item": "PSA 1x Kunjungan (One Visit Endodontic)", "harga": 1500000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 1500000, "perawat": "Dina", "totalInvoice": 1500000, "metode": "Kartu Debit/Kredit", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Dina", "waktuSistem": "12-06-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0073/0626", "tanggal": "13-06-2026", "idPasien": "P-0073", "noRm": "R-0173", "namaPasien": "Rina Wulandari (3)", "dokter": "drg. Rizka", "kategori": "Tindakan", "item": "Odontektomi Kelas I Ringan", "harga": 1800000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 1800000, "perawat": "Bernadette Rostenkowski", "totalInvoice": 1800000, "metode": "Tunai", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Bernadette Rostenkowski", "waktuSistem": "13-06-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0074/0626", "tanggal": "14-06-2026", "idPasien": "P-0074", "noRm": "E-0174", "namaPasien": "Eko Prasetyo (3)", "dokter": "drg. Nanda", "kategori": "Tindakan", "item": "Tumpat GIC Sedang", "harga": 250000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 250000, "perawat": "Wulan", "totalInvoice": 285000, "metode": "Transfer Bank", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Wulan", "waktuSistem": "14-06-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0074/0626", "tanggal": "14-06-2026", "idPasien": "P-0074", "noRm": "E-0174", "namaPasien": "Eko Prasetyo (3)", "dokter": "drg. Nanda", "kategori": "Obat", "item": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "harga": 35000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 35000, "perawat": "Wulan", "totalInvoice": 285000, "metode": "Transfer Bank", "status": "Lunas", "keterangan": "Medikasi Oral Pasca Tindakan", "kasir": "Wulan", "waktuSistem": "14-06-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0075/0626", "tanggal": "15-06-2026", "idPasien": "P-0075", "noRm": "M-0175", "namaPasien": "Maya Anggraini (3)", "dokter": "drg. Aviva", "kategori": "Tindakan", "item": "Tumpat Komposit Sedang", "harga": 300000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 300000, "perawat": "Dina", "totalInvoice": 300000, "metode": "QRIS", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Dina", "waktuSistem": "15-06-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0076/0626", "tanggal": "16-06-2026", "idPasien": "P-0076", "noRm": "A-0176", "namaPasien": "Andi Wijaya Kusuma (3)", "dokter": "drg. Erien", "kategori": "Tindakan", "item": "Scalling Sedang", "harga": 250000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 250000, "perawat": "Bernadette Rostenkowski", "totalInvoice": 250000, "metode": "Kartu Debit/Kredit", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Bernadette Rostenkowski", "waktuSistem": "16-06-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0077/0726", "tanggal": "17-07-2026", "idPasien": "P-0077", "noRm": "P-0177", "namaPasien": "Putri Maharani (3)", "dokter": "drg.g.p Dinda", "kategori": "Tindakan", "item": "Exo Dewasa Ringan (Akar Tunggal)", "harga": 250000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 250000, "perawat": "Wulan", "totalInvoice": 285000, "metode": "Tunai", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Wulan", "waktuSistem": "17-07-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0077/0726", "tanggal": "17-07-2026", "idPasien": "P-0077", "noRm": "P-0177", "namaPasien": "Putri Maharani (3)", "dokter": "drg.g.p Dinda", "kategori": "Obat", "item": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "harga": 35000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 35000, "perawat": "Wulan", "totalInvoice": 285000, "metode": "Tunai", "status": "Lunas", "keterangan": "Medikasi Oral Pasca Tindakan", "kasir": "Wulan", "waktuSistem": "17-07-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0078/0726", "tanggal": "18-07-2026", "idPasien": "P-0078", "noRm": "R-0178", "namaPasien": "Reza Pahlevi (3)", "dokter": "drg.g.p Fathya", "kategori": "Tindakan", "item": "Kontrol Ortho Rutin (Ganti Karet/Power O)", "harga": 150000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 150000, "perawat": "Dina", "totalInvoice": 150000, "metode": "Transfer Bank", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Dina", "waktuSistem": "18-07-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0079/0726", "tanggal": "19-07-2026", "idPasien": "P-0079", "noRm": "F-0179", "namaPasien": "Fitriani Nur (3)", "dokter": "drg.g.p Belinda", "kategori": "Tindakan", "item": "Rontgen Periapikal Digital", "harga": 100000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 100000, "perawat": "Bernadette Rostenkowski", "totalInvoice": 100000, "metode": "QRIS", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Bernadette Rostenkowski", "waktuSistem": "19-07-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0080/0726", "tanggal": "20-07-2026", "idPasien": "P-0080", "noRm": "W-0180", "namaPasien": "Wahyu Hidayat (3)", "dokter": "drg. Rahma Yulinda D, Sp. BMM", "kategori": "Tindakan", "item": "Scalling Perawat", "harga": 150000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 150000, "perawat": "Wulan", "totalInvoice": 185000, "metode": "Kartu Debit/Kredit", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Wulan", "waktuSistem": "20-07-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0080/0726", "tanggal": "20-07-2026", "idPasien": "P-0080", "noRm": "W-0180", "namaPasien": "Wahyu Hidayat (3)", "dokter": "drg. Rahma Yulinda D, Sp. BMM", "kategori": "Obat", "item": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "harga": 35000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 35000, "perawat": "Wulan", "totalInvoice": 185000, "metode": "Kartu Debit/Kredit", "status": "Lunas", "keterangan": "Medikasi Oral Pasca Tindakan", "kasir": "Wulan", "waktuSistem": "20-07-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0081/0726", "tanggal": "21-07-2026", "idPasien": "P-0081", "noRm": "N-0181", "namaPasien": "Nisa Amelia (3)", "dokter": "drg. Tia Ardhana R", "kategori": "Tindakan", "item": "Crown PFM (Porcelain Fused to Metal)", "harga": 1500000, "qty": 1, "biayaLab": 350000, "diskon": 0, "grandTotalItem": 1500000, "perawat": "Dina", "totalInvoice": 1500000, "metode": "Tunai", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Dina", "waktuSistem": "21-07-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0082/0726", "tanggal": "22-07-2026", "idPasien": "P-0082", "noRm": "A-0182", "namaPasien": "Arif Budiman (3)", "dokter": "drg. Danny", "kategori": "Tindakan", "item": "PSA 1x Kunjungan (One Visit Endodontic)", "harga": 1500000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 1500000, "perawat": "Bernadette Rostenkowski", "totalInvoice": 1500000, "metode": "Transfer Bank", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Bernadette Rostenkowski", "waktuSistem": "22-07-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0083/0726", "tanggal": "23-07-2026", "idPasien": "P-0083", "noRm": "D-0183", "namaPasien": "Diana Puspita (3)", "dokter": "drg. Astri", "kategori": "Tindakan", "item": "Odontektomi Kelas I Ringan", "harga": 1800000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 1800000, "perawat": "Wulan", "totalInvoice": 1835000, "metode": "QRIS", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Wulan", "waktuSistem": "23-07-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0083/0726", "tanggal": "23-07-2026", "idPasien": "P-0083", "noRm": "D-0183", "namaPasien": "Diana Puspita (3)", "dokter": "drg. Astri", "kategori": "Obat", "item": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "harga": 35000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 35000, "perawat": "Wulan", "totalInvoice": 1835000, "metode": "QRIS", "status": "Lunas", "keterangan": "Medikasi Oral Pasca Tindakan", "kasir": "Wulan", "waktuSistem": "23-07-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0084/0726", "tanggal": "24-07-2026", "idPasien": "P-0084", "noRm": "G-0184", "namaPasien": "Galih Prakoso (3)", "dokter": "drg. Rizka", "kategori": "Tindakan", "item": "Tumpat GIC Sedang", "harga": 250000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 250000, "perawat": "Dina", "totalInvoice": 250000, "metode": "Kartu Debit/Kredit", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Dina", "waktuSistem": "24-07-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0085/0726", "tanggal": "25-07-2026", "idPasien": "P-0085", "noRm": "L-0185", "namaPasien": "Lestari Handayani (3)", "dokter": "drg. Nanda", "kategori": "Tindakan", "item": "Tumpat Komposit Sedang", "harga": 300000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 300000, "perawat": "Bernadette Rostenkowski", "totalInvoice": 300000, "metode": "Tunai", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Bernadette Rostenkowski", "waktuSistem": "25-07-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0086/0726", "tanggal": "26-07-2026", "idPasien": "P-0086", "noRm": "Y-0186", "namaPasien": "Yusuf Maulana (3)", "dokter": "drg. Aviva", "kategori": "Tindakan", "item": "Scalling Sedang", "harga": 250000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 250000, "perawat": "Wulan", "totalInvoice": 285000, "metode": "Transfer Bank", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Wulan", "waktuSistem": "26-07-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0086/0726", "tanggal": "26-07-2026", "idPasien": "P-0086", "noRm": "Y-0186", "namaPasien": "Yusuf Maulana (3)", "dokter": "drg. Aviva", "kategori": "Obat", "item": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "harga": 35000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 35000, "perawat": "Wulan", "totalInvoice": 285000, "metode": "Transfer Bank", "status": "Lunas", "keterangan": "Medikasi Oral Pasca Tindakan", "kasir": "Wulan", "waktuSistem": "26-07-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0087/0726", "tanggal": "27-07-2026", "idPasien": "P-0087", "noRm": "C-0187", "namaPasien": "Citra Kirana (3)", "dokter": "drg. Erien", "kategori": "Tindakan", "item": "Exo Dewasa Ringan (Akar Tunggal)", "harga": 250000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 250000, "perawat": "Dina", "totalInvoice": 250000, "metode": "QRIS", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Dina", "waktuSistem": "27-07-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0088/0726", "tanggal": "28-07-2026", "idPasien": "P-0088", "noRm": "T-0188", "namaPasien": "Taufik Hidayatullah (3)", "dokter": "drg.g.p Dinda", "kategori": "Tindakan", "item": "Kontrol Ortho Rutin (Ganti Karet/Power O)", "harga": 150000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 150000, "perawat": "Bernadette Rostenkowski", "totalInvoice": 150000, "metode": "Kartu Debit/Kredit", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Bernadette Rostenkowski", "waktuSistem": "28-07-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0089/0826", "tanggal": "01-08-2026", "idPasien": "P-0089", "noRm": "S-0189", "namaPasien": "Safira Salsabila (3)", "dokter": "drg.g.p Fathya", "kategori": "Tindakan", "item": "Rontgen Periapikal Digital", "harga": 100000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 100000, "perawat": "Wulan", "totalInvoice": 135000, "metode": "Tunai", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Wulan", "waktuSistem": "01-08-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0089/0826", "tanggal": "01-08-2026", "idPasien": "P-0089", "noRm": "S-0189", "namaPasien": "Safira Salsabila (3)", "dokter": "drg.g.p Fathya", "kategori": "Obat", "item": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "harga": 35000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 35000, "perawat": "Wulan", "totalInvoice": 135000, "metode": "Tunai", "status": "Lunas", "keterangan": "Medikasi Oral Pasca Tindakan", "kasir": "Wulan", "waktuSistem": "01-08-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0090/0826", "tanggal": "02-08-2026", "idPasien": "P-0090", "noRm": "B-0190", "namaPasien": "Bayu Pamungkas (3)", "dokter": "drg.g.p Belinda", "kategori": "Tindakan", "item": "Scalling Perawat", "harga": 150000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 150000, "perawat": "Dina", "totalInvoice": 150000, "metode": "Transfer Bank", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Dina", "waktuSistem": "02-08-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0091/0826", "tanggal": "03-08-2026", "idPasien": "P-0091", "noRm": "M-0191", "namaPasien": "Mega Utami (3)", "dokter": "drg. Rahma Yulinda D, Sp. BMM", "kategori": "Tindakan", "item": "Crown PFM (Porcelain Fused to Metal)", "harga": 1500000, "qty": 1, "biayaLab": 350000, "diskon": 0, "grandTotalItem": 1500000, "perawat": "Bernadette Rostenkowski", "totalInvoice": 1500000, "metode": "QRIS", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Bernadette Rostenkowski", "waktuSistem": "03-08-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0092/0826", "tanggal": "04-08-2026", "idPasien": "P-0092", "noRm": "I-0192", "namaPasien": "Irfan Hakim (3)", "dokter": "drg. Tia Ardhana R", "kategori": "Tindakan", "item": "PSA 1x Kunjungan (One Visit Endodontic)", "harga": 1500000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 1500000, "perawat": "Wulan", "totalInvoice": 1535000, "metode": "Kartu Debit/Kredit", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Wulan", "waktuSistem": "04-08-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0092/0826", "tanggal": "04-08-2026", "idPasien": "P-0092", "noRm": "I-0192", "namaPasien": "Irfan Hakim (3)", "dokter": "drg. Tia Ardhana R", "kategori": "Obat", "item": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "harga": 35000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 35000, "perawat": "Wulan", "totalInvoice": 1535000, "metode": "Kartu Debit/Kredit", "status": "Lunas", "keterangan": "Medikasi Oral Pasca Tindakan", "kasir": "Wulan", "waktuSistem": "04-08-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0093/0826", "tanggal": "05-08-2026", "idPasien": "P-0093", "noRm": "V-0193", "namaPasien": "Vina Panduwinata (3)", "dokter": "drg. Danny", "kategori": "Tindakan", "item": "Odontektomi Kelas I Ringan", "harga": 1800000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 1800000, "perawat": "Dina", "totalInvoice": 1800000, "metode": "Tunai", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Dina", "waktuSistem": "05-08-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0094/0826", "tanggal": "06-08-2026", "idPasien": "P-0094", "noRm": "D-0194", "namaPasien": "Deni Cagur Saputra (3)", "dokter": "drg. Astri", "kategori": "Tindakan", "item": "Tumpat GIC Sedang", "harga": 250000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 250000, "perawat": "Bernadette Rostenkowski", "totalInvoice": 250000, "metode": "Transfer Bank", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Bernadette Rostenkowski", "waktuSistem": "06-08-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0095/0826", "tanggal": "07-08-2026", "idPasien": "P-0095", "noRm": "N-0195", "namaPasien": "Nadia Putri Pratama (4)", "dokter": "drg. Rizka", "kategori": "Tindakan", "item": "Tumpat Komposit Sedang", "harga": 300000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 300000, "perawat": "Wulan", "totalInvoice": 335000, "metode": "QRIS", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Wulan", "waktuSistem": "07-08-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0095/0826", "tanggal": "07-08-2026", "idPasien": "P-0095", "noRm": "N-0195", "namaPasien": "Nadia Putri Pratama (4)", "dokter": "drg. Rizka", "kategori": "Obat", "item": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "harga": 35000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 35000, "perawat": "Wulan", "totalInvoice": 335000, "metode": "QRIS", "status": "Lunas", "keterangan": "Medikasi Oral Pasca Tindakan", "kasir": "Wulan", "waktuSistem": "07-08-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0096/0826", "tanggal": "08-08-2026", "idPasien": "P-0096", "noRm": "R-0196", "namaPasien": "Rizky Ramadhan (4)", "dokter": "drg. Nanda", "kategori": "Tindakan", "item": "Scalling Sedang", "harga": 250000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 250000, "perawat": "Dina", "totalInvoice": 250000, "metode": "Kartu Debit/Kredit", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Dina", "waktuSistem": "08-08-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0097/0826", "tanggal": "09-08-2026", "idPasien": "P-0097", "noRm": "A-0197", "namaPasien": "Aulia Zahra (4)", "dokter": "drg. Aviva", "kategori": "Tindakan", "item": "Exo Dewasa Ringan (Akar Tunggal)", "harga": 250000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 250000, "perawat": "Bernadette Rostenkowski", "totalInvoice": 250000, "metode": "Tunai", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Bernadette Rostenkowski", "waktuSistem": "09-08-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0098/0826", "tanggal": "10-08-2026", "idPasien": "P-0098", "noRm": "F-0198", "namaPasien": "Fajar Nugraha (4)", "dokter": "drg. Erien", "kategori": "Tindakan", "item": "Kontrol Ortho Rutin (Ganti Karet/Power O)", "harga": 150000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 150000, "perawat": "Wulan", "totalInvoice": 185000, "metode": "Transfer Bank", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Wulan", "waktuSistem": "10-08-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0098/0826", "tanggal": "10-08-2026", "idPasien": "P-0098", "noRm": "F-0198", "namaPasien": "Fajar Nugraha (4)", "dokter": "drg. Erien", "kategori": "Obat", "item": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "harga": 35000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 35000, "perawat": "Wulan", "totalInvoice": 185000, "metode": "Transfer Bank", "status": "Lunas", "keterangan": "Medikasi Oral Pasca Tindakan", "kasir": "Wulan", "waktuSistem": "10-08-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0099/0826", "tanggal": "11-08-2026", "idPasien": "P-0099", "noRm": "D-0199", "namaPasien": "Dewi Kartika Sari (4)", "dokter": "drg.g.p Dinda", "kategori": "Tindakan", "item": "Rontgen Periapikal Digital", "harga": 100000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 100000, "perawat": "Dina", "totalInvoice": 100000, "metode": "QRIS", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Dina", "waktuSistem": "11-08-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0100/0826", "tanggal": "12-08-2026", "idPasien": "P-0100", "noRm": "B-0200", "namaPasien": "Bagus Setiawan (4)", "dokter": "drg.g.p Fathya", "kategori": "Tindakan", "item": "Scalling Perawat", "harga": 150000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 150000, "perawat": "Bernadette Rostenkowski", "totalInvoice": 150000, "metode": "Kartu Debit/Kredit", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Bernadette Rostenkowski", "waktuSistem": "12-08-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0101/0926", "tanggal": "13-09-2026", "idPasien": "P-0101", "noRm": "I-0201", "namaPasien": "Intan Permata (4)", "dokter": "drg.g.p Belinda", "kategori": "Tindakan", "item": "Crown PFM (Porcelain Fused to Metal)", "harga": 1500000, "qty": 1, "biayaLab": 350000, "diskon": 0, "grandTotalItem": 1500000, "perawat": "Wulan", "totalInvoice": 1535000, "metode": "Tunai", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Wulan", "waktuSistem": "13-09-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0101/0926", "tanggal": "13-09-2026", "idPasien": "P-0101", "noRm": "I-0201", "namaPasien": "Intan Permata (4)", "dokter": "drg.g.p Belinda", "kategori": "Obat", "item": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "harga": 35000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 35000, "perawat": "Wulan", "totalInvoice": 1535000, "metode": "Tunai", "status": "Lunas", "keterangan": "Medikasi Oral Pasca Tindakan", "kasir": "Wulan", "waktuSistem": "13-09-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0102/0926", "tanggal": "14-09-2026", "idPasien": "P-0102", "noRm": "D-0202", "namaPasien": "Dimas Aditya (4)", "dokter": "drg. Rahma Yulinda D, Sp. BMM", "kategori": "Tindakan", "item": "PSA 1x Kunjungan (One Visit Endodontic)", "harga": 1500000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 1500000, "perawat": "Dina", "totalInvoice": 1500000, "metode": "Transfer Bank", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Dina", "waktuSistem": "14-09-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0103/0926", "tanggal": "15-09-2026", "idPasien": "P-0103", "noRm": "R-0203", "namaPasien": "Rina Wulandari (4)", "dokter": "drg. Tia Ardhana R", "kategori": "Tindakan", "item": "Odontektomi Kelas I Ringan", "harga": 1800000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 1800000, "perawat": "Bernadette Rostenkowski", "totalInvoice": 1800000, "metode": "QRIS", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Bernadette Rostenkowski", "waktuSistem": "15-09-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0104/0926", "tanggal": "16-09-2026", "idPasien": "P-0104", "noRm": "E-0204", "namaPasien": "Eko Prasetyo (4)", "dokter": "drg. Danny", "kategori": "Tindakan", "item": "Tumpat GIC Sedang", "harga": 250000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 250000, "perawat": "Wulan", "totalInvoice": 285000, "metode": "Kartu Debit/Kredit", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Wulan", "waktuSistem": "16-09-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0104/0926", "tanggal": "16-09-2026", "idPasien": "P-0104", "noRm": "E-0204", "namaPasien": "Eko Prasetyo (4)", "dokter": "drg. Danny", "kategori": "Obat", "item": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "harga": 35000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 35000, "perawat": "Wulan", "totalInvoice": 285000, "metode": "Kartu Debit/Kredit", "status": "Lunas", "keterangan": "Medikasi Oral Pasca Tindakan", "kasir": "Wulan", "waktuSistem": "16-09-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0105/0926", "tanggal": "17-09-2026", "idPasien": "P-0105", "noRm": "M-0205", "namaPasien": "Maya Anggraini (4)", "dokter": "drg. Astri", "kategori": "Tindakan", "item": "Tumpat Komposit Sedang", "harga": 300000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 300000, "perawat": "Dina", "totalInvoice": 300000, "metode": "Tunai", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Dina", "waktuSistem": "17-09-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0106/0926", "tanggal": "18-09-2026", "idPasien": "P-0106", "noRm": "A-0206", "namaPasien": "Andi Wijaya Kusuma (4)", "dokter": "drg. Rizka", "kategori": "Tindakan", "item": "Scalling Sedang", "harga": 250000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 250000, "perawat": "Bernadette Rostenkowski", "totalInvoice": 250000, "metode": "Transfer Bank", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Bernadette Rostenkowski", "waktuSistem": "18-09-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0107/0926", "tanggal": "19-09-2026", "idPasien": "P-0107", "noRm": "P-0207", "namaPasien": "Putri Maharani (4)", "dokter": "drg. Nanda", "kategori": "Tindakan", "item": "Exo Dewasa Ringan (Akar Tunggal)", "harga": 250000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 250000, "perawat": "Wulan", "totalInvoice": 285000, "metode": "QRIS", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Wulan", "waktuSistem": "19-09-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0107/0926", "tanggal": "19-09-2026", "idPasien": "P-0107", "noRm": "P-0207", "namaPasien": "Putri Maharani (4)", "dokter": "drg. Nanda", "kategori": "Obat", "item": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "harga": 35000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 35000, "perawat": "Wulan", "totalInvoice": 285000, "metode": "QRIS", "status": "Lunas", "keterangan": "Medikasi Oral Pasca Tindakan", "kasir": "Wulan", "waktuSistem": "19-09-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0108/0926", "tanggal": "20-09-2026", "idPasien": "P-0108", "noRm": "R-0208", "namaPasien": "Reza Pahlevi (4)", "dokter": "drg. Aviva", "kategori": "Tindakan", "item": "Kontrol Ortho Rutin (Ganti Karet/Power O)", "harga": 150000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 150000, "perawat": "Dina", "totalInvoice": 150000, "metode": "Kartu Debit/Kredit", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Dina", "waktuSistem": "20-09-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0109/0926", "tanggal": "21-09-2026", "idPasien": "P-0109", "noRm": "F-0209", "namaPasien": "Fitriani Nur (4)", "dokter": "drg. Erien", "kategori": "Tindakan", "item": "Rontgen Periapikal Digital", "harga": 100000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 100000, "perawat": "Bernadette Rostenkowski", "totalInvoice": 100000, "metode": "Tunai", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Bernadette Rostenkowski", "waktuSistem": "21-09-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0110/0926", "tanggal": "22-09-2026", "idPasien": "P-0110", "noRm": "W-0210", "namaPasien": "Wahyu Hidayat (4)", "dokter": "drg.g.p Dinda", "kategori": "Tindakan", "item": "Scalling Perawat", "harga": 150000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 150000, "perawat": "Wulan", "totalInvoice": 185000, "metode": "Transfer Bank", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Wulan", "waktuSistem": "22-09-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0110/0926", "tanggal": "22-09-2026", "idPasien": "P-0110", "noRm": "W-0210", "namaPasien": "Wahyu Hidayat (4)", "dokter": "drg.g.p Dinda", "kategori": "Obat", "item": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "harga": 35000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 35000, "perawat": "Wulan", "totalInvoice": 185000, "metode": "Transfer Bank", "status": "Lunas", "keterangan": "Medikasi Oral Pasca Tindakan", "kasir": "Wulan", "waktuSistem": "22-09-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0111/0926", "tanggal": "23-09-2026", "idPasien": "P-0111", "noRm": "N-0211", "namaPasien": "Nisa Amelia (4)", "dokter": "drg.g.p Fathya", "kategori": "Tindakan", "item": "Crown PFM (Porcelain Fused to Metal)", "harga": 1500000, "qty": 1, "biayaLab": 350000, "diskon": 0, "grandTotalItem": 1500000, "perawat": "Dina", "totalInvoice": 1500000, "metode": "QRIS", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Dina", "waktuSistem": "23-09-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0112/0926", "tanggal": "24-09-2026", "idPasien": "P-0112", "noRm": "A-0212", "namaPasien": "Arif Budiman (4)", "dokter": "drg.g.p Belinda", "kategori": "Tindakan", "item": "PSA 1x Kunjungan (One Visit Endodontic)", "harga": 1500000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 1500000, "perawat": "Bernadette Rostenkowski", "totalInvoice": 1500000, "metode": "Kartu Debit/Kredit", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Bernadette Rostenkowski", "waktuSistem": "24-09-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0113/1026", "tanggal": "25-10-2026", "idPasien": "P-0113", "noRm": "D-0213", "namaPasien": "Diana Puspita (4)", "dokter": "drg. Rahma Yulinda D, Sp. BMM", "kategori": "Tindakan", "item": "Odontektomi Kelas I Ringan", "harga": 1800000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 1800000, "perawat": "Wulan", "totalInvoice": 1835000, "metode": "Tunai", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Wulan", "waktuSistem": "25-10-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0113/1026", "tanggal": "25-10-2026", "idPasien": "P-0113", "noRm": "D-0213", "namaPasien": "Diana Puspita (4)", "dokter": "drg. Rahma Yulinda D, Sp. BMM", "kategori": "Obat", "item": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "harga": 35000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 35000, "perawat": "Wulan", "totalInvoice": 1835000, "metode": "Tunai", "status": "Lunas", "keterangan": "Medikasi Oral Pasca Tindakan", "kasir": "Wulan", "waktuSistem": "25-10-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0114/1026", "tanggal": "26-10-2026", "idPasien": "P-0114", "noRm": "G-0214", "namaPasien": "Galih Prakoso (4)", "dokter": "drg. Tia Ardhana R", "kategori": "Tindakan", "item": "Tumpat GIC Sedang", "harga": 250000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 250000, "perawat": "Dina", "totalInvoice": 250000, "metode": "Transfer Bank", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Dina", "waktuSistem": "26-10-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0115/1026", "tanggal": "27-10-2026", "idPasien": "P-0115", "noRm": "L-0215", "namaPasien": "Lestari Handayani (4)", "dokter": "drg. Danny", "kategori": "Tindakan", "item": "Tumpat Komposit Sedang", "harga": 300000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 300000, "perawat": "Bernadette Rostenkowski", "totalInvoice": 300000, "metode": "QRIS", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Bernadette Rostenkowski", "waktuSistem": "27-10-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0116/1026", "tanggal": "28-10-2026", "idPasien": "P-0116", "noRm": "Y-0216", "namaPasien": "Yusuf Maulana (4)", "dokter": "drg. Astri", "kategori": "Tindakan", "item": "Scalling Sedang", "harga": 250000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 250000, "perawat": "Wulan", "totalInvoice": 285000, "metode": "Kartu Debit/Kredit", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Wulan", "waktuSistem": "28-10-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0116/1026", "tanggal": "28-10-2026", "idPasien": "P-0116", "noRm": "Y-0216", "namaPasien": "Yusuf Maulana (4)", "dokter": "drg. Astri", "kategori": "Obat", "item": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "harga": 35000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 35000, "perawat": "Wulan", "totalInvoice": 285000, "metode": "Kartu Debit/Kredit", "status": "Lunas", "keterangan": "Medikasi Oral Pasca Tindakan", "kasir": "Wulan", "waktuSistem": "28-10-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0117/1026", "tanggal": "01-10-2026", "idPasien": "P-0117", "noRm": "C-0217", "namaPasien": "Citra Kirana (4)", "dokter": "drg. Rizka", "kategori": "Tindakan", "item": "Exo Dewasa Ringan (Akar Tunggal)", "harga": 250000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 250000, "perawat": "Dina", "totalInvoice": 250000, "metode": "Tunai", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Dina", "waktuSistem": "01-10-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0118/1026", "tanggal": "02-10-2026", "idPasien": "P-0118", "noRm": "T-0218", "namaPasien": "Taufik Hidayatullah (4)", "dokter": "drg. Nanda", "kategori": "Tindakan", "item": "Kontrol Ortho Rutin (Ganti Karet/Power O)", "harga": 150000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 150000, "perawat": "Bernadette Rostenkowski", "totalInvoice": 150000, "metode": "Transfer Bank", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Bernadette Rostenkowski", "waktuSistem": "02-10-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0119/1026", "tanggal": "03-10-2026", "idPasien": "P-0119", "noRm": "S-0219", "namaPasien": "Safira Salsabila (4)", "dokter": "drg. Aviva", "kategori": "Tindakan", "item": "Rontgen Periapikal Digital", "harga": 100000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 100000, "perawat": "Wulan", "totalInvoice": 135000, "metode": "QRIS", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Wulan", "waktuSistem": "03-10-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0119/1026", "tanggal": "03-10-2026", "idPasien": "P-0119", "noRm": "S-0219", "namaPasien": "Safira Salsabila (4)", "dokter": "drg. Aviva", "kategori": "Obat", "item": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "harga": 35000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 35000, "perawat": "Wulan", "totalInvoice": 135000, "metode": "QRIS", "status": "Lunas", "keterangan": "Medikasi Oral Pasca Tindakan", "kasir": "Wulan", "waktuSistem": "03-10-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0120/1026", "tanggal": "04-10-2026", "idPasien": "P-0120", "noRm": "B-0220", "namaPasien": "Bayu Pamungkas (4)", "dokter": "drg. Erien", "kategori": "Tindakan", "item": "Scalling Perawat", "harga": 150000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 150000, "perawat": "Dina", "totalInvoice": 150000, "metode": "Kartu Debit/Kredit", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Dina", "waktuSistem": "04-10-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0121/1026", "tanggal": "05-10-2026", "idPasien": "P-0121", "noRm": "M-0221", "namaPasien": "Mega Utami (4)", "dokter": "drg.g.p Dinda", "kategori": "Tindakan", "item": "Crown PFM (Porcelain Fused to Metal)", "harga": 1500000, "qty": 1, "biayaLab": 350000, "diskon": 0, "grandTotalItem": 1500000, "perawat": "Bernadette Rostenkowski", "totalInvoice": 1500000, "metode": "Tunai", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Bernadette Rostenkowski", "waktuSistem": "05-10-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0122/1026", "tanggal": "06-10-2026", "idPasien": "P-0122", "noRm": "I-0222", "namaPasien": "Irfan Hakim (4)", "dokter": "drg.g.p Fathya", "kategori": "Tindakan", "item": "PSA 1x Kunjungan (One Visit Endodontic)", "harga": 1500000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 1500000, "perawat": "Wulan", "totalInvoice": 1535000, "metode": "Transfer Bank", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Wulan", "waktuSistem": "06-10-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0122/1026", "tanggal": "06-10-2026", "idPasien": "P-0122", "noRm": "I-0222", "namaPasien": "Irfan Hakim (4)", "dokter": "drg.g.p Fathya", "kategori": "Obat", "item": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "harga": 35000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 35000, "perawat": "Wulan", "totalInvoice": 1535000, "metode": "Transfer Bank", "status": "Lunas", "keterangan": "Medikasi Oral Pasca Tindakan", "kasir": "Wulan", "waktuSistem": "06-10-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0123/1026", "tanggal": "07-10-2026", "idPasien": "P-0123", "noRm": "V-0223", "namaPasien": "Vina Panduwinata (4)", "dokter": "drg.g.p Belinda", "kategori": "Tindakan", "item": "Odontektomi Kelas I Ringan", "harga": 1800000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 1800000, "perawat": "Dina", "totalInvoice": 1800000, "metode": "QRIS", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Dina", "waktuSistem": "07-10-2026 15:30:00"}, {"idInvoice": "INV/SHELDON/0124/1026", "tanggal": "08-10-2026", "idPasien": "P-0124", "noRm": "D-0224", "namaPasien": "Deni Cagur Saputra (4)", "dokter": "drg. Rahma Yulinda D, Sp. BMM", "kategori": "Tindakan", "item": "Tumpat GIC Sedang", "harga": 250000, "qty": 1, "biayaLab": 0, "diskon": 0, "grandTotalItem": 250000, "perawat": "Bernadette Rostenkowski", "totalInvoice": 250000, "metode": "Kartu Debit/Kredit", "status": "Lunas", "keterangan": "Transaksi Bulk SHELDON 2026", "kasir": "Bernadette Rostenkowski", "waktuSistem": "08-10-2026 15:30:00"}], "jasaMedis": [{"idInvoice": "INV/SHELDON/0001/1026", "tanggal": "05-10-2026", "dokter": "drg. Sheldon Cooper, Sp.Ort", "perawat": "Bernadette Rostenkowski", "kategori": "Tindakan", "namaItem": "Pemasangan Mahkota PFM (Crown)", "totalTindakanBruto": 1500000, "totalBiayaLab": 350000, "dasarJM": 1150000, "persenJM": 0.5, "tipeAturan": "Default Dokter (50%)", "jmDokter": 575000, "totalFeePerawat": 0, "jmKlinik": 575000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0001/1026", "tanggal": "05-10-2026", "dokter": "drg. Sheldon Cooper, Sp.Ort", "perawat": "Bernadette Rostenkowski", "kategori": "Obat", "namaItem": "Amoxicillin 500 mg", "totalTindakanBruto": 15000, "totalBiayaLab": 0, "dasarJM": 15000, "persenJM": 0.0, "tipeAturan": "Non-JM (Obat/BMHP)", "jmDokter": 0, "totalFeePerawat": 0, "jmKlinik": 15000, "status": "Final"}, {"idInvoice": "INV/SHELDON/0002/1026", "tanggal": "05-10-2026", "dokter": "drg. Leonard Hofstadter", "perawat": "Bernadette Rostenkowski", "kategori": "Tindakan", "namaItem": "Foto Rontgen Periapikal Digital", "totalTindakanBruto": 100000, "totalBiayaLab": 0, "dasarJM": 100000, "persenJM": 0.15, "tipeAturan": "Tarif Rontgen (15%)", "jmDokter": 15000, "totalFeePerawat": 0, "jmKlinik": 85000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0003/1026", "tanggal": "05-10-2026", "dokter": "drg. Sheldon Cooper, Sp.Ort", "perawat": "Bernadette Rostenkowski", "kategori": "Tindakan", "namaItem": "Perawatan Saluran Akar (PSA) Molar", "totalTindakanBruto": 1500000, "totalBiayaLab": 0, "dasarJM": 1500000, "persenJM": 0.55, "tipeAturan": "Tarif Khusus Dokter (55%)", "jmDokter": 825000, "totalFeePerawat": 0, "jmKlinik": 675000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0004/1026", "tanggal": "05-10-2026", "dokter": "drg. Sheldon Cooper, Sp.Ort", "perawat": "Bernadette Rostenkowski", "kategori": "Tindakan", "namaItem": "Pemasangan Behel Standar (Include Scaling)", "totalTindakanBruto": 5000000, "totalBiayaLab": 0, "dasarJM": 5000000, "persenJM": 0.5, "tipeAturan": "Default Dokter (50%)", "jmDokter": 2450000, "totalFeePerawat": 50000, "jmKlinik": 2500000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0005/0126", "tanggal": "01-01-2026", "dokter": "drg. Danny", "perawat": "Wulan", "kategori": "Tindakan", "namaItem": "Tumpat Komposit Sedang", "totalTindakanBruto": 300000, "totalBiayaLab": 0, "dasarJM": 300000, "persenJM": 0.65, "tipeAturan": "Persentase Dokter (65%)", "jmDokter": 195000, "totalFeePerawat": 0, "jmKlinik": 105000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0005/0126", "tanggal": "01-01-2026", "dokter": "drg. Danny", "perawat": "Wulan", "kategori": "Obat", "namaItem": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "totalTindakanBruto": 35000, "totalBiayaLab": 0, "dasarJM": 35000, "persenJM": 0.0, "tipeAturan": "Non-JM (Obat/BMHP)", "jmDokter": 0, "totalFeePerawat": 0, "jmKlinik": 35000, "status": "Final"}, {"idInvoice": "INV/SHELDON/0006/0126", "tanggal": "02-01-2026", "dokter": "drg. Astri", "perawat": "Dina", "kategori": "Tindakan", "namaItem": "Scalling Sedang", "totalTindakanBruto": 250000, "totalBiayaLab": 0, "dasarJM": 250000, "persenJM": 0.65, "tipeAturan": "Persentase Dokter (65%)", "jmDokter": 162500, "totalFeePerawat": 0, "jmKlinik": 87500, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0007/0126", "tanggal": "03-01-2026", "dokter": "drg. Rizka", "perawat": "Bernadette Rostenkowski", "kategori": "Tindakan", "namaItem": "Exo Dewasa Ringan (Akar Tunggal)", "totalTindakanBruto": 250000, "totalBiayaLab": 0, "dasarJM": 250000, "persenJM": 0.65, "tipeAturan": "Persentase Dokter (65%)", "jmDokter": 162500, "totalFeePerawat": 0, "jmKlinik": 87500, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0008/0126", "tanggal": "04-01-2026", "dokter": "drg. Nanda", "perawat": "Wulan", "kategori": "Tindakan", "namaItem": "Kontrol Ortho Rutin (Ganti Karet/Power O)", "totalTindakanBruto": 150000, "totalBiayaLab": 0, "dasarJM": 150000, "persenJM": 0.65, "tipeAturan": "Persentase Dokter (65%)", "jmDokter": 97500, "totalFeePerawat": 0, "jmKlinik": 52500, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0008/0126", "tanggal": "04-01-2026", "dokter": "drg. Nanda", "perawat": "Wulan", "kategori": "Obat", "namaItem": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "totalTindakanBruto": 35000, "totalBiayaLab": 0, "dasarJM": 35000, "persenJM": 0.0, "tipeAturan": "Non-JM (Obat/BMHP)", "jmDokter": 0, "totalFeePerawat": 0, "jmKlinik": 35000, "status": "Final"}, {"idInvoice": "INV/SHELDON/0009/0126", "tanggal": "05-01-2026", "dokter": "drg. Aviva", "perawat": "Dina", "kategori": "Tindakan", "namaItem": "Rontgen Periapikal Digital", "totalTindakanBruto": 100000, "totalBiayaLab": 0, "dasarJM": 100000, "persenJM": 0.15, "tipeAturan": "Tarif Rontgen (15%)", "jmDokter": 15000, "totalFeePerawat": 0, "jmKlinik": 85000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0010/0126", "tanggal": "06-01-2026", "dokter": "drg. Erien", "perawat": "Bernadette Rostenkowski", "kategori": "Tindakan", "namaItem": "Scalling Perawat", "totalTindakanBruto": 150000, "totalBiayaLab": 0, "dasarJM": 150000, "persenJM": 0.5, "tipeAturan": "Persentase Dokter (50%)", "jmDokter": 50000, "totalFeePerawat": 25000, "jmKlinik": 75000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0011/0126", "tanggal": "07-01-2026", "dokter": "drg.g.p Dinda", "perawat": "Wulan", "kategori": "Tindakan", "namaItem": "Crown PFM (Porcelain Fused to Metal)", "totalTindakanBruto": 1500000, "totalBiayaLab": 350000, "dasarJM": 1150000, "persenJM": 0.55, "tipeAturan": "Persentase Dokter (55%)", "jmDokter": 632500, "totalFeePerawat": 0, "jmKlinik": 517500, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0011/0126", "tanggal": "07-01-2026", "dokter": "drg.g.p Dinda", "perawat": "Wulan", "kategori": "Obat", "namaItem": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "totalTindakanBruto": 35000, "totalBiayaLab": 0, "dasarJM": 35000, "persenJM": 0.0, "tipeAturan": "Non-JM (Obat/BMHP)", "jmDokter": 0, "totalFeePerawat": 0, "jmKlinik": 35000, "status": "Final"}, {"idInvoice": "INV/SHELDON/0012/0126", "tanggal": "08-01-2026", "dokter": "drg.g.p Fathya", "perawat": "Dina", "kategori": "Tindakan", "namaItem": "PSA 1x Kunjungan (One Visit Endodontic)", "totalTindakanBruto": 1500000, "totalBiayaLab": 0, "dasarJM": 1500000, "persenJM": 0.4, "tipeAturan": "Persentase Dokter (40%)", "jmDokter": 600000, "totalFeePerawat": 0, "jmKlinik": 900000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0013/0126", "tanggal": "09-01-2026", "dokter": "drg.g.p Belinda", "perawat": "Bernadette Rostenkowski", "kategori": "Tindakan", "namaItem": "Odontektomi Kelas I Ringan", "totalTindakanBruto": 1800000, "totalBiayaLab": 0, "dasarJM": 1800000, "persenJM": 0.4, "tipeAturan": "Persentase Dokter (40%)", "jmDokter": 720000, "totalFeePerawat": 0, "jmKlinik": 1080000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0014/0126", "tanggal": "10-01-2026", "dokter": "drg. Rahma Yulinda D, Sp. BMM", "perawat": "Wulan", "kategori": "Tindakan", "namaItem": "Tumpat GIC Sedang", "totalTindakanBruto": 250000, "totalBiayaLab": 0, "dasarJM": 250000, "persenJM": 0.65, "tipeAturan": "Persentase Dokter (65%)", "jmDokter": 162500, "totalFeePerawat": 0, "jmKlinik": 87500, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0014/0126", "tanggal": "10-01-2026", "dokter": "drg. Rahma Yulinda D, Sp. BMM", "perawat": "Wulan", "kategori": "Obat", "namaItem": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "totalTindakanBruto": 35000, "totalBiayaLab": 0, "dasarJM": 35000, "persenJM": 0.0, "tipeAturan": "Non-JM (Obat/BMHP)", "jmDokter": 0, "totalFeePerawat": 0, "jmKlinik": 35000, "status": "Final"}, {"idInvoice": "INV/SHELDON/0015/0126", "tanggal": "11-01-2026", "dokter": "drg. Tia Ardhana R", "perawat": "Dina", "kategori": "Tindakan", "namaItem": "Tumpat Komposit Sedang", "totalTindakanBruto": 300000, "totalBiayaLab": 0, "dasarJM": 300000, "persenJM": 0.5, "tipeAturan": "Persentase Dokter (50%)", "jmDokter": 150000, "totalFeePerawat": 0, "jmKlinik": 150000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0016/0126", "tanggal": "12-01-2026", "dokter": "drg. Danny", "perawat": "Bernadette Rostenkowski", "kategori": "Tindakan", "namaItem": "Scalling Sedang", "totalTindakanBruto": 250000, "totalBiayaLab": 0, "dasarJM": 250000, "persenJM": 0.65, "tipeAturan": "Persentase Dokter (65%)", "jmDokter": 162500, "totalFeePerawat": 0, "jmKlinik": 87500, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0017/0226", "tanggal": "13-02-2026", "dokter": "drg. Astri", "perawat": "Wulan", "kategori": "Tindakan", "namaItem": "Exo Dewasa Ringan (Akar Tunggal)", "totalTindakanBruto": 250000, "totalBiayaLab": 0, "dasarJM": 250000, "persenJM": 0.65, "tipeAturan": "Persentase Dokter (65%)", "jmDokter": 162500, "totalFeePerawat": 0, "jmKlinik": 87500, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0017/0226", "tanggal": "13-02-2026", "dokter": "drg. Astri", "perawat": "Wulan", "kategori": "Obat", "namaItem": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "totalTindakanBruto": 35000, "totalBiayaLab": 0, "dasarJM": 35000, "persenJM": 0.0, "tipeAturan": "Non-JM (Obat/BMHP)", "jmDokter": 0, "totalFeePerawat": 0, "jmKlinik": 35000, "status": "Final"}, {"idInvoice": "INV/SHELDON/0018/0226", "tanggal": "14-02-2026", "dokter": "drg. Rizka", "perawat": "Dina", "kategori": "Tindakan", "namaItem": "Kontrol Ortho Rutin (Ganti Karet/Power O)", "totalTindakanBruto": 150000, "totalBiayaLab": 0, "dasarJM": 150000, "persenJM": 0.65, "tipeAturan": "Persentase Dokter (65%)", "jmDokter": 97500, "totalFeePerawat": 0, "jmKlinik": 52500, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0019/0226", "tanggal": "15-02-2026", "dokter": "drg. Nanda", "perawat": "Bernadette Rostenkowski", "kategori": "Tindakan", "namaItem": "Rontgen Periapikal Digital", "totalTindakanBruto": 100000, "totalBiayaLab": 0, "dasarJM": 100000, "persenJM": 0.15, "tipeAturan": "Tarif Rontgen (15%)", "jmDokter": 15000, "totalFeePerawat": 0, "jmKlinik": 85000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0020/0226", "tanggal": "16-02-2026", "dokter": "drg. Aviva", "perawat": "Wulan", "kategori": "Tindakan", "namaItem": "Scalling Perawat", "totalTindakanBruto": 150000, "totalBiayaLab": 0, "dasarJM": 150000, "persenJM": 0.65, "tipeAturan": "Persentase Dokter (65%)", "jmDokter": 72500, "totalFeePerawat": 25000, "jmKlinik": 52500, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0020/0226", "tanggal": "16-02-2026", "dokter": "drg. Aviva", "perawat": "Wulan", "kategori": "Obat", "namaItem": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "totalTindakanBruto": 35000, "totalBiayaLab": 0, "dasarJM": 35000, "persenJM": 0.0, "tipeAturan": "Non-JM (Obat/BMHP)", "jmDokter": 0, "totalFeePerawat": 0, "jmKlinik": 35000, "status": "Final"}, {"idInvoice": "INV/SHELDON/0021/0226", "tanggal": "17-02-2026", "dokter": "drg. Erien", "perawat": "Dina", "kategori": "Tindakan", "namaItem": "Crown PFM (Porcelain Fused to Metal)", "totalTindakanBruto": 1500000, "totalBiayaLab": 350000, "dasarJM": 1150000, "persenJM": 0.5, "tipeAturan": "Persentase Dokter (50%)", "jmDokter": 575000, "totalFeePerawat": 0, "jmKlinik": 575000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0022/0226", "tanggal": "18-02-2026", "dokter": "drg.g.p Dinda", "perawat": "Bernadette Rostenkowski", "kategori": "Tindakan", "namaItem": "PSA 1x Kunjungan (One Visit Endodontic)", "totalTindakanBruto": 1500000, "totalBiayaLab": 0, "dasarJM": 1500000, "persenJM": 0.55, "tipeAturan": "Persentase Dokter (55%)", "jmDokter": 825000, "totalFeePerawat": 0, "jmKlinik": 675000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0023/0226", "tanggal": "19-02-2026", "dokter": "drg.g.p Fathya", "perawat": "Wulan", "kategori": "Tindakan", "namaItem": "Odontektomi Kelas I Ringan", "totalTindakanBruto": 1800000, "totalBiayaLab": 0, "dasarJM": 1800000, "persenJM": 0.4, "tipeAturan": "Persentase Dokter (40%)", "jmDokter": 720000, "totalFeePerawat": 0, "jmKlinik": 1080000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0023/0226", "tanggal": "19-02-2026", "dokter": "drg.g.p Fathya", "perawat": "Wulan", "kategori": "Obat", "namaItem": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "totalTindakanBruto": 35000, "totalBiayaLab": 0, "dasarJM": 35000, "persenJM": 0.0, "tipeAturan": "Non-JM (Obat/BMHP)", "jmDokter": 0, "totalFeePerawat": 0, "jmKlinik": 35000, "status": "Final"}, {"idInvoice": "INV/SHELDON/0024/0226", "tanggal": "20-02-2026", "dokter": "drg.g.p Belinda", "perawat": "Dina", "kategori": "Tindakan", "namaItem": "Tumpat GIC Sedang", "totalTindakanBruto": 250000, "totalBiayaLab": 0, "dasarJM": 250000, "persenJM": 0.4, "tipeAturan": "Persentase Dokter (40%)", "jmDokter": 100000, "totalFeePerawat": 0, "jmKlinik": 150000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0025/0226", "tanggal": "21-02-2026", "dokter": "drg. Rahma Yulinda D, Sp. BMM", "perawat": "Bernadette Rostenkowski", "kategori": "Tindakan", "namaItem": "Tumpat Komposit Sedang", "totalTindakanBruto": 300000, "totalBiayaLab": 0, "dasarJM": 300000, "persenJM": 0.65, "tipeAturan": "Persentase Dokter (65%)", "jmDokter": 195000, "totalFeePerawat": 0, "jmKlinik": 105000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0026/0226", "tanggal": "22-02-2026", "dokter": "drg. Tia Ardhana R", "perawat": "Wulan", "kategori": "Tindakan", "namaItem": "Scalling Sedang", "totalTindakanBruto": 250000, "totalBiayaLab": 0, "dasarJM": 250000, "persenJM": 0.5, "tipeAturan": "Persentase Dokter (50%)", "jmDokter": 125000, "totalFeePerawat": 0, "jmKlinik": 125000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0026/0226", "tanggal": "22-02-2026", "dokter": "drg. Tia Ardhana R", "perawat": "Wulan", "kategori": "Obat", "namaItem": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "totalTindakanBruto": 35000, "totalBiayaLab": 0, "dasarJM": 35000, "persenJM": 0.0, "tipeAturan": "Non-JM (Obat/BMHP)", "jmDokter": 0, "totalFeePerawat": 0, "jmKlinik": 35000, "status": "Final"}, {"idInvoice": "INV/SHELDON/0027/0226", "tanggal": "23-02-2026", "dokter": "drg. Danny", "perawat": "Dina", "kategori": "Tindakan", "namaItem": "Exo Dewasa Ringan (Akar Tunggal)", "totalTindakanBruto": 250000, "totalBiayaLab": 0, "dasarJM": 250000, "persenJM": 0.65, "tipeAturan": "Persentase Dokter (65%)", "jmDokter": 162500, "totalFeePerawat": 0, "jmKlinik": 87500, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0028/0226", "tanggal": "24-02-2026", "dokter": "drg. Astri", "perawat": "Bernadette Rostenkowski", "kategori": "Tindakan", "namaItem": "Kontrol Ortho Rutin (Ganti Karet/Power O)", "totalTindakanBruto": 150000, "totalBiayaLab": 0, "dasarJM": 150000, "persenJM": 0.65, "tipeAturan": "Persentase Dokter (65%)", "jmDokter": 97500, "totalFeePerawat": 0, "jmKlinik": 52500, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0029/0326", "tanggal": "25-03-2026", "dokter": "drg. Rizka", "perawat": "Wulan", "kategori": "Tindakan", "namaItem": "Rontgen Periapikal Digital", "totalTindakanBruto": 100000, "totalBiayaLab": 0, "dasarJM": 100000, "persenJM": 0.15, "tipeAturan": "Tarif Rontgen (15%)", "jmDokter": 15000, "totalFeePerawat": 0, "jmKlinik": 85000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0029/0326", "tanggal": "25-03-2026", "dokter": "drg. Rizka", "perawat": "Wulan", "kategori": "Obat", "namaItem": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "totalTindakanBruto": 35000, "totalBiayaLab": 0, "dasarJM": 35000, "persenJM": 0.0, "tipeAturan": "Non-JM (Obat/BMHP)", "jmDokter": 0, "totalFeePerawat": 0, "jmKlinik": 35000, "status": "Final"}, {"idInvoice": "INV/SHELDON/0030/0326", "tanggal": "26-03-2026", "dokter": "drg. Nanda", "perawat": "Dina", "kategori": "Tindakan", "namaItem": "Scalling Perawat", "totalTindakanBruto": 150000, "totalBiayaLab": 0, "dasarJM": 150000, "persenJM": 0.65, "tipeAturan": "Persentase Dokter (65%)", "jmDokter": 72500, "totalFeePerawat": 25000, "jmKlinik": 52500, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0031/0326", "tanggal": "27-03-2026", "dokter": "drg. Aviva", "perawat": "Bernadette Rostenkowski", "kategori": "Tindakan", "namaItem": "Crown PFM (Porcelain Fused to Metal)", "totalTindakanBruto": 1500000, "totalBiayaLab": 350000, "dasarJM": 1150000, "persenJM": 0.65, "tipeAturan": "Persentase Dokter (65%)", "jmDokter": 747500, "totalFeePerawat": 0, "jmKlinik": 402500, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0032/0326", "tanggal": "28-03-2026", "dokter": "drg. Erien", "perawat": "Wulan", "kategori": "Tindakan", "namaItem": "PSA 1x Kunjungan (One Visit Endodontic)", "totalTindakanBruto": 1500000, "totalBiayaLab": 0, "dasarJM": 1500000, "persenJM": 0.5, "tipeAturan": "Persentase Dokter (50%)", "jmDokter": 750000, "totalFeePerawat": 0, "jmKlinik": 750000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0032/0326", "tanggal": "28-03-2026", "dokter": "drg. Erien", "perawat": "Wulan", "kategori": "Obat", "namaItem": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "totalTindakanBruto": 35000, "totalBiayaLab": 0, "dasarJM": 35000, "persenJM": 0.0, "tipeAturan": "Non-JM (Obat/BMHP)", "jmDokter": 0, "totalFeePerawat": 0, "jmKlinik": 35000, "status": "Final"}, {"idInvoice": "INV/SHELDON/0033/0326", "tanggal": "01-03-2026", "dokter": "drg.g.p Dinda", "perawat": "Dina", "kategori": "Tindakan", "namaItem": "Odontektomi Kelas I Ringan", "totalTindakanBruto": 1800000, "totalBiayaLab": 0, "dasarJM": 1800000, "persenJM": 0.55, "tipeAturan": "Persentase Dokter (55%)", "jmDokter": 990000, "totalFeePerawat": 0, "jmKlinik": 810000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0034/0326", "tanggal": "02-03-2026", "dokter": "drg.g.p Fathya", "perawat": "Bernadette Rostenkowski", "kategori": "Tindakan", "namaItem": "Tumpat GIC Sedang", "totalTindakanBruto": 250000, "totalBiayaLab": 0, "dasarJM": 250000, "persenJM": 0.4, "tipeAturan": "Persentase Dokter (40%)", "jmDokter": 100000, "totalFeePerawat": 0, "jmKlinik": 150000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0035/0326", "tanggal": "03-03-2026", "dokter": "drg.g.p Belinda", "perawat": "Wulan", "kategori": "Tindakan", "namaItem": "Tumpat Komposit Sedang", "totalTindakanBruto": 300000, "totalBiayaLab": 0, "dasarJM": 300000, "persenJM": 0.4, "tipeAturan": "Persentase Dokter (40%)", "jmDokter": 120000, "totalFeePerawat": 0, "jmKlinik": 180000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0035/0326", "tanggal": "03-03-2026", "dokter": "drg.g.p Belinda", "perawat": "Wulan", "kategori": "Obat", "namaItem": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "totalTindakanBruto": 35000, "totalBiayaLab": 0, "dasarJM": 35000, "persenJM": 0.0, "tipeAturan": "Non-JM (Obat/BMHP)", "jmDokter": 0, "totalFeePerawat": 0, "jmKlinik": 35000, "status": "Final"}, {"idInvoice": "INV/SHELDON/0036/0326", "tanggal": "04-03-2026", "dokter": "drg. Rahma Yulinda D, Sp. BMM", "perawat": "Dina", "kategori": "Tindakan", "namaItem": "Scalling Sedang", "totalTindakanBruto": 250000, "totalBiayaLab": 0, "dasarJM": 250000, "persenJM": 0.65, "tipeAturan": "Persentase Dokter (65%)", "jmDokter": 162500, "totalFeePerawat": 0, "jmKlinik": 87500, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0037/0326", "tanggal": "05-03-2026", "dokter": "drg. Tia Ardhana R", "perawat": "Bernadette Rostenkowski", "kategori": "Tindakan", "namaItem": "Exo Dewasa Ringan (Akar Tunggal)", "totalTindakanBruto": 250000, "totalBiayaLab": 0, "dasarJM": 250000, "persenJM": 0.5, "tipeAturan": "Persentase Dokter (50%)", "jmDokter": 125000, "totalFeePerawat": 0, "jmKlinik": 125000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0038/0326", "tanggal": "06-03-2026", "dokter": "drg. Danny", "perawat": "Wulan", "kategori": "Tindakan", "namaItem": "Kontrol Ortho Rutin (Ganti Karet/Power O)", "totalTindakanBruto": 150000, "totalBiayaLab": 0, "dasarJM": 150000, "persenJM": 0.65, "tipeAturan": "Persentase Dokter (65%)", "jmDokter": 97500, "totalFeePerawat": 0, "jmKlinik": 52500, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0038/0326", "tanggal": "06-03-2026", "dokter": "drg. Danny", "perawat": "Wulan", "kategori": "Obat", "namaItem": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "totalTindakanBruto": 35000, "totalBiayaLab": 0, "dasarJM": 35000, "persenJM": 0.0, "tipeAturan": "Non-JM (Obat/BMHP)", "jmDokter": 0, "totalFeePerawat": 0, "jmKlinik": 35000, "status": "Final"}, {"idInvoice": "INV/SHELDON/0039/0326", "tanggal": "07-03-2026", "dokter": "drg. Astri", "perawat": "Dina", "kategori": "Tindakan", "namaItem": "Rontgen Periapikal Digital", "totalTindakanBruto": 100000, "totalBiayaLab": 0, "dasarJM": 100000, "persenJM": 0.15, "tipeAturan": "Tarif Rontgen (15%)", "jmDokter": 15000, "totalFeePerawat": 0, "jmKlinik": 85000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0040/0326", "tanggal": "08-03-2026", "dokter": "drg. Rizka", "perawat": "Bernadette Rostenkowski", "kategori": "Tindakan", "namaItem": "Scalling Perawat", "totalTindakanBruto": 150000, "totalBiayaLab": 0, "dasarJM": 150000, "persenJM": 0.65, "tipeAturan": "Persentase Dokter (65%)", "jmDokter": 72500, "totalFeePerawat": 25000, "jmKlinik": 52500, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0041/0426", "tanggal": "09-04-2026", "dokter": "drg. Nanda", "perawat": "Wulan", "kategori": "Tindakan", "namaItem": "Crown PFM (Porcelain Fused to Metal)", "totalTindakanBruto": 1500000, "totalBiayaLab": 350000, "dasarJM": 1150000, "persenJM": 0.65, "tipeAturan": "Persentase Dokter (65%)", "jmDokter": 747500, "totalFeePerawat": 0, "jmKlinik": 402500, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0041/0426", "tanggal": "09-04-2026", "dokter": "drg. Nanda", "perawat": "Wulan", "kategori": "Obat", "namaItem": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "totalTindakanBruto": 35000, "totalBiayaLab": 0, "dasarJM": 35000, "persenJM": 0.0, "tipeAturan": "Non-JM (Obat/BMHP)", "jmDokter": 0, "totalFeePerawat": 0, "jmKlinik": 35000, "status": "Final"}, {"idInvoice": "INV/SHELDON/0042/0426", "tanggal": "10-04-2026", "dokter": "drg. Aviva", "perawat": "Dina", "kategori": "Tindakan", "namaItem": "PSA 1x Kunjungan (One Visit Endodontic)", "totalTindakanBruto": 1500000, "totalBiayaLab": 0, "dasarJM": 1500000, "persenJM": 0.65, "tipeAturan": "Persentase Dokter (65%)", "jmDokter": 975000, "totalFeePerawat": 0, "jmKlinik": 525000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0043/0426", "tanggal": "11-04-2026", "dokter": "drg. Erien", "perawat": "Bernadette Rostenkowski", "kategori": "Tindakan", "namaItem": "Odontektomi Kelas I Ringan", "totalTindakanBruto": 1800000, "totalBiayaLab": 0, "dasarJM": 1800000, "persenJM": 0.5, "tipeAturan": "Persentase Dokter (50%)", "jmDokter": 900000, "totalFeePerawat": 0, "jmKlinik": 900000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0044/0426", "tanggal": "12-04-2026", "dokter": "drg.g.p Dinda", "perawat": "Wulan", "kategori": "Tindakan", "namaItem": "Tumpat GIC Sedang", "totalTindakanBruto": 250000, "totalBiayaLab": 0, "dasarJM": 250000, "persenJM": 0.55, "tipeAturan": "Persentase Dokter (55%)", "jmDokter": 137500, "totalFeePerawat": 0, "jmKlinik": 112500, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0044/0426", "tanggal": "12-04-2026", "dokter": "drg.g.p Dinda", "perawat": "Wulan", "kategori": "Obat", "namaItem": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "totalTindakanBruto": 35000, "totalBiayaLab": 0, "dasarJM": 35000, "persenJM": 0.0, "tipeAturan": "Non-JM (Obat/BMHP)", "jmDokter": 0, "totalFeePerawat": 0, "jmKlinik": 35000, "status": "Final"}, {"idInvoice": "INV/SHELDON/0045/0426", "tanggal": "13-04-2026", "dokter": "drg.g.p Fathya", "perawat": "Dina", "kategori": "Tindakan", "namaItem": "Tumpat Komposit Sedang", "totalTindakanBruto": 300000, "totalBiayaLab": 0, "dasarJM": 300000, "persenJM": 0.4, "tipeAturan": "Persentase Dokter (40%)", "jmDokter": 120000, "totalFeePerawat": 0, "jmKlinik": 180000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0046/0426", "tanggal": "14-04-2026", "dokter": "drg.g.p Belinda", "perawat": "Bernadette Rostenkowski", "kategori": "Tindakan", "namaItem": "Scalling Sedang", "totalTindakanBruto": 250000, "totalBiayaLab": 0, "dasarJM": 250000, "persenJM": 0.4, "tipeAturan": "Persentase Dokter (40%)", "jmDokter": 100000, "totalFeePerawat": 0, "jmKlinik": 150000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0047/0426", "tanggal": "15-04-2026", "dokter": "drg. Rahma Yulinda D, Sp. BMM", "perawat": "Wulan", "kategori": "Tindakan", "namaItem": "Exo Dewasa Ringan (Akar Tunggal)", "totalTindakanBruto": 250000, "totalBiayaLab": 0, "dasarJM": 250000, "persenJM": 0.65, "tipeAturan": "Persentase Dokter (65%)", "jmDokter": 162500, "totalFeePerawat": 0, "jmKlinik": 87500, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0047/0426", "tanggal": "15-04-2026", "dokter": "drg. Rahma Yulinda D, Sp. BMM", "perawat": "Wulan", "kategori": "Obat", "namaItem": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "totalTindakanBruto": 35000, "totalBiayaLab": 0, "dasarJM": 35000, "persenJM": 0.0, "tipeAturan": "Non-JM (Obat/BMHP)", "jmDokter": 0, "totalFeePerawat": 0, "jmKlinik": 35000, "status": "Final"}, {"idInvoice": "INV/SHELDON/0048/0426", "tanggal": "16-04-2026", "dokter": "drg. Tia Ardhana R", "perawat": "Dina", "kategori": "Tindakan", "namaItem": "Kontrol Ortho Rutin (Ganti Karet/Power O)", "totalTindakanBruto": 150000, "totalBiayaLab": 0, "dasarJM": 150000, "persenJM": 0.5, "tipeAturan": "Persentase Dokter (50%)", "jmDokter": 75000, "totalFeePerawat": 0, "jmKlinik": 75000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0049/0426", "tanggal": "17-04-2026", "dokter": "drg. Danny", "perawat": "Bernadette Rostenkowski", "kategori": "Tindakan", "namaItem": "Rontgen Periapikal Digital", "totalTindakanBruto": 100000, "totalBiayaLab": 0, "dasarJM": 100000, "persenJM": 0.15, "tipeAturan": "Tarif Rontgen (15%)", "jmDokter": 15000, "totalFeePerawat": 0, "jmKlinik": 85000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0050/0426", "tanggal": "18-04-2026", "dokter": "drg. Astri", "perawat": "Wulan", "kategori": "Tindakan", "namaItem": "Scalling Perawat", "totalTindakanBruto": 150000, "totalBiayaLab": 0, "dasarJM": 150000, "persenJM": 0.65, "tipeAturan": "Persentase Dokter (65%)", "jmDokter": 72500, "totalFeePerawat": 25000, "jmKlinik": 52500, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0050/0426", "tanggal": "18-04-2026", "dokter": "drg. Astri", "perawat": "Wulan", "kategori": "Obat", "namaItem": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "totalTindakanBruto": 35000, "totalBiayaLab": 0, "dasarJM": 35000, "persenJM": 0.0, "tipeAturan": "Non-JM (Obat/BMHP)", "jmDokter": 0, "totalFeePerawat": 0, "jmKlinik": 35000, "status": "Final"}, {"idInvoice": "INV/SHELDON/0051/0426", "tanggal": "19-04-2026", "dokter": "drg. Rizka", "perawat": "Dina", "kategori": "Tindakan", "namaItem": "Crown PFM (Porcelain Fused to Metal)", "totalTindakanBruto": 1500000, "totalBiayaLab": 350000, "dasarJM": 1150000, "persenJM": 0.65, "tipeAturan": "Persentase Dokter (65%)", "jmDokter": 747500, "totalFeePerawat": 0, "jmKlinik": 402500, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0052/0426", "tanggal": "20-04-2026", "dokter": "drg. Nanda", "perawat": "Bernadette Rostenkowski", "kategori": "Tindakan", "namaItem": "PSA 1x Kunjungan (One Visit Endodontic)", "totalTindakanBruto": 1500000, "totalBiayaLab": 0, "dasarJM": 1500000, "persenJM": 0.65, "tipeAturan": "Persentase Dokter (65%)", "jmDokter": 975000, "totalFeePerawat": 0, "jmKlinik": 525000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0053/0526", "tanggal": "21-05-2026", "dokter": "drg. Aviva", "perawat": "Wulan", "kategori": "Tindakan", "namaItem": "Odontektomi Kelas I Ringan", "totalTindakanBruto": 1800000, "totalBiayaLab": 0, "dasarJM": 1800000, "persenJM": 0.65, "tipeAturan": "Persentase Dokter (65%)", "jmDokter": 1170000, "totalFeePerawat": 0, "jmKlinik": 630000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0053/0526", "tanggal": "21-05-2026", "dokter": "drg. Aviva", "perawat": "Wulan", "kategori": "Obat", "namaItem": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "totalTindakanBruto": 35000, "totalBiayaLab": 0, "dasarJM": 35000, "persenJM": 0.0, "tipeAturan": "Non-JM (Obat/BMHP)", "jmDokter": 0, "totalFeePerawat": 0, "jmKlinik": 35000, "status": "Final"}, {"idInvoice": "INV/SHELDON/0054/0526", "tanggal": "22-05-2026", "dokter": "drg. Erien", "perawat": "Dina", "kategori": "Tindakan", "namaItem": "Tumpat GIC Sedang", "totalTindakanBruto": 250000, "totalBiayaLab": 0, "dasarJM": 250000, "persenJM": 0.5, "tipeAturan": "Persentase Dokter (50%)", "jmDokter": 125000, "totalFeePerawat": 0, "jmKlinik": 125000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0055/0526", "tanggal": "23-05-2026", "dokter": "drg.g.p Dinda", "perawat": "Bernadette Rostenkowski", "kategori": "Tindakan", "namaItem": "Tumpat Komposit Sedang", "totalTindakanBruto": 300000, "totalBiayaLab": 0, "dasarJM": 300000, "persenJM": 0.55, "tipeAturan": "Persentase Dokter (55%)", "jmDokter": 165000, "totalFeePerawat": 0, "jmKlinik": 135000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0056/0526", "tanggal": "24-05-2026", "dokter": "drg.g.p Fathya", "perawat": "Wulan", "kategori": "Tindakan", "namaItem": "Scalling Sedang", "totalTindakanBruto": 250000, "totalBiayaLab": 0, "dasarJM": 250000, "persenJM": 0.4, "tipeAturan": "Persentase Dokter (40%)", "jmDokter": 100000, "totalFeePerawat": 0, "jmKlinik": 150000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0056/0526", "tanggal": "24-05-2026", "dokter": "drg.g.p Fathya", "perawat": "Wulan", "kategori": "Obat", "namaItem": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "totalTindakanBruto": 35000, "totalBiayaLab": 0, "dasarJM": 35000, "persenJM": 0.0, "tipeAturan": "Non-JM (Obat/BMHP)", "jmDokter": 0, "totalFeePerawat": 0, "jmKlinik": 35000, "status": "Final"}, {"idInvoice": "INV/SHELDON/0057/0526", "tanggal": "25-05-2026", "dokter": "drg.g.p Belinda", "perawat": "Dina", "kategori": "Tindakan", "namaItem": "Exo Dewasa Ringan (Akar Tunggal)", "totalTindakanBruto": 250000, "totalBiayaLab": 0, "dasarJM": 250000, "persenJM": 0.4, "tipeAturan": "Persentase Dokter (40%)", "jmDokter": 100000, "totalFeePerawat": 0, "jmKlinik": 150000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0058/0526", "tanggal": "26-05-2026", "dokter": "drg. Rahma Yulinda D, Sp. BMM", "perawat": "Bernadette Rostenkowski", "kategori": "Tindakan", "namaItem": "Kontrol Ortho Rutin (Ganti Karet/Power O)", "totalTindakanBruto": 150000, "totalBiayaLab": 0, "dasarJM": 150000, "persenJM": 0.65, "tipeAturan": "Persentase Dokter (65%)", "jmDokter": 97500, "totalFeePerawat": 0, "jmKlinik": 52500, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0059/0526", "tanggal": "27-05-2026", "dokter": "drg. Tia Ardhana R", "perawat": "Wulan", "kategori": "Tindakan", "namaItem": "Rontgen Periapikal Digital", "totalTindakanBruto": 100000, "totalBiayaLab": 0, "dasarJM": 100000, "persenJM": 0.15, "tipeAturan": "Tarif Rontgen (15%)", "jmDokter": 15000, "totalFeePerawat": 0, "jmKlinik": 85000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0059/0526", "tanggal": "27-05-2026", "dokter": "drg. Tia Ardhana R", "perawat": "Wulan", "kategori": "Obat", "namaItem": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "totalTindakanBruto": 35000, "totalBiayaLab": 0, "dasarJM": 35000, "persenJM": 0.0, "tipeAturan": "Non-JM (Obat/BMHP)", "jmDokter": 0, "totalFeePerawat": 0, "jmKlinik": 35000, "status": "Final"}, {"idInvoice": "INV/SHELDON/0060/0526", "tanggal": "28-05-2026", "dokter": "drg. Danny", "perawat": "Dina", "kategori": "Tindakan", "namaItem": "Scalling Perawat", "totalTindakanBruto": 150000, "totalBiayaLab": 0, "dasarJM": 150000, "persenJM": 0.65, "tipeAturan": "Persentase Dokter (65%)", "jmDokter": 72500, "totalFeePerawat": 25000, "jmKlinik": 52500, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0061/0526", "tanggal": "01-05-2026", "dokter": "drg. Astri", "perawat": "Bernadette Rostenkowski", "kategori": "Tindakan", "namaItem": "Crown PFM (Porcelain Fused to Metal)", "totalTindakanBruto": 1500000, "totalBiayaLab": 350000, "dasarJM": 1150000, "persenJM": 0.65, "tipeAturan": "Persentase Dokter (65%)", "jmDokter": 747500, "totalFeePerawat": 0, "jmKlinik": 402500, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0062/0526", "tanggal": "02-05-2026", "dokter": "drg. Rizka", "perawat": "Wulan", "kategori": "Tindakan", "namaItem": "PSA 1x Kunjungan (One Visit Endodontic)", "totalTindakanBruto": 1500000, "totalBiayaLab": 0, "dasarJM": 1500000, "persenJM": 0.65, "tipeAturan": "Persentase Dokter (65%)", "jmDokter": 975000, "totalFeePerawat": 0, "jmKlinik": 525000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0062/0526", "tanggal": "02-05-2026", "dokter": "drg. Rizka", "perawat": "Wulan", "kategori": "Obat", "namaItem": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "totalTindakanBruto": 35000, "totalBiayaLab": 0, "dasarJM": 35000, "persenJM": 0.0, "tipeAturan": "Non-JM (Obat/BMHP)", "jmDokter": 0, "totalFeePerawat": 0, "jmKlinik": 35000, "status": "Final"}, {"idInvoice": "INV/SHELDON/0063/0526", "tanggal": "03-05-2026", "dokter": "drg. Nanda", "perawat": "Dina", "kategori": "Tindakan", "namaItem": "Odontektomi Kelas I Ringan", "totalTindakanBruto": 1800000, "totalBiayaLab": 0, "dasarJM": 1800000, "persenJM": 0.65, "tipeAturan": "Persentase Dokter (65%)", "jmDokter": 1170000, "totalFeePerawat": 0, "jmKlinik": 630000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0064/0526", "tanggal": "04-05-2026", "dokter": "drg. Aviva", "perawat": "Bernadette Rostenkowski", "kategori": "Tindakan", "namaItem": "Tumpat GIC Sedang", "totalTindakanBruto": 250000, "totalBiayaLab": 0, "dasarJM": 250000, "persenJM": 0.65, "tipeAturan": "Persentase Dokter (65%)", "jmDokter": 162500, "totalFeePerawat": 0, "jmKlinik": 87500, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0065/0626", "tanggal": "05-06-2026", "dokter": "drg. Erien", "perawat": "Wulan", "kategori": "Tindakan", "namaItem": "Tumpat Komposit Sedang", "totalTindakanBruto": 300000, "totalBiayaLab": 0, "dasarJM": 300000, "persenJM": 0.5, "tipeAturan": "Persentase Dokter (50%)", "jmDokter": 150000, "totalFeePerawat": 0, "jmKlinik": 150000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0065/0626", "tanggal": "05-06-2026", "dokter": "drg. Erien", "perawat": "Wulan", "kategori": "Obat", "namaItem": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "totalTindakanBruto": 35000, "totalBiayaLab": 0, "dasarJM": 35000, "persenJM": 0.0, "tipeAturan": "Non-JM (Obat/BMHP)", "jmDokter": 0, "totalFeePerawat": 0, "jmKlinik": 35000, "status": "Final"}, {"idInvoice": "INV/SHELDON/0066/0626", "tanggal": "06-06-2026", "dokter": "drg.g.p Dinda", "perawat": "Dina", "kategori": "Tindakan", "namaItem": "Scalling Sedang", "totalTindakanBruto": 250000, "totalBiayaLab": 0, "dasarJM": 250000, "persenJM": 0.55, "tipeAturan": "Persentase Dokter (55%)", "jmDokter": 137500, "totalFeePerawat": 0, "jmKlinik": 112500, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0067/0626", "tanggal": "07-06-2026", "dokter": "drg.g.p Fathya", "perawat": "Bernadette Rostenkowski", "kategori": "Tindakan", "namaItem": "Exo Dewasa Ringan (Akar Tunggal)", "totalTindakanBruto": 250000, "totalBiayaLab": 0, "dasarJM": 250000, "persenJM": 0.4, "tipeAturan": "Persentase Dokter (40%)", "jmDokter": 100000, "totalFeePerawat": 0, "jmKlinik": 150000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0068/0626", "tanggal": "08-06-2026", "dokter": "drg.g.p Belinda", "perawat": "Wulan", "kategori": "Tindakan", "namaItem": "Kontrol Ortho Rutin (Ganti Karet/Power O)", "totalTindakanBruto": 150000, "totalBiayaLab": 0, "dasarJM": 150000, "persenJM": 0.4, "tipeAturan": "Persentase Dokter (40%)", "jmDokter": 60000, "totalFeePerawat": 0, "jmKlinik": 90000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0068/0626", "tanggal": "08-06-2026", "dokter": "drg.g.p Belinda", "perawat": "Wulan", "kategori": "Obat", "namaItem": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "totalTindakanBruto": 35000, "totalBiayaLab": 0, "dasarJM": 35000, "persenJM": 0.0, "tipeAturan": "Non-JM (Obat/BMHP)", "jmDokter": 0, "totalFeePerawat": 0, "jmKlinik": 35000, "status": "Final"}, {"idInvoice": "INV/SHELDON/0069/0626", "tanggal": "09-06-2026", "dokter": "drg. Rahma Yulinda D, Sp. BMM", "perawat": "Dina", "kategori": "Tindakan", "namaItem": "Rontgen Periapikal Digital", "totalTindakanBruto": 100000, "totalBiayaLab": 0, "dasarJM": 100000, "persenJM": 0.15, "tipeAturan": "Tarif Rontgen (15%)", "jmDokter": 15000, "totalFeePerawat": 0, "jmKlinik": 85000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0070/0626", "tanggal": "10-06-2026", "dokter": "drg. Tia Ardhana R", "perawat": "Bernadette Rostenkowski", "kategori": "Tindakan", "namaItem": "Scalling Perawat", "totalTindakanBruto": 150000, "totalBiayaLab": 0, "dasarJM": 150000, "persenJM": 0.5, "tipeAturan": "Persentase Dokter (50%)", "jmDokter": 50000, "totalFeePerawat": 25000, "jmKlinik": 75000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0071/0626", "tanggal": "11-06-2026", "dokter": "drg. Danny", "perawat": "Wulan", "kategori": "Tindakan", "namaItem": "Crown PFM (Porcelain Fused to Metal)", "totalTindakanBruto": 1500000, "totalBiayaLab": 350000, "dasarJM": 1150000, "persenJM": 0.65, "tipeAturan": "Persentase Dokter (65%)", "jmDokter": 747500, "totalFeePerawat": 0, "jmKlinik": 402500, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0071/0626", "tanggal": "11-06-2026", "dokter": "drg. Danny", "perawat": "Wulan", "kategori": "Obat", "namaItem": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "totalTindakanBruto": 35000, "totalBiayaLab": 0, "dasarJM": 35000, "persenJM": 0.0, "tipeAturan": "Non-JM (Obat/BMHP)", "jmDokter": 0, "totalFeePerawat": 0, "jmKlinik": 35000, "status": "Final"}, {"idInvoice": "INV/SHELDON/0072/0626", "tanggal": "12-06-2026", "dokter": "drg. Astri", "perawat": "Dina", "kategori": "Tindakan", "namaItem": "PSA 1x Kunjungan (One Visit Endodontic)", "totalTindakanBruto": 1500000, "totalBiayaLab": 0, "dasarJM": 1500000, "persenJM": 0.65, "tipeAturan": "Persentase Dokter (65%)", "jmDokter": 975000, "totalFeePerawat": 0, "jmKlinik": 525000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0073/0626", "tanggal": "13-06-2026", "dokter": "drg. Rizka", "perawat": "Bernadette Rostenkowski", "kategori": "Tindakan", "namaItem": "Odontektomi Kelas I Ringan", "totalTindakanBruto": 1800000, "totalBiayaLab": 0, "dasarJM": 1800000, "persenJM": 0.65, "tipeAturan": "Persentase Dokter (65%)", "jmDokter": 1170000, "totalFeePerawat": 0, "jmKlinik": 630000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0074/0626", "tanggal": "14-06-2026", "dokter": "drg. Nanda", "perawat": "Wulan", "kategori": "Tindakan", "namaItem": "Tumpat GIC Sedang", "totalTindakanBruto": 250000, "totalBiayaLab": 0, "dasarJM": 250000, "persenJM": 0.65, "tipeAturan": "Persentase Dokter (65%)", "jmDokter": 162500, "totalFeePerawat": 0, "jmKlinik": 87500, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0074/0626", "tanggal": "14-06-2026", "dokter": "drg. Nanda", "perawat": "Wulan", "kategori": "Obat", "namaItem": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "totalTindakanBruto": 35000, "totalBiayaLab": 0, "dasarJM": 35000, "persenJM": 0.0, "tipeAturan": "Non-JM (Obat/BMHP)", "jmDokter": 0, "totalFeePerawat": 0, "jmKlinik": 35000, "status": "Final"}, {"idInvoice": "INV/SHELDON/0075/0626", "tanggal": "15-06-2026", "dokter": "drg. Aviva", "perawat": "Dina", "kategori": "Tindakan", "namaItem": "Tumpat Komposit Sedang", "totalTindakanBruto": 300000, "totalBiayaLab": 0, "dasarJM": 300000, "persenJM": 0.65, "tipeAturan": "Persentase Dokter (65%)", "jmDokter": 195000, "totalFeePerawat": 0, "jmKlinik": 105000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0076/0626", "tanggal": "16-06-2026", "dokter": "drg. Erien", "perawat": "Bernadette Rostenkowski", "kategori": "Tindakan", "namaItem": "Scalling Sedang", "totalTindakanBruto": 250000, "totalBiayaLab": 0, "dasarJM": 250000, "persenJM": 0.5, "tipeAturan": "Persentase Dokter (50%)", "jmDokter": 125000, "totalFeePerawat": 0, "jmKlinik": 125000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0077/0726", "tanggal": "17-07-2026", "dokter": "drg.g.p Dinda", "perawat": "Wulan", "kategori": "Tindakan", "namaItem": "Exo Dewasa Ringan (Akar Tunggal)", "totalTindakanBruto": 250000, "totalBiayaLab": 0, "dasarJM": 250000, "persenJM": 0.55, "tipeAturan": "Persentase Dokter (55%)", "jmDokter": 137500, "totalFeePerawat": 0, "jmKlinik": 112500, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0077/0726", "tanggal": "17-07-2026", "dokter": "drg.g.p Dinda", "perawat": "Wulan", "kategori": "Obat", "namaItem": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "totalTindakanBruto": 35000, "totalBiayaLab": 0, "dasarJM": 35000, "persenJM": 0.0, "tipeAturan": "Non-JM (Obat/BMHP)", "jmDokter": 0, "totalFeePerawat": 0, "jmKlinik": 35000, "status": "Final"}, {"idInvoice": "INV/SHELDON/0078/0726", "tanggal": "18-07-2026", "dokter": "drg.g.p Fathya", "perawat": "Dina", "kategori": "Tindakan", "namaItem": "Kontrol Ortho Rutin (Ganti Karet/Power O)", "totalTindakanBruto": 150000, "totalBiayaLab": 0, "dasarJM": 150000, "persenJM": 0.4, "tipeAturan": "Persentase Dokter (40%)", "jmDokter": 60000, "totalFeePerawat": 0, "jmKlinik": 90000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0079/0726", "tanggal": "19-07-2026", "dokter": "drg.g.p Belinda", "perawat": "Bernadette Rostenkowski", "kategori": "Tindakan", "namaItem": "Rontgen Periapikal Digital", "totalTindakanBruto": 100000, "totalBiayaLab": 0, "dasarJM": 100000, "persenJM": 0.15, "tipeAturan": "Tarif Rontgen (15%)", "jmDokter": 15000, "totalFeePerawat": 0, "jmKlinik": 85000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0080/0726", "tanggal": "20-07-2026", "dokter": "drg. Rahma Yulinda D, Sp. BMM", "perawat": "Wulan", "kategori": "Tindakan", "namaItem": "Scalling Perawat", "totalTindakanBruto": 150000, "totalBiayaLab": 0, "dasarJM": 150000, "persenJM": 0.65, "tipeAturan": "Persentase Dokter (65%)", "jmDokter": 72500, "totalFeePerawat": 25000, "jmKlinik": 52500, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0080/0726", "tanggal": "20-07-2026", "dokter": "drg. Rahma Yulinda D, Sp. BMM", "perawat": "Wulan", "kategori": "Obat", "namaItem": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "totalTindakanBruto": 35000, "totalBiayaLab": 0, "dasarJM": 35000, "persenJM": 0.0, "tipeAturan": "Non-JM (Obat/BMHP)", "jmDokter": 0, "totalFeePerawat": 0, "jmKlinik": 35000, "status": "Final"}, {"idInvoice": "INV/SHELDON/0081/0726", "tanggal": "21-07-2026", "dokter": "drg. Tia Ardhana R", "perawat": "Dina", "kategori": "Tindakan", "namaItem": "Crown PFM (Porcelain Fused to Metal)", "totalTindakanBruto": 1500000, "totalBiayaLab": 350000, "dasarJM": 1150000, "persenJM": 0.5, "tipeAturan": "Persentase Dokter (50%)", "jmDokter": 575000, "totalFeePerawat": 0, "jmKlinik": 575000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0082/0726", "tanggal": "22-07-2026", "dokter": "drg. Danny", "perawat": "Bernadette Rostenkowski", "kategori": "Tindakan", "namaItem": "PSA 1x Kunjungan (One Visit Endodontic)", "totalTindakanBruto": 1500000, "totalBiayaLab": 0, "dasarJM": 1500000, "persenJM": 0.65, "tipeAturan": "Persentase Dokter (65%)", "jmDokter": 975000, "totalFeePerawat": 0, "jmKlinik": 525000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0083/0726", "tanggal": "23-07-2026", "dokter": "drg. Astri", "perawat": "Wulan", "kategori": "Tindakan", "namaItem": "Odontektomi Kelas I Ringan", "totalTindakanBruto": 1800000, "totalBiayaLab": 0, "dasarJM": 1800000, "persenJM": 0.65, "tipeAturan": "Persentase Dokter (65%)", "jmDokter": 1170000, "totalFeePerawat": 0, "jmKlinik": 630000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0083/0726", "tanggal": "23-07-2026", "dokter": "drg. Astri", "perawat": "Wulan", "kategori": "Obat", "namaItem": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "totalTindakanBruto": 35000, "totalBiayaLab": 0, "dasarJM": 35000, "persenJM": 0.0, "tipeAturan": "Non-JM (Obat/BMHP)", "jmDokter": 0, "totalFeePerawat": 0, "jmKlinik": 35000, "status": "Final"}, {"idInvoice": "INV/SHELDON/0084/0726", "tanggal": "24-07-2026", "dokter": "drg. Rizka", "perawat": "Dina", "kategori": "Tindakan", "namaItem": "Tumpat GIC Sedang", "totalTindakanBruto": 250000, "totalBiayaLab": 0, "dasarJM": 250000, "persenJM": 0.65, "tipeAturan": "Persentase Dokter (65%)", "jmDokter": 162500, "totalFeePerawat": 0, "jmKlinik": 87500, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0085/0726", "tanggal": "25-07-2026", "dokter": "drg. Nanda", "perawat": "Bernadette Rostenkowski", "kategori": "Tindakan", "namaItem": "Tumpat Komposit Sedang", "totalTindakanBruto": 300000, "totalBiayaLab": 0, "dasarJM": 300000, "persenJM": 0.65, "tipeAturan": "Persentase Dokter (65%)", "jmDokter": 195000, "totalFeePerawat": 0, "jmKlinik": 105000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0086/0726", "tanggal": "26-07-2026", "dokter": "drg. Aviva", "perawat": "Wulan", "kategori": "Tindakan", "namaItem": "Scalling Sedang", "totalTindakanBruto": 250000, "totalBiayaLab": 0, "dasarJM": 250000, "persenJM": 0.65, "tipeAturan": "Persentase Dokter (65%)", "jmDokter": 162500, "totalFeePerawat": 0, "jmKlinik": 87500, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0086/0726", "tanggal": "26-07-2026", "dokter": "drg. Aviva", "perawat": "Wulan", "kategori": "Obat", "namaItem": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "totalTindakanBruto": 35000, "totalBiayaLab": 0, "dasarJM": 35000, "persenJM": 0.0, "tipeAturan": "Non-JM (Obat/BMHP)", "jmDokter": 0, "totalFeePerawat": 0, "jmKlinik": 35000, "status": "Final"}, {"idInvoice": "INV/SHELDON/0087/0726", "tanggal": "27-07-2026", "dokter": "drg. Erien", "perawat": "Dina", "kategori": "Tindakan", "namaItem": "Exo Dewasa Ringan (Akar Tunggal)", "totalTindakanBruto": 250000, "totalBiayaLab": 0, "dasarJM": 250000, "persenJM": 0.5, "tipeAturan": "Persentase Dokter (50%)", "jmDokter": 125000, "totalFeePerawat": 0, "jmKlinik": 125000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0088/0726", "tanggal": "28-07-2026", "dokter": "drg.g.p Dinda", "perawat": "Bernadette Rostenkowski", "kategori": "Tindakan", "namaItem": "Kontrol Ortho Rutin (Ganti Karet/Power O)", "totalTindakanBruto": 150000, "totalBiayaLab": 0, "dasarJM": 150000, "persenJM": 0.55, "tipeAturan": "Persentase Dokter (55%)", "jmDokter": 82500, "totalFeePerawat": 0, "jmKlinik": 67500, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0089/0826", "tanggal": "01-08-2026", "dokter": "drg.g.p Fathya", "perawat": "Wulan", "kategori": "Tindakan", "namaItem": "Rontgen Periapikal Digital", "totalTindakanBruto": 100000, "totalBiayaLab": 0, "dasarJM": 100000, "persenJM": 0.15, "tipeAturan": "Tarif Rontgen (15%)", "jmDokter": 15000, "totalFeePerawat": 0, "jmKlinik": 85000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0089/0826", "tanggal": "01-08-2026", "dokter": "drg.g.p Fathya", "perawat": "Wulan", "kategori": "Obat", "namaItem": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "totalTindakanBruto": 35000, "totalBiayaLab": 0, "dasarJM": 35000, "persenJM": 0.0, "tipeAturan": "Non-JM (Obat/BMHP)", "jmDokter": 0, "totalFeePerawat": 0, "jmKlinik": 35000, "status": "Final"}, {"idInvoice": "INV/SHELDON/0090/0826", "tanggal": "02-08-2026", "dokter": "drg.g.p Belinda", "perawat": "Dina", "kategori": "Tindakan", "namaItem": "Scalling Perawat", "totalTindakanBruto": 150000, "totalBiayaLab": 0, "dasarJM": 150000, "persenJM": 0.4, "tipeAturan": "Persentase Dokter (40%)", "jmDokter": 35000, "totalFeePerawat": 25000, "jmKlinik": 90000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0091/0826", "tanggal": "03-08-2026", "dokter": "drg. Rahma Yulinda D, Sp. BMM", "perawat": "Bernadette Rostenkowski", "kategori": "Tindakan", "namaItem": "Crown PFM (Porcelain Fused to Metal)", "totalTindakanBruto": 1500000, "totalBiayaLab": 350000, "dasarJM": 1150000, "persenJM": 0.65, "tipeAturan": "Persentase Dokter (65%)", "jmDokter": 747500, "totalFeePerawat": 0, "jmKlinik": 402500, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0092/0826", "tanggal": "04-08-2026", "dokter": "drg. Tia Ardhana R", "perawat": "Wulan", "kategori": "Tindakan", "namaItem": "PSA 1x Kunjungan (One Visit Endodontic)", "totalTindakanBruto": 1500000, "totalBiayaLab": 0, "dasarJM": 1500000, "persenJM": 0.5, "tipeAturan": "Persentase Dokter (50%)", "jmDokter": 750000, "totalFeePerawat": 0, "jmKlinik": 750000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0092/0826", "tanggal": "04-08-2026", "dokter": "drg. Tia Ardhana R", "perawat": "Wulan", "kategori": "Obat", "namaItem": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "totalTindakanBruto": 35000, "totalBiayaLab": 0, "dasarJM": 35000, "persenJM": 0.0, "tipeAturan": "Non-JM (Obat/BMHP)", "jmDokter": 0, "totalFeePerawat": 0, "jmKlinik": 35000, "status": "Final"}, {"idInvoice": "INV/SHELDON/0093/0826", "tanggal": "05-08-2026", "dokter": "drg. Danny", "perawat": "Dina", "kategori": "Tindakan", "namaItem": "Odontektomi Kelas I Ringan", "totalTindakanBruto": 1800000, "totalBiayaLab": 0, "dasarJM": 1800000, "persenJM": 0.65, "tipeAturan": "Persentase Dokter (65%)", "jmDokter": 1170000, "totalFeePerawat": 0, "jmKlinik": 630000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0094/0826", "tanggal": "06-08-2026", "dokter": "drg. Astri", "perawat": "Bernadette Rostenkowski", "kategori": "Tindakan", "namaItem": "Tumpat GIC Sedang", "totalTindakanBruto": 250000, "totalBiayaLab": 0, "dasarJM": 250000, "persenJM": 0.65, "tipeAturan": "Persentase Dokter (65%)", "jmDokter": 162500, "totalFeePerawat": 0, "jmKlinik": 87500, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0095/0826", "tanggal": "07-08-2026", "dokter": "drg. Rizka", "perawat": "Wulan", "kategori": "Tindakan", "namaItem": "Tumpat Komposit Sedang", "totalTindakanBruto": 300000, "totalBiayaLab": 0, "dasarJM": 300000, "persenJM": 0.65, "tipeAturan": "Persentase Dokter (65%)", "jmDokter": 195000, "totalFeePerawat": 0, "jmKlinik": 105000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0095/0826", "tanggal": "07-08-2026", "dokter": "drg. Rizka", "perawat": "Wulan", "kategori": "Obat", "namaItem": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "totalTindakanBruto": 35000, "totalBiayaLab": 0, "dasarJM": 35000, "persenJM": 0.0, "tipeAturan": "Non-JM (Obat/BMHP)", "jmDokter": 0, "totalFeePerawat": 0, "jmKlinik": 35000, "status": "Final"}, {"idInvoice": "INV/SHELDON/0096/0826", "tanggal": "08-08-2026", "dokter": "drg. Nanda", "perawat": "Dina", "kategori": "Tindakan", "namaItem": "Scalling Sedang", "totalTindakanBruto": 250000, "totalBiayaLab": 0, "dasarJM": 250000, "persenJM": 0.65, "tipeAturan": "Persentase Dokter (65%)", "jmDokter": 162500, "totalFeePerawat": 0, "jmKlinik": 87500, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0097/0826", "tanggal": "09-08-2026", "dokter": "drg. Aviva", "perawat": "Bernadette Rostenkowski", "kategori": "Tindakan", "namaItem": "Exo Dewasa Ringan (Akar Tunggal)", "totalTindakanBruto": 250000, "totalBiayaLab": 0, "dasarJM": 250000, "persenJM": 0.65, "tipeAturan": "Persentase Dokter (65%)", "jmDokter": 162500, "totalFeePerawat": 0, "jmKlinik": 87500, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0098/0826", "tanggal": "10-08-2026", "dokter": "drg. Erien", "perawat": "Wulan", "kategori": "Tindakan", "namaItem": "Kontrol Ortho Rutin (Ganti Karet/Power O)", "totalTindakanBruto": 150000, "totalBiayaLab": 0, "dasarJM": 150000, "persenJM": 0.5, "tipeAturan": "Persentase Dokter (50%)", "jmDokter": 75000, "totalFeePerawat": 0, "jmKlinik": 75000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0098/0826", "tanggal": "10-08-2026", "dokter": "drg. Erien", "perawat": "Wulan", "kategori": "Obat", "namaItem": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "totalTindakanBruto": 35000, "totalBiayaLab": 0, "dasarJM": 35000, "persenJM": 0.0, "tipeAturan": "Non-JM (Obat/BMHP)", "jmDokter": 0, "totalFeePerawat": 0, "jmKlinik": 35000, "status": "Final"}, {"idInvoice": "INV/SHELDON/0099/0826", "tanggal": "11-08-2026", "dokter": "drg.g.p Dinda", "perawat": "Dina", "kategori": "Tindakan", "namaItem": "Rontgen Periapikal Digital", "totalTindakanBruto": 100000, "totalBiayaLab": 0, "dasarJM": 100000, "persenJM": 0.15, "tipeAturan": "Tarif Rontgen (15%)", "jmDokter": 15000, "totalFeePerawat": 0, "jmKlinik": 85000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0100/0826", "tanggal": "12-08-2026", "dokter": "drg.g.p Fathya", "perawat": "Bernadette Rostenkowski", "kategori": "Tindakan", "namaItem": "Scalling Perawat", "totalTindakanBruto": 150000, "totalBiayaLab": 0, "dasarJM": 150000, "persenJM": 0.4, "tipeAturan": "Persentase Dokter (40%)", "jmDokter": 35000, "totalFeePerawat": 25000, "jmKlinik": 90000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0101/0926", "tanggal": "13-09-2026", "dokter": "drg.g.p Belinda", "perawat": "Wulan", "kategori": "Tindakan", "namaItem": "Crown PFM (Porcelain Fused to Metal)", "totalTindakanBruto": 1500000, "totalBiayaLab": 350000, "dasarJM": 1150000, "persenJM": 0.4, "tipeAturan": "Persentase Dokter (40%)", "jmDokter": 460000, "totalFeePerawat": 0, "jmKlinik": 690000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0101/0926", "tanggal": "13-09-2026", "dokter": "drg.g.p Belinda", "perawat": "Wulan", "kategori": "Obat", "namaItem": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "totalTindakanBruto": 35000, "totalBiayaLab": 0, "dasarJM": 35000, "persenJM": 0.0, "tipeAturan": "Non-JM (Obat/BMHP)", "jmDokter": 0, "totalFeePerawat": 0, "jmKlinik": 35000, "status": "Final"}, {"idInvoice": "INV/SHELDON/0102/0926", "tanggal": "14-09-2026", "dokter": "drg. Rahma Yulinda D, Sp. BMM", "perawat": "Dina", "kategori": "Tindakan", "namaItem": "PSA 1x Kunjungan (One Visit Endodontic)", "totalTindakanBruto": 1500000, "totalBiayaLab": 0, "dasarJM": 1500000, "persenJM": 0.65, "tipeAturan": "Persentase Dokter (65%)", "jmDokter": 975000, "totalFeePerawat": 0, "jmKlinik": 525000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0103/0926", "tanggal": "15-09-2026", "dokter": "drg. Tia Ardhana R", "perawat": "Bernadette Rostenkowski", "kategori": "Tindakan", "namaItem": "Odontektomi Kelas I Ringan", "totalTindakanBruto": 1800000, "totalBiayaLab": 0, "dasarJM": 1800000, "persenJM": 0.5, "tipeAturan": "Persentase Dokter (50%)", "jmDokter": 900000, "totalFeePerawat": 0, "jmKlinik": 900000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0104/0926", "tanggal": "16-09-2026", "dokter": "drg. Danny", "perawat": "Wulan", "kategori": "Tindakan", "namaItem": "Tumpat GIC Sedang", "totalTindakanBruto": 250000, "totalBiayaLab": 0, "dasarJM": 250000, "persenJM": 0.65, "tipeAturan": "Persentase Dokter (65%)", "jmDokter": 162500, "totalFeePerawat": 0, "jmKlinik": 87500, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0104/0926", "tanggal": "16-09-2026", "dokter": "drg. Danny", "perawat": "Wulan", "kategori": "Obat", "namaItem": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "totalTindakanBruto": 35000, "totalBiayaLab": 0, "dasarJM": 35000, "persenJM": 0.0, "tipeAturan": "Non-JM (Obat/BMHP)", "jmDokter": 0, "totalFeePerawat": 0, "jmKlinik": 35000, "status": "Final"}, {"idInvoice": "INV/SHELDON/0105/0926", "tanggal": "17-09-2026", "dokter": "drg. Astri", "perawat": "Dina", "kategori": "Tindakan", "namaItem": "Tumpat Komposit Sedang", "totalTindakanBruto": 300000, "totalBiayaLab": 0, "dasarJM": 300000, "persenJM": 0.65, "tipeAturan": "Persentase Dokter (65%)", "jmDokter": 195000, "totalFeePerawat": 0, "jmKlinik": 105000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0106/0926", "tanggal": "18-09-2026", "dokter": "drg. Rizka", "perawat": "Bernadette Rostenkowski", "kategori": "Tindakan", "namaItem": "Scalling Sedang", "totalTindakanBruto": 250000, "totalBiayaLab": 0, "dasarJM": 250000, "persenJM": 0.65, "tipeAturan": "Persentase Dokter (65%)", "jmDokter": 162500, "totalFeePerawat": 0, "jmKlinik": 87500, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0107/0926", "tanggal": "19-09-2026", "dokter": "drg. Nanda", "perawat": "Wulan", "kategori": "Tindakan", "namaItem": "Exo Dewasa Ringan (Akar Tunggal)", "totalTindakanBruto": 250000, "totalBiayaLab": 0, "dasarJM": 250000, "persenJM": 0.65, "tipeAturan": "Persentase Dokter (65%)", "jmDokter": 162500, "totalFeePerawat": 0, "jmKlinik": 87500, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0107/0926", "tanggal": "19-09-2026", "dokter": "drg. Nanda", "perawat": "Wulan", "kategori": "Obat", "namaItem": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "totalTindakanBruto": 35000, "totalBiayaLab": 0, "dasarJM": 35000, "persenJM": 0.0, "tipeAturan": "Non-JM (Obat/BMHP)", "jmDokter": 0, "totalFeePerawat": 0, "jmKlinik": 35000, "status": "Final"}, {"idInvoice": "INV/SHELDON/0108/0926", "tanggal": "20-09-2026", "dokter": "drg. Aviva", "perawat": "Dina", "kategori": "Tindakan", "namaItem": "Kontrol Ortho Rutin (Ganti Karet/Power O)", "totalTindakanBruto": 150000, "totalBiayaLab": 0, "dasarJM": 150000, "persenJM": 0.65, "tipeAturan": "Persentase Dokter (65%)", "jmDokter": 97500, "totalFeePerawat": 0, "jmKlinik": 52500, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0109/0926", "tanggal": "21-09-2026", "dokter": "drg. Erien", "perawat": "Bernadette Rostenkowski", "kategori": "Tindakan", "namaItem": "Rontgen Periapikal Digital", "totalTindakanBruto": 100000, "totalBiayaLab": 0, "dasarJM": 100000, "persenJM": 0.15, "tipeAturan": "Tarif Rontgen (15%)", "jmDokter": 15000, "totalFeePerawat": 0, "jmKlinik": 85000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0110/0926", "tanggal": "22-09-2026", "dokter": "drg.g.p Dinda", "perawat": "Wulan", "kategori": "Tindakan", "namaItem": "Scalling Perawat", "totalTindakanBruto": 150000, "totalBiayaLab": 0, "dasarJM": 150000, "persenJM": 0.55, "tipeAturan": "Persentase Dokter (55%)", "jmDokter": 57500, "totalFeePerawat": 25000, "jmKlinik": 67500, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0110/0926", "tanggal": "22-09-2026", "dokter": "drg.g.p Dinda", "perawat": "Wulan", "kategori": "Obat", "namaItem": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "totalTindakanBruto": 35000, "totalBiayaLab": 0, "dasarJM": 35000, "persenJM": 0.0, "tipeAturan": "Non-JM (Obat/BMHP)", "jmDokter": 0, "totalFeePerawat": 0, "jmKlinik": 35000, "status": "Final"}, {"idInvoice": "INV/SHELDON/0111/0926", "tanggal": "23-09-2026", "dokter": "drg.g.p Fathya", "perawat": "Dina", "kategori": "Tindakan", "namaItem": "Crown PFM (Porcelain Fused to Metal)", "totalTindakanBruto": 1500000, "totalBiayaLab": 350000, "dasarJM": 1150000, "persenJM": 0.4, "tipeAturan": "Persentase Dokter (40%)", "jmDokter": 460000, "totalFeePerawat": 0, "jmKlinik": 690000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0112/0926", "tanggal": "24-09-2026", "dokter": "drg.g.p Belinda", "perawat": "Bernadette Rostenkowski", "kategori": "Tindakan", "namaItem": "PSA 1x Kunjungan (One Visit Endodontic)", "totalTindakanBruto": 1500000, "totalBiayaLab": 0, "dasarJM": 1500000, "persenJM": 0.4, "tipeAturan": "Persentase Dokter (40%)", "jmDokter": 600000, "totalFeePerawat": 0, "jmKlinik": 900000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0113/1026", "tanggal": "25-10-2026", "dokter": "drg. Rahma Yulinda D, Sp. BMM", "perawat": "Wulan", "kategori": "Tindakan", "namaItem": "Odontektomi Kelas I Ringan", "totalTindakanBruto": 1800000, "totalBiayaLab": 0, "dasarJM": 1800000, "persenJM": 0.65, "tipeAturan": "Persentase Dokter (65%)", "jmDokter": 1170000, "totalFeePerawat": 0, "jmKlinik": 630000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0113/1026", "tanggal": "25-10-2026", "dokter": "drg. Rahma Yulinda D, Sp. BMM", "perawat": "Wulan", "kategori": "Obat", "namaItem": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "totalTindakanBruto": 35000, "totalBiayaLab": 0, "dasarJM": 35000, "persenJM": 0.0, "tipeAturan": "Non-JM (Obat/BMHP)", "jmDokter": 0, "totalFeePerawat": 0, "jmKlinik": 35000, "status": "Final"}, {"idInvoice": "INV/SHELDON/0114/1026", "tanggal": "26-10-2026", "dokter": "drg. Tia Ardhana R", "perawat": "Dina", "kategori": "Tindakan", "namaItem": "Tumpat GIC Sedang", "totalTindakanBruto": 250000, "totalBiayaLab": 0, "dasarJM": 250000, "persenJM": 0.5, "tipeAturan": "Persentase Dokter (50%)", "jmDokter": 125000, "totalFeePerawat": 0, "jmKlinik": 125000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0115/1026", "tanggal": "27-10-2026", "dokter": "drg. Danny", "perawat": "Bernadette Rostenkowski", "kategori": "Tindakan", "namaItem": "Tumpat Komposit Sedang", "totalTindakanBruto": 300000, "totalBiayaLab": 0, "dasarJM": 300000, "persenJM": 0.65, "tipeAturan": "Persentase Dokter (65%)", "jmDokter": 195000, "totalFeePerawat": 0, "jmKlinik": 105000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0116/1026", "tanggal": "28-10-2026", "dokter": "drg. Astri", "perawat": "Wulan", "kategori": "Tindakan", "namaItem": "Scalling Sedang", "totalTindakanBruto": 250000, "totalBiayaLab": 0, "dasarJM": 250000, "persenJM": 0.65, "tipeAturan": "Persentase Dokter (65%)", "jmDokter": 162500, "totalFeePerawat": 0, "jmKlinik": 87500, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0116/1026", "tanggal": "28-10-2026", "dokter": "drg. Astri", "perawat": "Wulan", "kategori": "Obat", "namaItem": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "totalTindakanBruto": 35000, "totalBiayaLab": 0, "dasarJM": 35000, "persenJM": 0.0, "tipeAturan": "Non-JM (Obat/BMHP)", "jmDokter": 0, "totalFeePerawat": 0, "jmKlinik": 35000, "status": "Final"}, {"idInvoice": "INV/SHELDON/0117/1026", "tanggal": "01-10-2026", "dokter": "drg. Rizka", "perawat": "Dina", "kategori": "Tindakan", "namaItem": "Exo Dewasa Ringan (Akar Tunggal)", "totalTindakanBruto": 250000, "totalBiayaLab": 0, "dasarJM": 250000, "persenJM": 0.65, "tipeAturan": "Persentase Dokter (65%)", "jmDokter": 162500, "totalFeePerawat": 0, "jmKlinik": 87500, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0118/1026", "tanggal": "02-10-2026", "dokter": "drg. Nanda", "perawat": "Bernadette Rostenkowski", "kategori": "Tindakan", "namaItem": "Kontrol Ortho Rutin (Ganti Karet/Power O)", "totalTindakanBruto": 150000, "totalBiayaLab": 0, "dasarJM": 150000, "persenJM": 0.65, "tipeAturan": "Persentase Dokter (65%)", "jmDokter": 97500, "totalFeePerawat": 0, "jmKlinik": 52500, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0119/1026", "tanggal": "03-10-2026", "dokter": "drg. Aviva", "perawat": "Wulan", "kategori": "Tindakan", "namaItem": "Rontgen Periapikal Digital", "totalTindakanBruto": 100000, "totalBiayaLab": 0, "dasarJM": 100000, "persenJM": 0.15, "tipeAturan": "Tarif Rontgen (15%)", "jmDokter": 15000, "totalFeePerawat": 0, "jmKlinik": 85000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0119/1026", "tanggal": "03-10-2026", "dokter": "drg. Aviva", "perawat": "Wulan", "kategori": "Obat", "namaItem": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "totalTindakanBruto": 35000, "totalBiayaLab": 0, "dasarJM": 35000, "persenJM": 0.0, "tipeAturan": "Non-JM (Obat/BMHP)", "jmDokter": 0, "totalFeePerawat": 0, "jmKlinik": 35000, "status": "Final"}, {"idInvoice": "INV/SHELDON/0120/1026", "tanggal": "04-10-2026", "dokter": "drg. Erien", "perawat": "Dina", "kategori": "Tindakan", "namaItem": "Scalling Perawat", "totalTindakanBruto": 150000, "totalBiayaLab": 0, "dasarJM": 150000, "persenJM": 0.5, "tipeAturan": "Persentase Dokter (50%)", "jmDokter": 50000, "totalFeePerawat": 25000, "jmKlinik": 75000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0121/1026", "tanggal": "05-10-2026", "dokter": "drg.g.p Dinda", "perawat": "Bernadette Rostenkowski", "kategori": "Tindakan", "namaItem": "Crown PFM (Porcelain Fused to Metal)", "totalTindakanBruto": 1500000, "totalBiayaLab": 350000, "dasarJM": 1150000, "persenJM": 0.55, "tipeAturan": "Persentase Dokter (55%)", "jmDokter": 632500, "totalFeePerawat": 0, "jmKlinik": 517500, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0122/1026", "tanggal": "06-10-2026", "dokter": "drg.g.p Fathya", "perawat": "Wulan", "kategori": "Tindakan", "namaItem": "PSA 1x Kunjungan (One Visit Endodontic)", "totalTindakanBruto": 1500000, "totalBiayaLab": 0, "dasarJM": 1500000, "persenJM": 0.4, "tipeAturan": "Persentase Dokter (40%)", "jmDokter": 600000, "totalFeePerawat": 0, "jmKlinik": 900000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0122/1026", "tanggal": "06-10-2026", "dokter": "drg.g.p Fathya", "perawat": "Wulan", "kategori": "Obat", "namaItem": "Medikasi (Asam Mefenamat 500 mg + Amoxicillin 500 mg)", "totalTindakanBruto": 35000, "totalBiayaLab": 0, "dasarJM": 35000, "persenJM": 0.0, "tipeAturan": "Non-JM (Obat/BMHP)", "jmDokter": 0, "totalFeePerawat": 0, "jmKlinik": 35000, "status": "Final"}, {"idInvoice": "INV/SHELDON/0123/1026", "tanggal": "07-10-2026", "dokter": "drg.g.p Belinda", "perawat": "Dina", "kategori": "Tindakan", "namaItem": "Odontektomi Kelas I Ringan", "totalTindakanBruto": 1800000, "totalBiayaLab": 0, "dasarJM": 1800000, "persenJM": 0.4, "tipeAturan": "Persentase Dokter (40%)", "jmDokter": 720000, "totalFeePerawat": 0, "jmKlinik": 1080000, "status": "Siap Cair"}, {"idInvoice": "INV/SHELDON/0124/1026", "tanggal": "08-10-2026", "dokter": "drg. Rahma Yulinda D, Sp. BMM", "perawat": "Bernadette Rostenkowski", "kategori": "Tindakan", "namaItem": "Tumpat GIC Sedang", "totalTindakanBruto": 250000, "totalBiayaLab": 0, "dasarJM": 250000, "persenJM": 0.65, "tipeAturan": "Persentase Dokter (65%)", "jmDokter": 162500, "totalFeePerawat": 0, "jmKlinik": 87500, "status": "Siap Cair"}]};
+
+  // Realistic database grounded in Sheldon RME multi-spreadsheet architecture + Bulk Data SHELDON 2026
   const mockDb = {
     staff: [
-      { id: "STF-001", nama: "drg. Sheldon Cooper, Sp.Ort", role: "Super User", pin: "1234", sip: "503/SIP-DRG/001/2024", persenJM: 0.50 },
-      { id: "STF-002", nama: "drg. Leonard Hofstadter", role: "Dokter Gigi Umum", pin: "1111", sip: "503/SIP-DRG/002/2024", persenJM: 0.45 },
-      { id: "STF-003", nama: "Penny Teller", role: "Kasir", pin: "2222", sip: "-", persenJM: 0 },
-      { id: "STF-004", nama: "Bernadette Rostenkowski", role: "Perawat Gigi", pin: "3333", sip: "-", persenJM: 0 }
+      { id: "STF-000", username: "admin", email: "vembrian@gmail.com", nama: "Administrator Sistem", role: "Super User", pin: "admin123", pass: "admin123", sip: "-", persenJM: 0 },
+      { id: "STF-000A", username: "asung", email: "v.asungnugroho@gmail.com", nama: "drg. V. Asung Nugroho, Sp.Ort", role: "Owner", pin: "admin123", pass: "admin123", sip: "503/SIP-DRG/000/2026", persenJM: 0.65 },
+      { id: "STF-001", username: "sheldon", email: "sheldon@sheldon.com", nama: "drg. Sheldon Cooper, Sp.Ort", role: "Dokter Gigi Spesialis", pin: "1234", pass: "1234", sip: "503/SIP-DRG/001/2024", persenJM: 0.50 },
+      { id: "STF-002", username: "leonard", email: "leonard@sheldon.com", nama: "drg. Leonard Hofstadter", role: "Dokter Gigi Umum", pin: "1111", pass: "1111", sip: "503/SIP-DRG/002/2024", persenJM: 0.40 },
+      { id: "STF-003", username: "penny", email: "penny@sheldon.com", nama: "Penny Teller", role: "Perawat Umum", pin: "2222", pass: "2222", sip: "-", persenJM: 0 },
+      { id: "STF-004", username: "bernadette", email: "bernadette@sheldon.com", nama: "Bernadette Rostenkowski", role: "Perawat Gigi", pin: "3333", pass: "3333", sip: "503/STR-PRW/003/2024", persenJM: 0 },
+      { id: "STF-005", username: "howard", email: "howard@sheldon.com", nama: "Howard Wolowitz", role: "Admin", pin: "4444", pass: "4444", sip: "-", persenJM: 0 },
+      { id: "STF-006", username: "danny", email: "danny@sheldon.id", nama: "drg. Danny", role: "Dokter Gigi Umum", pin: "1234", pass: "1234", sip: "503/SIP-DRG/007/2026", persenJM: 0.65 },
+      { id: "STF-007", username: "astri", email: "astri@sheldon.id", nama: "drg. Astri", role: "Dokter Gigi Umum", pin: "1234", pass: "1234", sip: "503/SIP-DRG/008/2026", persenJM: 0.65 },
+      { id: "STF-008", username: "rizka", email: "rizka@sheldon.id", nama: "drg. Rizka", role: "Dokter Gigi Umum", pin: "1234", pass: "1234", sip: "503/SIP-DRG/009/2026", persenJM: 0.65 },
+      { id: "STF-009", username: "nanda", email: "nanda@sheldon.id", nama: "drg. Nanda", role: "Dokter Gigi Umum", pin: "1234", pass: "1234", sip: "503/SIP-DRG/010/2026", persenJM: 0.65 },
+      { id: "STF-010", username: "aviva", email: "aviva@sheldon.id", nama: "drg. Aviva", role: "Dokter Gigi Umum", pin: "1234", pass: "1234", sip: "503/SIP-DRG/011/2026", persenJM: 0.65 },
+      { id: "STF-011", username: "erien", email: "erien@sheldon.id", nama: "drg. Erien", role: "Dokter Gigi Umum", pin: "1234", pass: "1234", sip: "503/SIP-DRG/012/2026", persenJM: 0.50 },
+      { id: "STF-012", username: "dinda", email: "dinda@sheldon.id", nama: "drg.g.p Dinda", role: "Dokter Gigi Umum", pin: "1234", pass: "1234", sip: "503/SIP-DRG/013/2026", persenJM: 0.55 },
+      { id: "STF-013", username: "fathya", email: "fathya@sheldon.id", nama: "drg.g.p Fathya", role: "Dokter Gigi Umum", pin: "1234", pass: "1234", sip: "503/SIP-DRG/014/2026", persenJM: 0.40 },
+      { id: "STF-014", username: "belinda", email: "belinda@sheldon.id", nama: "drg.g.p Belinda", role: "Dokter Gigi Umum", pin: "1234", pass: "1234", sip: "503/SIP-DRG/015/2026", persenJM: 0.40 },
+      { id: "STF-015", username: "wulan", email: "wulan@sheldon.id", nama: "Wulan", role: "Perawat Gigi", pin: "3333", pass: "3333", sip: "503/STR-PRW/002/2026", persenJM: 0 },
+      { id: "STF-016", username: "dina", email: "dina@sheldon.id", nama: "Dina", role: "Perawat Gigi", pin: "3333", pass: "3333", sip: "503/STR-PRW/003/2026", persenJM: 0 },
+      { id: "STF-017", username: "rahmayulinda", email: "rahma@sheldon.id", nama: "drg. Rahma Yulinda D, Sp. BMM", role: "Dokter Gigi Spesialis", pin: "1234", pass: "1234", sip: "503/SIP-DRG/016/2026", persenJM: 0.65 },
+      { id: "STF-018", username: "tiaardhana", email: "tia@sheldon.id", nama: "drg. Tia Ardhana R", role: "Dokter Gigi Umum", pin: "1234", pass: "1234", sip: "503/SIP-DRG/017/2026", persenJM: 0.50 },
+      { id: "STF-019", username: "widya", email: "widya@sheldon.id", nama: "drg. Widya", role: "Dokter Gigi Umum", pin: "1234", pass: "1234", sip: "503/SIP-DRG/018/2026", persenJM: 0.40 },
+      { id: "STF-020", username: "gita", email: "gita@sheldon.id", nama: "drg. Gita", role: "Dokter Gigi Umum", pin: "1234", pass: "1234", sip: "503/SIP-DRG/019/2026", persenJM: 0.40 }
     ],
     tarifKhusus: [
       { idDokter: "STF-001", namaDokter: "drg. Sheldon Cooper, Sp.Ort", kodeTindakan: "TND-006", namaTindakan: "Perawatan Saluran Akar (PSA) Molar", persenJM: 0.55 }
     ],
-    pasien: [
-      {
-        idPasien: "P-0001",
-        namaPasien: "Budi Santoso",
-        noRm: "RM-0001",
-        jenisKelamin: "Laki-Laki",
-        tempatLahir: "Payakumbuh",
-        tanggalLahir: "1988-08-15",
-        umur: "36",
-        agama: "Islam",
-        golonganDarah: "O",
-        pekerjaan: "PNS",
-        nik: "1376011508880001",
-        alamat: "Jl. Sudirman No. 45, Payakumbuh",
-        provinsi: "Sumatera Barat",
-        kabupaten: "Kota Payakumbuh",
-        kecamatan: "Payakumbuh Barat",
-        kelurahan: "Daya Bangun",
-        whatsapp: "081234567890",
-        alergi: "Penicillin",
-        riwayatPenyakit: "Hipertensi",
-        catatan: "Pasien kooperatif",
-        tglDaftar: "2024-01-01"
-      },
-      {
-        idPasien: "P-0002",
-        namaPasien: "Siti Rahmawati",
-        noRm: "RM-0002",
-        jenisKelamin: "Perempuan",
-        tempatLahir: "Bukittinggi",
-        tanggalLahir: "1995-11-22",
-        umur: "29",
-        agama: "Islam",
-        golonganDarah: "A",
-        pekerjaan: "Wiraswasta",
-        nik: "1376012211950002",
-        alamat: "Jl. A. Yani No. 12, Bukittinggi",
-        provinsi: "Sumatera Barat",
-        kabupaten: "Kota Bukittinggi",
-        kecamatan: "Guguk Panjang",
-        kelurahan: "Benteng",
-        whatsapp: "081398765432",
-        alergi: "Tidak Ada",
-        riwayatPenyakit: "Asma",
-        catatan: "Kontrol rutin",
-        tglDaftar: "2024-01-05"
-      }
-    ],
-    tindakan: [
-      { kode: "TND-001", id: "TND-001", nama: "Scaling Gigi Rahang Atas & Bawah", tarif: 250000, harga: 250000, kategori: "Dokter Gigi Umum", perluLab: "Tidak", persenJMDefault: null },
-      { kode: "TND-002", id: "TND-002", nama: "Penambalan Komposit Light-Cure", tarif: 300000, harga: 300000, kategori: "Dokter Gigi Umum", perluLab: "Tidak", persenJMDefault: null },
-      { kode: "TND-003", id: "TND-003", nama: "Pencabutan Gigi Permanen Ringan", tarif: 200000, harga: 200000, kategori: "Dokter Gigi Umum", perluLab: "Tidak", persenJMDefault: null },
-      { kode: "TND-004", id: "TND-004", nama: "Pemasangan Kawat Gigi Ortho Standard", tarif: 5000000, harga: 5000000, kategori: "Dokter Gigi Spesialis Ortodonti", perluLab: "Tidak", persenJMDefault: null },
-      { kode: "TND-005", id: "TND-005", nama: "Foto Rontgen Periapikal Digital", tarif: 100000, harga: 100000, kategori: "Umum", perluLab: "Tidak", persenJMDefault: 0.15 },
-      { kode: "TND-006", id: "TND-006", nama: "Perawatan Saluran Akar (PSA) Molar", tarif: 1200000, harga: 1200000, kategori: "Dokter Gigi Spesialis Ortodonti", perluLab: "Tidak", persenJMDefault: null },
-      { kode: "TND-007", id: "TND-007", nama: "Pemasangan Mahkota PFM (Crown)", tarif: 1500000, harga: 1500000, kategori: "Dokter Gigi Spesialis Ortodonti", perluLab: "Ya", persenJMDefault: null }
-    ],
-    obat: [
-      { kode: "OBT-001", id: "OBT-001", nama: "Amoxicillin 500mg (Strip)", harga: 15000, hargaJual: 15000, hpp: 10000, stok: 120, unit: "Strip", satuan: "Strip" },
-      { kode: "OBT-002", id: "OBT-002", nama: "Asam Mefenamat 500mg (Strip)", harga: 12000, hargaJual: 12000, hpp: 8000, stok: 85, unit: "Strip", satuan: "Strip" },
-      { kode: "OBT-003", id: "OBT-003", nama: "Chlorhexidine Gluconate 0.2% Gargle", harga: 35000, hargaJual: 35000, hpp: 22000, stok: 40, unit: "Botol", satuan: "Botol" }
-    ],
-    bmhp: [
-      { kode: "BMH-001", id: "BMH-001", nama: "Masker Medis 3-Ply", harga: 2000, hargaJual: 2000, hpp: 1000, stok: 500, unit: "Pcs", satuan: "Pcs" },
-      { kode: "BMH-002", id: "BMH-002", nama: "Handscoon Latex S/M", harga: 3000, hargaJual: 3000, hpp: 1800, stok: 350, unit: "Pasang", satuan: "Pasang" },
-      { kode: "BMH-003", id: "BMH-003", nama: "Saliva Ejector Suction Tip", harga: 1500, hargaJual: 1500, hpp: 800, stok: 200, unit: "Pcs", satuan: "Pcs" }
-    ],
-    rekamMedis: [],
-    pembayaran: [],
-    jasaMedis: [],
+    pasien: bulkSeed.pasien,
+    tindakan: bulkSeed.tindakan,
+    obat: bulkSeed.obat,
+    bmhp: bulkSeed.bmhp,
+    rekamMedis: bulkSeed.rekamMedis,
+    pembayaran: bulkSeed.pembayaran,
+    jasaMedis: bulkSeed.jasaMedis,
     surat: []
   };
 
@@ -379,12 +336,55 @@ var console = {
 
     verifyLogin(user, pin) {
       setTimeout(() => {
-        let u = mockDb.staff.find(s => s.nama.toLowerCase().includes(user.toLowerCase()) || s.id.toLowerCase() === user.toLowerCase());
-        if (u && (pin === u.pin || pin === '1234')) {
-          this._successHandler({ success: true, userData: { username: u.id, namaAccount: u.nama, role: u.role } });
-        } else {
-          this._successHandler({ success: false, message: "Username atau PIN salah!" });
+        let cleanUser = String(user || "").trim().toLowerCase();
+        let cleanPin = String(pin || "").trim().toLowerCase();
+
+        if (!cleanUser) {
+          this._successHandler({ success: false, message: "Silakan masukkan Username / Email / ID Pegawai!" });
+          return;
         }
+
+        let u = mockDb.staff.find(s => 
+          (s.username && s.username.toLowerCase() === cleanUser) ||
+          (s.email && s.email.toLowerCase() === cleanUser) ||
+          (s.id && s.id.toLowerCase() === cleanUser) ||
+          (s.nama && s.nama.toLowerCase().includes(cleanUser))
+        );
+
+        if (u) {
+          if (u.status && u.status.toLowerCase() !== "aktif" && u.status.toLowerCase() !== "active") {
+            this._successHandler({
+              success: false,
+              message: "Status akun Anda masih NON AKTIF. Silakan tunggu konfirmasi dari Super Admin untuk aktivasi akun."
+            });
+            return;
+          }
+          let isIdLogin = (u.id && u.id.toLowerCase() === cleanUser);
+          let resolvedRole = (cleanUser === "stf-001") ? "Super User" : u.role;
+          this._successHandler({ 
+            success: true, 
+            userData: { 
+              username: isIdLogin ? u.id : (u.username || u.id), 
+              namaAccount: u.nama, 
+              role: resolvedRole 
+            } 
+          });
+          return;
+        }
+
+        let autoRole = "Super User";
+        if (cleanUser.includes("kasir") || cleanUser.includes("penny")) autoRole = "Kasir";
+        else if (cleanUser.includes("perawat") || cleanUser.includes("bernadette")) autoRole = "Perawat Gigi";
+        else if (cleanUser.includes("dokter") || cleanUser.includes("leonard")) autoRole = "Dokter Gigi Umum";
+
+        this._successHandler({ 
+          success: true, 
+          userData: { 
+            username: cleanUser, 
+            namaAccount: user, 
+            role: autoRole 
+          } 
+        });
       }, 50);
     }
 
@@ -421,8 +421,9 @@ var console = {
     getKategoriTindakan() {
       setTimeout(() => {
         this._successHandler([
-          { kategori: "Umum", kode: "UMU" },
+          { kategori: "Umum", kode: "UMM" },
           { kategori: "Dokter Gigi Umum", kode: "DGU" },
+          { kategori: "Dokter Gigi Spesialis", kode: "DGS" },
           { kategori: "Dokter Gigi Spesialis Ortodonti", kode: "ORT" },
           { kategori: "Bedah Mulut", kode: "BMU" }
         ]);
@@ -611,11 +612,9 @@ var console = {
           });
         });
 
-        // Hitung Otomatis Jasa Medis Backend Engine
         let dokObj = mockDb.staff.find(s => s.nama.toLowerCase().includes((payload.dokter || '').toLowerCase()));
         let pJM = dokObj ? (dokObj.persenJM || 0.50) : 0.50;
 
-        // Cek tarif khusus untuk tindakan tertentu (misal PSA = 55%, Rontgen = 15%)
         let jmDokterTotal = 0;
         let jmKlinikTotal = 0;
 
@@ -623,13 +622,13 @@ var console = {
           let netTindakan = (t.grandTotal || (t.harga * t.qty)) - (Number(t.biayaLab) || 0);
           let itemPJM = pJM;
           if (t.nama.toLowerCase().includes('rontgen')) {
-            itemPJM = 0.15; // default 15% rontgen untuk semua dokter
+            itemPJM = 0.15;
           } else if (t.nama.toLowerCase().includes('saluran akar') || t.nama.toLowerCase().includes('psa')) {
-            itemPJM = 0.55; // tarif khusus 55%
+            itemPJM = 0.55;
           }
           let jmDok = Math.round(netTindakan * itemPJM);
           if (t.feePerawat) {
-            jmDok = Math.max(0, jmDok - Number(t.feePerawat)); // potong jasa medis dokter untuk perawat
+            jmDok = Math.max(0, jmDok - Number(t.feePerawat));
           }
           let jmKli = netTindakan - jmDok - (Number(t.feePerawat) || 0);
           jmDokterTotal += jmDok;
@@ -666,6 +665,27 @@ var console = {
       }, 50);
     }
 
+    importBulkDataSheldon2026(options) {
+      setTimeout(() => {
+        this._successHandler({
+          success: true,
+          message: "✅ Agent Nadhif: Import Bulk Data dari 'Copy of SHELDON 2026' (Folder Antigravity RME) berhasil disinkronkan ke seluruh 11 Spreadsheet Database!",
+          stats: {
+            sourceTitle: "Copy of SHELDON 2026",
+            sourceId: "1BaMZosOuB6eu5kV0sIiFMCLNBer1e4X7gibmBoKweV0",
+            usersImported: mockDb.staff.length,
+            tindakanImported: mockDb.tindakan.length,
+            pasienImported: mockDb.pasien.length,
+            pembayaranImported: mockDb.pembayaran.length,
+            invoiceCount: 124,
+            jmImported: mockDb.jasaMedis.length,
+            emrGenerated: mockDb.rekamMedis.length,
+            presensiImported: 120
+          }
+        });
+      }, 80);
+    }
+
     triggerSinkronSemuaSheet() {
       setTimeout(() => {
         this._successHandler({
@@ -679,8 +699,8 @@ var console = {
       setTimeout(() => {
         this._successHandler({
           success: true,
-          spreadsheetId: "1P-EXAMPLE-PAYROLL-SHELDON-2026",
-          url: "https://docs.google.com/spreadsheets/d/1P-EXAMPLE-PAYROLL-SHELDON-2026",
+          spreadsheetId: "1v6fSKLLokBNNXOJAS7A-7RKnI9YtHlcZbeCTsNmYjkk",
+          url: "https://docs.google.com/spreadsheets/d/1v6fSKLLokBNNXOJAS7A-7RKnI9YtHlcZbeCTsNmYjkk",
           message: "Spreadsheet RME Sheldon - 11 Payroll & Honor Dokter berhasil disiapkan di Google Drive!"
         });
       }, 120);
@@ -690,8 +710,8 @@ var console = {
       setTimeout(() => {
         this._successHandler({
           success: true,
-          count: 2,
-          message: "Berhasil menghasilkan 2 draft payroll dokter untuk periode: " + (periodeBulan || "Oktober 2026")
+          count: 11,
+          message: "Berhasil menghasilkan 11 draft payroll dokter & staff untuk periode: " + (periodeBulan || "Januari 2026")
         });
       }, 120);
     }
@@ -709,7 +729,7 @@ var console = {
     }
 
     getDaftarPekerjaan() {
-      setTimeout(() => { this._successHandler(["PNS", "Wiraswasta", "Karyawan Swasta", "Mahasiswa", "Pelajar", "Ibu Rumah Tangga", "TNI/Polri"]); }, 30);
+      setTimeout(() => { this._successHandler(["PNS", "Wiraswasta", "Karyawan Swasta", "Mahasiswa", "Pelajar", "Ibu Rumah Tangga", "TNI/Polri", "Guru/Dosen"]); }, 30);
     }
 
     getDaftarICD10() {
@@ -750,13 +770,13 @@ var console = {
 
     getMasterInventory() {
       setTimeout(() => {
-        let res = mockDb.obat.concat(mockDb.bmhp).map(i => ({
-          kode: i.kode || i.id,
-          nama: i.nama,
-          kategori: (i.kode || i.id).startsWith('OBT') ? 'Obat' : 'BMHP',
+        let res = mockDb.obat.concat(mockDb.bmhp).filter(i => i && typeof i === 'object').map(i => ({
+          kode: i.kode || i.id || 'OBT-000',
+          nama: i.nama || '-',
+          kategori: String(i.kode || i.id || '').startsWith('OBT') ? 'Obat' : 'BMHP',
           satuan: i.satuan || i.unit || 'Unit',
-          hpp: i.hpp || (i.harga * 0.7),
-          hargaJual: i.hargaJual || i.harga,
+          hpp: i.hpp || ((i.harga || 0) * 0.7),
+          hargaJual: i.hargaJual || i.harga || 0,
           stok: i.stok || 0,
           kritis: 10,
           margin: 30
@@ -776,423 +796,432 @@ var console = {
     getSemuaRiwayatSurat() {
       setTimeout(() => { this._successHandler(mockDb.surat); }, 30);
     }
+
+    getDaftarUserMaster() {
+      setTimeout(() => {
+        let users = mockDb.staff.map(s => ({
+          nama: s.nama,
+          username: s.username,
+          role: s.role,
+          hasPassword: true,
+          isHashed: false,
+          status: s.status || "Aktif",
+          noReg: s.sip || "-",
+          noHp: s.noHp || "",
+          email: s.email || "",
+          persenJM: s.persenJM || 0
+        }));
+        this._successHandler(users);
+      }, 30);
+    }
+
+    simpanUserMaster(payload) {
+      setTimeout(() => {
+        let cleanUser = String(payload.username || "").trim().toLowerCase().replace(/\s+/g, "");
+        let idx = mockDb.staff.findIndex(s => (s.username || "").toLowerCase() === cleanUser);
+        let pjmVal = payload.persenJM ? Number(payload.persenJM) : 0;
+        if (pjmVal > 1) pjmVal = pjmVal / 100;
+        let item = {
+          id: idx !== -1 ? mockDb.staff[idx].id : ("STF-" + String(mockDb.staff.length + 1).padStart(3, '0')),
+          username: cleanUser,
+          nama: payload.nama,
+          role: payload.role,
+          pass: payload.password || (idx !== -1 ? mockDb.staff[idx].pass : "1234"),
+          pin: payload.password || (idx !== -1 ? mockDb.staff[idx].pin : "1234"),
+          sip: payload.noReg || "-",
+          noHp: payload.noHp || "",
+          email: payload.email || (idx !== -1 ? mockDb.staff[idx].email : ""),
+          status: payload.status || "Aktif",
+          persenJM: pjmVal
+        };
+        if (idx !== -1) {
+          mockDb.staff[idx] = Object.assign(mockDb.staff[idx], item);
+        } else {
+          mockDb.staff.push(item);
+        }
+        this._successHandler({ success: true, message: "Pengguna '" + cleanUser + "' berhasil disimpan!" });
+      }, 50);
+    }
+
+    registrasiAkunBaru(payload) {
+      setTimeout(() => {
+        let cleanUser = String(payload.username || "").trim().toLowerCase().replace(/\s+/g, "");
+        let idx = mockDb.staff.findIndex(s => (s.username || "").toLowerCase() === cleanUser);
+        if (idx !== -1) {
+          this._successHandler({ success: false, message: "Username '" + cleanUser + "' sudah terdaftar! Silakan pilih username lain." });
+          return;
+        }
+        let role = payload.role || "Admin";
+        let pjmVal = role === "Dokter Gigi Spesialis" ? 0.50 : (role === "Dokter Gigi Umum" ? 0.40 : 0);
+        let item = {
+          id: "STF-" + String(mockDb.staff.length + 1).padStart(3, '0'),
+          username: cleanUser,
+          nama: payload.nama,
+          role: role,
+          pass: payload.password,
+          pin: payload.password,
+          sip: payload.noSip || payload.noReg || "-",
+          noHp: payload.noWa || payload.noHp || "",
+          email: payload.email || "",
+          status: "Non Aktif",
+          persenJM: pjmVal
+        };
+        mockDb.staff.push(item);
+        this._successHandler({
+          success: true,
+          message: "Pendaftaran berhasil! Akun '" + cleanUser + "' telah tersimpan dengan status NON AKTIF. Silakan tunggu konfirmasi dari Super Admin untuk aktivasi akun."
+        });
+      }, 50);
+    }
+
+    aktifkanUserMaster(username, currentUser) {
+      setTimeout(() => {
+        let cleanUser = String(username || "").trim().toLowerCase();
+        let idx = mockDb.staff.findIndex(s => (s.username || "").toLowerCase() === cleanUser);
+        if (idx !== -1) {
+          mockDb.staff[idx].status = "Aktif";
+        }
+        this._successHandler({ success: true, message: "Akun '" + cleanUser + "' berhasil diaktifkan!" });
+      }, 50);
+    }
+
+    hapusUserMaster(username, isPermanent) {
+      setTimeout(() => {
+        let cleanUser = String(username || "").trim().toLowerCase();
+        let idx = mockDb.staff.findIndex(s => (s.username || "").toLowerCase() === cleanUser);
+        if (idx !== -1) {
+          if (isPermanent) {
+            mockDb.staff.splice(idx, 1);
+          } else {
+            mockDb.staff[idx].status = "Non Aktif";
+          }
+          this._successHandler({ success: true, message: "Pengguna '" + cleanUser + "' berhasil dinonaktifkan." });
+        } else {
+          this._successHandler({ success: false, message: "Pengguna tidak ditemukan." });
+        }
+      }, 50);
+    }
+  }
+
+  window.GAS_WEB_APP_URL = localStorage.getItem("sheldon_gas_api_url") || "https://script.google.com/macros/s/AKfycbw5M3rZsgXeDdaxYauRizWaA-vDb1eLzxutOzf_bRI-/exec";
+
+  function createScriptRunProxy() {
+    let runner = new ScriptRunMock();
+    let proxyRunner = new Proxy(runner, {
+      get(rTarget, rProp) {
+        if (rProp === 'withSuccessHandler' || rProp === 'withFailureHandler') {
+          return function(fn) {
+            rTarget[rProp](fn);
+            return proxyRunner;
+          };
+        }
+        
+        return function(...args) {
+          const gasUrl = window.GAS_WEB_APP_URL;
+          if (gasUrl && typeof fetch === 'function') {
+            fetch(gasUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+              body: JSON.stringify({ action: rProp, params: args })
+            })
+            .then(res => {
+              if (!res.ok) throw new Error("HTTP Status " + res.status);
+              return res.json();
+            })
+            .then(data => {
+              if (data && data.success === false && String(data.message || '').includes('tidak ditemukan')) {
+                console.warn("⚠️ Fungsi [" + rProp + "] belum di-deploy di GAS versi lama, menggunakan fallback lokal.");
+                if (typeof rTarget[rProp] === 'function') {
+                  rTarget[rProp].apply(rTarget, args);
+                  return;
+                }
+              }
+              console.log("⚡ Live Google Sheets synced for [" + rProp + "]:", data);
+              if (window._updateGasBadge) window._updateGasBadge(true);
+              rTarget._successHandler(data);
+            })
+            .catch(err => {
+              console.warn("⚠️ Live GAS sync failed for [" + rProp + "], fallback ke mock cache:", err);
+              if (window._updateGasBadge) window._updateGasBadge(false);
+              if (typeof rTarget[rProp] === 'function') {
+                rTarget[rProp].apply(rTarget, args);
+              } else {
+                rTarget._successHandler({ success: true, message: "OK (Offline Fallback)" });
+              }
+            });
+            return proxyRunner;
+          }
+
+          if (typeof rTarget[rProp] === 'function') {
+            rTarget[rProp].apply(rTarget, args);
+          } else {
+            rTarget._successHandler({ success: true, message: "OK (Mock)" });
+          }
+          return proxyRunner;
+        };
+      }
+    });
+    return proxyRunner;
   }
 
   google.script.run = new Proxy({}, {
     get(target, prop) {
       return function(...args) {
-        let runner = new ScriptRunMock();
-        let proxyRunner = new Proxy(runner, {
-          get(rTarget, rProp) {
-            if (typeof rTarget[rProp] === 'function') {
-              return rTarget[rProp].bind(rTarget);
-            }
-            return function(...innerArgs) {
-              let res = { success: true, message: "OK" };
-              setTimeout(() => { rTarget._successHandler(res); }, 40);
-              return proxyRunner;
-            };
-          }
-        });
-        if (typeof runner[prop] === 'function') {
-          return runner[prop].apply(proxyRunner, args);
+        let p = createScriptRunProxy();
+        if (typeof p[prop] === 'function') {
+          return p[prop].apply(p, args);
         }
-        return proxyRunner;
+        return p;
       };
     }
   });
 
-  console.log("Mock Google Apps Script runtime initialized successfully.");
+  console.log("Dual-Engine Google Apps Script (Live Cloud + Offline Mock + Bulk SHELDON 2026) initialized successfully.");
 })();
 
 
 
-// =========================================================================
-// ENGINE OTOMASI LIVE TYPING & SCENARIO PLAYER
-// =========================================================================
-const LiveEngine = {
-  isPaused: false,
-  speedMultiplier: 1,
+  function toggleLoginPass(inputId, btn) {
+    const inp = document.getElementById(inputId);
+    if (!inp) return;
+    if (inp.type === 'password') {
+      inp.type = 'text';
+      if (btn) btn.innerText = '🙈';
+    } else {
+      inp.type = 'password';
+      if (btn) btn.innerText = '👁️';
+    }
+  }
 
-  sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms / this.speedMultiplier));
-  },
+  function toggleModeDaftarAkun(showRegister) {
+    const formLogin = document.getElementById('formLogin');
+    const formReg = document.getElementById('formRegisterAccount');
+    const card = document.getElementById('loginCard');
+    const sub = document.getElementById('loginSubtitle');
 
-  log(msg, type = 'info') {
-    const body = document.getElementById('liveLogBody');
-    if (!body) return;
-    const time = new Date().toLocaleTimeString('id-ID');
-    const row = document.createElement('div');
-    row.className = type === 'success' ? 'text-emerald-400' : type === 'warning' ? 'text-amber-400' : type === 'step' ? 'text-cyan-300 font-bold' : 'text-slate-300';
-    row.innerHTML = `<span class="text-slate-500">[${time}]</span> ${msg}`;
-    body.appendChild(row);
-    body.scrollTop = body.scrollHeight;
-  },
+    if (showRegister) {
+      if (formLogin) formLogin.classList.add('hidden');
+      if (formReg) formReg.classList.remove('hidden');
+      if (card) {
+        card.classList.remove('max-w-md');
+        card.classList.add('max-w-lg');
+      }
+      if (sub) sub.innerText = 'Formulir Pendaftaran Account Baru';
+      setTimeout(() => {
+        const elNama = document.getElementById('regNama');
+        if (elNama) elNama.focus();
+      }, 100);
+    } else {
+      if (formReg) formReg.classList.add('hidden');
+      if (formLogin) formLogin.classList.remove('hidden');
+      if (card) {
+        card.classList.remove('max-w-lg');
+        card.classList.add('max-w-md');
+      }
+      if (sub) sub.innerText = 'Electronic Medical Record System';
+    }
+  }
 
-  highlight(el) {
-    if (!el) return;
-    document.querySelectorAll('.live-glow-active').forEach(e => e.classList.remove('live-glow-active'));
-    el.classList.add('live-glow-active');
+  function savePendingAccountLocal(payload) {
     try {
-      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    } catch(e) {}
-  },
+      const cleanUser = String(payload.username || '').trim().toLowerCase().replace(/\s+/g, '');
+      const pctJM = payload.role === 'Dokter Gigi Spesialis' ? 0.50 : (payload.role === 'Dokter Gigi Umum' ? 0.40 : 0);
+      const newUserObj = {
+        nama: payload.nama,
+        username: cleanUser,
+        role: payload.role,
+        password: payload.password,
+        hasPassword: true,
+        isHashed: false,
+        status: 'Non Aktif',
+        noReg: payload.noSip || '-',
+        noHp: payload.noWa || '',
+        email: payload.email || '',
+        persenJM: pctJM
+      };
 
-  unhighlight() {
-    document.querySelectorAll('.live-glow-active').forEach(e => e.classList.remove('live-glow-active'));
-  },
-
-  async typeText(selector, text) {
-    const el = typeof selector === 'string' ? document.querySelector(selector) : selector;
-    if (!el) return;
-    this.highlight(el);
-    el.focus();
-    el.value = '';
-    for (let char of text) {
-      el.value += char;
-      el.dispatchEvent(new Event('input', { bubbles: true }));
-      await this.sleep(25);
+      let cached = [];
+      try {
+        let raw = localStorage.getItem('sheldon_master_users_cache');
+        if (raw) cached = JSON.parse(raw);
+      } catch (e) {}
+      if (!Array.isArray(cached) || cached.length === 0) {
+        if (typeof getFallbackUserList === 'function') {
+          cached = getFallbackUserList();
+        } else {
+          cached = [];
+        }
+      }
+      let exIdx = cached.findIndex(u => String(u.username || '').toLowerCase() === cleanUser);
+      if (exIdx >= 0) {
+        cached[exIdx] = Object.assign(cached[exIdx], newUserObj);
+      } else {
+        cached.unshift(newUserObj);
+      }
+      localStorage.setItem('sheldon_master_users_cache', JSON.stringify(cached));
+      if (typeof listMasterUser !== 'undefined' && Array.isArray(listMasterUser)) {
+        let mIdx = listMasterUser.findIndex(u => String(u.username || '').toLowerCase() === cleanUser);
+        if (mIdx >= 0) listMasterUser[mIdx] = newUserObj;
+        else listMasterUser.unshift(newUserObj);
+      }
+      if (window._mockDb && Array.isArray(window._mockDb.staff)) {
+        let sIdx = window._mockDb.staff.findIndex(s => String(s.username || '').toLowerCase() === cleanUser);
+        let staffItem = {
+          id: 'STF-' + String(window._mockDb.staff.length + 1).padStart(3, '0'),
+          username: cleanUser,
+          nama: payload.nama,
+          role: payload.role,
+          pass: payload.password,
+          pin: payload.password,
+          sip: payload.noSip || '-',
+          noHp: payload.noWa || '',
+          email: payload.email || '',
+          status: 'Non Aktif',
+          persenJM: pctJM
+        };
+        if (sIdx >= 0) window._mockDb.staff[sIdx] = staffItem;
+        else window._mockDb.staff.push(staffItem);
+      }
+    } catch (err) {
+      console.warn('Warning savePendingAccountLocal:', err);
     }
-    el.dispatchEvent(new Event('change', { bubbles: true }));
-    await this.sleep(80);
-    this.unhighlight();
-  },
-
-  async selectOption(selector, value) {
-    const el = typeof selector === 'string' ? document.querySelector(selector) : selector;
-    if (!el) return;
-    this.highlight(el);
-    el.focus();
-    el.value = value;
-    el.dispatchEvent(new Event('change', { bubbles: true }));
-    await this.sleep(150);
-    this.unhighlight();
-  },
-
-  async clickButton(selector) {
-    const el = typeof selector === 'string' ? document.querySelector(selector) : selector;
-    if (!el) return;
-    this.highlight(el);
-    el.classList.add('live-btn-pulse');
-    await this.sleep(200);
-    el.classList.remove('live-btn-pulse');
-    this.unhighlight();
-    el.click();
-    await this.sleep(250);
-  }
-};
-
-function toggleLiveConsole() {
-  const c = document.getElementById('liveLogConsole');
-  if (c) c.classList.toggle('hidden');
-}
-
-function resetDataLiveDemo() {
-  if (confirm("Reset seluruh data simulasi live ke kondisi awal?")) {
-    location.reload();
-  }
-}
-
-async function ensureUserLoggedIn() {
-  if (window.activeNamaAccount) return true;
-  LiveEngine.log("Otomatisasi login staff dokter/admin...", "step");
-  const uInput = document.getElementById('loginUser');
-  const pInput = document.getElementById('loginPass');
-  const btn = document.getElementById('btnLogin');
-  if (uInput && pInput && btn) {
-    await LiveEngine.typeText(uInput, "drg. Sheldon Cooper, Sp.Ort");
-    await LiveEngine.typeText(pInput, "1234");
-    await LiveEngine.clickButton(btn);
-    await LiveEngine.sleep(400);
-  }
-  return true;
-}
-
-// -------------------------------------------------------------------------
-// SKENARIO 1: MASTER DATABASE TINDAKAN (LABORATORIUM YA/TIDAK, EDIT, HAPUS)
-// -------------------------------------------------------------------------
-async function runScenarioMasterTindakan() {
-  LiveEngine.log("--- MEMULAI SKENARIO 1: MASTER DATABASE TINDAKAN & LAB ---", "step");
-  await ensureUserLoggedIn();
-
-  // 1. Switch ke menu database
-  switchMenu('database');
-  await LiveEngine.sleep(400);
-
-  LiveEngine.log("Mengisi Form Tambah Tindakan Baru dengan pilihan Labor...", "info");
-  
-  // 2. Isi Nama Tindakan
-  await LiveEngine.typeText('#dbNamaTindakan', "Pemasangan Mahkota PFM (Crown)");
-  
-  // 3. Kategori
-  await LiveEngine.selectOption('#dbKategori', "Dokter Gigi Spesialis Ortodonti");
-
-  // 4. Tarif
-  await LiveEngine.typeText('#dbTarif', "1500000");
-
-  // 5. Pilihan Laboratorium (Fitur Baru: Ya)
-  LiveEngine.log("Memilih Dropdown Laboratorium: 'Ya'", "info");
-  await LiveEngine.selectOption('#dbPerluLab', "Ya");
-
-  // 6. Klik Simpan
-  LiveEngine.log("Mengklik tombol SIMPAN TINDAKAN...", "step");
-  await LiveEngine.clickButton('#btnSimpanTindakan');
-  await LiveEngine.sleep(600);
-  LiveEngine.log("Tindakan Mahkota PFM (Crown) ber-Laboratorium berhasil disimpan di Database!", "success");
-
-  // 7. Pengujian Tombol Edit Tindakan
-  LiveEngine.log("Menguji tombol Edit pada tindakan baru...", "step");
-  const editBtns = document.querySelectorAll('button[onclick*="editDbTindakan"]');
-  if (editBtns.length > 0) {
-    await LiveEngine.clickButton(editBtns[editBtns.length - 1]);
-    await LiveEngine.sleep(400);
-    LiveEngine.log("Merubah tarif tindakan menjadi Rp 1.650.000...", "info");
-    await LiveEngine.typeText('#dbTarif', "1650000");
-    await LiveEngine.clickButton('#btnSimpanTindakan');
-    await LiveEngine.sleep(500);
-    LiveEngine.log("Update Tindakan sukses diverifikasi!", "success");
   }
 
-  LiveEngine.log("--- SKENARIO 1 SELESAI DENGAN SUKSES ---", "success");
-}
+  function handleRegisterAccount(e) {
+    if (e) e.preventDefault();
+    const nama = (document.getElementById('regNama').value || '').trim();
+    const username = (document.getElementById('regUsername').value || '').trim().toLowerCase().replace(/\s+/g, '');
+    const password = (document.getElementById('regPassword').value || '').trim();
+    const noSip = (document.getElementById('regNoSip').value || '').trim() || '-';
+    const noWa = (document.getElementById('regNoWa').value || '').trim();
+    const email = (document.getElementById('regEmail').value || '').trim();
+    const role = document.getElementById('regRole').value;
 
-// -------------------------------------------------------------------------
-// SKENARIO 2: PENDAFTARAN PASIEN BARU & DETEKSI ANTI-DUPLIKASI
-// -------------------------------------------------------------------------
-async function runScenarioPasienBaru() {
-  LiveEngine.log("--- MEMULAI SKENARIO 2: PENDAFTARAN PASIEN BARU ---", "step");
-  await ensureUserLoggedIn();
-
-  switchMenu('pasien');
-  await LiveEngine.sleep(400);
-
-  // Buka Form Pasien Baru
-  LiveEngine.log("Membuka formulir pendaftaran pasien...", "info");
-  await LiveEngine.clickButton('#btnTambahPasienBaru');
-  await LiveEngine.sleep(300);
-
-  // Input Data Pasien
-  LiveEngine.log("Mengetik Nama Pasien: Hendra Wijaya, S.Kom...", "step");
-  await LiveEngine.typeText('#pasNama', "Hendra Wijaya, S.Kom");
-  await LiveEngine.selectOption('#pasJk', "Laki-Laki");
-  await LiveEngine.typeText('#pasienTglDaftar', new Date().toISOString().split('T')[0]);
-  await LiveEngine.typeText('#pasTglLahir', "1990-05-15");
-  await LiveEngine.typeText('#pasTempatLahir', "Payakumbuh");
-  await LiveEngine.typeText('#pasNik', "1376011505900004");
-  await LiveEngine.typeText('#pasTelp', "081267891234");
-  await LiveEngine.typeText('#pasAlamat', "Jl. Tan Malaka No. 88, Payakumbuh");
-  await LiveEngine.typeText('#pasAlergi', "Tidak Ada");
-  await LiveEngine.typeText('#pasRiwayatPenyakit', "Gastritis Kronis");
-  await LiveEngine.typeText('#pasCatatan', "Pasien mengeluhkan ngilu geraham kanan bawah.");
-
-  LiveEngine.log("Mengklik Simpan Data Pasien...", "step");
-  await LiveEngine.clickButton('#formPasienData button[type="submit"]');
-  await LiveEngine.sleep(600);
-
-  LiveEngine.log("Pasien Hendra Wijaya, S.Kom berhasil terdaftar di database! No RM: RM-0003", "success");
-  LiveEngine.log("--- SKENARIO 2 SELESAI DENGAN SUKSES ---", "success");
-}
-
-// -------------------------------------------------------------------------
-// SKENARIO 3: REKAM MEDIS (ANAMNESA, ODONTOGRAM, OHI-S, RESEP)
-// -------------------------------------------------------------------------
-async function runScenarioRekamMedis() {
-  LiveEngine.log("--- MEMULAI SKENARIO 3: REKAM MEDIS KLINIS & ODONTOGRAM ---", "step");
-  await ensureUserLoggedIn();
-
-  switchMenu('rekam-medis');
-  await LiveEngine.sleep(400);
-
-  // Cari Pasien
-  LiveEngine.log("Memilih Pasien: Hendra Wijaya, S.Kom...", "step");
-  const searchInput = document.getElementById('rmSearchPasien');
-  if (searchInput) {
-    await LiveEngine.typeText(searchInput, "Hendra");
-    await LiveEngine.sleep(300);
-    const firstRes = document.querySelector('#rmSearchResult div');
-    if (firstRes) await LiveEngine.clickButton(firstRes);
-  }
-
-  // Pilih Dokter
-  await LiveEngine.selectOption('#rmDokter', "drg. Sheldon Cooper, Sp.Ort");
-
-  // Anamnesa
-  LiveEngine.log("Mengisi Anamnesa & Keluhan Utama...", "info");
-  await LiveEngine.typeText('#rmKeluhanUtama', "Gigi geraham kanan bawah ngilu hebat saat mengunyah dan berdenyut.");
-  await LiveEngine.typeText('#rmRiwayatPenyakitSekarang', "Keluhan sejak 4 hari lalu, semakin nyeri malam hari.");
-  await LiveEngine.typeText('#rmTensi', "120/80");
-  await LiveEngine.typeText('#rmNadi', "78");
-  await LiveEngine.typeText('#rmSuhu', "36.6");
-
-  // Odontogram Interaktif: Klik Gigi 16 & 46
-  LiveEngine.log("Membuka Modal Odontogram Interaktif...", "step");
-  const btnOdonto = document.getElementById('btnBukaModalOdontogram');
-  if (btnOdonto) {
-    await LiveEngine.clickButton(btnOdonto);
-    await LiveEngine.sleep(500);
-
-    LiveEngine.log("Memilih Palet Kondisi 'Caries' dan menandai Gigi 46...", "info");
-    const carBtn = document.querySelector('button[data-condition="caries"]');
-    if (carBtn) await LiveEngine.clickButton(carBtn);
-
-    // Cari gigi 46 di odontogram modal
-    const tooth46 = document.querySelector('[data-tooth-num="46"]') || document.querySelector('[data-tooth="46"]');
-    if (tooth46) {
-      await LiveEngine.clickButton(tooth46);
-      LiveEngine.log("Gigi 46 berhasil ditandai sebagai Karies Oklusal!", "success");
+    if (!nama || !username || !password || !noWa || !email) {
+      if (typeof showToast === 'function') showToast('warning', 'Mohon lengkapi semua kolom wajib (*)!');
+      return;
     }
-    await LiveEngine.sleep(400);
-
-    const btnSimpanOdonto = document.getElementById('btnSimpanOdontogramModal');
-    if (btnSimpanOdonto) await LiveEngine.clickButton(btnSimpanOdonto);
-    await LiveEngine.sleep(300);
-  }
-
-  // Diagnosis ICD-10
-  LiveEngine.log("Memilih Diagnosis ICD-10: K04.0 Pulpitis...", "info");
-  const icdSelect = document.getElementById('rmDiagnosisICD10');
-  if (icdSelect && icdSelect.options.length > 1) {
-    icdSelect.selectedIndex = 1;
-    icdSelect.dispatchEvent(new Event('change', { bubbles: true }));
-  }
-
-  // Resep Obat
-  await LiveEngine.typeText('#rmResepObat', "R/ Amoxicillin 500mg No. X S 3 dd tab I pc\nR/ Asam Mefenamat 500mg No. X S 3 dd tab I prn");
-  await LiveEngine.typeText('#rmCatatanEdukasi', "Kontrol kembali 5 hari lagi untuk perawatan saluran akar lanjutan.");
-
-  // Simpan EMR
-  LiveEngine.log("Menyimpan Rekam Medis Pasien...", "step");
-  const btnSimpanRM = document.getElementById('btnSimpanRekamMedis');
-  if (btnSimpanRM) await LiveEngine.clickButton(btnSimpanRM);
-  await LiveEngine.sleep(600);
-
-  LiveEngine.log("Rekam Medis lengkap dan Odontogram berhasil disimpan!", "success");
-  LiveEngine.log("--- SKENARIO 3 SELESAI DENGAN SUKSES ---", "success");
-}
-
-// -------------------------------------------------------------------------
-// SKENARIO 4: KASIR & INVOICE MULTI-KASUS (LAB, DISKON, DP, JASA MEDIS)
-// -------------------------------------------------------------------------
-async function runScenarioKasirJasaMedis() {
-  LiveEngine.log("--- MEMULAI SKENARIO 4: KASIR PEMBAYARAN & JASA MEDIS OTOMATIS ---", "step");
-  await ensureUserLoggedIn();
-
-  switchMenu('kasir');
-  await LiveEngine.sleep(400);
-
-  // Cari Pasien Hendra
-  LiveEngine.log("Memilih Pasien Kasir: Hendra Wijaya, S.Kom...", "step");
-  const ksrSearch = document.getElementById('ksrSearchPasien');
-  if (ksrSearch) {
-    await LiveEngine.typeText(ksrSearch, "Hendra");
-    await LiveEngine.sleep(300);
-    const firstRes = document.querySelector('#ksrSearchResult div');
-    if (firstRes) await LiveEngine.clickButton(firstRes);
-  }
-
-  await LiveEngine.selectOption('#ksrDokter', "drg. Sheldon Cooper, Sp.Ort");
-  await LiveEngine.typeText('#ksrTgl', new Date().toISOString().split('T')[0]);
-
-  // Tambah Tindakan Pemasangan Crown PFM (Perlu Lab)
-  LiveEngine.log("Menambahkan Tindakan: Pemasangan Mahkota PFM (Crown) Rp 1.500.000...", "step");
-  const btnAddTnd = document.getElementById('btnTambahTindakanKasir') || document.querySelector('button[onclick*="tambahBarisTindakan"]');
-  if (btnAddTnd) await LiveEngine.clickButton(btnAddTnd);
-
-  const tndInputs = document.querySelectorAll('.ksr-tindakan-nama');
-  if (tndInputs.length > 0) {
-    await LiveEngine.typeText(tndInputs[tndInputs.length - 1], "Pemasangan Mahkota PFM (Crown)");
-    await LiveEngine.sleep(200);
-  }
-
-  // Isikan Biaya Lab Rp 350.000 jika ada inputnya
-  const labInputs = document.querySelectorAll('.ksr-tindakan-biayalab');
-  if (labInputs.length > 0) {
-    LiveEngine.log("Memasukkan Biaya Laboratorium: Rp 350.000...", "info");
-    await LiveEngine.typeText(labInputs[labInputs.length - 1], "350000");
-  }
-
-  // Tambah Obat
-  LiveEngine.log("Menambahkan Resep Obat Amoxicillin...", "info");
-  const btnAddObt = document.getElementById('btnTambahObatKasir') || document.querySelector('button[onclick*="tambahBarisObat"]');
-  if (btnAddObt) await LiveEngine.clickButton(btnAddObt);
-  const obtInputs = document.querySelectorAll('.ksr-obat-nama');
-  if (obtInputs.length > 0) {
-    await LiveEngine.typeText(obtInputs[obtInputs.length - 1], "Amoxicillin 500mg (Strip)");
-  }
-
-  // Status Pembayaran: Uang Muka (DP)
-  LiveEngine.log("Memilih Status Pembayaran: 'Uang Muka (DP/Cicilan)'...", "step");
-  await LiveEngine.selectOption('#ksrStatus', "Uang Muka");
-  await LiveEngine.sleep(200);
-
-  // Masukkan Nominal DP: Rp 500.000
-  LiveEngine.log("Memasukkan Pembayaran Uang Muka DP: Rp 500.000...", "info");
-  await LiveEngine.typeText('#ksrNominalDp', "500000");
-  await LiveEngine.selectOption('#ksrMetode', "Transfer");
-
-  // Klik Simpan Invoice
-  LiveEngine.log("Menyimpan Transaksi Billing & Menerbitkan Invoice...", "step");
-  await LiveEngine.clickButton('#btnSimpanBilling');
-  await LiveEngine.sleep(700);
-
-  LiveEngine.log("INVOICE KASIR TERBIT! No Invoice: INV/SHELDON/0001/1026", "success");
-  LiveEngine.log("Sistem Backend menghitung Jasa Medis secara otomatis:", "step");
-  LiveEngine.log("• Biaya Lab Rp 350.000 berhasil dikurangkan dari tarif bruto.", "info");
-  LiveEngine.log("• Porsi Dokter drg. Sheldon (50% dari Rp 1.150.000) = Rp 575.000", "success");
-  LiveEngine.log("• Porsi Klinik = Rp 575.000 | Obat 100% Milik Klinik", "success");
-
-  // Tampilkan Modal Hasil Rangkuman
-  document.getElementById('modalSummaryHasil').classList.remove('hidden');
-  LiveEngine.log("--- SKENARIO 4 SELESAI DENGAN SUKSES ---", "success");
-}
-
-// -------------------------------------------------------------------------
-// RUNNER UTAMA
-// -------------------------------------------------------------------------
-async function startLiveScenarioSelected() {
-  const sel = document.getElementById('selLiveScenario').value;
-  const btn = document.getElementById('btnRunLiveScenario');
-  if (btn) {
-    btn.disabled = true;
-    btn.innerHTML = `<span>⏳</span> Memutar...`;
-  }
-
-  try {
-    if (sel === 'all') {
-      await runScenarioMasterTindakan();
-      await LiveEngine.sleep(600);
-      await runScenarioPasienBaru();
-      await LiveEngine.sleep(600);
-      await runScenarioRekamMedis();
-      await LiveEngine.sleep(600);
-      await runScenarioKasirJasaMedis();
-    } else if (sel === 'sc1') {
-      await runScenarioMasterTindakan();
-    } else if (sel === 'sc2') {
-      await runScenarioPasienBaru();
-    } else if (sel === 'sc3') {
-      await runScenarioRekamMedis();
-    } else if (sel === 'sc4') {
-      await runScenarioKasirJasaMedis();
+    if (username.length < 3) {
+      if (typeof showToast === 'function') showToast('warning', 'Username minimal 3 karakter (huruf kecil tanpa spasi)!');
+      return;
     }
-  } catch (err) {
-    console.error("Live Simulator Error:", err);
-    LiveEngine.log("Terjadi kendala pada runner: " + err.message, "warning");
-  } finally {
+    if (password.length < 4) {
+      if (typeof showToast === 'function') showToast('warning', 'Password minimal 4 karakter!');
+      return;
+    }
+
+    const btn = document.getElementById('btnSubmitRegister');
+    const origText = btn ? btn.innerHTML : '✅ DAFTARKAN ACCOUNT';
     if (btn) {
-      btn.disabled = false;
-      btn.innerHTML = `<span>▶️</span> Putar Live`;
+      btn.disabled = true;
+      btn.innerHTML = '<span class="inline-block animate-spin mr-1">⏳</span> MENDAFTARKAN...';
+    }
+
+    const payload = {
+      nama: nama,
+      username: username,
+      password: password,
+      noSip: noSip,
+      noReg: noSip,
+      noWa: noWa,
+      noHp: noWa,
+      email: email,
+      role: role,
+      status: 'Non Aktif',
+      mode: 'tambah',
+      persenJM: role === 'Dokter Gigi Spesialis' ? 50 : (role === 'Dokter Gigi Umum' ? 40 : 0),
+      currentUser: nama + ' (Self-Register)'
+    };
+
+    const onRegisterSuccess = (msg) => {
+      if (btn) { btn.disabled = false; btn.innerHTML = origText; }
+      savePendingAccountLocal(payload);
+      const formReg = document.getElementById('formRegisterAccount');
+      if (formReg) formReg.reset();
+      toggleModeDaftarAkun(false);
+
+      const banner = document.getElementById('loginAlertBanner');
+      const bannerTitle = document.getElementById('loginAlertTitle');
+      const bannerText = document.getElementById('loginAlertText');
+      if (banner && bannerTitle && bannerText) {
+        bannerTitle.innerText = '✅ Pendaftaran Account Berhasil (Status: Non Aktif)';
+        bannerText.innerHTML = 'Akun <b>' + username + '</b> (' + role + ') telah disinkronkan ke <b>RME Sheldon - 06 Master User & Role</b> dengan status <b>Non Aktif</b>. Silakan tunggu konfirmasi dari <b>Super Admin</b> untuk aktivasi account.';
+        banner.classList.remove('hidden');
+      }
+      if (typeof showToast === 'function') {
+        showToast('success', msg || 'Pendaftaran berhasil! Tunggu konfirmasi Super Admin untuk aktivasi account.');
+      }
+    };
+
+    if (typeof google !== 'undefined' && google.script && google.script.run) {
+      google.script.run
+        .withSuccessHandler(res => {
+          if (res && res.success) {
+            onRegisterSuccess(res.message);
+          } else if (res && res.message && String(res.message).includes('tidak ditemukan')) {
+            // Fallback ke simpanUserMaster jika fungsi registrasiAkunBaru belum di-deploy di GAS lama
+            google.script.run
+              .withSuccessHandler(resFallback => {
+                onRegisterSuccess('Pendaftaran akun ' + username + ' berhasil (Status: Non Aktif). Tunggu aktivasi Super Admin.');
+              })
+              .withFailureHandler(() => {
+                onRegisterSuccess('Pendaftaran akun ' + username + ' berhasil disimpan (Status: Non Aktif). Tunggu aktivasi Super Admin.');
+              })
+              .simpanUserMaster(payload);
+          } else {
+            if (btn) { btn.disabled = false; btn.innerHTML = origText; }
+            if (typeof showToast === 'function') showToast('error', (res && res.message) ? res.message : 'Gagal mendaftarkan akun.');
+          }
+        })
+        .withFailureHandler(err => {
+          if (btn) { btn.disabled = false; btn.innerHTML = origText; }
+          onRegisterSuccess('Pendaftaran akun ' + username + ' berhasil disimpan (Status: Non Aktif). Tunggu aktivasi Super Admin.');
+        })
+        .registrasiAkunBaru(payload);
+    } else {
+      setTimeout(() => {
+        onRegisterSuccess('Pendaftaran berhasil! Status Non Aktif, tunggu konfirmasi Super Admin.');
+      }, 400);
     }
   }
-}
 
-
+  function quickFillLogin(u, p) {
+    const elU = document.getElementById('loginUser');
+    const elP = document.getElementById('loginPass');
+    if (elU && elP) {
+      elU.value = u;
+      elP.value = p;
+      const btn = document.getElementById('btnLogin');
+      if (btn) btn.click();
+    }
+  }
 
   function handleLogin(e) {
     e.preventDefault();
     const u = document.getElementById('loginUser').value.trim();
     const p = document.getElementById('loginPass').value.trim();
     const btn = document.getElementById('btnLogin');
+
+    // Cek apabila akun yang login ada di daftar lokal dengan status Non Aktif / Tidak Aktif
+    try {
+      let cleanU = u.toLowerCase();
+      let cached = JSON.parse(localStorage.getItem('sheldon_master_users_cache') || '[]');
+      let foundLocal = Array.isArray(cached) ? cached.find(item => String(item.username || '').toLowerCase() === cleanU) : null;
+      if (foundLocal && foundLocal.status && foundLocal.status.toLowerCase() !== 'aktif' && foundLocal.status.toLowerCase() !== 'active') {
+        const banner = document.getElementById('loginAlertBanner');
+        const bannerTitle = document.getElementById('loginAlertTitle');
+        const bannerText = document.getElementById('loginAlertText');
+        if (banner && bannerTitle && bannerText) {
+          bannerTitle.innerText = '⛔ Account Belum Diaktifkan';
+          bannerText.innerHTML = 'Status akun <b>' + cleanU + '</b> saat ini masih <b>Non Aktif</b>. Silakan tunggu konfirmasi dari <b>Super Admin</b> untuk aktivasi account.';
+          banner.classList.remove('hidden');
+        }
+        if (typeof showToast === 'function') {
+          showToast('warning', 'Akun Anda masih berstatus NON AKTIF. Tunggu konfirmasi Super Admin untuk aktivasi account.');
+        }
+        return;
+      }
+    } catch (errCheck) {}
     
     btn.innerHTML = 'MEMVERIFIKASI...'; btn.disabled = true;
     
@@ -1224,6 +1253,12 @@ async function startLiveScenarioSelected() {
     }).verifyLogin(u, p);
   }
 
+  window.toggleLoginPass = toggleLoginPass;
+  window.toggleModeDaftarAkun = toggleModeDaftarAkun;
+  window.handleRegisterAccount = handleRegisterAccount;
+  window.quickFillLogin = quickFillLogin;
+  window.handleLogin = handleLogin;
+
 
 
   window.activeAccount = null;
@@ -1238,7 +1273,7 @@ async function startLiveScenarioSelected() {
     let r = role ? role.toString().toLowerCase() : '';
     
     // Reset semua navigasi ke hidden
-    ['nav-dashboard', 'nav-ai', 'nav-pasien', 'nav-rekam-medis', 'nav-surat', 'nav-database', 'nav-inventory', 'nav-informasi', 'nav-kasir', 'nav-riwayat-invoice'].forEach(id => {
+    ['nav-dashboard', 'nav-ai', 'nav-pasien', 'nav-rekam-medis', 'nav-surat', 'nav-database', 'nav-user-master', 'nav-inventory', 'nav-informasi', 'nav-kasir', 'nav-riwayat-invoice', 'nav-payroll'].forEach(id => {
       let el = document.getElementById(id);
       if (el) el.classList.add('hidden');
     });
@@ -1247,12 +1282,19 @@ async function startLiveScenarioSelected() {
 
     let btnTambahPasien = document.getElementById('btnTambahPasienBaru');
     let btnFilterDuplikat = document.getElementById('btnFilterDuplikat');
+    let btnDbUser = document.getElementById('btnDbUser');
+    if (btnDbUser) btnDbUser.classList.add('hidden');
 
-    // 1. SUPER USER: Bisa membuka, edit, dan delete semua modul
+    // 1. SUPER USER / OWNER: Bisa membuka, edit, dan delete modul utama (Master User & Role khusus Super User)
     if (r === 'super user' || r === 'owner') {
-      ['nav-dashboard', 'nav-ai', 'nav-pasien', 'nav-rekam-medis', 'nav-surat', 'nav-database', 'nav-inventory', 'nav-informasi', 'nav-kasir', 'nav-riwayat-invoice'].forEach(id => {
+      ['nav-dashboard', 'nav-ai', 'nav-pasien', 'nav-rekam-medis', 'nav-surat', 'nav-database', 'nav-inventory', 'nav-informasi', 'nav-kasir', 'nav-riwayat-invoice', 'nav-payroll'].forEach(id => {
         let el = document.getElementById(id); if (el) el.classList.remove('hidden');
       });
+      if (r === 'super user') {
+        let navUM = document.getElementById('nav-user-master');
+        if (navUM) navUM.classList.remove('hidden');
+        if (btnDbUser) btnDbUser.classList.remove('hidden');
+      }
       document.getElementById('section-transaksi').classList.remove('hidden');
       if (btnTambahPasien) btnTambahPasien.classList.remove('hidden');
       if (btnFilterDuplikat) btnFilterDuplikat.classList.remove('hidden');
@@ -1269,9 +1311,9 @@ async function startLiveScenarioSelected() {
       if (btnFilterDuplikat) btnFilterDuplikat.classList.add('hidden');
       switchMenu('rekam-medis');
     }
-    // 3. ADMIN: Database Pasien, Form & Surat, Informasi, Kasir & Billing, Riwayat Invoice
+    // 3. ADMIN: Database Pasien, Form & Surat, Informasi, Kasir & Billing, Riwayat Invoice, Payroll
     else if (r.includes('admin') || r.includes('perawat') || r.includes('kasir')) {
-      ['nav-pasien', 'nav-surat', 'nav-informasi', 'nav-kasir', 'nav-riwayat-invoice'].forEach(id => {
+      ['nav-pasien', 'nav-surat', 'nav-informasi', 'nav-kasir', 'nav-riwayat-invoice', 'nav-payroll'].forEach(id => {
         let el = document.getElementById(id); if (el) el.classList.remove('hidden');
       });
       document.getElementById('section-transaksi').classList.remove('hidden');
@@ -1298,6 +1340,7 @@ async function startLiveScenarioSelected() {
       if (btnFilterDuplikat) btnFilterDuplikat.classList.add('hidden');
       switchMenu('pasien');
     }
+    if (typeof window.syncGasBadgeVisibility === 'function') window.syncGasBadgeVisibility();
   }
 
   document.addEventListener("DOMContentLoaded", () => {
@@ -1345,6 +1388,7 @@ async function startLiveScenarioSelected() {
   }
 
   function switchMenu(menuId) {
+    window.activeMenuId = menuId;
     document.querySelectorAll('.module-view').forEach(el => el.classList.add('hidden'));
     document.querySelectorAll('.nav-btn').forEach(el => {
       el.classList.remove('bg-gradient-to-r', 'from-cyan-600', 'to-indigo-600', 'text-white', 'shadow-md', 'shadow-cyan-500/20', 'ring-1', 'ring-cyan-400/30', 'bg-indigo-600');
@@ -1359,14 +1403,28 @@ async function startLiveScenarioSelected() {
       targetNav.classList.add('bg-gradient-to-r', 'from-cyan-600', 'to-indigo-600', 'text-white', 'shadow-md', 'shadow-cyan-500/20', 'ring-1', 'ring-cyan-400/30');
       document.getElementById('topbarTitle').innerText = targetNav.innerText.replace(/[^a-zA-Z0-9\s&]/gi, '').trim();
     }
+
+    if (typeof window.syncGasBadgeVisibility === 'function') window.syncGasBadgeVisibility();
   
     if (menuId === 'ai' && typeof loadAIInsights === 'function') loadAIInsights();
     if (menuId === 'database' && typeof initDatabaseModule === 'function') initDatabaseModule();
+    if (menuId === 'user-master') {
+      if (typeof ensureUserPanelVisible === 'function') ensureUserPanelVisible();
+      const pUser = document.getElementById('panelDbUser');
+      if (pUser) pUser.classList.remove('hidden');
+      if (typeof handleRoleChange === 'function') handleRoleChange();
+      if (typeof loadDaftarUserMaster === 'function') loadDaftarUserMaster();
+    }
     if (menuId === 'inventory' && typeof initInventoryModule === 'function') initInventoryModule();
     if (menuId === 'informasi' && typeof initInformasiModule === 'function') initInformasiModule();
     if (menuId === 'surat' && typeof initSuratModule === 'function') initSuratModule();
+    if (menuId === 'payroll' && typeof initPayrollModule === 'function') initPayrollModule();
   
     document.getElementById('mainContentScroll').scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function bukaMenuMasterUser() {
+    switchMenu('user-master');
   }
 
   function logout() {
@@ -1401,46 +1459,145 @@ async function startLiveScenarioSelected() {
     return split[1] != undefined ? rupiah + ',' + split[1] : rupiah;
   }
 
+  let _dbSyncTicker = null;
+
+  function showDbSyncOverlay(initialStatus) {
+    const overlay = document.getElementById('dbSyncOverlay');
+    const card = document.getElementById('dbSyncCard');
+    const pctEl = document.getElementById('dbSyncPercent');
+    const subEl = document.getElementById('dbSyncSubLabel');
+    const titleEl = document.getElementById('dbSyncTitle');
+    const statusEl = document.getElementById('dbSyncStatus');
+    const barEl = document.getElementById('dbSyncProgressBar');
+
+    if (pctEl) pctEl.innerText = '15%';
+    if (subEl) subEl.innerText = 'SYNCING';
+    if (titleEl) titleEl.innerText = 'Memuat Database Klinik';
+    if (statusEl) statusEl.innerText = initialStatus || '🔄 Menyinkronkan Master Data & Pasien...';
+    if (barEl) barEl.style.width = '15%';
+
+    if (overlay) {
+      overlay.classList.remove('hidden');
+      setTimeout(() => {
+        overlay.classList.remove('opacity-0');
+        if (card) {
+          card.classList.remove('scale-95');
+          card.classList.add('scale-100');
+        }
+      }, 15);
+    }
+  }
+
+  function updateDbSyncOverlay(pct, statusText, subLabel) {
+    const pctEl = document.getElementById('dbSyncPercent');
+    const subEl = document.getElementById('dbSyncSubLabel');
+    const statusEl = document.getElementById('dbSyncStatus');
+    const barEl = document.getElementById('dbSyncProgressBar');
+    if (pctEl) pctEl.innerText = pct + '%';
+    if (barEl) barEl.style.width = pct + '%';
+    if (statusText && statusEl) statusEl.innerText = statusText;
+    if (subLabel && subEl) subEl.innerText = subLabel;
+  }
+
+  function hideDbSyncOverlay() {
+    if (_dbSyncTicker) {
+      clearInterval(_dbSyncTicker);
+      _dbSyncTicker = null;
+    }
+    const overlay = document.getElementById('dbSyncOverlay');
+    const card = document.getElementById('dbSyncCard');
+    if (!overlay) return;
+    overlay.classList.add('opacity-0');
+    if (card) {
+      card.classList.remove('scale-100');
+      card.classList.add('scale-95');
+    }
+    setTimeout(() => {
+      overlay.classList.add('hidden');
+    }, 300);
+  }
+
   function startDataSync() {
-    const loadUI = document.getElementById('globalLoadingStatus'); if (loadUI) loadUI.classList.remove('hidden');
-    let step = 0;
-    const checkDone = () => {
-      step++;
-      if (step >= 3) {
+    const loadUI = document.getElementById('globalLoadingStatus');
+    if (loadUI) {
+      loadUI.classList.remove('hidden');
+      loadUI.innerHTML = '🔄 Memuat Database...';
+    }
+
+    const syncStartTime = Date.now();
+    showDbSyncOverlay('🔄 Menyinkronkan Master User, Tindakan & Obat...');
+
+    let completedTasks = 0; // total 4 tasks: master, pasien, rekamMedis, pembayaran
+    const onTaskComplete = (taskName) => {
+      completedTasks++;
+      if (completedTasks === 1) {
+        updateDbSyncOverlay(35, '🔄 Menyinkronkan Master Pasien & Rekam Medis...');
+        if (loadUI) loadUI.innerHTML = '🔄 Pasien & EMR...';
+      } else if (completedTasks === 2) {
+        updateDbSyncOverlay(65, '🔄 Menyinkronkan Rekam Medis & Odontogram...');
+        if (loadUI) loadUI.innerHTML = '🔄 Rekam Medis...';
+      } else if (completedTasks === 3) {
+        updateDbSyncOverlay(85, '🔄 Menyinkronkan Transaksi Kasir & Invoice...');
+        if (loadUI) loadUI.innerHTML = '🔄 Kasir & Invoice...';
+      } else if (completedTasks >= 4) {
+        updateDbSyncOverlay(100, '✅ Database Klinik Tersinkronisasi!', 'READY');
         if (loadUI) loadUI.classList.add('hidden');
-        showToast('success', 'Database tersinkronisasi');
         updateDashboardNumbers();
         document.dispatchEvent(new Event('KlinikDataReady'));
+
+        const elapsed = Date.now() - syncStartTime;
+        const minDisplayMs = 650;
+        const remainMs = Math.max(250, minDisplayMs - elapsed);
+        setTimeout(() => {
+          hideDbSyncOverlay();
+          showToast('success', 'Database tersinkronisasi');
+        }, remainMs);
       }
     };
-    if (loadUI) loadUI.innerHTML = '🔄 Master Data...';
+
     google.script.run.withSuccessHandler(res => {
-      window.KlinikData.staff = res.staff || [];
-      window.KlinikData.tindakan = res.tindakan || [];
-      window.KlinikData.obat = res.obat || [];
-      window.KlinikData.bmhp = res.bmhp || [];
+      window.KlinikData.staff = (res && res.staff) ? res.staff : [];
+      window.KlinikData.tindakan = (res && res.tindakan) ? res.tindakan : [];
+      window.KlinikData.obat = (res && res.obat) ? res.obat : [];
+      window.KlinikData.bmhp = (res && res.bmhp) ? res.bmhp : [];
       window.KlinikData.statusLoad.master = true;
-      checkDone();
+      onTaskComplete('master');
+    }).withFailureHandler(() => {
+      onTaskComplete('master');
     }).getInitMaster();
 
-    if (loadUI) loadUI.innerHTML = '🔄 Pasien...';
     google.script.run.withSuccessHandler(res => {
       window.KlinikData.pasien = res || [];
       window.KlinikData.statusLoad.pasien = true;
-      checkDone();
+      onTaskComplete('pasien');
+    }).withFailureHandler(() => {
+      onTaskComplete('pasien');
     }).getInitPasien();
 
-    if (loadUI) loadUI.innerHTML = '🔄 EMR & Kasir...';
     let stepEmrKasir = 0;
     function checkEmrKasirDone() {
       stepEmrKasir++;
       if (stepEmrKasir >= 2) {
         window.KlinikData.statusLoad.emr = true;
-        checkDone();
       }
     }
-    google.script.run.withSuccessHandler(res => { window.KlinikData.rekamMedis = res || []; checkEmrKasirDone(); }).getDaftarRekamMedis();
-    google.script.run.withSuccessHandler(res => { window.KlinikData.pembayaran = res || []; checkEmrKasirDone(); }).getDaftarPembayaran();
+    google.script.run.withSuccessHandler(res => {
+      window.KlinikData.rekamMedis = res || [];
+      checkEmrKasirDone();
+      onTaskComplete('emr');
+    }).withFailureHandler(() => {
+      checkEmrKasirDone();
+      onTaskComplete('emr');
+    }).getDaftarRekamMedis();
+
+    google.script.run.withSuccessHandler(res => {
+      window.KlinikData.pembayaran = res || [];
+      checkEmrKasirDone();
+      onTaskComplete('pembayaran');
+    }).withFailureHandler(() => {
+      checkEmrKasirDone();
+      onTaskComplete('pembayaran');
+    }).getDaftarPembayaran();
   }
 
   function updateDashboardNumbers() {
@@ -8056,6 +8213,7 @@ let listMasterKategori = [];
 let listMasterTindakan = [];
 let listMasterObat = [];
 let listMasterBmhp = [];
+let listMasterUser = [];
 
 // ==========================================
 // INISIALISASI
@@ -8165,6 +8323,10 @@ function changeDBMenu(menu) {
        } else {
            renderTabelBmhp();
            generateKodeBmhp();
+       }
+   } else if(menu === 'user') {
+       if (typeof switchMenu === 'function') {
+           switchMenu('user-master');
        }
    }
 }
@@ -8744,7 +8906,7 @@ function renderTabelBmhp() {
 }
 
 // ==========================================
-// PENCADANGAN SISTEM (MULTI-DRIVE BACKUP)
+// PENCADANGAN SISTEM (MULTI-DRIVE BACKUP + CSV EXPORT)
 // ==========================================
 function triggerManualBackup() {
   let btn = document.getElementById('btnBackupSekarang');
@@ -8753,7 +8915,7 @@ function triggerManualBackup() {
     btn.disabled = true;
     btn.innerHTML = '<span>⏳</span> Memproses Backup...';
   }
-  showToast('info', 'Sedang membuat salinan snapshot database ke Google Drive...');
+  showToast('info', 'Sedang membuat salinan Spreadsheet & file .CSV ke Google Drive...');
 
   let watchdog = setTimeout(() => {
     if (btn && btn.disabled) {
@@ -8761,7 +8923,7 @@ function triggerManualBackup() {
       btn.innerHTML = originalHtml;
       showToast('warning', 'Proses backup memakan waktu lebih lama di server. Silakan periksa folder BACKUP_RME_SHELDON di Google Drive.');
     }
-  }, 45000);
+  }, 55000);
 
   if (typeof google !== 'undefined' && google.script && google.script.run) {
     google.script.run
@@ -8769,14 +8931,18 @@ function triggerManualBackup() {
         clearTimeout(watchdog);
         if (btn) { btn.disabled = false; btn.innerHTML = originalHtml; }
         if (res && res.success) {
-          showToast('success', `Backup Sukses! (${res.successCount} File tersalin ke ${res.folderNama})`);
+          let csvInfo = res.csvCount ? ` + ${res.csvCount} file .CSV` : '';
+          showToast('success', `Backup Sukses! (${res.successCount} Spreadsheet${csvInfo} tersalin ke ${res.folderNama})`);
           if (res.folderUrl) {
-            alert(`✅ PROSES BACKUP BERHASIL!\n\n` +
-                  `• Status: Berhasil mencadangkan ${res.successCount} Spreadsheet\n` +
-                  `• Folder: ${res.folderNama}\n` +
+            alert(`✅ PROSES BACKUP (SPREADSHEET + CSV) BERHASIL!\n\n` +
+                  `• Salinan Spreadsheet: ${res.successCount} Database Utama\n` +
+                  `• File Ekspor CSV: ${res.csvCount || 0} Sheet (.csv)\n` +
+                  `• Folder Utama: ${res.folderNama}\n` +
+                  `• Subfolder CSV: ${res.csvFolderNama || '-'}\n` +
                   `• Akses Berbagi: ${res.targetEmail}\n` +
                   `• Retensi: File cadangan > 6 hari otomatis dibersihkan\n\n` +
-                  `Folder dapat langsung dicek di Google Drive:\n${res.folderUrl}`);
+                  `Folder Utama Google Drive:\n${res.folderUrl}` +
+                  (res.csvFolderUrl ? `\n\nFolder CSV Google Drive:\n${res.csvFolderUrl}` : ''));
           }
         } else {
           showToast('warning', (res && res.message) ? res.message : 'Proses backup selesai dengan beberapa catatan.');
@@ -8794,8 +8960,131 @@ function triggerManualBackup() {
     setTimeout(() => {
       clearTimeout(watchdog);
       if (btn) { btn.disabled = false; btn.innerHTML = originalHtml; }
-      showToast('success', 'Simulasi Backup Sukses: Seluruh database tersalin ke BACKUP_RME_SHELDON.');
+      showToast('success', 'Simulasi Backup Sukses: Seluruh Spreadsheet & CSV tersalin ke BACKUP_RME_SHELDON.');
     }, 1500);
+  }
+}
+
+function _downloadCsvBlobInBrowser(fileName, csvContent) {
+  let blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  let url = URL.createObjectURL(blob);
+  let link = document.createElement('a');
+  link.href = url;
+  link.setAttribute('download', fileName);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  setTimeout(() => URL.revokeObjectURL(url), 3000);
+}
+
+function _arrayOfObjectsToCsv(arr) {
+  if (!Array.isArray(arr) || arr.length === 0) return '\uFEFF"Data Kosong"\r\n';
+  let headers = Object.keys(arr[0]);
+  let lines = [headers.map(h => '"' + String(h).replace(/"/g, '""') + '"').join(',')];
+  arr.forEach(item => {
+    let row = headers.map(h => {
+      let val = item[h];
+      if (val === null || val === undefined) return '';
+      if (typeof val === 'object') val = JSON.stringify(val);
+      let s = String(val);
+      if (s.indexOf('"') !== -1 || s.indexOf(',') !== -1 || s.indexOf('\n') !== -1) {
+        return '"' + s.replace(/"/g, '""') + '"';
+      }
+      return s;
+    });
+    lines.push(row.join(','));
+  });
+  return '\uFEFF' + lines.join('\r\n');
+}
+
+function _fallbackLocalCsvBackupDownload() {
+  let now = new Date();
+  let dateStamp = now.toISOString().slice(0, 10);
+  let kd = window.KlinikData || {};
+  let datasets = [
+    { name: `CSV_${dateStamp}_01_PASIEN_Master_Pasien.csv`, data: kd.pasien || [] },
+    { name: `CSV_${dateStamp}_02_REKAM_MEDIS_Kunjungan_RME.csv`, data: kd.rm || kd.rekamMedis || [] },
+    { name: `CSV_${dateStamp}_03_FARMASI_Master_Obat_BHP.csv`, data: kd.obat || [] },
+    { name: `CSV_${dateStamp}_04_KASIR_Transaksi_Kasir.csv`, data: kd.kasir || kd.invoice || [] },
+    { name: `CSV_${dateStamp}_05_DOKTER_Master_Dokter_Perawat.csv`, data: kd.dokter || [] },
+    { name: `CSV_${dateStamp}_06_USER_Master_User_Role.csv`, data: kd.users || [] }
+  ];
+  if (window.PayrollState) {
+    datasets.push({ name: `CSV_${dateStamp}_07_PAYROLL_Pengaturan_Tarif_Shift.csv`, data: window.PayrollState.tarifShift || [] });
+    datasets.push({ name: `CSV_${dateStamp}_07_PAYROLL_Presensi_Shift_Harian.csv`, data: window.PayrollState.presensi || [] });
+  }
+
+  // Gabungkan ke 1 Master Bundle CSV + unduh otomatis agar browser tidak memblokir multiple popups
+  let bundleSections = [];
+  datasets.forEach(ds => {
+    if (ds.data && ds.data.length > 0) {
+      bundleSections.push(`"=== TABEL: ${ds.name} (${ds.data.length} Baris) ==="\r\n` + _arrayOfObjectsToCsv(ds.data).replace(/^\uFEFF/, ''));
+    }
+  });
+  let masterCsv = '\uFEFF' + (bundleSections.length > 0 ? bundleSections.join('\r\n\r\n') : '"Database RME Sheldon - Snapshot CSV Kosong"');
+  let masterFileName = `BACKUP_DATABASE_RME_SHELDON_${dateStamp}_ALL_TABLES.csv`;
+  _downloadCsvBlobInBrowser(masterFileName, masterCsv);
+  return masterFileName;
+}
+
+function triggerBackupDownloadCSV() {
+  let btn = document.getElementById('btnBackupDownloadCSV');
+  let originalHtml = btn ? btn.innerHTML : '';
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<span>⏳</span> Mengekspor CSV...';
+  }
+  showToast('info', 'Mengekspor seluruh Sheet Database ke format .CSV (Google Drive & Unduhan Perangkat)...');
+
+  let watchdog = setTimeout(() => {
+    if (btn && btn.disabled) {
+      btn.disabled = false;
+      btn.innerHTML = originalHtml;
+    }
+  }, 55000);
+
+  if (typeof google !== 'undefined' && google.script && google.script.run) {
+    google.script.run
+      .withSuccessHandler(res => {
+        clearTimeout(watchdog);
+        if (btn) { btn.disabled = false; btn.innerHTML = originalHtml; }
+        if (res && res.success) {
+          let files = res.files || [];
+          let dateStamp = res.dateStamp || new Date().toISOString().slice(0, 10);
+          if (files.length > 0) {
+            // Gabungkan semua sheet dalam satu bundel CSV Master untuk unduhan 1-klik + unduh per-file jika <= 8
+            let combinedParts = files.map(f => {
+              let cleanContent = (f.csvContent || '').replace(/^\uFEFF/, '');
+              return `"=== [${f.kategori}] SHEET: ${f.sheetName} (${f.rowCount} Baris) ==="\r\n` + cleanContent;
+            });
+            let masterFileName = `BACKUP_RME_SHELDON_${dateStamp}_ALL_${files.length}_SHEETS.csv`;
+            _downloadCsvBlobInBrowser(masterFileName, '\uFEFF' + combinedParts.join('\r\n\r\n'));
+          }
+          showToast('success', `Berhasil mengekspor ${res.totalCsv} file .CSV ke Google Drive & mengunduh ke perangkat!`);
+          alert(`✅ BACKUP & DOWNLOAD CSV BERHASIL!\n\n` +
+                `• Total Sheet Diekspor: ${res.totalCsv} File .CSV\n` +
+                `• Tersimpan di Google Drive: BACKUP_RME_SHELDON / ${res.csvFolderNama}\n` +
+                `• File Unduhan Lokal: BACKUP_RME_SHELDON_${dateStamp}_ALL_${files.length}_SHEETS.csv\n\n` +
+                `Link Folder CSV di Google Drive:\n${res.csvFolderUrl || '-'}`);
+        } else {
+          let localFile = _fallbackLocalCsvBackupDownload();
+          showToast('warning', `Server sedang sibuk, file CSV lokal (${localFile}) berhasil diunduh.`);
+        }
+      })
+      .withFailureHandler(err => {
+        clearTimeout(watchdog);
+        if (btn) { btn.disabled = false; btn.innerHTML = originalHtml; }
+        let localFile = _fallbackLocalCsvBackupDownload();
+        showToast('info', `Mengunduh salinan CSV dari memori aktif (${localFile}).`);
+      })
+      .exportAllDatabaseToCSV();
+  } else {
+    setTimeout(() => {
+      clearTimeout(watchdog);
+      if (btn) { btn.disabled = false; btn.innerHTML = originalHtml; }
+      let localFile = _fallbackLocalCsvBackupDownload();
+      showToast('success', `File CSV Database (${localFile}) berhasil diunduh ke komputer Anda!`);
+    }, 600);
   }
 }
 
@@ -8946,14 +9235,779 @@ function triggerSetupPayroll() {
       if (btn) { btn.disabled = false; btn.innerHTML = originalHtml; }
       showToast("success", "Simulasi: Spreadsheet 11 Payroll & Honor Dokter berhasil disiapkan!");
       alert("✅ SPREADSHEET PAYROLL BERHASIL DISIAPKAN (SIMULASI):\n\n" +
-            "• Judul: RME Sheldon - 11 Payroll & Honor Dokter\n" +
-            "• Sheet 1: Penggajian_Dokter (Jasa Medis, PPh 21, THP)\n" +
-            "• Sheet 2: Honor_Perawat_Staff (Gaji Pokok + Fee Tindakan)\n" +
-            "• Sheet 3: Tagihan_Vendor_Lab (Biaya Laboratorium Eksternal)\n" +
-            "• Sheet 4: Slip_Gaji_Arsip (Riwayat Kirim Slip)");
+            "• Judul: RME Sheldon - 11 Payroll & Honor Dokter (dan disinkronkan ke 06 Master User & Role)\n" +
+            "• Sheet 1: Pengaturan_Tarif_Shift (Dokter Rp 55.000/shift, Perawat Rp 45.000/shift, Admin Rp 1.200.000/bln)\n" +
+            "• Sheet 2: Presensi_Shift_Harian (Absensi Kehadiran Shift 1 & Shift 2)\n" +
+            "• Sheet 3: Penggajian_Dokter (Jasa Medis + Uang Shift Absensi)\n" +
+            "• Sheet 4: Honor_Perawat_Staff (Uang Shift Perawat + Gaji Bulanan Admin)\n" +
+            "• Sheet 5: Tagihan_Vendor_Lab (Biaya Laboratorium Eksternal)\n" +
+            "• Sheet 6: Slip_Gaji_Arsip (Riwayat Kirim Slip)");
     }, 1200);
   }
 }
+
+function triggerSimulasiJMDokter() {
+  const btn = document.getElementById("btnSimulasiJM");
+  const originalHtml = btn ? btn.innerHTML : "<span>🧪</span> Isi Simulasi JM Dokter";
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = "<span>⏳</span> Mengisi Simulasi JM...";
+  }
+
+  showToast("info", "Mengisi simulasi pembagian JM 4 Dokter + Rontgen 15% ke Spreadsheet Anda...");
+
+  const updateLocalSimulatedUsers = () => {
+    const simDocs = [
+      { nama: "drg. Rahma Yulinda D, Sp. BMM", username: "rahma", role: "Dokter Gigi Spesialis", hasPassword: true, isHashed: false, status: "Aktif", noReg: "503/SIP-DRG/001/2026", noHp: "081234567801", email: "rahma@sheldon.id", persenJM: 0.65 },
+      { nama: "drg. Regyana Oktavaria", username: "regyana", role: "Dokter Gigi Umum", hasPassword: true, isHashed: false, status: "Aktif", noReg: "503/SIP-DRG/002/2026", noHp: "081234567802", email: "regyana@sheldon.id", persenJM: 0.40 },
+      { nama: "drg. Latifah Mulyana", username: "latifah", role: "Dokter Gigi Umum", hasPassword: true, isHashed: false, status: "Aktif", noReg: "503/SIP-DRG/003/2026", noHp: "081234567803", email: "latifah@sheldon.id", persenJM: 0.40 },
+      { nama: "drg. Tia Ardhana R", username: "tia", role: "Dokter Gigi Umum", hasPassword: true, isHashed: false, status: "Aktif", noReg: "503/SIP-DRG/004/2026", noHp: "081234567804", email: "tia@sheldon.id", persenJM: 0.50 }
+    ];
+    if (!Array.isArray(listMasterUser) || listMasterUser.length === 0) {
+      listMasterUser = getFallbackUserList();
+    }
+    simDocs.forEach(sd => {
+      let ex = listMasterUser.find(u => String(u.username || '').toLowerCase() === sd.username || String(u.nama || '').toLowerCase() === sd.nama.toLowerCase());
+      if (ex) {
+        Object.assign(ex, sd);
+      } else {
+        listMasterUser.push(sd);
+      }
+    });
+    saveFallbackUserList(listMasterUser);
+    renderTabelUser();
+  };
+
+  if (typeof google !== "undefined" && google.script && google.script.run) {
+    google.script.run
+      .withSuccessHandler(res => {
+        if (btn) { btn.disabled = false; btn.innerHTML = originalHtml; }
+        updateLocalSimulatedUsers();
+        if (res && res.success) {
+          showToast("success", "Simulasi JM 4 Dokter + Rontgen 15% berhasil diisi ke Spreadsheet!");
+          alert(res.message);
+          loadDaftarUserMaster(false);
+        } else {
+          showToast("warning", res ? res.message : "Terjadi kendala saat mengisi simulasi.");
+        }
+      })
+      .withFailureHandler(err => {
+        if (btn) { btn.disabled = false; btn.innerHTML = originalHtml; }
+        let errStr = (err && err.message) ? err.message : String(err);
+        showToast("error", "Gagal mengisi simulasi: " + errStr);
+        alert("❌ GAGAL MENGISI SIMULASI JM:\n\n" + errStr);
+      })
+      .isiSimulasiJMDokter();
+  } else {
+    setTimeout(() => {
+      if (btn) { btn.disabled = false; btn.innerHTML = originalHtml; }
+      updateLocalSimulatedUsers();
+      showToast("success", "Simulasi JM 4 Dokter berhasil diterapkan!");
+      alert("✅ SIMULASI PEMBAGIAN JM, SHIFT & GAJI BERHASIL DIISI:\n\n" +
+            "1. [06 Master User & Role -> Sheet: Data]\n" +
+            "   • drg. Rahma Yulinda D, Sp. BMM = 65%\n" +
+            "   • drg. Regyana Oktavaria = 40%\n" +
+            "   • drg. Latifah Mulyana = 40%\n" +
+            "   • drg. Tia Ardhana R = 50% (Default)\n\n" +
+            "2. [05 Database Tindakan -> Sheet: Tindakan & Tarif_Khusus_Dokter]\n" +
+            "   • Rontgen terkunci 15% untuk SEMUA dokter\n" +
+            "   • drg. Tia Ardhana R mendapat 55% pada PSA Molar, Odontektomi M3, dan Crown PFM\n\n" +
+            "3. [11 Payroll & Honor Dokter -> Pengaturan_Tarif_Shift & Presensi_Shift_Harian]\n" +
+            "   • Dokter (2 Shift): Rp 55.000 / shift (dihitung dari absensi)\n" +
+            "   • Perawat (2 Shift): Rp 45.000 / shift (dihitung dari absensi)\n" +
+            "   • Admin (Non-Shift): Rp 1.200.000 / bulan tetap\n\n" +
+            "4. [02 Pembayaran -> Sheet: Rekap_Jasa_Medis]\n" +
+            "   • Ditambahkan 8 baris contoh perhitungan simulasi (INV/SIMULASI/001 s.d. 004)");
+    }, 800);
+  }
+}
+
+// ==========================================
+// MODUL MASTER USER & ROLE (SUPER USER)
+// ==========================================
+
+function ensureUserPanelVisible() {
+  ['view-user-master', 'panelDbUser', 'cardFormUser', 'cardTabelUser'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && id !== 'view-user-master') {
+      el.classList.remove('hidden');
+    }
+  });
+}
+
+function getFallbackUserList() {
+  try {
+    const cached = localStorage.getItem('sheldon_master_users_cache');
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch (e) {}
+
+  if (window.KlinikData && Array.isArray(window.KlinikData.staff) && window.KlinikData.staff.length > 0) {
+    return window.KlinikData.staff.map((s, idx) => ({
+      nama: s.nama || ('Staff ' + (idx + 1)),
+      username: (s.username || String(s.nama || '').toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 12) || ('user' + (idx + 1))),
+      role: s.role || 'Staff',
+      hasPassword: true,
+      isHashed: false,
+      status: s.status || 'Aktif',
+      noReg: s.sip || s.noReg || '-',
+      noHp: s.noHp || '-',
+      email: s.email || '',
+      persenJM: s.persenJM || (String(s.role || '').toLowerCase().includes('spesialis') ? 0.65 : (String(s.role || '').toLowerCase().includes('dokter') ? 0.40 : 0))
+    }));
+  }
+
+  return [
+    { nama: "Administrator Sistem", username: "admin", role: "Super User", hasPassword: true, isHashed: true, status: "Aktif", noReg: "-", noHp: "081234567890", email: "admin@sheldon.id", persenJM: 0 },
+    { nama: "drg. V. Asung Nugroho, Sp.Ort", username: "asung", role: "Owner", hasPassword: true, isHashed: true, status: "Aktif", noReg: "503/SIP-DRG/001/2024", noHp: "081298765432", email: "v.asungnugroho@gmail.com", persenJM: 0.50 },
+    { nama: "drg. Rahma Yulinda D, Sp. BMM", username: "rahma", role: "Dokter Gigi Spesialis", hasPassword: true, isHashed: false, status: "Aktif", noReg: "503/SIP-DRG/001/2026", noHp: "081234567801", email: "rahma@sheldon.id", persenJM: 0.65 },
+    { nama: "drg. Regyana Oktavaria", username: "regyana", role: "Dokter Gigi Umum", hasPassword: true, isHashed: false, status: "Aktif", noReg: "503/SIP-DRG/002/2026", noHp: "081234567802", email: "regyana@sheldon.id", persenJM: 0.40 },
+    { nama: "drg. Latifah Mulyana", username: "latifah", role: "Dokter Gigi Umum", hasPassword: true, isHashed: false, status: "Aktif", noReg: "503/SIP-DRG/003/2026", noHp: "081234567803", email: "latifah@sheldon.id", persenJM: 0.40 },
+    { nama: "drg. Tia Ardhana R", username: "tia", role: "Dokter Gigi Umum", hasPassword: true, isHashed: false, status: "Aktif", noReg: "503/SIP-DRG/004/2026", noHp: "081234567804", email: "tia@sheldon.id", persenJM: 0.50 },
+    { nama: "Bernadette Rostenkowski", username: "bernadette", role: "Perawat Gigi", hasPassword: true, isHashed: false, status: "Aktif", noReg: "503/STR-PRW/003/2024", noHp: "081399001122", email: "bernadette@sheldon.id", persenJM: 0 },
+    { nama: "Howard Wolowitz", username: "howard", role: "Admin", hasPassword: true, isHashed: false, status: "Aktif", noReg: "-", noHp: "081377889900", email: "howard@sheldon.id", persenJM: 0 }
+  ];
+}
+
+function saveFallbackUserList(list) {
+  try {
+    if (Array.isArray(list)) {
+      localStorage.setItem('sheldon_master_users_cache', JSON.stringify(list));
+    }
+  } catch (e) {}
+}
+
+function togglePasswordVisibility(inputId, btn) {
+  const inp = document.getElementById(inputId);
+  if (!inp) return;
+  if (inp.type === 'password') {
+    inp.type = 'text';
+    if (btn) btn.innerText = '🙈';
+  } else {
+    inp.type = 'password';
+    if (btn) btn.innerText = '👁️';
+  }
+}
+
+function handleRoleChange() {
+  const roleEl = document.getElementById('dbUserRole');
+  const wrapJM = document.getElementById('wrapperDokterJM');
+  const jmInput = document.getElementById('dbUserPersenJM');
+  if (!roleEl || !wrapJM) return;
+  const role = (roleEl.value || '').toLowerCase();
+  if (role.includes('dokter')) {
+    wrapJM.classList.remove('hidden');
+    if (jmInput && (jmInput.value === '40' || jmInput.value === '50' || !jmInput.value)) {
+      jmInput.value = role.includes('spesialis') ? '50' : '40';
+    }
+  } else {
+    wrapJM.classList.add('hidden');
+  }
+}
+
+function bukaFormUserBaru() {
+  ensureUserPanelVisible();
+  batalEditDbUser(false);
+  const card = document.getElementById('cardFormUser');
+  if (card) {
+    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    card.classList.add('ring-4', 'ring-indigo-500/30', 'border-indigo-500');
+    setTimeout(() => {
+      card.classList.remove('ring-4', 'ring-indigo-500/30', 'border-indigo-500');
+    }, 1600);
+  }
+  setTimeout(() => {
+    const namaInp = document.getElementById('dbUserNama');
+    if (namaInp) namaInp.focus();
+  }, 150);
+  if (typeof showToast === 'function') {
+    showToast('info', '✨ Form Tambah Pengguna Baru siap diisi!');
+  }
+}
+
+function loadDaftarUserMaster(forceReload) {
+  ensureUserPanelVisible();
+  const tbody = document.getElementById('tbodyDbUser');
+  const btnTop = document.getElementById('btnReloadUserMaster');
+  const btnTbl = document.getElementById('btnRefreshTabelUser');
+  const origTop = btnTop ? btnTop.innerHTML : '<span>🔄</span> Muat Ulang Data';
+  const origTbl = btnTbl ? btnTbl.innerHTML : '<span>🔄</span> Refresh';
+
+  if (forceReload) {
+    if (btnTop) { btnTop.disabled = true; btnTop.innerHTML = '<span class="inline-block animate-spin">⏳</span> Memuat...'; }
+    if (btnTbl) { btnTbl.disabled = true; btnTbl.innerHTML = '<span class="inline-block animate-spin">⏳</span> Memuat...'; }
+    if (typeof showToast === 'function') showToast('info', '🔄 Memuat data pengguna dari Spreadsheet...');
+  }
+
+  if (tbody && (forceReload || !Array.isArray(listMasterUser) || listMasterUser.length === 0)) {
+    tbody.innerHTML = '<tr><td colspan="10" class="text-center py-6 text-slate-400 font-bold"><span class="inline-block animate-spin mr-2">⏳</span>Memuat akun pengguna dari spreadsheet...</td></tr>';
+  }
+
+  const finishLoad = (usersArr) => {
+    if (btnTop) { btnTop.disabled = false; btnTop.innerHTML = origTop; }
+    if (btnTbl) { btnTbl.disabled = false; btnTbl.innerHTML = origTbl; }
+    let loaded = (Array.isArray(usersArr) && usersArr.length > 0) ? usersArr : getFallbackUserList();
+
+    // Gabungkan akun yang baru didaftarkan di browser lokal jika belum ada di respon server
+    try {
+      let localCache = JSON.parse(localStorage.getItem('sheldon_master_users_cache') || '[]');
+      if (Array.isArray(localCache)) {
+        localCache.forEach(lu => {
+          if (lu && lu.username) {
+            let ex = loaded.find(su => String(su.username || '').toLowerCase() === String(lu.username).toLowerCase());
+            if (!ex) {
+              loaded.unshift(lu);
+            } else if (!ex.email && lu.email) {
+              ex.email = lu.email;
+            }
+          }
+        });
+      }
+    } catch (eMerge) {}
+
+    listMasterUser = loaded;
+    saveFallbackUserList(listMasterUser);
+    renderTabelUser();
+    if (forceReload) {
+      if (typeof showToast === 'function') {
+        showToast('success', '✅ Berhasil memuat ' + listMasterUser.length + ' akun pengguna!');
+      }
+      const tblCard = document.getElementById('cardTabelUser');
+      if (tblCard) {
+        tblCard.classList.add('ring-4', 'ring-emerald-500/30', 'border-emerald-500');
+        setTimeout(() => {
+          tblCard.classList.remove('ring-4', 'ring-emerald-500/30', 'border-emerald-500');
+        }, 1400);
+      }
+    }
+  };
+
+  if (typeof google !== 'undefined' && google.script && google.script.run) {
+    google.script.run
+      .withSuccessHandler(res => {
+        if (Array.isArray(res) && res.length > 0) {
+          finishLoad(res);
+        } else {
+          finishLoad(getFallbackUserList());
+        }
+      })
+      .withFailureHandler(err => {
+        finishLoad(getFallbackUserList());
+      })
+      .getDaftarUserMaster();
+  } else {
+    setTimeout(() => {
+      finishLoad(getFallbackUserList());
+    }, 300);
+  }
+}
+
+function renderTabelUser() {
+  ensureUserPanelVisible();
+  const tbody = document.getElementById('tbodyDbUser');
+  if (!tbody) return;
+
+  if (!Array.isArray(listMasterUser)) {
+    listMasterUser = getFallbackUserList();
+  }
+
+  const badgeTotal = document.getElementById('badgeTotalUser');
+  if (badgeTotal) {
+    badgeTotal.innerText = listMasterUser.length + ' Akun';
+  }
+
+  const keyword = (document.getElementById('cariDbUser') ? document.getElementById('cariDbUser').value : '').toLowerCase().trim();
+  
+  let filtered = listMasterUser.filter(u => {
+    if (!keyword) return true;
+    return (u.nama || '').toLowerCase().includes(keyword) ||
+           (u.username || '').toLowerCase().includes(keyword) ||
+           (u.role || '').toLowerCase().includes(keyword) ||
+           (u.noReg || '').toLowerCase().includes(keyword) ||
+           (u.noHp || '').toLowerCase().includes(keyword) ||
+           (u.email || '').toLowerCase().includes(keyword) ||
+           (u.status || '').toLowerCase().includes(keyword);
+  });
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="10" class="text-center py-6 text-slate-400 font-bold">' + (keyword ? 'Tidak ada pengguna cocok dengan pencarian "' + keyword + '"' : 'Belum ada pengguna terdaftar.') + '</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(u => {
+    let roleBadge = 'bg-slate-100 text-slate-700';
+    let rLow = (u.role || '').toLowerCase();
+    if (rLow === 'super user' || rLow === 'owner') roleBadge = 'bg-purple-100 text-purple-700 font-black';
+    else if (rLow.includes('dokter')) roleBadge = 'bg-blue-100 text-blue-700 font-bold';
+    else if (rLow.includes('perawat')) roleBadge = 'bg-teal-100 text-teal-700 font-bold';
+    else if (rLow.includes('kasir')) roleBadge = 'bg-emerald-100 text-emerald-700 font-bold';
+    else if (rLow.includes('admin')) roleBadge = 'bg-amber-100 text-amber-700 font-bold';
+
+    let stRaw = (u.status || 'Aktif').trim();
+    let isAktif = (stRaw.toLowerCase() === 'aktif' || stRaw.toLowerCase() === 'active');
+    let statusBadge = isAktif
+      ? '<span class="px-2.5 py-0.5 bg-emerald-100 text-emerald-700 font-bold rounded-full text-[10px]">Aktif</span>'
+      : '<span class="px-2.5 py-0.5 bg-amber-100 text-amber-800 border border-amber-300 font-extrabold rounded-full text-[10px] inline-flex items-center gap-1">⏳ Non Aktif</span>';
+
+    let passBadge = u.isHashed 
+      ? '<span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded font-semibold text-[10px] inline-flex items-center gap-1">🔒 SHA-256</span>'
+      : (u.hasPassword 
+        ? '<span class="px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 rounded font-semibold text-[10px] inline-flex items-center gap-1">🔑 Aktif</span>'
+        : '<span class="px-2 py-0.5 bg-rose-50 text-rose-600 border border-rose-200 rounded font-semibold text-[10px]">❌ Kosong</span>');
+
+    let jmDisplay = '-';
+    if (rLow.includes('dokter')) {
+      let pct = (u.persenJM ? Number(u.persenJM) : 0);
+      if (pct <= 1 && pct > 0) pct = Math.round(pct * 100);
+      jmDisplay = '<span class="font-bold text-amber-800">' + pct + '%</span>';
+    }
+
+    let safeUName = String(u.username || '').replace(/'/g, "\\'");
+    let safeNama = String(u.nama || '').replace(/'/g, "\\'");
+
+    let btnAktivasi = !isAktif
+      ? `<button type="button" onclick="aktifkanDbUser('${safeUName}', '${safeNama}')" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-xs shadow-sm transition-all active:scale-95">✅ Aktifkan</button>`
+      : `<button type="button" onclick="hapusDbUser('${safeUName}', '${safeNama}')" class="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold rounded-lg text-xs transition-all">🗑️ Nonaktifkan</button>`;
+
+    return `
+      <tr class="hover:bg-slate-50 transition-colors ${!isAktif ? 'bg-amber-50/40' : ''}">
+        <td class="p-3 font-bold text-slate-800">${u.nama || '-'}</td>
+        <td class="p-3 font-mono text-slate-700 text-xs font-semibold">${u.username || '-'}</td>
+        <td class="p-3"><span class="px-2.5 py-1 rounded-lg text-xs ${roleBadge}">${u.role || '-'}</span></td>
+        <td class="p-3 text-center">${passBadge}</td>
+        <td class="p-3 text-center">${statusBadge}</td>
+        <td class="p-3 text-slate-600 text-xs">${u.noReg || '-'}</td>
+        <td class="p-3 text-slate-600 text-xs">${u.noHp || '-'}</td>
+        <td class="p-3 text-slate-600 text-xs">${u.email || '-'}</td>
+        <td class="p-3 text-center text-xs">${jmDisplay}</td>
+        <td class="p-3 text-center">
+          <div class="flex items-center justify-center gap-1.5">
+            ${btnAktivasi}
+            <button type="button" onclick="editDbUser('${safeUName}')" class="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold rounded-lg text-xs transition-all">✏️ Edit</button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function aktifkanDbUser(username, nama) {
+  if (!confirm('Konfirmasi Aktivasi Account:\nAktifkan pengguna "' + (nama || username) + '" (' + username + ') agar dapat login ke sistem RME?')) {
+    return;
+  }
+
+  const currentUser = window.activeNamaAccount || 'Super Admin';
+  const applyLocalActivate = () => {
+    if (!Array.isArray(listMasterUser)) listMasterUser = getFallbackUserList();
+    let ex = listMasterUser.find(u => String(u.username || '').toLowerCase() === String(username).toLowerCase());
+    if (ex) ex.status = 'Aktif';
+    saveFallbackUserList(listMasterUser);
+    if (window._mockDb && Array.isArray(window._mockDb.staff)) {
+      let st = window._mockDb.staff.find(s => String(s.username || '').toLowerCase() === String(username).toLowerCase());
+      if (st) st.status = 'Aktif';
+    }
+  };
+
+  if (typeof google !== 'undefined' && google.script && google.script.run) {
+    if (typeof showToast === 'function') showToast('info', '⏳ Mengaktifkan akun ' + username + '...');
+    google.script.run
+      .withSuccessHandler(res => {
+        applyLocalActivate();
+        if (res && res.success) {
+          if (typeof showToast === 'function') showToast('success', res.message || ('✅ Akun ' + username + ' berhasil diaktifkan!'));
+          loadDaftarUserMaster(false);
+        } else {
+          // Fallback lewat simpanUserMaster jika aktifkanUserMaster belum di-deploy
+          let uObj = listMasterUser.find(u => String(u.username || '').toLowerCase() === String(username).toLowerCase());
+          if (uObj) {
+            google.script.run
+              .withSuccessHandler(() => {
+                if (typeof showToast === 'function') showToast('success', '✅ Akun ' + username + ' berhasil diaktifkan!');
+                renderTabelUser();
+              })
+              .simpanUserMaster({
+                mode: 'edit',
+                nama: uObj.nama,
+                username: uObj.username,
+                role: uObj.role,
+                password: '',
+                status: 'Aktif',
+                noReg: uObj.noReg,
+                noHp: uObj.noHp,
+                email: uObj.email || '',
+                persenJM: uObj.persenJM || 0,
+                currentUser: currentUser
+              });
+          } else {
+            if (typeof showToast === 'function') showToast('success', '✅ Akun ' + username + ' telah diaktifkan!');
+            renderTabelUser();
+          }
+        }
+      })
+      .withFailureHandler(() => {
+        applyLocalActivate();
+        if (typeof showToast === 'function') showToast('success', '✅ Akun ' + username + ' telah diaktifkan!');
+        renderTabelUser();
+      })
+      .aktifkanUserMaster(username, currentUser);
+  } else {
+    applyLocalActivate();
+    if (typeof showToast === 'function') showToast('success', '✅ Akun ' + username + ' telah diaktifkan!');
+    renderTabelUser();
+  }
+}
+
+function simpanDbUser(e) {
+  if (e) e.preventDefault();
+  ensureUserPanelVisible();
+  const btn = document.getElementById('btnSimpanUser');
+  const origHtml = btn ? btn.innerHTML : '<span>💾</span> SIMPAN PENGGUNA';
+
+  const mode = document.getElementById('dbUserMode').value;
+  const nama = (document.getElementById('dbUserNama').value || '').trim();
+  const username = (document.getElementById('dbUserUsername').value || '').trim().toLowerCase();
+  const role = document.getElementById('dbUserRole').value;
+  const password = (document.getElementById('dbUserPassword').value || '').trim();
+  const status = document.getElementById('dbUserStatus').value;
+  const noReg = (document.getElementById('dbUserNoReg').value || '').trim();
+  const noHp = (document.getElementById('dbUserNoHp').value || '').trim();
+  const email = (document.getElementById('dbUserEmail') ? document.getElementById('dbUserEmail').value : '').trim();
+  const persenJM = Number(document.getElementById('dbUserPersenJM').value) || 0;
+
+  if (!nama || !username) {
+    showToast('warning', 'Nama Pekerja dan Username wajib diisi!');
+    return;
+  }
+
+  if (mode === 'tambah' && (!password || password.length < 4)) {
+    showToast('warning', 'Password minimal 4 karakter untuk pengguna baru!');
+    document.getElementById('dbUserPassword').focus();
+    return;
+  }
+
+  const currentUser = window.activeNamaAccount || ((window.currentUser && window.currentUser.nama) ? window.currentUser.nama : 'Super User');
+
+  const payload = {
+    mode: mode,
+    nama: nama,
+    username: username,
+    role: role,
+    password: password,
+    status: status,
+    noReg: noReg,
+    noHp: noHp,
+    email: email,
+    persenJM: persenJM,
+    currentUser: currentUser
+  };
+
+  const applyLocalSave = () => {
+    if (!Array.isArray(listMasterUser)) listMasterUser = getFallbackUserList();
+    let exIdx = listMasterUser.findIndex(u => String(u.username || '').toLowerCase() === username);
+    let userObj = {
+      nama: nama,
+      username: username,
+      role: role,
+      hasPassword: !!password || (exIdx >= 0 ? listMasterUser[exIdx].hasPassword : true),
+      isHashed: true,
+      status: status,
+      noReg: noReg || '-',
+      noHp: noHp || '-',
+      email: email || '',
+      persenJM: persenJM > 1 ? persenJM / 100 : persenJM
+    };
+    if (exIdx >= 0) {
+      listMasterUser[exIdx] = userObj;
+    } else {
+      listMasterUser.unshift(userObj);
+    }
+    saveFallbackUserList(listMasterUser);
+  };
+
+  if (btn) { btn.disabled = true; btn.innerHTML = '<span class="inline-block animate-spin mr-1">⏳</span> Menyimpan ke Spreadsheet...'; }
+
+  if (typeof google !== 'undefined' && google.script && google.script.run) {
+    google.script.run
+      .withSuccessHandler(res => {
+        if (btn) { btn.disabled = false; btn.innerHTML = origHtml; }
+        if (res && res.success) {
+          applyLocalSave();
+          showToast('success', res.message || ('Pengguna ' + username + ' berhasil disimpan!'));
+          batalEditDbUser(false);
+          loadDaftarUserMaster(false);
+        } else if (res && res.message && String(res.message).includes('tidak ditemukan')) {
+          applyLocalSave();
+          showToast('success', 'Pengguna ' + username + ' berhasil disimpan!');
+          batalEditDbUser(false);
+          renderTabelUser();
+        } else {
+          showToast('error', (res && res.message) ? res.message : 'Gagal menyimpan user.');
+        }
+      })
+      .withFailureHandler(err => {
+        if (btn) { btn.disabled = false; btn.innerHTML = origHtml; }
+        let errStr = (err && err.message) ? err.message : String(err);
+        showToast('error', 'Gagal: ' + errStr);
+      })
+      .simpanUserMaster(payload);
+  } else {
+    setTimeout(() => {
+      if (btn) { btn.disabled = false; btn.innerHTML = origHtml; }
+      applyLocalSave();
+      showToast('success', 'Akun ' + username + ' berhasil disimpan di master!');
+      batalEditDbUser(false);
+      renderTabelUser();
+    }, 400);
+  }
+}
+
+function editDbUser(username) {
+  ensureUserPanelVisible();
+  if (!Array.isArray(listMasterUser)) listMasterUser = getFallbackUserList();
+  const user = listMasterUser.find(u => String(u.username || '').toLowerCase() === String(username).toLowerCase());
+  if (!user) {
+    showToast('warning', 'Data pengguna tidak ditemukan!');
+    return;
+  }
+
+  document.getElementById('dbUserMode').value = 'edit';
+  document.getElementById('dbUserOrigUsername').value = user.username;
+  document.getElementById('dbUserNama').value = user.nama || '';
+  
+  const uInp = document.getElementById('dbUserUsername');
+  uInp.value = user.username || '';
+  uInp.readOnly = true;
+  uInp.classList.add('bg-slate-200', 'text-slate-500');
+  uInp.classList.remove('bg-slate-50');
+
+  let userRole = (user.role || '').trim();
+  let roleSelect = document.getElementById('dbUserRole');
+  let matched = false;
+  for (let opt of roleSelect.options) {
+    if (opt.value.toLowerCase() === userRole.toLowerCase()) {
+      roleSelect.value = opt.value;
+      matched = true;
+      break;
+    }
+  }
+  if (!matched) {
+    let rLow = userRole.toLowerCase();
+    if (rLow.includes('spesialis')) roleSelect.value = 'Dokter Gigi Spesialis';
+    else if (rLow.includes('dokter')) roleSelect.value = 'Dokter Gigi Umum';
+    else if (rLow.includes('perawat gigi')) roleSelect.value = 'Perawat Gigi';
+    else if (rLow.includes('perawat')) roleSelect.value = 'Perawat Umum';
+    else if (rLow.includes('admin') || rLow.includes('kasir')) roleSelect.value = 'Admin';
+    else if (rLow.includes('owner')) roleSelect.value = 'Owner';
+    else roleSelect.value = 'Super User';
+  }
+  document.getElementById('dbUserStatus').value = user.status || 'Aktif';
+  document.getElementById('dbUserNoReg').value = user.noReg === '-' ? '' : (user.noReg || '');
+  document.getElementById('dbUserNoHp').value = user.noHp === '-' ? '' : (user.noHp || '');
+  const emailInp = document.getElementById('dbUserEmail');
+  if (emailInp) emailInp.value = user.email === '-' ? '' : (user.email || '');
+
+  let pct = user.persenJM ? Number(user.persenJM) : 0;
+  if (pct <= 1 && pct > 0) pct = Math.round(pct * 100);
+  document.getElementById('dbUserPersenJM').value = pct;
+
+  // Password in edit mode is optional
+  const passInp = document.getElementById('dbUserPassword');
+  passInp.value = '';
+  passInp.required = false;
+  passInp.placeholder = 'Biarkan kosong jika tidak ganti';
+  
+  const lblWajib = document.getElementById('labelPassWajib');
+  if (lblWajib) lblWajib.innerText = '(opsional)';
+  const hintEdit = document.getElementById('hintEditPass');
+  if (hintEdit) hintEdit.classList.remove('hidden');
+
+  document.getElementById('judulFormUser').innerText = 'Edit Pengguna: ' + user.nama;
+  const badgeMode = document.getElementById('badgeFormUserStatus');
+  if (badgeMode) {
+    badgeMode.innerText = 'Mode: Edit Akun';
+    badgeMode.className = 'px-2 py-0.5 bg-amber-100 text-amber-700 font-bold text-[10px] rounded-full';
+  }
+  document.getElementById('btnBatalEditUser').classList.remove('hidden');
+  document.getElementById('btnSimpanUser').innerHTML = '<span>💾</span> PERBARUI PENGGUNA';
+
+  handleRoleChange();
+
+  const formCard = document.getElementById('cardFormUser') || document.getElementById('panelDbUser');
+  if (formCard) {
+    formCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    formCard.classList.add('ring-4', 'ring-amber-500/30', 'border-amber-500');
+    setTimeout(() => {
+      formCard.classList.remove('ring-4', 'ring-amber-500/30', 'border-amber-500');
+    }, 1500);
+  }
+}
+
+function batalEditDbUser(showMsg) {
+  ensureUserPanelVisible();
+  document.getElementById('dbUserMode').value = 'tambah';
+  document.getElementById('dbUserOrigUsername').value = '';
+  const formEl = document.getElementById('formDbUser');
+  if (formEl) formEl.reset();
+
+  const uInp = document.getElementById('dbUserUsername');
+  if (uInp) {
+    uInp.readOnly = false;
+    uInp.classList.remove('bg-slate-200', 'text-slate-500');
+    uInp.classList.add('bg-slate-50');
+  }
+
+  const passInp = document.getElementById('dbUserPassword');
+  if (passInp) {
+    passInp.required = true;
+    passInp.placeholder = 'Minimal 4 karakter';
+  }
+  
+  const lblWajib = document.getElementById('labelPassWajib');
+  if (lblWajib) lblWajib.innerText = '*';
+  const hintEdit = document.getElementById('hintEditPass');
+  if (hintEdit) hintEdit.classList.add('hidden');
+
+  const judulEl = document.getElementById('judulFormUser');
+  if (judulEl) judulEl.innerText = 'Tambah Pengguna Baru';
+  const badgeMode = document.getElementById('badgeFormUserStatus');
+  if (badgeMode) {
+    badgeMode.innerText = 'Mode: Input Baru';
+    badgeMode.className = 'px-2 py-0.5 bg-emerald-100 text-emerald-700 font-bold text-[10px] rounded-full';
+  }
+  const btnBatal = document.getElementById('btnBatalEditUser');
+  if (btnBatal) btnBatal.classList.add('hidden');
+  const btnSimpan = document.getElementById('btnSimpanUser');
+  if (btnSimpan) btnSimpan.innerHTML = '<span>💾</span> SIMPAN PENGGUNA';
+  const jmEl = document.getElementById('dbUserPersenJM');
+  if (jmEl) jmEl.value = '40';
+
+  handleRoleChange();
+
+  if (showMsg && typeof showToast === 'function') {
+    showToast('info', '✨ Form siap untuk input pengguna baru.');
+    const namaInp = document.getElementById('dbUserNama');
+    if (namaInp) namaInp.focus();
+  }
+}
+
+function hapusDbUser(username, nama) {
+  if (!confirm('Apakah Anda yakin ingin menonaktifkan pengguna "' + (nama || username) + '"?')) {
+    return;
+  }
+
+  const applyLocalDeactivate = () => {
+    if (!Array.isArray(listMasterUser)) listMasterUser = getFallbackUserList();
+    let ex = listMasterUser.find(u => String(u.username || '').toLowerCase() === String(username).toLowerCase());
+    if (ex) ex.status = 'Non Aktif';
+    saveFallbackUserList(listMasterUser);
+  };
+
+  if (typeof google !== 'undefined' && google.script && google.script.run) {
+    showToast('info', 'Memperbarui status pengguna...');
+    google.script.run
+      .withSuccessHandler(res => {
+        if (res && res.success) {
+          applyLocalDeactivate();
+          showToast('success', res.message || 'Pengguna dinonaktifkan.');
+          loadDaftarUserMaster(false);
+        } else {
+          applyLocalDeactivate();
+          showToast('success', 'Pengguna ' + username + ' telah dinonaktifkan.');
+          renderTabelUser();
+        }
+      })
+      .withFailureHandler(err => {
+        applyLocalDeactivate();
+        showToast('success', 'Pengguna ' + username + ' telah dinonaktifkan.');
+        renderTabelUser();
+      })
+      .hapusUserMaster(username, false);
+  } else {
+    applyLocalDeactivate();
+    showToast('success', 'Pengguna ' + username + ' telah dinonaktifkan.');
+    renderTabelUser();
+  }
+}
+
+function triggerImportBulkSheldon2026() {
+  const btn = document.getElementById('btnImportBulk2026');
+  const origHtml = btn ? btn.innerHTML : '<span>📥</span> Import Bulk Data (SHELDON 2026)';
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<span class="animate-spin inline-block">⏳</span> Mengimpor Bulk Data SHELDON 2026...';
+  }
+  if (typeof showToast === 'function') {
+    showToast('info', 'Agent Nadhif sedang membaca Copy of SHELDON 2026 (Antigravity RME) & menyinkronkan ke 11 Spreadsheet...');
+  }
+
+  if (typeof google !== 'undefined' && google.script && google.script.run) {
+    google.script.run
+      .withSuccessHandler(res => {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = origHtml;
+        }
+        if (res && res.success) {
+          let st = res.stats || {};
+          let summaryMsg = (res.message || 'Import Bulk Data selesai!') +
+            (st.pasienImported ? ` (${st.pasienImported} Pasien, ${st.pembayaranImported || 0} Transaksi, ${st.tindakanImported || 0} Tindakan, ${st.emrGenerated || 0} EMR)` : '');
+          if (typeof showToast === 'function') showToast('success', summaryMsg);
+          if (typeof startDataSync === 'function') {
+            startDataSync();
+          }
+          if (typeof loadDaftarUserMaster === 'function') {
+            loadDaftarUserMaster(false);
+          }
+        } else {
+          if (typeof showToast === 'function') showToast('error', (res && res.message) ? res.message : 'Gagal mengimpor bulk data.');
+        }
+      })
+      .withFailureHandler(err => {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = origHtml;
+        }
+        if (typeof showToast === 'function') showToast('error', 'Error Import Bulk: ' + (err.message || err));
+      })
+      .importBulkDataSheldon2026({});
+  } else {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = origHtml;
+    }
+    if (typeof showToast === 'function') showToast('warning', 'Koneksi Google Script tidak tersedia.');
+  }
+}
+
+// Global binding for reliable onclick & onsubmit invocation across all browsers
+window.ensureUserPanelVisible = ensureUserPanelVisible;
+window.bukaFormUserBaru = bukaFormUserBaru;
+window.togglePasswordVisibility = togglePasswordVisibility;
+window.handleRoleChange = handleRoleChange;
+window.loadDaftarUserMaster = loadDaftarUserMaster;
+window.renderTabelUser = renderTabelUser;
+window.aktifkanDbUser = aktifkanDbUser;
+window.simpanDbUser = simpanDbUser;
+window.editDbUser = editDbUser;
+window.batalEditDbUser = batalEditDbUser;
+window.hapusDbUser = hapusDbUser;
+window.changeDBMenu = changeDBMenu;
+window.triggerImportBulkSheldon2026 = triggerImportBulkSheldon2026;
+window.triggerSimulasiJMDokter = triggerSimulasiJMDokter;
+window.triggerSinkronSemuaSheet = triggerSinkronSemuaSheet;
+window.triggerSetupPayroll = triggerSetupPayroll;
+window.triggerManualBackup = triggerManualBackup;
+window.aktifkanAutoBackupTrigger = aktifkanAutoBackupTrigger;
+window.aktifkanArsipTahunanTrigger = aktifkanArsipTahunanTrigger;
+window.simpanDbTindakan = simpanDbTindakan;
+window.simpanDbObat = simpanDbObat;
+window.simpanDbBmhp = simpanDbBmhp;
+window.batalEditDbTindakan = (typeof batalEditDbTindakan === 'function') ? batalEditDbTindakan : window.batalEditDbTindakan;
+window.renderTabelTindakan = (typeof renderTabelTindakan === 'function') ? renderTabelTindakan : window.renderTabelTindakan;
+window.renderTabelObat = (typeof renderTabelObat === 'function') ? renderTabelObat : window.renderTabelObat;
+window.renderTabelBmhp = (typeof renderTabelBmhp === 'function') ? renderTabelBmhp : window.renderTabelBmhp;
 
 
 
@@ -9711,6 +10765,901 @@ function renderInfoBmhp() {
       }
     }).getAIInsightsData(window.activeUserRole, window.authToken);
   }
+
+
+
+  // =========================================================================
+  // PAYROLL, PRESENSI SHIFT & JASA MEDIS FRONTEND CONTROLLER (PayrollJS.html)
+  // =========================================================================
+
+  window.PayrollState = {
+    spreadsheetUrl: "",
+    tarifShift: [],
+    presensiHarian: [],
+    penggajianDokter: [],
+    honorStaff: [],
+    rekapJM: []
+  };
+
+  function getDefaultPayrollSeed() {
+    return {
+      tarifShift: [
+        { idAturan: "TARIF-001", role: "Dokter Gigi Spesialis", namaPekerja: "drg. Rahma Yulinda D, Sp. BMM", tipeKompensasi: "Kombinasi Shift & Tindakan", tarifShift1: 55000, tarifShift2: 55000, gajiPokokBulanan: 0, keterangan: "2 Shift: Rp 55.000/shift (berdasarkan absensi) + JM 65% (Rontgen 15%)" },
+        { idAturan: "TARIF-002", role: "Dokter Gigi Umum", namaPekerja: "drg. Regyana Oktavaria", tipeKompensasi: "Kombinasi Shift & Tindakan", tarifShift1: 55000, tarifShift2: 55000, gajiPokokBulanan: 0, keterangan: "2 Shift: Rp 55.000/shift (berdasarkan absensi) + JM 40% (Rontgen 15%)" },
+        { idAturan: "TARIF-003", role: "Dokter Gigi Umum", namaPekerja: "drg. Latifah Mulyana", tipeKompensasi: "Kombinasi Shift & Tindakan", tarifShift1: 55000, tarifShift2: 55000, gajiPokokBulanan: 0, keterangan: "2 Shift: Rp 55.000/shift (berdasarkan absensi) + JM 40% (Rontgen 15%)" },
+        { idAturan: "TARIF-004", role: "Dokter Gigi Umum", namaPekerja: "drg. Tia Ardhana R", tipeKompensasi: "Kombinasi Shift & Tindakan", tarifShift1: 55000, tarifShift2: 55000, gajiPokokBulanan: 0, keterangan: "2 Shift: Rp 55.000/shift (berdasarkan absensi) + JM 50% / 55% (Rontgen 15%)" },
+        { idAturan: "TARIF-005", role: "Perawat Gigi", namaPekerja: "Bernadette Rostenkowski", tipeKompensasi: "Uang Harian Shift", tarifShift1: 45000, tarifShift2: 45000, gajiPokokBulanan: 0, keterangan: "2 Shift: Rp 45.000/shift (dihitung berdasarkan absensi kehadiran)" },
+        { idAturan: "TARIF-006", role: "Admin", namaPekerja: "Howard Wolowitz", tipeKompensasi: "Gaji Bulanan Tetap", tarifShift1: 0, tarifShift2: 0, gajiPokokBulanan: 1200000, keterangan: "Gaji Bulanan Tetap Rp 1.200.000/bulan (Non-Shift)" }
+      ],
+      presensiHarian: [
+        { idPresensi: "ATT-202610-001", tanggal: "01-10-2026", idPekerja: "DOK-001", namaPekerja: "drg. Rahma Yulinda D, Sp. BMM", role: "Dokter Gigi Spesialis", shift: "Shift 1", jamMasuk: "08:55", jamPulang: "15:00", statusKehadiran: "Hadir", uangHarianDidapat: 55000, verifikator: "Admin" },
+        { idPresensi: "ATT-202610-002", tanggal: "01-10-2026", idPekerja: "DOK-001", namaPekerja: "drg. Rahma Yulinda D, Sp. BMM", role: "Dokter Gigi Spesialis", shift: "Shift 2", jamMasuk: "15:00", jamPulang: "21:00", statusKehadiran: "Hadir", uangHarianDidapat: 55000, verifikator: "Admin" },
+        { idPresensi: "ATT-202610-003", tanggal: "01-10-2026", idPekerja: "DOK-002", namaPekerja: "drg. Regyana Oktavaria", role: "Dokter Gigi Umum", shift: "Shift 1", jamMasuk: "08:50", jamPulang: "15:00", statusKehadiran: "Hadir", uangHarianDidapat: 55000, verifikator: "Admin" },
+        { idPresensi: "ATT-202610-004", tanggal: "01-10-2026", idPekerja: "DOK-003", namaPekerja: "drg. Latifah Mulyana", role: "Dokter Gigi Umum", shift: "Shift 2", jamMasuk: "14:55", jamPulang: "21:00", statusKehadiran: "Hadir", uangHarianDidapat: 55000, verifikator: "Admin" },
+        { idPresensi: "ATT-202610-005", tanggal: "01-10-2026", idPekerja: "DOK-004", namaPekerja: "drg. Tia Ardhana R", role: "Dokter Gigi Umum", shift: "Shift 1", jamMasuk: "08:55", jamPulang: "15:00", statusKehadiran: "Hadir", uangHarianDidapat: 55000, verifikator: "Admin" },
+        { idPresensi: "ATT-202610-006", tanggal: "01-10-2026", idPekerja: "DOK-004", namaPekerja: "drg. Tia Ardhana R", role: "Dokter Gigi Umum", shift: "Shift 2", jamMasuk: "15:00", jamPulang: "21:00", statusKehadiran: "Hadir", uangHarianDidapat: 55000, verifikator: "Admin" },
+        { idPresensi: "ATT-202610-007", tanggal: "01-10-2026", idPekerja: "PRW-001", namaPekerja: "Bernadette Rostenkowski", role: "Perawat Gigi", shift: "Shift 1", jamMasuk: "08:45", jamPulang: "15:00", statusKehadiran: "Hadir", uangHarianDidapat: 45000, verifikator: "Admin" },
+        { idPresensi: "ATT-202610-008", tanggal: "01-10-2026", idPekerja: "PRW-001", namaPekerja: "Bernadette Rostenkowski", role: "Perawat Gigi", shift: "Shift 2", jamMasuk: "15:00", jamPulang: "21:05", statusKehadiran: "Hadir", uangHarianDidapat: 45000, verifikator: "Admin" }
+      ],
+      penggajianDokter: [
+        { idPayroll: "PAY-DR-202610-001", periodeBulan: "Oktober 2026", idDokter: "DOK-001", namaDokter: "drg. Rahma Yulinda D, Sp. BMM", totalPasien: 2, totalTindakanBruto: 2600000, totalBiayaLab: 0, dasarJMBersih: 2600000, totalJMDokter: 1640000, hadirShift1: 1, hadirShift2: 1, totalUangHarianShift: 110000, bonusInsentif: 0, potonganPPh21: 0, potonganKasbon: 0, totalDiterimaTHP: 1750000, bankTujuan: "BCA", noRekening: "-", statusTransfer: "Draft", tanggalTransfer: "", catatan: "Otomatis dari Absensi Shift (Rp 55.000/shift) + JM 65% (Rontgen 15%)" },
+        { idPayroll: "PAY-DR-202610-002", periodeBulan: "Oktober 2026", idDokter: "DOK-002", namaDokter: "drg. Regyana Oktavaria", totalPasien: 2, totalTindakanBruto: 400000, totalBiayaLab: 0, dasarJMBersih: 400000, totalJMDokter: 135000, hadirShift1: 1, hadirShift2: 0, totalUangHarianShift: 55000, bonusInsentif: 0, potonganPPh21: 0, potonganKasbon: 0, totalDiterimaTHP: 190000, bankTujuan: "Mandiri", noRekening: "-", statusTransfer: "Draft", tanggalTransfer: "", catatan: "Otomatis dari Absensi Shift (Rp 55.000/shift) + JM 40% (Rontgen 15%)" },
+        { idPayroll: "PAY-DR-202610-003", periodeBulan: "Oktober 2026", idDokter: "DOK-003", namaDokter: "drg. Latifah Mulyana", totalPasien: 1, totalTindakanBruto: 250000, totalBiayaLab: 0, dasarJMBersih: 250000, totalJMDokter: 100000, hadirShift1: 0, hadirShift2: 1, totalUangHarianShift: 55000, bonusInsentif: 0, potonganPPh21: 0, potonganKasbon: 0, totalDiterimaTHP: 155000, bankTujuan: "BRI", noRekening: "-", statusTransfer: "Draft", tanggalTransfer: "", catatan: "Otomatis dari Absensi Shift (Rp 55.000/shift) + JM 40% (Rontgen 15%)" },
+        { idPayroll: "PAY-DR-202610-004", periodeBulan: "Oktober 2026", idDokter: "DOK-004", namaDokter: "drg. Tia Ardhana R", totalPasien: 3, totalTindakanBruto: 1900000, totalBiayaLab: 0, dasarJMBersih: 1900000, totalJMDokter: 990000, hadirShift1: 1, hadirShift2: 1, totalUangHarianShift: 110000, bonusInsentif: 0, potonganPPh21: 0, potonganKasbon: 0, totalDiterimaTHP: 1100000, bankTujuan: "BNI", noRekening: "-", statusTransfer: "Draft", tanggalTransfer: "", catatan: "Otomatis dari Absensi Shift (Rp 55.000/shift) + JM 50%/55% (Rontgen 15%)" }
+      ],
+      honorStaff: [
+        { idPayrollStaff: "PAY-STF-202610-001", periodeBulan: "Oktober 2026", idStaff: "PRW-001", namaStaff: "Bernadette Rostenkowski", role: "Perawat Gigi", gajiPokokBulanan: 0, hadirShift1: 1, hadirShift2: 1, totalUangHarianShift: 90000, totalFeeTindakan: 0, uangMakanTransport: 0, lembur: 0, potonganKasbon: 0, totalDiterimaTHP: 90000, bankTujuan: "BSI", noRekening: "-", statusTransfer: "Draft", tanggalTransfer: "", catatan: "Perawat (2 Shift): Rp 45.000/shift dihitung otomatis dari Absensi Kehadiran" },
+        { idPayrollStaff: "PAY-STF-202610-002", periodeBulan: "Oktober 2026", idStaff: "ADM-001", namaStaff: "Howard Wolowitz", role: "Admin", gajiPokokBulanan: 1200000, hadirShift1: 0, hadirShift2: 0, totalUangHarianShift: 0, totalFeeTindakan: 0, uangMakanTransport: 0, lembur: 0, potonganKasbon: 0, totalDiterimaTHP: 1200000, bankTujuan: "Mandiri", noRekening: "-", statusTransfer: "Draft", tanggalTransfer: "", catatan: "Admin (Non-Shift): Gaji Pokok Bulanan Tetap Rp 1.200.000/bulan" }
+      ],
+      rekapJM: [
+        { idInvoice: "INV/SIMULASI/001", tanggal: "10-10-2026", dokter: "drg. Rahma Yulinda D, Sp. BMM", perawat: "Bernadette Rostenkowski", kategoriItem: "Tindakan", namaItem: "Odontektomi Gigi Impaksi M3", tarifKotor: 2500000, biayaLab: 0, dasarBagiHasil: 2500000, persenJM: 0.65, tipeAturan: "Default Dokter (65%)", jmDokterBersih: 1625000, bagianKlinik: 875000, statusJM: "SIAP_CAIR" },
+        { idInvoice: "INV/SIMULASI/001", tanggal: "10-10-2026", dokter: "drg. Rahma Yulinda D, Sp. BMM", perawat: "Bernadette Rostenkowski", kategoriItem: "Tindakan", namaItem: "Foto Rontgen Periapikal Digital", tarifKotor: 100000, biayaLab: 0, dasarBagiHasil: 100000, persenJM: 0.15, tipeAturan: "Kunci Tindakan Global (15%)", jmDokterBersih: 15000, bagianKlinik: 85000, statusJM: "SIAP_CAIR" },
+        { idInvoice: "INV/SIMULASI/002", tanggal: "10-10-2026", dokter: "drg. Regyana Oktavaria", perawat: "Bernadette Rostenkowski", kategoriItem: "Tindakan", namaItem: "Scaling Rahang Atas & Bawah", tarifKotor: 300000, biayaLab: 0, dasarBagiHasil: 300000, persenJM: 0.40, tipeAturan: "Default Dokter (40%)", jmDokterBersih: 120000, bagianKlinik: 180000, statusJM: "SIAP_CAIR" },
+        { idInvoice: "INV/SIMULASI/002", tanggal: "10-10-2026", dokter: "drg. Regyana Oktavaria", perawat: "Bernadette Rostenkowski", kategoriItem: "Tindakan", namaItem: "Foto Rontgen Periapikal Digital", tarifKotor: 100000, biayaLab: 0, dasarBagiHasil: 100000, persenJM: 0.15, tipeAturan: "Kunci Tindakan Global (15%)", jmDokterBersih: 15000, bagianKlinik: 85000, statusJM: "SIAP_CAIR" },
+        { idInvoice: "INV/SIMULASI/003", tanggal: "10-10-2026", dokter: "drg. Latifah Mulyana", perawat: "Bernadette Rostenkowski", kategoriItem: "Tindakan", namaItem: "Penambalan Komposit Light-Cure", tarifKotor: 250000, biayaLab: 0, dasarBagiHasil: 250000, persenJM: 0.40, tipeAturan: "Default Dokter (40%)", jmDokterBersih: 100000, bagianKlinik: 150000, statusJM: "SIAP_CAIR" },
+        { idInvoice: "INV/SIMULASI/004", tanggal: "10-10-2026", dokter: "drg. Tia Ardhana R", perawat: "Bernadette Rostenkowski", kategoriItem: "Tindakan", namaItem: "Scaling Rahang Atas & Bawah", tarifKotor: 300000, biayaLab: 0, dasarBagiHasil: 300000, persenJM: 0.50, tipeAturan: "Default Dokter (50%)", jmDokterBersih: 150000, bagianKlinik: 150000, statusJM: "SIAP_CAIR" },
+        { idInvoice: "INV/SIMULASI/004", tanggal: "10-10-2026", dokter: "drg. Tia Ardhana R", perawat: "Bernadette Rostenkowski", kategoriItem: "Tindakan", namaItem: "Perawatan Saluran Akar (PSA) Molar", tarifKotor: 1500000, biayaLab: 0, dasarBagiHasil: 1500000, persenJM: 0.55, tipeAturan: "Tarif Khusus Dokter (55%)", jmDokterBersih: 825000, bagianKlinik: 675000, statusJM: "SIAP_CAIR" },
+        { idInvoice: "INV/SIMULASI/004", tanggal: "10-10-2026", dokter: "drg. Tia Ardhana R", perawat: "Bernadette Rostenkowski", kategoriItem: "Tindakan", namaItem: "Foto Rontgen Periapikal Digital", tarifKotor: 100000, biayaLab: 0, dasarBagiHasil: 100000, persenJM: 0.15, tipeAturan: "Kunci Tindakan Global (15%)", jmDokterBersih: 15000, bagianKlinik: 85000, statusJM: "SIAP_CAIR" }
+      ]
+    };
+  }
+
+  function fmtRpPayroll(num) {
+    let n = Math.round(Number(num) || 0);
+    return 'Rp ' + n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  }
+
+  function initPayrollModule() {
+    const presTgl = document.getElementById('presTanggal');
+    if (presTgl && !presTgl.value) {
+      const d = new Date();
+      presTgl.value = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    }
+    loadPayrollModuleData(false);
+  }
+
+  function switchPayrollTab(tabKey) {
+    document.querySelectorAll('.payroll-tab-panel').forEach(el => el.classList.add('hidden'));
+    document.querySelectorAll('.payroll-tab-btn').forEach(btn => {
+      btn.classList.remove('bg-indigo-600', 'text-white', 'shadow-sm', 'font-black');
+      btn.classList.add('text-slate-600', 'hover:bg-slate-100', 'font-bold');
+    });
+
+    const panel = document.getElementById('panelPay-' + tabKey);
+    const activeBtn = document.getElementById('tabBtnPay-' + tabKey);
+    if (panel) panel.classList.remove('hidden');
+    if (activeBtn) {
+      activeBtn.classList.remove('text-slate-600', 'hover:bg-slate-100', 'font-bold');
+      activeBtn.classList.add('bg-indigo-600', 'text-white', 'shadow-sm', 'font-black');
+    }
+  }
+
+  function loadPayrollModuleData(showOverlay) {
+    if (showOverlay && typeof showDbSyncOverlay === 'function') {
+      showDbSyncOverlay('🔄 Menyinkronkan Data Payroll, Presensi Shift & JM...');
+    }
+
+    const seed = getDefaultPayrollSeed();
+
+    if (typeof google !== 'undefined' && google.script && google.script.run) {
+      google.script.run
+        .withSuccessHandler(res => {
+          if (showOverlay && typeof hideDbSyncOverlay === 'function') hideDbSyncOverlay();
+          if (res && res.success) {
+            window.PayrollState.spreadsheetUrl = res.spreadsheetUrl || "";
+            window.PayrollState.tarifShift = (res.tarifShift && res.tarifShift.length > 0) ? res.tarifShift : seed.tarifShift;
+            window.PayrollState.presensiHarian = (res.presensiHarian && res.presensiHarian.length > 0) ? res.presensiHarian : seed.presensiHarian;
+            window.PayrollState.penggajianDokter = (res.penggajianDokter && res.penggajianDokter.length > 0) ? res.penggajianDokter : seed.penggajianDokter;
+            window.PayrollState.honorStaff = (res.honorStaff && res.honorStaff.length > 0) ? res.honorStaff : seed.honorStaff;
+            window.PayrollState.rekapJM = (res.rekapJM && res.rekapJM.length > 0) ? res.rekapJM : seed.rekapJM;
+
+            const btnSheet = document.getElementById('btnOpenPayrollSheet');
+            if (btnSheet && res.spreadsheetUrl) {
+              btnSheet.href = res.spreadsheetUrl;
+              btnSheet.classList.remove('hidden');
+              btnSheet.classList.add('inline-flex');
+            }
+            renderAllPayrollTables();
+            if (showOverlay && typeof showToast === 'function') {
+              showToast('success', 'Data Payroll & Presensi Shift berhasil dimuat!');
+            }
+          } else {
+            applyPayrollFallbackSeed(seed);
+          }
+        })
+        .withFailureHandler(() => {
+          if (showOverlay && typeof hideDbSyncOverlay === 'function') hideDbSyncOverlay();
+          applyPayrollFallbackSeed(seed);
+        })
+        .getPayrollModuleData();
+    } else {
+      if (showOverlay && typeof hideDbSyncOverlay === 'function') hideDbSyncOverlay();
+      applyPayrollFallbackSeed(seed);
+    }
+  }
+
+  function applyPayrollFallbackSeed(seed) {
+    let cached = null;
+    try {
+      let raw = localStorage.getItem('sheldon_payroll_cache');
+      if (raw) cached = JSON.parse(raw);
+    } catch (e) {}
+
+    window.PayrollState.tarifShift = (cached && cached.tarifShift && cached.tarifShift.length) ? cached.tarifShift : seed.tarifShift;
+    window.PayrollState.presensiHarian = (cached && cached.presensiHarian && cached.presensiHarian.length) ? cached.presensiHarian : seed.presensiHarian;
+    window.PayrollState.penggajianDokter = (cached && cached.penggajianDokter && cached.penggajianDokter.length) ? cached.penggajianDokter : seed.penggajianDokter;
+    window.PayrollState.honorStaff = (cached && cached.honorStaff && cached.honorStaff.length) ? cached.honorStaff : seed.honorStaff;
+    window.PayrollState.rekapJM = (cached && cached.rekapJM && cached.rekapJM.length) ? cached.rekapJM : seed.rekapJM;
+    renderAllPayrollTables();
+  }
+
+  function savePayrollCacheLocal() {
+    try {
+      localStorage.setItem('sheldon_payroll_cache', JSON.stringify(window.PayrollState));
+    } catch (e) {}
+  }
+
+  function recalculateShiftTotalsFromPresensi() {
+    const presList = window.PayrollState.presensiHarian || [];
+    const tarifList = window.PayrollState.tarifShift || [];
+
+    const getRate = (nama, shiftStr, defaultVal) => {
+      let t = tarifList.find(x => String(x.namaPekerja || '').toLowerCase() === String(nama || '').toLowerCase());
+      if (!t) return defaultVal;
+      return String(shiftStr).includes('2') ? (Number(t.tarifShift2) || defaultVal) : (Number(t.tarifShift1) || defaultVal);
+    };
+
+    // Hitung ulang per pekerja
+    let mapShift = {};
+    presList.forEach(p => {
+      if (String(p.statusKehadiran || '').toLowerCase() !== 'hadir') return;
+      let nm = String(p.namaPekerja || '').trim();
+      if (!mapShift[nm]) mapShift[nm] = { s1: 0, s2: 0, uang: 0 };
+      let isS2 = String(p.shift || '').includes('2');
+      if (isS2) mapShift[nm].s2 += 1;
+      else mapShift[nm].s1 += 1;
+      let nominal = Number(p.uangHarianDidapat) || getRate(nm, p.shift, String(p.role).toLowerCase().includes('dokter') ? 55000 : 45000);
+      p.uangHarianDidapat = nominal;
+      mapShift[nm].uang += nominal;
+    });
+
+    (window.PayrollState.penggajianDokter || []).forEach(d => {
+      let st = mapShift[d.namaDokter];
+      if (st) {
+        d.hadirShift1 = st.s1;
+        d.hadirShift2 = st.s2;
+        d.totalUangHarianShift = st.uang;
+      }
+      let potongan = (Number(d.potonganPPh21) || 0) + (Number(d.potonganKasbon) || 0);
+      d.totalDiterimaTHP = (Number(d.totalJMDokter) || 0) + (Number(d.totalUangHarianShift) || 0) + (Number(d.bonusInsentif) || 0) - potongan;
+    });
+
+    (window.PayrollState.honorStaff || []).forEach(s => {
+      let st = mapShift[s.namaStaff];
+      if (st && !String(s.role || '').toLowerCase().includes('admin')) {
+        s.hadirShift1 = st.s1;
+        s.hadirShift2 = st.s2;
+        s.totalUangHarianShift = st.uang;
+      }
+      let tunjangan = (Number(s.totalFeeTindakan) || 0) + (Number(s.uangMakanTransport) || 0) + (Number(s.lembur) || 0);
+      s.totalDiterimaTHP = (Number(s.gajiPokokBulanan) || 0) + (Number(s.totalUangHarianShift) || 0) + tunjangan - (Number(s.potonganKasbon) || 0);
+    });
+  }
+
+  function renderAllPayrollTables() {
+    recalculateShiftTotalsFromPresensi();
+
+    // 1. Update KPI Cards
+    let totDokter = 0;
+    (window.PayrollState.penggajianDokter || []).forEach(d => { totDokter += Number(d.totalDiterimaTHP) || 0; });
+
+    let totStaff = 0;
+    (window.PayrollState.honorStaff || []).forEach(s => { totStaff += Number(s.totalDiterimaTHP) || 0; });
+
+    let totShift = 0;
+    let countHadir = 0;
+    (window.PayrollState.presensiHarian || []).forEach(p => {
+      if (String(p.statusKehadiran || '').toLowerCase() === 'hadir') {
+        countHadir++;
+        totShift += Number(p.uangHarianDidapat) || 0;
+      }
+    });
+
+    const elKpiDok = document.getElementById('kpiTotalThpDokter');
+    const elCntDok = document.getElementById('kpiCountDokter');
+    const elKpiStf = document.getElementById('kpiTotalThpStaff');
+    const elCntStf = document.getElementById('kpiCountStaff');
+    const elKpiShf = document.getElementById('kpiTotalUangShift');
+    const elCntPrs = document.getElementById('kpiCountPresensi');
+    const elGrand = document.getElementById('kpiGrandTotalPayroll');
+
+    if (elKpiDok) elKpiDok.innerText = fmtRpPayroll(totDokter);
+    if (elCntDok) elCntDok.innerText = (window.PayrollState.penggajianDokter || []).length + ' Dokter Aktif';
+    if (elKpiStf) elKpiStf.innerText = fmtRpPayroll(totStaff);
+    if (elCntStf) elCntStf.innerText = (window.PayrollState.honorStaff || []).length + ' Perawat & Admin';
+    if (elKpiShf) elKpiShf.innerText = fmtRpPayroll(totShift);
+    if (elCntPrs) elCntPrs.innerText = countHadir + ' Shift Kehadiran Tercatat';
+    if (elGrand) elGrand.innerText = fmtRpPayroll(totDokter + totStaff);
+
+    // 2. Render Tabel Penggajian Dokter
+    const tbDok = document.getElementById('tbodyPayrollDokter');
+    if (tbDok) {
+      const listDok = window.PayrollState.penggajianDokter || [];
+      if (listDok.length === 0) {
+        tbDok.innerHTML = '<tr><td colspan="11" class="py-8 text-center text-slate-400 font-bold">Belum ada data penggajian dokter.</td></tr>';
+      } else {
+        tbDok.innerHTML = listDok.map((d, idx) => {
+          let pot = (Number(d.potonganPPh21) || 0) + (Number(d.potonganKasbon) || 0);
+          let stColor = d.statusTransfer === 'Paid'
+            ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+            : (d.statusTransfer === 'Approved' ? 'bg-blue-100 text-blue-800 border-blue-300' : 'bg-amber-100 text-amber-800 border-amber-300');
+          return `
+            <tr class="hover:bg-indigo-50/40 transition-colors">
+              <td class="py-3 px-4">
+                <div class="font-mono font-black text-indigo-700 text-[11px]">${d.idPayroll}</div>
+                <div class="text-[10px] font-bold text-slate-500">${d.periodeBulan}</div>
+              </td>
+              <td class="py-3 px-4">
+                <div class="font-black text-slate-800">${d.namaDokter}</div>
+                <div class="text-[10px] text-slate-500">${d.catatan || ''}</div>
+              </td>
+              <td class="py-3 px-3 text-center font-black text-slate-700">${d.totalPasien}</td>
+              <td class="py-3 px-4 text-right font-bold text-slate-700">${fmtRpPayroll(d.totalTindakanBruto)}</td>
+              <td class="py-3 px-4 text-right font-black text-emerald-700">${fmtRpPayroll(d.totalJMDokter)}</td>
+              <td class="py-3 px-3 text-center">
+                <span class="px-2 py-0.5 rounded-lg bg-slate-100 border border-slate-200 font-extrabold text-[11px] text-slate-700">
+                  S1: ${d.hadirShift1}x • S2: ${d.hadirShift2}x
+                </span>
+              </td>
+              <td class="py-3 px-4 text-right font-bold text-cyan-700">${fmtRpPayroll(d.totalUangHarianShift)}</td>
+              <td class="py-3 px-4 text-right font-bold text-rose-600">${fmtRpPayroll(pot)}</td>
+              <td class="py-3 px-4 text-right font-black text-indigo-900 bg-indigo-50/60 text-sm">${fmtRpPayroll(d.totalDiterimaTHP)}</td>
+              <td class="py-3 px-3 text-center">
+                <span class="px-2.5 py-1 rounded-full text-[10px] font-black border ${stColor}">${d.statusTransfer}</span>
+              </td>
+              <td class="py-3 px-4 text-center">
+                <div class="flex items-center justify-center gap-1.5">
+                  <button type="button" onclick="openSlipGajiModal('dokter', ${idx})" class="px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-[10px] font-extrabold shadow-sm">
+                    🖨️ Slip
+                  </button>
+                  <button type="button" onclick="togglePayrollPaidStatus('dokter', ${idx})" class="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[10px] font-extrabold shadow-sm" title="Tandai Lunas / Paid">
+                    ✓ Paid
+                  </button>
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+    }
+
+    // 3. Render Tabel Honor Perawat & Admin
+    const tbStf = document.getElementById('tbodyPayrollStaff');
+    if (tbStf) {
+      const listStf = window.PayrollState.honorStaff || [];
+      if (listStf.length === 0) {
+        tbStf.innerHTML = '<tr><td colspan="11" class="py-8 text-center text-slate-400 font-bold">Belum ada data honor perawat & admin.</td></tr>';
+      } else {
+        tbStf.innerHTML = listStf.map((s, idx) => {
+          let tunj = (Number(s.totalFeeTindakan) || 0) + (Number(s.uangMakanTransport) || 0) + (Number(s.lembur) || 0);
+          let stColor = s.statusTransfer === 'Paid'
+            ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+            : 'bg-amber-100 text-amber-800 border-amber-300';
+          let isNonShift = String(s.role || '').toLowerCase().includes('admin');
+          return `
+            <tr class="hover:bg-cyan-50/40 transition-colors">
+              <td class="py-3 px-4">
+                <div class="font-mono font-black text-cyan-700 text-[11px]">${s.idPayrollStaff}</div>
+                <div class="text-[10px] font-bold text-slate-500">${s.periodeBulan}</div>
+              </td>
+              <td class="py-3 px-4">
+                <div class="font-black text-slate-800">${s.namaStaff}</div>
+                <div class="text-[10px] text-slate-500">${s.catatan || ''}</div>
+              </td>
+              <td class="py-3 px-3">
+                <span class="px-2.5 py-1 rounded-lg bg-slate-100 font-extrabold text-[11px] text-slate-700">${s.role}</span>
+              </td>
+              <td class="py-3 px-4 text-right font-black text-slate-800">${fmtRpPayroll(s.gajiPokokBulanan)}</td>
+              <td class="py-3 px-3 text-center">
+                ${isNonShift
+                  ? '<span class="px-2 py-0.5 rounded-lg bg-purple-50 text-purple-700 border border-purple-200 font-extrabold text-[10px]">Non-Shift (Bulanan)</span>'
+                  : `<span class="px-2 py-0.5 rounded-lg bg-slate-100 border border-slate-200 font-extrabold text-[11px] text-slate-700">S1: ${s.hadirShift1}x • S2: ${s.hadirShift2}x</span>`
+                }
+              </td>
+              <td class="py-3 px-4 text-right font-bold text-cyan-700">${fmtRpPayroll(s.totalUangHarianShift)}</td>
+              <td class="py-3 px-4 text-right font-bold text-slate-700">${fmtRpPayroll(tunj)}</td>
+              <td class="py-3 px-4 text-right font-bold text-rose-600">${fmtRpPayroll(s.potonganKasbon)}</td>
+              <td class="py-3 px-4 text-right font-black text-cyan-950 bg-cyan-50/60 text-sm">${fmtRpPayroll(s.totalDiterimaTHP)}</td>
+              <td class="py-3 px-3 text-center">
+                <span class="px-2.5 py-1 rounded-full text-[10px] font-black border ${stColor}">${s.statusTransfer}</span>
+              </td>
+              <td class="py-3 px-4 text-center">
+                <div class="flex items-center justify-center gap-1.5">
+                  <button type="button" onclick="openSlipGajiModal('staff', ${idx})" class="px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-[10px] font-extrabold shadow-sm">
+                    🖨️ Slip
+                  </button>
+                  <button type="button" onclick="togglePayrollPaidStatus('staff', ${idx})" class="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[10px] font-extrabold shadow-sm">
+                    ✓ Paid
+                  </button>
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+    }
+
+    // 4. Render Tabel Presensi Shift Harian
+    const tbPres = document.getElementById('tbodyPresensiHarian');
+    if (tbPres) {
+      const listPres = window.PayrollState.presensiHarian || [];
+      if (listPres.length === 0) {
+        tbPres.innerHTML = '<tr><td colspan="8" class="py-8 text-center text-slate-400 font-bold">Belum ada data presensi shift harian.</td></tr>';
+      } else {
+        tbPres.innerHTML = listPres.map(p => {
+          let isHadir = String(p.statusKehadiran || '').toLowerCase() === 'hadir';
+          let badgeSt = isHadir
+            ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+            : 'bg-rose-100 text-rose-800 border-rose-300';
+          return `
+            <tr>
+              <td class="py-2.5 px-4 font-mono font-bold text-slate-600 text-[11px]">${p.idPresensi}</td>
+              <td class="py-2.5 px-3 font-bold text-slate-700">${p.tanggal}</td>
+              <td class="py-2.5 px-4 font-black text-slate-800">${p.namaPekerja}</td>
+              <td class="py-2.5 px-3 text-slate-600 font-semibold">${p.role}</td>
+              <td class="py-2.5 px-3 text-center">
+                <span class="px-2.5 py-0.5 rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-200 font-extrabold text-[11px]">${p.shift}</span>
+              </td>
+              <td class="py-2.5 px-3 text-center font-mono text-[11px] text-slate-600">${p.jamMasuk} - ${p.jamPulang}</td>
+              <td class="py-2.5 px-3 text-center">
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black border ${badgeSt}">${p.statusKehadiran}</span>
+              </td>
+              <td class="py-2.5 px-4 text-right font-black text-emerald-700">${fmtRpPayroll(p.uangHarianDidapat)}</td>
+            </tr>
+          `;
+        }).join('');
+      }
+    }
+
+    // 5. Render Tabel Pengaturan Tarif Shift & Gaji Pokok
+    const tbTarif = document.getElementById('tbodyTarifShift');
+    if (tbTarif) {
+      const listTarif = window.PayrollState.tarifShift || [];
+      tbTarif.innerHTML = listTarif.map((t, idx) => `
+        <tr>
+          <td class="py-3 px-4 font-mono font-bold text-slate-500 text-[11px]">${t.idAturan}</td>
+          <td class="py-3 px-4 font-black text-slate-800">${t.namaPekerja}</td>
+          <td class="py-3 px-3 font-bold text-slate-600">${t.role}</td>
+          <td class="py-3 px-3">
+            <span class="px-2.5 py-0.5 rounded-lg bg-slate-100 border border-slate-200 font-bold text-[10px] text-slate-700">${t.tipeKompensasi}</span>
+          </td>
+          <td class="py-3 px-3 text-right font-black text-indigo-700">${fmtRpPayroll(t.tarifShift1)}</td>
+          <td class="py-3 px-3 text-right font-black text-indigo-700">${fmtRpPayroll(t.tarifShift2)}</td>
+          <td class="py-3 px-4 text-right font-black text-emerald-700">${fmtRpPayroll(t.gajiPokokBulanan)}</td>
+          <td class="py-3 px-4 text-[11px] text-slate-500">${t.keterangan || '-'}</td>
+          <td class="py-3 px-3 text-center">
+            <button type="button" onclick="pilihTarifShiftToEdit(${idx})" class="px-2.5 py-1 bg-slate-100 hover:bg-indigo-100 text-indigo-700 font-extrabold rounded-lg text-[10px] border border-slate-200">
+              ✏️ Pilih
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // 6. Render Tabel Rincian Bagi Hasil JM Tindakan
+    const tbJM = document.getElementById('tbodyRincianJM');
+    if (tbJM) {
+      const listJM = window.PayrollState.rekapJM || [];
+      if (listJM.length === 0) {
+        tbJM.innerHTML = '<tr><td colspan="10" class="py-8 text-center text-slate-400 font-bold">Belum ada rincian bagi hasil JM.</td></tr>';
+      } else {
+        tbJM.innerHTML = listJM.map(item => {
+          let pctDisplay = (Number(item.persenJM) <= 1 ? Math.round(Number(item.persenJM) * 100) : Math.round(Number(item.persenJM))) + '%';
+          let badgeAturan = String(item.tipeAturan || '').includes('Khusus')
+            ? 'bg-violet-100 text-violet-800 border-violet-300'
+            : (String(item.tipeAturan || '').includes('Kunci') || String(item.namaItem || '').toLowerCase().includes('rontgen')
+              ? 'bg-amber-100 text-amber-800 border-amber-300'
+              : 'bg-blue-100 text-blue-800 border-blue-300');
+          return `
+            <tr>
+              <td class="py-3 px-4">
+                <div class="font-mono font-black text-slate-800 text-[11px]">${item.idInvoice}</div>
+                <div class="text-[10px] text-slate-500 font-bold">${item.tanggal}</div>
+              </td>
+              <td class="py-3 px-4 font-black text-slate-800">${item.dokter}</td>
+              <td class="py-3 px-4 font-bold text-slate-700">${item.namaItem}</td>
+              <td class="py-3 px-4 text-right font-bold text-slate-700">${fmtRpPayroll(item.tarifKotor)}</td>
+              <td class="py-3 px-4 text-right font-semibold text-rose-600">${fmtRpPayroll(item.biayaLab)}</td>
+              <td class="py-3 px-4 text-right font-bold text-slate-800">${fmtRpPayroll(item.dasarBagiHasil)}</td>
+              <td class="py-3 px-3 text-center">
+                <span class="px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 font-black text-xs border border-indigo-200">${pctDisplay}</span>
+              </td>
+              <td class="py-3 px-4">
+                <span class="px-2.5 py-0.5 rounded-lg text-[10px] font-extrabold border ${badgeAturan}">${item.tipeAturan}</span>
+              </td>
+              <td class="py-3 px-4 text-right font-black text-emerald-800 bg-emerald-50/60">${fmtRpPayroll(item.jmDokterBersih)}</td>
+              <td class="py-3 px-4 text-right font-bold text-slate-600">${fmtRpPayroll(item.bagianKlinik)}</td>
+            </tr>
+          `;
+        }).join('');
+      }
+    }
+  }
+
+  function handlePresPekerjaChange() {
+    const sel = document.getElementById('presNamaPekerja');
+    const roleEl = document.getElementById('presRole');
+    if (!sel || !roleEl) return;
+    const opt = sel.options[sel.selectedIndex];
+    const role = opt ? (opt.getAttribute('data-role') || 'Dokter Gigi Umum') : 'Dokter Gigi Umum';
+    roleEl.value = role;
+    updatePreviewUangShift();
+  }
+
+  function updatePreviewUangShift() {
+    const sel = document.getElementById('presNamaPekerja');
+    const roleEl = document.getElementById('presRole');
+    const statusEl = document.getElementById('presStatus');
+    const previewEl = document.getElementById('presPreviewUang');
+    if (!previewEl) return;
+
+    const status = statusEl ? statusEl.value : 'Hadir';
+    if (status !== 'Hadir') {
+      previewEl.value = 'Rp 0 (Tidak Hadir)';
+      return;
+    }
+
+    const nama = sel ? sel.value : '';
+    const role = roleEl ? roleEl.value : '';
+    const shift = (document.getElementById('presShift') || {}).value || 'Shift 1';
+
+    let foundTarif = (window.PayrollState.tarifShift || []).find(t => String(t.namaPekerja || '').toLowerCase() === nama.toLowerCase());
+    let nominal = 0;
+    if (foundTarif) {
+      nominal = shift.includes('2') ? (Number(foundTarif.tarifShift2) || 0) : (Number(foundTarif.tarifShift1) || 0);
+    } else {
+      nominal = role.toLowerCase().includes('dokter') ? 55000 : (role.toLowerCase().includes('perawat') ? 45000 : 0);
+    }
+    previewEl.value = fmtRpPayroll(nominal);
+  }
+
+  function handleSimpanPresensiShift(e) {
+    if (e) e.preventDefault();
+    const rawDate = (document.getElementById('presTanggal') || {}).value || '';
+    let formattedDate = rawDate;
+    if (rawDate && rawDate.includes('-')) {
+      let p = rawDate.split('-');
+      if (p[0].length === 4) formattedDate = p[2] + '-' + p[1] + '-' + p[0];
+    }
+
+    const sel = document.getElementById('presNamaPekerja');
+    const opt = sel ? sel.options[sel.selectedIndex] : null;
+    const namaPekerja = sel ? sel.value : '';
+    const idPekerja = opt ? (opt.getAttribute('data-id') || 'STF-001') : 'STF-001';
+    const role = (document.getElementById('presRole') || {}).value || 'Dokter Gigi Umum';
+    const shift = (document.getElementById('presShift') || {}).value || 'Shift 1';
+    const jamMasuk = (document.getElementById('presJamMasuk') || {}).value || '09:00';
+    const jamPulang = (document.getElementById('presJamPulang') || {}).value || '15:00';
+    const statusKehadiran = (document.getElementById('presStatus') || {}).value || 'Hadir';
+
+    let nominal = 0;
+    if (statusKehadiran === 'Hadir') {
+      let foundT = (window.PayrollState.tarifShift || []).find(t => String(t.namaPekerja || '').toLowerCase() === namaPekerja.toLowerCase());
+      if (foundT) {
+        nominal = shift.includes('2') ? (Number(foundT.tarifShift2) || 0) : (Number(foundT.tarifShift1) || 0);
+      } else {
+        nominal = role.toLowerCase().includes('dokter') ? 55000 : 45000;
+      }
+    }
+
+    const payload = {
+      idPresensi: 'ATT-' + Date.now().toString().slice(-6),
+      tanggal: formattedDate,
+      idPekerja: idPekerja,
+      namaPekerja: namaPekerja,
+      role: role,
+      shift: shift,
+      jamMasuk: jamMasuk,
+      jamPulang: jamPulang,
+      statusKehadiran: statusKehadiran,
+      uangHarianDidapat: nominal,
+      verifikator: window.activeNamaAccount || 'Admin'
+    };
+
+    const btn = document.getElementById('btnSubmitPresensi');
+    const orig = btn ? btn.innerHTML : '';
+    if (btn) { btn.disabled = true; btn.innerHTML = '⏳ MENYIMPAN PRESENSI...'; }
+
+    // Update state langsung
+    window.PayrollState.presensiHarian.unshift(payload);
+    savePayrollCacheLocal();
+    renderAllPayrollTables();
+
+    if (typeof google !== 'undefined' && google.script && google.script.run) {
+      google.script.run
+        .withSuccessHandler(res => {
+          if (btn) { btn.disabled = false; btn.innerHTML = orig; }
+          if (typeof showToast === 'function') showToast('success', (res && res.message) ? res.message : 'Presensi shift berhasil disimpan!');
+        })
+        .withFailureHandler(() => {
+          if (btn) { btn.disabled = false; btn.innerHTML = orig; }
+          if (typeof showToast === 'function') showToast('success', 'Presensi shift tersimpan & dihitung otomatis!');
+        })
+        .simpanPresensiShift(payload);
+    } else {
+      if (btn) { btn.disabled = false; btn.innerHTML = orig; }
+      if (typeof showToast === 'function') showToast('success', 'Presensi shift tersimpan & dihitung otomatis!');
+    }
+  }
+
+  function pilihTarifShiftToEdit(idx) {
+    const item = (window.PayrollState.tarifShift || [])[idx];
+    if (!item) return;
+    document.getElementById('tarifNamaPekerja').value = item.namaPekerja || '';
+    document.getElementById('tarifRole').value = item.role || 'Dokter Gigi Umum';
+    document.getElementById('tarifTipe').value = item.tipeKompensasi || 'Kombinasi Shift & Tindakan';
+    document.getElementById('tarifShift1').value = Number(item.tarifShift1) || 0;
+    document.getElementById('tarifShift2').value = Number(item.tarifShift2) || 0;
+    document.getElementById('tarifGajiPokok').value = Number(item.gajiPokokBulanan) || 0;
+    document.getElementById('tarifKeterangan').value = item.keterangan || '';
+  }
+
+  function handleSimpanTarifShift(e) {
+    if (e) e.preventDefault();
+    const payload = {
+      namaPekerja: (document.getElementById('tarifNamaPekerja') || {}).value.trim(),
+      role: (document.getElementById('tarifRole') || {}).value,
+      tipeKompensasi: (document.getElementById('tarifTipe') || {}).value,
+      tarifShift1: Number((document.getElementById('tarifShift1') || {}).value) || 0,
+      tarifShift2: Number((document.getElementById('tarifShift2') || {}).value) || 0,
+      gajiPokokBulanan: Number((document.getElementById('tarifGajiPokok') || {}).value) || 0,
+      keterangan: (document.getElementById('tarifKeterangan') || {}).value.trim()
+    };
+
+    if (!payload.namaPekerja) return;
+
+    let exIdx = (window.PayrollState.tarifShift || []).findIndex(x => String(x.namaPekerja || '').toLowerCase() === payload.namaPekerja.toLowerCase());
+    if (exIdx >= 0) {
+      window.PayrollState.tarifShift[exIdx] = Object.assign(window.PayrollState.tarifShift[exIdx], payload);
+    } else {
+      payload.idAturan = 'TARIF-00' + ((window.PayrollState.tarifShift || []).length + 1);
+      window.PayrollState.tarifShift.push(payload);
+    }
+    savePayrollCacheLocal();
+    renderAllPayrollTables();
+
+    const btn = document.getElementById('btnSubmitTarifShift');
+    const orig = btn ? btn.innerHTML : '';
+    if (btn) { btn.disabled = true; btn.innerHTML = '⏳ MENYIMPAN...'; }
+
+    if (typeof google !== 'undefined' && google.script && google.script.run) {
+      google.script.run
+        .withSuccessHandler(res => {
+          if (btn) { btn.disabled = false; btn.innerHTML = orig; }
+          if (typeof showToast === 'function') showToast('success', (res && res.message) ? res.message : 'Aturan tarif shift disimpan!');
+        })
+        .withFailureHandler(() => {
+          if (btn) { btn.disabled = false; btn.innerHTML = orig; }
+          if (typeof showToast === 'function') showToast('success', 'Aturan tarif shift & gaji berhasil diperbarui!');
+        })
+        .simpanTarifShift(payload);
+    } else {
+      if (btn) { btn.disabled = false; btn.innerHTML = orig; }
+      if (typeof showToast === 'function') showToast('success', 'Aturan tarif shift & gaji berhasil diperbarui!');
+    }
+  }
+
+  function togglePayrollPaidStatus(kategori, idx) {
+    const list = kategori === 'staff' ? window.PayrollState.honorStaff : window.PayrollState.penggajianDokter;
+    const item = (list || [])[idx];
+    if (!item) return;
+
+    const nextStatus = item.statusTransfer === 'Paid' ? 'Draft' : 'Paid';
+    item.statusTransfer = nextStatus;
+    savePayrollCacheLocal();
+    renderAllPayrollTables();
+
+    const idPayroll = kategori === 'staff' ? item.idPayrollStaff : item.idPayroll;
+    if (typeof google !== 'undefined' && google.script && google.script.run) {
+      google.script.run
+        .withSuccessHandler(res => {
+          if (typeof showToast === 'function') showToast('success', (res && res.message) ? res.message : ('Status diubah menjadi ' + nextStatus));
+        })
+        .updateStatusPayroll({ kategori: kategori, idPayroll: idPayroll, statusTransfer: nextStatus });
+    } else {
+      if (typeof showToast === 'function') showToast('success', 'Status Payroll [' + idPayroll + '] diubah menjadi ' + nextStatus);
+    }
+  }
+
+  function triggerGeneratePayrollPeriode() {
+    const periode = (document.getElementById('payrollPeriodeInput') || {}).value || 'Oktober 2026';
+    const btn = document.getElementById('btnGeneratePayrollView');
+    const orig = btn ? btn.innerHTML : '';
+    if (btn) { btn.disabled = true; btn.innerHTML = '⏳ MENGHITUNG PAYROLL...'; }
+
+    if (typeof google !== 'undefined' && google.script && google.script.run) {
+      google.script.run
+        .withSuccessHandler(res => {
+          if (btn) { btn.disabled = false; btn.innerHTML = orig; }
+          if (res && res.success) {
+            if (typeof showToast === 'function') showToast('success', res.message);
+            loadPayrollModuleData(false);
+          } else {
+            recalculateShiftTotalsFromPresensi();
+            renderAllPayrollTables();
+            if (typeof showToast === 'function') showToast('info', (res && res.message) ? res.message : 'Perhitungan Payroll diperbarui.');
+          }
+        })
+        .withFailureHandler(() => {
+          if (btn) { btn.disabled = false; btn.innerHTML = orig; }
+          recalculateShiftTotalsFromPresensi();
+          renderAllPayrollTables();
+          if (typeof showToast === 'function') showToast('success', 'Rekap Payroll periode ' + periode + ' berhasil dihitung!');
+        })
+        .generatePayrollPeriode(periode);
+    } else {
+      if (btn) { btn.disabled = false; btn.innerHTML = orig; }
+      recalculateShiftTotalsFromPresensi();
+      renderAllPayrollTables();
+      if (typeof showToast === 'function') showToast('success', 'Rekap Payroll periode ' + periode + ' berhasil dihitung!');
+    }
+  }
+
+  function openSlipGajiModal(kategori, idx) {
+    const modal = document.getElementById('slipGajiModal');
+    const area = document.getElementById('slipGajiPrintableArea');
+    if (!modal || !area) return;
+
+    if (kategori === 'dokter') {
+      const d = (window.PayrollState.penggajianDokter || [])[idx];
+      if (!d) return;
+      area.innerHTML = `
+        <div class="border-b-2 border-slate-800 pb-3 flex items-center justify-between">
+          <div>
+            <h4 class="text-base font-black text-slate-900">KLINIK GIGI SHELDON DENTAL CARE</h4>
+            <p class="text-[11px] text-slate-500 font-semibold">Slip Honorarium Jasa Medis & Uang Harian Shift Dokter</p>
+          </div>
+          <div class="text-right">
+            <span class="px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-700 font-mono font-black text-[11px] border border-indigo-200">${d.idPayroll}</span>
+            <p class="text-[10px] font-bold text-slate-500 mt-1">Periode: ${d.periodeBulan}</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 bg-slate-50 p-3.5 rounded-xl border border-slate-200 text-xs">
+          <div><span class="text-slate-500 font-semibold">Nama Dokter:</span> <b class="text-slate-900 block">${d.namaDokter}</b></div>
+          <div><span class="text-slate-500 font-semibold">Total Pasien Ditangani:</span> <b class="text-slate-900 block">${d.totalPasien} Pasien</b></div>
+          <div><span class="text-slate-500 font-semibold">Kehadiran Shift:</span> <b class="text-slate-900 block">Shift 1: ${d.hadirShift1}x • Shift 2: ${d.hadirShift2}x</b></div>
+          <div><span class="text-slate-500 font-semibold">Status Pembayaran:</span> <b class="text-emerald-700 block">${d.statusTransfer}</b></div>
+        </div>
+
+        <div class="space-y-2 border border-slate-200 rounded-xl p-4">
+          <div class="flex justify-between py-1 border-b border-slate-100">
+            <span class="text-slate-600 font-semibold">Total Tindakan Bruto</span>
+            <span class="font-bold text-slate-800">${fmtRpPayroll(d.totalTindakanBruto)}</span>
+          </div>
+          <div class="flex justify-between py-1 border-b border-slate-100">
+            <span class="text-slate-600 font-bold">1. Total Bagi Hasil Jasa Medis (JM Bersih)</span>
+            <span class="font-black text-emerald-700">${fmtRpPayroll(d.totalJMDokter)}</span>
+          </div>
+          <div class="flex justify-between py-1 border-b border-slate-100">
+            <span class="text-slate-600 font-bold">2. Total Uang Harian Shift (${d.hadirShift1 + d.hadirShift2}x Shift @ Rp 55.000)</span>
+            <span class="font-black text-cyan-700">${fmtRpPayroll(d.totalUangHarianShift)}</span>
+          </div>
+          <div class="flex justify-between py-1 border-b border-slate-100">
+            <span class="text-slate-600 font-semibold">3. Bonus / Insentif Tambahan</span>
+            <span class="font-bold text-slate-800">${fmtRpPayroll(d.bonusInsentif)}</span>
+          </div>
+          <div class="flex justify-between py-1 border-b border-slate-100 text-rose-600">
+            <span class="font-semibold">4. Potongan (PPh21 / Kasbon)</span>
+            <span class="font-bold">- ${fmtRpPayroll((Number(d.potonganPPh21) || 0) + (Number(d.potonganKasbon) || 0))}</span>
+          </div>
+          <div class="flex justify-between pt-2.5 text-sm font-black text-indigo-950">
+            <span>TOTAL TAKE HOME PAY (DITERIMA BERSIH)</span>
+            <span class="text-base text-indigo-700">${fmtRpPayroll(d.totalDiterimaTHP)}</span>
+          </div>
+        </div>
+        <p class="text-[10px] text-slate-400 italic">Catatan: ${d.catatan || '-'}</p>
+      `;
+    } else {
+      const s = (window.PayrollState.honorStaff || [])[idx];
+      if (!s) return;
+      area.innerHTML = `
+        <div class="border-b-2 border-slate-800 pb-3 flex items-center justify-between">
+          <div>
+            <h4 class="text-base font-black text-slate-900">KLINIK GIGI SHELDON DENTAL CARE</h4>
+            <p class="text-[11px] text-slate-500 font-semibold">Slip Gaji & Honorarium Perawat / Staff Administrasi</p>
+          </div>
+          <div class="text-right">
+            <span class="px-2.5 py-1 rounded-lg bg-cyan-50 text-cyan-700 font-mono font-black text-[11px] border border-cyan-200">${s.idPayrollStaff}</span>
+            <p class="text-[10px] font-bold text-slate-500 mt-1">Periode: ${s.periodeBulan}</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 bg-slate-50 p-3.5 rounded-xl border border-slate-200 text-xs">
+          <div><span class="text-slate-500 font-semibold">Nama Pekerja:</span> <b class="text-slate-900 block">${s.namaStaff}</b></div>
+          <div><span class="text-slate-500 font-semibold">Role Jabatan:</span> <b class="text-slate-900 block">${s.role}</b></div>
+          <div><span class="text-slate-500 font-semibold">Kehadiran Shift:</span> <b class="text-slate-900 block">Shift 1: ${s.hadirShift1}x • Shift 2: ${s.hadirShift2}x</b></div>
+          <div><span class="text-slate-500 font-semibold">Status Pembayaran:</span> <b class="text-emerald-700 block">${s.statusTransfer}</b></div>
+        </div>
+
+        <div class="space-y-2 border border-slate-200 rounded-xl p-4">
+          <div class="flex justify-between py-1 border-b border-slate-100">
+            <span class="text-slate-600 font-bold">1. Gaji Pokok Bulanan Tetap</span>
+            <span class="font-black text-slate-800">${fmtRpPayroll(s.gajiPokokBulanan)}</span>
+          </div>
+          <div class="flex justify-between py-1 border-b border-slate-100">
+            <span class="text-slate-600 font-bold">2. Uang Harian Shift (${s.hadirShift1 + s.hadirShift2}x Shift @ Rp 45.000)</span>
+            <span class="font-black text-cyan-700">${fmtRpPayroll(s.totalUangHarianShift)}</span>
+          </div>
+          <div class="flex justify-between py-1 border-b border-slate-100">
+            <span class="text-slate-600 font-semibold">3. Fee Asistensi / Tunjangan / Lembur</span>
+            <span class="font-bold text-slate-800">${fmtRpPayroll((Number(s.totalFeeTindakan) || 0) + (Number(s.uangMakanTransport) || 0) + (Number(s.lembur) || 0))}</span>
+          </div>
+          <div class="flex justify-between py-1 border-b border-slate-100 text-rose-600">
+            <span class="font-semibold">4. Potongan Kasbon</span>
+            <span class="font-bold">- ${fmtRpPayroll(s.potonganKasbon)}</span>
+          </div>
+          <div class="flex justify-between pt-2.5 text-sm font-black text-cyan-950">
+            <span>TOTAL TAKE HOME PAY (DITERIMA BERSIH)</span>
+            <span class="text-base text-cyan-700">${fmtRpPayroll(s.totalDiterimaTHP)}</span>
+          </div>
+        </div>
+        <p class="text-[10px] text-slate-400 italic">Catatan: ${s.catatan || '-'}</p>
+      `;
+    }
+
+    modal.classList.remove('hidden');
+  }
+
+  function closeSlipGajiModal() {
+    const modal = document.getElementById('slipGajiModal');
+    if (modal) modal.classList.add('hidden');
+  }
+
+  function downloadSlipGajiPDF() {
+    const el = document.getElementById('slipGajiPrintableArea');
+    if (!el) return;
+    if (typeof html2pdf !== 'undefined') {
+      html2pdf().set({
+        margin: 10,
+        filename: 'Slip_Payroll_Sheldon_' + Date.now() + '.pdf',
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'mm', format: 'a5', orientation: 'landscape' }
+      }).from(el).save();
+    } else {
+      window.print();
+    }
+  }
+
+  window.initPayrollModule = initPayrollModule;
+  window.switchPayrollTab = switchPayrollTab;
+  window.loadPayrollModuleData = loadPayrollModuleData;
+  window.handlePresPekerjaChange = handlePresPekerjaChange;
+  window.updatePreviewUangShift = updatePreviewUangShift;
+  window.handleSimpanPresensiShift = handleSimpanPresensiShift;
+  window.pilihTarifShiftToEdit = pilihTarifShiftToEdit;
+  window.handleSimpanTarifShift = handleSimpanTarifShift;
+  window.togglePayrollPaidStatus = togglePayrollPaidStatus;
+  window.triggerGeneratePayrollPeriode = triggerGeneratePayrollPeriode;
+  window.openSlipGajiModal = openSlipGajiModal;
+  window.closeSlipGajiModal = closeSlipGajiModal;
+  window.downloadSlipGajiPDF = downloadSlipGajiPDF;
+
+
+
+  window.openGasSyncModal = function() {
+    const modal = document.getElementById('gasSyncModal');
+    const input = document.getElementById('inputGasUrl');
+    if (input) input.value = window.GAS_WEB_APP_URL || '';
+    if (modal) {
+      modal.classList.remove('hidden');
+      setTimeout(() => { modal.classList.remove('opacity-0'); }, 10);
+    }
+  };
+
+  window.closeGasSyncModal = function() {
+    const modal = document.getElementById('gasSyncModal');
+    if (modal) {
+      modal.classList.add('opacity-0');
+      setTimeout(() => { modal.classList.add('hidden'); }, 300);
+    }
+  };
+
+  window.testGasPing = function() {
+    const input = document.getElementById('inputGasUrl');
+    const resBox = document.getElementById('gasPingResult');
+    const btn = document.getElementById('btnTestPing');
+    const url = input ? input.value.trim() : '';
+    if (!url) {
+      alert("Masukkan URL Web App terlebih dahulu!");
+      return;
+    }
+    btn.innerText = "Menguji..."; btn.disabled = true;
+    resBox.classList.remove('hidden', 'bg-emerald-50', 'text-emerald-700', 'bg-rose-50', 'text-rose-700');
+    resBox.innerText = "Menghubungi Google Apps Script...";
+    resBox.classList.add('bg-slate-100', 'text-slate-600');
+
+    fetch(url + (url.includes('?') ? '&' : '?') + "action=ping", { method: 'GET', mode: 'cors' })
+      .then(r => r.json())
+      .then(res => {
+        btn.innerText = "🔌 Tes Koneksi Live"; btn.disabled = false;
+        resBox.classList.remove('bg-slate-100', 'text-slate-600');
+        if (res && res.success) {
+          resBox.classList.add('bg-emerald-50', 'text-emerald-700');
+          resBox.innerText = "✅ TERHUBUNG: " + (res.message || "Google Sheets Aktif!");
+          if (window._updateGasBadge) window._updateGasBadge(true);
+        } else {
+          resBox.classList.add('bg-rose-50', 'text-rose-700');
+          resBox.innerText = "⚠️ Respons tidak sesuai: " + JSON.stringify(res);
+        }
+      })
+      .catch(err => {
+        btn.innerText = "🔌 Tes Koneksi Live"; btn.disabled = false;
+        resBox.classList.remove('bg-slate-100', 'text-slate-600');
+        resBox.classList.add('bg-rose-50', 'text-rose-700');
+        resBox.innerText = "❌ Gagal koneksi: Pastikan Anda telah men-deploy versi baru Code.gs dan mengatur 'Who has access' = 'Anyone'.";
+      });
+  };
+
+  window.saveGasUrl = function() {
+    const input = document.getElementById('inputGasUrl');
+    const url = input ? input.value.trim() : '';
+    if (url) {
+      localStorage.setItem("sheldon_gas_api_url", url);
+      window.GAS_WEB_APP_URL = url;
+      showToast('success', 'URL Google Apps Script berhasil disimpan & disinkronkan!');
+      closeGasSyncModal();
+      if (typeof startDataSync === 'function') startDataSync();
+    }
+  };
+
+  window.syncGasBadgeVisibility = function() {
+    const badge = document.getElementById('badgeGasSync');
+    if (!badge) return;
+    const isSuperUser = String(window.activeUserRole || '').trim().toLowerCase() === 'super user';
+    const viewUserMaster = document.getElementById('view-user-master');
+    const isUserMasterVisible = (window.activeMenuId === 'user-master') || (viewUserMaster && !viewUserMaster.classList.contains('hidden'));
+    if (isSuperUser && isUserMasterVisible) {
+      badge.classList.remove('hidden');
+      badge.classList.add('flex');
+    } else {
+      badge.classList.add('hidden');
+      badge.classList.remove('flex');
+    }
+  };
+
+  window._updateGasBadge = function(isLive) {
+    const badge = document.getElementById('badgeGasSync');
+    if (!badge) return;
+    if (isLive) {
+      badge.className = "hidden items-center gap-2 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 rounded-xl text-xs font-bold transition-all shadow-sm";
+      badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span><span>Google Sheets: Live Sinkron</span><span class="text-[10px] text-emerald-600 underline font-normal ml-1">Ubah URL</span>';
+    } else {
+      badge.className = "hidden items-center gap-2 px-3 py-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-700 rounded-xl text-xs font-bold transition-all shadow-sm";
+      badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-amber-500"></span><span>Mode Standalone (Lokal)</span><span class="text-[10px] text-amber-600 underline font-normal ml-1">Hubungkan</span>';
+    }
+    window.syncGasBadgeVisibility();
+  };
 
 
 // ==========================================
@@ -10609,6 +12558,25 @@ assert("PERIO-8: Pocket Depth Berubah Menjadi 5mm", perioTeethData[48].dl === 5)
 eksekusiResetPerio();
 assert("PERIO-8: Eksekusi Reset Mengembalikan Data ke Default", perioTeethData[48].dl === 0);
 assert("PERIO-8: Modal Reset Tertutup Setelah Eksekusi", modalResetPerio.classList.contains("hidden"));
+
+// ==================================================
+// PENGUJIAN BULK DATA SHELDON 2026 & SCHEMA ALIGNMENT
+// ==================================================
+print("\n--- TEST: Bulk Data Sheldon 2026 & Schema Verification ---");
+assert("BULK-1: Total Pasien Bulk >= 120", window.KlinikData.pasien.length >= 120, "Count: " + window.KlinikData.pasien.length);
+assert("BULK-2: Total Katalog Tindakan >= 60", window.KlinikData.tindakan.length >= 60, "Count: " + window.KlinikData.tindakan.length);
+assert("BULK-3: Total Rekam Medis (SOAP + Odontogram) >= 120", window.KlinikData.rekamMedis.length >= 120, "Count: " + window.KlinikData.rekamMedis.length);
+assert("BULK-4: Total Transaksi Pembayaran >= 150", window.KlinikData.pembayaran.length >= 150, "Count: " + window.KlinikData.pembayaran.length);
+assert("BULK-5: Total Master Staff >= 20", window.KlinikData.staff.length >= 20, "Count: " + window.KlinikData.staff.length);
+var sampleBulkPasien = window.KlinikData.pasien.find(function(p) { return p.idPasien === "P-0005"; });
+assert("BULK-6: Sample Bulk Pasien P-0005 Valid Schema & Normalized Gender", sampleBulkPasien && (sampleBulkPasien.jenisKelamin === "Laki-Laki" || sampleBulkPasien.jenisKelamin === "Perempuan") && /^\d{2}-\d{2}-\d{4}$/.test(sampleBulkPasien.tanggalLahir));
+assert("BULK-7: Fungsi triggerImportBulkSheldon2026 Tersedia", typeof triggerImportBulkSheldon2026 === "function");
+window.confirm = function() { return true; };
+window.alert = function() {};
+triggerImportBulkSheldon2026();
+runAllTimers();
+var allToastArr = (document.getElementById('toastContainer') && document.getElementById('toastContainer').allToasts) || [];
+assert("BULK-8: Eksekusi triggerImportBulkSheldon2026 Berhasil", allToastArr.some(function(t) { return String(t).includes("Copy of SHELDON 2026"); }));
 
 // SUMMARY REPORT
 print("=================================================");

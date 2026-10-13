@@ -11,15 +11,16 @@ const DB_CONFIG = {
   "PASIEN": "1CmwIrEpuVsE3z5gphsJ_cdOEXk9J_0n-u2cx28VBe-k",
   "PEMBAYARAN": "1HNIi5ZF0qGrONECxWEJ1UDDW7g72SYoIb8MPPwsVOYY",
   "REKAM_MEDIS": "1vyXsT_dOiRRj0M5d4NivpSyTky-NDu_DO2qafvOH5Jw",
-  "SURAT": "1J9-XU7b7NSKCGqAaDaNK27bgfeBqwL986PG7D3dXuAY",
+  "SURAT": "1fEz-fvoz_yMLOzZu8jHGS_vHx_rArSvEpIVjWex33tY",
   "DATABASE": "1K9C60hweu2feayWVKdzG80z9yhzkv1ONQ7Ao3xqPkZM",
   "MASTER": "1e_UqCBpqs-YBF2XRsaoW3yG1r8o3nNDI1vGPQyp8nCE",
   "LOG": "1QcDT9th0EB2keQF3hPjh6Pw9dstoD3ulsljTmc0w_Vk",
   "OBAT": "1cSQyijbtSlrTeGufQJXKwhWhz5DnqW7hhkp78pUoQsk",
-  "BMHP": "1j4cc_cPd79BWM1WG3LnRrRizttZvr_GdjCaPWUstcJk",
+  "BMHP": "1k6Qwypfs1UlT0IV31FMbiKbUPex4Hs7MUbaO8gJ-CTM",
   "ICD10": "19BRjI5Pya3GY-C2epylK0IsHTkYIhAszXw-UFDAzFwE",
   "ICD9": "19BRjI5Pya3GY-C2epylK0IsHTkYIhAszXw-UFDAzFwE",
-  "PAYROLL": ""
+  "PAYROLL": "1v6fSKLLokBNNXOJAS7A-7RKnI9YtHlcZbeCTsNmYjkk",
+  "SOURCE_BULK_2026": "1BaMZosOuB6eu5kV0sIiFMCLNBer1e4X7gibmBoKweV0"
 };
 
 /**

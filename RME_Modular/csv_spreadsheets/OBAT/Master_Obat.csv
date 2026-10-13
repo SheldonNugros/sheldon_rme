@@ -1,6 +1,13 @@
 ID_Obat,Nama_Obat,Kandungan_Obat,Satuan_Beli,Isi_Per_Satuan,Harga_Beli_Satuan,HPP_Pcs,Margin_Persen,Harga_Jual,Stock_Tersedia,Stock_Minimum,Terjual
-OBT-0001,Amoxicillin 500 mg,Amoxicillin Trihydrate 500mg,Box,100,80000,800,150%,2000,500,50,0
-OBT-0002,Asam Mefenamat 500 mg,Mefenamic Acid 500mg,Box,100,50000,500,200%,1500,500,50,0
-OBT-0003,Paracetamol 500 mg,Paracetamol 500mg,Box,100,30000,300,233.3%,1000,600,50,0
-OBT-0004,Metronidazole 500 mg,Metronidazole 500mg,Box,100,60000,600,200%,1800,300,30,0
-OBT-0005,Ibuprofen 400 mg,Ibuprofen 400mg,Box,100,45000,450,233.3%,1500,400,40,0
+OBT-0001,Amoxicillin 500 mg,Amoxicillin Trihydrate 500mg,Box,100,80000,800,150%,2000,500,50,45
+OBT-0002,Asam Mefenamat 500 mg,Mefenamic Acid 500mg,Box,100,50000,500,200%,1500,500,50,82
+OBT-0003,Paracetamol 500 mg,Paracetamol 500mg,Box,100,30000,300,233.3%,1000,600,50,60
+OBT-0004,Metronidazole 500 mg,Metronidazole 500mg,Box,100,60000,600,200%,1800,300,30,28
+OBT-0005,Ibuprofen 400 mg,Ibuprofen 400mg,Box,100,45000,450,233.3%,1500,400,40,34
+OBT-0006,Kalium Diklofenak 50 mg,Diclofenac Potassium 50mg,Box,50,75000,1500,100%,3000,250,30,40
+OBT-0007,Clindamycin 300 mg,Clindamycin HCl 300mg,Box,50,110000,2200,81.8%,4000,200,25,19
+OBT-0008,Cefadroxil 500 mg,Cefadroxil Monohydrate 500mg,Box,100,130000,1300,130.8%,3000,300,30,22
+OBT-0009,Dexamethasone 0.5 mg,Dexamethasone 0.5mg,Box,100,25000,250,300%,1000,400,40,35
+OBT-0010,Methylprednisolone 4 mg,Methylprednisolone 4mg,Box,100,90000,900,122.2%,2000,300,30,25
+OBT-0011,Chlorhexidine Gluconate 0.2% Gargle,Chlorhexidine Digluconate 0.2%,Botol,1,22000,22000,59.1%,35000,80,15,18
+OBT-0012,Aloclair Plus Gel 8 ml,Aloe Vera + Sodium Hyaluronate,Tube,1,65000,65000,38.5%,90000,40,10,12

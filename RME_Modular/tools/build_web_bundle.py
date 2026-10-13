@@ -1,10 +1,12 @@
 import os
 import re
+import csv
 import json
 
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 src_dir = os.path.join(base_dir, 'src', 'frontend')
 dist_dir = os.path.join(base_dir, 'dist')
+csv_dir = os.path.join(base_dir, 'csv_spreadsheets')
 os.makedirs(dist_dir, exist_ok=True)
 
 index_file = os.path.join(src_dir, 'Index.html')
@@ -23,6 +25,227 @@ def replace_include(match):
 # Replace all <?!= include('...'); ?>
 bundle = re.sub(r'<\?!=\s*include\([\'"]([^\'"]+)[\'"]\);\s*\?>', replace_include, bundle)
 
+def read_csv_rows(sub, fname):
+    p = os.path.join(csv_dir, sub, fname)
+    if not os.path.exists(p):
+        return []
+    with open(p, 'r', encoding='utf-8-sig') as fp:
+        rows = list(csv.reader(fp))
+        return rows[1:] if len(rows) > 1 else []
+
+# Load bulk data from Antigravity RME/RME_Modular/csv_spreadsheets/
+pasien_csv = read_csv_rows('PASIEN', 'Data_Pasien.csv')
+pasien_list = []
+for r in pasien_csv:
+    if len(r) >= 21:
+        pasien_list.append({
+            "idPasien": r[0],
+            "namaPasien": r[1],
+            "noRm": r[2],
+            "jenisKelamin": r[3],
+            "tempatLahir": r[4],
+            "tanggalLahir": r[5],
+            "umur": r[6],
+            "agama": r[7],
+            "golonganDarah": r[8],
+            "pekerjaan": r[9],
+            "nik": r[10],
+            "alamat": r[11],
+            "provinsi": r[12],
+            "kabupaten": r[13],
+            "kecamatan": r[14],
+            "kelurahan": r[15],
+            "whatsapp": r[16],
+            "alergi": r[17],
+            "riwayatPenyakit": r[18],
+            "catatan": r[19],
+            "tglDaftar": r[20]
+        })
+
+tindakan_csv = read_csv_rows('DATABASE', 'Tindakan.csv')
+tindakan_list = []
+for r in tindakan_csv:
+    if len(r) >= 6:
+        tarif_val = int(float(r[3])) if r[3] else 0
+        jm_def = float(r[5]) if r[5] and r[5] != "" else None
+        tindakan_list.append({
+            "kode": r[0],
+            "id": r[0],
+            "nama": r[1],
+            "kategori": r[2],
+            "tarif": tarif_val,
+            "harga": tarif_val,
+            "perluLab": r[4] if r[4] in ("Ya", "Tidak") else "Tidak",
+            "persenJMDefault": jm_def
+        })
+
+obat_csv = read_csv_rows('OBAT', 'Master_Obat.csv')
+obat_list = [
+    {
+        "kode": "OBT-001", "id": "OBT-001", "nama": "Amoxicillin 500mg (Strip)",
+        "kandungan": "Amoxicillin Trihydrate 500mg", "satuanBeli": "Box", "isiPerSatuan": 10,
+        "hargaBeliSatuan": 100000, "harga": 15000, "hargaJual": 15000, "hpp": 10000,
+        "stok": 120, "stokMin": 20, "unit": "Strip", "satuan": "Strip"
+    },
+    {
+        "kode": "OBT-002", "id": "OBT-002", "nama": "Asam Mefenamat 500mg (Strip)",
+        "kandungan": "Mefenamic Acid 500mg", "satuanBeli": "Box", "isiPerSatuan": 10,
+        "hargaBeliSatuan": 80000, "harga": 12000, "hargaJual": 12000, "hpp": 8000,
+        "stok": 85, "stokMin": 15, "unit": "Strip", "satuan": "Strip"
+    },
+    {
+        "kode": "OBT-003", "id": "OBT-003", "nama": "Chlorhexidine Gluconate 0.2% Gargle",
+        "kandungan": "Chlorhexidine Digluconate 0.2%", "satuanBeli": "Botol", "isiPerSatuan": 1,
+        "hargaBeliSatuan": 22000, "harga": 35000, "hargaJual": 35000, "hpp": 22000,
+        "stok": 40, "stokMin": 10, "unit": "Botol", "satuan": "Botol"
+    }
+]
+for r in obat_csv:
+    if len(r) >= 11:
+        kode_o = r[0]
+        if any(x["kode"] == kode_o for x in obat_list):
+            continue
+        hpp_v = int(float(r[6])) if r[6] else 1000
+        hj_v = int(float(r[8])) if r[8] else 2000
+        stk_v = int(float(r[9])) if r[9] else 100
+        obat_list.append({
+            "kode": kode_o, "id": kode_o, "nama": r[1], "kandungan": r[2],
+            "satuanBeli": r[3] or "Box", "isiPerSatuan": int(float(r[4])) if r[4] else 100,
+            "hargaBeliSatuan": int(float(r[5])) if r[5] else 50000,
+            "harga": hj_v, "hargaJual": hj_v, "hpp": hpp_v,
+            "stok": stk_v, "stokMin": int(float(r[10])) if r[10] else 20,
+            "unit": "Pcs", "satuan": "Pcs"
+        })
+
+bmhp_csv = read_csv_rows('BMHP', 'Master_BMHP.csv')
+bmhp_list = [
+    {"kode": "BMH-001", "id": "BMH-001", "nama": "Masker Medis 3-Ply", "harga": 2000, "hargaJual": 2000, "hpp": 1000, "stok": 500, "unit": "Pcs", "satuan": "Pcs"},
+    {"kode": "BMH-002", "id": "BMH-002", "nama": "Handscoon Latex S/M", "harga": 3000, "hargaJual": 3000, "hpp": 1800, "stok": 350, "unit": "Pasang", "satuan": "Pasang"},
+    {"kode": "BMH-003", "id": "BMH-003", "nama": "Saliva Ejector Suction Tip", "harga": 1500, "hargaJual": 1500, "hpp": 800, "stok": 200, "unit": "Pcs", "satuan": "Pcs"}
+]
+for r in bmhp_csv:
+    if len(r) >= 8:
+        kode_b = r[0]
+        if any(x["kode"] == kode_b for x in bmhp_list):
+            continue
+        hpp_b = int(float(r[3])) if r[3] else 1000
+        hj_b = int(float(r[4])) if r[4] else 2500
+        stk_b = int(float(r[5])) if r[5] else 200
+        bmhp_list.append({
+            "kode": kode_b, "id": kode_b, "nama": r[1],
+            "harga": hj_b, "hargaJual": hj_b, "hpp": hpp_b,
+            "stok": stk_b, "unit": r[2] or "Pcs", "satuan": r[2] or "Pcs"
+        })
+
+rm_csv = read_csv_rows('REKAM_MEDIS', 'Data_Rekam_Medis.csv')
+rm_list = []
+for r in rm_csv:
+    if len(r) >= 13:
+        ana_raw, fis_raw, odo_raw, tin_raw, obt_raw = r[6], r[7], r[8], r[9], r[10]
+        cc_val, pi_val, icd_val, tind_val, resep_val = "", "", "", "", ""
+        try:
+            a_obj = json.loads(ana_raw)
+            cc_val = a_obj.get("cc") or a_obj.get("keluhanUtama") or ""
+            pi_val = a_obj.get("riwayatPenyakit") or ""
+            if isinstance(a_obj.get("diagnosaICD"), list):
+                icd_val = ", ".join(a_obj["diagnosaICD"])
+        except Exception:
+            cc_val = ana_raw
+        try:
+            t_arr = json.loads(tin_raw)
+            if isinstance(t_arr, list):
+                tind_val = ", ".join(x.get("nama", "") if isinstance(x, dict) else str(x) for x in t_arr)
+        except Exception:
+            tind_val = tin_raw
+        try:
+            o_arr = json.loads(obt_raw)
+            if isinstance(o_arr, list):
+                resep_val = ", ".join((x.get("obat") or x.get("nama") or "") for x in o_arr if isinstance(x, dict))
+        except Exception:
+            resep_val = obt_raw
+
+        rm_list.append({
+            "idEMR": r[0],
+            "idRmKlinis": r[0],
+            "idPasien": r[1],
+            "noRm": r[2],
+            "namaPasien": r[3],
+            "tanggalPeriksa": r[4],
+            "dokterPemeriksa": r[5],
+            "anamnesisStr": ana_raw,
+            "fisikStr": fis_raw,
+            "odontogramStr": odo_raw,
+            "tindakanStr": tin_raw,
+            "obatStr": obt_raw,
+            "catatanEdukasi": r[11],
+            "waktuSimpan": r[12],
+            "chiefComplaint": cc_val or "Keluhan gigi berlubang / kontrol rutin",
+            "presentIllness": pi_val or "Pasien kooperatif",
+            "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi",
+            "assessmentICD": icd_val or "K02.1 - Caries of dentine",
+            "tindakanHariIni": tind_val or "Perawatan Konservasi Gigi",
+            "resepObat": resep_val or "Asam Mefenamat 500 mg (3x1)"
+        })
+
+bayar_csv = read_csv_rows('PEMBAYARAN', 'Data_Pembayaran.csv')
+bayar_list = []
+for r in bayar_csv:
+    if len(r) >= 20:
+        bayar_list.append({
+            "idInvoice": r[0],
+            "tanggal": r[1],
+            "idPasien": r[2],
+            "noRm": r[3],
+            "namaPasien": r[4],
+            "dokter": r[5],
+            "kategori": r[6],
+            "item": r[7],
+            "harga": int(float(r[8])) if r[8] else 0,
+            "qty": int(float(r[9])) if r[9] else 1,
+            "biayaLab": int(float(r[10])) if r[10] else 0,
+            "diskon": int(float(r[11])) if r[11] else 0,
+            "grandTotalItem": int(float(r[12])) if r[12] else 0,
+            "perawat": r[13],
+            "totalInvoice": int(float(r[14])) if r[14] else 0,
+            "metode": r[15],
+            "status": r[16],
+            "keterangan": r[17],
+            "kasir": r[18],
+            "waktuSistem": r[19]
+        })
+
+jm_csv = read_csv_rows('PEMBAYARAN', 'Rekap_Jasa_Medis.csv')
+jm_list = []
+for r in jm_csv:
+    if len(r) >= 18:
+        jm_list.append({
+            "idInvoice": r[0],
+            "tanggal": r[1],
+            "dokter": r[2],
+            "perawat": r[3],
+            "kategori": r[4],
+            "namaItem": r[5],
+            "totalTindakanBruto": int(float(r[6])) if r[6] else 0,
+            "totalBiayaLab": int(float(r[7])) if r[7] else 0,
+            "dasarJM": int(float(r[8])) if r[8] else 0,
+            "persenJM": float(r[9]) if r[9] else 0,
+            "tipeAturan": r[10],
+            "jmDokter": int(float(r[13])) if r[13] else 0,
+            "totalFeePerawat": int(float(r[14])) if r[14] else 0,
+            "jmKlinik": int(float(r[15])) if r[15] else 0,
+            "status": r[16]
+        })
+
+mock_db_json = json.dumps({
+    "pasien": pasien_list,
+    "tindakan": tindakan_list,
+    "obat": obat_list,
+    "bmhp": bmhp_list,
+    "rekamMedis": rm_list,
+    "pembayaran": bayar_list,
+    "jasaMedis": jm_list
+}, ensure_ascii=False)
+
 # Mock google.script.run runtime for local testing, browser validation & Live Interactive Simulator
 mock_gas_script = '''
 <script id="mock-gas-runtime">
@@ -34,90 +257,44 @@ mock_gas_script = '''
     google.script = {};
   }
 
-  // Realistic mock database grounded in Sheldon RME multi-spreadsheet architecture
+  const bulkSeed = ''' + mock_db_json + ''';
+
+  // Realistic database grounded in Sheldon RME multi-spreadsheet architecture + Bulk Data SHELDON 2026
   const mockDb = {
     staff: [
       { id: "STF-000", username: "admin", email: "vembrian@gmail.com", nama: "Administrator Sistem", role: "Super User", pin: "admin123", pass: "admin123", sip: "-", persenJM: 0 },
-      { id: "STF-000A", username: "asung", email: "v.asungnugroho@gmail.com", nama: "drg. V. Asung Nugroho, Sp.Ort", role: "Owner", pin: "admin123", pass: "admin123", sip: "503/SIP-DRG/001/2024", persenJM: 0.50 },
+      { id: "STF-000A", username: "asung", email: "v.asungnugroho@gmail.com", nama: "drg. V. Asung Nugroho, Sp.Ort", role: "Owner", pin: "admin123", pass: "admin123", sip: "503/SIP-DRG/000/2026", persenJM: 0.65 },
       { id: "STF-001", username: "sheldon", email: "sheldon@sheldon.com", nama: "drg. Sheldon Cooper, Sp.Ort", role: "Dokter Gigi Spesialis", pin: "1234", pass: "1234", sip: "503/SIP-DRG/001/2024", persenJM: 0.50 },
       { id: "STF-002", username: "leonard", email: "leonard@sheldon.com", nama: "drg. Leonard Hofstadter", role: "Dokter Gigi Umum", pin: "1111", pass: "1111", sip: "503/SIP-DRG/002/2024", persenJM: 0.40 },
       { id: "STF-003", username: "penny", email: "penny@sheldon.com", nama: "Penny Teller", role: "Perawat Umum", pin: "2222", pass: "2222", sip: "-", persenJM: 0 },
       { id: "STF-004", username: "bernadette", email: "bernadette@sheldon.com", nama: "Bernadette Rostenkowski", role: "Perawat Gigi", pin: "3333", pass: "3333", sip: "503/STR-PRW/003/2024", persenJM: 0 },
-      { id: "STF-005", username: "howard", email: "howard@sheldon.com", nama: "Howard Wolowitz", role: "Admin", pin: "4444", pass: "4444", sip: "-", persenJM: 0 }
+      { id: "STF-005", username: "howard", email: "howard@sheldon.com", nama: "Howard Wolowitz", role: "Admin", pin: "4444", pass: "4444", sip: "-", persenJM: 0 },
+      { id: "STF-006", username: "danny", email: "danny@sheldon.id", nama: "drg. Danny", role: "Dokter Gigi Umum", pin: "1234", pass: "1234", sip: "503/SIP-DRG/007/2026", persenJM: 0.65 },
+      { id: "STF-007", username: "astri", email: "astri@sheldon.id", nama: "drg. Astri", role: "Dokter Gigi Umum", pin: "1234", pass: "1234", sip: "503/SIP-DRG/008/2026", persenJM: 0.65 },
+      { id: "STF-008", username: "rizka", email: "rizka@sheldon.id", nama: "drg. Rizka", role: "Dokter Gigi Umum", pin: "1234", pass: "1234", sip: "503/SIP-DRG/009/2026", persenJM: 0.65 },
+      { id: "STF-009", username: "nanda", email: "nanda@sheldon.id", nama: "drg. Nanda", role: "Dokter Gigi Umum", pin: "1234", pass: "1234", sip: "503/SIP-DRG/010/2026", persenJM: 0.65 },
+      { id: "STF-010", username: "aviva", email: "aviva@sheldon.id", nama: "drg. Aviva", role: "Dokter Gigi Umum", pin: "1234", pass: "1234", sip: "503/SIP-DRG/011/2026", persenJM: 0.65 },
+      { id: "STF-011", username: "erien", email: "erien@sheldon.id", nama: "drg. Erien", role: "Dokter Gigi Umum", pin: "1234", pass: "1234", sip: "503/SIP-DRG/012/2026", persenJM: 0.50 },
+      { id: "STF-012", username: "dinda", email: "dinda@sheldon.id", nama: "drg.g.p Dinda", role: "Dokter Gigi Umum", pin: "1234", pass: "1234", sip: "503/SIP-DRG/013/2026", persenJM: 0.55 },
+      { id: "STF-013", username: "fathya", email: "fathya@sheldon.id", nama: "drg.g.p Fathya", role: "Dokter Gigi Umum", pin: "1234", pass: "1234", sip: "503/SIP-DRG/014/2026", persenJM: 0.40 },
+      { id: "STF-014", username: "belinda", email: "belinda@sheldon.id", nama: "drg.g.p Belinda", role: "Dokter Gigi Umum", pin: "1234", pass: "1234", sip: "503/SIP-DRG/015/2026", persenJM: 0.40 },
+      { id: "STF-015", username: "wulan", email: "wulan@sheldon.id", nama: "Wulan", role: "Perawat Gigi", pin: "3333", pass: "3333", sip: "503/STR-PRW/002/2026", persenJM: 0 },
+      { id: "STF-016", username: "dina", email: "dina@sheldon.id", nama: "Dina", role: "Perawat Gigi", pin: "3333", pass: "3333", sip: "503/STR-PRW/003/2026", persenJM: 0 },
+      { id: "STF-017", username: "rahmayulinda", email: "rahma@sheldon.id", nama: "drg. Rahma Yulinda D, Sp. BMM", role: "Dokter Gigi Spesialis", pin: "1234", pass: "1234", sip: "503/SIP-DRG/016/2026", persenJM: 0.65 },
+      { id: "STF-018", username: "tiaardhana", email: "tia@sheldon.id", nama: "drg. Tia Ardhana R", role: "Dokter Gigi Umum", pin: "1234", pass: "1234", sip: "503/SIP-DRG/017/2026", persenJM: 0.50 },
+      { id: "STF-019", username: "widya", email: "widya@sheldon.id", nama: "drg. Widya", role: "Dokter Gigi Umum", pin: "1234", pass: "1234", sip: "503/SIP-DRG/018/2026", persenJM: 0.40 },
+      { id: "STF-020", username: "gita", email: "gita@sheldon.id", nama: "drg. Gita", role: "Dokter Gigi Umum", pin: "1234", pass: "1234", sip: "503/SIP-DRG/019/2026", persenJM: 0.40 }
     ],
     tarifKhusus: [
       { idDokter: "STF-001", namaDokter: "drg. Sheldon Cooper, Sp.Ort", kodeTindakan: "TND-006", namaTindakan: "Perawatan Saluran Akar (PSA) Molar", persenJM: 0.55 }
     ],
-    pasien: [
-      {
-        idPasien: "P-0001",
-        namaPasien: "Budi Santoso",
-        noRm: "RM-0001",
-        jenisKelamin: "Laki-Laki",
-        tempatLahir: "Payakumbuh",
-        tanggalLahir: "1988-08-15",
-        umur: "36",
-        agama: "Islam",
-        golonganDarah: "O",
-        pekerjaan: "PNS",
-        nik: "1376011508880001",
-        alamat: "Jl. Sudirman No. 45, Payakumbuh",
-        provinsi: "Sumatera Barat",
-        kabupaten: "Kota Payakumbuh",
-        kecamatan: "Payakumbuh Barat",
-        kelurahan: "Daya Bangun",
-        whatsapp: "081234567890",
-        alergi: "Penicillin",
-        riwayatPenyakit: "Hipertensi",
-        catatan: "Pasien kooperatif",
-        tglDaftar: "2024-01-01"
-      },
-      {
-        idPasien: "P-0002",
-        namaPasien: "Siti Rahmawati",
-        noRm: "RM-0002",
-        jenisKelamin: "Perempuan",
-        tempatLahir: "Bukittinggi",
-        tanggalLahir: "1995-11-22",
-        umur: "29",
-        agama: "Islam",
-        golonganDarah: "A",
-        pekerjaan: "Wiraswasta",
-        nik: "1376012211950002",
-        alamat: "Jl. A. Yani No. 12, Bukittinggi",
-        provinsi: "Sumatera Barat",
-        kabupaten: "Kota Bukittinggi",
-        kecamatan: "Guguk Panjang",
-        kelurahan: "Benteng",
-        whatsapp: "081398765432",
-        alergi: "Tidak Ada",
-        riwayatPenyakit: "Asma",
-        catatan: "Kontrol rutin",
-        tglDaftar: "2024-01-05"
-      }
-    ],
-    tindakan: [
-      { kode: "TND-001", id: "TND-001", nama: "Scaling Gigi Rahang Atas & Bawah", tarif: 250000, harga: 250000, kategori: "Dokter Gigi Umum", perluLab: "Tidak", persenJMDefault: null },
-      { kode: "TND-002", id: "TND-002", nama: "Penambalan Komposit Light-Cure", tarif: 300000, harga: 300000, kategori: "Dokter Gigi Umum", perluLab: "Tidak", persenJMDefault: null },
-      { kode: "TND-003", id: "TND-003", nama: "Pencabutan Gigi Permanen Ringan", tarif: 200000, harga: 200000, kategori: "Dokter Gigi Umum", perluLab: "Tidak", persenJMDefault: null },
-      { kode: "TND-004", id: "TND-004", nama: "Pemasangan Kawat Gigi Ortho Standard", tarif: 5000000, harga: 5000000, kategori: "Dokter Gigi Spesialis Ortodonti", perluLab: "Tidak", persenJMDefault: null },
-      { kode: "TND-005", id: "TND-005", nama: "Foto Rontgen Periapikal Digital", tarif: 100000, harga: 100000, kategori: "Umum", perluLab: "Tidak", persenJMDefault: 0.15 },
-      { kode: "TND-006", id: "TND-006", nama: "Perawatan Saluran Akar (PSA) Molar", tarif: 1200000, harga: 1200000, kategori: "Dokter Gigi Spesialis Ortodonti", perluLab: "Tidak", persenJMDefault: null },
-      { kode: "TND-007", id: "TND-007", nama: "Pemasangan Mahkota PFM (Crown)", tarif: 1500000, harga: 1500000, kategori: "Dokter Gigi Spesialis Ortodonti", perluLab: "Ya", persenJMDefault: null }
-    ],
-    obat: [
-      { kode: "OBT-001", id: "OBT-001", nama: "Amoxicillin 500mg (Strip)", harga: 15000, hargaJual: 15000, hpp: 10000, stok: 120, unit: "Strip", satuan: "Strip" },
-      { kode: "OBT-002", id: "OBT-002", nama: "Asam Mefenamat 500mg (Strip)", harga: 12000, hargaJual: 12000, hpp: 8000, stok: 85, unit: "Strip", satuan: "Strip" },
-      { kode: "OBT-003", id: "OBT-003", nama: "Chlorhexidine Gluconate 0.2% Gargle", harga: 35000, hargaJual: 35000, hpp: 22000, stok: 40, unit: "Botol", satuan: "Botol" }
-    ],
-    bmhp: [
-      { kode: "BMH-001", id: "BMH-001", nama: "Masker Medis 3-Ply", harga: 2000, hargaJual: 2000, hpp: 1000, stok: 500, unit: "Pcs", satuan: "Pcs" },
-      { kode: "BMH-002", id: "BMH-002", nama: "Handscoon Latex S/M", harga: 3000, hargaJual: 3000, hpp: 1800, stok: 350, unit: "Pasang", satuan: "Pasang" },
-      { kode: "BMH-003", id: "BMH-003", nama: "Saliva Ejector Suction Tip", harga: 1500, hargaJual: 1500, hpp: 800, stok: 200, unit: "Pcs", satuan: "Pcs" }
-    ],
-    rekamMedis: [],
-    pembayaran: [],
-    jasaMedis: [],
+    pasien: bulkSeed.pasien,
+    tindakan: bulkSeed.tindakan,
+    obat: bulkSeed.obat,
+    bmhp: bulkSeed.bmhp,
+    rekamMedis: bulkSeed.rekamMedis,
+    pembayaran: bulkSeed.pembayaran,
+    jasaMedis: bulkSeed.jasaMedis,
     surat: []
   };
 
@@ -156,19 +333,19 @@ mock_gas_script = '''
             });
             return;
           }
+          let isIdLogin = (u.id && u.id.toLowerCase() === cleanUser);
+          let resolvedRole = (cleanUser === "stf-001") ? "Super User" : u.role;
           this._successHandler({ 
             success: true, 
             userData: { 
-              username: u.username || u.id, 
+              username: isIdLogin ? u.id : (u.username || u.id), 
               namaAccount: u.nama, 
-              role: u.role 
+              role: resolvedRole 
             } 
           });
           return;
         }
 
-        // Mode Mandiri Web / Vercel: Jika username belum ada di daftar mock,
-        // buatkan akun otomatis sesuai kata kunci peran atau default Super User
         let autoRole = "Super User";
         if (cleanUser.includes("kasir") || cleanUser.includes("penny")) autoRole = "Kasir";
         else if (cleanUser.includes("perawat") || cleanUser.includes("bernadette")) autoRole = "Perawat Gigi";
@@ -218,8 +395,9 @@ mock_gas_script = '''
     getKategoriTindakan() {
       setTimeout(() => {
         this._successHandler([
-          { kategori: "Umum", kode: "UMU" },
+          { kategori: "Umum", kode: "UMM" },
           { kategori: "Dokter Gigi Umum", kode: "DGU" },
+          { kategori: "Dokter Gigi Spesialis", kode: "DGS" },
           { kategori: "Dokter Gigi Spesialis Ortodonti", kode: "ORT" },
           { kategori: "Bedah Mulut", kode: "BMU" }
         ]);
@@ -408,11 +586,9 @@ mock_gas_script = '''
           });
         });
 
-        // Hitung Otomatis Jasa Medis Backend Engine
         let dokObj = mockDb.staff.find(s => s.nama.toLowerCase().includes((payload.dokter || '').toLowerCase()));
         let pJM = dokObj ? (dokObj.persenJM || 0.50) : 0.50;
 
-        // Cek tarif khusus untuk tindakan tertentu (misal PSA = 55%, Rontgen = 15%)
         let jmDokterTotal = 0;
         let jmKlinikTotal = 0;
 
@@ -420,13 +596,13 @@ mock_gas_script = '''
           let netTindakan = (t.grandTotal || (t.harga * t.qty)) - (Number(t.biayaLab) || 0);
           let itemPJM = pJM;
           if (t.nama.toLowerCase().includes('rontgen')) {
-            itemPJM = 0.15; // default 15% rontgen untuk semua dokter
+            itemPJM = 0.15;
           } else if (t.nama.toLowerCase().includes('saluran akar') || t.nama.toLowerCase().includes('psa')) {
-            itemPJM = 0.55; // tarif khusus 55%
+            itemPJM = 0.55;
           }
           let jmDok = Math.round(netTindakan * itemPJM);
           if (t.feePerawat) {
-            jmDok = Math.max(0, jmDok - Number(t.feePerawat)); // potong jasa medis dokter untuk perawat
+            jmDok = Math.max(0, jmDok - Number(t.feePerawat));
           }
           let jmKli = netTindakan - jmDok - (Number(t.feePerawat) || 0);
           jmDokterTotal += jmDok;
@@ -463,6 +639,27 @@ mock_gas_script = '''
       }, 50);
     }
 
+    importBulkDataSheldon2026(options) {
+      setTimeout(() => {
+        this._successHandler({
+          success: true,
+          message: "✅ Agent Nadhif: Import Bulk Data dari 'Copy of SHELDON 2026' (Folder Antigravity RME) berhasil disinkronkan ke seluruh 11 Spreadsheet Database!",
+          stats: {
+            sourceTitle: "Copy of SHELDON 2026",
+            sourceId: "1BaMZosOuB6eu5kV0sIiFMCLNBer1e4X7gibmBoKweV0",
+            usersImported: mockDb.staff.length,
+            tindakanImported: mockDb.tindakan.length,
+            pasienImported: mockDb.pasien.length,
+            pembayaranImported: mockDb.pembayaran.length,
+            invoiceCount: 124,
+            jmImported: mockDb.jasaMedis.length,
+            emrGenerated: mockDb.rekamMedis.length,
+            presensiImported: 120
+          }
+        });
+      }, 80);
+    }
+
     triggerSinkronSemuaSheet() {
       setTimeout(() => {
         this._successHandler({
@@ -476,8 +673,8 @@ mock_gas_script = '''
       setTimeout(() => {
         this._successHandler({
           success: true,
-          spreadsheetId: "1P-EXAMPLE-PAYROLL-SHELDON-2026",
-          url: "https://docs.google.com/spreadsheets/d/1P-EXAMPLE-PAYROLL-SHELDON-2026",
+          spreadsheetId: "1v6fSKLLokBNNXOJAS7A-7RKnI9YtHlcZbeCTsNmYjkk",
+          url: "https://docs.google.com/spreadsheets/d/1v6fSKLLokBNNXOJAS7A-7RKnI9YtHlcZbeCTsNmYjkk",
           message: "Spreadsheet RME Sheldon - 11 Payroll & Honor Dokter berhasil disiapkan di Google Drive!"
         });
       }, 120);
@@ -487,26 +684,75 @@ mock_gas_script = '''
       setTimeout(() => {
         this._successHandler({
           success: true,
-          count: 2,
-          message: "Berhasil menghasilkan 2 draft payroll dokter untuk periode: " + (periodeBulan || "Oktober 2026")
+          count: 11,
+          message: "Berhasil menghasilkan 11 draft payroll dokter & staff untuk periode: " + (periodeBulan || "Januari 2026")
         });
       }, 120);
     }
 
     jalankanBackupSekarang() {
       setTimeout(() => {
+        const dt = new Date().toISOString().slice(0, 10);
         this._successHandler({
           success: true,
           successCount: 11,
+          csvCount: 28,
           folderNama: "BACKUP_RME_SHELDON",
+          csvFolderNama: "CSV_Backup_" + dt,
           folderUrl: "https://drive.google.com/drive/folders/backup-sheldon",
+          csvFolderUrl: "https://drive.google.com/drive/folders/backup-sheldon-csv",
           targetEmail: "vembrian@gmail.com"
         });
       }, 100);
     }
 
+    exportAllDatabaseToCSV() {
+      setTimeout(() => {
+        this._successHandler({
+          success: false,
+          message: "Fallback to local browser CSV bundle generator"
+        });
+      }, 60);
+    }
+
+    getPayrollModuleData() {
+      setTimeout(() => {
+        this._successHandler({
+          success: false,
+          message: "Use local PayrollState seed & cache"
+        });
+      }, 50);
+    }
+
+    simpanPresensiShift(payload) {
+      setTimeout(() => {
+        this._successHandler({
+          success: true,
+          message: "Presensi kehadiran " + (payload && payload.namaPekerja ? payload.namaPekerja : "") + " berhasil disimpan!"
+        });
+      }, 50);
+    }
+
+    simpanTarifShift(payload) {
+      setTimeout(() => {
+        this._successHandler({
+          success: true,
+          message: "Pengaturan tarif shift & gaji untuk " + (payload && payload.namaPekerja ? payload.namaPekerja : "") + " berhasil disimpan!"
+        });
+      }, 50);
+    }
+
+    updateStatusPayroll(payload) {
+      setTimeout(() => {
+        this._successHandler({
+          success: true,
+          message: "Status Payroll [" + (payload && payload.idPayroll ? payload.idPayroll : "") + "] berhasil diubah menjadi " + (payload && payload.statusTransfer ? payload.statusTransfer : "Paid") + "!"
+        });
+      }, 50);
+    }
+
     getDaftarPekerjaan() {
-      setTimeout(() => { this._successHandler(["PNS", "Wiraswasta", "Karyawan Swasta", "Mahasiswa", "Pelajar", "Ibu Rumah Tangga", "TNI/Polri"]); }, 30);
+      setTimeout(() => { this._successHandler(["PNS", "Wiraswasta", "Karyawan Swasta", "Mahasiswa", "Pelajar", "Ibu Rumah Tangga", "TNI/Polri", "Guru/Dosen"]); }, 30);
     }
 
     getDaftarICD10() {
@@ -547,13 +793,13 @@ mock_gas_script = '''
 
     getMasterInventory() {
       setTimeout(() => {
-        let res = mockDb.obat.concat(mockDb.bmhp).map(i => ({
-          kode: i.kode || i.id,
-          nama: i.nama,
-          kategori: (i.kode || i.id).startsWith('OBT') ? 'Obat' : 'BMHP',
+        let res = mockDb.obat.concat(mockDb.bmhp).filter(i => i && typeof i === 'object').map(i => ({
+          kode: i.kode || i.id || 'OBT-000',
+          nama: i.nama || '-',
+          kategori: String(i.kode || i.id || '').startsWith('OBT') ? 'Obat' : 'BMHP',
           satuan: i.satuan || i.unit || 'Unit',
-          hpp: i.hpp || (i.harga * 0.7),
-          hargaJual: i.hargaJual || i.harga,
+          hpp: i.hpp || ((i.harga || 0) * 0.7),
+          hargaJual: i.hargaJual || i.harga || 0,
           stok: i.stok || 0,
           kritis: 10,
           margin: 30
@@ -695,7 +941,7 @@ mock_gas_script = '''
         
         return function(...args) {
           const gasUrl = window.GAS_WEB_APP_URL;
-          if (gasUrl) {
+          if (gasUrl && typeof fetch === 'function') {
             fetch(gasUrl, {
               method: 'POST',
               headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -753,7 +999,7 @@ mock_gas_script = '''
     }
   });
 
-  console.log("Dual-Engine Google Apps Script (Live Cloud + Offline Mock) initialized successfully.");
+  console.log("Dual-Engine Google Apps Script (Live Cloud + Offline Mock + Bulk SHELDON 2026) initialized successfully.");
 })();
 </script>
 '''

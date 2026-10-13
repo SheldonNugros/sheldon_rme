@@ -1,6 +1,11 @@
-Kode_Item,Nama_Barang,Satuan,HPP,Harga_Jual,Stok_Tersedia,Stok_Minimum,Total_Terjual,Expired_Date,Supplier,"={""Margin_Persen"";ARRAYFORMULA(IF(B2:B="""","""",IFERROR(ROUND((E2:E-D2:D)/D2:D*100,1),0)))}","={""Status_Stok"";ARRAYFORMULA(IF(B2:B="""","""",IF((I2:I<>"""")*(I2:I<TODAY()),""KADALUARSA"",IF(F2:F<=0,""HABIS"",IF(F2:F<=G2:G,""KRITIS"",""AMAN"")))))}","={""Nilai_Persediaan"";ARRAYFORMULA(IF(B2:B="""","""",F2:F*D2:D))}"
-BMH-0001,Sarung Tangan Lateks,Pasang,1500,5000,500,100,0,2028-06-30,Contoh Supplier
-BMH-0002,Masker Medis,Pcs,700,2500,500,100,0,2028-06-30,Contoh Supplier
-BMH-0003,Cotton Roll,Pcs,100,500,1000,200,0,2028-06-30,Contoh Supplier
-BMH-0004,Lidocaine Cartridge,Cartridge,6000,15000,100,20,0,2027-06-30,Contoh Supplier
-BMH-0005,Needle Disposable 27G,Pcs,1500,5000,200,40,0,2028-06-30,Contoh Supplier
+Kode_Item,Nama_Barang,Satuan,HPP,Harga_Jual,Stok_Tersedia,Stok_Minimum,Total_Terjual,Expired_Date,Supplier
+BMH-0001,Sarung Tangan Lateks (Handscoon),Pasang,1500,5000,500,100,120,30-06-2028,PT Medika Alkesindo
+BMH-0002,Masker Medis 3-Ply Earloop,Pcs,700,2500,500,100,140,30-06-2028,PT Medika Alkesindo
+BMH-0003,Cotton Roll Dental,Pcs,100,500,1000,200,310,30-06-2028,PT Dental Jaya
+BMH-0004,Lidocaine Compositum Cartridge,Cartridge,6000,15000,180,30,45,30-06-2027,PT Septodont Indo
+BMH-0005,Needle Disposable Citoject 30G,Pcs,1500,5000,250,40,45,30-06-2028,PT Septodont Indo
+BMH-0006,Saliva Ejector Suction Tip,Pcs,800,2000,400,80,110,30-12-2028,PT Dental Jaya
+BMH-0007,Spuit Disposable 3cc OneMed,Pcs,1200,3500,300,50,60,30-12-2028,PT Medika Alkesindo
+BMH-0008,Gelas Kumur Plastik Disposable,Pcs,300,1000,800,150,220,30-12-2029,PT Dental Jaya
+BMH-0009,Polibib / Dental Bib Celemek,Lembar,600,2000,450,80,130,30-12-2029,PT Dental Jaya
+BMH-0010,Spons Hemostatik (Spongostan),Cube,12000,25000,60,15,14,30-06-2027,PT Medika Alkesindo

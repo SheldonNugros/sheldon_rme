@@ -9,6 +9,7 @@ Icon
 *.gsheet
 *.gdoc
 *.gslides
+*.gform
 copy/
 
 # Python

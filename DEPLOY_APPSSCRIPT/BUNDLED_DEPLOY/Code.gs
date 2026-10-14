@@ -92,9 +92,13 @@ const ROLE_RULES = {
 // =========================================================================
 
 function doGet(e) {
-  // Jika dipanggil via API HTTP GET (misal dari Vercel / Web Browser)
+  // Jika dipanggil via API HTTP GET (misal dari Vercel / Web Browser / Redirect 302)
   if (e && e.parameter && (e.parameter.action || e.parameter.api === "true")) {
-    return handleApiRequest(e.parameter.action, e.parameter);
+    let p = e.parameter;
+    if (e.parameter.params) {
+      try { p = JSON.parse(e.parameter.params); } catch(ex) { p = e.parameter; }
+    }
+    return handleApiRequest(e.parameter.action, p);
   }
 
   // Jika dipanggil dengan parameter page=formUser, tampilkan Form Master User langsung
@@ -116,10 +120,21 @@ function doPost(e) {
   try {
     let body = {};
     if (e && e.postData && e.postData.contents) {
-      body = JSON.parse(e.postData.contents);
+      try {
+        body = JSON.parse(e.postData.contents);
+      } catch (errJson) {
+        body = {};
+      }
     }
     const action = body.action || (e && e.parameter && e.parameter.action);
-    const params = body.params || (e && e.parameter ? e.parameter : {});
+    let params = body.params;
+    if (params === undefined || params === null) {
+      if (e && e.parameter && e.parameter.params) {
+        try { params = JSON.parse(e.parameter.params); } catch(e2) { params = e.parameter; }
+      } else {
+        params = (e && e.parameter) ? e.parameter : {};
+      }
+    }
     return handleApiRequest(action, params);
   } catch (err) {
     return ContentService.createTextOutput(JSON.stringify({ success: false, message: "Error API Post: " + err.message }))

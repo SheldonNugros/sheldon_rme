@@ -940,10 +940,13 @@
         return function(...args) {
           const gasUrl = window.GAS_WEB_APP_URL;
           if (gasUrl && typeof fetch === 'function') {
-            fetch(gasUrl, {
+            const separator = gasUrl.includes('?') ? '&' : '?';
+            const fetchUrl = gasUrl + separator + 'action=' + encodeURIComponent(rProp);
+            fetch(fetchUrl, {
               method: 'POST',
               headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-              body: JSON.stringify({ action: rProp, params: args })
+              body: JSON.stringify({ action: rProp, params: args }),
+              redirect: 'follow'
             })
             .then(res => {
               if (!res.ok) throw new Error("HTTP Status " + res.status);
@@ -952,7 +955,7 @@
             .then(text => {
               let trimmed = (text || '').trim();
               if (trimmed.startsWith('<') || trimmed.toLowerCase().includes('<!doctype') || trimmed.toLowerCase().includes('<html')) {
-                throw new Error("GAS Web App mengembalikan halaman HTML/Login Google (Perlu set 'Who has access: Anyone')");
+                throw new Error("GAS Web App mengembalikan HTML (Pastikan deployment Apps Script diatur 'Who has access: Anyone')");
               }
               let data = JSON.parse(trimmed);
               if (data && data.success === false && String(data.message || '').includes('tidak ditemukan')) {
@@ -1450,8 +1453,8 @@
     <header class="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between shadow-sm z-30">
       <h1 id="topbarTitle" class="text-lg font-black text-slate-800 tracking-tight">Dashboard Overview</h1>
       <div class="flex items-center gap-3">
-        <!-- Live Google Sheets Sync Status Badge (Khusus Super User & Menu Master User & Role) -->
-        <button type="button" onclick="openGasSyncModal()" id="badgeGasSync" class="hidden items-center gap-2 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 rounded-xl text-xs font-bold transition-all shadow-sm">
+        <!-- Live Google Sheets Sync Status Badge -->
+        <button type="button" onclick="openGasSyncModal()" id="badgeGasSync" class="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer" title="Cek status atau ubah URL Google Apps Script Web App">
           <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
           <span>Google Sheets: Live Sinkron</span>
           <span class="text-[10px] text-emerald-600 underline font-normal ml-1">Ubah URL</span>
@@ -1826,6 +1829,27 @@
    <button onclick="changeDBMenu('tindakan')" id="btnDbTindakan" class="px-5 py-2.5 bg-indigo-50 text-indigo-700 font-bold rounded-lg transition-all flex-shrink-0">DB Tindakan</button>
    <button onclick="changeDBMenu('obat')" id="btnDbObat" class="px-5 py-2.5 bg-white text-slate-600 font-bold rounded-lg hover:bg-slate-50 transition-all flex-shrink-0">DB Obat</button>
    <button onclick="changeDBMenu('bmhp')" id="btnDbBmhp" class="px-5 py-2.5 bg-white text-slate-600 font-bold rounded-lg hover:bg-slate-50 transition-all flex-shrink-0">DB BMHP</button>
+   <button onclick="changeDBMenu('user')" id="btnDbUser" class="px-5 py-2.5 bg-white text-slate-600 font-bold rounded-lg hover:bg-slate-50 transition-all flex-shrink-0">👥 Master User & Role</button>
+ </div>
+
+ <!-- QUICK SYSTEM & SYNC ACTIONS (SUPER USER & OWNER) -->
+ <div id="dbSystemActionsBar" class="bg-white p-3.5 rounded-xl shadow-sm border border-slate-200 flex items-center gap-2.5 flex-wrap">
+   <span class="text-[11px] font-black text-slate-500 uppercase tracking-wider mr-1 flex items-center gap-1">⚙️ Aksi Cepat:</span>
+   <button id="btnDbImportBulk" type="button" onclick="triggerImportBulkSheldon2026()" class="px-3.5 py-2 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-extrabold rounded-lg text-xs shadow-sm transition-all flex items-center gap-1.5 active:scale-95" title="Impor & Sinkronkan Bulk Data dari SHELDON 2026 ke 11 Spreadsheet Database">
+     <span>📥</span> Import Bulk Data 2026
+   </button>
+   <button id="btnDbSinkronSheet" type="button" onclick="triggerSinkronSemuaSheet()" class="px-3 py-2 bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 font-bold rounded-lg text-xs transition-all flex items-center gap-1.5" title="Otomatis sinkronkan dan perbarui seluruh sheet database">
+     <span>🔄</span> Sinkronkan Sheet
+   </button>
+   <button id="btnDbSetupPayroll" type="button" onclick="triggerSetupPayroll()" class="px-3 py-2 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 font-bold rounded-lg text-xs transition-all flex items-center gap-1.5" title="Setup & sinkronkan database Payroll Dokter">
+     <span>💼</span> Setup Payroll
+   </button>
+   <button id="btnDbBackup" type="button" onclick="triggerManualBackup()" class="px-3 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-lg text-xs shadow-sm transition-all flex items-center gap-1.5" title="Cadangkan seluruh database ke Google Drive">
+     <span>💾</span> Backup Sekarang
+   </button>
+   <button id="btnDbDownloadCSV" type="button" onclick="triggerBackupDownloadCSV()" class="px-3 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold rounded-lg text-xs shadow-sm transition-all flex items-center gap-1.5" title="Unduh cadangan database format CSV">
+     <span>📥</span> Download CSV
+   </button>
  </div>
 
 
@@ -5521,17 +5545,19 @@
     let btnFilterDuplikat = document.getElementById('btnFilterDuplikat');
     let btnDbUser = document.getElementById('btnDbUser');
     if (btnDbUser) btnDbUser.classList.add('hidden');
+    let dbSysBar = document.getElementById('dbSystemActionsBar');
+    if (dbSysBar) dbSysBar.classList.add('hidden');
 
-    // 1. SUPER USER / OWNER: Bisa membuka, edit, dan delete modul utama (Master User & Role khusus Super User)
+    // 1. SUPER USER / OWNER: Bisa membuka, edit, dan delete modul utama & manajemen user
     if (r === 'super user' || r === 'owner') {
-      ['nav-dashboard', 'nav-ai', 'nav-pasien', 'nav-rekam-medis', 'nav-surat', 'nav-database', 'nav-inventory', 'nav-informasi', 'nav-kasir', 'nav-riwayat-invoice', 'nav-payroll'].forEach(id => {
+      ['nav-dashboard', 'nav-ai', 'nav-pasien', 'nav-rekam-medis', 'nav-surat', 'nav-database', 'nav-user-master', 'nav-inventory', 'nav-informasi', 'nav-kasir', 'nav-riwayat-invoice', 'nav-payroll'].forEach(id => {
         let el = document.getElementById(id); if (el) el.classList.remove('hidden');
       });
-      if (r === 'super user') {
-        let navUM = document.getElementById('nav-user-master');
-        if (navUM) navUM.classList.remove('hidden');
-        if (btnDbUser) btnDbUser.classList.remove('hidden');
-      }
+      let navUM = document.getElementById('nav-user-master');
+      if (navUM) navUM.classList.remove('hidden');
+      if (btnDbUser) btnDbUser.classList.remove('hidden');
+      if (dbSysBar) dbSysBar.classList.remove('hidden');
+
       document.getElementById('section-transaksi').classList.remove('hidden');
       if (btnTambahPasien) btnTambahPasien.classList.remove('hidden');
       if (btnFilterDuplikat) btnFilterDuplikat.classList.remove('hidden');
@@ -16166,30 +16192,35 @@ function renderInfoBmhp() {
   window.syncGasBadgeVisibility = function() {
     const badge = document.getElementById('badgeGasSync');
     if (!badge) return;
-    const isSuperUser = String(window.activeUserRole || '').trim().toLowerCase() === 'super user';
-    const viewUserMaster = document.getElementById('view-user-master');
-    const isUserMasterVisible = (window.activeMenuId === 'user-master') || (viewUserMaster && !viewUserMaster.classList.contains('hidden'));
-    if (isSuperUser && isUserMasterVisible) {
-      badge.classList.remove('hidden');
-      badge.classList.add('flex');
-    } else {
-      badge.classList.add('hidden');
-      badge.classList.remove('flex');
-    }
+    badge.classList.remove('hidden');
+    badge.classList.add('flex');
   };
 
   window._updateGasBadge = function(isLive) {
     const badge = document.getElementById('badgeGasSync');
     if (!badge) return;
+    badge.classList.remove('hidden');
+    badge.classList.add('flex');
     if (isLive) {
-      badge.className = "hidden items-center gap-2 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 rounded-xl text-xs font-bold transition-all shadow-sm";
+      badge.className = "flex items-center gap-2 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer";
       badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span><span>Google Sheets: Live Sinkron</span><span class="text-[10px] text-emerald-600 underline font-normal ml-1">Ubah URL</span>';
     } else {
-      badge.className = "hidden items-center gap-2 px-3 py-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-700 rounded-xl text-xs font-bold transition-all shadow-sm";
-      badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-amber-500"></span><span>Mode Standalone (Lokal)</span><span class="text-[10px] text-amber-600 underline font-normal ml-1">Hubungkan</span>';
+      badge.className = "flex items-center gap-2 px-3 py-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-800 rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer animate-pulse";
+      badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-amber-500"></span><span>⚡ Hubungkan Google Sheets</span><span class="text-[10px] text-amber-700 underline font-semibold ml-1">Klik Disini</span>';
     }
-    window.syncGasBadgeVisibility();
   };
+
+  // Auto-connect jika URL query parameter menyertakan gas_url
+  try {
+    const urlParams = new URLSearchParams(window.location.search);
+    const qGas = urlParams.get('gas_url') || urlParams.get('gasUrl') || urlParams.get('gas');
+    if (qGas && qGas.trim().startsWith('http')) {
+      localStorage.setItem("sheldon_gas_api_url", qGas.trim());
+      window.GAS_WEB_APP_URL = qGas.trim();
+      const inGas = document.getElementById('inputGasUrl');
+      if (inGas) inGas.value = qGas.trim();
+    }
+  } catch(e) {}
 </script>
 </body>
 </html>

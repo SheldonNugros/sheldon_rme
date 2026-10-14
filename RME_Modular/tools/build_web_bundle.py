@@ -984,10 +984,13 @@ mock_gas_script = '''
         return function(...args) {
           const gasUrl = window.GAS_WEB_APP_URL;
           if (gasUrl && typeof fetch === 'function') {
-            fetch(gasUrl, {
+            const separator = gasUrl.includes('?') ? '&' : '?';
+            const fetchUrl = gasUrl + separator + 'action=' + encodeURIComponent(rProp);
+            fetch(fetchUrl, {
               method: 'POST',
               headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-              body: JSON.stringify({ action: rProp, params: args })
+              body: JSON.stringify({ action: rProp, params: args }),
+              redirect: 'follow'
             })
             .then(res => {
               if (!res.ok) throw new Error("HTTP Status " + res.status);
@@ -996,7 +999,7 @@ mock_gas_script = '''
             .then(text => {
               let trimmed = (text || '').trim();
               if (trimmed.startsWith('<') || trimmed.toLowerCase().includes('<!doctype') || trimmed.toLowerCase().includes('<html')) {
-                throw new Error("GAS Web App mengembalikan halaman HTML/Login Google (Perlu set 'Who has access: Anyone')");
+                throw new Error("GAS Web App mengembalikan HTML (Pastikan deployment Apps Script diatur 'Who has access: Anyone')");
               }
               let data = JSON.parse(trimmed);
               if (data && data.success === false && String(data.message || '').includes('tidak ditemukan')) {

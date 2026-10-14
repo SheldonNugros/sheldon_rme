@@ -1010,10 +1010,13 @@ var console = {
         return function(...args) {
           const gasUrl = window.GAS_WEB_APP_URL;
           if (gasUrl && typeof fetch === 'function') {
-            fetch(gasUrl, {
+            const separator = gasUrl.includes('?') ? '&' : '?';
+            const fetchUrl = gasUrl + separator + 'action=' + encodeURIComponent(rProp);
+            fetch(fetchUrl, {
               method: 'POST',
               headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-              body: JSON.stringify({ action: rProp, params: args })
+              body: JSON.stringify({ action: rProp, params: args }),
+              redirect: 'follow'
             })
             .then(res => {
               if (!res.ok) throw new Error("HTTP Status " + res.status);
@@ -1022,7 +1025,7 @@ var console = {
             .then(text => {
               let trimmed = (text || '').trim();
               if (trimmed.startsWith('<') || trimmed.toLowerCase().includes('<!doctype') || trimmed.toLowerCase().includes('<html')) {
-                throw new Error("GAS Web App mengembalikan halaman HTML/Login Google (Perlu set 'Who has access: Anyone')");
+                throw new Error("GAS Web App mengembalikan HTML (Pastikan deployment Apps Script diatur 'Who has access: Anyone')");
               }
               let data = JSON.parse(trimmed);
               if (data && data.success === false && String(data.message || '').includes('tidak ditemukan')) {
@@ -1380,17 +1383,19 @@ var console = {
     let btnFilterDuplikat = document.getElementById('btnFilterDuplikat');
     let btnDbUser = document.getElementById('btnDbUser');
     if (btnDbUser) btnDbUser.classList.add('hidden');
+    let dbSysBar = document.getElementById('dbSystemActionsBar');
+    if (dbSysBar) dbSysBar.classList.add('hidden');
 
-    // 1. SUPER USER / OWNER: Bisa membuka, edit, dan delete modul utama (Master User & Role khusus Super User)
+    // 1. SUPER USER / OWNER: Bisa membuka, edit, dan delete modul utama & manajemen user
     if (r === 'super user' || r === 'owner') {
-      ['nav-dashboard', 'nav-ai', 'nav-pasien', 'nav-rekam-medis', 'nav-surat', 'nav-database', 'nav-inventory', 'nav-informasi', 'nav-kasir', 'nav-riwayat-invoice', 'nav-payroll'].forEach(id => {
+      ['nav-dashboard', 'nav-ai', 'nav-pasien', 'nav-rekam-medis', 'nav-surat', 'nav-database', 'nav-user-master', 'nav-inventory', 'nav-informasi', 'nav-kasir', 'nav-riwayat-invoice', 'nav-payroll'].forEach(id => {
         let el = document.getElementById(id); if (el) el.classList.remove('hidden');
       });
-      if (r === 'super user') {
-        let navUM = document.getElementById('nav-user-master');
-        if (navUM) navUM.classList.remove('hidden');
-        if (btnDbUser) btnDbUser.classList.remove('hidden');
-      }
+      let navUM = document.getElementById('nav-user-master');
+      if (navUM) navUM.classList.remove('hidden');
+      if (btnDbUser) btnDbUser.classList.remove('hidden');
+      if (dbSysBar) dbSysBar.classList.remove('hidden');
+
       document.getElementById('section-transaksi').classList.remove('hidden');
       if (btnTambahPasien) btnTambahPasien.classList.remove('hidden');
       if (btnFilterDuplikat) btnFilterDuplikat.classList.remove('hidden');
@@ -11982,30 +11987,35 @@ function renderInfoBmhp() {
   window.syncGasBadgeVisibility = function() {
     const badge = document.getElementById('badgeGasSync');
     if (!badge) return;
-    const isSuperUser = String(window.activeUserRole || '').trim().toLowerCase() === 'super user';
-    const viewUserMaster = document.getElementById('view-user-master');
-    const isUserMasterVisible = (window.activeMenuId === 'user-master') || (viewUserMaster && !viewUserMaster.classList.contains('hidden'));
-    if (isSuperUser && isUserMasterVisible) {
-      badge.classList.remove('hidden');
-      badge.classList.add('flex');
-    } else {
-      badge.classList.add('hidden');
-      badge.classList.remove('flex');
-    }
+    badge.classList.remove('hidden');
+    badge.classList.add('flex');
   };
 
   window._updateGasBadge = function(isLive) {
     const badge = document.getElementById('badgeGasSync');
     if (!badge) return;
+    badge.classList.remove('hidden');
+    badge.classList.add('flex');
     if (isLive) {
-      badge.className = "hidden items-center gap-2 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 rounded-xl text-xs font-bold transition-all shadow-sm";
+      badge.className = "flex items-center gap-2 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer";
       badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span><span>Google Sheets: Live Sinkron</span><span class="text-[10px] text-emerald-600 underline font-normal ml-1">Ubah URL</span>';
     } else {
-      badge.className = "hidden items-center gap-2 px-3 py-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-700 rounded-xl text-xs font-bold transition-all shadow-sm";
-      badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-amber-500"></span><span>Mode Standalone (Lokal)</span><span class="text-[10px] text-amber-600 underline font-normal ml-1">Hubungkan</span>';
+      badge.className = "flex items-center gap-2 px-3 py-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-800 rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer animate-pulse";
+      badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-amber-500"></span><span>⚡ Hubungkan Google Sheets</span><span class="text-[10px] text-amber-700 underline font-semibold ml-1">Klik Disini</span>';
     }
-    window.syncGasBadgeVisibility();
   };
+
+  // Auto-connect jika URL query parameter menyertakan gas_url
+  try {
+    const urlParams = new URLSearchParams(window.location.search);
+    const qGas = urlParams.get('gas_url') || urlParams.get('gasUrl') || urlParams.get('gas');
+    if (qGas && qGas.trim().startsWith('http')) {
+      localStorage.setItem("sheldon_gas_api_url", qGas.trim());
+      window.GAS_WEB_APP_URL = qGas.trim();
+      const inGas = document.getElementById('inputGasUrl');
+      if (inGas) inGas.value = qGas.trim();
+    }
+  } catch(e) {}
 
 
 // ==========================================

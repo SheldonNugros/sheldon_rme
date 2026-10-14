@@ -79,6 +79,8 @@ function handleApiRequest(action, params) {
         args = [params.periodeBulan || params[0] || ""];
       } else if (action === "hapusUserMaster" || action === "aktifkanUserMaster") {
         args = [params.username || params[0], params.isPermanent || params.currentUser || params[1]];
+      } else if (action === "syncAllUsersToPayrollTarifShift" || action === "getPayrollModuleData" || action === "setupPayrollSpreadsheet") {
+        args = [];
       } else {
         args = [params];
       }

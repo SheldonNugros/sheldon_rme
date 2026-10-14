@@ -1208,6 +1208,56 @@ runAllTimers();
 var allToastArr = (document.getElementById('toastContainer') && document.getElementById('toastContainer').allToasts) || [];
 assert("BULK-8: Eksekusi triggerImportBulkSheldon2026 Berhasil", allToastArr.some(function(t) { return String(t).includes("Copy of SHELDON 2026"); }));
 
+// ==================================================
+// PENGUJIAN SINKRONISASI PAYROLL DARI PENGATURAN_TARIF_SHIFT (06 MASTER)
+// ==================================================
+print("\n--- TEST: Payroll & Honor Dokter Sync dari Pengaturan_Tarif_Shift ---");
+assert("PAYROLL-1: Fungsi initPayrollModule & loadPayrollModuleData Tersedia", typeof initPayrollModule === "function" && typeof loadPayrollModuleData === "function");
+loadPayrollModuleData(false);
+runAllTimers();
+
+assert("PAYROLL-2: Tarif Shift Terisi dari Master", window.PayrollState.tarifShift && window.PayrollState.tarifShift.length > 0, "Count: " + window.PayrollState.tarifShift.length);
+
+var docPayroll = window.PayrollState.penggajianDokter || [];
+var staffPayroll = window.PayrollState.honorStaff || [];
+
+assert("PAYROLL-3: Penggajian Dokter Terisi dari Nama-nama Dokter di Tarif Shift", docPayroll.length > 0, "Count: " + docPayroll.length);
+assert("PAYROLL-4: Honor Perawat & Staff Terisi dari Nama-nama Staff di Tarif Shift", staffPayroll.length > 0, "Count: " + staffPayroll.length);
+
+// Uji Pekerja Berstatus Tidak Aktif Dikeluarkan dari Payroll
+var inactiveWorker = window.PayrollState.tarifShift.find(function(t) { 
+  var st = String(t.status || '').toLowerCase();
+  return st === 'tidak aktif' || st === 'non aktif';
+});
+
+if (!inactiveWorker && window.PayrollState.tarifShift.length > 0) {
+  // Simulasikan satu pekerja diubah statusnya menjadi Tidak Aktif
+  window.PayrollState.tarifShift[0].status = "Tidak Aktif";
+  var nonActiveName = window.PayrollState.tarifShift[0].namaPekerja;
+  renderAllPayrollTables();
+  var filteredDocs = (window.PayrollState.penggajianDokter || []).filter(function(d) { return isPekerjaAktif(d.namaDokter); });
+  var hasNonActiveInDocs = filteredDocs.some(function(d) { return d.namaDokter.toLowerCase() === nonActiveName.toLowerCase(); });
+  assert("PAYROLL-5: Pekerja Berstatus Tidak Aktif Tidak Muncul di Penggajian Dokter", !hasNonActiveInDocs);
+  // Kembalikan ke Aktif
+  window.PayrollState.tarifShift[0].status = "Aktif";
+  renderAllPayrollTables();
+} else if (inactiveWorker) {
+  var hasNonActiveInDocs = docPayroll.some(function(d) { return d.namaDokter.toLowerCase() === inactiveWorker.namaPekerja.toLowerCase(); });
+  assert("PAYROLL-5: Pekerja Berstatus Tidak Aktif Tidak Muncul di Penggajian Dokter", !hasNonActiveInDocs);
+}
+
+// Uji Semua Dokter Aktif Muncul
+var activeDoctorsInTarif = window.PayrollState.tarifShift.filter(function(t) {
+  var isDoc = (t.role || '').toLowerCase().includes('dokter') || (t.namaPekerja || '').toLowerCase().startsWith('drg');
+  var isActive = String(t.status || 'Aktif').toLowerCase() !== 'tidak aktif';
+  return isDoc && isActive;
+});
+
+var allDocsAccounted = activeDoctorsInTarif.length > 0 && activeDoctorsInTarif.every(function(t) {
+  return docPayroll.some(function(d) { return d.namaDokter.toLowerCase() === t.namaPekerja.toLowerCase(); });
+});
+assert("PAYROLL-6: Seluruh Dokter Aktif dari Pengaturan_Tarif_Shift Masuk ke Penggajian Dokter", allDocsAccounted);
+
 // SUMMARY REPORT
 print("=================================================");
 var passedTotal = results.filter(r => r.passed).length;

@@ -725,9 +725,87 @@ var console = {
 
     getPayrollModuleData() {
       setTimeout(() => {
+        let tList = mockDb.tarifShift || [];
+        let isWorkerActive = function(t) {
+          let st = String(t.status || "Aktif").trim().toLowerCase();
+          return st !== "tidak aktif" && st !== "non aktif" && st !== "nonaktif" && st !== "inactive";
+        };
+        let activeTarif = tList.filter(isWorkerActive);
+        
+        let docList = [];
+        let staffList = [];
+        let docCounter = 1;
+        let staffCounter = 1;
+
+        activeTarif.forEach(t => {
+          let roleLower = (t.role || "").toLowerCase();
+          let isDoc = roleLower.includes("dokter") || (t.namaPekerja || "").toLowerCase().startsWith("drg");
+          if (isDoc) {
+            let s1 = Number(t.tarifShift1) || 55000;
+            let s2 = Number(t.tarifShift2) || 55000;
+            let thp = 250000 + s1 + s2;
+            docList.push({
+              idPayroll: "PAY-DR-" + new Date().getFullYear() + String(new Date().getMonth() + 1).padStart(2, '0') + "-" + String(docCounter).padStart(3, '0'),
+              periodeBulan: "Oktober 2026",
+              idDokter: "DOK-" + String(docCounter).padStart(3, '0'),
+              namaDokter: t.namaPekerja,
+              totalPasien: 2,
+              totalTindakanBruto: 500000,
+              totalBiayaLab: 0,
+              dasarJMBersih: 500000,
+              totalJMDokter: 250000,
+              hadirShift1: 1,
+              hadirShift2: 1,
+              totalUangHarianShift: s1 + s2,
+              bonusInsentif: 0,
+              potonganPPh21: 0,
+              potonganKasbon: 0,
+              totalDiterimaTHP: thp,
+              bankTujuan: "BCA / Mandiri",
+              noRekening: "-",
+              statusTransfer: "Draft",
+              tanggalTransfer: "",
+              catatan: "Diambil otomatis dari Pengaturan_Tarif_Shift (06 Master User & Role)"
+            });
+            docCounter++;
+          } else {
+            let isAdmin = roleLower.includes("admin");
+            let gp = Number(t.gajiPokokBulanan) || (isAdmin ? 1200000 : 0);
+            let s1 = Number(t.tarifShift1) || (isAdmin ? 0 : 45000);
+            let s2 = Number(t.tarifShift2) || (isAdmin ? 0 : 45000);
+            let uShift = isAdmin ? 0 : (s1 + s2);
+            staffList.push({
+              idPayrollStaff: "PAY-STF-" + new Date().getFullYear() + String(new Date().getMonth() + 1).padStart(2, '0') + "-" + String(staffCounter).padStart(3, '0'),
+              periodeBulan: "Oktober 2026",
+              idStaff: (isAdmin ? "ADM-" : "PRW-") + String(staffCounter).padStart(3, '0'),
+              namaStaff: t.namaPekerja,
+              role: t.role,
+              gajiPokokBulanan: gp,
+              hadirShift1: isAdmin ? 0 : 1,
+              hadirShift2: isAdmin ? 0 : 1,
+              totalUangHarianShift: uShift,
+              totalFeeTindakan: 0,
+              uangMakanTransport: 0,
+              lembur: 0,
+              potonganKasbon: 0,
+              totalDiterimaTHP: gp + uShift,
+              bankTujuan: "Mandiri / BSI",
+              noRekening: "-",
+              statusTransfer: "Draft",
+              tanggalTransfer: "",
+              catatan: "Diambil otomatis dari Pengaturan_Tarif_Shift (06 Master User & Role)"
+            });
+            staffCounter++;
+          }
+        });
+
         this._successHandler({
           success: true,
-          tarifShift: mockDb.tarifShift || []
+          tarifShift: tList,
+          presensiHarian: mockDb.presensiHarian || [],
+          penggajianDokter: docList,
+          honorStaff: staffList,
+          rekapJM: mockDb.jasaMedis || []
         });
       }, 50);
     }
@@ -11637,8 +11715,14 @@ function renderInfoBmhp() {
     const sel = document.getElementById('presNamaPekerja');
     const roleEl = document.getElementById('presRole');
     if (!sel || !roleEl) return;
-    const opt = sel.options[sel.selectedIndex];
-    const role = opt ? (opt.getAttribute('data-role') || 'Dokter Gigi Umum') : 'Dokter Gigi Umum';
+    const opt = (sel.options && sel.selectedIndex >= 0 && sel.options[sel.selectedIndex]) ? sel.options[sel.selectedIndex] : null;
+    let role = 'Dokter Gigi Umum';
+    if (opt && typeof opt.getAttribute === 'function') {
+      role = opt.getAttribute('data-role') || 'Dokter Gigi Umum';
+    } else if (sel.value) {
+      let t = (window.PayrollState.tarifShift || []).find(x => (x.namaPekerja || '').toLowerCase() === String(sel.value).toLowerCase());
+      if (t && t.role) role = t.role;
+    }
     roleEl.value = role;
     updatePreviewUangShift();
   }
@@ -13023,6 +13107,56 @@ triggerImportBulkSheldon2026();
 runAllTimers();
 var allToastArr = (document.getElementById('toastContainer') && document.getElementById('toastContainer').allToasts) || [];
 assert("BULK-8: Eksekusi triggerImportBulkSheldon2026 Berhasil", allToastArr.some(function(t) { return String(t).includes("Copy of SHELDON 2026"); }));
+
+// ==================================================
+// PENGUJIAN SINKRONISASI PAYROLL DARI PENGATURAN_TARIF_SHIFT (06 MASTER)
+// ==================================================
+print("\n--- TEST: Payroll & Honor Dokter Sync dari Pengaturan_Tarif_Shift ---");
+assert("PAYROLL-1: Fungsi initPayrollModule & loadPayrollModuleData Tersedia", typeof initPayrollModule === "function" && typeof loadPayrollModuleData === "function");
+loadPayrollModuleData(false);
+runAllTimers();
+
+assert("PAYROLL-2: Tarif Shift Terisi dari Master", window.PayrollState.tarifShift && window.PayrollState.tarifShift.length > 0, "Count: " + window.PayrollState.tarifShift.length);
+
+var docPayroll = window.PayrollState.penggajianDokter || [];
+var staffPayroll = window.PayrollState.honorStaff || [];
+
+assert("PAYROLL-3: Penggajian Dokter Terisi dari Nama-nama Dokter di Tarif Shift", docPayroll.length > 0, "Count: " + docPayroll.length);
+assert("PAYROLL-4: Honor Perawat & Staff Terisi dari Nama-nama Staff di Tarif Shift", staffPayroll.length > 0, "Count: " + staffPayroll.length);
+
+// Uji Pekerja Berstatus Tidak Aktif Dikeluarkan dari Payroll
+var inactiveWorker = window.PayrollState.tarifShift.find(function(t) { 
+  var st = String(t.status || '').toLowerCase();
+  return st === 'tidak aktif' || st === 'non aktif';
+});
+
+if (!inactiveWorker && window.PayrollState.tarifShift.length > 0) {
+  // Simulasikan satu pekerja diubah statusnya menjadi Tidak Aktif
+  window.PayrollState.tarifShift[0].status = "Tidak Aktif";
+  var nonActiveName = window.PayrollState.tarifShift[0].namaPekerja;
+  renderAllPayrollTables();
+  var filteredDocs = (window.PayrollState.penggajianDokter || []).filter(function(d) { return isPekerjaAktif(d.namaDokter); });
+  var hasNonActiveInDocs = filteredDocs.some(function(d) { return d.namaDokter.toLowerCase() === nonActiveName.toLowerCase(); });
+  assert("PAYROLL-5: Pekerja Berstatus Tidak Aktif Tidak Muncul di Penggajian Dokter", !hasNonActiveInDocs);
+  // Kembalikan ke Aktif
+  window.PayrollState.tarifShift[0].status = "Aktif";
+  renderAllPayrollTables();
+} else if (inactiveWorker) {
+  var hasNonActiveInDocs = docPayroll.some(function(d) { return d.namaDokter.toLowerCase() === inactiveWorker.namaPekerja.toLowerCase(); });
+  assert("PAYROLL-5: Pekerja Berstatus Tidak Aktif Tidak Muncul di Penggajian Dokter", !hasNonActiveInDocs);
+}
+
+// Uji Semua Dokter Aktif Muncul
+var activeDoctorsInTarif = window.PayrollState.tarifShift.filter(function(t) {
+  var isDoc = (t.role || '').toLowerCase().includes('dokter') || (t.namaPekerja || '').toLowerCase().startsWith('drg');
+  var isActive = String(t.status || 'Aktif').toLowerCase() !== 'tidak aktif';
+  return isDoc && isActive;
+});
+
+var allDocsAccounted = activeDoctorsInTarif.length > 0 && activeDoctorsInTarif.every(function(t) {
+  return docPayroll.some(function(d) { return d.namaDokter.toLowerCase() === t.namaPekerja.toLowerCase(); });
+});
+assert("PAYROLL-6: Seluruh Dokter Aktif dari Pengaturan_Tarif_Shift Masuk ke Penggajian Dokter", allDocsAccounted);
 
 // SUMMARY REPORT
 print("=================================================");

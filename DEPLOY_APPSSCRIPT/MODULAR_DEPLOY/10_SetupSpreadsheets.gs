@@ -1228,41 +1228,43 @@ function generatePayrollPeriode(periodeBulan) {
     lock.waitLock(15000);
     const targetBulan = periodeBulan || Utilities.formatDate(new Date(), "Asia/Jakarta", "MMMM yyyy");
     
-    // 1. Baca Rekap_Jasa_Medis
-    const rawJM = readFast(DB_CONFIG.PEMBAYARAN, "Rekap_Jasa_Medis");
-    if (rawJM.length <= 1) {
-      return { success: false, message: "Belum ada data tindakan di Rekap_Jasa_Medis." };
-    }
-
-    const hJM = rawJM[0];
-    const idxDokter = getColIdx(hJM, ['dokter', 'nama_dokter']);
-    const idxBruto = getColIdx(hJM, ['tarif_kotor', 'tarif']);
-    const idxLab = getColIdx(hJM, ['biaya_lab', 'lab']);
-    const idxDasar = getColIdx(hJM, ['dasar_bagi_hasil', 'dasar_jm']);
-    const idxJMDokter = getColIdx(hJM, ['jm_dokter_bersih', 'jm_dokter']);
-
-    // Agregasi per dokter
+    // 1. Baca Rekap_Jasa_Medis jika ada
     let dokterMap = {};
-    for (let i = 1; i < rawJM.length; i++) {
-      let r = rawJM[i];
-      let dokName = r[idxDokter] ? String(r[idxDokter]).trim() : "";
-      if (!dokName || dokName === "" || dokName === "-") continue;
+    try {
+      const rawJM = readFast(DB_CONFIG.PEMBAYARAN, "Rekap_Jasa_Medis");
+      if (rawJM && rawJM.length > 1) {
+        const hJM = rawJM[0];
+        const idxDokter = getColIdx(hJM, ['dokter', 'nama_dokter']);
+        const idxBruto = getColIdx(hJM, ['tarif_kotor', 'tarif']);
+        const idxLab = getColIdx(hJM, ['biaya_lab', 'lab']);
+        const idxDasar = getColIdx(hJM, ['dasar_bagi_hasil', 'dasar_jm']);
+        const idxJMDokter = getColIdx(hJM, ['jm_dokter_bersih', 'jm_dokter']);
 
-      if (!dokterMap[dokName]) {
-        dokterMap[dokName] = {
-          pasienCount: 0,
-          bruto: 0,
-          lab: 0,
-          dasar: 0,
-          jm: 0
-        };
+        // Agregasi per dokter
+        for (let i = 1; i < rawJM.length; i++) {
+          let r = rawJM[i];
+          let dokName = r[idxDokter] ? String(r[idxDokter]).trim() : "";
+          if (!dokName || dokName === "" || dokName === "-") continue;
+
+          if (!dokterMap[dokName]) {
+            dokterMap[dokName] = {
+              pasienCount: 0,
+              bruto: 0,
+              lab: 0,
+              dasar: 0,
+              jm: 0
+            };
+          }
+
+          dokterMap[dokName].pasienCount += 1;
+          dokterMap[dokName].bruto += Number(r[idxBruto]) || 0;
+          dokterMap[dokName].lab += Number(r[idxLab]) || 0;
+          dokterMap[dokName].dasar += Number(r[idxDasar]) || 0;
+          dokterMap[dokName].jm += Number(r[idxJMDokter]) || 0;
+        }
       }
-
-      dokterMap[dokName].pasienCount += 1;
-      dokterMap[dokName].bruto += Number(r[idxBruto]) || 0;
-      dokterMap[dokName].lab += Number(r[idxLab]) || 0;
-      dokterMap[dokName].dasar += Number(r[idxDasar]) || 0;
-      dokterMap[dokName].jm += Number(r[idxJMDokter]) || 0;
+    } catch (eJM) {
+      Logger.log("Info: Belum ada Rekap_Jasa_Medis: " + eJM.message);
     }
 
     // 2. Baca Data Presensi_Shift_Harian (dari PAYROLL) & Pengaturan_Tarif_Shift (dari MASTER)
@@ -1350,17 +1352,53 @@ function generatePayrollPeriode(periodeBulan) {
       Logger.log("Info: Belum ada Presensi_Shift_Harian: " + ePres.message);
     }
 
+    // Ambil seluruh daftar pekerja (Dokter dan Staff) langsung dari Pengaturan_Tarif_Shift
+    let doctorList = [];
+    let staffList = [];
+    let seenDoctors = new Set();
+
+    if (rawTarif && rawTarif.length > 1) {
+      const hTarif = rawTarif[0];
+      const idxNama = getColIdx(hTarif, ['nama_pekerja', 'nama']);
+      const idxRole = getColIdx(hTarif, ['role']);
+      const idxStatus = getColIdx(hTarif, ['status']);
+
+      for (let t = 1; t < rawTarif.length; t++) {
+        let rowT = rawTarif[t];
+        let namaT = rowT[idxNama] ? String(rowT[idxNama]).trim() : "";
+        let roleT = (idxRole !== -1 && rowT[idxRole]) ? String(rowT[idxRole]).trim() : "";
+        let rawSt = (idxStatus !== -1 && rowT[idxStatus]) ? String(rowT[idxStatus]).trim().toLowerCase() : "aktif";
+        let isAktif = !(rawSt === "tidak aktif" || rawSt === "non aktif" || rawSt === "nonaktif" || rawSt === "inactive");
+
+        if (!namaT) continue;
+        let isDok = roleT.toLowerCase().includes("dokter") || namaT.toLowerCase().startsWith("drg");
+        if (isDok) {
+          doctorList.push({ nama: namaT, role: roleT, isAktif: isAktif });
+          seenDoctors.add(namaT.toLowerCase());
+        } else {
+          staffList.push({ nama: namaT, role: roleT, isAktif: isAktif });
+        }
+      }
+    }
+
+    // Pastikan jika ada dokter dari Rekap_Jasa_Medis yang belum tercatat tetap diikutsertakan
+    for (let dok in dokterMap) {
+      if (!seenDoctors.has(dok.toLowerCase())) {
+        doctorList.push({ nama: dok, role: "Dokter Gigi Umum", isAktif: true });
+        seenDoctors.add(dok.toLowerCase());
+      }
+    }
+
     const sheetPayroll = getSheetEksternal(ssPayrollId, "Penggajian_Dokter");
     let countGenerated = 0;
 
-    for (let dok in dokterMap) {
-      // Validasi keaktifan dokter: Jika Tidak Aktif, JANGAN muncul di payroll
-      let dokTarif = tarifMap[dok];
-      let isDokAktif = true;
-      if (dokTarif && dokTarif.status === "Tidak Aktif") {
-        isDokAktif = false;
-      }
+    // 1. Sinkronkan Penggajian_Dokter berdasarkan nama-nama di Pengaturan_Tarif_Shift
+    for (let i = 0; i < doctorList.length; i++) {
+      let dokItem = doctorList[i];
+      let dok = dokItem.nama;
+      let isDokAktif = dokItem.isAktif;
 
+      // Validasi keaktifan dokter: Jika Tidak Aktif, JANGAN muncul di payroll
       if (!isDokAktif) {
         // Hapus dari sheet Penggajian_Dokter jika ada rekam lama untuk periode berjalan
         try {
@@ -1376,7 +1414,7 @@ function generatePayrollPeriode(periodeBulan) {
         continue;
       }
 
-      let d = dokterMap[dok];
+      let d = dokterMap[dok] || { pasienCount: 0, bruto: 0, lab: 0, dasar: 0, jm: 0 };
       let idPay = "PAY-DR-" + Utilities.formatDate(new Date(), "Asia/Jakarta", "yyyyMM") + "-" + String(countGenerated + 1).padStart(3, '0');
       
       let pres = presensiMap[dok] || { s1: 0, s2: 0, totalUangHarian: 0 };
@@ -1390,11 +1428,11 @@ function generatePayrollPeriode(periodeBulan) {
       }
 
       let bonusInsentif = 0;
-      let pph21 = 0; // Default 0 (dapat diisi manual atau sesuai kebijakan klinik)
+      let pph21 = 0; // Default 0
       let kasbon = 0;
       let thp = (d.jm + totalUangHarian + bonusInsentif) - (pph21 + kasbon);
 
-      let catatanPresensi = "Uang Harian: " + hadirs1 + "x Shift 1, " + hadirs2 + "x Shift 2 = Rp " + totalUangHarian.toLocaleString('id-ID') + " + JM";
+      let catatanPresensi = "Uang Harian: " + hadirs1 + "x Shift 1, " + hadirs2 + "x Shift 2 = Rp " + totalUangHarian.toLocaleString('id-ID') + (d.jm > 0 ? " + JM" : "");
 
       // Cek apakah baris dokter pada periode yang sama sudah ada agar di-update (bukan duplikat)
       let existingPayData = sheetPayroll.getDataRange().getValues();
@@ -1442,21 +1480,17 @@ function generatePayrollPeriode(periodeBulan) {
       countGenerated++;
     }
 
-    // 3. Sinkronkan juga Honor_Perawat_Staff (Perawat 2 Shift @ 45.000 & Admin Non-Shift Rp 1.200.000/bulan)
+    // 2. Sinkronkan Honor_Perawat_Staff berdasarkan nama-nama di Pengaturan_Tarif_Shift
     try {
       const sheetStaff = getSheetEksternal(ssPayrollId, "Honor_Perawat_Staff");
-      const rawTarifAll = rawTarif || (ssMasterId ? readFast(ssMasterId, "Pengaturan_Tarif_Shift") : null);
-      if (sheetStaff && rawTarifAll && rawTarifAll.length > 1) {
+      if (sheetStaff && staffList.length > 0) {
         let existingStf = sheetStaff.getDataRange().getValues();
-        let idxStatAll = getColIdx(rawTarifAll[0], ['status']);
         let stfCounter = 1;
-        for (let t = 1; t < rawTarifAll.length; t++) {
-          let roleT = String(rawTarifAll[t][1] || "").trim();
-          let namaT = String(rawTarifAll[t][2] || "").trim();
-          let rawStatT = (idxStatAll !== -1 && rawTarifAll[t][idxStatAll]) ? String(rawTarifAll[t][idxStatAll]).trim().toLowerCase() : "aktif";
-          let isStfAktif = !(rawStatT === "tidak aktif" || rawStatT === "non aktif" || rawStatT === "nonaktif" || rawStatT === "inactive");
-
-          if (!namaT || roleT.toLowerCase().includes("dokter")) continue;
+        for (let s = 0; s < staffList.length; s++) {
+          let stfItem = staffList[s];
+          let namaT = stfItem.nama;
+          let roleT = stfItem.role;
+          let isStfAktif = stfItem.isAktif;
 
           // Jika status Tidak Aktif, JANGAN muncul di payroll
           if (!isStfAktif) {
@@ -1653,7 +1687,7 @@ function getPayrollModuleData() {
       catatan: String(r[20] || "")
     })).filter(x => x.namaDokter !== "" && isWorkerActive(x.namaDokter));
 
-    const honorStaff = readSheetRows("Honor_Perawat_Staff").map(r => ({
+    let honorStaff = readSheetRows("Honor_Perawat_Staff").map(r => ({
       idPayrollStaff: String(r[0] || ""),
       periodeBulan: String(r[1] || ""),
       idStaff: String(r[2] || ""),
@@ -1674,6 +1708,70 @@ function getPayrollModuleData() {
       tanggalTransfer: fDate(r[17]),
       catatan: String(r[18] || "")
     })).filter(x => x.namaStaff !== "" && isWorkerActive(x.namaStaff));
+
+    // Pastikan seluruh dokter aktif dari Pengaturan_Tarif_Shift terwakili di Penggajian_Dokter
+    const activeDocNames = new Set(penggajianDokter.map(d => d.namaDokter.toLowerCase()));
+    tarifShift.forEach((t) => {
+      let isDoc = (t.role.toLowerCase().includes("dokter") || t.namaPekerja.toLowerCase().startsWith("drg"));
+      if (isDoc && isWorkerActive(t.namaPekerja) && !activeDocNames.has(t.namaPekerja.toLowerCase())) {
+        penggajianDokter.push({
+          idPayroll: "PAY-DR-" + Utilities.formatDate(new Date(), "Asia/Jakarta", "yyyyMM") + "-" + String(penggajianDokter.length + 1).padStart(3, '0'),
+          periodeBulan: Utilities.formatDate(new Date(), "Asia/Jakarta", "MMMM yyyy"),
+          idDokter: "DOK-" + String(penggajianDokter.length + 1).padStart(3, '0'),
+          namaDokter: t.namaPekerja,
+          totalPasien: 0,
+          totalTindakanBruto: 0,
+          totalBiayaLab: 0,
+          dasarJMBersih: 0,
+          totalJMDokter: 0,
+          hadirShift1: 0,
+          hadirShift2: 0,
+          totalUangHarianShift: 0,
+          bonusInsentif: 0,
+          potonganPPh21: 0,
+          potonganKasbon: 0,
+          totalDiterimaTHP: 0,
+          bankTujuan: "BCA / Mandiri",
+          noRekening: "-",
+          statusTransfer: "Draft",
+          tanggalTransfer: "",
+          catatan: "Diambil dari Pengaturan_Tarif_Shift (06 Master User & Role)"
+        });
+        activeDocNames.add(t.namaPekerja.toLowerCase());
+      }
+    });
+
+    // Pastikan seluruh staff aktif dari Pengaturan_Tarif_Shift terwakili di Honor_Perawat_Staff
+    const activeStaffNames = new Set(honorStaff.map(s => s.namaStaff.toLowerCase()));
+    tarifShift.forEach((t) => {
+      let isDoc = (t.role.toLowerCase().includes("dokter") || t.namaPekerja.toLowerCase().startsWith("drg"));
+      if (!isDoc && isWorkerActive(t.namaPekerja) && !activeStaffNames.has(t.namaPekerja.toLowerCase())) {
+        let isAdmin = t.role.toLowerCase().includes("admin");
+        let gp = t.gajiPokokBulanan || (isAdmin ? 1200000 : 0);
+        honorStaff.push({
+          idPayrollStaff: "PAY-STF-" + Utilities.formatDate(new Date(), "Asia/Jakarta", "yyyyMM") + "-" + String(honorStaff.length + 1).padStart(3, '0'),
+          periodeBulan: Utilities.formatDate(new Date(), "Asia/Jakarta", "MMMM yyyy"),
+          idStaff: (isAdmin ? "ADM-" : "PRW-") + String(honorStaff.length + 1).padStart(3, '0'),
+          namaStaff: t.namaPekerja,
+          role: t.role,
+          gajiPokokBulanan: gp,
+          hadirShift1: 0,
+          hadirShift2: 0,
+          totalUangHarianShift: 0,
+          totalFeeTindakan: 0,
+          uangMakanTransport: 0,
+          lembur: 0,
+          potonganKasbon: 0,
+          totalDiterimaTHP: gp,
+          bankTujuan: "Mandiri / BSI",
+          noRekening: "-",
+          statusTransfer: "Draft",
+          tanggalTransfer: "",
+          catatan: "Diambil dari Pengaturan_Tarif_Shift (06 Master User & Role)"
+        });
+        activeStaffNames.add(t.namaPekerja.toLowerCase());
+      }
+    });
 
     let rekapJM = [];
     try {

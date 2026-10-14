@@ -488,8 +488,14 @@
     const sel = document.getElementById('presNamaPekerja');
     const roleEl = document.getElementById('presRole');
     if (!sel || !roleEl) return;
-    const opt = sel.options[sel.selectedIndex];
-    const role = opt ? (opt.getAttribute('data-role') || 'Dokter Gigi Umum') : 'Dokter Gigi Umum';
+    const opt = (sel.options && sel.selectedIndex >= 0 && sel.options[sel.selectedIndex]) ? sel.options[sel.selectedIndex] : null;
+    let role = 'Dokter Gigi Umum';
+    if (opt && typeof opt.getAttribute === 'function') {
+      role = opt.getAttribute('data-role') || 'Dokter Gigi Umum';
+    } else if (sel.value) {
+      let t = (window.PayrollState.tarifShift || []).find(x => (x.namaPekerja || '').toLowerCase() === String(sel.value).toLowerCase());
+      if (t && t.role) role = t.role;
+    }
     roleEl.value = role;
     updatePreviewUangShift();
   }

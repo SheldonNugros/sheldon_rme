@@ -152,11 +152,14 @@ function simpanUserMaster(payload) {
     let pjmVal = payload.persenJM !== undefined && payload.persenJM !== "" ? Number(payload.persenJM) : 0;
     if (pjmVal > 1) pjmVal = pjmVal / 100;
 
+    let rawSt = String(payload.status || "Aktif").trim().toLowerCase();
+    let normStatus = (rawSt === "tidak aktif" || rawSt === "non aktif" || rawSt === "nonaktif" || rawSt === "inactive") ? "Tidak Aktif" : "Aktif";
+
     if (rowIndex > 1) {
       // MODE EDIT
       sheet.getRange(rowIndex, idNama + 1).setValue(payload.nama.trim());
       sheet.getRange(rowIndex, idRole + 1).setValue(payload.role.trim());
-      sheet.getRange(rowIndex, idStatus + 1).setValue(payload.status || "Aktif");
+      sheet.getRange(rowIndex, idStatus + 1).setValue(normStatus);
       sheet.getRange(rowIndex, idSIP + 1).setValue(payload.noReg || "-");
       sheet.getRange(rowIndex, idHP + 1).setValue(payload.noHp || "");
       sheet.getRange(rowIndex, idJM + 1).setValue(pjmVal);
@@ -178,7 +181,7 @@ function simpanUserMaster(payload) {
           syncUserToPayrollTarifShift({
             nama: payload.nama.trim(),
             role: payload.role.trim(),
-            status: payload.status || "Aktif"
+            status: normStatus
           });
         }
       } catch (eSyncPay) {
@@ -197,7 +200,7 @@ function simpanUserMaster(payload) {
       newRow[idUser] = cleanUser;
       newRow[idRole] = payload.role.trim();
       newRow[idPass] = String(payload.password).trim();
-      newRow[idStatus] = payload.status || "Aktif";
+      newRow[idStatus] = normStatus;
       newRow[idSIP] = payload.noReg || "-";
       newRow[idHP] = payload.noHp || "";
       newRow[idJM] = pjmVal;
@@ -216,7 +219,7 @@ function simpanUserMaster(payload) {
           syncUserToPayrollTarifShift({
             nama: payload.nama.trim(),
             role: payload.role.trim(),
-            status: payload.status || "Aktif"
+            status: normStatus
           });
         }
       } catch (eSyncPay) {
@@ -336,10 +339,34 @@ function onOpen() {
       .addItem("➕ Buka Form Tambah/Edit User", "bukaFormUserMasterDialog")
       .addItem("📋 Buka Sidebar Kelola User", "bukaFormUserMasterSidebar")
       .addSeparator()
+      .addItem("🔄 Sinkronkan Data ke Pengaturan Tarif Shift", "syncAllUsersToPayrollTarifShift")
       .addItem("⚙️ Setup Header & Format Sheet Data", "initFormatSheetUserMaster")
       .addToUi();
   } catch (e) {
     // Abaikan jika dipanggil di luar konteks Spreadsheet UI
+  }
+}
+
+/**
+ * Trigger otomatis onEdit pada Spreadsheet RME Sheldon - 06 Master User & Role.
+ * Setiap kali Super Admin menambah, mengedit baris, atau mengubah Status / Role di Sheet 'Data',
+ * fungsi ini langsung menyinkronkan data ke sheet Pengaturan_Tarif_Shift.
+ */
+function onEdit(e) {
+  try {
+    if (!e || !e.range) return;
+    const sh = e.range.getSheet();
+    const sheetName = sh.getName();
+    const row = e.range.getRow();
+    if (row <= 1) return; // Header edit diabaikan
+
+    if (sheetName === "Data" || sheetName === "Pengaturan_Tarif_Shift") {
+      if (typeof syncAllUsersToPayrollTarifShift === "function") {
+        syncAllUsersToPayrollTarifShift();
+      }
+    }
+  } catch (err) {
+    Logger.log("Info onEdit: " + err.message);
   }
 }
 
@@ -392,7 +419,7 @@ function initFormatSheetUserMaster() {
     sheet.getRange(2, 3, 100, 1).setDataValidation(ruleRole);
 
     const ruleStatus = SpreadsheetApp.newDataValidation()
-      .requireValueInList(["Aktif", "Non Aktif", "Tidak Aktif"], true)
+      .requireValueInList(["Aktif", "Tidak Aktif"], true)
       .setAllowInvalid(false)
       .build();
     sheet.getRange(2, 5, 100, 1).setDataValidation(ruleStatus);

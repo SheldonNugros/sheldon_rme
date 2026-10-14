@@ -11346,19 +11346,62 @@ function renderInfoBmhp() {
     });
   }
 
+  function isPekerjaAktif(nama) {
+    if (!nama) return false;
+    let found = (window.PayrollState.tarifShift || []).find(t => String(t.namaPekerja || '').trim().toLowerCase() === String(nama).trim().toLowerCase());
+    if (found) {
+      let st = String(found.status || 'Aktif').trim().toLowerCase();
+      return st !== 'tidak aktif' && st !== 'non aktif' && st !== 'nonaktif' && st !== 'inactive';
+    }
+    return true;
+  }
+
+  function populatePresensiPekerjaDropdown() {
+    const sel = document.getElementById('presNamaPekerja');
+    if (!sel) return;
+    const currentVal = sel.value;
+    const activeWorkers = (window.PayrollState.tarifShift || []).filter(t => isPekerjaAktif(t.namaPekerja));
+
+    if (activeWorkers.length === 0) {
+      sel.innerHTML = '<option value="">(Tidak ada pekerja aktif)</option>';
+      const roleEl = document.getElementById('presRole');
+      if (roleEl) roleEl.value = '-';
+      return;
+    }
+
+    sel.innerHTML = activeWorkers.map((w, idx) => {
+      let idStr = w.idAturan || ('STF-' + String(idx + 1).padStart(3, '0'));
+      return `<option value="${w.namaPekerja}" data-role="${w.role}" data-id="${idStr}">${w.namaPekerja} (${w.role})</option>`;
+    }).join('');
+
+    let stillExists = activeWorkers.some(w => w.namaPekerja.toLowerCase() === currentVal.toLowerCase());
+    if (stillExists) {
+      sel.value = currentVal;
+    } else {
+      sel.selectedIndex = 0;
+    }
+    handlePresPekerjaChange();
+  }
+
   function renderAllPayrollTables() {
+    populatePresensiPekerjaDropdown();
     recalculateShiftTotalsFromPresensi();
+
+    // Saring hanya pekerja AKTIF agar pekerja Tidak Aktif tidak muncul di Payroll
+    const listDok = (window.PayrollState.penggajianDokter || []).filter(d => isPekerjaAktif(d.namaDokter));
+    const listStf = (window.PayrollState.honorStaff || []).filter(s => isPekerjaAktif(s.namaStaff));
+    const listPres = (window.PayrollState.presensiHarian || []).filter(p => isPekerjaAktif(p.namaPekerja));
 
     // 1. Update KPI Cards
     let totDokter = 0;
-    (window.PayrollState.penggajianDokter || []).forEach(d => { totDokter += Number(d.totalDiterimaTHP) || 0; });
+    listDok.forEach(d => { totDokter += Number(d.totalDiterimaTHP) || 0; });
 
     let totStaff = 0;
-    (window.PayrollState.honorStaff || []).forEach(s => { totStaff += Number(s.totalDiterimaTHP) || 0; });
+    listStf.forEach(s => { totStaff += Number(s.totalDiterimaTHP) || 0; });
 
     let totShift = 0;
     let countHadir = 0;
-    (window.PayrollState.presensiHarian || []).forEach(p => {
+    listPres.forEach(p => {
       if (String(p.statusKehadiran || '').toLowerCase() === 'hadir') {
         countHadir++;
         totShift += Number(p.uangHarianDidapat) || 0;
@@ -11374,9 +11417,9 @@ function renderInfoBmhp() {
     const elGrand = document.getElementById('kpiGrandTotalPayroll');
 
     if (elKpiDok) elKpiDok.innerText = fmtRpPayroll(totDokter);
-    if (elCntDok) elCntDok.innerText = (window.PayrollState.penggajianDokter || []).length + ' Dokter Aktif';
+    if (elCntDok) elCntDok.innerText = listDok.length + ' Dokter Aktif';
     if (elKpiStf) elKpiStf.innerText = fmtRpPayroll(totStaff);
-    if (elCntStf) elCntStf.innerText = (window.PayrollState.honorStaff || []).length + ' Perawat & Admin';
+    if (elCntStf) elCntStf.innerText = listStf.length + ' Perawat & Admin';
     if (elKpiShf) elKpiShf.innerText = fmtRpPayroll(totShift);
     if (elCntPrs) elCntPrs.innerText = countHadir + ' Shift Kehadiran Tercatat';
     if (elGrand) elGrand.innerText = fmtRpPayroll(totDokter + totStaff);
@@ -11384,9 +11427,8 @@ function renderInfoBmhp() {
     // 2. Render Tabel Penggajian Dokter
     const tbDok = document.getElementById('tbodyPayrollDokter');
     if (tbDok) {
-      const listDok = window.PayrollState.penggajianDokter || [];
       if (listDok.length === 0) {
-        tbDok.innerHTML = '<tr><td colspan="11" class="py-8 text-center text-slate-400 font-bold">Belum ada data penggajian dokter.</td></tr>';
+        tbDok.innerHTML = '<tr><td colspan="11" class="py-8 text-center text-slate-400 font-bold">Belum ada data penggajian dokter aktif.</td></tr>';
       } else {
         tbDok.innerHTML = listDok.map((d, idx) => {
           let pot = (Number(d.potonganPPh21) || 0) + (Number(d.potonganKasbon) || 0);
@@ -11436,9 +11478,8 @@ function renderInfoBmhp() {
     // 3. Render Tabel Honor Perawat & Admin
     const tbStf = document.getElementById('tbodyPayrollStaff');
     if (tbStf) {
-      const listStf = window.PayrollState.honorStaff || [];
       if (listStf.length === 0) {
-        tbStf.innerHTML = '<tr><td colspan="11" class="py-8 text-center text-slate-400 font-bold">Belum ada data honor perawat & admin.</td></tr>';
+        tbStf.innerHTML = '<tr><td colspan="11" class="py-8 text-center text-slate-400 font-bold">Belum ada data honor perawat & admin aktif.</td></tr>';
       } else {
         tbStf.innerHTML = listStf.map((s, idx) => {
           let tunj = (Number(s.totalFeeTindakan) || 0) + (Number(s.uangMakanTransport) || 0) + (Number(s.lembur) || 0);
@@ -11492,7 +11533,6 @@ function renderInfoBmhp() {
     // 4. Render Tabel Presensi Shift Harian
     const tbPres = document.getElementById('tbodyPresensiHarian');
     if (tbPres) {
-      const listPres = window.PayrollState.presensiHarian || [];
       if (listPres.length === 0) {
         tbPres.innerHTML = '<tr><td colspan="8" class="py-8 text-center text-slate-400 font-bold">Belum ada data presensi shift harian.</td></tr>';
       } else {
@@ -11526,10 +11566,10 @@ function renderInfoBmhp() {
     if (tbTarif) {
       const listTarif = window.PayrollState.tarifShift || [];
       tbTarif.innerHTML = listTarif.map((t, idx) => {
-        let isAktif = !t.status || String(t.status).toLowerCase() === 'aktif';
+        let isAktif = isPekerjaAktif(t.namaPekerja);
         let badgeStatus = isAktif
           ? '<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-extrabold text-[10px] border border-emerald-300">Aktif</span>'
-          : '<span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-bold text-[10px] border border-slate-300">Non Aktif</span>';
+          : '<span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 font-bold text-[10px] border border-rose-300">Tidak Aktif</span>';
         return `
         <tr>
           <td class="py-3 px-4 font-mono font-bold text-slate-500 text-[11px]">${t.idAturan}</td>
@@ -11709,6 +11749,10 @@ function renderInfoBmhp() {
     document.getElementById('tarifShift2').value = Number(item.tarifShift2) || 0;
     document.getElementById('tarifGajiPokok').value = Number(item.gajiPokokBulanan) || 0;
     document.getElementById('tarifKeterangan').value = item.keterangan || '';
+    const statEl = document.getElementById('tarifStatus');
+    if (statEl) {
+      statEl.value = isPekerjaAktif(item.namaPekerja) ? 'Aktif' : 'Tidak Aktif';
+    }
   }
 
   function handleSimpanTarifShift(e) {
@@ -11720,7 +11764,8 @@ function renderInfoBmhp() {
       tarifShift1: Number((document.getElementById('tarifShift1') || {}).value) || 0,
       tarifShift2: Number((document.getElementById('tarifShift2') || {}).value) || 0,
       gajiPokokBulanan: Number((document.getElementById('tarifGajiPokok') || {}).value) || 0,
-      keterangan: (document.getElementById('tarifKeterangan') || {}).value.trim()
+      keterangan: (document.getElementById('tarifKeterangan') || {}).value.trim(),
+      status: (document.getElementById('tarifStatus') || {}).value || 'Aktif'
     };
 
     if (!payload.namaPekerja) return;

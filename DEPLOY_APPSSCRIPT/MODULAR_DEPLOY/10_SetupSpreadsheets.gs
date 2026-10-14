@@ -175,7 +175,7 @@ const SPREADSHEET_DEFINITIONS = {
           ],
           "validations": {
             "C": ["Super User", "Owner", "Dokter Gigi Umum", "Dokter Gigi Spesialis", "Perawat Gigi", "Perawat Umum", "Admin", "Kasir", "Staff"],
-            "E": ["Aktif", "Non Aktif", "Tidak Aktif"]
+            "E": ["Aktif", "Tidak Aktif"]
           }
         },
         {
@@ -185,7 +185,7 @@ const SPREADSHEET_DEFINITIONS = {
           "validations": {
             "B": ["Super User", "Owner", "Dokter Gigi Spesialis", "Dokter Gigi Umum", "Perawat Gigi", "Perawat Umum", "Admin", "Kasir", "Staff"],
             "D": ["Uang Harian Shift", "Gaji Bulanan Tetap", "Kombinasi Shift & Tindakan"],
-            "I": ["Aktif", "Non Aktif", "Tidak Aktif"]
+            "I": ["Aktif", "Tidak Aktif"]
           },
           "seedRows": [
             ["TARIF-001", "Dokter Gigi Spesialis", "drg. Rahma Yulinda D, Sp. BMM", "Kombinasi Shift & Tindakan", 55000, 55000, 0, "2 Shift: Rp 55.000/shift (berdasarkan absensi) + JM 65% (Rontgen 15%)", "Aktif"],
@@ -1293,14 +1293,19 @@ function generatePayrollPeriode(periodeBulan) {
           const idxS2 = getColIdx(hTarif, ['tarif_shift_2', 'shift_2']);
           const idxGajiPokok = getColIdx(hTarif, ['gaji_pokok_bulanan', 'gaji_pokok']);
 
+          const idxStatus = getColIdx(hTarif, ['status']);
+
           for (let t = 1; t < rawTarif.length; t++) {
             let rowT = rawTarif[t];
             let namaT = rowT[idxNama] ? String(rowT[idxNama]).trim() : "";
+            let rawSt = (idxStatus !== -1 && rowT[idxStatus]) ? String(rowT[idxStatus]).trim().toLowerCase() : "aktif";
+            let normSt = (rawSt === "tidak aktif" || rawSt === "non aktif" || rawSt === "nonaktif" || rawSt === "inactive") ? "Tidak Aktif" : "Aktif";
             if (namaT) {
               tarifMap[namaT] = {
                 shift1: Number(rowT[idxS1]) || 0,
                 shift2: Number(rowT[idxS2]) || 0,
-                gajiPokok: Number(rowT[idxGajiPokok]) || 0
+                gajiPokok: Number(rowT[idxGajiPokok]) || 0,
+                status: normSt
               };
             }
           }
@@ -1349,6 +1354,28 @@ function generatePayrollPeriode(periodeBulan) {
     let countGenerated = 0;
 
     for (let dok in dokterMap) {
+      // Validasi keaktifan dokter: Jika Tidak Aktif, JANGAN muncul di payroll
+      let dokTarif = tarifMap[dok];
+      let isDokAktif = true;
+      if (dokTarif && dokTarif.status === "Tidak Aktif") {
+        isDokAktif = false;
+      }
+
+      if (!isDokAktif) {
+        // Hapus dari sheet Penggajian_Dokter jika ada rekam lama untuk periode berjalan
+        try {
+          let curPay = sheetPayroll.getDataRange().getValues();
+          for (let rIdx = 1; rIdx < curPay.length; rIdx++) {
+            if (String(curPay[rIdx][1] || "").trim().toLowerCase() === targetBulan.toLowerCase() &&
+                String(curPay[rIdx][3] || "").trim().toLowerCase() === dok.toLowerCase()) {
+              sheetPayroll.deleteRow(rIdx + 1);
+              break;
+            }
+          }
+        } catch(eDelDok) {}
+        continue;
+      }
+
       let d = dokterMap[dok];
       let idPay = "PAY-DR-" + Utilities.formatDate(new Date(), "Asia/Jakarta", "yyyyMM") + "-" + String(countGenerated + 1).padStart(3, '0');
       
@@ -1421,11 +1448,29 @@ function generatePayrollPeriode(periodeBulan) {
       const rawTarifAll = rawTarif || (ssMasterId ? readFast(ssMasterId, "Pengaturan_Tarif_Shift") : null);
       if (sheetStaff && rawTarifAll && rawTarifAll.length > 1) {
         let existingStf = sheetStaff.getDataRange().getValues();
+        let idxStatAll = getColIdx(rawTarifAll[0], ['status']);
         let stfCounter = 1;
         for (let t = 1; t < rawTarifAll.length; t++) {
           let roleT = String(rawTarifAll[t][1] || "").trim();
           let namaT = String(rawTarifAll[t][2] || "").trim();
+          let rawStatT = (idxStatAll !== -1 && rawTarifAll[t][idxStatAll]) ? String(rawTarifAll[t][idxStatAll]).trim().toLowerCase() : "aktif";
+          let isStfAktif = !(rawStatT === "tidak aktif" || rawStatT === "non aktif" || rawStatT === "nonaktif" || rawStatT === "inactive");
+
           if (!namaT || roleT.toLowerCase().includes("dokter")) continue;
+
+          // Jika status Tidak Aktif, JANGAN muncul di payroll
+          if (!isStfAktif) {
+            try {
+              for (let sIdx = 1; sIdx < existingStf.length; sIdx++) {
+                if (String(existingStf[sIdx][1] || "").trim().toLowerCase() === targetBulan.toLowerCase() &&
+                    String(existingStf[sIdx][3] || "").trim().toLowerCase() === namaT.toLowerCase()) {
+                  sheetStaff.deleteRow(sIdx + 1);
+                  break;
+                }
+              }
+            } catch(eDelStf) {}
+            continue;
+          }
 
           let isAdminRole = roleT.toLowerCase().includes("admin");
           let gajiPokokVal = (tarifMap[namaT] && tarifMap[namaT].gajiPokok) ? tarifMap[namaT].gajiPokok : (isAdminRole ? 1200000 : 0);
@@ -1542,17 +1587,33 @@ function getPayrollModuleData() {
     } catch(eSyncAuto) {}
 
     // Pengaturan_Tarif_Shift disimpan dan dibaca dari Spreadsheet 06 Master User & Role
-    const tarifShift = readSheetRowsFrom(ssM, "Pengaturan_Tarif_Shift").map(r => ({
-      idAturan: String(r[0] || ""),
-      role: String(r[1] || ""),
-      namaPekerja: String(r[2] || ""),
-      tipeKompensasi: String(r[3] || ""),
-      tarifShift1: Number(r[4]) || 0,
-      tarifShift2: Number(r[5]) || 0,
-      gajiPokokBulanan: Number(r[6]) || 0,
-      keterangan: String(r[7] || ""),
-      status: String(r[8] || "Aktif")
-    })).filter(x => x.namaPekerja !== "");
+    const tarifShift = readSheetRowsFrom(ssM, "Pengaturan_Tarif_Shift").map(r => {
+      let rawSt = String(r[8] || "Aktif").trim().toLowerCase();
+      let stVal = (rawSt === "tidak aktif" || rawSt === "non aktif" || rawSt === "nonaktif" || rawSt === "inactive") ? "Tidak Aktif" : "Aktif";
+      return {
+        idAturan: String(r[0] || ""),
+        role: String(r[1] || ""),
+        namaPekerja: String(r[2] || ""),
+        tipeKompensasi: String(r[3] || ""),
+        tarifShift1: Number(r[4]) || 0,
+        tarifShift2: Number(r[5]) || 0,
+        gajiPokokBulanan: Number(r[6]) || 0,
+        keterangan: String(r[7] || ""),
+        status: stVal
+      };
+    }).filter(x => x.namaPekerja !== "");
+
+    // Map status pekerja untuk memfilter modul payroll (Pekerja Tidak Aktif tidak muncul di payroll)
+    const mapStatusPekerja = {};
+    tarifShift.forEach(t => {
+      mapStatusPekerja[t.namaPekerja.toLowerCase()] = t.status;
+    });
+
+    const isWorkerActive = (nama) => {
+      let key = String(nama || "").trim().toLowerCase();
+      if (!key) return false;
+      return mapStatusPekerja[key] !== "Tidak Aktif";
+    };
 
     const presensiHarian = readSheetRows("Presensi_Shift_Harian").map(r => ({
       idPresensi: String(r[0] || ""),
@@ -1566,7 +1627,7 @@ function getPayrollModuleData() {
       statusKehadiran: String(r[8] || "Hadir"),
       uangHarianDidapat: Number(r[9]) || 0,
       verifikator: String(r[10] || "")
-    })).filter(x => x.namaPekerja !== "");
+    })).filter(x => x.namaPekerja !== "" && isWorkerActive(x.namaPekerja));
 
     const penggajianDokter = readSheetRows("Penggajian_Dokter").map(r => ({
       idPayroll: String(r[0] || ""),
@@ -1590,7 +1651,7 @@ function getPayrollModuleData() {
       statusTransfer: String(r[18] || "Draft"),
       tanggalTransfer: fDate(r[19]),
       catatan: String(r[20] || "")
-    })).filter(x => x.namaDokter !== "");
+    })).filter(x => x.namaDokter !== "" && isWorkerActive(x.namaDokter));
 
     const honorStaff = readSheetRows("Honor_Perawat_Staff").map(r => ({
       idPayrollStaff: String(r[0] || ""),
@@ -1612,7 +1673,7 @@ function getPayrollModuleData() {
       statusTransfer: String(r[16] || "Draft"),
       tanggalTransfer: fDate(r[17]),
       catatan: String(r[18] || "")
-    })).filter(x => x.namaStaff !== "");
+    })).filter(x => x.namaStaff !== "" && isWorkerActive(x.namaStaff));
 
     let rekapJM = [];
     try {
@@ -1827,12 +1888,14 @@ function syncUserToPayrollTarifShift(userData) {
 
     const namaPekerja = String(userData.nama || "").trim();
     const role = String(userData.role || "Admin").trim();
-    const status = String(userData.status || "Aktif").trim();
+    const rawStatus = String(userData.status || "Aktif").trim().toLowerCase();
+    const status = (rawStatus === "tidak aktif" || rawStatus === "non aktif" || rawStatus === "nonaktif" || rawStatus === "inactive") ? "Tidak Aktif" : "Aktif";
 
     // Pastikan header memiliki kolom Status (Kolom 9)
     if (sh.getLastRow() === 0) {
       const headers = ["ID_Aturan", "Role", "Nama_Pekerja", "Tipe_Kompensasi", "Tarif_Shift_1", "Tarif_Shift_2", "Gaji_Pokok_Bulanan", "Keterangan", "Status"];
       sh.getRange(1, 1, 1, headers.length).setValues([headers]).setFontWeight("bold").setBackground("#e2e8f0");
+      sh.setFrozenRows(1);
     } else {
       let hRow = sh.getRange(1, 1, 1, Math.max(9, sh.getLastColumn())).getValues()[0];
       let idStatCol = getColIdx(hRow, ["status"]);
@@ -1843,6 +1906,7 @@ function syncUserToPayrollTarifShift(userData) {
 
     let data = sh.getDataRange().getValues();
     let h = data[0];
+    let idIdCol = getColIdx(h, ["id_aturan", "idaturan", "id"]); if (idIdCol === -1) idIdCol = 0;
     let idRoleCol = getColIdx(h, ["role"]); if (idRoleCol === -1) idRoleCol = 1;
     let idNamaCol = getColIdx(h, ["namapekerja", "nama"]); if (idNamaCol === -1) idNamaCol = 2;
     let idTipeCol = getColIdx(h, ["tipekompensasi", "tipe"]); if (idTipeCol === -1) idTipeCol = 3;
@@ -1853,10 +1917,16 @@ function syncUserToPayrollTarifShift(userData) {
     let idStatCol = getColIdx(h, ["status"]); if (idStatCol === -1) idStatCol = 8;
 
     let foundRow = -1;
+    let maxIdNum = 0;
     for (let i = 1; i < data.length; i++) {
+      let curId = String(data[i][idIdCol] || "");
+      let match = curId.match(/TARIF-(\d+)/i);
+      if (match) {
+        let n = parseInt(match[1], 10);
+        if (n > maxIdNum) maxIdNum = n;
+      }
       if (String(data[i][idNamaCol] || "").trim().toLowerCase() === namaPekerja.toLowerCase()) {
         foundRow = i + 1;
-        break;
       }
     }
 
@@ -1864,6 +1934,11 @@ function syncUserToPayrollTarifShift(userData) {
       // Update data: Role dan Status selalu di-sync
       sh.getRange(foundRow, idRoleCol + 1).setValue(role);
       sh.getRange(foundRow, idStatCol + 1).setValue(status);
+      let curIdVal = String(data[foundRow - 1][idIdCol] || "").trim();
+      if (!curIdVal) {
+        maxIdNum++;
+        sh.getRange(foundRow, idIdCol + 1).setValue("TARIF-" + String(maxIdNum).padStart(3, '0'));
+      }
       if (userData.tipeKompensasi) sh.getRange(foundRow, idTipeCol + 1).setValue(userData.tipeKompensasi);
       if (userData.tarifShift1 !== undefined) sh.getRange(foundRow, idS1Col + 1).setValue(Number(userData.tarifShift1) || 0);
       if (userData.tarifShift2 !== undefined) sh.getRange(foundRow, idS2Col + 1).setValue(Number(userData.tarifShift2) || 0);
@@ -1924,7 +1999,8 @@ function syncUserToPayrollTarifShift(userData) {
       if (userData.gajiPokokBulanan !== undefined) gp = Number(userData.gajiPokokBulanan) || 0;
       if (userData.keterangan) ket = userData.keterangan;
 
-      const idAturan = "TARIF-" + String(data.length).padStart(3, '0');
+      maxIdNum++;
+      const idAturan = "TARIF-" + String(maxIdNum).padStart(3, '0');
       let newRow = new Array(Math.max(9, h.length)).fill("");
       newRow[0] = idAturan;
       newRow[idRoleCol] = role;
@@ -1941,7 +2017,18 @@ function syncUserToPayrollTarifShift(userData) {
       sh.getRange(newLastRow, idS1Col + 1).setNumberFormat("#,##0");
       sh.getRange(newLastRow, idS2Col + 1).setNumberFormat("#,##0");
       sh.getRange(newLastRow, idGpCol + 1).setNumberFormat("#,##0");
+      sh.getRange(newLastRow, 1).setHorizontalAlignment("center");
+      sh.getRange(newLastRow, idStatCol + 1).setHorizontalAlignment("center");
     }
+
+    // Set Data Validation Dropdown: Aktif / Tidak Aktif
+    try {
+      const ruleStatus = SpreadsheetApp.newDataValidation()
+        .requireValueInList(["Aktif", "Tidak Aktif"], true)
+        .setAllowInvalid(false)
+        .build();
+      sh.getRange(2, idStatCol + 1, Math.max(50, sh.getLastRow()), 1).setDataValidation(ruleStatus);
+    } catch(eVal) {}
 
     SpreadsheetApp.flush();
     return { success: true, message: "Sinkronisasi user ke Pengaturan_Tarif_Shift berhasil: " + namaPekerja };
@@ -1956,39 +2043,233 @@ function syncUserToPayrollTarifShift(userData) {
 /**
  * Menyinkronkan seluruh daftar pekerja dari RME Sheldon - 06 Master User & Role (Sheet: Data)
  * ke sheet Pengaturan_Tarif_Shift (di dalam Spreadsheet 06 Master User & Role).
+ * - Otomatis mengambil Nama Pekerja dan Role dari Sheet Data.
+ * - Otomatis mengisi ID_Aturan (format TARIF-001, TARIF-002, dst).
+ * - Status pilihan strictly: Aktif dan Tidak Aktif.
+ * - Pekerja berstatus Tidak Aktif tidak akan muncul lagi di Payroll.
  */
 function syncAllUsersToPayrollTarifShift() {
+  const lock = LockService.getScriptLock();
   try {
+    lock.waitLock(15000);
     const ssM = SpreadsheetApp.openById(DB_CONFIG.MASTER.trim());
-    const sheetM = ssM.getSheetByName("Data");
-    if (!sheetM || sheetM.getLastRow() <= 1) return { success: false, message: "Data Master User kosong." };
+    const sheetData = ssM.getSheetByName("Data");
+    if (!sheetData || sheetData.getLastRow() <= 1) return { success: false, message: "Data Master User kosong." };
 
-    const v = sheetM.getDataRange().getValues();
-    const h = v[0];
-    let idNama = getColIdx(h, ['namapekerja', 'nama']); if (idNama === -1) idNama = 0;
-    let idRole = getColIdx(h, ['kategorirole', 'role', 'kategori']); if (idRole === -1) idRole = 2;
-    let idStatus = getColIdx(h, ['status']); if (idStatus === -1) idStatus = 4;
+    let shTarif = ssM.getSheetByName("Pengaturan_Tarif_Shift") || ssM.insertSheet("Pengaturan_Tarif_Shift");
 
-    let syncCount = 0;
-    for (let i = 1; i < v.length; i++) {
-      let r = v[i];
-      let nama = String(r[idNama] || "").trim();
-      if (!nama) continue;
-      let role = r[idRole] ? String(r[idRole]).trim() : "Admin";
-      let status = r[idStatus] ? String(r[idStatus]).trim() : "Aktif";
+    // Bersihkan sheet usang jika masih ada
+    try {
+      let legacyPresM = ssM.getSheetByName("Presensi_Shift_Harian");
+      if (legacyPresM && ssM.getSheets().length > 1) {
+        ssM.deleteSheet(legacyPresM);
+      }
+    } catch (eDelM) {}
 
-      syncUserToPayrollTarifShift({
-        nama: nama,
-        role: role,
-        status: status
-      });
-      syncCount++;
+    try {
+      if (DB_CONFIG && DB_CONFIG.PAYROLL) {
+        let ssPay = SpreadsheetApp.openById(DB_CONFIG.PAYROLL.trim());
+        let legacyTarifPay = ssPay.getSheetByName("Pengaturan_Tarif_Shift");
+        if (legacyTarifPay && ssPay.getSheets().length > 1) {
+          ssPay.deleteSheet(legacyTarifPay);
+        }
+      }
+    } catch (eDelP) {}
+
+    // Ambil data pekerja dari Sheet Data
+    const vData = sheetData.getDataRange().getValues();
+    const hData = vData[0];
+    let idNama = getColIdx(hData, ['namapekerja', 'nama']); if (idNama === -1) idNama = 0;
+    let idRole = getColIdx(hData, ['kategorirole', 'role', 'kategori']); if (idRole === -1) idRole = 2;
+    let idStatus = getColIdx(hData, ['status']); if (idStatus === -1) idStatus = 4;
+
+    const headers = ["ID_Aturan", "Role", "Nama_Pekerja", "Tipe_Kompensasi", "Tarif_Shift_1", "Tarif_Shift_2", "Gaji_Pokok_Bulanan", "Keterangan", "Status"];
+
+    // Ambil data yang sudah ada di Pengaturan_Tarif_Shift
+    let existingTarif = [];
+    if (shTarif.getLastRow() > 1) {
+      existingTarif = shTarif.getRange(2, 1, shTarif.getLastRow() - 1, Math.max(9, shTarif.getLastColumn())).getValues();
     }
 
-    return { success: true, message: "Berhasil menyinkronkan " + syncCount + " pekerja ke Pengaturan_Tarif_Shift." };
+    let mapTarif = {};
+    let maxIdNum = 0;
+    for (let i = 0; i < existingTarif.length; i++) {
+      let r = existingTarif[i];
+      let idStr = String(r[0] || "");
+      let match = idStr.match(/TARIF-(\d+)/i);
+      if (match) {
+        let n = parseInt(match[1], 10);
+        if (n > maxIdNum) maxIdNum = n;
+      }
+      let nm = String(r[2] || "").trim().toLowerCase();
+      if (nm) {
+        let curSt = String(r[8] || "Aktif").trim().toLowerCase();
+        let normSt = (curSt === "tidak aktif" || curSt === "non aktif" || curSt === "nonaktif" || curSt === "inactive") ? "Tidak Aktif" : "Aktif";
+        mapTarif[nm] = {
+          idAturan: idStr,
+          role: String(r[1] || ""),
+          namaPekerja: String(r[2] || ""),
+          tipeKompensasi: String(r[3] || ""),
+          tarifShift1: Number(r[4]) || 0,
+          tarifShift2: Number(r[5]) || 0,
+          gajiPokokBulanan: Number(r[6]) || 0,
+          keterangan: String(r[7] || ""),
+          status: normSt
+        };
+      }
+    }
+
+    let finalRows = [];
+    let processedNames = new Set();
+
+    // 1. Sinkronkan dari sheet Data
+    for (let i = 1; i < vData.length; i++) {
+      let r = vData[i];
+      let nama = String(r[idNama] || "").trim();
+      if (!nama) continue;
+      let nmKey = nama.toLowerCase();
+      if (processedNames.has(nmKey)) continue;
+      processedNames.add(nmKey);
+
+      let role = r[idRole] ? String(r[idRole]).trim() : "Admin";
+      let rawStatus = r[idStatus] ? String(r[idStatus]).trim().toLowerCase() : "aktif";
+      let status = (rawStatus === "tidak aktif" || rawStatus === "non aktif" || rawStatus === "nonaktif" || rawStatus === "inactive") ? "Tidak Aktif" : "Aktif";
+
+      if (mapTarif[nmKey]) {
+        let curr = mapTarif[nmKey];
+        if (!curr.idAturan) {
+          maxIdNum++;
+          curr.idAturan = "TARIF-" + String(maxIdNum).padStart(3, '0');
+        }
+        curr.role = role;
+        curr.namaPekerja = nama;
+        curr.status = status;
+        finalRows.push([
+          curr.idAturan,
+          curr.role,
+          curr.namaPekerja,
+          curr.tipeKompensasi,
+          curr.tarifShift1,
+          curr.tarifShift2,
+          curr.gajiPokokBulanan,
+          curr.keterangan,
+          curr.status
+        ]);
+      } else {
+        // Otomatis isi ID_Aturan dan default tarif berdasarkan Role
+        maxIdNum++;
+        let newIdAturan = "TARIF-" + String(maxIdNum).padStart(3, '0');
+        let tipeKompensasi = "Uang Harian Shift";
+        let s1 = 45000;
+        let s2 = 45000;
+        let gp = 0;
+        let ket = "";
+
+        let rLower = role.toLowerCase();
+        if (rLower.includes("dokter")) {
+          tipeKompensasi = "Kombinasi Shift & Tindakan";
+          s1 = 55000;
+          s2 = 55000;
+          gp = 0;
+          ket = "2 Shift: Rp 55.000/shift (berdasarkan absensi) + JM Tindakan";
+        } else if (rLower.includes("perawat")) {
+          tipeKompensasi = "Uang Harian Shift";
+          s1 = 45000;
+          s2 = 45000;
+          gp = 0;
+          ket = "2 Shift: Rp 45.000/shift (dihitung berdasarkan absensi kehadiran)";
+        } else if (rLower.includes("admin") || rLower.includes("kasir")) {
+          tipeKompensasi = "Gaji Bulanan Tetap";
+          s1 = 0;
+          s2 = 0;
+          gp = 1200000;
+          ket = "Gaji Bulanan Tetap Rp 1.200.000/bulan (Non-Shift)";
+        } else if (rLower.includes("owner")) {
+          if (nama.toLowerCase().startsWith("drg")) {
+            tipeKompensasi = "Kombinasi Shift & Tindakan";
+            s1 = 55000;
+            s2 = 55000;
+            gp = 0;
+            ket = "Owner / Dokter Gigi Spesialis + JM 65%";
+          } else {
+            tipeKompensasi = "Gaji Bulanan Tetap";
+            s1 = 0;
+            s2 = 0;
+            gp = 0;
+            ket = "Owner / Manajemen";
+          }
+        } else {
+          tipeKompensasi = "Uang Harian Shift";
+          s1 = 40000;
+          s2 = 40000;
+          gp = 0;
+          ket = "Staff Umum / Operasional";
+        }
+
+        finalRows.push([
+          newIdAturan,
+          role,
+          nama,
+          tipeKompensasi,
+          s1,
+          s2,
+          gp,
+          ket,
+          status
+        ]);
+      }
+    }
+
+    // 2. Pertahankan entri lama yang tidak terdaftar di Sheet Data dengan status "Tidak Aktif"
+    for (let nmKey in mapTarif) {
+      if (!processedNames.has(nmKey)) {
+        let curr = mapTarif[nmKey];
+        finalRows.push([
+          curr.idAturan,
+          curr.role,
+          curr.namaPekerja,
+          curr.tipeKompensasi,
+          curr.tarifShift1,
+          curr.tarifShift2,
+          curr.gajiPokokBulanan,
+          curr.keterangan || "Pekerja diarsipkan / non-aktif",
+          "Tidak Aktif"
+        ]);
+      }
+    }
+
+    // Tulis ulang seluruh sheet Pengaturan_Tarif_Shift secara rapi
+    shTarif.clear();
+    shTarif.getRange(1, 1, 1, headers.length).setValues([headers]).setFontWeight("bold").setBackground("#e2e8f0");
+    shTarif.setFrozenRows(1);
+
+    if (finalRows.length > 0) {
+      shTarif.getRange(2, 1, finalRows.length, headers.length).setValues(finalRows);
+      shTarif.getRange(2, 5, finalRows.length, 3).setNumberFormat("#,##0");
+      shTarif.getRange(2, 1, finalRows.length, 1).setHorizontalAlignment("center");
+      shTarif.getRange(2, 9, finalRows.length, 1).setHorizontalAlignment("center");
+    }
+
+    // Validasi Data Dropdown Status: Aktif / Tidak Aktif
+    try {
+      const ruleStatus = SpreadsheetApp.newDataValidation()
+        .requireValueInList(["Aktif", "Tidak Aktif"], true)
+        .setAllowInvalid(false)
+        .build();
+      shTarif.getRange(2, 9, Math.max(50, finalRows.length + 20), 1).setDataValidation(ruleStatus);
+    } catch(eVal) {}
+
+    SpreadsheetApp.flush();
+    return {
+      success: true,
+      count: finalRows.length,
+      message: "Berhasil menyinkronkan " + finalRows.length + " pekerja ke Pengaturan_Tarif_Shift."
+    };
   } catch (err) {
     Logger.log("Error syncAllUsersToPayrollTarifShift: " + err.message);
     return { success: false, message: err.message };
+  } finally {
+    lock.releaseLock();
   }
 }
 

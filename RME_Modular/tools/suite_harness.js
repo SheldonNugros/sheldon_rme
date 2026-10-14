@@ -9590,176 +9590,6 @@ function triggerSinkronSemuaSheet() {
 // ==========================================
 // FITUR OTOMATISASI PAYROLL & HONOR DOKTER
 // ==========================================
-function triggerSetupPayroll() {
-  const btn = document.getElementById("btnSetupPayroll");
-  const originalHtml = btn ? btn.innerHTML : "<span>💼</span> Setup Payroll Dokter";
-  if (btn) {
-    btn.disabled = true;
-    btn.innerHTML = "<span>⏳</span> Menyiapkan Payroll...";
-  }
-
-  showToast("info", "Membuat/menyiapkan Spreadsheet 11 Payroll & Honor Dokter di Google Drive...");
-
-  if (typeof google !== "undefined" && google.script && google.script.run) {
-    google.script.run
-      .withSuccessHandler(res => {
-        if (btn) { btn.disabled = false; btn.innerHTML = originalHtml; }
-        if (res && res.success) {
-          showToast("success", "Spreadsheet Payroll Dokter Berhasil Dibuat/Disinkronkan!");
-          alert("✅ SPREADSHEET PAYROLL DOKTER BERHASIL DISIAPKAN:\n\n" + 
-                (res.message || "Spreadsheet RME Sheldon - 11 Payroll & Honor Dokter telah siap.") +
-                (res.url ? "\n\nLink Google Spreadsheet:\n" + res.url : ""));
-        } else {
-          showToast("warning", res ? res.message : "Terjadi kendala saat setup payroll.");
-        }
-      })
-      .withFailureHandler(err => {
-        if (btn) { btn.disabled = false; btn.innerHTML = originalHtml; }
-        let errStr = (err && err.message) ? err.message : String(err);
-        showToast("error", "Gagal setup payroll: " + errStr);
-        alert("❌ GAGAL MEMBUAT SPREADSHEET PAYROLL:\n\n" + errStr);
-      })
-      .setupPayrollSpreadsheet();
-  } else {
-    setTimeout(() => {
-      if (btn) { btn.disabled = false; btn.innerHTML = originalHtml; }
-      showToast("success", "Simulasi: Spreadsheet 11 Payroll & Honor Dokter berhasil disiapkan!");
-      alert("✅ SPREADSHEET PAYROLL BERHASIL DISIAPKAN (SIMULASI):\n\n" +
-            "• Spreadsheet Master: RME Sheldon - 06 Master User & Role (Sheet: Pengaturan_Tarif_Shift)\n" +
-            "• Spreadsheet Payroll: RME Sheldon - 11 Payroll & Honor Dokter\n" +
-            "  - Sheet: Presensi_Shift_Harian (Absensi Kehadiran Shift 1 & Shift 2)\n" +
-            "  - Sheet: Penggajian_Dokter (Jasa Medis + Uang Shift Absensi)\n" +
-            "  - Sheet: Honor_Perawat_Staff (Uang Shift Perawat + Gaji Bulanan Admin)\n" +
-            "  - Sheet: Tagihan_Vendor_Lab (Biaya Laboratorium Eksternal)\n" +
-            "  - Sheet: Slip_Gaji_Arsip (Riwayat Kirim Slip)");
-    }, 1200);
-  }
-}
-
-function triggerHapusSheetSalah() {
-  if (!confirm("Konfirmasi Pembersihan Sheet Database:\n\n1. Hapus sheet [Presensi_Shift_Harian] pada Spreadsheet 06 Master User & Role.\n2. Hapus sheet [Pengaturan_Tarif_Shift] pada Spreadsheet 11 Payroll & Honor Dokter.\n\nLanjutkan proses pembersihan sheet?")) {
-    return;
-  }
-
-  const btn = document.getElementById("btnHapusSheetSalah");
-  const originalHtml = btn ? btn.innerHTML : "<span>🗑️</span> Bersihkan Sheet Presensi & Tarif";
-  if (btn) {
-    btn.disabled = true;
-    btn.innerHTML = "<span>⏳</span> Membersihkan...";
-  }
-
-  showToast("info", "Menghapus sheet yang tidak sesuai di Spreadsheet Master & Payroll...");
-
-  if (typeof google !== "undefined" && google.script && google.script.run) {
-    google.script.run
-      .withSuccessHandler(res => {
-        if (btn) { btn.disabled = false; btn.innerHTML = originalHtml; }
-        if (res && res.success) {
-          showToast("success", "Pembersihan sheet berhasil!");
-          alert("✅ HASIL PEMBERSIHAN SHEET SPREADSHEET:\n\n" + res.message);
-        } else {
-          showToast("warning", res ? res.message : "Terjadi kendala saat pembersihan sheet.");
-          alert(res ? res.message : "Gagal membersihkan sheet.");
-        }
-      })
-      .withFailureHandler(err => {
-        if (btn) { btn.disabled = false; btn.innerHTML = originalHtml; }
-        let errStr = (err && err.message) ? err.message : String(err);
-        showToast("error", "Gagal pembersihan: " + errStr);
-        alert("❌ GAGAL PEMBERSIHAN SHEET:\n\n" + errStr);
-      })
-      .hapusSheetPresensiMasterDanTarifPayroll();
-  } else {
-    setTimeout(() => {
-      if (btn) { btn.disabled = false; btn.innerHTML = originalHtml; }
-      showToast("success", "Pembersihan sheet berhasil (Mode Offline/Demo)!");
-      alert("✅ PEMBERSIHAN SHEET BERHASIL (SIMULASI / DEMO):\n\n" +
-            "• Sheet [Presensi_Shift_Harian] dihapus dari RME Sheldon - 06 Master User & Role.\n" +
-            "• Sheet [Pengaturan_Tarif_Shift] dihapus dari RME Sheldon - 11 Payroll & Honor Dokter.\n" +
-            "• Sheet [Pengaturan_Tarif_Shift] tersimpan rapi di 06 Master User & Role.");
-    }, 800);
-  }
-}
-
-function triggerSimulasiJMDokter() {
-  const btn = document.getElementById("btnSimulasiJM");
-  const originalHtml = btn ? btn.innerHTML : "<span>🧪</span> Isi Simulasi JM Dokter";
-  if (btn) {
-    btn.disabled = true;
-    btn.innerHTML = "<span>⏳</span> Mengisi Simulasi JM...";
-  }
-
-  showToast("info", "Mengisi simulasi pembagian JM 4 Dokter + Rontgen 15% ke Spreadsheet Anda...");
-
-  const updateLocalSimulatedUsers = () => {
-    const simDocs = [
-      { nama: "drg. Rahma Yulinda D, Sp. BMM", username: "rahma", role: "Dokter Gigi Spesialis", hasPassword: true, isHashed: false, status: "Aktif", noReg: "503/SIP-DRG/001/2026", noHp: "081234567801", email: "rahma@sheldon.id", persenJM: 0.65 },
-      { nama: "drg. Regyana Oktavaria", username: "regyana", role: "Dokter Gigi Umum", hasPassword: true, isHashed: false, status: "Aktif", noReg: "503/SIP-DRG/002/2026", noHp: "081234567802", email: "regyana@sheldon.id", persenJM: 0.40 },
-      { nama: "drg. Latifah Mulyana", username: "latifah", role: "Dokter Gigi Umum", hasPassword: true, isHashed: false, status: "Aktif", noReg: "503/SIP-DRG/003/2026", noHp: "081234567803", email: "latifah@sheldon.id", persenJM: 0.40 },
-      { nama: "drg. Tia Ardhana R", username: "tia", role: "Dokter Gigi Umum", hasPassword: true, isHashed: false, status: "Aktif", noReg: "503/SIP-DRG/004/2026", noHp: "081234567804", email: "tia@sheldon.id", persenJM: 0.50 }
-    ];
-    if (!Array.isArray(listMasterUser) || listMasterUser.length === 0) {
-      listMasterUser = getFallbackUserList();
-    }
-    simDocs.forEach(sd => {
-      let ex = listMasterUser.find(u => String(u.username || '').toLowerCase() === sd.username || String(u.nama || '').toLowerCase() === sd.nama.toLowerCase());
-      if (ex) {
-        Object.assign(ex, sd);
-      } else {
-        listMasterUser.push(sd);
-      }
-    });
-    saveFallbackUserList(listMasterUser);
-    renderTabelUser();
-  };
-
-  if (typeof google !== "undefined" && google.script && google.script.run) {
-    google.script.run
-      .withSuccessHandler(res => {
-        if (btn) { btn.disabled = false; btn.innerHTML = originalHtml; }
-        updateLocalSimulatedUsers();
-        if (res && res.success) {
-          showToast("success", "Simulasi JM 4 Dokter + Rontgen 15% berhasil diisi ke Spreadsheet!");
-          alert(res.message);
-          loadDaftarUserMaster(false);
-        } else {
-          showToast("warning", res ? res.message : "Terjadi kendala saat mengisi simulasi.");
-        }
-      })
-      .withFailureHandler(err => {
-        if (btn) { btn.disabled = false; btn.innerHTML = originalHtml; }
-        let errStr = (err && err.message) ? err.message : String(err);
-        showToast("error", "Gagal mengisi simulasi: " + errStr);
-        alert("❌ GAGAL MENGISI SIMULASI JM:\n\n" + errStr);
-      })
-      .isiSimulasiJMDokter();
-  } else {
-    setTimeout(() => {
-      if (btn) { btn.disabled = false; btn.innerHTML = originalHtml; }
-      updateLocalSimulatedUsers();
-      showToast("success", "Simulasi JM 4 Dokter berhasil diterapkan!");
-      alert("✅ SIMULASI PEMBAGIAN JM, SHIFT & GAJI BERHASIL DIISI:\n\n" +
-            "1. [06 Master User & Role -> Sheet: Data]\n" +
-            "   • drg. Rahma Yulinda D, Sp. BMM = 65%\n" +
-            "   • drg. Regyana Oktavaria = 40%\n" +
-            "   • drg. Latifah Mulyana = 40%\n" +
-            "   • drg. Tia Ardhana R = 50% (Default)\n\n" +
-            "2. [05 Database Tindakan -> Sheet: Tindakan & Tarif_Khusus_Dokter]\n" +
-            "   • Rontgen terkunci 15% untuk SEMUA dokter\n" +
-            "   • drg. Tia Ardhana R mendapat 55% pada PSA Molar, Odontektomi M3, dan Crown PFM\n\n" +
-            "3. [06 Master User & Role -> Sheet: Pengaturan_Tarif_Shift]\n" +
-            "   • Dokter (2 Shift): Rp 55.000 / shift\n" +
-            "   • Perawat (2 Shift): Rp 45.000 / shift\n" +
-            "   • Admin (Non-Shift): Rp 1.200.000 / bulan tetap\n\n" +
-            "4. [11 Payroll & Honor Dokter -> Sheet: Presensi_Shift_Harian]\n" +
-            "   • Riwayat kehadiran per shift dokter & perawat\n\n" +
-            "5. [02 Pembayaran -> Sheet: Rekap_Jasa_Medis]\n" +
-            "   • Ditambahkan 8 baris contoh perhitungan simulasi (INV/SIMULASI/001 s.d. 004)");
-    }, 800);
-  }
-}
-
-// ==========================================
 // MODUL MASTER USER & ROLE (SUPER USER)
 // ==========================================
 
@@ -9841,26 +9671,6 @@ function handleRoleChange() {
     }
   } else {
     wrapJM.classList.add('hidden');
-  }
-}
-
-function bukaFormUserBaru() {
-  ensureUserPanelVisible();
-  batalEditDbUser(false);
-  const card = document.getElementById('cardFormUser');
-  if (card) {
-    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    card.classList.add('ring-4', 'ring-indigo-500/30', 'border-indigo-500');
-    setTimeout(() => {
-      card.classList.remove('ring-4', 'ring-indigo-500/30', 'border-indigo-500');
-    }, 1600);
-  }
-  setTimeout(() => {
-    const namaInp = document.getElementById('dbUserNama');
-    if (namaInp) namaInp.focus();
-  }, 150);
-  if (typeof showToast === 'function') {
-    showToast('info', '✨ Form Tambah Pengguna Baru siap diisi!');
   }
 }
 
@@ -10474,7 +10284,6 @@ function triggerImportBulkSheldon2026() {
 
 // Global binding for reliable onclick & onsubmit invocation across all browsers
 window.ensureUserPanelVisible = ensureUserPanelVisible;
-window.bukaFormUserBaru = bukaFormUserBaru;
 window.togglePasswordVisibility = togglePasswordVisibility;
 window.handleRoleChange = handleRoleChange;
 window.loadDaftarUserMaster = loadDaftarUserMaster;
@@ -10486,9 +10295,7 @@ window.batalEditDbUser = batalEditDbUser;
 window.hapusDbUser = hapusDbUser;
 window.changeDBMenu = changeDBMenu;
 window.triggerImportBulkSheldon2026 = triggerImportBulkSheldon2026;
-window.triggerSimulasiJMDokter = triggerSimulasiJMDokter;
 window.triggerSinkronSemuaSheet = triggerSinkronSemuaSheet;
-window.triggerSetupPayroll = triggerSetupPayroll;
 window.triggerManualBackup = triggerManualBackup;
 window.aktifkanAutoBackupTrigger = aktifkanAutoBackupTrigger;
 window.aktifkanArsipTahunanTrigger = aktifkanArsipTahunanTrigger;

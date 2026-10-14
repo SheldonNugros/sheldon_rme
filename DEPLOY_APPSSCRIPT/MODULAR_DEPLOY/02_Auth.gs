@@ -239,6 +239,19 @@ function registrasiAkunBaru(payload) {
 
     catatLog("Registrasi Akun", "Pendaftaran akun baru (Status: Non Aktif): " + cleanUser + " (" + role + ")", nama);
 
+    // Auto-sync ke RME Sheldon - 11 Payroll & Honor Dokter (Sheet: Pengaturan_Tarif_Shift)
+    try {
+      if (typeof syncUserToPayrollTarifShift === "function") {
+        syncUserToPayrollTarifShift({
+          nama: nama,
+          role: role,
+          status: "Non Aktif"
+        });
+      }
+    } catch (errSync) {
+      Logger.log("Warning: Gagal sinkronisasi registrasi akun ke Payroll: " + errSync.message);
+    }
+
     return {
       success: true,
       message: "Pendaftaran berhasil! Akun '" + cleanUser + "' telah tersimpan dengan status NON AKTIF. Silakan tunggu konfirmasi dari Super Admin untuk aktivasi akun."

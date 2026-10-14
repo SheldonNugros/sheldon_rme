@@ -1456,6 +1456,53 @@ function renderTabelUser() {
   }).join('');
 }
 
+function syncUserToClientPayroll(nama, role, status) {
+  if (window.PayrollState && Array.isArray(window.PayrollState.tarifShift)) {
+    let cleanNama = String(nama || '').trim();
+    let cleanRole = String(role || '').trim();
+    let cleanStatus = String(status || 'Aktif').trim();
+    if (!cleanNama) return;
+    let idx = window.PayrollState.tarifShift.findIndex(t => String(t.namaPekerja || '').trim().toLowerCase() === cleanNama.toLowerCase());
+    if (idx >= 0) {
+      if (cleanRole) window.PayrollState.tarifShift[idx].role = cleanRole;
+      window.PayrollState.tarifShift[idx].status = cleanStatus;
+    } else {
+      let rLow = cleanRole.toLowerCase();
+      let tipeKomp = "Uang Harian Shift";
+      let s1 = 45000, s2 = 45000, gp = 0;
+      let ket = "Shift Rp 45.000/shift";
+      if (rLow.includes("dokter") || rLow.includes("spesialis")) {
+        tipeKomp = "Kombinasi Shift & Tindakan";
+        s1 = 55000; s2 = 55000; gp = 0;
+        ket = "2 Shift: Rp 55.000/shift + JM";
+      } else if (rLow.includes("admin") || rLow.includes("kasir")) {
+        tipeKomp = "Gaji Bulanan Tetap";
+        s1 = 0; s2 = 0; gp = 1200000;
+        ket = "Gaji Bulanan Tetap Rp 1.200.000/bulan (Non-Shift)";
+      } else if (rLow.includes("owner") || rLow.includes("super")) {
+        tipeKomp = "Kombinasi Shift & Tindakan";
+        s1 = 55000; s2 = 55000; gp = 0;
+        ket = "Shift Rp 55.000/shift + JM";
+      }
+      let newId = "TARIF-" + String(window.PayrollState.tarifShift.length + 1).padStart(3, '0');
+      window.PayrollState.tarifShift.push({
+        idAturan: newId,
+        role: cleanRole || "Staff",
+        namaPekerja: cleanNama,
+        tipeKompensasi: tipeKomp,
+        tarifShift1: s1,
+        tarifShift2: s2,
+        gajiPokokBulanan: gp,
+        status: cleanStatus,
+        keterangan: ket
+      });
+    }
+    if (typeof renderAllPayrollTables === 'function') {
+      try { renderAllPayrollTables(); } catch (e) {}
+    }
+  }
+}
+
 function aktifkanDbUser(username, nama) {
   if (!confirm('Konfirmasi Aktivasi Account:\nAktifkan pengguna "' + (nama || username) + '" (' + username + ') agar dapat login ke sistem RME?')) {
     return;
@@ -1471,6 +1518,7 @@ function aktifkanDbUser(username, nama) {
       let st = window._mockDb.staff.find(s => String(s.username || '').toLowerCase() === String(username).toLowerCase());
       if (st) st.status = 'Aktif';
     }
+    syncUserToClientPayroll(ex ? ex.nama : (nama || username), ex ? ex.role : '', 'Aktif');
   };
 
   if (typeof google !== 'undefined' && google.script && google.script.run) {
@@ -1587,6 +1635,7 @@ function simpanDbUser(e) {
       listMasterUser.unshift(userObj);
     }
     saveFallbackUserList(listMasterUser);
+    syncUserToClientPayroll(nama, role, status);
   };
 
   if (btn) { btn.disabled = true; btn.innerHTML = '<span class="inline-block animate-spin mr-1">⏳</span> Menyimpan ke Spreadsheet...'; }
@@ -1765,6 +1814,11 @@ function hapusDbUser(username, nama) {
     let ex = listMasterUser.find(u => String(u.username || '').toLowerCase() === String(username).toLowerCase());
     if (ex) ex.status = 'Non Aktif';
     saveFallbackUserList(listMasterUser);
+    if (window._mockDb && Array.isArray(window._mockDb.staff)) {
+      let st = window._mockDb.staff.find(s => String(s.username || '').toLowerCase() === String(username).toLowerCase());
+      if (st) st.status = 'Non Aktif';
+    }
+    syncUserToClientPayroll(ex ? ex.nama : (nama || username), ex ? ex.role : '', 'Non Aktif');
   };
 
   if (typeof google !== 'undefined' && google.script && google.script.run) {

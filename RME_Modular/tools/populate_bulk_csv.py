@@ -463,22 +463,44 @@ def main():
     # -------------------------------------------------------------------------
     # 7. 11 PAYROLL & HONOR DOKTER (PAYROLL/*.csv)
     # -------------------------------------------------------------------------
-    tarif_headers = ["ID_Aturan", "Role", "Nama_Pekerja", "Tipe_Kompensasi", "Tarif_Shift_1", "Tarif_Shift_2", "Gaji_Pokok_Bulanan", "Keterangan"]
-    tarif_rows = [
-        ["TARIF-001", "Dokter Gigi Spesialis", "drg. Sheldon Cooper, Sp.Ort", "Kombinasi Shift & Tindakan", "55000", "55000", "0", "2 Shift: Rp 55.000/shift + JM 50%/55% (Rontgen 15%)"],
-        ["TARIF-002", "Dokter Gigi Umum", "drg. Leonard Hofstadter", "Kombinasi Shift & Tindakan", "55000", "55000", "0", "2 Shift: Rp 55.000/shift + JM 40% (Rontgen 15%)"],
-        ["TARIF-003", "Dokter Gigi Spesialis", "drg. Rahma Yulinda D, Sp. BMM", "Kombinasi Shift & Tindakan", "55000", "55000", "0", "2 Shift: Rp 55.000/shift + JM 65% (Rontgen 15%)"],
-        ["TARIF-004", "Dokter Gigi Umum", "drg. Danny", "Kombinasi Shift & Tindakan", "55000", "55000", "0", "2 Shift: Rp 55.000/shift + JM 65% (Rontgen 15%)"],
-        ["TARIF-005", "Dokter Gigi Umum", "drg. Astri", "Kombinasi Shift & Tindakan", "55000", "55000", "0", "2 Shift: Rp 55.000/shift + JM 65% (Rontgen 15%)"],
-        ["TARIF-006", "Dokter Gigi Umum", "drg. Rizka", "Kombinasi Shift & Tindakan", "55000", "55000", "0", "2 Shift: Rp 55.000/shift + JM 65% (Rontgen 15%)"],
-        ["TARIF-007", "Dokter Gigi Umum", "drg. Erien", "Kombinasi Shift & Tindakan", "55000", "55000", "0", "2 Shift: Rp 55.000/shift + JM 50% (Rontgen 15%)"],
-        ["TARIF-008", "Dokter Gigi Umum", "drg.g.p Dinda", "Kombinasi Shift & Tindakan", "55000", "55000", "0", "2 Shift: Rp 55.000/shift + JM 55% (Rontgen 15%)"],
-        ["TARIF-009", "Dokter Gigi Umum", "drg.g.p Fathya", "Kombinasi Shift & Tindakan", "55000", "55000", "0", "2 Shift: Rp 55.000/shift + JM 40% (Rontgen 15%)"],
-        ["TARIF-010", "Perawat Gigi", "Bernadette Rostenkowski", "Uang Harian Shift", "45000", "45000", "0", "2 Shift: Rp 45.000/shift + Fee Scaling Perawat"],
-        ["TARIF-011", "Perawat Gigi", "Wulan", "Uang Harian Shift", "45000", "45000", "0", "2 Shift: Rp 45.000/shift + Fee Scaling Perawat Rp 25.000"],
-        ["TARIF-012", "Perawat Gigi", "Dina", "Uang Harian Shift", "45000", "45000", "0", "2 Shift: Rp 45.000/shift + Fee Scaling Perawat Rp 25.000"],
-        ["TARIF-013", "Admin", "Howard Wolowitz", "Gaji Bulanan Tetap", "0", "0", "1200000", "Gaji Bulanan Tetap Rp 1.200.000/bulan (Non-Shift)"]
-    ]
+    tarif_headers = ["ID_Aturan", "Role", "Nama_Pekerja", "Tipe_Kompensasi", "Tarif_Shift_1", "Tarif_Shift_2", "Gaji_Pokok_Bulanan", "Keterangan", "Status"]
+    tarif_rows = []
+    for u_idx, u in enumerate(master_rows):
+        nama_u = u[0]
+        role_u = u[2]
+        status_u = u[4] or "Aktif"
+        id_at = f"TARIF-{u_idx+1:03d}"
+        r_low = role_u.lower()
+        if "dokter" in r_low or "spesialis" in r_low:
+            tipe = "Kombinasi Shift & Tindakan"
+            s1 = "55000"
+            s2 = "55000"
+            gp = "0"
+            try:
+                pjm_val = float(u[7]) if u[7] else 0.40
+                pct = int(pjm_val * 100) if pjm_val <= 1 else int(pjm_val)
+            except Exception:
+                pct = 40
+            ket = f"2 Shift: Rp 55.000/shift + JM {pct}% (Rontgen 15%)"
+        elif "perawat" in r_low:
+            tipe = "Uang Harian Shift"
+            s1 = "45000"
+            s2 = "45000"
+            gp = "0"
+            ket = "2 Shift: Rp 45.000/shift (dihitung berdasarkan absensi kehadiran)"
+        elif "admin" in r_low or "kasir" in r_low:
+            tipe = "Gaji Bulanan Tetap"
+            s1 = "0"
+            s2 = "0"
+            gp = "1200000"
+            ket = "Gaji Bulanan Tetap Rp 1.200.000/bulan (Non-Shift)"
+        else: # Owner / Super User
+            tipe = "Kombinasi Shift & Tindakan"
+            s1 = "55000"
+            s2 = "55000"
+            gp = "0"
+            ket = "2 Shift: Rp 55.000/shift + JM 65%"
+        tarif_rows.append([id_at, role_u, nama_u, tipe, s1, s2, gp, ket, status_u])
     write_csv("PAYROLL", "Pengaturan_Tarif_Shift.csv", tarif_headers, tarif_rows)
 
     presensi_headers = ["ID_Presensi", "Tanggal", "ID_Pekerja", "Nama_Pekerja", "Role", "Shift", "Jam_Masuk", "Jam_Pulang", "Status_Kehadiran", "Uang_Harian_Didapat", "Verifikator", "Waktu_Sistem"]

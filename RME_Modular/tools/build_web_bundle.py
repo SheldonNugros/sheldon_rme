@@ -236,6 +236,41 @@ for r in jm_csv:
             "status": r[16]
         })
 
+staff_csv = read_csv_rows('MASTER', 'Data.csv')
+staff_list = []
+for idx_st, r in enumerate(staff_csv):
+    if len(r) >= 5:
+        pjm_val = float(r[7]) if len(r) > 7 and r[7] else 0
+        staff_list.append({
+            "id": f"STF-{idx_st:03d}",
+            "username": r[1].lower().strip(),
+            "nama": r[0].strip(),
+            "role": r[2].strip(),
+            "pass": r[3].strip(),
+            "pin": r[3].strip(),
+            "status": r[4].strip() if len(r) > 4 and r[4] else "Aktif",
+            "sip": r[5].strip() if len(r) > 5 and r[5] else "-",
+            "noHp": r[6].strip() if len(r) > 6 and r[6] else "",
+            "persenJM": pjm_val,
+            "email": r[8].strip() if len(r) > 8 and r[8] else ""
+        })
+
+tarif_csv = read_csv_rows('PAYROLL', 'Pengaturan_Tarif_Shift.csv')
+tarif_list = []
+for r in tarif_csv:
+    if len(r) >= 8:
+        tarif_list.append({
+            "idAturan": r[0].strip(),
+            "role": r[1].strip(),
+            "namaPekerja": r[2].strip(),
+            "tipeKompensasi": r[3].strip(),
+            "tarifShift1": int(float(r[4])) if r[4] else 0,
+            "tarifShift2": int(float(r[5])) if r[5] else 0,
+            "gajiPokokBulanan": int(float(r[6])) if r[6] else 0,
+            "keterangan": r[7].strip() if len(r) > 7 else "",
+            "status": r[8].strip() if len(r) > 8 and r[8] else "Aktif"
+        })
+
 mock_db_json = json.dumps({
     "pasien": pasien_list,
     "tindakan": tindakan_list,
@@ -243,7 +278,9 @@ mock_db_json = json.dumps({
     "bmhp": bmhp_list,
     "rekamMedis": rm_list,
     "pembayaran": bayar_list,
-    "jasaMedis": jm_list
+    "jasaMedis": jm_list,
+    "staff": staff_list,
+    "tarifShift": tarif_list
 }, ensure_ascii=False)
 
 # Mock google.script.run runtime for local testing, browser validation & Live Interactive Simulator
@@ -261,30 +298,12 @@ mock_gas_script = '''
 
   // Realistic database grounded in Sheldon RME multi-spreadsheet architecture + Bulk Data SHELDON 2026
   const mockDb = {
-    staff: [
+    staff: (bulkSeed.staff && bulkSeed.staff.length > 0) ? bulkSeed.staff : [
       { id: "STF-000", username: "admin", email: "vembrian@gmail.com", nama: "Administrator Sistem", role: "Super User", pin: "admin123", pass: "admin123", sip: "-", persenJM: 0 },
       { id: "STF-000A", username: "asung", email: "v.asungnugroho@gmail.com", nama: "drg. V. Asung Nugroho, Sp.Ort", role: "Owner", pin: "admin123", pass: "admin123", sip: "503/SIP-DRG/000/2026", persenJM: 0.65 },
-      { id: "STF-001", username: "sheldon", email: "sheldon@sheldon.com", nama: "drg. Sheldon Cooper, Sp.Ort", role: "Dokter Gigi Spesialis", pin: "1234", pass: "1234", sip: "503/SIP-DRG/001/2024", persenJM: 0.50 },
-      { id: "STF-002", username: "leonard", email: "leonard@sheldon.com", nama: "drg. Leonard Hofstadter", role: "Dokter Gigi Umum", pin: "1111", pass: "1111", sip: "503/SIP-DRG/002/2024", persenJM: 0.40 },
-      { id: "STF-003", username: "penny", email: "penny@sheldon.com", nama: "Penny Teller", role: "Perawat Umum", pin: "2222", pass: "2222", sip: "-", persenJM: 0 },
-      { id: "STF-004", username: "bernadette", email: "bernadette@sheldon.com", nama: "Bernadette Rostenkowski", role: "Perawat Gigi", pin: "3333", pass: "3333", sip: "503/STR-PRW/003/2024", persenJM: 0 },
-      { id: "STF-005", username: "howard", email: "howard@sheldon.com", nama: "Howard Wolowitz", role: "Admin", pin: "4444", pass: "4444", sip: "-", persenJM: 0 },
-      { id: "STF-006", username: "danny", email: "danny@sheldon.id", nama: "drg. Danny", role: "Dokter Gigi Umum", pin: "1234", pass: "1234", sip: "503/SIP-DRG/007/2026", persenJM: 0.65 },
-      { id: "STF-007", username: "astri", email: "astri@sheldon.id", nama: "drg. Astri", role: "Dokter Gigi Umum", pin: "1234", pass: "1234", sip: "503/SIP-DRG/008/2026", persenJM: 0.65 },
-      { id: "STF-008", username: "rizka", email: "rizka@sheldon.id", nama: "drg. Rizka", role: "Dokter Gigi Umum", pin: "1234", pass: "1234", sip: "503/SIP-DRG/009/2026", persenJM: 0.65 },
-      { id: "STF-009", username: "nanda", email: "nanda@sheldon.id", nama: "drg. Nanda", role: "Dokter Gigi Umum", pin: "1234", pass: "1234", sip: "503/SIP-DRG/010/2026", persenJM: 0.65 },
-      { id: "STF-010", username: "aviva", email: "aviva@sheldon.id", nama: "drg. Aviva", role: "Dokter Gigi Umum", pin: "1234", pass: "1234", sip: "503/SIP-DRG/011/2026", persenJM: 0.65 },
-      { id: "STF-011", username: "erien", email: "erien@sheldon.id", nama: "drg. Erien", role: "Dokter Gigi Umum", pin: "1234", pass: "1234", sip: "503/SIP-DRG/012/2026", persenJM: 0.50 },
-      { id: "STF-012", username: "dinda", email: "dinda@sheldon.id", nama: "drg.g.p Dinda", role: "Dokter Gigi Umum", pin: "1234", pass: "1234", sip: "503/SIP-DRG/013/2026", persenJM: 0.55 },
-      { id: "STF-013", username: "fathya", email: "fathya@sheldon.id", nama: "drg.g.p Fathya", role: "Dokter Gigi Umum", pin: "1234", pass: "1234", sip: "503/SIP-DRG/014/2026", persenJM: 0.40 },
-      { id: "STF-014", username: "belinda", email: "belinda@sheldon.id", nama: "drg.g.p Belinda", role: "Dokter Gigi Umum", pin: "1234", pass: "1234", sip: "503/SIP-DRG/015/2026", persenJM: 0.40 },
-      { id: "STF-015", username: "wulan", email: "wulan@sheldon.id", nama: "Wulan", role: "Perawat Gigi", pin: "3333", pass: "3333", sip: "503/STR-PRW/002/2026", persenJM: 0 },
-      { id: "STF-016", username: "dina", email: "dina@sheldon.id", nama: "Dina", role: "Perawat Gigi", pin: "3333", pass: "3333", sip: "503/STR-PRW/003/2026", persenJM: 0 },
-      { id: "STF-017", username: "rahmayulinda", email: "rahma@sheldon.id", nama: "drg. Rahma Yulinda D, Sp. BMM", role: "Dokter Gigi Spesialis", pin: "1234", pass: "1234", sip: "503/SIP-DRG/016/2026", persenJM: 0.65 },
-      { id: "STF-018", username: "tiaardhana", email: "tia@sheldon.id", nama: "drg. Tia Ardhana R", role: "Dokter Gigi Umum", pin: "1234", pass: "1234", sip: "503/SIP-DRG/017/2026", persenJM: 0.50 },
-      { id: "STF-019", username: "widya", email: "widya@sheldon.id", nama: "drg. Widya", role: "Dokter Gigi Umum", pin: "1234", pass: "1234", sip: "503/SIP-DRG/018/2026", persenJM: 0.40 },
-      { id: "STF-020", username: "gita", email: "gita@sheldon.id", nama: "drg. Gita", role: "Dokter Gigi Umum", pin: "1234", pass: "1234", sip: "503/SIP-DRG/019/2026", persenJM: 0.40 }
+      { id: "STF-001", username: "sheldon", email: "sheldon@sheldon.com", nama: "drg. Sheldon Cooper, Sp.Ort", role: "Dokter Gigi Spesialis", pin: "1234", pass: "1234", sip: "503/SIP-DRG/001/2024", persenJM: 0.50 }
     ],
+    tarifShift: (bulkSeed.tarifShift && bulkSeed.tarifShift.length > 0) ? bulkSeed.tarifShift : [],
     tarifKhusus: [
       { idDokter: "STF-001", namaDokter: "drg. Sheldon Cooper, Sp.Ort", kodeTindakan: "TND-006", namaTindakan: "Perawatan Saluran Akar (PSA) Molar", persenJM: 0.55 }
     ],
@@ -718,8 +737,8 @@ mock_gas_script = '''
     getPayrollModuleData() {
       setTimeout(() => {
         this._successHandler({
-          success: false,
-          message: "Use local PayrollState seed & cache"
+          success: true,
+          tarifShift: mockDb.tarifShift || []
         });
       }, 50);
     }
@@ -735,10 +754,70 @@ mock_gas_script = '''
 
     simpanTarifShift(payload) {
       setTimeout(() => {
+        if (payload && payload.namaPekerja) {
+          let ex = (mockDb.tarifShift || []).find(t => (t.namaPekerja || "").toLowerCase() === String(payload.namaPekerja).toLowerCase());
+          if (ex) {
+            Object.assign(ex, payload);
+          } else {
+            mockDb.tarifShift.push(payload);
+          }
+        }
         this._successHandler({
           success: true,
           message: "Pengaturan tarif shift & gaji untuk " + (payload && payload.namaPekerja ? payload.namaPekerja : "") + " berhasil disimpan!"
         });
+      }, 50);
+    }
+
+    syncUserToPayrollTarifShift(userData) {
+      setTimeout(() => {
+        if (userData && userData.nama) {
+          let nama = String(userData.nama).trim();
+          let role = String(userData.role || "Admin").trim();
+          let status = String(userData.status || "Aktif").trim();
+          let ex = (mockDb.tarifShift || []).find(t => (t.namaPekerja || "").toLowerCase() === nama.toLowerCase());
+          if (ex) {
+            if (role) ex.role = role;
+            ex.status = status;
+          } else {
+            let rLow = role.toLowerCase();
+            let tipe = "Uang Harian Shift";
+            let s1 = 45000, s2 = 45000, gp = 0;
+            let ket = "Shift Rp 45.000/shift";
+            if (rLow.includes("dokter") || rLow.includes("spesialis")) {
+              tipe = "Kombinasi Shift & Tindakan";
+              s1 = 55000; s2 = 55000; gp = 0;
+              ket = "2 Shift: Rp 55.000/shift + JM";
+            } else if (rLow.includes("admin") || rLow.includes("kasir")) {
+              tipe = "Gaji Bulanan Tetap";
+              s1 = 0; s2 = 0; gp = 1200000;
+              ket = "Gaji Bulanan Tetap Rp 1.200.000/bulan (Non-Shift)";
+            } else if (rLow.includes("owner") || rLow.includes("super")) {
+              tipe = "Kombinasi Shift & Tindakan";
+              s1 = 55000; s2 = 55000; gp = 0;
+              ket = "Shift Rp 55.000/shift + JM 65%";
+            }
+            let newId = "TARIF-" + String((mockDb.tarifShift || []).length + 1).padStart(3, '0');
+            mockDb.tarifShift.push({
+              idAturan: newId,
+              role: role,
+              namaPekerja: nama,
+              tipeKompensasi: tipe,
+              tarifShift1: s1,
+              tarifShift2: s2,
+              gajiPokokBulanan: gp,
+              keterangan: ket,
+              status: status
+            });
+          }
+        }
+        this._successHandler({ success: true, message: "Sinkronisasi user ke Payroll berhasil!" });
+      }, 30);
+    }
+
+    syncAllUsersToPayrollTarifShift() {
+      setTimeout(() => {
+        this._successHandler({ success: true, message: "Semua user berhasil disinkronkan ke Payroll!" });
       }, 50);
     }
 
@@ -904,6 +983,44 @@ mock_gas_script = '''
         } else {
           mockDb.staff.push(item);
         }
+
+        // Auto-sync ke mockDb.tarifShift
+        let exTarif = (mockDb.tarifShift || []).find(t => (t.namaPekerja || '').toLowerCase() === String(payload.nama || '').toLowerCase());
+        if (exTarif) {
+          if (payload.role) exTarif.role = payload.role;
+          if (payload.status) exTarif.status = payload.status;
+        } else if (payload.nama) {
+          let rLow = String(payload.role || '').toLowerCase();
+          let tipe = "Uang Harian Shift";
+          let s1 = 45000, s2 = 45000, gp = 0;
+          let ket = "Shift Rp 45.000/shift";
+          if (rLow.includes("dokter") || rLow.includes("spesialis")) {
+            tipe = "Kombinasi Shift & Tindakan";
+            s1 = 55000; s2 = 55000; gp = 0;
+            ket = "2 Shift: Rp 55.000/shift + JM";
+          } else if (rLow.includes("admin") || rLow.includes("kasir")) {
+            tipe = "Gaji Bulanan Tetap";
+            s1 = 0; s2 = 0; gp = 1200000;
+            ket = "Gaji Bulanan Tetap Rp 1.200.000/bulan (Non-Shift)";
+          } else if (rLow.includes("owner") || rLow.includes("super")) {
+            tipe = "Kombinasi Shift & Tindakan";
+            s1 = 55000; s2 = 55000; gp = 0;
+            ket = "Shift Rp 55.000/shift + JM 65%";
+          }
+          let newId = "TARIF-" + String((mockDb.tarifShift || []).length + 1).padStart(3, '0');
+          mockDb.tarifShift.push({
+            idAturan: newId,
+            role: payload.role || 'Staff',
+            namaPekerja: payload.nama,
+            tipeKompensasi: tipe,
+            tarifShift1: s1,
+            tarifShift2: s2,
+            gajiPokokBulanan: gp,
+            keterangan: ket,
+            status: payload.status || 'Aktif'
+          });
+        }
+
         this._successHandler({ success: true, message: "Pengguna '" + cleanUser + "' berhasil disimpan!" });
       }, 50);
     }
@@ -932,6 +1049,39 @@ mock_gas_script = '''
           persenJM: pjmVal
         };
         mockDb.staff.push(item);
+
+        // Auto-sync ke mockDb.tarifShift
+        let exTarif = (mockDb.tarifShift || []).find(t => (t.namaPekerja || '').toLowerCase() === String(payload.nama || '').toLowerCase());
+        if (exTarif) {
+          exTarif.status = 'Non Aktif';
+        } else if (payload.nama) {
+          let rLow = String(role).toLowerCase();
+          let tipe = "Uang Harian Shift";
+          let s1 = 45000, s2 = 45000, gp = 0;
+          let ket = "Shift Rp 45.000/shift";
+          if (rLow.includes("dokter") || rLow.includes("spesialis")) {
+            tipe = "Kombinasi Shift & Tindakan";
+            s1 = 55000; s2 = 55000; gp = 0;
+            ket = "2 Shift: Rp 55.000/shift + JM";
+          } else if (rLow.includes("admin") || rLow.includes("kasir")) {
+            tipe = "Gaji Bulanan Tetap";
+            s1 = 0; s2 = 0; gp = 1200000;
+            ket = "Gaji Bulanan Tetap Rp 1.200.000/bulan (Non-Shift)";
+          }
+          let newId = "TARIF-" + String((mockDb.tarifShift || []).length + 1).padStart(3, '0');
+          mockDb.tarifShift.push({
+            idAturan: newId,
+            role: role,
+            namaPekerja: payload.nama,
+            tipeKompensasi: tipe,
+            tarifShift1: s1,
+            tarifShift2: s2,
+            gajiPokokBulanan: gp,
+            keterangan: ket,
+            status: 'Non Aktif'
+          });
+        }
+
         this._successHandler({
           success: true,
           message: "Pendaftaran berhasil! Akun '" + cleanUser + "' telah tersimpan dengan status NON AKTIF. Silakan tunggu konfirmasi dari Super Admin untuk aktivasi akun."
@@ -945,6 +1095,8 @@ mock_gas_script = '''
         let idx = mockDb.staff.findIndex(s => (s.username || "").toLowerCase() === cleanUser);
         if (idx !== -1) {
           mockDb.staff[idx].status = "Aktif";
+          let exTarif = (mockDb.tarifShift || []).find(t => (t.namaPekerja || '').toLowerCase() === String(mockDb.staff[idx].nama || '').toLowerCase());
+          if (exTarif) exTarif.status = 'Aktif';
         }
         this._successHandler({ success: true, message: "Akun '" + cleanUser + "' berhasil diaktifkan!" });
       }, 50);
@@ -955,10 +1107,15 @@ mock_gas_script = '''
         let cleanUser = String(username || "").trim().toLowerCase();
         let idx = mockDb.staff.findIndex(s => (s.username || "").toLowerCase() === cleanUser);
         if (idx !== -1) {
+          let uNama = mockDb.staff[idx].nama;
           if (isPermanent) {
             mockDb.staff.splice(idx, 1);
+            let tIdx = (mockDb.tarifShift || []).findIndex(t => (t.namaPekerja || '').toLowerCase() === String(uNama || '').toLowerCase());
+            if (tIdx !== -1) mockDb.tarifShift.splice(tIdx, 1);
           } else {
             mockDb.staff[idx].status = "Non Aktif";
+            let exTarif = (mockDb.tarifShift || []).find(t => (t.namaPekerja || '').toLowerCase() === String(uNama || '').toLowerCase());
+            if (exTarif) exTarif.status = 'Non Aktif';
           }
           this._successHandler({ success: true, message: "Pengguna '" + cleanUser + "' berhasil dinonaktifkan." });
         } else {

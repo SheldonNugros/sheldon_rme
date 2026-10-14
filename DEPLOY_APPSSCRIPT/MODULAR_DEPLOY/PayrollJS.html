@@ -15,12 +15,12 @@
   function getDefaultPayrollSeed() {
     return {
       tarifShift: [
-        { idAturan: "TARIF-001", role: "Dokter Gigi Spesialis", namaPekerja: "drg. Rahma Yulinda D, Sp. BMM", tipeKompensasi: "Kombinasi Shift & Tindakan", tarifShift1: 55000, tarifShift2: 55000, gajiPokokBulanan: 0, keterangan: "2 Shift: Rp 55.000/shift (berdasarkan absensi) + JM 65% (Rontgen 15%)" },
-        { idAturan: "TARIF-002", role: "Dokter Gigi Umum", namaPekerja: "drg. Regyana Oktavaria", tipeKompensasi: "Kombinasi Shift & Tindakan", tarifShift1: 55000, tarifShift2: 55000, gajiPokokBulanan: 0, keterangan: "2 Shift: Rp 55.000/shift (berdasarkan absensi) + JM 40% (Rontgen 15%)" },
-        { idAturan: "TARIF-003", role: "Dokter Gigi Umum", namaPekerja: "drg. Latifah Mulyana", tipeKompensasi: "Kombinasi Shift & Tindakan", tarifShift1: 55000, tarifShift2: 55000, gajiPokokBulanan: 0, keterangan: "2 Shift: Rp 55.000/shift (berdasarkan absensi) + JM 40% (Rontgen 15%)" },
-        { idAturan: "TARIF-004", role: "Dokter Gigi Umum", namaPekerja: "drg. Tia Ardhana R", tipeKompensasi: "Kombinasi Shift & Tindakan", tarifShift1: 55000, tarifShift2: 55000, gajiPokokBulanan: 0, keterangan: "2 Shift: Rp 55.000/shift (berdasarkan absensi) + JM 50% / 55% (Rontgen 15%)" },
-        { idAturan: "TARIF-005", role: "Perawat Gigi", namaPekerja: "Bernadette Rostenkowski", tipeKompensasi: "Uang Harian Shift", tarifShift1: 45000, tarifShift2: 45000, gajiPokokBulanan: 0, keterangan: "2 Shift: Rp 45.000/shift (dihitung berdasarkan absensi kehadiran)" },
-        { idAturan: "TARIF-006", role: "Admin", namaPekerja: "Howard Wolowitz", tipeKompensasi: "Gaji Bulanan Tetap", tarifShift1: 0, tarifShift2: 0, gajiPokokBulanan: 1200000, keterangan: "Gaji Bulanan Tetap Rp 1.200.000/bulan (Non-Shift)" }
+        { idAturan: "TARIF-001", role: "Dokter Gigi Spesialis", namaPekerja: "drg. Rahma Yulinda D, Sp. BMM", tipeKompensasi: "Kombinasi Shift & Tindakan", tarifShift1: 55000, tarifShift2: 55000, gajiPokokBulanan: 0, status: "Aktif", keterangan: "2 Shift: Rp 55.000/shift (berdasarkan absensi) + JM 65% (Rontgen 15%)" },
+        { idAturan: "TARIF-002", role: "Dokter Gigi Umum", namaPekerja: "drg. Regyana Oktavaria", tipeKompensasi: "Kombinasi Shift & Tindakan", tarifShift1: 55000, tarifShift2: 55000, gajiPokokBulanan: 0, status: "Aktif", keterangan: "2 Shift: Rp 55.000/shift (berdasarkan absensi) + JM 40% (Rontgen 15%)" },
+        { idAturan: "TARIF-003", role: "Dokter Gigi Umum", namaPekerja: "drg. Latifah Mulyana", tipeKompensasi: "Kombinasi Shift & Tindakan", tarifShift1: 55000, tarifShift2: 55000, gajiPokokBulanan: 0, status: "Aktif", keterangan: "2 Shift: Rp 55.000/shift (berdasarkan absensi) + JM 40% (Rontgen 15%)" },
+        { idAturan: "TARIF-004", role: "Dokter Gigi Umum", namaPekerja: "drg. Tia Ardhana R", tipeKompensasi: "Kombinasi Shift & Tindakan", tarifShift1: 55000, tarifShift2: 55000, gajiPokokBulanan: 0, status: "Aktif", keterangan: "2 Shift: Rp 55.000/shift (berdasarkan absensi) + JM 50% / 55% (Rontgen 15%)" },
+        { idAturan: "TARIF-005", role: "Perawat Gigi", namaPekerja: "Bernadette Rostenkowski", tipeKompensasi: "Uang Harian Shift", tarifShift1: 45000, tarifShift2: 45000, gajiPokokBulanan: 0, status: "Aktif", keterangan: "2 Shift: Rp 45.000/shift (dihitung berdasarkan absensi kehadiran)" },
+        { idAturan: "TARIF-006", role: "Admin", namaPekerja: "Howard Wolowitz", tipeKompensasi: "Gaji Bulanan Tetap", tarifShift1: 0, tarifShift2: 0, gajiPokokBulanan: 1200000, status: "Aktif", keterangan: "Gaji Bulanan Tetap Rp 1.200.000/bulan (Non-Shift)" }
       ],
       presensiHarian: [
         { idPresensi: "ATT-202610-001", tanggal: "01-10-2026", idPekerja: "DOK-001", namaPekerja: "drg. Rahma Yulinda D, Sp. BMM", role: "Dokter Gigi Spesialis", shift: "Shift 1", jamMasuk: "08:55", jamPulang: "15:00", statusKehadiran: "Hadir", uangHarianDidapat: 55000, verifikator: "Admin" },
@@ -376,7 +376,12 @@
     const tbTarif = document.getElementById('tbodyTarifShift');
     if (tbTarif) {
       const listTarif = window.PayrollState.tarifShift || [];
-      tbTarif.innerHTML = listTarif.map((t, idx) => `
+      tbTarif.innerHTML = listTarif.map((t, idx) => {
+        let isAktif = !t.status || String(t.status).toLowerCase() === 'aktif';
+        let badgeStatus = isAktif
+          ? '<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-extrabold text-[10px] border border-emerald-300">Aktif</span>'
+          : '<span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-bold text-[10px] border border-slate-300">Non Aktif</span>';
+        return `
         <tr>
           <td class="py-3 px-4 font-mono font-bold text-slate-500 text-[11px]">${t.idAturan}</td>
           <td class="py-3 px-4 font-black text-slate-800">${t.namaPekerja}</td>
@@ -387,6 +392,7 @@
           <td class="py-3 px-3 text-right font-black text-indigo-700">${fmtRpPayroll(t.tarifShift1)}</td>
           <td class="py-3 px-3 text-right font-black text-indigo-700">${fmtRpPayroll(t.tarifShift2)}</td>
           <td class="py-3 px-4 text-right font-black text-emerald-700">${fmtRpPayroll(t.gajiPokokBulanan)}</td>
+          <td class="py-3 px-3 text-center">${badgeStatus}</td>
           <td class="py-3 px-4 text-[11px] text-slate-500">${t.keterangan || '-'}</td>
           <td class="py-3 px-3 text-center">
             <button type="button" onclick="pilihTarifShiftToEdit(${idx})" class="px-2.5 py-1 bg-slate-100 hover:bg-indigo-100 text-indigo-700 font-extrabold rounded-lg text-[10px] border border-slate-200">
@@ -394,7 +400,8 @@
             </button>
           </td>
         </tr>
-      `).join('');
+      `;
+      }).join('');
     }
 
     // 6. Render Tabel Rincian Bagi Hasil JM Tindakan

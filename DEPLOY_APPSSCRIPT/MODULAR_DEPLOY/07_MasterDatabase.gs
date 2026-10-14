@@ -171,6 +171,20 @@ function simpanUserMaster(payload) {
       }
 
       catatLog("Master User", "Edit user: " + cleanUser + " (" + payload.role + ")", payload.currentUser || "Super User");
+
+      // Otomatis input/sinkronkan Nama Pekerja, Role, dan Status ke RME Sheldon - 11 Payroll & Honor Dokter (Pengaturan_Tarif_Shift)
+      try {
+        if (typeof syncUserToPayrollTarifShift === 'function') {
+          syncUserToPayrollTarifShift({
+            nama: payload.nama.trim(),
+            role: payload.role.trim(),
+            status: payload.status || "Aktif"
+          });
+        }
+      } catch (eSyncPay) {
+        Logger.log("Info auto-sync to payroll: " + eSyncPay.message);
+      }
+
       return { success: true, message: "Akun user '" + cleanUser + "' berhasil diperbarui!" };
     } else {
       // MODE TAMBAH BARU
@@ -195,6 +209,20 @@ function simpanUserMaster(payload) {
       sheet.getRange(lastRow, idJM + 1).setNumberFormat("0.0%");
 
       catatLog("Master User", "Tambah user baru: " + cleanUser + " (" + payload.role + ")", payload.currentUser || "Super User");
+
+      // Otomatis input/sinkronkan Nama Pekerja, Role, dan Status ke RME Sheldon - 11 Payroll & Honor Dokter (Pengaturan_Tarif_Shift)
+      try {
+        if (typeof syncUserToPayrollTarifShift === 'function') {
+          syncUserToPayrollTarifShift({
+            nama: payload.nama.trim(),
+            role: payload.role.trim(),
+            status: payload.status || "Aktif"
+          });
+        }
+      } catch (eSyncPay) {
+        Logger.log("Info auto-sync to payroll: " + eSyncPay.message);
+      }
+
       return { success: true, message: "User baru '" + cleanUser + "' berhasil ditambahkan ke Database Master!" };
     }
   } catch (e) {
@@ -213,6 +241,8 @@ function aktifkanUserMaster(username, currentUser) {
 
     const v = sheet.getDataRange().getValues();
     const h = v[0];
+    let idNama = getColIdx(h, ['namapekerja', 'nama']); if (idNama === -1) idNama = 0;
+    let idRole = getColIdx(h, ['kategorirole', 'role', 'kategori']); if (idRole === -1) idRole = 2;
     let idUser = getColIdx(h, ['username', 'user']); if (idUser === -1) idUser = 1;
     let idStatus = getColIdx(h, ['status']); if (idStatus === -1) idStatus = 4;
 
@@ -221,6 +251,18 @@ function aktifkanUserMaster(username, currentUser) {
       if (String(v[i][idUser] || "").trim().toLowerCase() === cleanUser) {
         sheet.getRange(i + 1, idStatus + 1).setValue("Aktif");
         catatLog("Master User", "Aktivasi akun user: " + cleanUser, currentUser || "Super Admin");
+
+        // Otomatis sinkronkan status ke Pengaturan_Tarif_Shift
+        try {
+          if (typeof syncUserToPayrollTarifShift === 'function') {
+            syncUserToPayrollTarifShift({
+              nama: String(v[i][idNama] || "").trim(),
+              role: String(v[i][idRole] || "").trim(),
+              status: "Aktif"
+            });
+          }
+        } catch (eSyncPay) {}
+
         return { success: true, message: "Akun '" + username + "' berhasil diaktifkan! Pengguna kini dapat login ke sistem." };
       }
     }
@@ -241,17 +283,39 @@ function hapusUserMaster(username, isPermanent) {
 
     const v = sheet.getDataRange().getValues();
     const h = v[0];
+    let idNama = getColIdx(h, ['namapekerja', 'nama']); if (idNama === -1) idNama = 0;
+    let idRole = getColIdx(h, ['kategorirole', 'role', 'kategori']); if (idRole === -1) idRole = 2;
     let idUser = getColIdx(h, ['username', 'user']); if (idUser === -1) idUser = 1;
     let idStatus = getColIdx(h, ['status']); if (idStatus === -1) idStatus = 4;
 
     let cleanUser = String(username).trim().toLowerCase();
     for (let i = 1; i < v.length; i++) {
       if (String(v[i][idUser] || "").trim().toLowerCase() === cleanUser) {
+        let namaTarget = String(v[i][idNama] || "").trim();
+        let roleTarget = String(v[i][idRole] || "").trim();
         if (isPermanent) {
           sheet.deleteRow(i + 1);
+          try {
+            if (typeof syncUserToPayrollTarifShift === 'function') {
+              syncUserToPayrollTarifShift({
+                nama: namaTarget,
+                role: roleTarget,
+                status: "Non Aktif"
+              });
+            }
+          } catch (eSyncPay) {}
           return { success: true, message: "Akun '" + username + "' berhasil dihapus permanen." };
         } else {
           sheet.getRange(i + 1, idStatus + 1).setValue("Non Aktif");
+          try {
+            if (typeof syncUserToPayrollTarifShift === 'function') {
+              syncUserToPayrollTarifShift({
+                nama: namaTarget,
+                role: roleTarget,
+                status: "Non Aktif"
+              });
+            }
+          } catch (eSyncPay) {}
           return { success: true, message: "Status akun '" + username + "' diubah menjadi Non Aktif." };
         }
       }

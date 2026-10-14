@@ -4631,12 +4631,13 @@
                 <th class="py-3 px-3 text-right">Tarif Shift 1</th>
                 <th class="py-3 px-3 text-right">Tarif Shift 2</th>
                 <th class="py-3 px-4 text-right">Gaji Bulanan</th>
+                <th class="py-3 px-3 text-center">Status</th>
                 <th class="py-3 px-4">Keterangan</th>
                 <th class="py-3 px-3 text-center">Aksi</th>
               </tr>
             </thead>
             <tbody id="tbodyTarifShift" class="divide-y divide-slate-200 text-xs">
-              <tr><td colspan="9" class="py-8 text-center text-slate-400 font-bold">Memuat pengaturan tarif shift...</td></tr>
+              <tr><td colspan="10" class="py-8 text-center text-slate-400 font-bold">Memuat pengaturan tarif shift...</td></tr>
             </tbody>
           </table>
         </div>
@@ -13230,6 +13231,53 @@ function renderTabelUser() {
   }).join('');
 }
 
+function syncUserToClientPayroll(nama, role, status) {
+  if (window.PayrollState && Array.isArray(window.PayrollState.tarifShift)) {
+    let cleanNama = String(nama || '').trim();
+    let cleanRole = String(role || '').trim();
+    let cleanStatus = String(status || 'Aktif').trim();
+    if (!cleanNama) return;
+    let idx = window.PayrollState.tarifShift.findIndex(t => String(t.namaPekerja || '').trim().toLowerCase() === cleanNama.toLowerCase());
+    if (idx >= 0) {
+      if (cleanRole) window.PayrollState.tarifShift[idx].role = cleanRole;
+      window.PayrollState.tarifShift[idx].status = cleanStatus;
+    } else {
+      let rLow = cleanRole.toLowerCase();
+      let tipeKomp = "Uang Harian Shift";
+      let s1 = 45000, s2 = 45000, gp = 0;
+      let ket = "Shift Rp 45.000/shift";
+      if (rLow.includes("dokter") || rLow.includes("spesialis")) {
+        tipeKomp = "Kombinasi Shift & Tindakan";
+        s1 = 55000; s2 = 55000; gp = 0;
+        ket = "2 Shift: Rp 55.000/shift + JM";
+      } else if (rLow.includes("admin") || rLow.includes("kasir")) {
+        tipeKomp = "Gaji Bulanan Tetap";
+        s1 = 0; s2 = 0; gp = 1200000;
+        ket = "Gaji Bulanan Tetap Rp 1.200.000/bulan (Non-Shift)";
+      } else if (rLow.includes("owner") || rLow.includes("super")) {
+        tipeKomp = "Kombinasi Shift & Tindakan";
+        s1 = 55000; s2 = 55000; gp = 0;
+        ket = "Shift Rp 55.000/shift + JM";
+      }
+      let newId = "TARIF-" + String(window.PayrollState.tarifShift.length + 1).padStart(3, '0');
+      window.PayrollState.tarifShift.push({
+        idAturan: newId,
+        role: cleanRole || "Staff",
+        namaPekerja: cleanNama,
+        tipeKompensasi: tipeKomp,
+        tarifShift1: s1,
+        tarifShift2: s2,
+        gajiPokokBulanan: gp,
+        status: cleanStatus,
+        keterangan: ket
+      });
+    }
+    if (typeof renderAllPayrollTables === 'function') {
+      try { renderAllPayrollTables(); } catch (e) {}
+    }
+  }
+}
+
 function aktifkanDbUser(username, nama) {
   if (!confirm('Konfirmasi Aktivasi Account:\nAktifkan pengguna "' + (nama || username) + '" (' + username + ') agar dapat login ke sistem RME?')) {
     return;
@@ -13245,6 +13293,7 @@ function aktifkanDbUser(username, nama) {
       let st = window._mockDb.staff.find(s => String(s.username || '').toLowerCase() === String(username).toLowerCase());
       if (st) st.status = 'Aktif';
     }
+    syncUserToClientPayroll(ex ? ex.nama : (nama || username), ex ? ex.role : '', 'Aktif');
   };
 
   if (typeof google !== 'undefined' && google.script && google.script.run) {
@@ -13361,6 +13410,7 @@ function simpanDbUser(e) {
       listMasterUser.unshift(userObj);
     }
     saveFallbackUserList(listMasterUser);
+    syncUserToClientPayroll(nama, role, status);
   };
 
   if (btn) { btn.disabled = true; btn.innerHTML = '<span class="inline-block animate-spin mr-1">⏳</span> Menyimpan ke Spreadsheet...'; }
@@ -13539,6 +13589,11 @@ function hapusDbUser(username, nama) {
     let ex = listMasterUser.find(u => String(u.username || '').toLowerCase() === String(username).toLowerCase());
     if (ex) ex.status = 'Non Aktif';
     saveFallbackUserList(listMasterUser);
+    if (window._mockDb && Array.isArray(window._mockDb.staff)) {
+      let st = window._mockDb.staff.find(s => String(s.username || '').toLowerCase() === String(username).toLowerCase());
+      if (st) st.status = 'Non Aktif';
+    }
+    syncUserToClientPayroll(ex ? ex.nama : (nama || username), ex ? ex.role : '', 'Non Aktif');
   };
 
   if (typeof google !== 'undefined' && google.script && google.script.run) {
@@ -14500,12 +14555,12 @@ function renderInfoBmhp() {
   function getDefaultPayrollSeed() {
     return {
       tarifShift: [
-        { idAturan: "TARIF-001", role: "Dokter Gigi Spesialis", namaPekerja: "drg. Rahma Yulinda D, Sp. BMM", tipeKompensasi: "Kombinasi Shift & Tindakan", tarifShift1: 55000, tarifShift2: 55000, gajiPokokBulanan: 0, keterangan: "2 Shift: Rp 55.000/shift (berdasarkan absensi) + JM 65% (Rontgen 15%)" },
-        { idAturan: "TARIF-002", role: "Dokter Gigi Umum", namaPekerja: "drg. Regyana Oktavaria", tipeKompensasi: "Kombinasi Shift & Tindakan", tarifShift1: 55000, tarifShift2: 55000, gajiPokokBulanan: 0, keterangan: "2 Shift: Rp 55.000/shift (berdasarkan absensi) + JM 40% (Rontgen 15%)" },
-        { idAturan: "TARIF-003", role: "Dokter Gigi Umum", namaPekerja: "drg. Latifah Mulyana", tipeKompensasi: "Kombinasi Shift & Tindakan", tarifShift1: 55000, tarifShift2: 55000, gajiPokokBulanan: 0, keterangan: "2 Shift: Rp 55.000/shift (berdasarkan absensi) + JM 40% (Rontgen 15%)" },
-        { idAturan: "TARIF-004", role: "Dokter Gigi Umum", namaPekerja: "drg. Tia Ardhana R", tipeKompensasi: "Kombinasi Shift & Tindakan", tarifShift1: 55000, tarifShift2: 55000, gajiPokokBulanan: 0, keterangan: "2 Shift: Rp 55.000/shift (berdasarkan absensi) + JM 50% / 55% (Rontgen 15%)" },
-        { idAturan: "TARIF-005", role: "Perawat Gigi", namaPekerja: "Bernadette Rostenkowski", tipeKompensasi: "Uang Harian Shift", tarifShift1: 45000, tarifShift2: 45000, gajiPokokBulanan: 0, keterangan: "2 Shift: Rp 45.000/shift (dihitung berdasarkan absensi kehadiran)" },
-        { idAturan: "TARIF-006", role: "Admin", namaPekerja: "Howard Wolowitz", tipeKompensasi: "Gaji Bulanan Tetap", tarifShift1: 0, tarifShift2: 0, gajiPokokBulanan: 1200000, keterangan: "Gaji Bulanan Tetap Rp 1.200.000/bulan (Non-Shift)" }
+        { idAturan: "TARIF-001", role: "Dokter Gigi Spesialis", namaPekerja: "drg. Rahma Yulinda D, Sp. BMM", tipeKompensasi: "Kombinasi Shift & Tindakan", tarifShift1: 55000, tarifShift2: 55000, gajiPokokBulanan: 0, status: "Aktif", keterangan: "2 Shift: Rp 55.000/shift (berdasarkan absensi) + JM 65% (Rontgen 15%)" },
+        { idAturan: "TARIF-002", role: "Dokter Gigi Umum", namaPekerja: "drg. Regyana Oktavaria", tipeKompensasi: "Kombinasi Shift & Tindakan", tarifShift1: 55000, tarifShift2: 55000, gajiPokokBulanan: 0, status: "Aktif", keterangan: "2 Shift: Rp 55.000/shift (berdasarkan absensi) + JM 40% (Rontgen 15%)" },
+        { idAturan: "TARIF-003", role: "Dokter Gigi Umum", namaPekerja: "drg. Latifah Mulyana", tipeKompensasi: "Kombinasi Shift & Tindakan", tarifShift1: 55000, tarifShift2: 55000, gajiPokokBulanan: 0, status: "Aktif", keterangan: "2 Shift: Rp 55.000/shift (berdasarkan absensi) + JM 40% (Rontgen 15%)" },
+        { idAturan: "TARIF-004", role: "Dokter Gigi Umum", namaPekerja: "drg. Tia Ardhana R", tipeKompensasi: "Kombinasi Shift & Tindakan", tarifShift1: 55000, tarifShift2: 55000, gajiPokokBulanan: 0, status: "Aktif", keterangan: "2 Shift: Rp 55.000/shift (berdasarkan absensi) + JM 50% / 55% (Rontgen 15%)" },
+        { idAturan: "TARIF-005", role: "Perawat Gigi", namaPekerja: "Bernadette Rostenkowski", tipeKompensasi: "Uang Harian Shift", tarifShift1: 45000, tarifShift2: 45000, gajiPokokBulanan: 0, status: "Aktif", keterangan: "2 Shift: Rp 45.000/shift (dihitung berdasarkan absensi kehadiran)" },
+        { idAturan: "TARIF-006", role: "Admin", namaPekerja: "Howard Wolowitz", tipeKompensasi: "Gaji Bulanan Tetap", tarifShift1: 0, tarifShift2: 0, gajiPokokBulanan: 1200000, status: "Aktif", keterangan: "Gaji Bulanan Tetap Rp 1.200.000/bulan (Non-Shift)" }
       ],
       presensiHarian: [
         { idPresensi: "ATT-202610-001", tanggal: "01-10-2026", idPekerja: "DOK-001", namaPekerja: "drg. Rahma Yulinda D, Sp. BMM", role: "Dokter Gigi Spesialis", shift: "Shift 1", jamMasuk: "08:55", jamPulang: "15:00", statusKehadiran: "Hadir", uangHarianDidapat: 55000, verifikator: "Admin" },
@@ -14861,7 +14916,12 @@ function renderInfoBmhp() {
     const tbTarif = document.getElementById('tbodyTarifShift');
     if (tbTarif) {
       const listTarif = window.PayrollState.tarifShift || [];
-      tbTarif.innerHTML = listTarif.map((t, idx) => `
+      tbTarif.innerHTML = listTarif.map((t, idx) => {
+        let isAktif = !t.status || String(t.status).toLowerCase() === 'aktif';
+        let badgeStatus = isAktif
+          ? '<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-extrabold text-[10px] border border-emerald-300">Aktif</span>'
+          : '<span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-bold text-[10px] border border-slate-300">Non Aktif</span>';
+        return `
         <tr>
           <td class="py-3 px-4 font-mono font-bold text-slate-500 text-[11px]">${t.idAturan}</td>
           <td class="py-3 px-4 font-black text-slate-800">${t.namaPekerja}</td>
@@ -14872,6 +14932,7 @@ function renderInfoBmhp() {
           <td class="py-3 px-3 text-right font-black text-indigo-700">${fmtRpPayroll(t.tarifShift1)}</td>
           <td class="py-3 px-3 text-right font-black text-indigo-700">${fmtRpPayroll(t.tarifShift2)}</td>
           <td class="py-3 px-4 text-right font-black text-emerald-700">${fmtRpPayroll(t.gajiPokokBulanan)}</td>
+          <td class="py-3 px-3 text-center">${badgeStatus}</td>
           <td class="py-3 px-4 text-[11px] text-slate-500">${t.keterangan || '-'}</td>
           <td class="py-3 px-3 text-center">
             <button type="button" onclick="pilihTarifShiftToEdit(${idx})" class="px-2.5 py-1 bg-slate-100 hover:bg-indigo-100 text-indigo-700 font-extrabold rounded-lg text-[10px] border border-slate-200">
@@ -14879,7 +14940,8 @@ function renderInfoBmhp() {
             </button>
           </td>
         </tr>
-      `).join('');
+      `;
+      }).join('');
     }
 
     // 6. Render Tabel Rincian Bagi Hasil JM Tindakan

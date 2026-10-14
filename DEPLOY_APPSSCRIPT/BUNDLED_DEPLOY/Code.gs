@@ -562,7 +562,7 @@ function registrasiAkunBaru(payload) {
 
     catatLog("Registrasi Akun", "Pendaftaran akun baru (Status: Non Aktif): " + cleanUser + " (" + role + ")", nama);
 
-    // Auto-sync ke RME Sheldon - 11 Payroll & Honor Dokter (Sheet: Pengaturan_Tarif_Shift)
+    // Auto-sync ke RME Sheldon - 06 Master User & Role (Sheet: Pengaturan_Tarif_Shift)
     try {
       if (typeof syncUserToPayrollTarifShift === "function") {
         syncUserToPayrollTarifShift({
@@ -2254,7 +2254,7 @@ function simpanUserMaster(payload) {
 
       catatLog("Master User", "Edit user: " + cleanUser + " (" + payload.role + ")", payload.currentUser || "Super User");
 
-      // Otomatis input/sinkronkan Nama Pekerja, Role, dan Status ke RME Sheldon - 11 Payroll & Honor Dokter (Pengaturan_Tarif_Shift)
+      // Otomatis input/sinkronkan Nama Pekerja, Role, dan Status ke RME Sheldon - 06 Master User & Role (Pengaturan_Tarif_Shift)
       try {
         if (typeof syncUserToPayrollTarifShift === 'function') {
           syncUserToPayrollTarifShift({
@@ -2292,7 +2292,7 @@ function simpanUserMaster(payload) {
 
       catatLog("Master User", "Tambah user baru: " + cleanUser + " (" + payload.role + ")", payload.currentUser || "Super User");
 
-      // Otomatis input/sinkronkan Nama Pekerja, Role, dan Status ke RME Sheldon - 11 Payroll & Honor Dokter (Pengaturan_Tarif_Shift)
+      // Otomatis input/sinkronkan Nama Pekerja, Role, dan Status ke RME Sheldon - 06 Master User & Role (Pengaturan_Tarif_Shift)
       try {
         if (typeof syncUserToPayrollTarifShift === 'function') {
           syncUserToPayrollTarifShift({
@@ -4036,26 +4036,6 @@ const SPREADSHEET_DEFINITIONS = {
             ["TARIF-005", "Perawat Gigi", "Bernadette Rostenkowski", "Uang Harian Shift", 45000, 45000, 0, "2 Shift: Rp 45.000/shift (dihitung berdasarkan absensi kehadiran)", "Aktif"],
             ["TARIF-006", "Admin", "Howard Wolowitz", "Gaji Bulanan Tetap", 0, 0, 1200000, "Gaji Bulanan Tetap Rp 1.200.000/bulan (Non-Shift)", "Aktif"]
           ]
-        },
-        {
-          "name": "Presensi_Shift_Harian",
-          "headers": ["ID_Presensi", "Tanggal", "ID_Pekerja", "Nama_Pekerja", "Role", "Shift", "Jam_Masuk", "Jam_Pulang", "Status_Kehadiran", "Uang_Harian_Didapat", "Verifikator", "Waktu_Sistem"],
-          "formats": { "B": "dd-mm-yyyy", "J": "#,##0", "L": "dd-mm-yyyy hh:mm:ss" },
-          "validations": {
-            "E": ["Dokter Gigi Spesialis", "Dokter Gigi Umum", "Perawat Gigi", "Perawat Umum", "Admin"],
-            "F": ["Shift 1", "Shift 2", "Non-Shift"],
-            "I": ["Hadir", "Izin", "Sakit", "Cuti"]
-          },
-          "seedRows": [
-            ["ATT-202610-001", "01-10-2026", "DOK-001", "drg. Rahma Yulinda D, Sp. BMM", "Dokter Gigi Spesialis", "Shift 1", "08:55", "15:00", "Hadir", "=IF(I2=\"Hadir\",IF(F2=\"Shift 1\",IFERROR(VLOOKUP(D2,Pengaturan_Tarif_Shift!C:F,3,FALSE),55000),IF(F2=\"Shift 2\",IFERROR(VLOOKUP(D2,Pengaturan_Tarif_Shift!C:F,4,FALSE),55000),0)),0)", "Admin", "01-10-2026 15:05:00"],
-            ["ATT-202610-002", "01-10-2026", "DOK-001", "drg. Rahma Yulinda D, Sp. BMM", "Dokter Gigi Spesialis", "Shift 2", "15:00", "21:00", "Hadir", "=IF(I3=\"Hadir\",IF(F3=\"Shift 1\",IFERROR(VLOOKUP(D3,Pengaturan_Tarif_Shift!C:F,3,FALSE),55000),IF(F3=\"Shift 2\",IFERROR(VLOOKUP(D3,Pengaturan_Tarif_Shift!C:F,4,FALSE),55000),0)),0)", "Admin", "01-10-2026 21:05:00"],
-            ["ATT-202610-003", "01-10-2026", "DOK-002", "drg. Regyana Oktavaria", "Dokter Gigi Umum", "Shift 1", "08:50", "15:00", "Hadir", "=IF(I4=\"Hadir\",IF(F4=\"Shift 1\",IFERROR(VLOOKUP(D4,Pengaturan_Tarif_Shift!C:F,3,FALSE),55000),IF(F4=\"Shift 2\",IFERROR(VLOOKUP(D4,Pengaturan_Tarif_Shift!C:F,4,FALSE),55000),0)),0)", "Admin", "01-10-2026 15:05:00"],
-            ["ATT-202610-004", "01-10-2026", "DOK-003", "drg. Latifah Mulyana", "Dokter Gigi Umum", "Shift 2", "14:55", "21:00", "Hadir", "=IF(I5=\"Hadir\",IF(F5=\"Shift 1\",IFERROR(VLOOKUP(D5,Pengaturan_Tarif_Shift!C:F,3,FALSE),55000),IF(F5=\"Shift 2\",IFERROR(VLOOKUP(D5,Pengaturan_Tarif_Shift!C:F,4,FALSE),55000),0)),0)", "Admin", "01-10-2026 21:05:00"],
-            ["ATT-202610-005", "01-10-2026", "DOK-004", "drg. Tia Ardhana R", "Dokter Gigi Umum", "Shift 1", "08:55", "15:00", "Hadir", "=IF(I6=\"Hadir\",IF(F6=\"Shift 1\",IFERROR(VLOOKUP(D6,Pengaturan_Tarif_Shift!C:F,3,FALSE),55000),IF(F6=\"Shift 2\",IFERROR(VLOOKUP(D6,Pengaturan_Tarif_Shift!C:F,4,FALSE),55000),0)),0)", "Admin", "01-10-2026 15:05:00"],
-            ["ATT-202610-006", "01-10-2026", "DOK-004", "drg. Tia Ardhana R", "Dokter Gigi Umum", "Shift 2", "15:00", "21:00", "Hadir", "=IF(I7=\"Hadir\",IF(F7=\"Shift 1\",IFERROR(VLOOKUP(D7,Pengaturan_Tarif_Shift!C:F,3,FALSE),55000),IF(F7=\"Shift 2\",IFERROR(VLOOKUP(D7,Pengaturan_Tarif_Shift!C:F,4,FALSE),55000),0)),0)", "Admin", "01-10-2026 21:05:00"],
-            ["ATT-202610-007", "01-10-2026", "PRW-001", "Bernadette Rostenkowski", "Perawat Gigi", "Shift 1", "08:45", "15:00", "Hadir", "=IF(I8=\"Hadir\",IF(F8=\"Shift 1\",IFERROR(VLOOKUP(D8,Pengaturan_Tarif_Shift!C:F,3,FALSE),45000),IF(F8=\"Shift 2\",IFERROR(VLOOKUP(D8,Pengaturan_Tarif_Shift!C:F,4,FALSE),45000),0)),0)", "Admin", "01-10-2026 15:05:00"],
-            ["ATT-202610-008", "01-10-2026", "PRW-001", "Bernadette Rostenkowski", "Perawat Gigi", "Shift 2", "15:00", "21:05", "Hadir", "=IF(I9=\"Hadir\",IF(F9=\"Shift 1\",IFERROR(VLOOKUP(D9,Pengaturan_Tarif_Shift!C:F,3,FALSE),45000),IF(F9=\"Shift 2\",IFERROR(VLOOKUP(D9,Pengaturan_Tarif_Shift!C:F,4,FALSE),45000),0)),0)", "Admin", "01-10-2026 21:10:00"]
-          ]
         }
       ]
     },
@@ -4162,23 +4142,6 @@ const SPREADSHEET_DEFINITIONS = {
       "title": "RME Sheldon - 11 Payroll & Honor Dokter",
       "sheets": [
         {
-          "name": "Pengaturan_Tarif_Shift",
-          "headers": ["ID_Aturan", "Role", "Nama_Pekerja", "Tipe_Kompensasi", "Tarif_Shift_1", "Tarif_Shift_2", "Gaji_Pokok_Bulanan", "Keterangan"],
-          "formats": { "E": "#,##0", "F": "#,##0", "G": "#,##0" },
-          "validations": {
-            "B": ["Dokter Gigi Spesialis", "Dokter Gigi Umum", "Perawat Gigi", "Perawat Umum", "Admin"],
-            "D": ["Uang Harian Shift", "Gaji Bulanan Tetap", "Kombinasi Shift & Tindakan"]
-          },
-          "seedRows": [
-            ["TARIF-001", "Dokter Gigi Spesialis", "drg. Rahma Yulinda D, Sp. BMM", "Kombinasi Shift & Tindakan", 55000, 55000, 0, "2 Shift: Rp 55.000/shift (berdasarkan absensi) + JM 65% (Rontgen 15%)"],
-            ["TARIF-002", "Dokter Gigi Umum", "drg. Regyana Oktavaria", "Kombinasi Shift & Tindakan", 55000, 55000, 0, "2 Shift: Rp 55.000/shift (berdasarkan absensi) + JM 40% (Rontgen 15%)"],
-            ["TARIF-003", "Dokter Gigi Umum", "drg. Latifah Mulyana", "Kombinasi Shift & Tindakan", 55000, 55000, 0, "2 Shift: Rp 55.000/shift (berdasarkan absensi) + JM 40% (Rontgen 15%)"],
-            ["TARIF-004", "Dokter Gigi Umum", "drg. Tia Ardhana R", "Kombinasi Shift & Tindakan", 55000, 55000, 0, "2 Shift: Rp 55.000/shift (berdasarkan absensi) + JM 50% / 55% (Rontgen 15%)"],
-            ["TARIF-005", "Perawat Gigi", "Bernadette Rostenkowski", "Uang Harian Shift", 45000, 45000, 0, "2 Shift: Rp 45.000/shift (dihitung berdasarkan absensi kehadiran)"],
-            ["TARIF-006", "Admin", "Howard Wolowitz", "Gaji Bulanan Tetap", 0, 0, 1200000, "Gaji Bulanan Tetap Rp 1.200.000/bulan (Non-Shift)"]
-          ]
-        },
-        {
           "name": "Presensi_Shift_Harian",
           "headers": ["ID_Presensi", "Tanggal", "ID_Pekerja", "Nama_Pekerja", "Role", "Shift", "Jam_Masuk", "Jam_Pulang", "Status_Kehadiran", "Uang_Harian_Didapat", "Verifikator", "Waktu_Sistem"],
           "formats": { "B": "dd-mm-yyyy", "J": "#,##0", "L": "dd-mm-yyyy hh:mm:ss" },
@@ -4188,14 +4151,14 @@ const SPREADSHEET_DEFINITIONS = {
             "I": ["Hadir", "Izin", "Sakit", "Cuti"]
           },
           "seedRows": [
-            ["ATT-202610-001", "01-10-2026", "DOK-001", "drg. Rahma Yulinda D, Sp. BMM", "Dokter Gigi Spesialis", "Shift 1", "08:55", "15:00", "Hadir", "=IF(I2=\"Hadir\",IF(F2=\"Shift 1\",IFERROR(VLOOKUP(D2,Pengaturan_Tarif_Shift!C:F,3,FALSE),55000),IF(F2=\"Shift 2\",IFERROR(VLOOKUP(D2,Pengaturan_Tarif_Shift!C:F,4,FALSE),55000),0)),0)", "Admin", "01-10-2026 15:05:00"],
-            ["ATT-202610-002", "01-10-2026", "DOK-001", "drg. Rahma Yulinda D, Sp. BMM", "Dokter Gigi Spesialis", "Shift 2", "15:00", "21:00", "Hadir", "=IF(I3=\"Hadir\",IF(F3=\"Shift 1\",IFERROR(VLOOKUP(D3,Pengaturan_Tarif_Shift!C:F,3,FALSE),55000),IF(F3=\"Shift 2\",IFERROR(VLOOKUP(D3,Pengaturan_Tarif_Shift!C:F,4,FALSE),55000),0)),0)", "Admin", "01-10-2026 21:05:00"],
-            ["ATT-202610-003", "01-10-2026", "DOK-002", "drg. Regyana Oktavaria", "Dokter Gigi Umum", "Shift 1", "08:50", "15:00", "Hadir", "=IF(I4=\"Hadir\",IF(F4=\"Shift 1\",IFERROR(VLOOKUP(D4,Pengaturan_Tarif_Shift!C:F,3,FALSE),55000),IF(F4=\"Shift 2\",IFERROR(VLOOKUP(D4,Pengaturan_Tarif_Shift!C:F,4,FALSE),55000),0)),0)", "Admin", "01-10-2026 15:05:00"],
-            ["ATT-202610-004", "01-10-2026", "DOK-003", "drg. Latifah Mulyana", "Dokter Gigi Umum", "Shift 2", "14:55", "21:00", "Hadir", "=IF(I5=\"Hadir\",IF(F5=\"Shift 1\",IFERROR(VLOOKUP(D5,Pengaturan_Tarif_Shift!C:F,3,FALSE),55000),IF(F5=\"Shift 2\",IFERROR(VLOOKUP(D5,Pengaturan_Tarif_Shift!C:F,4,FALSE),55000),0)),0)", "Admin", "01-10-2026 21:05:00"],
-            ["ATT-202610-005", "01-10-2026", "DOK-004", "drg. Tia Ardhana R", "Dokter Gigi Umum", "Shift 1", "08:55", "15:00", "Hadir", "=IF(I6=\"Hadir\",IF(F6=\"Shift 1\",IFERROR(VLOOKUP(D6,Pengaturan_Tarif_Shift!C:F,3,FALSE),55000),IF(F6=\"Shift 2\",IFERROR(VLOOKUP(D6,Pengaturan_Tarif_Shift!C:F,4,FALSE),55000),0)),0)", "Admin", "01-10-2026 15:05:00"],
-            ["ATT-202610-006", "01-10-2026", "DOK-004", "drg. Tia Ardhana R", "Dokter Gigi Umum", "Shift 2", "15:00", "21:00", "Hadir", "=IF(I7=\"Hadir\",IF(F7=\"Shift 1\",IFERROR(VLOOKUP(D7,Pengaturan_Tarif_Shift!C:F,3,FALSE),55000),IF(F7=\"Shift 2\",IFERROR(VLOOKUP(D7,Pengaturan_Tarif_Shift!C:F,4,FALSE),55000),0)),0)", "Admin", "01-10-2026 21:05:00"],
-            ["ATT-202610-007", "01-10-2026", "PRW-001", "Bernadette Rostenkowski", "Perawat Gigi", "Shift 1", "08:45", "15:00", "Hadir", "=IF(I8=\"Hadir\",IF(F8=\"Shift 1\",IFERROR(VLOOKUP(D8,Pengaturan_Tarif_Shift!C:F,3,FALSE),45000),IF(F8=\"Shift 2\",IFERROR(VLOOKUP(D8,Pengaturan_Tarif_Shift!C:F,4,FALSE),45000),0)),0)", "Admin", "01-10-2026 15:05:00"],
-            ["ATT-202610-008", "01-10-2026", "PRW-001", "Bernadette Rostenkowski", "Perawat Gigi", "Shift 2", "15:00", "21:05", "Hadir", "=IF(I9=\"Hadir\",IF(F9=\"Shift 1\",IFERROR(VLOOKUP(D9,Pengaturan_Tarif_Shift!C:F,3,FALSE),45000),IF(F9=\"Shift 2\",IFERROR(VLOOKUP(D9,Pengaturan_Tarif_Shift!C:F,4,FALSE),45000),0)),0)", "Admin", "01-10-2026 21:10:00"]
+            ["ATT-202610-001", "01-10-2026", "DOK-001", "drg. Rahma Yulinda D, Sp. BMM", "Dokter Gigi Spesialis", "Shift 1", "08:55", "15:00", "Hadir", "=IF(I2=\"Hadir\",55000,0)", "Admin", "01-10-2026 15:05:00"],
+            ["ATT-202610-002", "01-10-2026", "DOK-001", "drg. Rahma Yulinda D, Sp. BMM", "Dokter Gigi Spesialis", "Shift 2", "15:00", "21:00", "Hadir", "=IF(I3=\"Hadir\",55000,0)", "Admin", "01-10-2026 21:05:00"],
+            ["ATT-202610-003", "01-10-2026", "DOK-002", "drg. Regyana Oktavaria", "Dokter Gigi Umum", "Shift 1", "08:50", "15:00", "Hadir", "=IF(I4=\"Hadir\",55000,0)", "Admin", "01-10-2026 15:05:00"],
+            ["ATT-202610-004", "01-10-2026", "DOK-003", "drg. Latifah Mulyana", "Dokter Gigi Umum", "Shift 2", "14:55", "21:00", "Hadir", "=IF(I5=\"Hadir\",55000,0)", "Admin", "01-10-2026 21:05:00"],
+            ["ATT-202610-005", "01-10-2026", "DOK-004", "drg. Tia Ardhana R", "Dokter Gigi Umum", "Shift 1", "08:55", "15:00", "Hadir", "=IF(I6=\"Hadir\",55000,0)", "Admin", "01-10-2026 15:05:00"],
+            ["ATT-202610-006", "01-10-2026", "DOK-004", "drg. Tia Ardhana R", "Dokter Gigi Umum", "Shift 2", "15:00", "21:00", "Hadir", "=IF(I7=\"Hadir\",55000,0)", "Admin", "01-10-2026 21:05:00"],
+            ["ATT-202610-007", "01-10-2026", "PRW-001", "Bernadette Rostenkowski", "Perawat Gigi", "Shift 1", "08:45", "15:00", "Hadir", "=IF(I8=\"Hadir\",45000,0)", "Admin", "01-10-2026 15:05:00"],
+            ["ATT-202610-008", "01-10-2026", "PRW-001", "Bernadette Rostenkowski", "Perawat Gigi", "Shift 2", "15:00", "21:05", "Hadir", "=IF(I9=\"Hadir\",45000,0)", "Admin", "01-10-2026 21:10:00"]
           ]
         },
         {
@@ -4221,7 +4184,7 @@ const SPREADSHEET_DEFINITIONS = {
           },
           "seedRows": [
             ["PAY-STF-202610-001", "Oktober 2026", "PRW-001", "Bernadette Rostenkowski", "Perawat Gigi", 0, "=COUNTIFS(Presensi_Shift_Harian!D:D,D2,Presensi_Shift_Harian!F:F,\"Shift 1\",Presensi_Shift_Harian!I:I,\"Hadir\")", "=COUNTIFS(Presensi_Shift_Harian!D:D,D2,Presensi_Shift_Harian!F:F,\"Shift 2\",Presensi_Shift_Harian!I:I,\"Hadir\")", "=SUMIFS(Presensi_Shift_Harian!J:J,Presensi_Shift_Harian!D:D,D2,Presensi_Shift_Harian!I:I,\"Hadir\")", 0, 0, 0, 0, "=(F2+I2+J2+K2+L2)-M2", "BSI", "-", "Draft", "", "Perawat (2 Shift): Rp 45.000/shift dihitung otomatis dari Absensi Kehadiran", "10-10-2026 10:00:00"],
-            ["PAY-STF-202610-002", "Oktober 2026", "ADM-001", "Howard Wolowitz", "Admin", "=IFERROR(VLOOKUP(D3,Pengaturan_Tarif_Shift!C:G,5,FALSE),1200000)", 0, 0, 0, 0, 0, 0, 0, "=(F3+I3+J3+K3+L3)-M3", "Mandiri", "-", "Draft", "", "Admin (Non-Shift): Gaji Pokok Bulanan Tetap Rp 1.200.000/bulan", "10-10-2026 10:00:00"]
+            ["PAY-STF-202610-002", "Oktober 2026", "ADM-001", "Howard Wolowitz", "Admin", 1200000, 0, 0, 0, 0, 0, 0, 0, "=(F3+I3+J3+K3+L3)-M3", "Mandiri", "-", "Draft", "", "Admin (Non-Shift): Gaji Pokok Bulanan Tetap Rp 1.200.000/bulan", "10-10-2026 10:00:00"]
           ]
         },
         {
@@ -4484,6 +4447,28 @@ function setupAllSpreadsheets() {
         });
       }
     });
+
+    // Pembersihan sheet yang dipindahkan sesuai arsitektur database Sheldon:
+    // 1. Hapus sheet Presensi_Shift_Harian dari 06 Master User & Role jika masih ada
+    if (key === "MASTER") {
+      try {
+        let delPres = ss.getSheetByName("Presensi_Shift_Harian");
+        if (delPres && ss.getSheets().length > 1) {
+          ss.deleteSheet(delPres);
+          Logger.log("🗑️ Berhasil menghapus sheet Presensi_Shift_Harian dari RME Sheldon - 06 Master User & Role");
+        }
+      } catch (eDel) {}
+    }
+    // 2. Hapus sheet Pengaturan_Tarif_Shift dari 11 Payroll & Honor Dokter jika masih ada
+    if (key === "PAYROLL") {
+      try {
+        let delTarif = ss.getSheetByName("Pengaturan_Tarif_Shift");
+        if (delTarif && ss.getSheets().length > 1) {
+          ss.deleteSheet(delTarif);
+          Logger.log("🗑️ Berhasil menghapus sheet Pengaturan_Tarif_Shift dari RME Sheldon - 11 Payroll & Honor Dokter");
+        }
+      } catch (eDel) {}
+    }
   });
 
   Logger.log("\n=== PASTE OBJEK DB_CONFIG INI KE `00_Config.gs` ===");
@@ -4788,9 +4773,9 @@ function sinkronkanSemuaSheetOtomatis() {
 // =========================================================================
 
 /**
- * Helper privat: Memastikan 2 sheet (Pengaturan_Tarif_Shift & Presensi_Shift_Harian)
- * juga dibuat & diisi di dalam Spreadsheet "RME Sheldon - 06 Master User & Role"
- * agar pengguna yang membuka Master User & Role langsung melihatnya.
+ * Helper privat: Memastikan sheet (Pengaturan_Tarif_Shift)
+ * dibuat & diisi di dalam Spreadsheet "RME Sheldon - 06 Master User & Role".
+ * Menghapus sheet Presensi_Shift_Harian dari Master User & Role jika masih ada.
  */
 function _sinkronkanShiftKeMasterUser() {
   try {
@@ -4799,8 +4784,16 @@ function _sinkronkanShiftKeMasterUser() {
     let foundMaster = _findOrCreateSpreadsheetInFolder("MASTER", defMaster.title);
     const ssMaster = foundMaster.ss;
 
+    // Hapus Presensi_Shift_Harian dari 06 Master jika ada
+    try {
+      let legacyPresM = ssMaster.getSheetByName("Presensi_Shift_Harian");
+      if (legacyPresM && ssMaster.getSheets().length > 1) {
+        ssMaster.deleteSheet(legacyPresM);
+      }
+    } catch (eDelM) {}
+
     defMaster.sheets.forEach(shDef => {
-      if (shDef.name !== "Pengaturan_Tarif_Shift" && shDef.name !== "Presensi_Shift_Harian") return;
+      if (shDef.name !== "Pengaturan_Tarif_Shift") return;
       let sheet = ssMaster.getSheetByName(shDef.name) || ssMaster.insertSheet(shDef.name);
 
       if (shDef.headers) {
@@ -4915,6 +4908,14 @@ function setupPayrollSpreadsheet() {
       }
     });
 
+    // Hapus sheet Pengaturan_Tarif_Shift dari 11 Payroll jika masih ada
+    try {
+      let legacyTarifP = ss.getSheetByName("Pengaturan_Tarif_Shift");
+      if (legacyTarifP && ss.getSheets().length > 1) {
+        ss.deleteSheet(legacyTarifP);
+      }
+    } catch (eDelTarifP) {}
+
     // Pastikan juga terbuat di "RME Sheldon - 06 Master User & Role"
     _sinkronkanShiftKeMasterUser();
 
@@ -4924,7 +4925,8 @@ function setupPayrollSpreadsheet() {
       spreadsheetId: ssId,
       url: ss.getUrl(),
       message: (isBaru ? "Spreadsheet baru berhasil dibuat di folder [" + found.folderName + "]: " : "Spreadsheet yang sudah ada berhasil di-update di folder [" + found.folderName + "]: ") + def.title + " (ID: " + ssId + ")\n\n" +
-               "• Sheet 1 (Pengaturan_Tarif_Shift) & Sheet 2 (Presensi_Shift_Harian) telah di-update di [RME Sheldon - 06 Master User & Role] dan [RME Sheldon - 11 Payroll & Honor Dokter]!\n" +
+               "• Sheet Pengaturan_Tarif_Shift tersimpan di [RME Sheldon - 06 Master User & Role]!\n" +
+               "• Sheet Presensi_Shift_Harian & Modul Payroll tersimpan di [RME Sheldon - 11 Payroll & Honor Dokter]!\n" +
                "• Dokter: Rp 55.000/shift (2 shift), Perawat: Rp 45.000/shift (2 shift), Admin: Rp 1.200.000/bulan (Non-Shift)"
     };
   } catch (err) {
@@ -4982,33 +4984,44 @@ function generatePayrollPeriode(periodeBulan) {
       dokterMap[dokName].jm += Number(r[idxJMDokter]) || 0;
     }
 
-    // 2. Baca Data Presensi_Shift_Harian & Pengaturan_Tarif_Shift jika ada
+    // 2. Baca Data Presensi_Shift_Harian (dari PAYROLL) & Pengaturan_Tarif_Shift (dari MASTER)
     let ssPayrollId = (DB_CONFIG && DB_CONFIG.PAYROLL) ? DB_CONFIG.PAYROLL.trim() : "";
     if (!ssPayrollId) {
       let initRes = setupPayrollSpreadsheet();
       ssPayrollId = initRes.spreadsheetId;
     }
+    let ssMasterId = (DB_CONFIG && DB_CONFIG.MASTER) ? DB_CONFIG.MASTER.trim() : "";
+    if (!ssMasterId) {
+      try {
+        const defM = SPREADSHEET_DEFINITIONS["MASTER"];
+        const foundM = _findOrCreateSpreadsheetInFolder("MASTER", defM.title);
+        ssMasterId = foundM.ssId;
+      } catch (eM) {}
+    }
 
-    // Ambil data tarif shift
+    // Ambil data tarif shift dari 06 Master User & Role
     let tarifMap = {};
+    let rawTarif = null;
     try {
-      const rawTarif = readFast(ssPayrollId, "Pengaturan_Tarif_Shift");
-      if (rawTarif && rawTarif.length > 1) {
-        const hTarif = rawTarif[0];
-        const idxNama = getColIdx(hTarif, ['nama_pekerja', 'nama']);
-        const idxS1 = getColIdx(hTarif, ['tarif_shift_1', 'shift_1']);
-        const idxS2 = getColIdx(hTarif, ['tarif_shift_2', 'shift_2']);
-        const idxGajiPokok = getColIdx(hTarif, ['gaji_pokok_bulanan', 'gaji_pokok']);
+      if (ssMasterId) {
+        rawTarif = readFast(ssMasterId, "Pengaturan_Tarif_Shift");
+        if (rawTarif && rawTarif.length > 1) {
+          const hTarif = rawTarif[0];
+          const idxNama = getColIdx(hTarif, ['nama_pekerja', 'nama']);
+          const idxS1 = getColIdx(hTarif, ['tarif_shift_1', 'shift_1']);
+          const idxS2 = getColIdx(hTarif, ['tarif_shift_2', 'shift_2']);
+          const idxGajiPokok = getColIdx(hTarif, ['gaji_pokok_bulanan', 'gaji_pokok']);
 
-        for (let t = 1; t < rawTarif.length; t++) {
-          let rowT = rawTarif[t];
-          let namaT = rowT[idxNama] ? String(rowT[idxNama]).trim() : "";
-          if (namaT) {
-            tarifMap[namaT] = {
-              shift1: Number(rowT[idxS1]) || 0,
-              shift2: Number(rowT[idxS2]) || 0,
-              gajiPokok: Number(rowT[idxGajiPokok]) || 0
-            };
+          for (let t = 1; t < rawTarif.length; t++) {
+            let rowT = rawTarif[t];
+            let namaT = rowT[idxNama] ? String(rowT[idxNama]).trim() : "";
+            if (namaT) {
+              tarifMap[namaT] = {
+                shift1: Number(rowT[idxS1]) || 0,
+                shift2: Number(rowT[idxS2]) || 0,
+                gajiPokok: Number(rowT[idxGajiPokok]) || 0
+              };
+            }
           }
         }
       }
@@ -5124,7 +5137,7 @@ function generatePayrollPeriode(periodeBulan) {
     // 3. Sinkronkan juga Honor_Perawat_Staff (Perawat 2 Shift @ 45.000 & Admin Non-Shift Rp 1.200.000/bulan)
     try {
       const sheetStaff = getSheetEksternal(ssPayrollId, "Honor_Perawat_Staff");
-      const rawTarifAll = readFast(ssPayrollId, "Pengaturan_Tarif_Shift");
+      const rawTarifAll = rawTarif || (ssMasterId ? readFast(ssMasterId, "Pengaturan_Tarif_Shift") : null);
       if (sheetStaff && rawTarifAll && rawTarifAll.length > 1) {
         let existingStf = sheetStaff.getDataRange().getValues();
         let stfCounter = 1;
@@ -5134,6 +5147,7 @@ function generatePayrollPeriode(periodeBulan) {
           if (!namaT || roleT.toLowerCase().includes("dokter")) continue;
 
           let isAdminRole = roleT.toLowerCase().includes("admin");
+          let gajiPokokVal = (tarifMap[namaT] && tarifMap[namaT].gajiPokok) ? tarifMap[namaT].gajiPokok : (isAdminRole ? 1200000 : 0);
           let idStfPay = "PAY-STF-" + Utilities.formatDate(new Date(), "Asia/Jakarta", "yyyyMM") + "-" + String(stfCounter).padStart(3, '0');
           let foundStfRow = -1;
           for (let sIdx = 1; sIdx < existingStf.length; sIdx++) {
@@ -5152,7 +5166,7 @@ function generatePayrollPeriode(periodeBulan) {
             (isAdminRole ? "ADM-" : "PRW-") + String(stfCounter).padStart(3, '0'),
             namaT,
             roleT,
-            isAdminRole ? `=IFERROR(VLOOKUP(D${rNum},Pengaturan_Tarif_Shift!C:G,5,FALSE),1200000)` : 0,
+            isAdminRole ? gajiPokokVal : 0,
             isAdminRole ? 0 : `=COUNTIFS(Presensi_Shift_Harian!D:D,D${rNum},Presensi_Shift_Harian!F:F,"Shift 1",Presensi_Shift_Harian!I:I,"Hadir")`,
             isAdminRole ? 0 : `=COUNTIFS(Presensi_Shift_Harian!D:D,D${rNum},Presensi_Shift_Harian!F:F,"Shift 2",Presensi_Shift_Harian!I:I,"Hadir")`,
             isAdminRole ? 0 : `=SUMIFS(Presensi_Shift_Harian!J:J,Presensi_Shift_Harian!D:D,D${rNum},Presensi_Shift_Harian!I:I,"Hadir")`,
@@ -5415,18 +5429,42 @@ function getPayrollModuleData() {
     const ss = found.ss;
     const ssId = found.ssId;
 
-    const readSheetRows = (sheetName) => {
-      let sh = ss.getSheetByName(sheetName);
+    // Hapus sheet Pengaturan_Tarif_Shift di spreadsheet 11 Payroll jika masih ada
+    try {
+      let legacyTarifInPayroll = ss.getSheetByName("Pengaturan_Tarif_Shift");
+      if (legacyTarifInPayroll && ss.getSheets().length > 1) {
+        ss.deleteSheet(legacyTarifInPayroll);
+      }
+    } catch (eDelP) {}
+
+    // Spreadsheet 06 Master User & Role
+    const defM = SPREADSHEET_DEFINITIONS["MASTER"];
+    const foundM = _findOrCreateSpreadsheetInFolder("MASTER", defM.title);
+    const ssM = foundM.ss;
+
+    // Hapus sheet Presensi_Shift_Harian di spreadsheet 06 Master User & Role jika masih ada
+    try {
+      let legacyPresInMaster = ssM.getSheetByName("Presensi_Shift_Harian");
+      if (legacyPresInMaster && ssM.getSheets().length > 1) {
+        ssM.deleteSheet(legacyPresInMaster);
+      }
+    } catch (eDelM) {}
+
+    const readSheetRowsFrom = (targetSs, sheetName) => {
+      let sh = targetSs.getSheetByName(sheetName);
       if (!sh || sh.getLastRow() <= 1) return [];
       return sh.getRange(2, 1, sh.getLastRow() - 1, sh.getLastColumn()).getValues();
     };
 
-    // Otomatis sinkronkan pekerja dari Master User & Role yang belum tercatat di Pengaturan_Tarif_Shift
+    const readSheetRows = (sheetName) => readSheetRowsFrom(ss, sheetName);
+
+    // Otomatis sinkronkan pekerja dari Master User & Role ke Pengaturan_Tarif_Shift di Spreadsheet MASTER
     try {
       syncAllUsersToPayrollTarifShift();
     } catch(eSyncAuto) {}
 
-    const tarifShift = readSheetRows("Pengaturan_Tarif_Shift").map(r => ({
+    // Pengaturan_Tarif_Shift disimpan dan dibaca dari Spreadsheet 06 Master User & Role
+    const tarifShift = readSheetRowsFrom(ssM, "Pengaturan_Tarif_Shift").map(r => ({
       idAturan: String(r[0] || ""),
       role: String(r[1] || ""),
       namaPekerja: String(r[2] || ""),
@@ -5551,6 +5589,16 @@ function simpanPresensiShift(payload) {
     const ss = found.ss;
     let sh = ss.getSheetByName("Presensi_Shift_Harian") || ss.insertSheet("Presensi_Shift_Harian");
 
+    // Hapus sheet Presensi_Shift_Harian di spreadsheet 06 Master User & Role jika masih ada
+    try {
+      const defM = SPREADSHEET_DEFINITIONS["MASTER"];
+      const foundM = _findOrCreateSpreadsheetInFolder("MASTER", defM.title);
+      let legacyPresM = foundM.ss.getSheetByName("Presensi_Shift_Harian");
+      if (legacyPresM && foundM.ss.getSheets().length > 1) {
+        foundM.ss.deleteSheet(legacyPresM);
+      }
+    } catch (eDelM) {}
+
     const nextRow = sh.getLastRow() + 1;
     const idPresensi = payload.idPresensi || ("ATT-" + Utilities.formatDate(new Date(), "Asia/Jakarta", "yyyyMMdd") + "-" + String(nextRow - 1).padStart(3, '0'));
     const tanggal = payload.tanggal || Utilities.formatDate(new Date(), "Asia/Jakarta", "dd-MM-yyyy");
@@ -5562,19 +5610,33 @@ function simpanPresensiShift(payload) {
     const jamPulang = String(payload.jamPulang || "15:00").trim();
     const status = String(payload.statusKehadiran || "Hadir").trim();
     const defaultTarif = role.toLowerCase().includes("dokter") ? 55000 : (role.toLowerCase().includes("perawat") ? 45000 : 0);
-    const formulaUang = `=IF(I${nextRow}="Hadir",IF(F${nextRow}="Shift 1",IFERROR(VLOOKUP(D${nextRow},Pengaturan_Tarif_Shift!C:F,3,FALSE),${defaultTarif}),IF(F${nextRow}="Shift 2",IFERROR(VLOOKUP(D${nextRow},Pengaturan_Tarif_Shift!C:F,4,FALSE),${defaultTarif}),0)),0)`;
+
+    let uangHarian = defaultTarif;
+    if (status !== "Hadir") {
+      uangHarian = 0;
+    } else {
+      // Ambil tarif shift pekerja dari Pengaturan_Tarif_Shift di Spreadsheet 06 Master User & Role
+      try {
+        const defM = SPREADSHEET_DEFINITIONS["MASTER"];
+        const foundM = _findOrCreateSpreadsheetInFolder("MASTER", defM.title);
+        const shTarif = foundM.ss.getSheetByName("Pengaturan_Tarif_Shift");
+        if (shTarif) {
+          let tData = shTarif.getDataRange().getValues();
+          for (let ti = 1; ti < tData.length; ti++) {
+            if (String(tData[ti][2] || "").trim().toLowerCase() === namaPekerja.toLowerCase()) {
+              uangHarian = shift === "Shift 2" ? (Number(tData[ti][5]) || defaultTarif) : (Number(tData[ti][4]) || defaultTarif);
+              break;
+            }
+          }
+        }
+      } catch (eTarif) {}
+    }
+
     const verifikator = String(payload.verifikator || "Admin").trim();
     const waktu = Utilities.formatDate(new Date(), "Asia/Jakarta", "dd-MM-yyyy HH:mm:ss");
 
-    const rowData = [idPresensi, tanggal, idPekerja, namaPekerja, role, shift, jamMasuk, jamPulang, status, formulaUang, verifikator, waktu];
+    const rowData = [idPresensi, tanggal, idPekerja, namaPekerja, role, shift, jamMasuk, jamPulang, status, uangHarian, verifikator, waktu];
     sh.appendRow(rowData);
-
-    // Sinkronkan juga ke 06 Master User & Role
-    try {
-      const foundM = _findOrCreateSpreadsheetInFolder("MASTER", "RME Sheldon - 06 Master User & Role");
-      let shM = foundM.ss.getSheetByName("Presensi_Shift_Harian");
-      if (shM) shM.appendRow(rowData);
-    } catch (eSyncM) {}
 
     SpreadsheetApp.flush();
     return {
@@ -5589,16 +5651,28 @@ function simpanPresensiShift(payload) {
 }
 
 /**
- * Menyimpan atau memperbarui aturan tarif shift / gaji pokok di Pengaturan_Tarif_Shift.
+ * Menyimpan atau memperbarui aturan tarif shift / gaji pokok di Pengaturan_Tarif_Shift
+ * pada Spreadsheet RME Sheldon - 06 Master User & Role.
  */
 function simpanTarifShift(payload) {
   const lock = LockService.getScriptLock();
   try {
     lock.waitLock(10000);
-    const def = SPREADSHEET_DEFINITIONS["PAYROLL"];
-    const found = _findOrCreateSpreadsheetInFolder("PAYROLL", def.title);
-    const ss = found.ss;
-    let sh = ss.getSheetByName("Pengaturan_Tarif_Shift") || ss.insertSheet("Pengaturan_Tarif_Shift");
+    // Simpan di Spreadsheet 06 Master User & Role (Sheet: Pengaturan_Tarif_Shift)
+    const defM = SPREADSHEET_DEFINITIONS["MASTER"];
+    const foundM = _findOrCreateSpreadsheetInFolder("MASTER", defM.title);
+    const ssM = foundM.ss;
+    let sh = ssM.getSheetByName("Pengaturan_Tarif_Shift") || ssM.insertSheet("Pengaturan_Tarif_Shift");
+
+    // Hapus sheet Pengaturan_Tarif_Shift di spreadsheet 11 Payroll jika masih ada
+    try {
+      const defP = SPREADSHEET_DEFINITIONS["PAYROLL"];
+      const foundP = _findOrCreateSpreadsheetInFolder("PAYROLL", defP.title);
+      let legacyP = foundP.ss.getSheetByName("Pengaturan_Tarif_Shift");
+      if (legacyP && foundP.ss.getSheets().length > 1) {
+        foundP.ss.deleteSheet(legacyP);
+      }
+    } catch (eDelP) {}
 
     const namaPekerja = String(payload.namaPekerja || "").trim();
     const role = String(payload.role || "Dokter Gigi Umum").trim();
@@ -5607,7 +5681,6 @@ function simpanTarifShift(payload) {
     const s2 = Number(payload.tarifShift2) || 0;
     const gp = Number(payload.gajiPokokBulanan) || 0;
     const ket = String(payload.keterangan || "").trim();
-
     const status = String(payload.status || "Aktif").trim();
 
     let data = sh.getDataRange().getValues();
@@ -5628,28 +5701,10 @@ function simpanTarifShift(payload) {
       sh.appendRow(rowValues);
     }
 
-    // Sinkronkan juga ke 06 Master User & Role
-    try {
-      const foundM = _findOrCreateSpreadsheetInFolder("MASTER", "RME Sheldon - 06 Master User & Role");
-      let shM = foundM.ss.getSheetByName("Pengaturan_Tarif_Shift");
-      if (shM) {
-        let dataM = shM.getDataRange().getValues();
-        let fRowM = -1;
-        for (let j = 1; j < dataM.length; j++) {
-          if (String(dataM[j][2] || "").trim().toLowerCase() === namaPekerja.toLowerCase()) {
-            fRowM = j + 1;
-            break;
-          }
-        }
-        if (fRowM > 1) shM.getRange(fRowM, 1, 1, rowValues.length).setValues([rowValues]);
-        else shM.appendRow(rowValues);
-      }
-    } catch (eSyncM) {}
-
     SpreadsheetApp.flush();
     return {
       success: true,
-      message: "Pengaturan tarif shift & gaji untuk " + namaPekerja + " berhasil disimpan!"
+      message: "Pengaturan tarif shift & gaji untuk " + namaPekerja + " berhasil disimpan di 06 Master User & Role!"
     };
   } catch (err) {
     return { success: false, message: "Gagal menyimpan pengaturan tarif shift: " + err.message };
@@ -5659,8 +5714,8 @@ function simpanTarifShift(payload) {
 }
 
 /**
- * Otomatis menyinkronkan data pengguna baru/update dari RME Sheldon - 06 Master User & Role
- * ke RME Sheldon - 11 Payroll & Honor Dokter (Sheet: Pengaturan_Tarif_Shift).
+ * Otomatis menyinkronkan data pengguna baru/update di RME Sheldon - 06 Master User & Role
+ * ke sheet Pengaturan_Tarif_Shift (di dalam spreadsheet 06 Master User & Role).
  * Menginput Nama Pekerja, Role, dan Status secara otomatis saat Super Admin input data.
  */
 function syncUserToPayrollTarifShift(userData) {
@@ -5668,10 +5723,29 @@ function syncUserToPayrollTarifShift(userData) {
   const lock = LockService.getScriptLock();
   try {
     lock.waitLock(10000);
-    const def = SPREADSHEET_DEFINITIONS["PAYROLL"];
-    const found = _findOrCreateSpreadsheetInFolder("PAYROLL", def.title);
-    const ss = found.ss;
-    let sh = ss.getSheetByName("Pengaturan_Tarif_Shift") || ss.insertSheet("Pengaturan_Tarif_Shift");
+    // Simpan di Spreadsheet 06 Master User & Role (Sheet: Pengaturan_Tarif_Shift)
+    const defM = SPREADSHEET_DEFINITIONS["MASTER"];
+    const foundM = _findOrCreateSpreadsheetInFolder("MASTER", defM.title);
+    const ssM = foundM.ss;
+    let sh = ssM.getSheetByName("Pengaturan_Tarif_Shift") || ssM.insertSheet("Pengaturan_Tarif_Shift");
+
+    // Hapus sheet Pengaturan_Tarif_Shift di spreadsheet 11 Payroll jika masih ada
+    try {
+      const defP = SPREADSHEET_DEFINITIONS["PAYROLL"];
+      const foundP = _findOrCreateSpreadsheetInFolder("PAYROLL", defP.title);
+      let legacyP = foundP.ss.getSheetByName("Pengaturan_Tarif_Shift");
+      if (legacyP && foundP.ss.getSheets().length > 1) {
+        foundP.ss.deleteSheet(legacyP);
+      }
+    } catch (eDelP) {}
+
+    // Hapus sheet Presensi_Shift_Harian di spreadsheet 06 Master User & Role jika masih ada
+    try {
+      let legacyPresM = ssM.getSheetByName("Presensi_Shift_Harian");
+      if (legacyPresM && ssM.getSheets().length > 1) {
+        ssM.deleteSheet(legacyPresM);
+      }
+    } catch (eDelPres) {}
 
     const namaPekerja = String(userData.nama || "").trim();
     const role = String(userData.role || "Admin").trim();
@@ -5791,26 +5865,6 @@ function syncUserToPayrollTarifShift(userData) {
       sh.getRange(newLastRow, idGpCol + 1).setNumberFormat("#,##0");
     }
 
-    // Sinkronkan juga salinan di 06 Master User & Role jika sheet Pengaturan_Tarif_Shift ada
-    try {
-      const foundM = _findOrCreateSpreadsheetInFolder("MASTER", "RME Sheldon - 06 Master User & Role");
-      let shM = foundM.ss.getSheetByName("Pengaturan_Tarif_Shift");
-      if (shM) {
-        let dataM = shM.getDataRange().getValues();
-        let fRowM = -1;
-        for (let j = 1; j < dataM.length; j++) {
-          if (String(dataM[j][2] || "").trim().toLowerCase() === namaPekerja.toLowerCase()) {
-            fRowM = j + 1;
-            break;
-          }
-        }
-        if (fRowM > 1) {
-          shM.getRange(fRowM, idRoleCol + 1).setValue(role);
-          shM.getRange(fRowM, idStatCol + 1).setValue(status);
-        }
-      }
-    } catch (eSyncM) {}
-
     SpreadsheetApp.flush();
     return { success: true, message: "Sinkronisasi user ke Pengaturan_Tarif_Shift berhasil: " + namaPekerja };
   } catch (err) {
@@ -5823,7 +5877,7 @@ function syncUserToPayrollTarifShift(userData) {
 
 /**
  * Menyinkronkan seluruh daftar pekerja dari RME Sheldon - 06 Master User & Role (Sheet: Data)
- * ke RME Sheldon - 11 Payroll & Honor Dokter (Sheet: Pengaturan_Tarif_Shift).
+ * ke sheet Pengaturan_Tarif_Shift (di dalam Spreadsheet 06 Master User & Role).
  */
 function syncAllUsersToPayrollTarifShift() {
   try {
@@ -6486,7 +6540,7 @@ function importBulkDataSheldon2026(options) {
             let idPekerja = isPrw ? ("PRW-00" + ((c % 2) + 1)) : ("DOK-00" + ((c % 6) + 1));
             let pRowIdx = presensiOut.length + 2;
             let defTarif = isPrw ? 45000 : 55000;
-            let fUangShift = `=IF(I${pRowIdx}="Hadir",IF(F${pRowIdx}="Shift 1",IFERROR(VLOOKUP(D${pRowIdx},Pengaturan_Tarif_Shift!C:F,3,FALSE),${defTarif}),IF(F${pRowIdx}="Shift 2",IFERROR(VLOOKUP(D${pRowIdx},Pengaturan_Tarif_Shift!C:F,4,FALSE),${defTarif}),0)),0)`;
+            let fUangShift = defTarif;
             presensiOut.push([
               "ATT-202601" + dayStr + "-" + String(attCounter++).padStart(3, "0"),
               tglAbsen,

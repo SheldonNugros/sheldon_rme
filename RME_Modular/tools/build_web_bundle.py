@@ -255,7 +255,7 @@ for idx_st, r in enumerate(staff_csv):
             "email": r[8].strip() if len(r) > 8 and r[8] else ""
         })
 
-tarif_csv = read_csv_rows('PAYROLL', 'Pengaturan_Tarif_Shift.csv')
+tarif_csv = read_csv_rows('MASTER', 'Pengaturan_Tarif_Shift.csv')
 tarif_list = []
 for r in tarif_csv:
     if len(r) >= 8:

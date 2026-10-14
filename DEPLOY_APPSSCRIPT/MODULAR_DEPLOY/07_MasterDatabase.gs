@@ -172,7 +172,7 @@ function simpanUserMaster(payload) {
 
       catatLog("Master User", "Edit user: " + cleanUser + " (" + payload.role + ")", payload.currentUser || "Super User");
 
-      // Otomatis input/sinkronkan Nama Pekerja, Role, dan Status ke RME Sheldon - 11 Payroll & Honor Dokter (Pengaturan_Tarif_Shift)
+      // Otomatis input/sinkronkan Nama Pekerja, Role, dan Status ke RME Sheldon - 06 Master User & Role (Pengaturan_Tarif_Shift)
       try {
         if (typeof syncUserToPayrollTarifShift === 'function') {
           syncUserToPayrollTarifShift({
@@ -210,7 +210,7 @@ function simpanUserMaster(payload) {
 
       catatLog("Master User", "Tambah user baru: " + cleanUser + " (" + payload.role + ")", payload.currentUser || "Super User");
 
-      // Otomatis input/sinkronkan Nama Pekerja, Role, dan Status ke RME Sheldon - 11 Payroll & Honor Dokter (Pengaturan_Tarif_Shift)
+      // Otomatis input/sinkronkan Nama Pekerja, Role, dan Status ke RME Sheldon - 06 Master User & Role (Pengaturan_Tarif_Shift)
       try {
         if (typeof syncUserToPayrollTarifShift === 'function') {
           syncUserToPayrollTarifShift({

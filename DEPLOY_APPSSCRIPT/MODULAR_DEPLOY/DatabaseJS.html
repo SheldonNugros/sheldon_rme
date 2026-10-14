@@ -870,7 +870,7 @@ function _fallbackLocalCsvBackupDownload() {
     { name: `CSV_${dateStamp}_09_BMHP_Master_BMHP.csv`, data: kd.bmhp || [] }
   ];
   if (window.PayrollState) {
-    datasets.push({ name: `CSV_${dateStamp}_11_PAYROLL_Pengaturan_Tarif_Shift.csv`, data: window.PayrollState.tarifShift || [] });
+    datasets.push({ name: `CSV_${dateStamp}_06_MASTER_Pengaturan_Tarif_Shift.csv`, data: window.PayrollState.tarifShift || [] });
     datasets.push({ name: `CSV_${dateStamp}_11_PAYROLL_Presensi_Shift_Harian.csv`, data: window.PayrollState.presensiHarian || window.PayrollState.presensi || [] });
     datasets.push({ name: `CSV_${dateStamp}_11_PAYROLL_Penggajian_Dokter.csv`, data: window.PayrollState.penggajianDokter || [] });
     datasets.push({ name: `CSV_${dateStamp}_11_PAYROLL_Honor_Perawat_Staff.csv`, data: window.PayrollState.honorStaff || [] });
@@ -1098,13 +1098,13 @@ function triggerSetupPayroll() {
       if (btn) { btn.disabled = false; btn.innerHTML = originalHtml; }
       showToast("success", "Simulasi: Spreadsheet 11 Payroll & Honor Dokter berhasil disiapkan!");
       alert("✅ SPREADSHEET PAYROLL BERHASIL DISIAPKAN (SIMULASI):\n\n" +
-            "• Judul: RME Sheldon - 11 Payroll & Honor Dokter (dan disinkronkan ke 06 Master User & Role)\n" +
-            "• Sheet 1: Pengaturan_Tarif_Shift (Dokter Rp 55.000/shift, Perawat Rp 45.000/shift, Admin Rp 1.200.000/bln)\n" +
-            "• Sheet 2: Presensi_Shift_Harian (Absensi Kehadiran Shift 1 & Shift 2)\n" +
-            "• Sheet 3: Penggajian_Dokter (Jasa Medis + Uang Shift Absensi)\n" +
-            "• Sheet 4: Honor_Perawat_Staff (Uang Shift Perawat + Gaji Bulanan Admin)\n" +
-            "• Sheet 5: Tagihan_Vendor_Lab (Biaya Laboratorium Eksternal)\n" +
-            "• Sheet 6: Slip_Gaji_Arsip (Riwayat Kirim Slip)");
+            "• Spreadsheet Master: RME Sheldon - 06 Master User & Role (Sheet: Pengaturan_Tarif_Shift)\n" +
+            "• Spreadsheet Payroll: RME Sheldon - 11 Payroll & Honor Dokter\n" +
+            "  - Sheet: Presensi_Shift_Harian (Absensi Kehadiran Shift 1 & Shift 2)\n" +
+            "  - Sheet: Penggajian_Dokter (Jasa Medis + Uang Shift Absensi)\n" +
+            "  - Sheet: Honor_Perawat_Staff (Uang Shift Perawat + Gaji Bulanan Admin)\n" +
+            "  - Sheet: Tagihan_Vendor_Lab (Biaya Laboratorium Eksternal)\n" +
+            "  - Sheet: Slip_Gaji_Arsip (Riwayat Kirim Slip)");
     }, 1200);
   }
 }
@@ -1175,11 +1175,13 @@ function triggerSimulasiJMDokter() {
             "2. [05 Database Tindakan -> Sheet: Tindakan & Tarif_Khusus_Dokter]\n" +
             "   • Rontgen terkunci 15% untuk SEMUA dokter\n" +
             "   • drg. Tia Ardhana R mendapat 55% pada PSA Molar, Odontektomi M3, dan Crown PFM\n\n" +
-            "3. [11 Payroll & Honor Dokter -> Pengaturan_Tarif_Shift & Presensi_Shift_Harian]\n" +
-            "   • Dokter (2 Shift): Rp 55.000 / shift (dihitung dari absensi)\n" +
-            "   • Perawat (2 Shift): Rp 45.000 / shift (dihitung dari absensi)\n" +
+            "3. [06 Master User & Role -> Sheet: Pengaturan_Tarif_Shift]\n" +
+            "   • Dokter (2 Shift): Rp 55.000 / shift\n" +
+            "   • Perawat (2 Shift): Rp 45.000 / shift\n" +
             "   • Admin (Non-Shift): Rp 1.200.000 / bulan tetap\n\n" +
-            "4. [02 Pembayaran -> Sheet: Rekap_Jasa_Medis]\n" +
+            "4. [11 Payroll & Honor Dokter -> Sheet: Presensi_Shift_Harian]\n" +
+            "   • Riwayat kehadiran per shift dokter & perawat\n\n" +
+            "5. [02 Pembayaran -> Sheet: Rekap_Jasa_Medis]\n" +
             "   • Ditambahkan 8 baris contoh perhitungan simulasi (INV/SIMULASI/001 s.d. 004)");
     }, 800);
   }

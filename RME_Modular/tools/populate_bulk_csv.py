@@ -501,7 +501,7 @@ def main():
             gp = "0"
             ket = "2 Shift: Rp 55.000/shift + JM 65%"
         tarif_rows.append([id_at, role_u, nama_u, tipe, s1, s2, gp, ket, status_u])
-    write_csv("PAYROLL", "Pengaturan_Tarif_Shift.csv", tarif_headers, tarif_rows)
+    write_csv("MASTER", "Pengaturan_Tarif_Shift.csv", tarif_headers, tarif_rows)
 
     presensi_headers = ["ID_Presensi", "Tanggal", "ID_Pekerja", "Nama_Pekerja", "Role", "Shift", "Jam_Masuk", "Jam_Pulang", "Status_Kehadiran", "Uang_Harian_Didapat", "Verifikator", "Waktu_Sistem"]
     presensi_rows = []

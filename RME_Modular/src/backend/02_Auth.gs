@@ -239,7 +239,7 @@ function registrasiAkunBaru(payload) {
 
     catatLog("Registrasi Akun", "Pendaftaran akun baru (Status: Non Aktif): " + cleanUser + " (" + role + ")", nama);
 
-    // Auto-sync ke RME Sheldon - 11 Payroll & Honor Dokter (Sheet: Pengaturan_Tarif_Shift)
+    // Auto-sync ke RME Sheldon - 06 Master User & Role (Sheet: Pengaturan_Tarif_Shift)
     try {
       if (typeof syncUserToPayrollTarifShift === "function") {
         syncUserToPayrollTarifShift({

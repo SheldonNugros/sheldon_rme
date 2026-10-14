@@ -1109,6 +1109,51 @@ function triggerSetupPayroll() {
   }
 }
 
+function triggerHapusSheetSalah() {
+  if (!confirm("Konfirmasi Pembersihan Sheet Database:\n\n1. Hapus sheet [Presensi_Shift_Harian] pada Spreadsheet 06 Master User & Role.\n2. Hapus sheet [Pengaturan_Tarif_Shift] pada Spreadsheet 11 Payroll & Honor Dokter.\n\nLanjutkan proses pembersihan sheet?")) {
+    return;
+  }
+
+  const btn = document.getElementById("btnHapusSheetSalah");
+  const originalHtml = btn ? btn.innerHTML : "<span>🗑️</span> Bersihkan Sheet Presensi & Tarif";
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = "<span>⏳</span> Membersihkan...";
+  }
+
+  showToast("info", "Menghapus sheet yang tidak sesuai di Spreadsheet Master & Payroll...");
+
+  if (typeof google !== "undefined" && google.script && google.script.run) {
+    google.script.run
+      .withSuccessHandler(res => {
+        if (btn) { btn.disabled = false; btn.innerHTML = originalHtml; }
+        if (res && res.success) {
+          showToast("success", "Pembersihan sheet berhasil!");
+          alert("✅ HASIL PEMBERSIHAN SHEET SPREADSHEET:\n\n" + res.message);
+        } else {
+          showToast("warning", res ? res.message : "Terjadi kendala saat pembersihan sheet.");
+          alert(res ? res.message : "Gagal membersihkan sheet.");
+        }
+      })
+      .withFailureHandler(err => {
+        if (btn) { btn.disabled = false; btn.innerHTML = originalHtml; }
+        let errStr = (err && err.message) ? err.message : String(err);
+        showToast("error", "Gagal pembersihan: " + errStr);
+        alert("❌ GAGAL PEMBERSIHAN SHEET:\n\n" + errStr);
+      })
+      .hapusSheetPresensiMasterDanTarifPayroll();
+  } else {
+    setTimeout(() => {
+      if (btn) { btn.disabled = false; btn.innerHTML = originalHtml; }
+      showToast("success", "Pembersihan sheet berhasil (Mode Offline/Demo)!");
+      alert("✅ PEMBERSIHAN SHEET BERHASIL (SIMULASI / DEMO):\n\n" +
+            "• Sheet [Presensi_Shift_Harian] dihapus dari RME Sheldon - 06 Master User & Role.\n" +
+            "• Sheet [Pengaturan_Tarif_Shift] dihapus dari RME Sheldon - 11 Payroll & Honor Dokter.\n" +
+            "• Sheet [Pengaturan_Tarif_Shift] tersimpan rapi di 06 Master User & Role.");
+    }, 800);
+  }
+}
+
 function triggerSimulasiJMDokter() {
   const btn = document.getElementById("btnSimulasiJM");
   const originalHtml = btn ? btn.innerHTML : "<span>🧪</span> Isi Simulasi JM Dokter";

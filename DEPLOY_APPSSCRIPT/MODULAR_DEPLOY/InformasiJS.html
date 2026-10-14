@@ -50,11 +50,26 @@ function changeInfoTab(tab) {
 // 1. DATA & RENDER TINDAKAN
 // ------------------------------------------
 function loadInfoTindakanData() {
+  if (dataInfoTindakan.length === 0 && window.KlinikData && Array.isArray(window.KlinikData.tindakan) && window.KlinikData.tindakan.length > 0) {
+    dataInfoTindakan = window.KlinikData.tindakan;
+    populateInfoKategoriDropdown();
+    renderInfoTindakan();
+  }
   if (typeof google !== 'undefined' && google.script && google.script.run) {
     google.script.run.withSuccessHandler(res => {
-      dataInfoTindakan = res || [];
+      if (res && res.length > 0) {
+        dataInfoTindakan = res;
+      } else if (window.KlinikData && Array.isArray(window.KlinikData.tindakan) && window.KlinikData.tindakan.length > 0) {
+        dataInfoTindakan = window.KlinikData.tindakan;
+      }
       populateInfoKategoriDropdown();
       renderInfoTindakan();
+    }).withFailureHandler(() => {
+      if (window.KlinikData && Array.isArray(window.KlinikData.tindakan) && window.KlinikData.tindakan.length > 0) {
+        dataInfoTindakan = window.KlinikData.tindakan;
+        populateInfoKategoriDropdown();
+        renderInfoTindakan();
+      }
     }).getDaftarTindakanLengkap();
   }
 }
@@ -122,10 +137,23 @@ function renderInfoTindakan() {
 // 2. DATA & RENDER OBAT
 // ------------------------------------------
 function loadInfoObatData() {
+  if (dataInfoObat.length === 0 && window.KlinikData && Array.isArray(window.KlinikData.obat) && window.KlinikData.obat.length > 0) {
+    dataInfoObat = window.KlinikData.obat;
+    renderInfoObat();
+  }
   if (typeof google !== 'undefined' && google.script && google.script.run) {
     google.script.run.withSuccessHandler(res => {
-      dataInfoObat = res || [];
+      if (res && res.length > 0) {
+        dataInfoObat = res;
+      } else if (window.KlinikData && Array.isArray(window.KlinikData.obat) && window.KlinikData.obat.length > 0) {
+        dataInfoObat = window.KlinikData.obat;
+      }
       renderInfoObat();
+    }).withFailureHandler(() => {
+      if (window.KlinikData && Array.isArray(window.KlinikData.obat) && window.KlinikData.obat.length > 0) {
+        dataInfoObat = window.KlinikData.obat;
+        renderInfoObat();
+      }
     }).getDaftarObatLengkap();
   }
 }
@@ -198,10 +226,23 @@ function renderInfoObat() {
 // 3. DATA & RENDER BMHP
 // ------------------------------------------
 function loadInfoBmhpData() {
+  if (dataInfoBmhp.length === 0 && window.KlinikData && Array.isArray(window.KlinikData.bmhp) && window.KlinikData.bmhp.length > 0) {
+    dataInfoBmhp = window.KlinikData.bmhp;
+    renderInfoBmhp();
+  }
   if (typeof google !== 'undefined' && google.script && google.script.run) {
     google.script.run.withSuccessHandler(res => {
-      dataInfoBmhp = res || [];
+      if (res && res.length > 0) {
+        dataInfoBmhp = res;
+      } else if (window.KlinikData && Array.isArray(window.KlinikData.bmhp) && window.KlinikData.bmhp.length > 0) {
+        dataInfoBmhp = window.KlinikData.bmhp;
+      }
       renderInfoBmhp();
+    }).withFailureHandler(() => {
+      if (window.KlinikData && Array.isArray(window.KlinikData.bmhp) && window.KlinikData.bmhp.length > 0) {
+        dataInfoBmhp = window.KlinikData.bmhp;
+        renderInfoBmhp();
+      }
     }).getDaftarBMHPLengkap();
   }
 }

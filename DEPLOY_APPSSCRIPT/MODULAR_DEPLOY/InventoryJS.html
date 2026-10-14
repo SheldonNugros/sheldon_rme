@@ -11,11 +11,52 @@
 
 
  function loadInventoryData() {
-   google.script.run.withSuccessHandler(res => {
-     rawDataInventory = res || [];
-     renderInventoryTable(rawDataInventory);
-     populateRestockDropdown(rawDataInventory);
-   }).getMasterInventory();
+   if (rawDataInventory.length === 0 && window.KlinikData && (window.KlinikData.obat || window.KlinikData.bmhp)) {
+     let oList = Array.isArray(window.KlinikData.obat) ? window.KlinikData.obat : [];
+     let bList = Array.isArray(window.KlinikData.bmhp) ? window.KlinikData.bmhp : [];
+     let combined = oList.map(o => ({
+       kode: o.kode || o.id || 'OBT-000',
+       nama: o.nama || '-',
+       kategori: 'Obat',
+       satuan: o.satuan || o.unit || 'Unit',
+       hpp: o.hpp || ((o.harga || o.hargaJual || 0) * 0.7),
+       hargaJual: o.hargaJual || o.harga || 0,
+       stok: o.stok || 0,
+       kritis: o.stokMin || 10,
+       margin: 30,
+       satuanBeli: o.satuanBeli || 'Box',
+       isiPerSatuan: o.isiPerSatuan || 1
+     })).concat(bList.map(b => ({
+       kode: b.kode || b.id || 'BMH-000',
+       nama: b.nama || '-',
+       kategori: 'BMHP',
+       satuan: b.satuan || b.unit || 'Unit',
+       hpp: b.hpp || ((b.harga || b.hargaJual || 0) * 0.7),
+       hargaJual: b.hargaJual || b.harga || 0,
+       stok: b.stok || 0,
+       kritis: 10,
+       margin: 30,
+       satuanBeli: 'Box',
+       isiPerSatuan: 1
+     })));
+     if (combined.length > 0) {
+       rawDataInventory = combined;
+       renderInventoryTable(rawDataInventory);
+       populateRestockDropdown(rawDataInventory);
+     }
+   }
+
+   if (typeof google !== 'undefined' && google.script && google.script.run) {
+     google.script.run.withSuccessHandler(res => {
+       if (res && res.length > 0) {
+         rawDataInventory = res;
+         renderInventoryTable(rawDataInventory);
+         populateRestockDropdown(rawDataInventory);
+       }
+     }).withFailureHandler(() => {
+       // fallback aktif
+     }).getMasterInventory();
+   }
  }
 
 

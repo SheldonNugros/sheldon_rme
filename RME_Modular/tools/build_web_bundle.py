@@ -813,7 +813,49 @@ mock_gas_script = '''
     }
 
     getDaftarInvoice() {
-      setTimeout(() => { this._successHandler(mockDb.pembayaran); }, 30);
+      setTimeout(() => {
+        let groups = {};
+        mockDb.pembayaran.forEach(row => {
+          let invId = row.idInvoice || "INV-UNSPECIFIED";
+          if (!groups[invId]) {
+            groups[invId] = {
+              idInvoice: invId,
+              tanggalBayar: row.tanggal ? row.tanggal.split(' ')[0] : "",
+              waktuFull: row.tanggal || row.waktuSistem || "",
+              idPasien: row.idPasien,
+              noRm: row.noRm,
+              namaPasien: row.namaPasien,
+              alamat: "-",
+              dokter: row.dokter,
+              totalBayar: row.totalInvoice,
+              grandTotal: row.totalInvoice,
+              metode: row.metode,
+              metodeBayar: row.metode || "Cash",
+              status: row.status,
+              statusPembayaran: row.status || "Lunas",
+              keterangan: row.keterangan || "",
+              kasir: row.kasir,
+              items: [],
+              rincianItems: []
+            };
+          }
+          let itm = {
+            nama: row.item,
+            namaItem: row.item,
+            kategori: row.kategori,
+            qty: row.qty,
+            tarif: row.harga,
+            hargaSatuan: row.harga,
+            diskon: row.diskon,
+            diskonPercent: row.diskon,
+            subtotal: row.grandTotalItem
+          };
+          groups[invId].items.push(itm);
+          groups[invId].rincianItems.push(itm);
+        });
+        let res = Object.values(groups).sort((a, b) => b.idInvoice.localeCompare(a.idInvoice));
+        this._successHandler(res);
+      }, 30);
     }
 
     getSemuaRiwayatSurat() {
@@ -949,9 +991,14 @@ mock_gas_script = '''
             })
             .then(res => {
               if (!res.ok) throw new Error("HTTP Status " + res.status);
-              return res.json();
+              return res.text();
             })
-            .then(data => {
+            .then(text => {
+              let trimmed = (text || '').trim();
+              if (trimmed.startsWith('<') || trimmed.toLowerCase().includes('<!doctype') || trimmed.toLowerCase().includes('<html')) {
+                throw new Error("GAS Web App mengembalikan halaman HTML/Login Google (Perlu set 'Who has access: Anyone')");
+              }
+              let data = JSON.parse(trimmed);
               if (data && data.success === false && String(data.message || '').includes('tidak ditemukan')) {
                 console.warn("⚠️ Fungsi [" + rProp + "] belum di-deploy di GAS versi lama, menggunakan fallback lokal.");
                 if (typeof rTarget[rProp] === 'function') {

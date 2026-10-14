@@ -1341,21 +1341,30 @@ function getDaftarInvoice() {
           namaPasien: row.namaPasien,
           dokter: row.dokter,
           totalBayar: row.totalInvoice,
+          grandTotal: row.totalInvoice,
           metode: row.metode,
+          metodeBayar: row.metode || "Cash",
           status: row.status,
+          statusPembayaran: row.status || "Lunas",
           keterangan: row.keterangan || "",
           kasir: row.kasir,
-          items: []
+          items: [],
+          rincianItems: []
         };
       }
-      groups[invId].items.push({
+      let itm = {
+        nama: row.item,
         namaItem: row.item,
         kategori: row.kategori,
         qty: row.qty,
+        tarif: row.harga,
         hargaSatuan: row.harga,
         diskon: row.diskon,
+        diskonPercent: row.diskon,
         subtotal: row.grandTotalItem
-      });
+      };
+      groups[invId].items.push(itm);
+      groups[invId].rincianItems.push(itm);
     });
     
     return Object.values(groups).sort((a, b) => b.idInvoice.localeCompare(a.idInvoice));

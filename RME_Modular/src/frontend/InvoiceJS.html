@@ -1,4 +1,4 @@
-﻿<script>
+<script>
  var arrInvoices = [];
  var filteredInvoices = [];
  var activeInvoice = null;
@@ -46,51 +46,149 @@
  }
 
 
+ function normalizeInvoicesData(data) {
+   if (!data || !Array.isArray(data) || data.length === 0) return [];
+   
+   // Jika data berupa baris transaksi kasir individual (belum digroup per invoice)
+   let isFlatRows = data.length > 0 && !data[0].rincianItems && !data[0].items && data[0].item;
+   if (isFlatRows) {
+     let groups = {};
+     data.forEach(row => {
+       let invId = row.idInvoice || "INV-UNSPECIFIED";
+       if (!groups[invId]) {
+         groups[invId] = {
+           idInvoice: invId,
+           tanggalBayar: row.tanggal ? row.tanggal.split(' ')[0] : "",
+           waktuFull: row.tanggal || row.waktuSistem || "",
+           idPasien: row.idPasien || "",
+           noRm: row.noRm || "",
+           namaPasien: row.namaPasien || "",
+           alamat: row.alamat || "-",
+           dokter: row.dokter || "",
+           totalBayar: row.totalInvoice || 0,
+           grandTotal: row.totalInvoice || 0,
+           metodeBayar: row.metode || "Cash",
+           statusPembayaran: row.status || "Lunas",
+           keterangan: row.keterangan || "",
+           kasir: row.kasir || "",
+           rincianItems: []
+         };
+       }
+       groups[invId].rincianItems.push({
+         nama: row.item,
+         kategori: row.kategori || "",
+         qty: Number(row.qty) || 1,
+         tarif: Number(row.harga) || 0,
+         diskonPercent: Number(row.diskon) || 0,
+         subtotal: Number(row.grandTotalItem) || 0
+       });
+     });
+     data = Object.values(groups);
+   }
+
+   return data.map(inv => {
+     let rawItems = inv.rincianItems || inv.items || [];
+     let items = rawItems.map(it => ({
+       nama: it.nama || it.namaItem || "-",
+       kategori: it.kategori || "",
+       qty: Number(it.qty) || 1,
+       tarif: Number(it.tarif || it.hargaSatuan || it.harga || 0),
+       diskonPercent: it.diskonPercent !== undefined ? Number(it.diskonPercent) : (Number(it.diskon) || 0),
+       subtotal: Number(it.subtotal || it.grandTotalItem || 0)
+     }));
+
+     let subtotalCalc = items.reduce((acc, it) => acc + (it.tarif * it.qty), 0);
+     let grandTotalCalc = Number(inv.grandTotal || inv.totalBayar || inv.totalInvoice || subtotalCalc);
+     let diskonCalc = inv.totalDiskon !== undefined ? Number(inv.totalDiskon) : Math.max(0, subtotalCalc - grandTotalCalc);
+
+     return {
+       idInvoice: inv.idInvoice || "-",
+       tanggalBayar: inv.tanggalBayar || (inv.tanggal ? inv.tanggal.split(' ')[0] : "") || "",
+       waktuFull: inv.waktuFull || inv.tanggal || "",
+       idPasien: inv.idPasien || "",
+       noRm: inv.noRm || "",
+       namaPasien: inv.namaPasien || "",
+       alamat: inv.alamat || "-",
+       dokter: inv.dokter || "",
+       metodeBayar: inv.metodeBayar || inv.metode || "Cash",
+       statusPembayaran: inv.statusPembayaran || inv.status || "Lunas",
+       totalBayar: grandTotalCalc,
+       grandTotal: grandTotalCalc,
+       subtotalBiaya: inv.subtotalBiaya || subtotalCalc,
+       totalDiskon: diskonCalc,
+       keterangan: inv.keterangan || "",
+       kasir: inv.kasir || "",
+       whatsapp: inv.whatsapp || "",
+       rincianItems: items,
+       items: items
+     };
+   });
+ }
+
  function loadDataInvoice() {
    document.getElementById('viewDaftarInvoice').classList.remove('hidden');
    document.getElementById('viewDetailInvoice').classList.add('hidden');
-   document.getElementById('tabelBodyInvoice').innerHTML = '<tr><td colspan="7" class="text-center py-8 text-slate-400">Memuat data rekap pembayaran...</td></tr>';
-  
-   google.script.run.withSuccessHandler(function(data) {
-     arrInvoices = data || [];
-    
-     // SET TANGGAL DEFAULT KE HARI INI
-     var today = new Date().toISOString().split('T')[0];
-     document.getElementById('filterTglMulai').value = today;
+   
+   // Inisialisasi rentang tanggal YTD (awal tahun s/d hari ini) agar data 2026 langsung terlihat
+   var today = new Date().toISOString().split('T')[0];
+   var thisYear = today.split('-')[0];
+   var startOfYear = thisYear + '-01-01';
+   
+   if (document.getElementById('filterTglMulai') && !document.getElementById('filterTglMulai').value) {
+     document.getElementById('filterTglMulai').value = startOfYear;
+   }
+   if (document.getElementById('filterTglAkhir') && !document.getElementById('filterTglAkhir').value) {
      document.getElementById('filterTglAkhir').value = today;
-    
-     // Kosongkan form pencarian kata kunci
-     document.getElementById('inputCariInvoice').value = '';
-    
-     currentPageInv = 1;
-    
-     // Langsung panggil filter untuk menerapkan Tgl Hari ini
+   }
+
+   // Cek fallback data dari window.KlinikData jika ada
+   if (arrInvoices.length === 0 && window.KlinikData && Array.isArray(window.KlinikData.pembayaran) && window.KlinikData.pembayaran.length > 0) {
+     arrInvoices = normalizeInvoicesData(window.KlinikData.pembayaran);
      filterInvoice();
-   }).getDaftarInvoice();
+   } else {
+     document.getElementById('tabelBodyInvoice').innerHTML = '<tr><td colspan="7" class="text-center py-8 text-slate-400">Memuat data rekap pembayaran...</td></tr>';
+   }
+  
+   if (typeof google !== 'undefined' && google.script && google.script.run) {
+     google.script.run.withSuccessHandler(function(data) {
+       if (data && data.length > 0) {
+         arrInvoices = normalizeInvoicesData(data);
+       } else if (window.KlinikData && Array.isArray(window.KlinikData.pembayaran) && window.KlinikData.pembayaran.length > 0) {
+         arrInvoices = normalizeInvoicesData(window.KlinikData.pembayaran);
+       }
+       currentPageInv = 1;
+       filterInvoice();
+     }).withFailureHandler(function() {
+       if (window.KlinikData && Array.isArray(window.KlinikData.pembayaran) && window.KlinikData.pembayaran.length > 0) {
+         arrInvoices = normalizeInvoicesData(window.KlinikData.pembayaran);
+       }
+       currentPageInv = 1;
+       filterInvoice();
+     }).getDaftarInvoice();
+   }
  }
 
 
  // FUNGSI FILTER BERDASARKAN KATA KUNCI & TANGGAL
  function filterInvoice() {
-   var kw = document.getElementById('inputCariInvoice').value.toLowerCase();
-   var tglMulai = document.getElementById('filterTglMulai').value;
-   var tglAkhir = document.getElementById('filterTglAkhir').value;
-
+   var kw = (document.getElementById('inputCariInvoice')?.value || '').toLowerCase().trim();
+   var tglMulai = document.getElementById('filterTglMulai')?.value || '';
+   var tglAkhir = document.getElementById('filterTglAkhir')?.value || '';
 
    filteredInvoices = arrInvoices.filter(function(inv) {
-     var matchKw = inv.namaPasien.toLowerCase().indexOf(kw) !== -1 || inv.idInvoice.toLowerCase().indexOf(kw) !== -1 || inv.noRm.toLowerCase().indexOf(kw) !== -1;
+     var matchKw = !kw || 
+       (inv.namaPasien && inv.namaPasien.toLowerCase().indexOf(kw) !== -1) || 
+       (inv.idInvoice && inv.idInvoice.toLowerCase().indexOf(kw) !== -1) || 
+       (inv.noRm && inv.noRm.toLowerCase().indexOf(kw) !== -1);
     
      var matchTgl = true;
-     // inv.tanggalBayar format dari backend adalah 'YYYY-MM-DD'
-     if (tglMulai && inv.tanggalBayar < tglMulai) matchTgl = false;
-     if (tglAkhir && inv.tanggalBayar > tglAkhir) matchTgl = false;
-
+     if (tglMulai && inv.tanggalBayar && inv.tanggalBayar < tglMulai) matchTgl = false;
+     if (tglAkhir && inv.tanggalBayar && inv.tanggalBayar > tglAkhir) matchTgl = false;
 
      return matchKw && matchTgl;
    });
 
-
-   currentPageInv = 1; // Kembali ke halaman pertama saat parameter berubah
+   currentPageInv = 1;
    renderTabelInvoice();
  }
 

@@ -718,14 +718,63 @@ var console = {
 
     jalankanBackupSekarang() {
       setTimeout(() => {
+        const dt = new Date().toISOString().slice(0, 10);
         this._successHandler({
           success: true,
           successCount: 11,
+          csvCount: 28,
           folderNama: "BACKUP_RME_SHELDON",
+          csvFolderNama: "CSV_Backup_" + dt,
           folderUrl: "https://drive.google.com/drive/folders/backup-sheldon",
+          csvFolderUrl: "https://drive.google.com/drive/folders/backup-sheldon-csv",
           targetEmail: "vembrian@gmail.com"
         });
       }, 100);
+    }
+
+    exportAllDatabaseToCSV() {
+      setTimeout(() => {
+        this._successHandler({
+          success: false,
+          message: "Fallback to local browser CSV bundle generator"
+        });
+      }, 60);
+    }
+
+    getPayrollModuleData() {
+      setTimeout(() => {
+        this._successHandler({
+          success: false,
+          message: "Use local PayrollState seed & cache"
+        });
+      }, 50);
+    }
+
+    simpanPresensiShift(payload) {
+      setTimeout(() => {
+        this._successHandler({
+          success: true,
+          message: "Presensi kehadiran " + (payload && payload.namaPekerja ? payload.namaPekerja : "") + " berhasil disimpan!"
+        });
+      }, 50);
+    }
+
+    simpanTarifShift(payload) {
+      setTimeout(() => {
+        this._successHandler({
+          success: true,
+          message: "Pengaturan tarif shift & gaji untuk " + (payload && payload.namaPekerja ? payload.namaPekerja : "") + " berhasil disimpan!"
+        });
+      }, 50);
+    }
+
+    updateStatusPayroll(payload) {
+      setTimeout(() => {
+        this._successHandler({
+          success: true,
+          message: "Status Payroll [" + (payload && payload.idPayroll ? payload.idPayroll : "") + "] berhasil diubah menjadi " + (payload && payload.statusTransfer ? payload.statusTransfer : "Paid") + "!"
+        });
+      }, 50);
     }
 
     getDaftarPekerjaan() {
@@ -790,7 +839,49 @@ var console = {
     }
 
     getDaftarInvoice() {
-      setTimeout(() => { this._successHandler(mockDb.pembayaran); }, 30);
+      setTimeout(() => {
+        let groups = {};
+        mockDb.pembayaran.forEach(row => {
+          let invId = row.idInvoice || "INV-UNSPECIFIED";
+          if (!groups[invId]) {
+            groups[invId] = {
+              idInvoice: invId,
+              tanggalBayar: row.tanggal ? row.tanggal.split(' ')[0] : "",
+              waktuFull: row.tanggal || row.waktuSistem || "",
+              idPasien: row.idPasien,
+              noRm: row.noRm,
+              namaPasien: row.namaPasien,
+              alamat: "-",
+              dokter: row.dokter,
+              totalBayar: row.totalInvoice,
+              grandTotal: row.totalInvoice,
+              metode: row.metode,
+              metodeBayar: row.metode || "Cash",
+              status: row.status,
+              statusPembayaran: row.status || "Lunas",
+              keterangan: row.keterangan || "",
+              kasir: row.kasir,
+              items: [],
+              rincianItems: []
+            };
+          }
+          let itm = {
+            nama: row.item,
+            namaItem: row.item,
+            kategori: row.kategori,
+            qty: row.qty,
+            tarif: row.harga,
+            hargaSatuan: row.harga,
+            diskon: row.diskon,
+            diskonPercent: row.diskon,
+            subtotal: row.grandTotalItem
+          };
+          groups[invId].items.push(itm);
+          groups[invId].rincianItems.push(itm);
+        });
+        let res = Object.values(groups).sort((a, b) => b.idInvoice.localeCompare(a.idInvoice));
+        this._successHandler(res);
+      }, 30);
     }
 
     getSemuaRiwayatSurat() {
@@ -926,9 +1017,14 @@ var console = {
             })
             .then(res => {
               if (!res.ok) throw new Error("HTTP Status " + res.status);
-              return res.json();
+              return res.text();
             })
-            .then(data => {
+            .then(text => {
+              let trimmed = (text || '').trim();
+              if (trimmed.startsWith('<') || trimmed.toLowerCase().includes('<!doctype') || trimmed.toLowerCase().includes('<html')) {
+                throw new Error("GAS Web App mengembalikan halaman HTML/Login Google (Perlu set 'Who has access: Anyone')");
+              }
+              let data = JSON.parse(trimmed);
               if (data && data.success === false && String(data.message || '').includes('tidak ditemukan')) {
                 console.warn("⚠️ Fungsi [" + rProp + "] belum di-deploy di GAS versi lama, menggunakan fallback lokal.");
                 if (typeof rTarget[rProp] === 'function') {
@@ -7039,51 +7135,149 @@ function renderDatalistKasir(tindakanTersaring = null) {
  }
 
 
+ function normalizeInvoicesData(data) {
+   if (!data || !Array.isArray(data) || data.length === 0) return [];
+   
+   // Jika data berupa baris transaksi kasir individual (belum digroup per invoice)
+   let isFlatRows = data.length > 0 && !data[0].rincianItems && !data[0].items && data[0].item;
+   if (isFlatRows) {
+     let groups = {};
+     data.forEach(row => {
+       let invId = row.idInvoice || "INV-UNSPECIFIED";
+       if (!groups[invId]) {
+         groups[invId] = {
+           idInvoice: invId,
+           tanggalBayar: row.tanggal ? row.tanggal.split(' ')[0] : "",
+           waktuFull: row.tanggal || row.waktuSistem || "",
+           idPasien: row.idPasien || "",
+           noRm: row.noRm || "",
+           namaPasien: row.namaPasien || "",
+           alamat: row.alamat || "-",
+           dokter: row.dokter || "",
+           totalBayar: row.totalInvoice || 0,
+           grandTotal: row.totalInvoice || 0,
+           metodeBayar: row.metode || "Cash",
+           statusPembayaran: row.status || "Lunas",
+           keterangan: row.keterangan || "",
+           kasir: row.kasir || "",
+           rincianItems: []
+         };
+       }
+       groups[invId].rincianItems.push({
+         nama: row.item,
+         kategori: row.kategori || "",
+         qty: Number(row.qty) || 1,
+         tarif: Number(row.harga) || 0,
+         diskonPercent: Number(row.diskon) || 0,
+         subtotal: Number(row.grandTotalItem) || 0
+       });
+     });
+     data = Object.values(groups);
+   }
+
+   return data.map(inv => {
+     let rawItems = inv.rincianItems || inv.items || [];
+     let items = rawItems.map(it => ({
+       nama: it.nama || it.namaItem || "-",
+       kategori: it.kategori || "",
+       qty: Number(it.qty) || 1,
+       tarif: Number(it.tarif || it.hargaSatuan || it.harga || 0),
+       diskonPercent: it.diskonPercent !== undefined ? Number(it.diskonPercent) : (Number(it.diskon) || 0),
+       subtotal: Number(it.subtotal || it.grandTotalItem || 0)
+     }));
+
+     let subtotalCalc = items.reduce((acc, it) => acc + (it.tarif * it.qty), 0);
+     let grandTotalCalc = Number(inv.grandTotal || inv.totalBayar || inv.totalInvoice || subtotalCalc);
+     let diskonCalc = inv.totalDiskon !== undefined ? Number(inv.totalDiskon) : Math.max(0, subtotalCalc - grandTotalCalc);
+
+     return {
+       idInvoice: inv.idInvoice || "-",
+       tanggalBayar: inv.tanggalBayar || (inv.tanggal ? inv.tanggal.split(' ')[0] : "") || "",
+       waktuFull: inv.waktuFull || inv.tanggal || "",
+       idPasien: inv.idPasien || "",
+       noRm: inv.noRm || "",
+       namaPasien: inv.namaPasien || "",
+       alamat: inv.alamat || "-",
+       dokter: inv.dokter || "",
+       metodeBayar: inv.metodeBayar || inv.metode || "Cash",
+       statusPembayaran: inv.statusPembayaran || inv.status || "Lunas",
+       totalBayar: grandTotalCalc,
+       grandTotal: grandTotalCalc,
+       subtotalBiaya: inv.subtotalBiaya || subtotalCalc,
+       totalDiskon: diskonCalc,
+       keterangan: inv.keterangan || "",
+       kasir: inv.kasir || "",
+       whatsapp: inv.whatsapp || "",
+       rincianItems: items,
+       items: items
+     };
+   });
+ }
+
  function loadDataInvoice() {
    document.getElementById('viewDaftarInvoice').classList.remove('hidden');
    document.getElementById('viewDetailInvoice').classList.add('hidden');
-   document.getElementById('tabelBodyInvoice').innerHTML = '<tr><td colspan="7" class="text-center py-8 text-slate-400">Memuat data rekap pembayaran...</td></tr>';
-  
-   google.script.run.withSuccessHandler(function(data) {
-     arrInvoices = data || [];
-    
-     // SET TANGGAL DEFAULT KE HARI INI
-     var today = new Date().toISOString().split('T')[0];
-     document.getElementById('filterTglMulai').value = today;
+   
+   // Inisialisasi rentang tanggal YTD (awal tahun s/d hari ini) agar data 2026 langsung terlihat
+   var today = new Date().toISOString().split('T')[0];
+   var thisYear = today.split('-')[0];
+   var startOfYear = thisYear + '-01-01';
+   
+   if (document.getElementById('filterTglMulai') && !document.getElementById('filterTglMulai').value) {
+     document.getElementById('filterTglMulai').value = startOfYear;
+   }
+   if (document.getElementById('filterTglAkhir') && !document.getElementById('filterTglAkhir').value) {
      document.getElementById('filterTglAkhir').value = today;
-    
-     // Kosongkan form pencarian kata kunci
-     document.getElementById('inputCariInvoice').value = '';
-    
-     currentPageInv = 1;
-    
-     // Langsung panggil filter untuk menerapkan Tgl Hari ini
+   }
+
+   // Cek fallback data dari window.KlinikData jika ada
+   if (arrInvoices.length === 0 && window.KlinikData && Array.isArray(window.KlinikData.pembayaran) && window.KlinikData.pembayaran.length > 0) {
+     arrInvoices = normalizeInvoicesData(window.KlinikData.pembayaran);
      filterInvoice();
-   }).getDaftarInvoice();
+   } else {
+     document.getElementById('tabelBodyInvoice').innerHTML = '<tr><td colspan="7" class="text-center py-8 text-slate-400">Memuat data rekap pembayaran...</td></tr>';
+   }
+  
+   if (typeof google !== 'undefined' && google.script && google.script.run) {
+     google.script.run.withSuccessHandler(function(data) {
+       if (data && data.length > 0) {
+         arrInvoices = normalizeInvoicesData(data);
+       } else if (window.KlinikData && Array.isArray(window.KlinikData.pembayaran) && window.KlinikData.pembayaran.length > 0) {
+         arrInvoices = normalizeInvoicesData(window.KlinikData.pembayaran);
+       }
+       currentPageInv = 1;
+       filterInvoice();
+     }).withFailureHandler(function() {
+       if (window.KlinikData && Array.isArray(window.KlinikData.pembayaran) && window.KlinikData.pembayaran.length > 0) {
+         arrInvoices = normalizeInvoicesData(window.KlinikData.pembayaran);
+       }
+       currentPageInv = 1;
+       filterInvoice();
+     }).getDaftarInvoice();
+   }
  }
 
 
  // FUNGSI FILTER BERDASARKAN KATA KUNCI & TANGGAL
  function filterInvoice() {
-   var kw = document.getElementById('inputCariInvoice').value.toLowerCase();
-   var tglMulai = document.getElementById('filterTglMulai').value;
-   var tglAkhir = document.getElementById('filterTglAkhir').value;
-
+   var kw = (document.getElementById('inputCariInvoice')?.value || '').toLowerCase().trim();
+   var tglMulai = document.getElementById('filterTglMulai')?.value || '';
+   var tglAkhir = document.getElementById('filterTglAkhir')?.value || '';
 
    filteredInvoices = arrInvoices.filter(function(inv) {
-     var matchKw = inv.namaPasien.toLowerCase().indexOf(kw) !== -1 || inv.idInvoice.toLowerCase().indexOf(kw) !== -1 || inv.noRm.toLowerCase().indexOf(kw) !== -1;
+     var matchKw = !kw || 
+       (inv.namaPasien && inv.namaPasien.toLowerCase().indexOf(kw) !== -1) || 
+       (inv.idInvoice && inv.idInvoice.toLowerCase().indexOf(kw) !== -1) || 
+       (inv.noRm && inv.noRm.toLowerCase().indexOf(kw) !== -1);
     
      var matchTgl = true;
-     // inv.tanggalBayar format dari backend adalah 'YYYY-MM-DD'
-     if (tglMulai && inv.tanggalBayar < tglMulai) matchTgl = false;
-     if (tglAkhir && inv.tanggalBayar > tglAkhir) matchTgl = false;
-
+     if (tglMulai && inv.tanggalBayar && inv.tanggalBayar < tglMulai) matchTgl = false;
+     if (tglAkhir && inv.tanggalBayar && inv.tanggalBayar > tglAkhir) matchTgl = false;
 
      return matchKw && matchTgl;
    });
 
-
-   currentPageInv = 1; // Kembali ke halaman pertama saat parameter berubah
+   currentPageInv = 1;
    renderTabelInvoice();
  }
 
@@ -8231,17 +8425,53 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function initDatabaseModule() {
+   // Fallback langsung dari window.KlinikData agar tidak kosong saat dibuka di Vercel / koneksi tertunda
+   if (window.KlinikData) {
+       if (listMasterTindakan.length === 0 && Array.isArray(window.KlinikData.tindakan) && window.KlinikData.tindakan.length > 0) {
+           listMasterTindakan = window.KlinikData.tindakan.map(t => ({
+               kode: t.kode || t.id,
+               nama: t.nama,
+               kategori: t.kategori || 'Umum',
+               tarif: t.harga || t.tarif || 0,
+               harga: t.harga || t.tarif || 0,
+               perluLab: t.perluLab || 'Tidak'
+           }));
+           renderTabelTindakan();
+       }
+       if (listMasterObat.length === 0 && Array.isArray(window.KlinikData.obat) && window.KlinikData.obat.length > 0) {
+           listMasterObat = window.KlinikData.obat;
+           renderTabelObat();
+           generateKodeObat();
+       }
+       if (listMasterBmhp.length === 0 && Array.isArray(window.KlinikData.bmhp) && window.KlinikData.bmhp.length > 0) {
+           listMasterBmhp = window.KlinikData.bmhp;
+           renderTabelBmhp();
+           generateKodeBmhp();
+       }
+   }
+
    if (typeof google !== 'undefined' && google.script && google.script.run) {
        // Tarik Kategori (Untuk Dropdown Tindakan)
        google.script.run.withSuccessHandler(res => {
-           listMasterKategori = res || [];
-           populateKategoriDropdown();
+           if (res && res.length > 0) {
+               listMasterKategori = res;
+               populateKategoriDropdown();
+           }
        }).getKategoriTindakan();
 
        // Tarik Daftar Tindakan (Untuk Tabel dan Acuan Kode)
        google.script.run.withSuccessHandler(res => {
-           listMasterTindakan = res || [];
+           if (res && res.length > 0) {
+               listMasterTindakan = res;
+           } else if (window.KlinikData && Array.isArray(window.KlinikData.tindakan) && window.KlinikData.tindakan.length > 0) {
+               listMasterTindakan = window.KlinikData.tindakan;
+           }
            renderTabelTindakan();
+       }).withFailureHandler(() => {
+           if (window.KlinikData && Array.isArray(window.KlinikData.tindakan) && window.KlinikData.tindakan.length > 0) {
+               listMasterTindakan = window.KlinikData.tindakan;
+               renderTabelTindakan();
+           }
        }).getDaftarTindakanLengkap();
 
        // Tarik Master Obat
@@ -8253,21 +8483,51 @@ function initDatabaseModule() {
 }
 
 function loadDaftarObatMaster() {
+   if (listMasterObat.length === 0 && window.KlinikData && Array.isArray(window.KlinikData.obat) && window.KlinikData.obat.length > 0) {
+       listMasterObat = window.KlinikData.obat;
+       renderTabelObat();
+       generateKodeObat();
+   }
    if (typeof google !== 'undefined' && google.script && google.script.run) {
        google.script.run.withSuccessHandler(res => {
-           listMasterObat = res || [];
+           if (res && res.length > 0) {
+               listMasterObat = res;
+           } else if (window.KlinikData && Array.isArray(window.KlinikData.obat) && window.KlinikData.obat.length > 0) {
+               listMasterObat = window.KlinikData.obat;
+           }
            renderTabelObat();
            generateKodeObat();
+       }).withFailureHandler(() => {
+           if (window.KlinikData && Array.isArray(window.KlinikData.obat) && window.KlinikData.obat.length > 0) {
+               listMasterObat = window.KlinikData.obat;
+               renderTabelObat();
+               generateKodeObat();
+           }
        }).getDaftarObatLengkap();
    }
 }
 
 function loadDaftarBmhpMaster() {
+   if (listMasterBmhp.length === 0 && window.KlinikData && Array.isArray(window.KlinikData.bmhp) && window.KlinikData.bmhp.length > 0) {
+       listMasterBmhp = window.KlinikData.bmhp;
+       renderTabelBmhp();
+       generateKodeBmhp();
+   }
    if (typeof google !== 'undefined' && google.script && google.script.run) {
        google.script.run.withSuccessHandler(res => {
-           listMasterBmhp = res || [];
+           if (res && res.length > 0) {
+               listMasterBmhp = res;
+           } else if (window.KlinikData && Array.isArray(window.KlinikData.bmhp) && window.KlinikData.bmhp.length > 0) {
+               listMasterBmhp = window.KlinikData.bmhp;
+           }
            renderTabelBmhp();
            generateKodeBmhp();
+       }).withFailureHandler(() => {
+           if (window.KlinikData && Array.isArray(window.KlinikData.bmhp) && window.KlinikData.bmhp.length > 0) {
+               listMasterBmhp = window.KlinikData.bmhp;
+               renderTabelBmhp();
+               generateKodeBmhp();
+           }
        }).getDaftarBMHPLengkap();
    }
 }
@@ -9002,16 +9262,20 @@ function _fallbackLocalCsvBackupDownload() {
   let dateStamp = now.toISOString().slice(0, 10);
   let kd = window.KlinikData || {};
   let datasets = [
-    { name: `CSV_${dateStamp}_01_PASIEN_Master_Pasien.csv`, data: kd.pasien || [] },
-    { name: `CSV_${dateStamp}_02_REKAM_MEDIS_Kunjungan_RME.csv`, data: kd.rm || kd.rekamMedis || [] },
-    { name: `CSV_${dateStamp}_03_FARMASI_Master_Obat_BHP.csv`, data: kd.obat || [] },
-    { name: `CSV_${dateStamp}_04_KASIR_Transaksi_Kasir.csv`, data: kd.kasir || kd.invoice || [] },
-    { name: `CSV_${dateStamp}_05_DOKTER_Master_Dokter_Perawat.csv`, data: kd.dokter || [] },
-    { name: `CSV_${dateStamp}_06_USER_Master_User_Role.csv`, data: kd.users || [] }
+    { name: `CSV_${dateStamp}_01_PASIEN_Data_Pasien.csv`, data: kd.pasien || [] },
+    { name: `CSV_${dateStamp}_02_PEMBAYARAN_Data_Pembayaran.csv`, data: kd.pembayaran || kd.kasir || kd.invoice || [] },
+    { name: `CSV_${dateStamp}_03_REKAM_MEDIS_Data_Rekam_Medis.csv`, data: kd.rekamMedis || kd.rm || [] },
+    { name: `CSV_${dateStamp}_05_DATABASE_Master_Tindakan.csv`, data: kd.tindakan || [] },
+    { name: `CSV_${dateStamp}_06_MASTER_User_Dan_Staff.csv`, data: kd.staff || kd.users || [] },
+    { name: `CSV_${dateStamp}_08_OBAT_Master_Obat.csv`, data: kd.obat || [] },
+    { name: `CSV_${dateStamp}_09_BMHP_Master_BMHP.csv`, data: kd.bmhp || [] }
   ];
   if (window.PayrollState) {
-    datasets.push({ name: `CSV_${dateStamp}_07_PAYROLL_Pengaturan_Tarif_Shift.csv`, data: window.PayrollState.tarifShift || [] });
-    datasets.push({ name: `CSV_${dateStamp}_07_PAYROLL_Presensi_Shift_Harian.csv`, data: window.PayrollState.presensi || [] });
+    datasets.push({ name: `CSV_${dateStamp}_11_PAYROLL_Pengaturan_Tarif_Shift.csv`, data: window.PayrollState.tarifShift || [] });
+    datasets.push({ name: `CSV_${dateStamp}_11_PAYROLL_Presensi_Shift_Harian.csv`, data: window.PayrollState.presensiHarian || window.PayrollState.presensi || [] });
+    datasets.push({ name: `CSV_${dateStamp}_11_PAYROLL_Penggajian_Dokter.csv`, data: window.PayrollState.penggajianDokter || [] });
+    datasets.push({ name: `CSV_${dateStamp}_11_PAYROLL_Honor_Perawat_Staff.csv`, data: window.PayrollState.honorStaff || [] });
+    datasets.push({ name: `CSV_${dateStamp}_02_PEMBAYARAN_Rekap_Jasa_Medis.csv`, data: window.PayrollState.rekapJM || [] });
   }
 
   // Gabungkan ke 1 Master Bundle CSV + unduh otomatis agar browser tidak memblokir multiple popups
@@ -10024,11 +10288,52 @@ window.renderTabelBmhp = (typeof renderTabelBmhp === 'function') ? renderTabelBm
 
 
  function loadInventoryData() {
-   google.script.run.withSuccessHandler(res => {
-     rawDataInventory = res || [];
-     renderInventoryTable(rawDataInventory);
-     populateRestockDropdown(rawDataInventory);
-   }).getMasterInventory();
+   if (rawDataInventory.length === 0 && window.KlinikData && (window.KlinikData.obat || window.KlinikData.bmhp)) {
+     let oList = Array.isArray(window.KlinikData.obat) ? window.KlinikData.obat : [];
+     let bList = Array.isArray(window.KlinikData.bmhp) ? window.KlinikData.bmhp : [];
+     let combined = oList.map(o => ({
+       kode: o.kode || o.id || 'OBT-000',
+       nama: o.nama || '-',
+       kategori: 'Obat',
+       satuan: o.satuan || o.unit || 'Unit',
+       hpp: o.hpp || ((o.harga || o.hargaJual || 0) * 0.7),
+       hargaJual: o.hargaJual || o.harga || 0,
+       stok: o.stok || 0,
+       kritis: o.stokMin || 10,
+       margin: 30,
+       satuanBeli: o.satuanBeli || 'Box',
+       isiPerSatuan: o.isiPerSatuan || 1
+     })).concat(bList.map(b => ({
+       kode: b.kode || b.id || 'BMH-000',
+       nama: b.nama || '-',
+       kategori: 'BMHP',
+       satuan: b.satuan || b.unit || 'Unit',
+       hpp: b.hpp || ((b.harga || b.hargaJual || 0) * 0.7),
+       hargaJual: b.hargaJual || b.harga || 0,
+       stok: b.stok || 0,
+       kritis: 10,
+       margin: 30,
+       satuanBeli: 'Box',
+       isiPerSatuan: 1
+     })));
+     if (combined.length > 0) {
+       rawDataInventory = combined;
+       renderInventoryTable(rawDataInventory);
+       populateRestockDropdown(rawDataInventory);
+     }
+   }
+
+   if (typeof google !== 'undefined' && google.script && google.script.run) {
+     google.script.run.withSuccessHandler(res => {
+       if (res && res.length > 0) {
+         rawDataInventory = res;
+         renderInventoryTable(rawDataInventory);
+         populateRestockDropdown(rawDataInventory);
+       }
+     }).withFailureHandler(() => {
+       // fallback aktif
+     }).getMasterInventory();
+   }
  }
 
 
@@ -10218,11 +10523,26 @@ function changeInfoTab(tab) {
 // 1. DATA & RENDER TINDAKAN
 // ------------------------------------------
 function loadInfoTindakanData() {
+  if (dataInfoTindakan.length === 0 && window.KlinikData && Array.isArray(window.KlinikData.tindakan) && window.KlinikData.tindakan.length > 0) {
+    dataInfoTindakan = window.KlinikData.tindakan;
+    populateInfoKategoriDropdown();
+    renderInfoTindakan();
+  }
   if (typeof google !== 'undefined' && google.script && google.script.run) {
     google.script.run.withSuccessHandler(res => {
-      dataInfoTindakan = res || [];
+      if (res && res.length > 0) {
+        dataInfoTindakan = res;
+      } else if (window.KlinikData && Array.isArray(window.KlinikData.tindakan) && window.KlinikData.tindakan.length > 0) {
+        dataInfoTindakan = window.KlinikData.tindakan;
+      }
       populateInfoKategoriDropdown();
       renderInfoTindakan();
+    }).withFailureHandler(() => {
+      if (window.KlinikData && Array.isArray(window.KlinikData.tindakan) && window.KlinikData.tindakan.length > 0) {
+        dataInfoTindakan = window.KlinikData.tindakan;
+        populateInfoKategoriDropdown();
+        renderInfoTindakan();
+      }
     }).getDaftarTindakanLengkap();
   }
 }
@@ -10290,10 +10610,23 @@ function renderInfoTindakan() {
 // 2. DATA & RENDER OBAT
 // ------------------------------------------
 function loadInfoObatData() {
+  if (dataInfoObat.length === 0 && window.KlinikData && Array.isArray(window.KlinikData.obat) && window.KlinikData.obat.length > 0) {
+    dataInfoObat = window.KlinikData.obat;
+    renderInfoObat();
+  }
   if (typeof google !== 'undefined' && google.script && google.script.run) {
     google.script.run.withSuccessHandler(res => {
-      dataInfoObat = res || [];
+      if (res && res.length > 0) {
+        dataInfoObat = res;
+      } else if (window.KlinikData && Array.isArray(window.KlinikData.obat) && window.KlinikData.obat.length > 0) {
+        dataInfoObat = window.KlinikData.obat;
+      }
       renderInfoObat();
+    }).withFailureHandler(() => {
+      if (window.KlinikData && Array.isArray(window.KlinikData.obat) && window.KlinikData.obat.length > 0) {
+        dataInfoObat = window.KlinikData.obat;
+        renderInfoObat();
+      }
     }).getDaftarObatLengkap();
   }
 }
@@ -10366,10 +10699,23 @@ function renderInfoObat() {
 // 3. DATA & RENDER BMHP
 // ------------------------------------------
 function loadInfoBmhpData() {
+  if (dataInfoBmhp.length === 0 && window.KlinikData && Array.isArray(window.KlinikData.bmhp) && window.KlinikData.bmhp.length > 0) {
+    dataInfoBmhp = window.KlinikData.bmhp;
+    renderInfoBmhp();
+  }
   if (typeof google !== 'undefined' && google.script && google.script.run) {
     google.script.run.withSuccessHandler(res => {
-      dataInfoBmhp = res || [];
+      if (res && res.length > 0) {
+        dataInfoBmhp = res;
+      } else if (window.KlinikData && Array.isArray(window.KlinikData.bmhp) && window.KlinikData.bmhp.length > 0) {
+        dataInfoBmhp = window.KlinikData.bmhp;
+      }
       renderInfoBmhp();
+    }).withFailureHandler(() => {
+      if (window.KlinikData && Array.isArray(window.KlinikData.bmhp) && window.KlinikData.bmhp.length > 0) {
+        dataInfoBmhp = window.KlinikData.bmhp;
+        renderInfoBmhp();
+      }
     }).getDaftarBMHPLengkap();
   }
 }

@@ -1369,6 +1369,7 @@ var console = {
 
   // ROLE MANAGEMENT ENGINE
   function terapkanRoleAkses(role) {
+    window.activeUserRole = role;
     let r = role ? role.toString().toLowerCase() : '';
     
     // Reset semua navigasi ke hidden
@@ -11987,22 +11988,31 @@ function renderInfoBmhp() {
   window.syncGasBadgeVisibility = function() {
     const badge = document.getElementById('badgeGasSync');
     if (!badge) return;
-    badge.classList.remove('hidden');
-    badge.classList.add('flex');
+    const r = String(window.activeUserRole || '').trim().toLowerCase();
+    const isSuperUser = (r === 'super user');
+    const viewUserMaster = document.getElementById('view-user-master');
+    const isUserMasterVisible = (window.activeMenuId === 'user-master') || (viewUserMaster && !viewUserMaster.classList.contains('hidden'));
+
+    if (isSuperUser && isUserMasterVisible) {
+      badge.classList.remove('hidden');
+      badge.classList.add('flex');
+    } else {
+      badge.classList.add('hidden');
+      badge.classList.remove('flex');
+    }
   };
 
   window._updateGasBadge = function(isLive) {
     const badge = document.getElementById('badgeGasSync');
     if (!badge) return;
-    badge.classList.remove('hidden');
-    badge.classList.add('flex');
     if (isLive) {
-      badge.className = "flex items-center gap-2 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer";
+      badge.className = "hidden items-center gap-2 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer";
       badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span><span>Google Sheets: Live Sinkron</span><span class="text-[10px] text-emerald-600 underline font-normal ml-1">Ubah URL</span>';
     } else {
-      badge.className = "flex items-center gap-2 px-3 py-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-800 rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer animate-pulse";
+      badge.className = "hidden items-center gap-2 px-3 py-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-800 rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer animate-pulse";
       badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-amber-500"></span><span>⚡ Hubungkan Google Sheets</span><span class="text-[10px] text-amber-700 underline font-semibold ml-1">Klik Disini</span>';
     }
+    window.syncGasBadgeVisibility();
   };
 
   // Auto-connect jika URL query parameter menyertakan gas_url

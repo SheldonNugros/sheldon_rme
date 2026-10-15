@@ -1456,6 +1456,12 @@ runAllTimers();
 assert("ABSENSI-4: Hari Minggu Terdeteksi isMinggu = true", window.AbsensiState.isMinggu === true);
 assert("ABSENSI-4: Hari Minggu Terdeteksi isLibur = true", window.AbsensiState.isLibur === true);
 assert("ABSENSI-4: Operasional Hari Minggu Otomatis Tutup (Libur Rutin)", window.AbsensiState.infoLibur && window.AbsensiState.infoLibur.statusOperasional === "Tutup");
+assert("ABSENSI-4: isAbsensiLockedToday Mengembalikan true pada Hari Minggu", isAbsensiLockedToday() === true);
+var btnSimpanMinggu = document.getElementById('btnSimpanAbsensi');
+assert("ABSENSI-4: Tombol Simpan Presensi Dikunci (disabled) pada Hari Minggu", btnSimpanMinggu && btnSimpanMinggu.disabled === true);
+assert("ABSENSI-4: Label Tombol Simpan Mengindikasikan Dikunci", btnSimpanMinggu && btnSimpanMinggu.innerHTML.indexOf("Presensi Dikunci") !== -1);
+var tbodyMinggu = document.getElementById('tbodyAbsensiPegawai') ? document.getElementById('tbodyAbsensiPegawai').innerHTML : "";
+assert("ABSENSI-4: Select Input Presensi Terkunci dengan Label Libur", tbodyMinggu.indexOf("🔒 Libur (Tidak Hadir)") !== -1);
 
 // ABSENSI-5: Pekerja dengan Status 'Tidak Aktif' di Pengaturan_Tarif_Shift TIDAK AKAN MUNCUL di Absen
 if (window._mockDb && window._mockDb.tarifShift) {

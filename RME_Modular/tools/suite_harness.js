@@ -12641,6 +12641,22 @@ function applyAbsensiDataToState(res) {
 }
 
 /**
+ * Mengecek apakah presensi pada tanggal saat ini dikunci.
+ * Kondisi kunci:
+ * 1. Hari Minggu (isMinggu === true)
+ * 2. Hari Libur Nasional / Khusus dengan status operasional Tutup (statusOperasional === 'Tutup')
+ */
+function isAbsensiLockedToday() {
+  if (window.AbsensiState.isMinggu) return true;
+  if (window.AbsensiState.infoLibur) {
+    let opStatus = String(window.AbsensiState.infoLibur.statusOperasional || 'Tutup').trim().toLowerCase();
+    return opStatus === 'tutup';
+  }
+  if (window.AbsensiState.isLibur) return true;
+  return false;
+}
+
+/**
  * Menampilkan status banner operasional (Minggu / Libur Nasional / Buka Normal).
  */
 function updateOperasionalBannerUI() {
@@ -12667,7 +12683,7 @@ function updateOperasionalBannerUI() {
       }
       if (bannerKet) {
         bannerKet.className = "text-xs text-rose-700 mt-0.5";
-        bannerKet.innerText = "Sesuai jadwal klinik, hari Minggu libur operasional. Presensi shift default Tidak Hadir.";
+        bannerKet.innerText = "Sesuai jadwal klinik, hari Minggu libur operasional. Pengisian presensi dikunci (default Tidak Hadir).";
       }
     }
   } else if (infoLibur) {
@@ -12690,7 +12706,9 @@ function updateOperasionalBannerUI() {
       }
       if (bannerKet) {
         bannerKet.className = isTutup ? "text-xs text-amber-700 mt-0.5" : "text-xs text-sky-700 mt-0.5";
-        bannerKet.innerText = infoLibur.keterangan || ("Kategori: " + infoLibur.kategoriLibur + " - Status operasional klinik: " + opStatus);
+        bannerKet.innerText = isTutup 
+          ? ((infoLibur.keterangan ? infoLibur.keterangan + " — " : "") + "Klinik libur operasional (" + opStatus + "). Pengisian presensi shift dikunci.")
+          : (infoLibur.keterangan || ("Kategori: " + infoLibur.kategoriLibur + " - Status operasional klinik: " + opStatus));
       }
     }
   } else {
@@ -12718,6 +12736,28 @@ function renderAbsensiTable() {
   let curShiftKey = curShift.toLowerCase();
   let jadwal = getJadwalShiftCurrent();
   let presensiSaved = window.AbsensiState.presensiHariIni || [];
+  let isLocked = isAbsensiLockedToday();
+
+  // Tombol Simpan Presensi Shift: Kunci jika hari libur operasional / Minggu
+  let btnSimpan = document.getElementById('btnSimpanAbsensi');
+  if (btnSimpan) {
+    if (isLocked) {
+      btnSimpan.disabled = true;
+      btnSimpan.className = "px-5 py-2.5 bg-slate-200 text-slate-500 rounded-xl text-xs font-bold border border-slate-300 cursor-not-allowed flex items-center gap-2 shadow-none";
+      btnSimpan.innerHTML = '<span>🔒</span> Presensi Dikunci (Hari Libur)';
+      btnSimpan.title = 'Presensi tidak dapat diisi pada hari Minggu / Libur Operasional';
+    } else {
+      btnSimpan.disabled = false;
+      btnSimpan.className = "px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-600/20 transition-all flex items-center gap-2 hover:scale-[1.02]";
+      btnSimpan.innerHTML = '<span>💾</span> Simpan Presensi Shift';
+      btnSimpan.removeAttribute('title');
+    }
+  }
+
+  let autoInd = document.getElementById('autosaveIndicator');
+  if (autoInd) {
+    autoInd.innerHTML = isLocked ? '<span class="text-rose-600 font-bold">🔒 Form Presensi Terkunci</span>' : '';
+  }
 
   if (!window.AbsensiState.shiftAttendance) {
     window.AbsensiState.shiftAttendance = { pagi: {}, sore: {} };
@@ -12756,7 +12796,10 @@ function renderAbsensiTable() {
   // Tampilkan status penyimpanan shift ini
   let statSimpan = document.getElementById('statStatusTersimpan');
   let statWaktu = document.getElementById('statWaktuSimpan');
-  if (shiftRecords.length > 0) {
+  if (isLocked) {
+    if (statSimpan) statSimpan.innerHTML = '<span class="text-rose-700 font-extrabold">🔒 Libur Operasional</span>';
+    if (statWaktu) statWaktu.innerText = 'Klinik Tutup (Presensi Dikunci)';
+  } else if (shiftRecords.length > 0) {
     if (statSimpan) statSimpan.innerHTML = '<span class="text-emerald-700 font-extrabold">✅ Sudah Disimpan</span>';
     if (statWaktu) statWaktu.innerText = 'Tersimpan ' + shiftRecords.length + ' pegawai';
   } else {
@@ -12771,7 +12814,13 @@ function renderAbsensiTable() {
     
     // Inisialisasi map input
     // User request: Default status absensi adalah Tidak hadir.
-    if (!window.AbsensiState.attendanceMap[namaKey]) {
+    // Jika hari libur / tutup, status strictly 'Tidak'
+    if (isLocked) {
+      window.AbsensiState.attendanceMap[namaKey] = {
+        status: 'Tidak',
+        keterangan: 'Libur Operasional'
+      };
+    } else if (!window.AbsensiState.attendanceMap[namaKey]) {
       if (savedStatusMap[namaKey]) {
         window.AbsensiState.attendanceMap[namaKey] = {
           status: savedStatusMap[namaKey].status,
@@ -12824,15 +12873,23 @@ function renderAbsensiTable() {
         <td class="px-4 py-3.5">
           <!-- Status_Absensi strictly: (Hadir / Tidak) -->
           <div class="relative">
-            <select onchange="updateWorkerAbsensi('${escapeHtml(namaClean)}', this.value)" 
-                    class="w-full px-3 py-2 rounded-xl font-black text-xs border focus:ring-2 focus:outline-none transition-all cursor-pointer ${
-                      isHadir 
-                        ? 'bg-emerald-50 text-emerald-800 border-emerald-400 focus:ring-emerald-500' 
-                        : 'bg-rose-50 text-rose-800 border-rose-300 focus:ring-rose-500'
-                    }">
-              <option value="Tidak" ${!isHadir ? 'selected' : ''}>🔴 Tidak Hadir</option>
-              <option value="Hadir" ${isHadir ? 'selected' : ''}>🟢 Hadir</option>
-            </select>
+            ${isLocked ? `
+              <select disabled 
+                      class="w-full px-3 py-2 rounded-xl font-bold text-xs border bg-slate-100 text-slate-500 border-slate-300 cursor-not-allowed opacity-80"
+                      title="Presensi dikunci pada hari libur / klinik tutup">
+                <option value="Tidak" selected>🔒 Libur (Tidak Hadir)</option>
+              </select>
+            ` : `
+              <select onchange="updateWorkerAbsensi('${escapeHtml(namaClean)}', this.value)" 
+                      class="w-full px-3 py-2 rounded-xl font-black text-xs border focus:ring-2 focus:outline-none transition-all cursor-pointer ${
+                        isHadir 
+                          ? 'bg-emerald-50 text-emerald-800 border-emerald-400 focus:ring-emerald-500' 
+                          : 'bg-rose-50 text-rose-800 border-rose-300 focus:ring-rose-500'
+                      }">
+                <option value="Tidak" ${!isHadir ? 'selected' : ''}>🔴 Tidak Hadir</option>
+                <option value="Hadir" ${isHadir ? 'selected' : ''}>🟢 Hadir</option>
+              </select>
+            `}
           </div>
         </td>
       </tr>
@@ -12847,6 +12904,10 @@ function renderAbsensiTable() {
  * Update nilai status absensi pekerja individual.
  */
 function updateWorkerAbsensi(namaPekerja, val) {
+  if (isAbsensiLockedToday()) {
+    showToast('warning', 'Presensi dikunci pada Hari Libur / Klinik Tutup.');
+    return;
+  }
   let key = (namaPekerja || '').trim().toLowerCase();
   if (!window.AbsensiState.attendanceMap[key]) {
     window.AbsensiState.attendanceMap[key] = { status: 'Tidak', keterangan: '' };
@@ -12859,6 +12920,10 @@ function updateWorkerAbsensi(namaPekerja, val) {
  * Toggle cepat Hadir / Tidak untuk pekerja.
  */
 function toggleWorkerAbsensi(namaPekerja) {
+  if (isAbsensiLockedToday()) {
+    showToast('warning', 'Presensi dikunci pada Hari Libur / Klinik Tutup.');
+    return;
+  }
   let key = (namaPekerja || '').toLowerCase();
   let cur = window.AbsensiState.attendanceMap[key] ? window.AbsensiState.attendanceMap[key].status : 'Tidak';
   updateWorkerAbsensi(namaPekerja, cur === 'Hadir' ? 'Tidak' : 'Hadir');
@@ -12868,6 +12933,7 @@ function toggleWorkerAbsensi(namaPekerja) {
  * Update catatan keterangan pekerja.
  */
 function updateWorkerKeterangan(namaPekerja, ket) {
+  if (isAbsensiLockedToday()) return;
   let key = (namaPekerja || '').toLowerCase();
   if (!window.AbsensiState.attendanceMap[key]) {
     window.AbsensiState.attendanceMap[key] = { status: 'Hadir', keterangan: '' };
@@ -12879,6 +12945,10 @@ function updateWorkerKeterangan(namaPekerja, ket) {
  * Aksi Cepat: Tandai Semua Hadir.
  */
 function quickMarkAllHadir() {
+  if (isAbsensiLockedToday()) {
+    showToast('warning', 'Presensi dikunci pada Hari Libur / Klinik Tutup.');
+    return;
+  }
   (window.AbsensiState.activeWorkers || []).forEach(w => {
     let key = (w.namaPekerja || '').toLowerCase();
     if (!window.AbsensiState.attendanceMap[key]) {
@@ -12897,6 +12967,10 @@ function quickMarkAllHadir() {
  * Aksi Cepat: Tandai Semua Tidak Hadir.
  */
 function quickMarkAllTidak() {
+  if (isAbsensiLockedToday()) {
+    showToast('warning', 'Presensi dikunci pada Hari Libur / Klinik Tutup.');
+    return;
+  }
   (window.AbsensiState.activeWorkers || []).forEach(w => {
     let key = (w.namaPekerja || '').toLowerCase();
     if (!window.AbsensiState.attendanceMap[key]) {
@@ -12939,6 +13013,10 @@ function updateAbsensiStats() {
  * Menyimpan data Presensi Shift ke Spreadsheet 12 Presensi & Absensi Pegawai.
  */
 function simpanAbsensiShiftCurrent() {
+  if (isAbsensiLockedToday()) {
+    showToast('warning', 'Presensi tidak dapat disimpan karena klinik libur operasional / tutup.');
+    return;
+  }
   let workers = window.AbsensiState.activeWorkers || [];
   if (workers.length === 0) {
     showToast('warning', 'Tidak ada data pegawai aktif untuk disimpan.');
@@ -14708,6 +14786,12 @@ runAllTimers();
 assert("ABSENSI-4: Hari Minggu Terdeteksi isMinggu = true", window.AbsensiState.isMinggu === true);
 assert("ABSENSI-4: Hari Minggu Terdeteksi isLibur = true", window.AbsensiState.isLibur === true);
 assert("ABSENSI-4: Operasional Hari Minggu Otomatis Tutup (Libur Rutin)", window.AbsensiState.infoLibur && window.AbsensiState.infoLibur.statusOperasional === "Tutup");
+assert("ABSENSI-4: isAbsensiLockedToday Mengembalikan true pada Hari Minggu", isAbsensiLockedToday() === true);
+var btnSimpanMinggu = document.getElementById('btnSimpanAbsensi');
+assert("ABSENSI-4: Tombol Simpan Presensi Dikunci (disabled) pada Hari Minggu", btnSimpanMinggu && btnSimpanMinggu.disabled === true);
+assert("ABSENSI-4: Label Tombol Simpan Mengindikasikan Dikunci", btnSimpanMinggu && btnSimpanMinggu.innerHTML.indexOf("Presensi Dikunci") !== -1);
+var tbodyMinggu = document.getElementById('tbodyAbsensiPegawai') ? document.getElementById('tbodyAbsensiPegawai').innerHTML : "";
+assert("ABSENSI-4: Select Input Presensi Terkunci dengan Label Libur", tbodyMinggu.indexOf("🔒 Libur (Tidak Hadir)") !== -1);
 
 // ABSENSI-5: Pekerja dengan Status 'Tidak Aktif' di Pengaturan_Tarif_Shift TIDAK AKAN MUNCUL di Absen
 if (window._mockDb && window._mockDb.tarifShift) {

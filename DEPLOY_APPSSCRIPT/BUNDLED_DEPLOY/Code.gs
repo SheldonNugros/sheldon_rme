@@ -2418,13 +2418,20 @@ function hapusUserMaster(username, isPermanent) {
  */
 function onOpen() {
   try {
-    SpreadsheetApp.getUi()
-      .createMenu("👥 Master User & Role")
+    var ui = SpreadsheetApp.getUi();
+    ui.createMenu("👥 Master User & Role")
       .addItem("➕ Buka Form Tambah/Edit User", "bukaFormUserMasterDialog")
       .addItem("📋 Buka Sidebar Kelola User", "bukaFormUserMasterSidebar")
       .addSeparator()
       .addItem("🔄 Sinkronkan Data ke Pengaturan Tarif Shift", "syncAllUsersToPayrollTarifShift")
       .addItem("⚙️ Setup Header & Format Sheet Data", "initFormatSheetUserMaster")
+      .addToUi();
+
+    ui.createMenu("⚙️ Pengaturan Tarif Shift")
+      .addItem("➕ Buka Form Input / Edit Tarif Shift", "bukaFormTarifShiftDialog")
+      .addItem("📋 Buka Sidebar Tarif Shift", "bukaFormTarifShiftSidebar")
+      .addSeparator()
+      .addItem("🔄 Sinkronkan Semua Pekerja dari Sheet Data", "syncAllUsersToPayrollTarifShift")
       .addToUi();
   } catch (e) {
     // Abaikan jika dipanggil di luar konteks Spreadsheet UI
@@ -2433,8 +2440,11 @@ function onOpen() {
 
 /**
  * Trigger otomatis onEdit pada Spreadsheet RME Sheldon - 06 Master User & Role.
- * Setiap kali Super Admin menambah, mengedit baris, atau mengubah Status / Role di Sheet 'Data',
- * fungsi ini langsung menyinkronkan data ke sheet Pengaturan_Tarif_Shift.
+ * Menjamin integritas:
+ * 1. Di sheet Pengaturan_Tarif_Shift: Jika nama diinput/diedit di kolom C, cek validitas ke Sheet Data.
+ *    Jika tidak ada di Sheet Data: tolak dan kosongkan cell.
+ *    Jika ada di Sheet Data: otomatis isi ID_Aturan (TARIF-XXX) & Role dari Sheet Data.
+ * 2. Di sheet Data: Jika ada penambahan / perubahan nama / role, sinkronkan ke Pengaturan_Tarif_Shift.
  */
 function onEdit(e) {
   try {
@@ -2444,7 +2454,61 @@ function onEdit(e) {
     const row = e.range.getRow();
     if (row <= 1) return; // Header edit diabaikan
 
-    if (sheetName === "Data" || sheetName === "Pengaturan_Tarif_Shift") {
+    if (sheetName === "Pengaturan_Tarif_Shift") {
+      var col = e.range.getColumn();
+      if (col === 3) { // Kolom C: Nama_Pekerja diedit langsung di spreadsheet
+        var enteredNama = String(e.value || e.range.getValue() || "").trim();
+        if (enteredNama) {
+          var ss = sh.getParent();
+          var sData = ss.getSheetByName("Data");
+          var found = null;
+          if (sData) {
+            var lRow = sData.getLastRow();
+            if (lRow >= 2) {
+              var uVals = sData.getRange(2, 1, lRow - 1, Math.min(8, sData.getLastColumn())).getValues();
+              for (var u = 0; u < uVals.length; u++) {
+                if (String(uVals[u][1] || "").trim().toLowerCase() === enteredNama.toLowerCase()) {
+                  found = {
+                    nama: String(uVals[u][1]).trim(),
+                    role: String(uVals[u][2] || "Staf").trim(),
+                    status: String(uVals[u][6] || "Aktif").trim()
+                  };
+                  break;
+                }
+              }
+            }
+          }
+
+          if (!found) {
+            e.range.setValue(""); // Kosongkan cell karena nama tidak valid
+            try {
+              SpreadsheetApp.getUi().alert("❌ Ditolak!\n\nNama \"" + enteredNama + "\" belum terdaftar di Sheet Data.\nSilakan daftarkan pekerja di Sheet Data terlebih dahulu.");
+            } catch(uiErr) {}
+            return;
+          }
+
+          // Auto-fill Kolom A (ID_Aturan), B (Role), I (Status), J (Timestamp)
+          var curId = String(sh.getRange(row, 1).getValue() || "").trim();
+          if (!curId) {
+            var maxId = 0;
+            var allIds = sh.getRange(2, 1, Math.max(1, sh.getLastRow() - 1), 1).getValues();
+            for (var k = 0; k < allIds.length; k++) {
+              var m = String(allIds[k][0] || "").match(/TARIF-(\d+)/i);
+              if (m) {
+                var num = parseInt(m[1], 10);
+                if (num > maxId) maxId = num;
+              }
+            }
+            sh.getRange(row, 1).setValue("TARIF-" + String(maxId + 1).padStart(3, '0'));
+          }
+          sh.getRange(row, 2).setValue(found.role);
+          if (!sh.getRange(row, 9).getValue()) {
+            sh.getRange(row, 9).setValue(found.status || "Aktif");
+          }
+          sh.getRange(row, 10).setValue(new Date());
+        }
+      }
+    } else if (sheetName === "Data") {
       if (typeof syncAllUsersToPayrollTarifShift === "function") {
         syncAllUsersToPayrollTarifShift();
       }
@@ -2472,6 +2536,218 @@ function bukaFormUserMasterSidebar() {
   const html = HtmlService.createHtmlOutput(getHtmlFormUserMasterContent())
     .setTitle("Kelola User & Role");
   SpreadsheetApp.getUi().showSidebar(html);
+}
+
+/**
+ * Menampilkan Form Input/Edit Pengaturan Tarif Shift dalam bentuk Modal Dialog di Spreadsheet
+ */
+function bukaFormTarifShiftDialog() {
+  const html = HtmlService.createHtmlOutput(getHtmlFormTarifShiftContent())
+    .setWidth(620)
+    .setHeight(620)
+    .setTitle("Form Pengaturan Tarif Shift & Gaji - RME Sheldon");
+  SpreadsheetApp.getUi().showModalDialog(html, "⚙️ Form Pengaturan Tarif Shift");
+}
+
+/**
+ * Menampilkan Form Input/Edit Pengaturan Tarif Shift dalam bentuk Sidebar di Spreadsheet
+ */
+function bukaFormTarifShiftSidebar() {
+  const html = HtmlService.createHtmlOutput(getHtmlFormTarifShiftContent())
+    .setTitle("Pengaturan Tarif Shift");
+  SpreadsheetApp.getUi().showSidebar(html);
+}
+
+/**
+ * Mengambil daftar user dari Sheet Data untuk dropdown Form Tarif Shift
+ */
+function getUsersForTarifDropdown() {
+  try {
+    var ssUser = getSpreadsheetMasterUser_();
+    if (!ssUser) return [];
+    var sheetData = ssUser.getSheetByName("Data");
+    if (!sheetData) return [];
+    var lastRow = sheetData.getLastRow();
+    if (lastRow < 2) return [];
+    var vals = sheetData.getRange(2, 1, lastRow - 1, Math.min(8, sheetData.getLastColumn())).getValues();
+    var res = [];
+    for (var i = 0; i < vals.length; i++) {
+      var nama = String(vals[i][1] || "").trim();
+      var role = String(vals[i][2] || "Staf").trim();
+      var status = String(vals[i][6] || "Aktif").trim();
+      if (nama) {
+        res.push({ nama: nama, role: role, status: status });
+      }
+    }
+    return res;
+  } catch (e) {
+    return [];
+  }
+}
+
+/**
+ * Template HTML Form Pengaturan Tarif Shift untuk Dialog / Sidebar Spreadsheet
+ */
+function getHtmlFormTarifShiftContent() {
+  return '<!DOCTYPE html>' +
+'<html>' +
+'<head>' +
+'  <base target="_top">' +
+'  <meta charset="utf-8">' +
+'  <meta name="viewport" content="width=device-width, initial-scale=1.0">' +
+'  <script src="https://cdn.tailwindcss.com"></script>' +
+'  <style>' +
+'    body { font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif; }' +
+'  </style>' +
+'</head>' +
+'<body class="bg-slate-50 text-slate-800 p-4 text-xs">' +
+'  <div class="max-w-xl mx-auto bg-white p-5 rounded-2xl shadow-sm border border-slate-200 space-y-4">' +
+'    <div class="flex items-center gap-3 pb-3 border-b border-slate-100">' +
+'      <div class="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-200 flex items-center justify-center text-xl">⚙️</div>' +
+'      <div>' +
+'        <h1 class="text-sm font-black text-slate-800">Form Pengaturan Tarif Shift & Gaji</h1>' +
+'        <p class="text-[11px] text-slate-500">Tersimpan ke Sheet: <b>Pengaturan_Tarif_Shift</b> (06 Master User & Role)</p>' +
+'      </div>' +
+'    </div>' +
+'    <form id="formTarifDialog" onsubmit="submitTarifForm(event)" class="space-y-3.5">' +
+'      <div>' +
+'        <label class="block font-black text-slate-700 mb-1 uppercase text-[10px]">Nama Pekerja (Wajib Terdaftar di Sheet Data) *</label>' +
+'        <select id="diagNama" required onchange="handleDiagNamaChange()" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-bold text-slate-800 text-xs">' +
+'          <option value="">Memuat nama pekerja dari Sheet Data...</option>' +
+'        </select>' +
+'        <p id="diagNamaHint" class="text-[10px] text-slate-500 mt-1">Daftar nama diambil otomatis dari Sheet Data</p>' +
+'      </div>' +
+'      <div class="grid grid-cols-2 gap-3">' +
+'        <div>' +
+'          <label class="block font-black text-slate-700 mb-1 uppercase text-[10px]">Role Jabatan (Otomatis)</label>' +
+'          <input type="text" id="diagRole" readonly placeholder="(Otomatis terisi)" class="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl font-bold text-slate-600 text-xs">' +
+'        </div>' +
+'        <div>' +
+'          <label class="block font-black text-slate-700 mb-1 uppercase text-[10px]">Tipe Kompensasi *</label>' +
+'          <select id="diagTipe" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-bold text-slate-800 text-xs">' +
+'            <option value="Kombinasi Shift & Tindakan">Kombinasi Shift & Tindakan</option>' +
+'            <option value="Uang Harian Shift">Uang Harian Shift</option>' +
+'            <option value="Gaji Bulanan Tetap">Gaji Bulanan Tetap</option>' +
+'          </select>' +
+'        </div>' +
+'      </div>' +
+'      <div class="grid grid-cols-2 gap-3">' +
+'        <div>' +
+'          <label class="block font-black text-slate-700 mb-1 uppercase text-[10px]">Tarif Shift 1 (Rp)</label>' +
+'          <input type="number" id="diagShift1" value="55000" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-bold text-slate-800 text-xs">' +
+'        </div>' +
+'        <div>' +
+'          <label class="block font-black text-slate-700 mb-1 uppercase text-[10px]">Tarif Shift 2 (Rp)</label>' +
+'          <input type="number" id="diagShift2" value="55000" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-bold text-slate-800 text-xs">' +
+'        </div>' +
+'      </div>' +
+'      <div>' +
+'        <label class="block font-black text-slate-700 mb-1 uppercase text-[10px]">Gaji Pokok Bulanan Tetap (Khusus Admin Non-Shift)</label>' +
+'        <input type="number" id="diagGajiPokok" value="0" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-bold text-slate-800 text-xs">' +
+'      </div>' +
+'      <div>' +
+'        <label class="block font-black text-slate-700 mb-1 uppercase text-[10px]">Keterangan Aturan</label>' +
+'        <input type="text" id="diagKeterangan" placeholder="Contoh: 2 Shift Rp 55.000/shift + JM" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-bold text-slate-800 text-xs">' +
+'      </div>' +
+'      <div>' +
+'        <label class="block font-black text-slate-700 mb-1 uppercase text-[10px]">Status Keaktifan *</label>' +
+'        <select id="diagStatus" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-bold text-slate-800 text-xs">' +
+'          <option value="Aktif" selected>Aktif (Muncul di Payroll)</option>' +
+'          <option value="Tidak Aktif">Tidak Aktif (Tidak Muncul di Payroll)</option>' +
+'        </select>' +
+'      </div>' +
+'      <div id="diagAlert" class="hidden p-3 rounded-xl text-xs font-bold"></div>' +
+'      <button type="submit" id="btnSubmitDiag" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-xl shadow-md transition-all text-xs">' +
+'        💾 SIMPAN KE PENGATURAN TARIF SHIFT' +
+'      </button>' +
+'    </form>' +
+'  </div>' +
+'  <script>' +
+'    var listStaff = [];' +
+'    window.onload = function() {' +
+'      google.script.run' +
+'        .withSuccessHandler(function(data) {' +
+'          listStaff = data || [];' +
+'          var sel = document.getElementById("diagNama");' +
+'          if (listStaff.length === 0) {' +
+'            sel.innerHTML = "<option value=\'\'>Belum ada staf terdaftar di Sheet Data</option>";' +
+'            return;' +
+'          }' +
+'          sel.innerHTML = "<option value=\'\'>-- Pilih Pekerja Terdaftar --</option>" +' +
+'            listStaff.map(function(s) { return "<option value=\'" + s.nama + "\'>" + s.nama + " (" + (s.role || "Staf") + ")</option>"; }).join("");' +
+'        })' +
+'        .getUsersForTarifDropdown();' +
+'    };' +
+'    function handleDiagNamaChange() {' +
+'      var nama = document.getElementById("diagNama").value;' +
+'      var found = listStaff.find(function(s) { return s.nama === nama; });' +
+'      var roleInput = document.getElementById("diagRole");' +
+'      var tipeSel = document.getElementById("diagTipe");' +
+'      if (found) {' +
+'        roleInput.value = found.role || "Staf";' +
+'        var rLow = (found.role || "").toLowerCase();' +
+'        if (rLow.includes("dokter")) {' +
+'          tipeSel.value = "Kombinasi Shift & Tindakan";' +
+'          document.getElementById("diagShift1").value = 55000;' +
+'          document.getElementById("diagShift2").value = 55000;' +
+'          document.getElementById("diagGajiPokok").value = 0;' +
+'        } else if (rLow.includes("perawat")) {' +
+'          tipeSel.value = "Uang Harian Shift";' +
+'          document.getElementById("diagShift1").value = 45000;' +
+'          document.getElementById("diagShift2").value = 45000;' +
+'          document.getElementById("diagGajiPokok").value = 0;' +
+'        } else if (rLow.includes("admin") || rLow.includes("kasir")) {' +
+'          tipeSel.value = "Gaji Bulanan Tetap";' +
+'          document.getElementById("diagShift1").value = 0;' +
+'          document.getElementById("diagShift2").value = 0;' +
+'          document.getElementById("diagGajiPokok").value = 1200000;' +
+'        }' +
+'      } else {' +
+'        roleInput.value = "";' +
+'      }' +
+'    }' +
+'    function submitTarifForm(e) {' +
+'      e.preventDefault();' +
+'      var btn = document.getElementById("btnSubmitDiag");' +
+'      var alertDiv = document.getElementById("diagAlert");' +
+'      btn.disabled = true;' +
+'      btn.innerText = "⏳ Menyimpan...";' +
+'      alertDiv.className = "hidden";' +
+'      var payload = {' +
+'        namaPekerja: document.getElementById("diagNama").value,' +
+'        tipeKompensasi: document.getElementById("diagTipe").value,' +
+'        tarifShift1: Number(document.getElementById("diagShift1").value) || 0,' +
+'        tarifShift2: Number(document.getElementById("diagShift2").value) || 0,' +
+'        gajiPokokBulanan: Number(document.getElementById("diagGajiPokok").value) || 0,' +
+'        keterangan: document.getElementById("diagKeterangan").value,' +
+'        status: document.getElementById("diagStatus").value' +
+'      };' +
+'      google.script.run' +
+'        .withSuccessHandler(function(res) {' +
+'          btn.disabled = false;' +
+'          btn.innerText = "💾 SIMPAN KE PENGATURAN TARIF SHIFT";' +
+'          alertDiv.classList.remove("hidden");' +
+'          if (res && res.success) {' +
+'            alertDiv.className = "p-3 rounded-xl text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200";' +
+'            alertDiv.innerText = "✅ " + (res.message || "Berhasil disimpan!");' +
+'            setTimeout(function() { google.script.host.close(); }, 1600);' +
+'          } else {' +
+'            alertDiv.className = "p-3 rounded-xl text-xs font-bold bg-rose-100 text-rose-800 border border-rose-200";' +
+'            alertDiv.innerText = "❌ " + ((res && res.message) ? res.message : "Gagal menyimpan.");' +
+'          }' +
+'        })' +
+'        .withFailureHandler(function(err) {' +
+'          btn.disabled = false;' +
+'          btn.innerText = "💾 SIMPAN KE PENGATURAN TARIF SHIFT";' +
+'          alertDiv.classList.remove("hidden");' +
+'          alertDiv.className = "p-3 rounded-xl text-xs font-bold bg-rose-100 text-rose-800 border border-rose-200";' +
+'          alertDiv.innerText = "❌ Error: " + (err.message || err);' +
+'        })' +
+'        .simpanTarifShift(payload);' +
+'    }' +
+'  </script>' +
+'</body>' +
+'</html>';
 }
 
 /**

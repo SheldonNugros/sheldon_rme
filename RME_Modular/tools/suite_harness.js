@@ -11896,6 +11896,34 @@ function renderInfoBmhp() {
     }
   }
 
+  function resetFormTarifShiftBaru() {
+    const elNama = document.getElementById('tarifNamaPekerja');
+    if (elNama) { elNama.value = ''; elNama.focus(); }
+    const elRole = document.getElementById('tarifRole');
+    if (elRole) elRole.value = '';
+    const elTipe = document.getElementById('tarifTipe');
+    if (elTipe) elTipe.value = 'Kombinasi Shift & Tindakan';
+    const elS1 = document.getElementById('tarifShift1');
+    if (elS1) elS1.value = 55000;
+    const elS2 = document.getElementById('tarifShift2');
+    if (elS2) elS2.value = 55000;
+    const elGp = document.getElementById('tarifGajiPokok');
+    if (elGp) elGp.value = 0;
+    const elKet = document.getElementById('tarifKeterangan');
+    if (elKet) elKet.value = '';
+    const elStat = document.getElementById('tarifStatus');
+    if (elStat) elStat.value = 'Aktif';
+    const hint = document.getElementById('tarifNamaHint');
+    if (hint) {
+      hint.textContent = 'Pilih atau ketik nama pekerja terdaftar di Sheet Data';
+      hint.className = 'text-[10px] text-slate-500 mt-1';
+    }
+    const card = document.getElementById('cardFormTarifShift');
+    if (card && typeof card.scrollIntoView === 'function') {
+      card.scrollIntoView({ behavior: 'smooth' });
+    }
+  }
+
   function pilihTarifShiftToEdit(idx) {
     const item = (window.PayrollState.tarifShift || [])[idx];
     if (!item) return;
@@ -12192,6 +12220,7 @@ function renderInfoBmhp() {
   window.updatePreviewUangShift = updatePreviewUangShift;
   window.handleSimpanPresensiShift = handleSimpanPresensiShift;
   window.pilihTarifShiftToEdit = pilihTarifShiftToEdit;
+  window.resetFormTarifShiftBaru = resetFormTarifShiftBaru;
   window.handleSimpanTarifShift = handleSimpanTarifShift;
   window.togglePayrollPaidStatus = togglePayrollPaidStatus;
   window.triggerGeneratePayrollPeriode = triggerGeneratePayrollPeriode;

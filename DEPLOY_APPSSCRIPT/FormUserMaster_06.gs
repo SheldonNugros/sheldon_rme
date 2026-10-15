@@ -6,13 +6,13 @@
  * Sesuai Spreadsheet: RME Sheldon - 06 Master User & Role (Sheet: Data)
  * 
  * Kategori Role Resmi (Title Case):
- * 1. Super User
- * 2. Dokter Gigi Umum
- * 3. Dokter Gigi Spesialis
- * 4. Perawat Umum
- * 5. Perawat Gigi
+ * 1. Owner
+ * 2. Dokter Gigi Spesialis
+ * 3. Dokter Gigi Umum
+ * 4. Perawat Gigi
+ * 5. Perawat Umum
  * 6. Admin
- * 7. Owner
+ * 7. Office
  * =========================================================================
  */
 
@@ -32,13 +32,13 @@ const MASTER_USER_CONFIG = {
     "Persen_JM_Dokter"
   ],
   ROLES: [
-    "Super User",
-    "Dokter Gigi Umum",
+    "Owner",
     "Dokter Gigi Spesialis",
-    "Perawat Umum",
+    "Dokter Gigi Umum",
     "Perawat Gigi",
+    "Perawat Umum",
     "Admin",
-    "Owner"
+    "Office"
   ]
 };
 
@@ -368,7 +368,7 @@ function getHtmlFormUserMasterContent() {
 '      <div class="flex items-center gap-3">' +
 '        <div class="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-xl">👤</div>' +
 '        <div>' +
-'          <h1 class="text-sm font-black text-slate-800">Form Master User & Role (Khusus Super User)</h1>' +
+'          <h1 class="text-sm font-black text-slate-800">Form Master User & Role (Khusus Owner)</h1>' +
 '          <p class="text-[11px] text-slate-500 font-medium">Sinkron ke Spreadsheet: RME Sheldon - 06 Master User & Role (Sheet: Data)</p>' +
 '        </div>' +
 '      </div>' +
@@ -390,13 +390,13 @@ function getHtmlFormUserMasterContent() {
 '          <div>' +
 '            <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase">Kategori Role *</label>' +
 '            <select id="inRole" required onchange="handleRoleChange()" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">' +
-'              <option value="Super User">Super User</option>' +
-'              <option value="Dokter Gigi Umum">Dokter Gigi Umum</option>' +
-'              <option value="Dokter Gigi Spesialis">Dokter Gigi Spesialis</option>' +
-'              <option value="Perawat Umum">Perawat Umum</option>' +
-'              <option value="Perawat Gigi">Perawat Gigi</option>' +
-'              <option value="Admin">Admin</option>' +
 '              <option value="Owner">Owner</option>' +
+'              <option value="Dokter Gigi Spesialis">Dokter Gigi Spesialis</option>' +
+'              <option value="Dokter Gigi Umum">Dokter Gigi Umum</option>' +
+'              <option value="Perawat Gigi">Perawat Gigi</option>' +
+'              <option value="Perawat Umum">Perawat Umum</option>' +
+'              <option value="Admin">Admin</option>' +
+'              <option value="Office">Office</option>' +
 '            </select>' +
 '          </div>' +
 '        </div>' +

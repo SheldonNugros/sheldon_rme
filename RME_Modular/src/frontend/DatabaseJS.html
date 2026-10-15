@@ -1100,7 +1100,7 @@ function getFallbackUserList() {
   }
 
   return [
-    { nama: "Administrator Sistem", username: "admin", role: "Super User", hasPassword: true, isHashed: true, status: "Aktif", noReg: "-", noHp: "081234567890", email: "admin@sheldon.id", persenJM: 0 },
+    { nama: "Administrator Sistem", username: "admin", role: "Owner", hasPassword: true, isHashed: true, status: "Aktif", noReg: "-", noHp: "081234567890", email: "admin@sheldon.id", persenJM: 0 },
     { nama: "drg. V. Asung Nugroho, Sp.Ort", username: "asung", role: "Owner", hasPassword: true, isHashed: true, status: "Aktif", noReg: "503/SIP-DRG/001/2024", noHp: "081298765432", email: "v.asungnugroho@gmail.com", persenJM: 0.50 },
     { nama: "drg. Rahma Yulinda D, Sp. BMM", username: "rahma", role: "Dokter Gigi Spesialis", hasPassword: true, isHashed: false, status: "Aktif", noReg: "503/SIP-DRG/001/2026", noHp: "081234567801", email: "rahma@sheldon.id", persenJM: 0.65 },
     { nama: "drg. Regyana Oktavaria", username: "regyana", role: "Dokter Gigi Umum", hasPassword: true, isHashed: false, status: "Aktif", noReg: "503/SIP-DRG/002/2026", noHp: "081234567802", email: "regyana@sheldon.id", persenJM: 0.40 },
@@ -1259,11 +1259,11 @@ function renderTabelUser() {
   tbody.innerHTML = filtered.map(u => {
     let roleBadge = 'bg-slate-100 text-slate-700';
     let rLow = (u.role || '').toLowerCase();
-    if (rLow === 'super user' || rLow === 'owner') roleBadge = 'bg-purple-100 text-purple-700 font-black';
+    if (rLow === 'owner' || rLow === 'super user') roleBadge = 'bg-purple-100 text-purple-700 font-black';
     else if (rLow.includes('dokter')) roleBadge = 'bg-blue-100 text-blue-700 font-bold';
     else if (rLow.includes('perawat')) roleBadge = 'bg-teal-100 text-teal-700 font-bold';
-    else if (rLow.includes('kasir')) roleBadge = 'bg-emerald-100 text-emerald-700 font-bold';
-    else if (rLow.includes('admin')) roleBadge = 'bg-amber-100 text-amber-700 font-bold';
+    else if (rLow.includes('office')) roleBadge = 'bg-indigo-100 text-indigo-700 font-bold';
+    else if (rLow.includes('admin') || rLow.includes('kasir')) roleBadge = 'bg-amber-100 text-amber-700 font-bold';
 
     let stRaw = (u.status || 'Aktif').trim();
     let isAktif = (stRaw.toLowerCase() === 'aktif' || stRaw.toLowerCase() === 'active');
@@ -1332,7 +1332,7 @@ function syncUserToClientPayroll(nama, role, status) {
         tipeKomp = "Kombinasi Shift & Tindakan";
         s1 = 55000; s2 = 55000; gp = 0;
         ket = "2 Shift: Rp 55.000/shift + JM";
-      } else if (rLow.includes("admin") || rLow.includes("kasir")) {
+      } else if (rLow.includes("admin") || rLow.includes("kasir") || rLow.includes("office")) {
         tipeKomp = "Gaji Bulanan Tetap";
         s1 = 0; s2 = 0; gp = 1200000;
         ket = "Gaji Bulanan Tetap Rp 1.200.000/bulan (Non-Shift)";
@@ -1455,7 +1455,7 @@ function simpanDbUser(e) {
     return;
   }
 
-  const currentUser = window.activeNamaAccount || ((window.currentUser && window.currentUser.nama) ? window.currentUser.nama : 'Super User');
+  const currentUser = window.activeNamaAccount || ((window.currentUser && window.currentUser.nama) ? window.currentUser.nama : 'Owner');
 
   const payload = {
     mode: mode,
@@ -1567,9 +1567,10 @@ function editDbUser(username) {
     else if (rLow.includes('dokter')) roleSelect.value = 'Dokter Gigi Umum';
     else if (rLow.includes('perawat gigi')) roleSelect.value = 'Perawat Gigi';
     else if (rLow.includes('perawat')) roleSelect.value = 'Perawat Umum';
+    else if (rLow.includes('office')) roleSelect.value = 'Office';
     else if (rLow.includes('admin') || rLow.includes('kasir')) roleSelect.value = 'Admin';
-    else if (rLow.includes('owner')) roleSelect.value = 'Owner';
-    else roleSelect.value = 'Super User';
+    else if (rLow.includes('owner') || rLow.includes('super')) roleSelect.value = 'Owner';
+    else roleSelect.value = 'Owner';
   }
   document.getElementById('dbUserStatus').value = user.status || 'Aktif';
   document.getElementById('dbUserNoReg').value = user.noReg === '-' ? '' : (user.noReg || '');

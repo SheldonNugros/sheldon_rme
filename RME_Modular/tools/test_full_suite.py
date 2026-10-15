@@ -1,5 +1,6 @@
 import os
 import re
+import json
 import subprocess
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -17,6 +18,8 @@ idx_rad = html.find('id="navRadiologi"')
 idx_kon = html.find('id="navKonsultasi"')
 is_kon_removed = (idx_kon == -1)
 is_modal_perio_in_html = ("Reset Data Periodontal Charting ?" in html)
+role_select_m = re.search(r'<select[^>]*id=["\']dbUserRole["\'][^>]*>(.*?)</select>', html, re.DOTALL)
+role_options = re.findall(r'<option[^>]*value=["\']([^"\']+)["\']', role_select_m.group(1)) if role_select_m else []
 
 test_harness_file = os.path.join(BASE_DIR, 'tools', 'suite_harness.js')
 
@@ -1575,6 +1578,29 @@ assert("ABSENSI-9: Hari Kerja November 2026 Terhitung Akurat Dikurangi Libur Tam
 var badgeHkEl = document.getElementById('badgeHariKerjaRekap');
 assert("ABSENSI-9: Badge Hari Kerja Tersedia dan Tampil di UI Rekap", badgeHkEl !== null && badgeHkEl.innerText.indexOf('27') !== -1);
 
+// --- TEST: Kategori Role (Owner, Dokter Gigi Spesialis, Dokter Gigi Umum, Perawat Gigi, Perawat Umum, Admin, Office) ---
+var selectRoleEl = document.getElementById('dbUserRole');
+assert("ROLE-1: Dropdown Kategori Role Tersedia", selectRoleEl !== null);
+
+var roleOpts = (typeof roleSelectOptionsFromHtml !== 'undefined' && roleSelectOptionsFromHtml.length > 0) ? roleSelectOptionsFromHtml : [];
+if (roleOpts.length === 0 && selectRoleEl && selectRoleEl.options) {
+  for (var ro = 0; ro < selectRoleEl.options.length; ro++) {
+    roleOpts.push(selectRoleEl.options[ro].value);
+  }
+}
+assert("ROLE-2: Super User Tidak Lagi Ada di Opsi Role", roleOpts.indexOf("Super User") === -1);
+assert("ROLE-2: Role Owner Berada di Opsi Pertama", roleOpts[0] === "Owner");
+assert("ROLE-2: Role Dokter Gigi Spesialis Tersedia", roleOpts.indexOf("Dokter Gigi Spesialis") !== -1);
+assert("ROLE-2: Role Dokter Gigi Umum Tersedia", roleOpts.indexOf("Dokter Gigi Umum") !== -1);
+assert("ROLE-2: Role Perawat Gigi Tersedia", roleOpts.indexOf("Perawat Gigi") !== -1);
+assert("ROLE-2: Role Perawat Umum Tersedia", roleOpts.indexOf("Perawat Umum") !== -1);
+assert("ROLE-2: Role Admin Tersedia", roleOpts.indexOf("Admin") !== -1);
+assert("ROLE-2: Role Office Tersedia Menggantikan Owner Sebelumnya", roleOpts.indexOf("Office") !== -1);
+
+var fallbackUsers = getFallbackUserList();
+var adminUser = fallbackUsers.find(function(u) { return u.username === "admin"; });
+assert("ROLE-3: Akun Admin Sistem Menggunakan Role 'Owner'", adminUser && adminUser.role === "Owner");
+
 // SUMMARY REPORT
 print("=================================================");
 var passedTotal = results.filter(r => r.passed).length;
@@ -1589,7 +1615,7 @@ if (failedTotal > 0) {
 }
 '''
 
-full_test_script = f"var isButtonKonsultasiRemoved = {str(is_kon_removed).lower()};\nvar isModalResetPerioInHtml = {str(is_modal_perio_in_html).lower()};\n" + dom_shim + "\n" + all_js + "\n" + test_runner_js
+full_test_script = f"var isButtonKonsultasiRemoved = {str(is_kon_removed).lower()};\nvar isModalResetPerioInHtml = {str(is_modal_perio_in_html).lower()};\nvar roleSelectOptionsFromHtml = {json.dumps(role_options)};\n" + dom_shim + "\n" + all_js + "\n" + test_runner_js
 
 with open(test_harness_file, 'w', encoding='utf-8') as f:
     f.write(full_test_script)

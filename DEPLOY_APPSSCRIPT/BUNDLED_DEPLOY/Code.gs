@@ -363,7 +363,7 @@ function verifikasiSesi(token, allowedRoles) {
     if (allowedRoles && allowedRoles.length > 0) {
       let roleLower = (user.role || "").toLowerCase();
       let matched = allowedRoles.some(r => r.toLowerCase() === roleLower);
-      if (!matched && roleLower !== "super user") {
+      if (!matched && roleLower !== "owner" && roleLower !== "super user") {
         return {
           valid: false,
           message: "Akses Ditolak: Peran '" + user.role + "' tidak memiliki hak akses untuk fungsi ini."
@@ -919,7 +919,7 @@ function hapusPasienPermanen(payload) {
     
     // Verifikasi Otorisasi Sisi Server
     if (payload && payload.token) {
-      let auth = verifikasiSesi(payload.token, ["Super User"]);
+      let auth = verifikasiSesi(payload.token, ["Owner", "Super User"]);
       if (!auth.valid) return { success: false, message: auth.message };
     }
 
@@ -954,7 +954,7 @@ function hapusPasienPermanen(payload) {
     }
 
     sheet.getRange(targetRow, idStatus + 1).setValue("Nonaktif");
-    catatLog("Hapus Pasien", "Super User menonaktifkan pasien (Soft-Delete aman): " + targetNama + " (ID: " + payload.idPasien + ")", payload.currentUser);
+    catatLog("Hapus Pasien", "Owner menonaktifkan pasien (Soft-Delete aman): " + targetNama + " (ID: " + payload.idPasien + ")", payload.currentUser);
     return { success: true, message: "Data Pasien (" + targetNama + ") berhasil dinonaktifkan (Arsip Medis Aman)!" };
   } catch (e) {
     return { success: false, message: "Gagal menghapus pasien: " + e.message };
@@ -1945,7 +1945,7 @@ function simpanPembelianGudang(payload) {
     lock.waitLock(10000);
     
     if (payload && payload.token) {
-      let auth = verifikasiSesi(payload.token, ["Super User", "Admin", "Kasir"]);
+      let auth = verifikasiSesi(payload.token, ["Owner", "Super User", "Admin", "Kasir", "Office"]);
       if (!auth.valid) return { success: false, message: auth.message };
     }
     
@@ -2758,13 +2758,13 @@ function initFormatSheetUserMaster() {
     sheet.setFrozenRows(1);
 
     const validRoles = [
-      "Super User",
-      "Dokter Gigi Umum",
+      "Owner",
       "Dokter Gigi Spesialis",
-      "Perawat Umum",
+      "Dokter Gigi Umum",
       "Perawat Gigi",
+      "Perawat Umum",
       "Admin",
-      "Owner"
+      "Office"
     ];
 
     const ruleRole = SpreadsheetApp.newDataValidation()
@@ -2815,7 +2815,7 @@ function getHtmlFormUserMasterContent() {
 '      <div class="flex items-center gap-3">' +
 '        <div class="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-xl">👤</div>' +
 '        <div>' +
-'          <h1 class="text-sm font-black text-slate-800">Form Master User & Role (Khusus Super User)</h1>' +
+'          <h1 class="text-sm font-black text-slate-800">Form Master User & Role (Khusus Owner)</h1>' +
 '          <p class="text-[11px] text-slate-500 font-medium">Sinkron ke Spreadsheet: RME Sheldon - 06 Master User & Role (Sheet: Data)</p>' +
 '        </div>' +
 '      </div>' +
@@ -2837,13 +2837,13 @@ function getHtmlFormUserMasterContent() {
 '          <div>' +
 '            <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase">Kategori Role *</label>' +
 '            <select id="inRole" required onchange="handleRoleChange()" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">' +
-'              <option value="Super User">Super User</option>' +
-'              <option value="Dokter Gigi Umum">Dokter Gigi Umum</option>' +
-'              <option value="Dokter Gigi Spesialis">Dokter Gigi Spesialis</option>' +
-'              <option value="Perawat Umum">Perawat Umum</option>' +
-'              <option value="Perawat Gigi">Perawat Gigi</option>' +
-'              <option value="Admin">Admin</option>' +
 '              <option value="Owner">Owner</option>' +
+'              <option value="Dokter Gigi Spesialis">Dokter Gigi Spesialis</option>' +
+'              <option value="Dokter Gigi Umum">Dokter Gigi Umum</option>' +
+'              <option value="Perawat Gigi">Perawat Gigi</option>' +
+'              <option value="Perawat Umum">Perawat Umum</option>' +
+'              <option value="Admin">Admin</option>' +
+'              <option value="Office">Office</option>' +
 '            </select>' +
 '          </div>' +
 '        </div>' +
@@ -3158,7 +3158,7 @@ function simpanTindakanBaru(payload) {
   try {
     lock.waitLock(10000);
     if (payload && payload.token) {
-      let auth = verifikasiSesi(payload.token, ["Super User"]);
+      let auth = verifikasiSesi(payload.token, ["Owner", "Super User"]);
       if (!auth.valid) return { success: false, message: auth.message };
     }
     const idTindakan = DB_CONFIG.DATABASE;
@@ -3205,7 +3205,7 @@ function updateTindakan(payload) {
   try {
     lock.waitLock(10000);
     if (payload && payload.token) {
-      let auth = verifikasiSesi(payload.token, ["Super User"]);
+      let auth = verifikasiSesi(payload.token, ["Owner", "Super User"]);
       if (!auth.valid) return { success: false, message: auth.message };
     }
     const idTindakan = DB_CONFIG.DATABASE;
@@ -3257,7 +3257,7 @@ function hapusTindakan(payload) {
   try {
     lock.waitLock(10000);
     if (payload && payload.token) {
-      let auth = verifikasiSesi(payload.token, ["Super User"]);
+      let auth = verifikasiSesi(payload.token, ["Owner", "Super User"]);
       if (!auth.valid) return { success: false, message: auth.message };
     }
     const idTindakan = DB_CONFIG.DATABASE;
@@ -3320,7 +3320,7 @@ function simpanObatBaru(payload) {
   try {
     lock.waitLock(10000);
     if (payload && payload.token) {
-      let auth = verifikasiSesi(payload.token, ["Super User"]);
+      let auth = verifikasiSesi(payload.token, ["Owner", "Super User"]);
       if (!auth.valid) return { success: false, message: auth.message };
     }
     const idObat = DB_CONFIG.OBAT;
@@ -3391,7 +3391,7 @@ function simpanBmhpBaru(payload) {
   try {
     lock.waitLock(10000);
     if (payload && payload.token) {
-      let auth = verifikasiSesi(payload.token, ["Super User"]);
+      let auth = verifikasiSesi(payload.token, ["Owner", "Super User"]);
       if (!auth.valid) return { success: false, message: auth.message };
     }
     const idBmhp = DB_CONFIG.BMHP;
@@ -4306,7 +4306,7 @@ const SPREADSHEET_DEFINITIONS = {
           "headers": ["Nama_Pekerja", "Username", "Kategori_Role", "Password", "Status", "No_Registrasi", "No_HP", "Persen_JM_Dokter", "Email"],
           "formats": { "H": "0.0%" },
           "seedRows": [
-            ["Administrator Sistem", "admin", "Super User", "admin123", "Aktif", "-", "08123456789", "", "admin@sheldon.id"],
+            ["Administrator Sistem", "admin", "Owner", "admin123", "Aktif", "-", "08123456789", "", "admin@sheldon.id"],
             ["drg. Rahma Yulinda D, Sp. BMM", "rahma", "Dokter Gigi Spesialis", "1234", "Aktif", "503/SIP-DRG/001/2026", "081234567801", 0.65, "rahma@sheldon.id"],
             ["drg. Regyana Oktavaria", "regyana", "Dokter Gigi Umum", "1234", "Aktif", "503/SIP-DRG/002/2026", "081234567802", 0.40, "regyana@sheldon.id"],
             ["drg. Latifah Mulyana", "latifah", "Dokter Gigi Umum", "1234", "Aktif", "503/SIP-DRG/003/2026", "081234567803", 0.40, "latifah@sheldon.id"],
@@ -4315,7 +4315,7 @@ const SPREADSHEET_DEFINITIONS = {
             ["Howard Wolowitz", "howard", "Admin", "4444", "Aktif", "-", "081234567894", "", "howard@sheldon.id"]
           ],
           "validations": {
-            "C": ["Super User", "Owner", "Dokter Gigi Umum", "Dokter Gigi Spesialis", "Perawat Gigi", "Perawat Umum", "Admin", "Kasir", "Staff"],
+            "C": ["Owner", "Dokter Gigi Spesialis", "Dokter Gigi Umum", "Perawat Gigi", "Perawat Umum", "Admin", "Office"],
             "E": ["Aktif", "Tidak Aktif"]
           }
         },
@@ -4324,7 +4324,7 @@ const SPREADSHEET_DEFINITIONS = {
           "headers": ["ID_Aturan", "Role", "Nama_Pekerja", "Tipe_Kompensasi", "Tarif_Shift_1", "Tarif_Shift_2", "Gaji_Pokok_Bulanan", "Keterangan", "Status"],
           "formats": { "E": "#,##0", "F": "#,##0", "G": "#,##0" },
           "validations": {
-            "B": ["Super User", "Owner", "Dokter Gigi Spesialis", "Dokter Gigi Umum", "Perawat Gigi", "Perawat Umum", "Admin", "Kasir", "Staff"],
+            "B": ["Owner", "Dokter Gigi Spesialis", "Dokter Gigi Umum", "Perawat Gigi", "Perawat Umum", "Admin", "Office"],
             "D": ["Uang Harian Shift", "Gaji Bulanan Tetap", "Kombinasi Shift & Tindakan"],
             "I": ["Aktif", "Tidak Aktif"]
           },

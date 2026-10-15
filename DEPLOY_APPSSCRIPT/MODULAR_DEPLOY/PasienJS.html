@@ -52,10 +52,10 @@ function updateStatistikPasienTampilan() {
 // ========================================================
 function toggleFilterDataGanda() {
   const role = (window.activeUserRole || (window.currentUser && window.currentUser.role) || '').toString().toLowerCase();
-  const isSuperUser = (role.includes('super user') || role.includes('owner'));
+  const isSuperUser = (role.includes('owner') || role.includes('super user'));
   if (role && !isSuperUser) {
     if (typeof alertMsg === 'function') {
-      alertMsg('warning', 'Fitur Filter Data Ganda hanya dapat diakses oleh Super User.');
+      alertMsg('warning', 'Fitur Filter Data Ganda hanya dapat diakses oleh Owner.');
     }
     return;
   }
@@ -188,7 +188,7 @@ function renderTablePagePasien() {
           <td class="p-3 text-center">
               <div class="flex justify-center gap-1.5">
                   ${(window.activeUserRole && (window.activeUserRole.toLowerCase().includes('super user') || window.activeUserRole.toLowerCase().includes('owner') || window.activeUserRole.toLowerCase().includes('admin'))) ? `<button onclick="editPasien('${p.idPasien}')" class="px-3 py-1.5 bg-white border border-slate-200 hover:bg-slate-100 text-slate-600 rounded-lg text-[10px] font-bold transition-all shadow-sm">Edit</button>` : ''}
-                  ${(window.activeUserRole && (window.activeUserRole.toLowerCase().includes('super user') || window.activeUserRole.toLowerCase().includes('owner'))) ? `<button onclick="konfirmasiHapusPasien('${p.idPasien}', '${p.namaPasien}')" class="px-2.5 py-1.5 bg-rose-50 border border-rose-200 hover:bg-rose-500 hover:text-white text-rose-600 rounded-lg text-[10px] font-bold transition-all shadow-sm" title="Hapus Pasien (Super User)">🗑️ Hapus</button>` : ''}
+                  ${(window.activeUserRole && (window.activeUserRole.toLowerCase().includes('super user') || window.activeUserRole.toLowerCase().includes('owner'))) ? `<button onclick="konfirmasiHapusPasien('${p.idPasien}', '${p.namaPasien}')" class="px-2.5 py-1.5 bg-rose-50 border border-rose-200 hover:bg-rose-500 hover:text-white text-rose-600 rounded-lg text-[10px] font-bold transition-all shadow-sm" title="Hapus Pasien (Owner)">🗑️ Hapus</button>` : ''}
                   <button onclick="openHistoryEMR('${p.idPasien}')" class="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg text-[10px] font-bold transition-all shadow-sm border border-indigo-200" title="Lihat Riwayat Rekam Medis">🩺 History</button>
               </div>
           </td>

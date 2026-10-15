@@ -35,7 +35,7 @@ function verifikasiSesi(token, allowedRoles) {
     if (allowedRoles && allowedRoles.length > 0) {
       let roleLower = (user.role || "").toLowerCase();
       let matched = allowedRoles.some(r => r.toLowerCase() === roleLower);
-      if (!matched && roleLower !== "super user") {
+      if (!matched && roleLower !== "owner" && roleLower !== "super user") {
         return {
           valid: false,
           message: "Akses Ditolak: Peran '" + user.role + "' tidak memiliki hak akses untuk fungsi ini."

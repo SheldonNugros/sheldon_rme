@@ -325,7 +325,7 @@ function hapusPasienPermanen(payload) {
     
     // Verifikasi Otorisasi Sisi Server
     if (payload && payload.token) {
-      let auth = verifikasiSesi(payload.token, ["Super User"]);
+      let auth = verifikasiSesi(payload.token, ["Owner", "Super User"]);
       if (!auth.valid) return { success: false, message: auth.message };
     }
 
@@ -360,7 +360,7 @@ function hapusPasienPermanen(payload) {
     }
 
     sheet.getRange(targetRow, idStatus + 1).setValue("Nonaktif");
-    catatLog("Hapus Pasien", "Super User menonaktifkan pasien (Soft-Delete aman): " + targetNama + " (ID: " + payload.idPasien + ")", payload.currentUser);
+    catatLog("Hapus Pasien", "Owner menonaktifkan pasien (Soft-Delete aman): " + targetNama + " (ID: " + payload.idPasien + ")", payload.currentUser);
     return { success: true, message: "Data Pasien (" + targetNama + ") berhasil dinonaktifkan (Arsip Medis Aman)!" };
   } catch (e) {
     return { success: false, message: "Gagal menghapus pasien: " + e.message };

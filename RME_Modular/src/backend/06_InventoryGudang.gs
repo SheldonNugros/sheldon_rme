@@ -193,7 +193,7 @@ function simpanPembelianGudang(payload) {
     lock.waitLock(10000);
     
     if (payload && payload.token) {
-      let auth = verifikasiSesi(payload.token, ["Super User", "Admin", "Kasir"]);
+      let auth = verifikasiSesi(payload.token, ["Owner", "Super User", "Admin", "Kasir", "Office"]);
       if (!auth.valid) return { success: false, message: auth.message };
     }
     

@@ -6499,7 +6499,8 @@ function simpanPresensiShift(payload) {
           let tData = shTarif.getDataRange().getValues();
           for (let ti = 1; ti < tData.length; ti++) {
             if (String(tData[ti][2] || "").trim().toLowerCase() === namaPekerja.toLowerCase()) {
-              uangHarian = shift === "Shift 2" ? (Number(tData[ti][5]) || defaultTarif) : (Number(tData[ti][4]) || defaultTarif);
+              let rawVal = shift === "Shift 2" ? tData[ti][5] : tData[ti][4];
+              uangHarian = (rawVal !== "" && rawVal !== null && !isNaN(Number(rawVal))) ? Number(rawVal) : defaultTarif;
               break;
             }
           }

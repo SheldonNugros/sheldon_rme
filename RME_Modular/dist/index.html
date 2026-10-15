@@ -16035,7 +16035,8 @@ function renderInfoBmhp() {
     const getRate = (nama, shiftStr, defaultVal) => {
       let t = tarifList.find(x => String(x.namaPekerja || '').toLowerCase() === String(nama || '').toLowerCase());
       if (!t) return defaultVal;
-      return String(shiftStr).includes('2') ? (Number(t.tarifShift2) || defaultVal) : (Number(t.tarifShift1) || defaultVal);
+      let rawVal = String(shiftStr).includes('2') ? t.tarifShift2 : t.tarifShift1;
+      return (rawVal !== undefined && rawVal !== null && rawVal !== '' && !isNaN(Number(rawVal))) ? Number(rawVal) : defaultVal;
     };
 
     // Hitung ulang per pekerja
@@ -16047,7 +16048,8 @@ function renderInfoBmhp() {
       let isS2 = String(p.shift || '').includes('2');
       if (isS2) mapShift[nm].s2 += 1;
       else mapShift[nm].s1 += 1;
-      let nominal = Number(p.uangHarianDidapat) || getRate(nm, p.shift, String(p.role).toLowerCase().includes('dokter') ? 55000 : 45000);
+      let hasNominal = (p.uangHarianDidapat !== undefined && p.uangHarianDidapat !== null && p.uangHarianDidapat !== '' && !isNaN(Number(p.uangHarianDidapat)));
+      let nominal = hasNominal ? Number(p.uangHarianDidapat) : getRate(nm, p.shift, String(p.role).toLowerCase().includes('dokter') ? 55000 : 45000);
       p.uangHarianDidapat = nominal;
       mapShift[nm].uang += nominal;
     });

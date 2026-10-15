@@ -199,6 +199,10 @@
           <span class="text-base group-hover:scale-110 transition-transform">💰</span>
           <span class="flex-1">Payroll & Honor</span>
         </button>
+        <button onclick="switchMenu('absensi')" id="nav-absensi" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-300 hover:text-white hover:bg-slate-800/90 transition-all text-left group">
+          <span class="text-base group-hover:scale-110 transition-transform">📅</span>
+          <span class="flex-1">Absensi Pegawai</span>
+        </button>
         <button onclick="switchMenu('informasi')" id="nav-informasi" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-300 hover:text-white hover:bg-slate-800/90 transition-all text-left group">
           <span class="text-base group-hover:scale-110 transition-transform">ℹ️</span>
           <span class="flex-1">Informasi Tarif & Stok</span>
@@ -315,6 +319,7 @@
       <div id="view-kasir" class="module-view hidden"><?!= include('PembayaranView'); ?></div>
       <div id="view-riwayat-invoice" class="module-view hidden"><?!= include('RiwayatInvoiceView'); ?></div>
       <div id="view-payroll" class="module-view hidden"><?!= include('PayrollView'); ?></div>
+      <div id="view-absensi" class="module-view hidden"><?!= include('AbsensiView'); ?></div>
     </div>
   </main>
 </div>
@@ -333,7 +338,7 @@
     let r = role ? role.toString().toLowerCase() : '';
     
     // Reset semua navigasi ke hidden
-    ['nav-dashboard', 'nav-ai', 'nav-pasien', 'nav-rekam-medis', 'nav-surat', 'nav-database', 'nav-user-master', 'nav-inventory', 'nav-informasi', 'nav-kasir', 'nav-riwayat-invoice', 'nav-payroll'].forEach(id => {
+    ['nav-dashboard', 'nav-ai', 'nav-pasien', 'nav-rekam-medis', 'nav-surat', 'nav-database', 'nav-user-master', 'nav-inventory', 'nav-informasi', 'nav-kasir', 'nav-riwayat-invoice', 'nav-payroll', 'nav-absensi'].forEach(id => {
       let el = document.getElementById(id);
       if (el) el.classList.add('hidden');
     });
@@ -349,7 +354,7 @@
 
     // 1. SUPER USER / OWNER: Bisa membuka, edit, dan delete modul utama & manajemen user
     if (r === 'super user' || r === 'owner') {
-      ['nav-dashboard', 'nav-ai', 'nav-pasien', 'nav-rekam-medis', 'nav-surat', 'nav-database', 'nav-user-master', 'nav-inventory', 'nav-informasi', 'nav-kasir', 'nav-riwayat-invoice', 'nav-payroll'].forEach(id => {
+      ['nav-dashboard', 'nav-ai', 'nav-pasien', 'nav-rekam-medis', 'nav-surat', 'nav-database', 'nav-user-master', 'nav-inventory', 'nav-informasi', 'nav-kasir', 'nav-riwayat-invoice', 'nav-payroll', 'nav-absensi'].forEach(id => {
         let el = document.getElementById(id); if (el) el.classList.remove('hidden');
       });
       let navUM = document.getElementById('nav-user-master');
@@ -362,9 +367,9 @@
       if (btnFilterDuplikat) btnFilterDuplikat.classList.remove('hidden');
       switchMenu('dashboard');
     }
-    // 2. DOKTER GIGI SPESIALIS / UMUM: Rekam Medis & Odontogram, Form & Surat, Informasi, view Database Pasien, AI Clinical Insights
+    // 2. DOKTER GIGI SPESIALIS / UMUM: Rekam Medis & Odontogram, Form & Surat, Informasi, view Database Pasien, AI Clinical Insights, Absensi
     else if (r.includes('dokter')) {
-      ['nav-rekam-medis', 'nav-surat', 'nav-informasi', 'nav-pasien', 'nav-ai'].forEach(id => {
+      ['nav-rekam-medis', 'nav-surat', 'nav-informasi', 'nav-pasien', 'nav-ai', 'nav-absensi'].forEach(id => {
         let el = document.getElementById(id); if (el) el.classList.remove('hidden');
       });
       document.getElementById('section-transaksi').classList.remove('hidden');
@@ -373,9 +378,9 @@
       if (btnFilterDuplikat) btnFilterDuplikat.classList.add('hidden');
       switchMenu('rekam-medis');
     }
-    // 3. ADMIN: Database Pasien, Form & Surat, Informasi, Kasir & Billing, Riwayat Invoice, Payroll
+    // 3. ADMIN: Database Pasien, Form & Surat, Informasi, Kasir & Billing, Riwayat Invoice, Payroll, Absensi
     else if (r.includes('admin') || r.includes('perawat') || r.includes('kasir')) {
-      ['nav-pasien', 'nav-surat', 'nav-informasi', 'nav-kasir', 'nav-riwayat-invoice', 'nav-payroll'].forEach(id => {
+      ['nav-pasien', 'nav-surat', 'nav-informasi', 'nav-kasir', 'nav-riwayat-invoice', 'nav-payroll', 'nav-absensi'].forEach(id => {
         let el = document.getElementById(id); if (el) el.classList.remove('hidden');
       });
       document.getElementById('section-transaksi').classList.remove('hidden');
@@ -383,9 +388,9 @@
       if (btnFilterDuplikat) btnFilterDuplikat.classList.add('hidden');
       switchMenu('pasien');
     }
-    // 4. STAFF: Database Pasien (view-only), Informasi
+    // 4. STAFF: Database Pasien (view-only), Informasi, Absensi
     else if (r.includes('staff')) {
-      ['nav-pasien', 'nav-informasi'].forEach(id => {
+      ['nav-pasien', 'nav-informasi', 'nav-absensi'].forEach(id => {
         let el = document.getElementById(id); if (el) el.classList.remove('hidden');
       });
       document.getElementById('section-transaksi').classList.remove('hidden');
@@ -395,7 +400,7 @@
       switchMenu('pasien');
     }
     else {
-      ['nav-pasien', 'nav-informasi'].forEach(id => {
+      ['nav-pasien', 'nav-informasi', 'nav-absensi'].forEach(id => {
         let el = document.getElementById(id); if (el) el.classList.remove('hidden');
       });
       if (btnTambahPasien) btnTambahPasien.classList.add('hidden');
@@ -481,6 +486,7 @@
     if (menuId === 'informasi' && typeof initInformasiModule === 'function') initInformasiModule();
     if (menuId === 'surat' && typeof initSuratModule === 'function') initSuratModule();
     if (menuId === 'payroll' && typeof initPayrollModule === 'function') initPayrollModule();
+    if (menuId === 'absensi' && typeof initAbsensiModule === 'function') initAbsensiModule();
   
     document.getElementById('mainContentScroll').scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -720,6 +726,7 @@
 <?!= include('InformasiJS'); ?>
 <?!= include('AIInsightsJS'); ?>
 <?!= include('PayrollJS'); ?>
+<?!= include('AbsensiJS'); ?>
 <!-- MODAL SINKRONISASI GOOGLE APPS SCRIPT -->
 <div id="gasSyncModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[300] hidden flex items-center justify-center p-4 transition-opacity duration-300 opacity-0">
   <div class="bg-white p-6 md:p-8 rounded-3xl shadow-2xl w-full max-w-lg border border-slate-100" id="gasSyncModalContent">

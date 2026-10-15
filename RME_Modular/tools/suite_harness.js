@@ -303,7 +303,20 @@ var console = {
     rekamMedis: bulkSeed.rekamMedis,
     pembayaran: bulkSeed.pembayaran,
     jasaMedis: bulkSeed.jasaMedis,
-    surat: []
+    surat: [],
+    presensiHarian: [
+      { idPresensi: "ATT-20261015-001", tanggal: "15-10-2026", hari: "Kamis", shift: "Pagi", jamMulai: "10:00", jamSelesai: "15:00", idPekerja: "STF-001", namaPekerja: "Bernadette Rostenkowski", role: "Perawat", statusAbsensi: "Hadir", keterangan: "Tepat waktu", verifikator: "Admin" },
+      { idPresensi: "ATT-20261015-002", tanggal: "15-10-2026", hari: "Kamis", shift: "Pagi", jamMulai: "10:00", jamSelesai: "15:00", idPekerja: "STF-002", namaPekerja: "Howard Wolowitz", role: "Admin", statusAbsensi: "Hadir", keterangan: "Tepat waktu", verifikator: "Admin" }
+    ],
+    kalenderLibur: [
+      { tanggal: "01-01-2026", hari: "Kamis", kategoriLibur: "Libur Nasional", namaHariLibur: "Tahun Baru Masehi 2026", statusOperasional: "Tutup", keterangan: "Libur Nasional Kalender", dibuatOleh: "Sistem", waktuUpdate: "01-01-2026 00:00:00" },
+      { tanggal: "17-08-2026", hari: "Senin", kategoriLibur: "Libur Nasional", namaHariLibur: "Hari Kemerdekaan RI Ke-81", statusOperasional: "Tutup", keterangan: "Libur Nasional Kalender", dibuatOleh: "Sistem", waktuUpdate: "01-01-2026 00:00:00" },
+      { tanggal: "25-12-2026", hari: "Jumat", kategoriLibur: "Libur Nasional", namaHariLibur: "Hari Raya Natal", statusOperasional: "Tutup", keterangan: "Libur Nasional Kalender", dibuatOleh: "Sistem", waktuUpdate: "01-01-2026 00:00:00" }
+    ],
+    rekapBulananAbsensi: [
+      { periodeBulan: "Oktober 2026", namaPekerja: "Bernadette Rostenkowski", role: "Perawat", totalShiftPagi: 10, totalShiftSore: 8, totalHadir: 18, totalTidakHadir: 0, persentase: "100.0%", terakhirUpdate: "15-10-2026 15:00:00" },
+      { periodeBulan: "Oktober 2026", namaPekerja: "Howard Wolowitz", role: "Admin", totalShiftPagi: 12, totalShiftSore: 6, totalHadir: 18, totalTidakHadir: 0, persentase: "100.0%", terakhirUpdate: "15-10-2026 15:00:00" }
+    ]
   };
 
   window._mockDb = mockDb;
@@ -908,6 +921,136 @@ var console = {
         this._successHandler({
           success: true,
           message: "Status Payroll [" + (payload && payload.idPayroll ? payload.idPayroll : "") + "] berhasil diubah menjadi " + (payload && payload.statusTransfer ? payload.statusTransfer : "Paid") + "!"
+        });
+      }, 50);
+    }
+
+    getAbsensiModuleData(dateStr) {
+      setTimeout(() => {
+        let cleanDate = dateStr || "15-10-2026";
+        let parts = cleanDate.split('-');
+        let dObj = (parts[0].length === 4) 
+          ? new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10))
+          : new Date(parseInt(parts[2], 10), parseInt(parts[1], 10) - 1, parseInt(parts[0], 10));
+
+        const dayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+        let dIdx = dObj.getDay();
+        let dayName = dayNames[dIdx];
+        let isSun = (dIdx === 0);
+        let formattedDate = (parts[0].length === 4) ? (parts[2] + '-' + parts[1] + '-' + parts[0]) : cleanDate;
+
+        let tList = mockDb.tarifShift || [];
+        let isWorkerActive = function(t) {
+          let st = String(t.status || "Aktif").trim().toLowerCase();
+          return st !== "tidak aktif" && st !== "non aktif" && st !== "nonaktif" && st !== "inactive";
+        };
+        let activeTarif = tList.filter(isWorkerActive);
+
+        let kLibur = mockDb.kalenderLibur || [];
+        let foundHoliday = kLibur.find(h => h.tanggal === formattedDate);
+        let isLibur = isSun || Boolean(foundHoliday);
+        let infoLibur = foundHoliday || (isSun ? {
+          tanggal: formattedDate,
+          hari: "Minggu",
+          kategoriLibur: "Libur Rutin Minggu",
+          namaHariLibur: "Libur Rutin Akhir Pekan (Minggu)",
+          statusOperasional: "Tutup",
+          keterangan: "Klinik Libur Rutin Hari Minggu"
+        } : null);
+
+        let shiftSchedules = {
+          "Pagi": { jamMulai: "10:00", jamSelesai: (dIdx === 6 ? "14:00" : "15:00") },
+          "Sore": { jamMulai: (dIdx === 6 ? "14:00" : "16:00"), jamSelesai: (dIdx === 6 ? "18:00" : "20:00") }
+        };
+
+        this._successHandler({
+          success: true,
+          date: formattedDate,
+          dayName: dayName,
+          isMinggu: isSun,
+          isLibur: isLibur,
+          infoLibur: infoLibur,
+          shiftSchedules: shiftSchedules,
+          activeWorkers: activeTarif,
+          presensiHariIni: (mockDb.presensiHarian || []).filter(p => p.tanggal === formattedDate),
+          kalenderLibur: kLibur,
+          rekapBulanan: mockDb.rekapBulananAbsensi || []
+        });
+      }, 50);
+    }
+
+    simpanAbsensiShift(payload) {
+      setTimeout(() => {
+        if (!payload || !payload.records) {
+          this._successHandler({ success: false, message: "Data presensi kosong" });
+          return;
+        }
+        mockDb.presensiHarian = mockDb.presensiHarian || [];
+        let count = 0;
+        payload.records.forEach(r => {
+          let ex = mockDb.presensiHarian.find(p => 
+            p.tanggal === payload.tanggal && 
+            (p.shift || "").toLowerCase() === (payload.shift || "").toLowerCase() &&
+            (p.namaPekerja || "").toLowerCase() === (r.namaPekerja || "").toLowerCase()
+          );
+          let st = r.statusAbsensi === "Hadir" ? "Hadir" : "Tidak";
+          if (ex) {
+            ex.statusAbsensi = st;
+            ex.keterangan = r.keterangan || "";
+            ex.jamMulai = payload.jamMulai || "10:00";
+            ex.jamSelesai = payload.jamSelesai || "15:00";
+          } else {
+            mockDb.presensiHarian.push({
+              idPresensi: "ATT-" + String(Date.now()).slice(-6) + "-" + String(count + 1).padStart(3, '0'),
+              tanggal: payload.tanggal,
+              hari: payload.hari,
+              shift: payload.shift,
+              jamMulai: payload.jamMulai || "10:00",
+              jamSelesai: payload.jamSelesai || "15:00",
+              idPekerja: r.idPekerja || "STF-001",
+              namaPekerja: r.namaPekerja,
+              role: r.role || "Staff",
+              statusAbsensi: st,
+              keterangan: r.keterangan || "",
+              verifikator: payload.verifikator || "Admin"
+            });
+          }
+          count++;
+        });
+
+        this._successHandler({
+          success: true,
+          count: count,
+          message: "Presensi Shift " + (payload.shift || "") + " tanggal " + (payload.tanggal || "") + " (" + count + " pegawai) berhasil disimpan!"
+        });
+      }, 50);
+    }
+
+    simpanKalenderLibur(payload) {
+      setTimeout(() => {
+        if (!payload || !payload.tanggal) {
+          this._successHandler({ success: false, message: "Tanggal libur wajib diisi!" });
+          return;
+        }
+        mockDb.kalenderLibur = mockDb.kalenderLibur || [];
+        let ex = mockDb.kalenderLibur.find(h => h.tanggal === payload.tanggal);
+        if (ex) {
+          Object.assign(ex, payload);
+        } else {
+          mockDb.kalenderLibur.push(payload);
+        }
+        this._successHandler({
+          success: true,
+          message: "Hari libur [" + (payload.namaHariLibur || "") + "] tanggal " + payload.tanggal + " berhasil disimpan!"
+        });
+      }, 50);
+    }
+
+    setupAbsensiSpreadsheet() {
+      setTimeout(() => {
+        this._successHandler({
+          success: true,
+          message: "Spreadsheet RME Sheldon - 12 Presensi & Absensi Pegawai berhasil di-setup!"
         });
       }, 50);
     }
@@ -1586,7 +1729,7 @@ var console = {
     let r = role ? role.toString().toLowerCase() : '';
     
     // Reset semua navigasi ke hidden
-    ['nav-dashboard', 'nav-ai', 'nav-pasien', 'nav-rekam-medis', 'nav-surat', 'nav-database', 'nav-user-master', 'nav-inventory', 'nav-informasi', 'nav-kasir', 'nav-riwayat-invoice', 'nav-payroll'].forEach(id => {
+    ['nav-dashboard', 'nav-ai', 'nav-pasien', 'nav-rekam-medis', 'nav-surat', 'nav-database', 'nav-user-master', 'nav-inventory', 'nav-informasi', 'nav-kasir', 'nav-riwayat-invoice', 'nav-payroll', 'nav-absensi'].forEach(id => {
       let el = document.getElementById(id);
       if (el) el.classList.add('hidden');
     });
@@ -1602,7 +1745,7 @@ var console = {
 
     // 1. SUPER USER / OWNER: Bisa membuka, edit, dan delete modul utama & manajemen user
     if (r === 'super user' || r === 'owner') {
-      ['nav-dashboard', 'nav-ai', 'nav-pasien', 'nav-rekam-medis', 'nav-surat', 'nav-database', 'nav-user-master', 'nav-inventory', 'nav-informasi', 'nav-kasir', 'nav-riwayat-invoice', 'nav-payroll'].forEach(id => {
+      ['nav-dashboard', 'nav-ai', 'nav-pasien', 'nav-rekam-medis', 'nav-surat', 'nav-database', 'nav-user-master', 'nav-inventory', 'nav-informasi', 'nav-kasir', 'nav-riwayat-invoice', 'nav-payroll', 'nav-absensi'].forEach(id => {
         let el = document.getElementById(id); if (el) el.classList.remove('hidden');
       });
       let navUM = document.getElementById('nav-user-master');
@@ -1615,9 +1758,9 @@ var console = {
       if (btnFilterDuplikat) btnFilterDuplikat.classList.remove('hidden');
       switchMenu('dashboard');
     }
-    // 2. DOKTER GIGI SPESIALIS / UMUM: Rekam Medis & Odontogram, Form & Surat, Informasi, view Database Pasien, AI Clinical Insights
+    // 2. DOKTER GIGI SPESIALIS / UMUM: Rekam Medis & Odontogram, Form & Surat, Informasi, view Database Pasien, AI Clinical Insights, Absensi
     else if (r.includes('dokter')) {
-      ['nav-rekam-medis', 'nav-surat', 'nav-informasi', 'nav-pasien', 'nav-ai'].forEach(id => {
+      ['nav-rekam-medis', 'nav-surat', 'nav-informasi', 'nav-pasien', 'nav-ai', 'nav-absensi'].forEach(id => {
         let el = document.getElementById(id); if (el) el.classList.remove('hidden');
       });
       document.getElementById('section-transaksi').classList.remove('hidden');
@@ -1626,9 +1769,9 @@ var console = {
       if (btnFilterDuplikat) btnFilterDuplikat.classList.add('hidden');
       switchMenu('rekam-medis');
     }
-    // 3. ADMIN: Database Pasien, Form & Surat, Informasi, Kasir & Billing, Riwayat Invoice, Payroll
+    // 3. ADMIN: Database Pasien, Form & Surat, Informasi, Kasir & Billing, Riwayat Invoice, Payroll, Absensi
     else if (r.includes('admin') || r.includes('perawat') || r.includes('kasir')) {
-      ['nav-pasien', 'nav-surat', 'nav-informasi', 'nav-kasir', 'nav-riwayat-invoice', 'nav-payroll'].forEach(id => {
+      ['nav-pasien', 'nav-surat', 'nav-informasi', 'nav-kasir', 'nav-riwayat-invoice', 'nav-payroll', 'nav-absensi'].forEach(id => {
         let el = document.getElementById(id); if (el) el.classList.remove('hidden');
       });
       document.getElementById('section-transaksi').classList.remove('hidden');
@@ -1636,9 +1779,9 @@ var console = {
       if (btnFilterDuplikat) btnFilterDuplikat.classList.add('hidden');
       switchMenu('pasien');
     }
-    // 4. STAFF: Database Pasien (view-only), Informasi
+    // 4. STAFF: Database Pasien (view-only), Informasi, Absensi
     else if (r.includes('staff')) {
-      ['nav-pasien', 'nav-informasi'].forEach(id => {
+      ['nav-pasien', 'nav-informasi', 'nav-absensi'].forEach(id => {
         let el = document.getElementById(id); if (el) el.classList.remove('hidden');
       });
       document.getElementById('section-transaksi').classList.remove('hidden');
@@ -1648,7 +1791,7 @@ var console = {
       switchMenu('pasien');
     }
     else {
-      ['nav-pasien', 'nav-informasi'].forEach(id => {
+      ['nav-pasien', 'nav-informasi', 'nav-absensi'].forEach(id => {
         let el = document.getElementById(id); if (el) el.classList.remove('hidden');
       });
       if (btnTambahPasien) btnTambahPasien.classList.add('hidden');
@@ -1734,6 +1877,7 @@ var console = {
     if (menuId === 'informasi' && typeof initInformasiModule === 'function') initInformasiModule();
     if (menuId === 'surat' && typeof initSuratModule === 'function') initSuratModule();
     if (menuId === 'payroll' && typeof initPayrollModule === 'function') initPayrollModule();
+    if (menuId === 'absensi' && typeof initAbsensiModule === 'function') initAbsensiModule();
   
     document.getElementById('mainContentScroll').scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -12230,6 +12374,963 @@ function renderInfoBmhp() {
 
 
 
+// =========================================================================
+// MODUL PRESENSI & ABSENSI PEGAWAI - FRONTEND CONTROLLER (AbsensiJS.html)
+// =========================================================================
+
+window.AbsensiState = {
+  currentDate: '',       // Format YYYY-MM-DD
+  formattedDate: '',     // Format DD-MM-YYYY
+  currentDayName: '',    // Senin, Selasa, dst.
+  currentDayIndex: 1,    // 0=Minggu, 1=Senin, ..., 6=Sabtu
+  currentShift: 'Pagi',  // 'Pagi' atau 'Sore'
+  activeWorkers: [],     // Hanya pekerja yang berstatus Aktif
+  presensiHariIni: [],   // Presensi tersimpan di tanggal ini
+  kalenderLibur: [],     // Daftar hari libur
+  rekapBulanan: [],      // Data rekap kehadiran
+  attendanceMap: {},     // { [namaPekerja]: { status: 'Hadir'|'Tidak', keterangan: '' } }
+  isMinggu: false,
+  isLibur: false,
+  infoLibur: null,
+  spreadsheetUrl: ''
+};
+
+/**
+ * Inisialisasi Modul Absensi saat pertama kali dibuka dari menu.
+ */
+function initAbsensiModule() {
+  if (!window.AbsensiState.currentDate) {
+    let now = new Date();
+    let y = now.getFullYear();
+    let m = String(now.getMonth() + 1).padStart(2, '0');
+    let d = String(now.getDate()).padStart(2, '0');
+    window.AbsensiState.currentDate = y + '-' + m + '-' + d;
+  }
+  let datePicker = document.getElementById('absensiDatePicker');
+  if (datePicker) {
+    datePicker.value = window.AbsensiState.currentDate;
+  }
+  loadAbsensiData(window.AbsensiState.currentDate);
+}
+
+/**
+ * Beralih tab tampilan absensi (harian, rekap, libur).
+ */
+function switchTabAbsensi(tabKey) {
+  ['harian', 'rekap', 'libur'].forEach(k => {
+    let content = document.getElementById('tabContentAbsensi' + k.charAt(0).toUpperCase() + k.slice(1));
+    let btn = document.getElementById('tabBtnAbsensi' + k.charAt(0).toUpperCase() + k.slice(1));
+    if (content) {
+      if (k === tabKey) {
+        content.classList.remove('hidden');
+      } else {
+        content.classList.add('hidden');
+      }
+    }
+    if (btn) {
+      if (k === tabKey) {
+        btn.className = "tab-btn-absensi px-4 py-2 rounded-xl text-xs font-bold transition-all bg-indigo-600 text-white shadow-md shadow-indigo-600/30 flex items-center gap-2";
+      } else {
+        btn.className = "tab-btn-absensi px-4 py-2 rounded-xl text-xs font-bold transition-all bg-slate-800/60 text-slate-300 hover:text-white hover:bg-slate-800 flex items-center gap-2";
+      }
+    }
+  });
+
+  if (tabKey === 'rekap') {
+    renderRekapBulanan();
+  } else if (tabKey === 'libur') {
+    renderKalenderLibur();
+  }
+}
+
+/**
+ * Navigasi tanggal mundur/maju delta hari.
+ */
+function navigasiHariAbsensi(deltaDays) {
+  let cur = new Date(window.AbsensiState.currentDate || new Date());
+  cur.setDate(cur.getDate() + deltaDays);
+  let y = cur.getFullYear();
+  let m = String(cur.getMonth() + 1).padStart(2, '0');
+  let d = String(cur.getDate()).padStart(2, '0');
+  let newDateStr = y + '-' + m + '-' + d;
+  handleAbsensiDateChange(newDateStr);
+}
+
+function setTanggalAbsensiHariIni() {
+  let now = new Date();
+  let y = now.getFullYear();
+  let m = String(now.getMonth() + 1).padStart(2, '0');
+  let d = String(now.getDate()).padStart(2, '0');
+  let todayStr = y + '-' + m + '-' + d;
+  handleAbsensiDateChange(todayStr);
+}
+
+function handleAbsensiDateChange(newDateStr) {
+  if (!newDateStr) return;
+  window.AbsensiState.currentDate = newDateStr;
+  let datePicker = document.getElementById('absensiDatePicker');
+  if (datePicker) datePicker.value = newDateStr;
+  loadAbsensiData(newDateStr);
+}
+
+/**
+ * Memilih shift Pagi atau Sore dan memperbarui tombol & jadwal jam kerja.
+ */
+function pilihShiftAbsensi(shiftName) {
+  window.AbsensiState.currentShift = shiftName;
+  updateShiftSelectorUI();
+  renderAbsensiTable();
+}
+
+/**
+ * Mengupdate tampilan UI selector Shift (Jam shift Senin-Jumat vs Sabtu).
+ */
+function updateShiftSelectorUI() {
+  let dayIdx = window.AbsensiState.currentDayIndex; // 6 = Sabtu
+  let btnPagi = document.getElementById('btnShiftPagi');
+  let btnSore = document.getElementById('btnShiftSore');
+  let badgePagi = document.getElementById('badgeJamShiftPagi');
+  let badgeSore = document.getElementById('badgeJamShiftSore');
+
+  // Aturan Jadwal:
+  // Senin - Jumat : Pagi (10.00 - 15.00), Sore (16.00 - 20.00)
+  // Sabtu         : Pagi (10.00 - 14.00), Sore (14.00 - 18.00)
+  let jamPagi = (dayIdx === 6) ? "10.00 - 14.00" : "10.00 - 15.00";
+  let jamSore = (dayIdx === 6) ? "14.00 - 18.00" : "16.00 - 20.00";
+
+  if (badgePagi) badgePagi.innerText = jamPagi;
+  if (badgeSore) badgeSore.innerText = jamSore;
+
+  let isPagi = (window.AbsensiState.currentShift === 'Pagi');
+  if (btnPagi) {
+    if (isPagi) {
+      btnPagi.className = "px-4 py-2 rounded-lg text-xs font-bold transition-all bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-sm flex items-center gap-2";
+    } else {
+      btnPagi.className = "px-4 py-2 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-slate-200 flex items-center gap-2";
+    }
+  }
+
+  if (btnSore) {
+    if (!isPagi) {
+      btnSore.className = "px-4 py-2 rounded-lg text-xs font-bold transition-all bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 shadow-sm flex items-center gap-2";
+    } else {
+      btnSore.className = "px-4 py-2 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-slate-200 flex items-center gap-2";
+    }
+  }
+}
+
+/**
+ * Menghitung jadwal jam kerja saat ini.
+ */
+function getJadwalShiftCurrent() {
+  let dayIdx = window.AbsensiState.currentDayIndex;
+  let isPagi = (window.AbsensiState.currentShift === 'Pagi');
+  if (dayIdx === 6) { // Sabtu
+    return isPagi ? { jamMulai: "10:00", jamSelesai: "14:00", label: "10.00 - 14.00" } 
+                  : { jamMulai: "14:00", jamSelesai: "18:00", label: "14.00 - 18.00" };
+  } else { // Senin - Jumat
+    return isPagi ? { jamMulai: "10:00", jamSelesai: "15:00", label: "10.00 - 15.00" } 
+                  : { jamMulai: "16:00", jamSelesai: "20:00", label: "16.00 - 20.00" };
+  }
+}
+
+/**
+ * Memuat data absensi dari Google Apps Script Backend (getAbsensiModuleData).
+ */
+function loadAbsensiData(dateStr) {
+  let tbody = document.getElementById('tbodyAbsensiPegawai');
+  if (tbody) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="7" class="px-4 py-12 text-center text-slate-400">
+          <div class="inline-block animate-spin text-xl mb-2">⏳</div>
+          <p>Memuat daftar pegawai aktif & presensi shift...</p>
+        </td>
+      </tr>
+    `;
+  }
+
+  let formattedQueryDate = dateStr;
+  if (dateStr && dateStr.indexOf('-') !== -1 && dateStr.split('-')[0].length === 4) {
+    let p = dateStr.split('-');
+    formattedQueryDate = p[2] + '-' + p[1] + '-' + p[0];
+  }
+
+  if (typeof google !== 'undefined' && google.script && google.script.run) {
+    google.script.run
+      .withSuccessHandler(function(res) {
+        if (!res || !res.success) {
+          showToast('error', res && res.message ? res.message : 'Gagal memuat data absensi.');
+          return;
+        }
+        applyAbsensiDataToState(res);
+      })
+      .withFailureHandler(function(err) {
+        showToast('error', 'Koneksi backend gagal: ' + err.message);
+      })
+      .getAbsensiModuleData(formattedQueryDate);
+  } else {
+    // Mode Standalone / Test Harness Fallback
+    fallbackLoadAbsensiLocal(formattedQueryDate);
+  }
+}
+
+function refreshAbsensiData() {
+  loadAbsensiData(window.AbsensiState.currentDate);
+}
+
+/**
+ * Menyimpan data respon backend ke state dan merender UI.
+ */
+function applyAbsensiDataToState(res) {
+  window.AbsensiState.formattedDate = res.date || '';
+  window.AbsensiState.currentDayName = res.dayName || '';
+  window.AbsensiState.isMinggu = Boolean(res.isMinggu);
+  window.AbsensiState.isLibur = Boolean(res.isLibur);
+  window.AbsensiState.infoLibur = res.infoLibur || null;
+  window.AbsensiState.kalenderLibur = res.kalenderLibur || [];
+  window.AbsensiState.rekapBulanan = res.rekapBulanan || [];
+  window.AbsensiState.presensiHariIni = res.presensiHariIni || [];
+  window.AbsensiState.spreadsheetUrl = res.spreadsheetUrl || '';
+
+  // Hitung dayIndex dari date YYYY-MM-DD atau DD-MM-YYYY
+  if (window.AbsensiState.currentDate) {
+    let p = window.AbsensiState.currentDate.split('-');
+    let d = (p[0].length === 4)
+      ? new Date(parseInt(p[0], 10), parseInt(p[1], 10) - 1, parseInt(p[2], 10))
+      : new Date(parseInt(p[2], 10), parseInt(p[1], 10) - 1, parseInt(p[0], 10));
+    window.AbsensiState.currentDayIndex = d.getDay();
+  }
+
+  // Filter pekerja aktif: jika status pekerja "Tidak Aktif", mereka TIDAK MUNCUL di absen!
+  let rawWorkers = res.activeWorkers || [];
+  window.AbsensiState.activeWorkers = rawWorkers.filter(w => {
+    let st = String(w.status || "Aktif").trim().toLowerCase();
+    return st !== "tidak aktif" && st !== "non aktif" && st !== "nonaktif" && st !== "inactive";
+  });
+
+  // Tampilkan label tanggal & hari
+  let lbl = document.getElementById('labelHariTanggal');
+  if (lbl) {
+    lbl.innerText = window.AbsensiState.currentDayName + ', ' + window.AbsensiState.formattedDate;
+  }
+
+  // Tampilkan status banner libur operasional
+  updateOperasionalBannerUI();
+
+  // Update jadwal shift sesuai hari
+  updateShiftSelectorUI();
+
+  // Render tabel presensi
+  renderAbsensiTable();
+}
+
+/**
+ * Menampilkan status banner operasional (Minggu / Libur Nasional / Buka Normal).
+ */
+function updateOperasionalBannerUI() {
+  let badgeOperasional = document.getElementById('badgeStatusOperasional');
+  let banner = document.getElementById('bannerStatusLibur');
+  let bannerIcon = document.getElementById('bannerIconLibur');
+  let bannerJudul = document.getElementById('bannerJudulLibur');
+  let bannerKet = document.getElementById('bannerKeteranganLibur');
+
+  let isMinggu = window.AbsensiState.isMinggu;
+  let infoLibur = window.AbsensiState.infoLibur;
+
+  if (isMinggu) {
+    if (badgeOperasional) {
+      badgeOperasional.className = "px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-500/20 text-rose-300 border border-rose-400/30";
+      badgeOperasional.innerHTML = "🛑 Tutup (Libur Minggu)";
+    }
+    if (banner) {
+      banner.className = "mt-4 p-4 rounded-xl border bg-rose-950/40 border-rose-500/40 transition-all block";
+      if (bannerIcon) bannerIcon.innerText = "🛑";
+      if (bannerJudul) bannerJudul.innerText = "Hari Minggu: Klinik Libur Rutin";
+      if (bannerKet) bannerKet.innerText = "Sesuai jadwal klinik, hari Minggu libur operasional. Presensi shift default Tidak Hadir / Libur.";
+    }
+  } else if (infoLibur) {
+    let opStatus = infoLibur.statusOperasional || "Tutup";
+    let isTutup = (opStatus === "Tutup");
+    if (badgeOperasional) {
+      badgeOperasional.className = isTutup 
+        ? "px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-400/30"
+        : "px-2.5 py-0.5 rounded-full text-xs font-bold bg-sky-500/20 text-sky-300 border border-sky-400/30";
+      badgeOperasional.innerHTML = (isTutup ? "🏖️ " : "⚡ ") + opStatus + " (" + infoLibur.kategoriLibur + ")";
+    }
+    if (banner) {
+      banner.className = isTutup
+        ? "mt-4 p-4 rounded-xl border bg-amber-950/40 border-amber-500/40 transition-all block"
+        : "mt-4 p-4 rounded-xl border bg-sky-950/40 border-sky-500/40 transition-all block";
+      if (bannerIcon) bannerIcon.innerText = isTutup ? "🏖️" : "🏥";
+      if (bannerJudul) bannerJudul.innerText = infoLibur.namaHariLibur + " (" + opStatus + ")";
+      if (bannerKet) bannerKet.innerText = infoLibur.keterangan || ("Kategori: " + infoLibur.kategoriLibur + " - Status operasional klinik: " + opStatus);
+    }
+  } else {
+    if (badgeOperasional) {
+      badgeOperasional.className = "px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30";
+      badgeOperasional.innerHTML = "🟢 Buka Normal";
+    }
+    if (banner) {
+      banner.className = "mt-4 p-4 rounded-xl border hidden";
+    }
+  }
+}
+
+/**
+ * Render tabel presensi pegawai untuk shift terpilih.
+ * Status_Absensi strictly: 'Hadir' atau 'Tidak'.
+ */
+function renderAbsensiTable() {
+  let tbody = document.getElementById('tbodyAbsensiPegawai');
+  if (!tbody) return;
+
+  let workers = window.AbsensiState.activeWorkers || [];
+  let curShift = window.AbsensiState.currentShift;
+  let jadwal = getJadwalShiftCurrent();
+  let presensiSaved = window.AbsensiState.presensiHariIni || [];
+  let isSundayOrHoliday = (window.AbsensiState.isMinggu || (window.AbsensiState.infoLibur && window.AbsensiState.infoLibur.statusOperasional === 'Tutup'));
+
+  if (workers.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="7" class="px-4 py-8 text-center text-slate-400">
+          <p class="font-bold text-amber-300">Tidak ada pegawai aktif ditemukan di Sheet Pengaturan_Tarif_Shift.</p>
+          <p class="text-[11px] text-slate-500 mt-1">Pastikan nama pekerja telah terdaftar dan berstatus 'Aktif' di Master User & Role.</p>
+        </td>
+      </tr>
+    `;
+    updateAbsensiStats();
+    return;
+  }
+
+  // Map riwayat presensi yang sudah tersimpan untuk shift ini
+  let shiftRecords = presensiSaved.filter(p => (p.shift || '').toLowerCase() === curShift.toLowerCase());
+  let savedStatusMap = {};
+  shiftRecords.forEach(r => {
+    savedStatusMap[(r.namaPekerja || '').toLowerCase()] = {
+      status: r.statusAbsensi || 'Hadir',
+      keterangan: r.keterangan || ''
+    };
+  });
+
+  // Tampilkan status penyimpanan shift ini
+  let statSimpan = document.getElementById('statStatusTersimpan');
+  let statWaktu = document.getElementById('statWaktuSimpan');
+  if (shiftRecords.length > 0) {
+    if (statSimpan) statSimpan.innerHTML = '<span class="text-emerald-400">✅ Sudah Disimpan</span>';
+    if (statWaktu) statWaktu.innerText = 'Tersimpan ' + shiftRecords.length + ' pegawai';
+  } else {
+    if (statSimpan) statSimpan.innerHTML = '<span class="text-amber-400">⏳ Belum Disimpan</span>';
+    if (statWaktu) statWaktu.innerText = 'Draft belum ke sheet';
+  }
+
+  let htmlRows = '';
+  workers.forEach((w, idx) => {
+    let namaKey = (w.namaPekerja || '').toLowerCase();
+    
+    // Inisialisasi map input
+    if (!window.AbsensiState.attendanceMap[namaKey]) {
+      if (savedStatusMap[namaKey]) {
+        window.AbsensiState.attendanceMap[namaKey] = {
+          status: savedStatusMap[namaKey].status,
+          keterangan: savedStatusMap[namaKey].keterangan
+        };
+      } else {
+        // Default: jika hari Minggu / Libur Tutup -> 'Tidak', jika hari kerja -> 'Hadir'
+        window.AbsensiState.attendanceMap[namaKey] = {
+          status: isSundayOrHoliday ? 'Tidak' : 'Hadir',
+          keterangan: isSundayOrHoliday ? 'Libur Operasional' : ''
+        };
+      }
+    }
+
+    let curAtt = window.AbsensiState.attendanceMap[namaKey];
+    let isHadir = (curAtt.status === 'Hadir');
+
+    // Role badge color
+    let rBadge = "bg-slate-800 text-slate-300 border-slate-700";
+    let roleLower = (w.role || "").toLowerCase();
+    if (roleLower.includes("dokter")) {
+      rBadge = "bg-cyan-500/20 text-cyan-300 border-cyan-400/30";
+    } else if (roleLower.includes("perawat")) {
+      rBadge = "bg-emerald-500/20 text-emerald-300 border-emerald-400/30";
+    } else if (roleLower.includes("admin")) {
+      rBadge = "bg-amber-500/20 text-amber-300 border-amber-400/30";
+    }
+
+    htmlRows += `
+      <tr class="hover:bg-slate-800/40 transition-colors ${isHadir ? '' : 'bg-rose-950/10'}">
+        <td class="px-4 py-3 text-center text-slate-400 font-bold">${idx + 1}</td>
+        
+        <td class="px-4 py-3">
+          <div class="font-bold text-white text-xs">${escapeHtml(w.namaPekerja)}</div>
+          <div class="text-[10px] text-slate-400 font-normal">ID Aturan: ${escapeHtml(w.idAturan || '-')}</div>
+        </td>
+
+        <td class="px-4 py-3">
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-bold border ${rBadge}">
+            ${escapeHtml(w.role || 'Staf')}
+          </span>
+        </td>
+
+        <td class="px-4 py-3 font-semibold text-slate-300">
+          <div class="flex items-center gap-1.5">
+            <span class="text-xs">${curShift === 'Pagi' ? '☀️' : '🌙'}</span>
+            <span class="text-[11px]">${jadwal.label}</span>
+          </div>
+        </td>
+
+        <td class="px-4 py-3">
+          <!-- Status_Absensi strictly: (Hadir / Tidak) -->
+          <div class="relative">
+            <select onchange="updateWorkerAbsensi('${escapeHtml(w.namaPekerja)}', this.value)" 
+                    class="absensi-status-select w-full px-2.5 py-1.5 rounded-xl font-bold text-xs border focus:ring-2 focus:outline-none transition-all ${
+                      isHadir 
+                        ? 'bg-emerald-950/80 text-emerald-300 border-emerald-500/50 focus:ring-emerald-500' 
+                        : 'bg-rose-950/80 text-rose-300 border-rose-500/50 focus:ring-rose-500'
+                    }">
+              <option value="Hadir" ${isHadir ? 'selected' : ''}>🟢 Hadir</option>
+              <option value="Tidak" ${!isHadir ? 'selected' : ''}>🔴 Tidak</option>
+            </select>
+          </div>
+        </td>
+
+        <td class="px-4 py-3">
+          <input type="text" 
+                 value="${escapeHtml(curAtt.keterangan || '')}" 
+                 placeholder="${isHadir ? 'Tepat waktu / Tugas' : 'Alasan (Izin / Sakit / Libur)'}" 
+                 onchange="updateWorkerKeterangan('${escapeHtml(w.namaPekerja)}', this.value)"
+                 class="w-full bg-slate-950 border border-slate-700/80 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none">
+        </td>
+
+        <td class="px-4 py-3 text-center">
+          <button onclick="toggleWorkerAbsensi('${escapeHtml(w.namaPekerja)}')" 
+                  title="Klik untuk mengubah Hadir / Tidak"
+                  class="px-2.5 py-1 rounded-lg text-[10px] font-bold border transition-all ${
+                    isHadir 
+                      ? 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border-emerald-500/40' 
+                      : 'bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border-rose-500/40'
+                  }">
+            ${isHadir ? '✓ Hadir' : '✕ Tidak'}
+          </button>
+        </td>
+      </tr>
+    `;
+  });
+
+  tbody.innerHTML = htmlRows;
+  updateAbsensiStats();
+}
+
+/**
+ * Update nilai status absensi pekerja individual.
+ */
+function updateWorkerAbsensi(namaPekerja, val) {
+  let key = (namaPekerja || '').toLowerCase();
+  if (!window.AbsensiState.attendanceMap[key]) {
+    window.AbsensiState.attendanceMap[key] = { status: 'Hadir', keterangan: '' };
+  }
+  window.AbsensiState.attendanceMap[key].status = (val === 'Hadir' ? 'Hadir' : 'Tidak');
+  renderAbsensiTable();
+}
+
+/**
+ * Toggle cepat Hadir / Tidak untuk pekerja.
+ */
+function toggleWorkerAbsensi(namaPekerja) {
+  let key = (namaPekerja || '').toLowerCase();
+  let cur = window.AbsensiState.attendanceMap[key] ? window.AbsensiState.attendanceMap[key].status : 'Hadir';
+  updateWorkerAbsensi(namaPekerja, cur === 'Hadir' ? 'Tidak' : 'Hadir');
+}
+
+/**
+ * Update catatan keterangan pekerja.
+ */
+function updateWorkerKeterangan(namaPekerja, ket) {
+  let key = (namaPekerja || '').toLowerCase();
+  if (!window.AbsensiState.attendanceMap[key]) {
+    window.AbsensiState.attendanceMap[key] = { status: 'Hadir', keterangan: '' };
+  }
+  window.AbsensiState.attendanceMap[key].keterangan = String(ket || '').trim();
+}
+
+/**
+ * Aksi Cepat: Tandai Semua Hadir.
+ */
+function quickMarkAllHadir() {
+  (window.AbsensiState.activeWorkers || []).forEach(w => {
+    let key = (w.namaPekerja || '').toLowerCase();
+    if (!window.AbsensiState.attendanceMap[key]) {
+      window.AbsensiState.attendanceMap[key] = { status: 'Hadir', keterangan: '' };
+    }
+    window.AbsensiState.attendanceMap[key].status = 'Hadir';
+    if (window.AbsensiState.attendanceMap[key].keterangan === 'Libur Operasional') {
+      window.AbsensiState.attendanceMap[key].keterangan = '';
+    }
+  });
+  renderAbsensiTable();
+  showToast('info', 'Semua pegawai aktif ditandai Hadir pada Shift ' + window.AbsensiState.currentShift);
+}
+
+/**
+ * Aksi Cepat: Tandai Semua Tidak Hadir.
+ */
+function quickMarkAllTidak() {
+  (window.AbsensiState.activeWorkers || []).forEach(w => {
+    let key = (w.namaPekerja || '').toLowerCase();
+    if (!window.AbsensiState.attendanceMap[key]) {
+      window.AbsensiState.attendanceMap[key] = { status: 'Tidak', keterangan: '' };
+    }
+    window.AbsensiState.attendanceMap[key].status = 'Tidak';
+  });
+  renderAbsensiTable();
+  showToast('info', 'Semua status pegawai direset ke Tidak Hadir');
+}
+
+/**
+ * Update badge statistik ringkasan di atas tabel.
+ */
+function updateAbsensiStats() {
+  let workers = window.AbsensiState.activeWorkers || [];
+  let hadirCount = 0;
+  let tidakCount = 0;
+
+  workers.forEach(w => {
+    let key = (w.namaPekerja || '').toLowerCase();
+    let att = window.AbsensiState.attendanceMap[key];
+    if (att && att.status === 'Hadir') {
+      hadirCount++;
+    } else {
+      tidakCount++;
+    }
+  });
+
+  let elTotal = document.getElementById('statTotalPegawai');
+  let elHadir = document.getElementById('statTotalHadir');
+  let elTidak = document.getElementById('statTotalTidakHadir');
+
+  if (elTotal) elTotal.innerText = workers.length;
+  if (elHadir) elHadir.innerText = hadirCount;
+  if (elTidak) elTidak.innerText = tidakCount;
+}
+
+/**
+ * Menyimpan data Presensi Shift ke Spreadsheet 12 Presensi & Absensi Pegawai.
+ */
+function simpanAbsensiShiftCurrent() {
+  let workers = window.AbsensiState.activeWorkers || [];
+  if (workers.length === 0) {
+    showToast('warning', 'Tidak ada data pegawai aktif untuk disimpan.');
+    return;
+  }
+
+  let jadwal = getJadwalShiftCurrent();
+  let shiftName = window.AbsensiState.currentShift;
+  let records = [];
+
+  workers.forEach(w => {
+    let key = (w.namaPekerja || '').toLowerCase();
+    let att = window.AbsensiState.attendanceMap[key] || { status: 'Hadir', keterangan: '' };
+    records.push({
+      idPekerja: w.idAturan || ('STF-' + w.namaPekerja.substring(0, 3).toUpperCase()),
+      namaPekerja: w.namaPekerja,
+      role: w.role || 'Staff',
+      statusAbsensi: att.status === 'Hadir' ? 'Hadir' : 'Tidak',
+      keterangan: att.keterangan || ''
+    });
+  });
+
+  let payload = {
+    tanggal: window.AbsensiState.formattedDate,
+    hari: window.AbsensiState.currentDayName,
+    shift: shiftName,
+    jamMulai: jadwal.jamMulai,
+    jamSelesai: jadwal.jamSelesai,
+    records: records,
+    verifikator: window.activeNamaAccount || "Admin"
+  };
+
+  let btnSimpan = document.getElementById('btnSimpanAbsensi');
+  if (btnSimpan) {
+    btnSimpan.disabled = true;
+    btnSimpan.innerHTML = '<span>⏳</span> Menyimpan...';
+  }
+
+  if (typeof google !== 'undefined' && google.script && google.script.run) {
+    google.script.run
+      .withSuccessHandler(function(res) {
+        if (btnSimpan) {
+          btnSimpan.disabled = false;
+          btnSimpan.innerHTML = '<span>💾</span> Simpan Presensi Shift';
+        }
+        if (!res || !res.success) {
+          showToast('error', res && res.message ? res.message : 'Gagal menyimpan absensi.');
+          return;
+        }
+        showToast('success', res.message || 'Presensi shift berhasil disimpan!');
+        loadAbsensiData(window.AbsensiState.currentDate);
+      })
+      .withFailureHandler(function(err) {
+        if (btnSimpan) {
+          btnSimpan.disabled = false;
+          btnSimpan.innerHTML = '<span>💾</span> Simpan Presensi Shift';
+        }
+        showToast('error', 'Gagal menghubungi server: ' + err.message);
+      })
+      .simpanAbsensiShift(payload);
+  } else {
+    // Mode Standalone / Test Harness
+    setTimeout(function() {
+      if (btnSimpan) {
+        btnSimpan.disabled = false;
+        btnSimpan.innerHTML = '<span>💾</span> Simpan Presensi Shift';
+      }
+      showToast('success', 'Presensi Shift ' + shiftName + ' berhasil disimpan (Mode Lokal)!');
+      // Update data presensiHariIni di state
+      records.forEach(r => {
+        let existing = window.AbsensiState.presensiHariIni.find(x => 
+          (x.namaPekerja || '').toLowerCase() === r.namaPekerja.toLowerCase() && 
+          (x.shift || '').toLowerCase() === shiftName.toLowerCase()
+        );
+        if (existing) {
+          existing.statusAbsensi = r.statusAbsensi;
+          existing.keterangan = r.keterangan;
+        } else {
+          window.AbsensiState.presensiHariIni.push({
+            idPresensi: 'ATT-' + Date.now(),
+            tanggal: window.AbsensiState.formattedDate,
+            hari: window.AbsensiState.currentDayName,
+            shift: shiftName,
+            jamMulai: jadwal.jamMulai,
+            jamSelesai: jadwal.jamSelesai,
+            idPekerja: r.idPekerja,
+            namaPekerja: r.namaPekerja,
+            role: r.role,
+            statusAbsensi: r.statusAbsensi,
+            keterangan: r.keterangan,
+            verifikator: 'Admin'
+          });
+        }
+      });
+      renderAbsensiTable();
+    }, 100);
+  }
+}
+
+/**
+ * Render Tabel Rekap Kehadiran Bulanan.
+ */
+function renderRekapBulanan() {
+  let tbody = document.getElementById('tbodyRekapBulanan');
+  if (!tbody) return;
+
+  let rekap = window.AbsensiState.rekapBulanan || [];
+  let workers = window.AbsensiState.activeWorkers || [];
+
+  if (rekap.length === 0 && workers.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="9" class="px-4 py-8 text-center text-slate-400">Belum ada data rekap kehadiran bulanan.</td>
+      </tr>
+    `;
+    return;
+  }
+
+  // Gabungkan dengan pekerja aktif
+  let html = '';
+  workers.forEach((w, idx) => {
+    let found = rekap.find(r => (r.namaPekerja || '').toLowerCase() === (w.namaPekerja || '').toLowerCase());
+    let pagi = found ? found.totalShiftPagi : 0;
+    let sore = found ? found.totalShiftSore : 0;
+    let hadir = found ? found.totalHadir : (pagi + sore);
+    let tidak = found ? found.totalTidakHadir : 0;
+    let pct = found ? found.persentase : (hadir > 0 ? '100.0%' : '0%');
+
+    html += `
+      <tr class="hover:bg-slate-800/40 transition-colors">
+        <td class="px-4 py-3 text-center text-slate-400 font-bold">${idx + 1}</td>
+        <td class="px-4 py-3 font-bold text-white">${escapeHtml(w.namaPekerja)}</td>
+        <td class="px-4 py-3 text-slate-300">${escapeHtml(w.role || 'Staf')}</td>
+        <td class="px-4 py-3 text-center font-semibold text-amber-300">${pagi}</td>
+        <td class="px-4 py-3 text-center font-semibold text-indigo-300">${sore}</td>
+        <td class="px-4 py-3 text-center font-bold text-emerald-400">${hadir}</td>
+        <td class="px-4 py-3 text-center font-bold text-rose-400">${tidak}</td>
+        <td class="px-4 py-3 text-center font-bold text-cyan-300">${pct}</td>
+        <td class="px-4 py-3 text-center">
+          <button onclick="lihatDetailPresensiPegawai('${escapeHtml(w.namaPekerja)}')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-[11px] font-semibold border border-slate-700">
+            Detail
+          </button>
+        </td>
+      </tr>
+    `;
+  });
+
+  tbody.innerHTML = html;
+}
+
+function filterRekapBulanan(bulanVal) {
+  showToast('info', 'Menampilkan rekap kehadiran bulan: ' + bulanVal);
+}
+
+function lihatDetailPresensiPegawai(nama) {
+  showToast('info', 'Menampilkan rekap presensi untuk ' + nama);
+}
+
+/**
+ * Render Tabel Kalender Hari Libur & Operasional.
+ */
+function renderKalenderLibur() {
+  let tbody = document.getElementById('tbodyKalenderLibur');
+  if (!tbody) return;
+
+  let liburList = window.AbsensiState.kalenderLibur || [];
+  if (liburList.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="8" class="px-4 py-8 text-center text-slate-400">Belum ada data kalender libur terdaftar.</td>
+      </tr>
+    `;
+    return;
+  }
+
+  let html = '';
+  liburList.forEach((item, idx) => {
+    let opStatus = item.statusOperasional || 'Tutup';
+    let isTutup = (opStatus === 'Tutup');
+    let badgeOp = isTutup 
+      ? 'bg-rose-500/20 text-rose-300 border-rose-500/30' 
+      : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30';
+
+    html += `
+      <tr class="hover:bg-slate-800/40 transition-colors">
+        <td class="px-4 py-3 text-center text-slate-400 font-bold">${idx + 1}</td>
+        <td class="px-4 py-3 font-semibold text-white">${escapeHtml(item.tanggal)}</td>
+        <td class="px-4 py-3 text-slate-300">${escapeHtml(item.hari || '-')}</td>
+        <td class="px-4 py-3 font-bold text-amber-200">${escapeHtml(item.namaHariLibur)}</td>
+        <td class="px-4 py-3 text-slate-400">${escapeHtml(item.kategoriLibur)}</td>
+        <td class="px-4 py-3 text-center">
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-bold border ${badgeOp}">
+            ${escapeHtml(opStatus)}
+          </span>
+        </td>
+        <td class="px-4 py-3 text-slate-300 text-[11px]">${escapeHtml(item.keterangan || '-')}</td>
+        <td class="px-4 py-3 text-center">
+          <button onclick="editHariLiburManual('${escapeHtml(item.tanggal)}')" class="px-2 py-1 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 rounded text-[10px] font-bold">
+            Edit
+          </button>
+        </td>
+      </tr>
+    `;
+  });
+
+  tbody.innerHTML = html;
+}
+
+/**
+ * Modal Kelola Hari Libur & Operasional.
+ */
+function bukaModalKelolaLibur() {
+  let modal = document.getElementById('modalKelolaLibur');
+  if (modal) modal.classList.remove('hidden');
+  let inpTgl = document.getElementById('inputTglLibur');
+  if (inpTgl && window.AbsensiState.currentDate) {
+    inpTgl.value = window.AbsensiState.currentDate;
+  }
+}
+
+function tutupModalKelolaLibur() {
+  let modal = document.getElementById('modalKelolaLibur');
+  if (modal) modal.classList.add('hidden');
+}
+
+function editHariLiburManual(tgl) {
+  let liburList = window.AbsensiState.kalenderLibur || [];
+  let found = liburList.find(x => x.tanggal === tgl);
+  bukaModalKelolaLibur();
+  if (found) {
+    if (tgl.indexOf('-') !== -1) {
+      let p = tgl.split('-');
+      if (p[0].length === 2) {
+        document.getElementById('inputTglLibur').value = p[2] + '-' + p[1] + '-' + p[0];
+      }
+    }
+    document.getElementById('inputNamaLibur').value = found.namaHariLibur || '';
+    document.getElementById('inputKategoriLibur').value = found.kategoriLibur || 'Libur Khusus Klinik';
+    document.getElementById('inputStatusOperasional').value = found.statusOperasional || 'Tutup';
+    document.getElementById('inputKeteranganLibur').value = found.keterangan || '';
+  }
+}
+
+function handleSimpanHariLibur(e) {
+  if (e && e.preventDefault) e.preventDefault();
+
+  let tglVal = document.getElementById('inputTglLibur').value;
+  let namaLibur = document.getElementById('inputNamaLibur').value;
+  let kategori = document.getElementById('inputKategoriLibur').value;
+  let operasional = document.getElementById('inputStatusOperasional').value;
+  let ket = document.getElementById('inputKeteranganLibur').value;
+
+  if (!tglVal || !namaLibur) {
+    showToast('warning', 'Tanggal dan nama hari libur wajib diisi!');
+    return;
+  }
+
+  // Format ke DD-MM-YYYY
+  let parts = tglVal.split('-');
+  let tglFormatted = parts[2] + '-' + parts[1] + '-' + parts[0];
+
+  let payload = {
+    tanggal: tglFormatted,
+    namaHariLibur: namaLibur,
+    kategoriLibur: kategori,
+    statusOperasional: operasional,
+    keterangan: ket,
+    user: window.activeNamaAccount || "Admin"
+  };
+
+  let btnSubmit = document.getElementById('btnSubmitLibur');
+  if (btnSubmit) {
+    btnSubmit.disabled = true;
+    btnSubmit.innerText = 'Menyimpan...';
+  }
+
+  if (typeof google !== 'undefined' && google.script && google.script.run) {
+    google.script.run
+      .withSuccessHandler(function(res) {
+        if (btnSubmit) {
+          btnSubmit.disabled = false;
+          btnSubmit.innerText = 'Simpan Jadwal Libur';
+        }
+        if (!res || !res.success) {
+          showToast('error', res && res.message ? res.message : 'Gagal menyimpan hari libur.');
+          return;
+        }
+        showToast('success', res.message || 'Jadwal hari libur berhasil disimpan!');
+        tutupModalKelolaLibur();
+        loadAbsensiData(tglVal);
+      })
+      .withFailureHandler(function(err) {
+        if (btnSubmit) {
+          btnSubmit.disabled = false;
+          btnSubmit.innerText = 'Simpan Jadwal Libur';
+        }
+        showToast('error', 'Koneksi backend gagal: ' + err.message);
+      })
+      .simpanKalenderLibur(payload);
+  } else {
+    // Mode Standalone Fallback
+    setTimeout(function() {
+      if (btnSubmit) {
+        btnSubmit.disabled = false;
+        btnSubmit.innerText = 'Simpan Jadwal Libur';
+      }
+      showToast('success', 'Hari libur [' + namaLibur + '] berhasil disimpan!');
+      tutupModalKelolaLibur();
+      let ex = window.AbsensiState.kalenderLibur.find(x => x.tanggal === tglFormatted);
+      if (ex) {
+        Object.assign(ex, payload);
+      } else {
+        window.AbsensiState.kalenderLibur.push(payload);
+      }
+      loadAbsensiData(tglVal);
+    }, 100);
+  }
+}
+
+/**
+ * Membuka Spreadsheet 12 Presensi & Absensi Pegawai di tab baru.
+ */
+function bukaSpreadsheetAbsensi() {
+  if (window.AbsensiState.spreadsheetUrl) {
+    window.open(window.AbsensiState.spreadsheetUrl, '_blank');
+  } else {
+    showToast('info', 'Membuka Google Sheets Database RME...');
+  }
+}
+
+/**
+ * Fallback data lokal jika dijalankan di mode web standalone / test harness.
+ */
+function fallbackLoadAbsensiLocal(queryDate) {
+  let parts = queryDate.split('-');
+  let dObj = (parts[0].length === 4) 
+    ? new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10))
+    : new Date(parseInt(parts[2], 10), parseInt(parts[1], 10) - 1, parseInt(parts[0], 10));
+
+  const dayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+  let dIdx = dObj.getDay();
+  let dayName = dayNames[dIdx];
+  let isSun = (dIdx === 0);
+
+  // Ambil daftar pekerja dari PayrollState.tarifShift atau KlinikData.staff
+  let workers = [];
+  if (window.PayrollState && window.PayrollState.tarifShift && window.PayrollState.tarifShift.length > 0) {
+    workers = window.PayrollState.tarifShift;
+  } else if (window.KlinikData && window.KlinikData.staff) {
+    workers = window.KlinikData.staff.map((s, i) => ({
+      idAturan: "TARIF-" + String(i + 1).padStart(3, '0'),
+      namaPekerja: s.nama,
+      role: s.role,
+      status: "Aktif",
+      tarifShift1: 45000,
+      tarifShift2: 45000
+    }));
+  } else {
+    workers = [
+      { idAturan: "TARIF-001", namaPekerja: "drg. Rahma Yulinda D, Sp. BMM", role: "Dokter Gigi Spesialis", status: "Aktif" },
+      { idAturan: "TARIF-002", namaPekerja: "Bernadette Rostenkowski", role: "Perawat", status: "Aktif" },
+      { idAturan: "TARIF-003", namaPekerja: "Howard Wolowitz", role: "Admin", status: "Aktif" }
+    ];
+  }
+
+  // Filter HANYA pekerja Aktif
+  let activeW = workers.filter(w => {
+    let st = String(w.status || "Aktif").trim().toLowerCase();
+    return st !== "tidak aktif" && st !== "non aktif" && st !== "nonaktif" && st !== "inactive";
+  });
+
+  let mockRes = {
+    success: true,
+    date: queryDate,
+    dayName: dayName,
+    isMinggu: isSun,
+    isLibur: isSun,
+    infoLibur: isSun ? {
+      tanggal: queryDate,
+      hari: "Minggu",
+      kategoriLibur: "Libur Rutin Minggu",
+      namaHariLibur: "Libur Rutin Akhir Pekan (Minggu)",
+      statusOperasional: "Tutup",
+      keterangan: "Klinik Libur Rutin Hari Minggu"
+    } : null,
+    activeWorkers: activeW,
+    presensiHariIni: window.AbsensiState.presensiHariIni || [],
+    kalenderLibur: [
+      { tanggal: "01-01-2026", hari: "Kamis", namaHariLibur: "Tahun Baru 2026", kategoriLibur: "Libur Nasional", statusOperasional: "Tutup", keterangan: "Libur Nasional" },
+      { tanggal: "17-08-2026", hari: "Senin", namaHariLibur: "Hari Kemerdekaan RI", kategoriLibur: "Libur Nasional", statusOperasional: "Tutup", keterangan: "Libur Nasional" }
+    ],
+    rekapBulanan: [
+      { namaPekerja: "Bernadette Rostenkowski", role: "Perawat", totalShiftPagi: 10, totalShiftSore: 8, totalHadir: 18, totalTidakHadir: 0, persentase: "100.0%" },
+      { namaPekerja: "Howard Wolowitz", role: "Admin", totalShiftPagi: 12, totalShiftSore: 6, totalHadir: 18, totalTidakHadir: 0, persentase: "100.0%" }
+    ]
+  };
+
+  applyAbsensiDataToState(mockRes);
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+
+
   window.openGasSyncModal = function() {
     const modal = document.getElementById('gasSyncModal');
     const input = document.getElementById('inputGasUrl');
@@ -13460,6 +14561,128 @@ assert("PAYROLL-15: Skenario 11 - Pendaftaran Berhasil & Role Otomatis Sesuai Sh
 
 // Uji Skenario 12: ID_Aturan Terisi Otomatis dengan Format TARIF-XXX
 assert("PAYROLL-16: Skenario 12 - ID_Aturan Terisi Otomatis dengan Format TARIF-XXX", savedTarif && /^TARIF-\d{3,}$/.test(savedTarif.idAturan));
+
+// --- TEST: Sistem Presensi & Absensi Pegawai ---
+print("\n--- TEST: Sistem Presensi & Absensi Pegawai ---");
+
+// ABSENSI-1: Navigasi nav-absensi dan view-absensi tersedia dan dapat diakses
+var navAbsensi = document.getElementById('nav-absensi');
+var viewAbsensi = document.getElementById('view-absensi');
+assert("ABSENSI-1: Tombol Navigasi nav-absensi Tersedia di Workspace", navAbsensi !== null);
+assert("ABSENSI-1: Kontainer view-absensi Tersedia di HTML", viewAbsensi !== null);
+
+// Inisialisasi Modul Absensi
+initAbsensiModule();
+runAllTimers();
+assert("ABSENSI-1: State window.AbsensiState Terinisialisasi", window.AbsensiState !== undefined && window.AbsensiState !== null);
+
+// ABSENSI-2: Shift Schedule Logic Senin - Jumat (Pagi: 10:00 - 15:00, Sore: 16:00 - 20:00)
+handleAbsensiDateChange("2026-10-19"); // 19 Oktober 2026 adalah hari Senin
+runAllTimers();
+pilihShiftAbsensi('Pagi');
+var jadwalPagiSenin = getJadwalShiftCurrent();
+assert("ABSENSI-2: Shift Pagi Senin - Jumat Mulai Jam 10:00 Selesai 15:00", jadwalPagiSenin.jamMulai === "10:00" && jadwalPagiSenin.jamSelesai === "15:00");
+
+pilihShiftAbsensi('Sore');
+var jadwalSoreSenin = getJadwalShiftCurrent();
+assert("ABSENSI-2: Shift Sore Senin - Jumat Mulai Jam 16:00 Selesai 20:00", jadwalSoreSenin.jamMulai === "16:00" && jadwalSoreSenin.jamSelesai === "20:00");
+
+// ABSENSI-3: Shift Schedule Logic Sabtu (Pagi: 10:00 - 14:00, Sore: 14:00 - 18:00)
+handleAbsensiDateChange("2026-10-24"); // 24 Oktober 2026 adalah hari Sabtu
+runAllTimers();
+pilihShiftAbsensi('Pagi');
+var jadwalPagiSabtu = getJadwalShiftCurrent();
+assert("ABSENSI-3: Shift Pagi Hari Sabtu Mulai Jam 10:00 Selesai 14:00", jadwalPagiSabtu.jamMulai === "10:00" && jadwalPagiSabtu.jamSelesai === "14:00");
+
+pilihShiftAbsensi('Sore');
+var jadwalSoreSabtu = getJadwalShiftCurrent();
+assert("ABSENSI-3: Shift Sore Hari Sabtu Mulai Jam 14:00 Selesai 18:00", jadwalSoreSabtu.jamMulai === "14:00" && jadwalSoreSabtu.jamSelesai === "18:00");
+
+// ABSENSI-4: Hari Minggu Otomatis Libur Rutin
+handleAbsensiDateChange("2026-10-25"); // 25 Oktober 2026 adalah hari Minggu
+runAllTimers();
+assert("ABSENSI-4: Hari Minggu Terdeteksi isMinggu = true", window.AbsensiState.isMinggu === true);
+assert("ABSENSI-4: Hari Minggu Terdeteksi isLibur = true", window.AbsensiState.isLibur === true);
+assert("ABSENSI-4: Operasional Hari Minggu Otomatis Tutup (Libur Rutin)", window.AbsensiState.infoLibur && window.AbsensiState.infoLibur.statusOperasional === "Tutup");
+
+// ABSENSI-5: Pekerja dengan Status 'Tidak Aktif' di Pengaturan_Tarif_Shift TIDAK AKAN MUNCUL di Absen
+if (window._mockDb && window._mockDb.tarifShift) {
+  window._mockDb.tarifShift.push({
+    idAturan: "TARIF-998",
+    role: "Perawat",
+    namaPekerja: "Staf Aktif Terdaftar",
+    status: "Aktif"
+  });
+  window._mockDb.tarifShift.push({
+    idAturan: "TARIF-999",
+    role: "Perawat",
+    namaPekerja: "Staf Eks Tidak Aktif",
+    status: "Tidak Aktif"
+  });
+}
+if (window.PayrollState && window.PayrollState.tarifShift) {
+  window.PayrollState.tarifShift.push({
+    idAturan: "TARIF-998",
+    role: "Perawat",
+    namaPekerja: "Staf Aktif Terdaftar",
+    status: "Aktif"
+  });
+  window.PayrollState.tarifShift.push({
+    idAturan: "TARIF-999",
+    role: "Perawat",
+    namaPekerja: "Staf Eks Tidak Aktif",
+    status: "Tidak Aktif"
+  });
+}
+
+// Refresh data absensi
+handleAbsensiDateChange("2026-10-15");
+runAllTimers();
+var inactiveWorkerInAbsensi = (window.AbsensiState.activeWorkers || []).find(function(w) {
+  return w.namaPekerja === "Staf Eks Tidak Aktif";
+});
+var activeWorkerInAbsensi = (window.AbsensiState.activeWorkers || []).find(function(w) {
+  return w.namaPekerja === "Staf Aktif Terdaftar";
+});
+
+assert("ABSENSI-5: Pekerja Berstatus 'Tidak Aktif' TIDAK MUNCUL di Daftar Absen", inactiveWorkerInAbsensi === undefined);
+assert("ABSENSI-5: Pekerja Berstatus 'Aktif' MUNCUL di Daftar Absen", activeWorkerInAbsensi !== undefined);
+
+// ABSENSI-6: Status_Absensi Strictly Hanya Opsi (Hadir / Tidak)
+renderAbsensiTable();
+quickMarkAllHadir();
+var activeKey = "staf aktif terdaftar";
+assert("ABSENSI-6: Tandai Semua Hadir Menghasilkan Status 'Hadir'", window.AbsensiState.attendanceMap[activeKey] && window.AbsensiState.attendanceMap[activeKey].status === "Hadir");
+
+quickMarkAllTidak();
+assert("ABSENSI-6: Reset ke Tidak Hadir Menghasilkan Status 'Tidak'", window.AbsensiState.attendanceMap[activeKey] && window.AbsensiState.attendanceMap[activeKey].status === "Tidak");
+
+// Test toggle Hadir / Tidak
+toggleWorkerAbsensi("Staf Aktif Terdaftar");
+assert("ABSENSI-6: Toggle Status Mengubah Menjadi 'Hadir'", window.AbsensiState.attendanceMap[activeKey] && window.AbsensiState.attendanceMap[activeKey].status === "Hadir");
+
+// ABSENSI-7: Simpan Presensi Shift Menyimpan Data ke Presensi Harian
+simpanAbsensiShiftCurrent();
+runAllTimers();
+var savedShiftAtt = (window.AbsensiState.presensiHariIni || []).find(function(p) {
+  return (p.namaPekerja || '').toLowerCase() === "staf aktif terdaftar" && p.shift === window.AbsensiState.currentShift;
+});
+assert("ABSENSI-7: Simpan Presensi Shift Berhasil Mencatat Riwayat Kehadiran", savedShiftAtt !== undefined && savedShiftAtt.statusAbsensi === "Hadir");
+
+// ABSENSI-8: Fitur Tambah & Edit Manual Hari Libur (Kalender Libur)
+document.getElementById('inputTglLibur').value = "2026-11-20";
+document.getElementById('inputNamaLibur').value = "Hari Libur Khusus Klinik Sheldon";
+document.getElementById('inputKategoriLibur').value = "Libur Khusus Klinik";
+document.getElementById('inputStatusOperasional').value = "Tutup";
+document.getElementById('inputKeteranganLibur').value = "Sterilisasi Alat & Renovasi Minor";
+
+handleSimpanHariLibur();
+runAllTimers();
+var savedLibur = (window.AbsensiState.kalenderLibur || []).find(function(k) {
+  return k.tanggal === "20-11-2026";
+});
+assert("ABSENSI-8: Hari Libur Manual Berhasil Ditambahkan ke Kalender Libur", savedLibur !== undefined && savedLibur.namaHariLibur === "Hari Libur Khusus Klinik Sheldon");
+assert("ABSENSI-8: Status Operasional Hari Libur Tersimpan 'Tutup'", savedLibur && savedLibur.statusOperasional === "Tutup");
 
 // SUMMARY REPORT
 print("=================================================");

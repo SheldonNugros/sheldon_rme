@@ -20,6 +20,7 @@ const DB_CONFIG = {
   "ICD10": "19BRjI5Pya3GY-C2epylK0IsHTkYIhAszXw-UFDAzFwE",
   "ICD9": "19BRjI5Pya3GY-C2epylK0IsHTkYIhAszXw-UFDAzFwE",
   "PAYROLL": "1v6fSKLLokBNNXOJAS7A-7RKnI9YtHlcZbeCTsNmYjkk",
+  "ABSENSI": "",
   "SOURCE_BULK_2026": "1BaMZosOuB6eu5kV0sIiFMCLNBer1e4X7gibmBoKweV0"
 };
 
@@ -53,27 +54,27 @@ const ARCHIVE_CONFIG = {
 const ROLE_RULES = {
   "SUPER_USER": {
     roles: ["super user", "owner"],
-    allowedMenus: ["dashboard", "ai", "pasien", "rekam-medis", "surat", "database", "inventory", "informasi", "kasir", "riwayat-invoice", "payroll"],
+    allowedMenus: ["dashboard", "ai", "pasien", "rekam-medis", "surat", "database", "inventory", "informasi", "kasir", "riwayat-invoice", "payroll", "absensi"],
     defaultMenu: "dashboard"
   },
   "DOKTER_SPESIALIS": {
     roles: ["dokter gigi spesialis"],
-    allowedMenus: ["rekam-medis", "surat", "informasi", "pasien"],
+    allowedMenus: ["rekam-medis", "surat", "informasi", "pasien", "absensi"],
     defaultMenu: "rekam-medis"
   },
   "DOKTER_UMUM": {
     roles: ["dokter gigi umum", "dokter"],
-    allowedMenus: ["rekam-medis", "surat", "informasi", "pasien"],
+    allowedMenus: ["rekam-medis", "surat", "informasi", "pasien", "absensi"],
     defaultMenu: "rekam-medis"
   },
   "ADMIN": {
     roles: ["admin", "perawat umum", "perawat gigi", "kasir"],
-    allowedMenus: ["pasien", "surat", "informasi", "kasir", "riwayat-invoice", "payroll"],
+    allowedMenus: ["pasien", "surat", "informasi", "kasir", "riwayat-invoice", "payroll", "absensi"],
     defaultMenu: "pasien"
   },
   "STAFF": {
     roles: ["staff"],
-    allowedMenus: ["pasien", "informasi"],
+    allowedMenus: ["pasien", "informasi", "absensi"],
     defaultMenu: "pasien"
   }
 };

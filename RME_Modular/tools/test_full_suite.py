@@ -1414,6 +1414,128 @@ assert("PAYROLL-15: Skenario 11 - Pendaftaran Berhasil & Role Otomatis Sesuai Sh
 // Uji Skenario 12: ID_Aturan Terisi Otomatis dengan Format TARIF-XXX
 assert("PAYROLL-16: Skenario 12 - ID_Aturan Terisi Otomatis dengan Format TARIF-XXX", savedTarif && /^TARIF-\d{3,}$/.test(savedTarif.idAturan));
 
+// --- TEST: Sistem Presensi & Absensi Pegawai ---
+print("\n--- TEST: Sistem Presensi & Absensi Pegawai ---");
+
+// ABSENSI-1: Navigasi nav-absensi dan view-absensi tersedia dan dapat diakses
+var navAbsensi = document.getElementById('nav-absensi');
+var viewAbsensi = document.getElementById('view-absensi');
+assert("ABSENSI-1: Tombol Navigasi nav-absensi Tersedia di Workspace", navAbsensi !== null);
+assert("ABSENSI-1: Kontainer view-absensi Tersedia di HTML", viewAbsensi !== null);
+
+// Inisialisasi Modul Absensi
+initAbsensiModule();
+runAllTimers();
+assert("ABSENSI-1: State window.AbsensiState Terinisialisasi", window.AbsensiState !== undefined && window.AbsensiState !== null);
+
+// ABSENSI-2: Shift Schedule Logic Senin - Jumat (Pagi: 10:00 - 15:00, Sore: 16:00 - 20:00)
+handleAbsensiDateChange("2026-10-19"); // 19 Oktober 2026 adalah hari Senin
+runAllTimers();
+pilihShiftAbsensi('Pagi');
+var jadwalPagiSenin = getJadwalShiftCurrent();
+assert("ABSENSI-2: Shift Pagi Senin - Jumat Mulai Jam 10:00 Selesai 15:00", jadwalPagiSenin.jamMulai === "10:00" && jadwalPagiSenin.jamSelesai === "15:00");
+
+pilihShiftAbsensi('Sore');
+var jadwalSoreSenin = getJadwalShiftCurrent();
+assert("ABSENSI-2: Shift Sore Senin - Jumat Mulai Jam 16:00 Selesai 20:00", jadwalSoreSenin.jamMulai === "16:00" && jadwalSoreSenin.jamSelesai === "20:00");
+
+// ABSENSI-3: Shift Schedule Logic Sabtu (Pagi: 10:00 - 14:00, Sore: 14:00 - 18:00)
+handleAbsensiDateChange("2026-10-24"); // 24 Oktober 2026 adalah hari Sabtu
+runAllTimers();
+pilihShiftAbsensi('Pagi');
+var jadwalPagiSabtu = getJadwalShiftCurrent();
+assert("ABSENSI-3: Shift Pagi Hari Sabtu Mulai Jam 10:00 Selesai 14:00", jadwalPagiSabtu.jamMulai === "10:00" && jadwalPagiSabtu.jamSelesai === "14:00");
+
+pilihShiftAbsensi('Sore');
+var jadwalSoreSabtu = getJadwalShiftCurrent();
+assert("ABSENSI-3: Shift Sore Hari Sabtu Mulai Jam 14:00 Selesai 18:00", jadwalSoreSabtu.jamMulai === "14:00" && jadwalSoreSabtu.jamSelesai === "18:00");
+
+// ABSENSI-4: Hari Minggu Otomatis Libur Rutin
+handleAbsensiDateChange("2026-10-25"); // 25 Oktober 2026 adalah hari Minggu
+runAllTimers();
+assert("ABSENSI-4: Hari Minggu Terdeteksi isMinggu = true", window.AbsensiState.isMinggu === true);
+assert("ABSENSI-4: Hari Minggu Terdeteksi isLibur = true", window.AbsensiState.isLibur === true);
+assert("ABSENSI-4: Operasional Hari Minggu Otomatis Tutup (Libur Rutin)", window.AbsensiState.infoLibur && window.AbsensiState.infoLibur.statusOperasional === "Tutup");
+
+// ABSENSI-5: Pekerja dengan Status 'Tidak Aktif' di Pengaturan_Tarif_Shift TIDAK AKAN MUNCUL di Absen
+if (window._mockDb && window._mockDb.tarifShift) {
+  window._mockDb.tarifShift.push({
+    idAturan: "TARIF-998",
+    role: "Perawat",
+    namaPekerja: "Staf Aktif Terdaftar",
+    status: "Aktif"
+  });
+  window._mockDb.tarifShift.push({
+    idAturan: "TARIF-999",
+    role: "Perawat",
+    namaPekerja: "Staf Eks Tidak Aktif",
+    status: "Tidak Aktif"
+  });
+}
+if (window.PayrollState && window.PayrollState.tarifShift) {
+  window.PayrollState.tarifShift.push({
+    idAturan: "TARIF-998",
+    role: "Perawat",
+    namaPekerja: "Staf Aktif Terdaftar",
+    status: "Aktif"
+  });
+  window.PayrollState.tarifShift.push({
+    idAturan: "TARIF-999",
+    role: "Perawat",
+    namaPekerja: "Staf Eks Tidak Aktif",
+    status: "Tidak Aktif"
+  });
+}
+
+// Refresh data absensi
+handleAbsensiDateChange("2026-10-15");
+runAllTimers();
+var inactiveWorkerInAbsensi = (window.AbsensiState.activeWorkers || []).find(function(w) {
+  return w.namaPekerja === "Staf Eks Tidak Aktif";
+});
+var activeWorkerInAbsensi = (window.AbsensiState.activeWorkers || []).find(function(w) {
+  return w.namaPekerja === "Staf Aktif Terdaftar";
+});
+
+assert("ABSENSI-5: Pekerja Berstatus 'Tidak Aktif' TIDAK MUNCUL di Daftar Absen", inactiveWorkerInAbsensi === undefined);
+assert("ABSENSI-5: Pekerja Berstatus 'Aktif' MUNCUL di Daftar Absen", activeWorkerInAbsensi !== undefined);
+
+// ABSENSI-6: Status_Absensi Strictly Hanya Opsi (Hadir / Tidak)
+renderAbsensiTable();
+quickMarkAllHadir();
+var activeKey = "staf aktif terdaftar";
+assert("ABSENSI-6: Tandai Semua Hadir Menghasilkan Status 'Hadir'", window.AbsensiState.attendanceMap[activeKey] && window.AbsensiState.attendanceMap[activeKey].status === "Hadir");
+
+quickMarkAllTidak();
+assert("ABSENSI-6: Reset ke Tidak Hadir Menghasilkan Status 'Tidak'", window.AbsensiState.attendanceMap[activeKey] && window.AbsensiState.attendanceMap[activeKey].status === "Tidak");
+
+// Test toggle Hadir / Tidak
+toggleWorkerAbsensi("Staf Aktif Terdaftar");
+assert("ABSENSI-6: Toggle Status Mengubah Menjadi 'Hadir'", window.AbsensiState.attendanceMap[activeKey] && window.AbsensiState.attendanceMap[activeKey].status === "Hadir");
+
+// ABSENSI-7: Simpan Presensi Shift Menyimpan Data ke Presensi Harian
+simpanAbsensiShiftCurrent();
+runAllTimers();
+var savedShiftAtt = (window.AbsensiState.presensiHariIni || []).find(function(p) {
+  return (p.namaPekerja || '').toLowerCase() === "staf aktif terdaftar" && p.shift === window.AbsensiState.currentShift;
+});
+assert("ABSENSI-7: Simpan Presensi Shift Berhasil Mencatat Riwayat Kehadiran", savedShiftAtt !== undefined && savedShiftAtt.statusAbsensi === "Hadir");
+
+// ABSENSI-8: Fitur Tambah & Edit Manual Hari Libur (Kalender Libur)
+document.getElementById('inputTglLibur').value = "2026-11-20";
+document.getElementById('inputNamaLibur').value = "Hari Libur Khusus Klinik Sheldon";
+document.getElementById('inputKategoriLibur').value = "Libur Khusus Klinik";
+document.getElementById('inputStatusOperasional').value = "Tutup";
+document.getElementById('inputKeteranganLibur').value = "Sterilisasi Alat & Renovasi Minor";
+
+handleSimpanHariLibur();
+runAllTimers();
+var savedLibur = (window.AbsensiState.kalenderLibur || []).find(function(k) {
+  return k.tanggal === "20-11-2026";
+});
+assert("ABSENSI-8: Hari Libur Manual Berhasil Ditambahkan ke Kalender Libur", savedLibur !== undefined && savedLibur.namaHariLibur === "Hari Libur Khusus Klinik Sheldon");
+assert("ABSENSI-8: Status Operasional Hari Libur Tersimpan 'Tutup'", savedLibur && savedLibur.statusOperasional === "Tutup");
+
 // SUMMARY REPORT
 print("=================================================");
 var passedTotal = results.filter(r => r.passed).length;

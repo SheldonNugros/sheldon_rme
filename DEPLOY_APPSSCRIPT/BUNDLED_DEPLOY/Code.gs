@@ -27,6 +27,7 @@ const DB_CONFIG = {
   "ICD10": "19BRjI5Pya3GY-C2epylK0IsHTkYIhAszXw-UFDAzFwE",
   "ICD9": "19BRjI5Pya3GY-C2epylK0IsHTkYIhAszXw-UFDAzFwE",
   "PAYROLL": "1v6fSKLLokBNNXOJAS7A-7RKnI9YtHlcZbeCTsNmYjkk",
+  "ABSENSI": "",
   "SOURCE_BULK_2026": "1BaMZosOuB6eu5kV0sIiFMCLNBer1e4X7gibmBoKweV0"
 };
 
@@ -60,27 +61,27 @@ const ARCHIVE_CONFIG = {
 const ROLE_RULES = {
   "SUPER_USER": {
     roles: ["super user", "owner"],
-    allowedMenus: ["dashboard", "ai", "pasien", "rekam-medis", "surat", "database", "inventory", "informasi", "kasir", "riwayat-invoice", "payroll"],
+    allowedMenus: ["dashboard", "ai", "pasien", "rekam-medis", "surat", "database", "inventory", "informasi", "kasir", "riwayat-invoice", "payroll", "absensi"],
     defaultMenu: "dashboard"
   },
   "DOKTER_SPESIALIS": {
     roles: ["dokter gigi spesialis"],
-    allowedMenus: ["rekam-medis", "surat", "informasi", "pasien"],
+    allowedMenus: ["rekam-medis", "surat", "informasi", "pasien", "absensi"],
     defaultMenu: "rekam-medis"
   },
   "DOKTER_UMUM": {
     roles: ["dokter gigi umum", "dokter"],
-    allowedMenus: ["rekam-medis", "surat", "informasi", "pasien"],
+    allowedMenus: ["rekam-medis", "surat", "informasi", "pasien", "absensi"],
     defaultMenu: "rekam-medis"
   },
   "ADMIN": {
     roles: ["admin", "perawat umum", "perawat gigi", "kasir"],
-    allowedMenus: ["pasien", "surat", "informasi", "kasir", "riwayat-invoice", "payroll"],
+    allowedMenus: ["pasien", "surat", "informasi", "kasir", "riwayat-invoice", "payroll", "absensi"],
     defaultMenu: "pasien"
   },
   "STAFF": {
     roles: ["staff"],
-    allowedMenus: ["pasien", "informasi"],
+    allowedMenus: ["pasien", "informasi", "absensi"],
     defaultMenu: "pasien"
   }
 };
@@ -162,13 +163,15 @@ function handleApiRequest(action, params) {
         args = [params.username || params.user, params.password || params.pin || params.pass];
       } else if (action === "getRiwayatMedisByPasien") {
         args = [params.noRm || params.norm || params[0]];
-      } else if (action === "simpanPasienBaru" || action === "simpanRekamMedis" || action === "simpanKasirInvoice" || action === "simpanItemObat" || action === "simpanItemBMHP" || action === "simpanUserMaster" || action === "registrasiAkunBaru" || action === "simpanPresensiShift" || action === "simpanTarifShift" || action === "syncUserToPayrollTarifShift" || action === "updateStatusPayroll" || action === "importBulkDataSheldon2026") {
+      } else if (action === "simpanPasienBaru" || action === "simpanRekamMedis" || action === "simpanKasirInvoice" || action === "simpanItemObat" || action === "simpanItemBMHP" || action === "simpanUserMaster" || action === "registrasiAkunBaru" || action === "simpanPresensiShift" || action === "simpanTarifShift" || action === "syncUserToPayrollTarifShift" || action === "updateStatusPayroll" || action === "importBulkDataSheldon2026" || action === "simpanKalenderLibur" || action === "simpanAbsensiShift") {
         args = [params.payload || params];
+      } else if (action === "getAbsensiModuleData") {
+        args = [params.dateStr || params.tanggal || params[0] || ""];
       } else if (action === "generatePayrollPeriode") {
         args = [params.periodeBulan || params[0] || ""];
       } else if (action === "hapusUserMaster" || action === "aktifkanUserMaster") {
         args = [params.username || params[0], params.isPermanent || params.currentUser || params[1]];
-      } else if (action === "syncAllUsersToPayrollTarifShift" || action === "getPayrollModuleData" || action === "setupPayrollSpreadsheet") {
+      } else if (action === "syncAllUsersToPayrollTarifShift" || action === "getPayrollModuleData" || action === "setupPayrollSpreadsheet" || action === "setupAbsensiSpreadsheet") {
         args = [];
       } else {
         args = [params];
@@ -4518,6 +4521,63 @@ const SPREADSHEET_DEFINITIONS = {
           ]
         }
       ]
+    },
+    "ABSENSI": {
+      "title": "RME Sheldon - 12 Presensi & Absensi Pegawai",
+      "sheets": [
+        {
+          "name": "Presensi_Harian",
+          "headers": ["ID_Presensi", "Tanggal", "Hari", "Shift", "Jam_Mulai", "Jam_Selesai", "ID_Pekerja", "Nama_Pekerja", "Role", "Status_Absensi", "Keterangan", "Verifikator", "Waktu_Input"],
+          "formats": { "B": "dd-mm-yyyy", "E": "hh:mm", "F": "hh:mm", "M": "dd-mm-yyyy hh:mm:ss" },
+          "validations": {
+            "D": ["Pagi", "Sore"],
+            "J": ["Hadir", "Tidak"]
+          },
+          "seedRows": [
+            ["ATT-20261015-001", "15-10-2026", "Kamis", "Pagi", "10:00", "15:00", "USR-STF-001", "Bernadette Rostenkowski", "Perawat", "Hadir", "Tepat waktu", "Admin", "15-10-2026 10:05:00"],
+            ["ATT-20261015-002", "15-10-2026", "Kamis", "Pagi", "10:00", "15:00", "USR-ADM-001", "Howard Wolowitz", "Admin", "Hadir", "Tepat waktu", "Admin", "15-10-2026 10:02:00"],
+            ["ATT-20261015-003", "15-10-2026", "Kamis", "Pagi", "10:00", "15:00", "DRG-001", "drg. Rahma Yulinda D, Sp. BMM", "Dokter Spesialis", "Hadir", "Tepat waktu", "Admin", "15-10-2026 10:10:00"]
+          ]
+        },
+        {
+          "name": "Kalender_Hari_Libur",
+          "headers": ["Tanggal", "Hari", "Kategori_Libur", "Nama_Hari_Libur", "Status_Operasional", "Keterangan", "Dibuat_Oleh", "Waktu_Update"],
+          "formats": { "A": "dd-mm-yyyy", "H": "dd-mm-yyyy hh:mm:ss" },
+          "validations": {
+            "C": ["Libur Rutin Minggu", "Libur Nasional", "Cuti Bersama", "Libur Khusus Klinik"],
+            "E": ["Tutup", "Buka Terbatas", "Buka Normal"]
+          },
+          "seedRows": [
+            ["01-01-2026", "Kamis", "Libur Nasional", "Tahun Baru Masehi 2026", "Tutup", "Libur Nasional Kalender", "Sistem", "01-01-2026 00:00:00"],
+            ["16-01-2026", "Jumat", "Libur Nasional", "Isra Mi'raj Nabi Muhammad SAW", "Tutup", "Libur Nasional Kalender", "Sistem", "01-01-2026 00:00:00"],
+            ["17-02-2026", "Selasa", "Libur Nasional", "Tahun Baru Imlek 2577", "Tutup", "Libur Nasional Kalender", "Sistem", "01-01-2026 00:00:00"],
+            ["20-03-2026", "Jumat", "Libur Nasional", "Hari Suci Nyepi (Tahun Baru Saka 1948)", "Tutup", "Libur Nasional Kalender", "Sistem", "01-01-2026 00:00:00"],
+            ["21-03-2026", "Sabtu", "Libur Nasional", "Hari Raya Idul Fitri 1447 H (Hari ke-1)", "Tutup", "Libur Nasional Kalender", "Sistem", "01-01-2026 00:00:00"],
+            ["22-03-2026", "Minggu", "Libur Nasional", "Hari Raya Idul Fitri 1447 H (Hari ke-2)", "Tutup", "Libur Nasional Kalender", "Sistem", "01-01-2026 00:00:00"],
+            ["03-04-2026", "Jumat", "Libur Nasional", "Wafat Yesus Kristus", "Tutup", "Libur Nasional Kalender", "Sistem", "01-01-2026 00:00:00"],
+            ["01-05-2026", "Jumat", "Libur Nasional", "Hari Buruh Internasional", "Tutup", "Libur Nasional Kalender", "Sistem", "01-01-2026 00:00:00"],
+            ["14-05-2026", "Kamis", "Libur Nasional", "Kenaikan Yesus Kristus", "Tutup", "Libur Nasional Kalender", "Sistem", "01-01-2026 00:00:00"],
+            ["27-05-2026", "Rabu", "Libur Nasional", "Hari Raya Idul Adha 1447 H", "Tutup", "Libur Nasional Kalender", "Sistem", "01-01-2026 00:00:00"],
+            ["01-06-2026", "Senin", "Libur Nasional", "Hari Lahir Pancasila", "Tutup", "Libur Nasional Kalender", "Sistem", "01-01-2026 00:00:00"],
+            ["16-06-2026", "Selasa", "Libur Nasional", "Tahun Baru Islam 1448 H", "Tutup", "Libur Nasional Kalender", "Sistem", "01-01-2026 00:00:00"],
+            ["17-08-2026", "Senin", "Libur Nasional", "Hari Kemerdekaan RI Ke-81", "Tutup", "Libur Nasional Kalender", "Sistem", "01-01-2026 00:00:00"],
+            ["25-08-2026", "Selasa", "Libur Nasional", "Maulid Nabi Muhammad SAW", "Tutup", "Libur Nasional Kalender", "Sistem", "01-01-2026 00:00:00"],
+            ["25-12-2026", "Jumat", "Libur Nasional", "Hari Raya Natal", "Tutup", "Libur Nasional Kalender", "Sistem", "01-01-2026 00:00:00"]
+          ]
+        },
+        {
+          "name": "Rekap_Bulanan",
+          "headers": ["Periode_Bulan", "Nama_Pekerja", "Role", "Total_Shift_Pagi", "Total_Shift_Sore", "Total_Hadir", "Total_Tidak_Hadir", "Persentase_Kehadiran", "Terakhir_Diperbarui"],
+          "formats": { "H": "0.0%", "I": "dd-mm-yyyy hh:mm:ss" },
+          "validations": {
+            "C": ["Dokter Spesialis", "Dokter Gigi", "Perawat", "Admin", "Staff"]
+          },
+          "seedRows": [
+            ["Oktober 2026", "Bernadette Rostenkowski", "Perawat", 10, 8, 18, 0, "100.0%", "15-10-2026 15:00:00"],
+            ["Oktober 2026", "Howard Wolowitz", "Admin", 12, 6, 18, 0, "100.0%", "15-10-2026 15:00:00"]
+          ]
+        }
+      ]
     }
   };
 
@@ -4667,6 +4727,7 @@ function _findOrCreateSpreadsheetInFolder(key, title) {
     if (DB_CONFIG) DB_CONFIG[key] = ssId;
     prop.setProperty(propKey, ssId);
     if (key === "PAYROLL") prop.setProperty("RME_PAYROLL_SS_ID", ssId);
+    if (key === "ABSENSI") prop.setProperty("RME_ABSENSI_SS_ID", ssId);
   } catch (e) {}
 
   return { ss: ss, ssId: ssId, isBaru: isBaru, folderName: folder ? folder.getName() : "Root" };
@@ -5358,6 +5419,456 @@ function setupPayrollSpreadsheet() {
     };
   } catch (err) {
     return { success: false, message: "Gagal membuat/mengupdate spreadsheet Payroll: " + err.message };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+/**
+ * Helper: Mengambil atau membuat Spreadsheet 12 Presensi & Absensi Pegawai.
+ */
+function getSpreadsheetAbsensi_() {
+  const def = SPREADSHEET_DEFINITIONS["ABSENSI"];
+  const found = _findOrCreateSpreadsheetInFolder("ABSENSI", def.title);
+  return { ss: found.ss, ssId: found.ssId, url: found.ss.getUrl() };
+}
+
+/**
+ * Setup atau perbarui struktur Spreadsheet 12 Presensi & Absensi Pegawai.
+ */
+function setupAbsensiSpreadsheet() {
+  const lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(15000);
+    const def = SPREADSHEET_DEFINITIONS["ABSENSI"];
+    let found = _findOrCreateSpreadsheetInFolder("ABSENSI", def.title);
+    let ss = found.ss;
+    let ssId = found.ssId;
+    let isBaru = found.isBaru;
+
+    let firstSheet = ss.getSheets()[0];
+    def.sheets.forEach((shDef, idx) => {
+      let sheet = ss.getSheetByName(shDef.name);
+      if (!sheet) {
+        if (idx === 0 && isBaru && firstSheet) {
+          sheet = firstSheet;
+          sheet.setName(shDef.name);
+        } else {
+          sheet = ss.insertSheet(shDef.name, idx);
+        }
+      }
+
+      // Headers
+      if (shDef.headers) {
+        if (sheet.getLastRow() === 0) {
+          sheet.appendRow(shDef.headers);
+        } else {
+          sheet.getRange(1, 1, 1, shDef.headers.length).setValues([shDef.headers]);
+        }
+        sheet.getRange(1, 1, 1, shDef.headers.length)
+          .setFontWeight("bold")
+          .setBackground("#1e293b")
+          .setFontColor("#ffffff");
+        sheet.setFrozenRows(1);
+      }
+
+      // Seed Rows jika kosong
+      if (shDef.seedRows && shDef.seedRows.length > 0 && sheet.getLastRow() <= 1) {
+        sheet.getRange(2, 1, shDef.seedRows.length, shDef.seedRows[0].length).setValues(shDef.seedRows);
+      }
+
+      // Validasi Dropdown
+      if (shDef.validations) {
+        Object.keys(shDef.validations).forEach(colLetter => {
+          let listValues = shDef.validations[colLetter];
+          let rule = SpreadsheetApp.newDataValidation().requireValueInList(listValues, true).build();
+          sheet.getRange(colLetter + "2:" + colLetter + "1000").setDataValidation(rule);
+        });
+      }
+
+      // Format Angka & Tanggal
+      if (shDef.formats) {
+        Object.keys(shDef.formats).forEach(colLetter => {
+          sheet.getRange(colLetter + "2:" + colLetter + "1000").setNumberFormat(shDef.formats[colLetter]);
+        });
+      }
+    });
+
+    SpreadsheetApp.flush();
+    return {
+      success: true,
+      spreadsheetId: ssId,
+      url: ss.getUrl(),
+      message: (isBaru ? "Spreadsheet baru berhasil dibuat: " : "Spreadsheet berhasil di-update: ") + def.title + " (ID: " + ssId + ")"
+    };
+  } catch (err) {
+    return { success: false, message: "Gagal membuat/mengupdate spreadsheet Absensi: " + err.message };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+/**
+ * Mengambil data modul Absensi & Presensi:
+ * - Daftar nama pekerja aktif diambil dari Spreadsheet 06 Master User & Role sheet Pengaturan_Tarif_Shift.
+ *   (Jika status pekerja 'Tidak Aktif', pekerja tersebut diabaikan / tidak muncul di absen).
+ * - Shift Senin - Jumat: Pagi (10.00 - 15.00), Sore (16.00 - 20.00).
+ * - Shift Sabtu: Pagi (10.00 - 14.00), Sore (14.00 - 18.00).
+ * - Hari Minggu: Libur Rutin.
+ * - Hari Libur Nasional / Cuti Bersama: Diambil dari sheet Kalender_Hari_Libur (dan bisa diedit manual).
+ * - Riwayat Presensi pada tanggal yang dipilih.
+ */
+function getAbsensiModuleData(dateStr) {
+  try {
+    const absensiRef = getSpreadsheetAbsensi_();
+    const ssA = absensiRef.ss;
+    const ssId = absensiRef.ssId;
+
+    // 1. Parsing Tanggal & Hari
+    let now = new Date();
+    let targetDate = now;
+    if (dateStr) {
+      if (String(dateStr).indexOf('-') !== -1) {
+        let parts = String(dateStr).split('-');
+        if (parts[0].length === 4) {
+          // YYYY-MM-DD
+          targetDate = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+        } else {
+          // DD-MM-YYYY
+          targetDate = new Date(parseInt(parts[2], 10), parseInt(parts[1], 10) - 1, parseInt(parts[0], 10));
+        }
+      }
+    }
+    const dayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+    const dayIndex = targetDate.getDay();
+    const namaHari = dayNames[dayIndex];
+    const formattedDate = Utilities.formatDate(targetDate, "Asia/Jakarta", "dd-MM-yyyy");
+    const isMinggu = (dayIndex === 0);
+
+    // 2. Tentukan Jadwal Shift berdasarkan hari
+    let shiftSchedules = {
+      "Pagi": { jamMulai: "10:00", jamSelesai: (dayIndex === 6 ? "14:00" : "15:00") },
+      "Sore": { jamMulai: (dayIndex === 6 ? "14:00" : "16:00"), jamSelesai: (dayIndex === 6 ? "18:00" : "20:00") }
+    };
+
+    // 3. Ambil Kalender Hari Libur dari sheet Kalender_Hari_Libur
+    let kalenderLibur = [];
+    let isLiburNasional = false;
+    let infoLibur = null;
+    let shLibur = ssA.getSheetByName("Kalender_Hari_Libur");
+    if (shLibur && shLibur.getLastRow() > 1) {
+      let vLibur = shLibur.getRange(2, 1, shLibur.getLastRow() - 1, shLibur.getLastColumn()).getValues();
+      vLibur.forEach(r => {
+        let tglRaw = r[0];
+        let tglStr = "";
+        if (tglRaw instanceof Date) {
+          tglStr = Utilities.formatDate(tglRaw, "Asia/Jakarta", "dd-MM-yyyy");
+        } else {
+          tglStr = String(tglRaw || "").trim();
+        }
+        let item = {
+          tanggal: tglStr,
+          hari: String(r[1] || ""),
+          kategoriLibur: String(r[2] || ""),
+          namaHariLibur: String(r[3] || ""),
+          statusOperasional: String(r[4] || "Tutup"),
+          keterangan: String(r[5] || ""),
+          dibuatOleh: String(r[6] || ""),
+          waktuUpdate: String(r[7] || "")
+        };
+        kalenderLibur.push(item);
+        if (tglStr === formattedDate) {
+          isLiburNasional = true;
+          infoLibur = item;
+        }
+      });
+    }
+
+    if (isMinggu && !infoLibur) {
+      infoLibur = {
+        tanggal: formattedDate,
+        hari: "Minggu",
+        kategoriLibur: "Libur Rutin Minggu",
+        namaHariLibur: "Libur Rutin Akhir Pekan (Minggu)",
+        statusOperasional: "Tutup",
+        keterangan: "Klinik Libur Rutin Hari Minggu"
+      };
+    }
+
+    // 4. Ambil Daftar Pegawai dari Spreadsheet 06 Master User & Role sheet Pengaturan_Tarif_Shift
+    // Syarat Wajib: Pekerja dengan status "Tidak Aktif" TIDAK AKAN MUNCUL di absen!
+    const defM = SPREADSHEET_DEFINITIONS["MASTER"];
+    const foundM = _findOrCreateSpreadsheetInFolder("MASTER", defM.title);
+    const ssM = foundM.ss;
+    let shTarif = ssM.getSheetByName("Pengaturan_Tarif_Shift");
+    let activeWorkers = [];
+
+    // Fallback sync jika belum tersinkron
+    try {
+      if (typeof syncAllUsersToPayrollTarifShift === 'function') {
+        syncAllUsersToPayrollTarifShift();
+      }
+    } catch(eSync) {}
+
+    if (shTarif && shTarif.getLastRow() > 1) {
+      let vTarif = shTarif.getRange(2, 1, shTarif.getLastRow() - 1, shTarif.getLastColumn()).getValues();
+      vTarif.forEach(r => {
+        let rawNama = String(r[2] || "").trim();
+        let rawRole = String(r[1] || "").trim();
+        let rawStatus = String(r[8] || "Aktif").trim().toLowerCase();
+        let isInactive = (rawStatus === "tidak aktif" || rawStatus === "non aktif" || rawStatus === "nonaktif" || rawStatus === "inactive");
+
+        // HANYA pekerja yang AKTIF yang dimasukkan ke daftar absensi
+        if (rawNama !== "" && !isInactive) {
+          activeWorkers.push({
+            idAturan: String(r[0] || ""),
+            role: rawRole,
+            namaPekerja: rawNama,
+            tipeKompensasi: String(r[3] || ""),
+            tarifShift1: Number(r[4]) || 0,
+            tarifShift2: Number(r[5]) || 0,
+            gajiPokokBulanan: Number(r[6]) || 0,
+            status: "Aktif"
+          });
+        }
+      });
+    }
+
+    // 5. Ambil data Presensi yang sudah tersimpan untuk tanggal ini
+    let presensiHariIni = [];
+    let shPres = ssA.getSheetByName("Presensi_Harian");
+    if (shPres && shPres.getLastRow() > 1) {
+      let vPres = shPres.getRange(2, 1, shPres.getLastRow() - 1, shPres.getLastColumn()).getValues();
+      vPres.forEach(r => {
+        let tglPres = r[1];
+        let tglPresStr = (tglPres instanceof Date) ? Utilities.formatDate(tglPres, "Asia/Jakarta", "dd-MM-yyyy") : String(tglPres || "").trim();
+        if (tglPresStr === formattedDate) {
+          presensiHariIni.push({
+            idPresensi: String(r[0] || ""),
+            tanggal: tglPresStr,
+            hari: String(r[2] || ""),
+            shift: String(r[3] || ""),
+            jamMulai: String(r[4] || ""),
+            jamSelesai: String(r[5] || ""),
+            idPekerja: String(r[6] || ""),
+            namaPekerja: String(r[7] || ""),
+            role: String(r[8] || ""),
+            statusAbsensi: String(r[9] || "Hadir"),
+            keterangan: String(r[10] || ""),
+            verifikator: String(r[11] || ""),
+            waktuInput: String(r[12] || "")
+          });
+        }
+      });
+    }
+
+    // 6. Ambil Rekap Bulanan
+    let rekapBulanan = [];
+    let shRekap = ssA.getSheetByName("Rekap_Bulanan");
+    if (shRekap && shRekap.getLastRow() > 1) {
+      let vRekap = shRekap.getRange(2, 1, shRekap.getLastRow() - 1, shRekap.getLastColumn()).getValues();
+      vRekap.forEach(r => {
+        rekapBulanan.push({
+          periodeBulan: String(r[0] || ""),
+          namaPekerja: String(r[1] || ""),
+          role: String(r[2] || ""),
+          totalShiftPagi: Number(r[3]) || 0,
+          totalShiftSore: Number(r[4]) || 0,
+          totalHadir: Number(r[5]) || 0,
+          totalTidakHadir: Number(r[6]) || 0,
+          persentase: String(r[7] || "100%"),
+          terakhirUpdate: String(r[8] || "")
+        });
+      });
+    }
+
+    return {
+      success: true,
+      spreadsheetId: ssId,
+      spreadsheetUrl: ssA.getUrl(),
+      date: formattedDate,
+      dayName: namaHari,
+      isMinggu: isMinggu,
+      isLibur: (isMinggu || isLiburNasional),
+      infoLibur: infoLibur,
+      shiftSchedules: shiftSchedules,
+      activeWorkers: activeWorkers,
+      presensiHariIni: presensiHariIni,
+      kalenderLibur: kalenderLibur,
+      rekapBulanan: rekapBulanan
+    };
+  } catch (err) {
+    return { success: false, message: "Gagal memuat modul Absensi: " + err.message };
+  }
+}
+
+/**
+ * Menyimpan data presensi shift pegawai (Pagi atau Sore).
+ * Status absensi dibatasi: Hadir / Tidak.
+ */
+function simpanAbsensiShift(payload) {
+  const lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(15000);
+    const absensiRef = getSpreadsheetAbsensi_();
+    const ss = absensiRef.ss;
+    let sh = ss.getSheetByName("Presensi_Harian") || ss.insertSheet("Presensi_Harian");
+
+    const tanggal = String(payload.tanggal || Utilities.formatDate(new Date(), "Asia/Jakarta", "dd-MM-yyyy")).trim();
+    const hari = String(payload.hari || "Senin").trim();
+    const shift = String(payload.shift || "Pagi").trim();
+    const jamMulai = String(payload.jamMulai || "10:00").trim();
+    const jamSelesai = String(payload.jamSelesai || "15:00").trim();
+    const verifikator = String(payload.verifikator || "Admin").trim();
+    const waktuInput = Utilities.formatDate(new Date(), "Asia/Jakarta", "dd-MM-yyyy HH:mm:ss");
+
+    const records = Array.isArray(payload.records) ? payload.records : [payload];
+    if (records.length === 0) {
+      return { success: false, message: "Tidak ada baris data presensi yang dikirim." };
+    }
+
+    // Baca data yang ada untuk menghindari duplikasi
+    let existingValues = [];
+    if (sh.getLastRow() > 1) {
+      existingValues = sh.getRange(2, 1, sh.getLastRow() - 1, sh.getLastColumn()).getValues();
+    }
+
+    let savedCount = 0;
+    records.forEach(rec => {
+      let namaPekerja = String(rec.namaPekerja || "").trim();
+      if (!namaPekerja) return;
+
+      let idPekerja = String(rec.idPekerja || "STF-001").trim();
+      let role = String(rec.role || "Staff").trim();
+      let statusAbsensi = String(rec.statusAbsensi || "Hadir").trim();
+      // Validasi Ketat: Hanya 'Hadir' atau 'Tidak'
+      if (statusAbsensi !== "Hadir" && statusAbsensi !== "Tidak") {
+        statusAbsensi = (statusAbsensi.toLowerCase().indexOf("hadir") !== -1) ? "Hadir" : "Tidak";
+      }
+      let keterangan = String(rec.keterangan || "").trim();
+
+      // Cek apakah sudah ada baris (Tanggal, Shift, Nama_Pekerja)
+      let matchedRowIdx = -1;
+      for (let i = 0; i < existingValues.length; i++) {
+        let rowTgl = existingValues[i][1];
+        let rowTglStr = (rowTgl instanceof Date) ? Utilities.formatDate(rowTgl, "Asia/Jakarta", "dd-MM-yyyy") : String(rowTgl || "").trim();
+        let rowShift = String(existingValues[i][3] || "").trim();
+        let rowNama = String(existingValues[i][7] || "").trim();
+
+        if (rowTglStr === tanggal && rowShift.toLowerCase() === shift.toLowerCase() && rowNama.toLowerCase() === namaPekerja.toLowerCase()) {
+          matchedRowIdx = i + 2;
+          break;
+        }
+      }
+
+      if (matchedRowIdx !== -1) {
+        // Update baris yang sudah ada
+        sh.getRange(matchedRowIdx, 5).setValue(jamMulai);
+        sh.getRange(matchedRowIdx, 6).setValue(jamSelesai);
+        sh.getRange(matchedRowIdx, 9).setValue(role);
+        sh.getRange(matchedRowIdx, 10).setValue(statusAbsensi);
+        sh.getRange(matchedRowIdx, 11).setValue(keterangan);
+        sh.getRange(matchedRowIdx, 12).setValue(verifikator);
+        sh.getRange(matchedRowIdx, 13).setValue(waktuInput);
+      } else {
+        // Baris baru
+        let newId = "ATT-" + tanggal.replace(/[^0-9]/g, '') + "-" + String(sh.getLastRow()).padStart(3, '0');
+        sh.appendRow([
+          newId,
+          tanggal,
+          hari,
+          shift,
+          jamMulai,
+          jamSelesai,
+          idPekerja,
+          namaPekerja,
+          role,
+          statusAbsensi,
+          keterangan,
+          verifikator,
+          waktuInput
+        ]);
+      }
+      savedCount++;
+    });
+
+    SpreadsheetApp.flush();
+    return {
+      success: true,
+      count: savedCount,
+      message: "Presensi Shift " + shift + " tanggal " + tanggal + " (" + savedCount + " pegawai) berhasil disimpan!"
+    };
+  } catch (err) {
+    return { success: false, message: "Gagal menyimpan presensi shift: " + err.message };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+/**
+ * Menyimpan / memperbarui tanggal libur khusus, libur nasional, atau cuti bersama
+ * di sheet Kalender_Hari_Libur.
+ */
+function simpanKalenderLibur(payload) {
+  const lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(10000);
+    const absensiRef = getSpreadsheetAbsensi_();
+    const ss = absensiRef.ss;
+    let sh = ss.getSheetByName("Kalender_Hari_Libur") || ss.insertSheet("Kalender_Hari_Libur");
+
+    const tanggal = String(payload.tanggal || "").trim();
+    if (!tanggal) {
+      return { success: false, message: "Tanggal libur wajib diisi (format DD-MM-YYYY)." };
+    }
+
+    const namaHariLibur = String(payload.namaHariLibur || "Libur Klinik").trim();
+    const kategoriLibur = String(payload.kategoriLibur || "Libur Khusus Klinik").trim();
+    const statusOperasional = String(payload.statusOperasional || "Tutup").trim();
+    const keterangan = String(payload.keterangan || "").trim();
+    const dibuatOleh = String(payload.user || "Admin").trim();
+    const waktuUpdate = Utilities.formatDate(new Date(), "Asia/Jakarta", "dd-MM-yyyy HH:mm:ss");
+
+    // Hitung hari dari tanggal
+    let namaHari = String(payload.hari || "").trim();
+    if (!namaHari && tanggal.indexOf('-') !== -1) {
+      let p = tanggal.split('-');
+      let dObj = (p[0].length === 4) ? new Date(parseInt(p[0], 10), parseInt(p[1], 10) - 1, parseInt(p[2], 10)) : new Date(parseInt(p[2], 10), parseInt(p[1], 10) - 1, parseInt(p[0], 10));
+      const dayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+      namaHari = dayNames[dObj.getDay()] || "Senin";
+    }
+
+    // Cek apakah tanggal sudah terdaftar
+    let matchedRow = -1;
+    if (sh.getLastRow() > 1) {
+      let v = sh.getRange(2, 1, sh.getLastRow() - 1, 1).getValues();
+      for (let i = 0; i < v.length; i++) {
+        let curTgl = v[i][0];
+        let curTglStr = (curTgl instanceof Date) ? Utilities.formatDate(curTgl, "Asia/Jakarta", "dd-MM-yyyy") : String(curTgl || "").trim();
+        if (curTglStr === tanggal) {
+          matchedRow = i + 2;
+          break;
+        }
+      }
+    }
+
+    if (matchedRow !== -1) {
+      sh.getRange(matchedRow, 1, 1, 8).setValues([[
+        tanggal, namaHari, kategoriLibur, namaHariLibur, statusOperasional, keterangan, dibuatOleh, waktuUpdate
+      ]]);
+    } else {
+      sh.appendRow([
+        tanggal, namaHari, kategoriLibur, namaHariLibur, statusOperasional, keterangan, dibuatOleh, waktuUpdate
+      ]);
+    }
+
+    SpreadsheetApp.flush();
+    return {
+      success: true,
+      message: "Hari libur [" + namaHariLibur + "] tanggal " + tanggal + " berhasil disimpan!"
+    };
+  } catch (err) {
+    return { success: false, message: "Gagal menyimpan kalender libur: " + err.message };
   } finally {
     lock.releaseLock();
   }

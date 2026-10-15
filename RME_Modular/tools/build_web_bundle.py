@@ -314,7 +314,20 @@ mock_gas_script = '''
     rekamMedis: bulkSeed.rekamMedis,
     pembayaran: bulkSeed.pembayaran,
     jasaMedis: bulkSeed.jasaMedis,
-    surat: []
+    surat: [],
+    presensiHarian: [
+      { idPresensi: "ATT-20261015-001", tanggal: "15-10-2026", hari: "Kamis", shift: "Pagi", jamMulai: "10:00", jamSelesai: "15:00", idPekerja: "STF-001", namaPekerja: "Bernadette Rostenkowski", role: "Perawat", statusAbsensi: "Hadir", keterangan: "Tepat waktu", verifikator: "Admin" },
+      { idPresensi: "ATT-20261015-002", tanggal: "15-10-2026", hari: "Kamis", shift: "Pagi", jamMulai: "10:00", jamSelesai: "15:00", idPekerja: "STF-002", namaPekerja: "Howard Wolowitz", role: "Admin", statusAbsensi: "Hadir", keterangan: "Tepat waktu", verifikator: "Admin" }
+    ],
+    kalenderLibur: [
+      { tanggal: "01-01-2026", hari: "Kamis", kategoriLibur: "Libur Nasional", namaHariLibur: "Tahun Baru Masehi 2026", statusOperasional: "Tutup", keterangan: "Libur Nasional Kalender", dibuatOleh: "Sistem", waktuUpdate: "01-01-2026 00:00:00" },
+      { tanggal: "17-08-2026", hari: "Senin", kategoriLibur: "Libur Nasional", namaHariLibur: "Hari Kemerdekaan RI Ke-81", statusOperasional: "Tutup", keterangan: "Libur Nasional Kalender", dibuatOleh: "Sistem", waktuUpdate: "01-01-2026 00:00:00" },
+      { tanggal: "25-12-2026", hari: "Jumat", kategoriLibur: "Libur Nasional", namaHariLibur: "Hari Raya Natal", statusOperasional: "Tutup", keterangan: "Libur Nasional Kalender", dibuatOleh: "Sistem", waktuUpdate: "01-01-2026 00:00:00" }
+    ],
+    rekapBulananAbsensi: [
+      { periodeBulan: "Oktober 2026", namaPekerja: "Bernadette Rostenkowski", role: "Perawat", totalShiftPagi: 10, totalShiftSore: 8, totalHadir: 18, totalTidakHadir: 0, persentase: "100.0%", terakhirUpdate: "15-10-2026 15:00:00" },
+      { periodeBulan: "Oktober 2026", namaPekerja: "Howard Wolowitz", role: "Admin", totalShiftPagi: 12, totalShiftSore: 6, totalHadir: 18, totalTidakHadir: 0, persentase: "100.0%", terakhirUpdate: "15-10-2026 15:00:00" }
+    ]
   };
 
   window._mockDb = mockDb;
@@ -919,6 +932,136 @@ mock_gas_script = '''
         this._successHandler({
           success: true,
           message: "Status Payroll [" + (payload && payload.idPayroll ? payload.idPayroll : "") + "] berhasil diubah menjadi " + (payload && payload.statusTransfer ? payload.statusTransfer : "Paid") + "!"
+        });
+      }, 50);
+    }
+
+    getAbsensiModuleData(dateStr) {
+      setTimeout(() => {
+        let cleanDate = dateStr || "15-10-2026";
+        let parts = cleanDate.split('-');
+        let dObj = (parts[0].length === 4) 
+          ? new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10))
+          : new Date(parseInt(parts[2], 10), parseInt(parts[1], 10) - 1, parseInt(parts[0], 10));
+
+        const dayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+        let dIdx = dObj.getDay();
+        let dayName = dayNames[dIdx];
+        let isSun = (dIdx === 0);
+        let formattedDate = (parts[0].length === 4) ? (parts[2] + '-' + parts[1] + '-' + parts[0]) : cleanDate;
+
+        let tList = mockDb.tarifShift || [];
+        let isWorkerActive = function(t) {
+          let st = String(t.status || "Aktif").trim().toLowerCase();
+          return st !== "tidak aktif" && st !== "non aktif" && st !== "nonaktif" && st !== "inactive";
+        };
+        let activeTarif = tList.filter(isWorkerActive);
+
+        let kLibur = mockDb.kalenderLibur || [];
+        let foundHoliday = kLibur.find(h => h.tanggal === formattedDate);
+        let isLibur = isSun || Boolean(foundHoliday);
+        let infoLibur = foundHoliday || (isSun ? {
+          tanggal: formattedDate,
+          hari: "Minggu",
+          kategoriLibur: "Libur Rutin Minggu",
+          namaHariLibur: "Libur Rutin Akhir Pekan (Minggu)",
+          statusOperasional: "Tutup",
+          keterangan: "Klinik Libur Rutin Hari Minggu"
+        } : null);
+
+        let shiftSchedules = {
+          "Pagi": { jamMulai: "10:00", jamSelesai: (dIdx === 6 ? "14:00" : "15:00") },
+          "Sore": { jamMulai: (dIdx === 6 ? "14:00" : "16:00"), jamSelesai: (dIdx === 6 ? "18:00" : "20:00") }
+        };
+
+        this._successHandler({
+          success: true,
+          date: formattedDate,
+          dayName: dayName,
+          isMinggu: isSun,
+          isLibur: isLibur,
+          infoLibur: infoLibur,
+          shiftSchedules: shiftSchedules,
+          activeWorkers: activeTarif,
+          presensiHariIni: (mockDb.presensiHarian || []).filter(p => p.tanggal === formattedDate),
+          kalenderLibur: kLibur,
+          rekapBulanan: mockDb.rekapBulananAbsensi || []
+        });
+      }, 50);
+    }
+
+    simpanAbsensiShift(payload) {
+      setTimeout(() => {
+        if (!payload || !payload.records) {
+          this._successHandler({ success: false, message: "Data presensi kosong" });
+          return;
+        }
+        mockDb.presensiHarian = mockDb.presensiHarian || [];
+        let count = 0;
+        payload.records.forEach(r => {
+          let ex = mockDb.presensiHarian.find(p => 
+            p.tanggal === payload.tanggal && 
+            (p.shift || "").toLowerCase() === (payload.shift || "").toLowerCase() &&
+            (p.namaPekerja || "").toLowerCase() === (r.namaPekerja || "").toLowerCase()
+          );
+          let st = r.statusAbsensi === "Hadir" ? "Hadir" : "Tidak";
+          if (ex) {
+            ex.statusAbsensi = st;
+            ex.keterangan = r.keterangan || "";
+            ex.jamMulai = payload.jamMulai || "10:00";
+            ex.jamSelesai = payload.jamSelesai || "15:00";
+          } else {
+            mockDb.presensiHarian.push({
+              idPresensi: "ATT-" + String(Date.now()).slice(-6) + "-" + String(count + 1).padStart(3, '0'),
+              tanggal: payload.tanggal,
+              hari: payload.hari,
+              shift: payload.shift,
+              jamMulai: payload.jamMulai || "10:00",
+              jamSelesai: payload.jamSelesai || "15:00",
+              idPekerja: r.idPekerja || "STF-001",
+              namaPekerja: r.namaPekerja,
+              role: r.role || "Staff",
+              statusAbsensi: st,
+              keterangan: r.keterangan || "",
+              verifikator: payload.verifikator || "Admin"
+            });
+          }
+          count++;
+        });
+
+        this._successHandler({
+          success: true,
+          count: count,
+          message: "Presensi Shift " + (payload.shift || "") + " tanggal " + (payload.tanggal || "") + " (" + count + " pegawai) berhasil disimpan!"
+        });
+      }, 50);
+    }
+
+    simpanKalenderLibur(payload) {
+      setTimeout(() => {
+        if (!payload || !payload.tanggal) {
+          this._successHandler({ success: false, message: "Tanggal libur wajib diisi!" });
+          return;
+        }
+        mockDb.kalenderLibur = mockDb.kalenderLibur || [];
+        let ex = mockDb.kalenderLibur.find(h => h.tanggal === payload.tanggal);
+        if (ex) {
+          Object.assign(ex, payload);
+        } else {
+          mockDb.kalenderLibur.push(payload);
+        }
+        this._successHandler({
+          success: true,
+          message: "Hari libur [" + (payload.namaHariLibur || "") + "] tanggal " + payload.tanggal + " berhasil disimpan!"
+        });
+      }, 50);
+    }
+
+    setupAbsensiSpreadsheet() {
+      setTimeout(() => {
+        this._successHandler({
+          success: true,
+          message: "Spreadsheet RME Sheldon - 12 Presensi & Absensi Pegawai berhasil di-setup!"
         });
       }, 50);
     }

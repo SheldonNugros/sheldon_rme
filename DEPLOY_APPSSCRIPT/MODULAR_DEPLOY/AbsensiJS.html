@@ -129,17 +129,17 @@ function updateShiftSelectorUI() {
   let isPagi = (window.AbsensiState.currentShift === 'Pagi');
   if (btnPagi) {
     if (isPagi) {
-      btnPagi.className = "px-4 py-2 rounded-lg text-xs font-bold transition-all bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-sm flex items-center gap-2";
+      btnPagi.className = "px-4 py-2 rounded-lg text-xs font-bold transition-all bg-amber-500 text-white border border-amber-600 shadow-sm flex items-center gap-2";
     } else {
-      btnPagi.className = "px-4 py-2 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-slate-200 flex items-center gap-2";
+      btnPagi.className = "px-4 py-2 rounded-lg text-xs font-bold transition-all text-slate-600 hover:text-slate-900 flex items-center gap-2";
     }
   }
 
   if (btnSore) {
     if (!isPagi) {
-      btnSore.className = "px-4 py-2 rounded-lg text-xs font-bold transition-all bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 shadow-sm flex items-center gap-2";
+      btnSore.className = "px-4 py-2 rounded-lg text-xs font-bold transition-all bg-indigo-600 text-white border border-indigo-700 shadow-sm flex items-center gap-2";
     } else {
-      btnSore.className = "px-4 py-2 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-slate-200 flex items-center gap-2";
+      btnSore.className = "px-4 py-2 rounded-lg text-xs font-bold transition-all text-slate-600 hover:text-slate-900 flex items-center gap-2";
     }
   }
 }
@@ -229,7 +229,11 @@ function applyAbsensiDataToState(res) {
 
   // Filter pekerja aktif: jika status pekerja "Tidak Aktif", mereka TIDAK MUNCUL di absen!
   let rawWorkers = res.activeWorkers || [];
-  window.AbsensiState.activeWorkers = rawWorkers.filter(w => {
+  window.AbsensiState.activeWorkers = rawWorkers.map(w => {
+    let cleanNama = (w.namaPekerja || w.nama || w.namaLengkap || w.namaPegawai || w.nama_pekerja || '').trim();
+    return Object.assign({}, w, { namaPekerja: cleanNama });
+  }).filter(w => {
+    if (!w.namaPekerja) return false;
     let st = String(w.status || "Aktif").trim().toLowerCase();
     return st !== "tidak aktif" && st !== "non aktif" && st !== "nonaktif" && st !== "inactive";
   });
@@ -265,35 +269,47 @@ function updateOperasionalBannerUI() {
 
   if (isMinggu) {
     if (badgeOperasional) {
-      badgeOperasional.className = "px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-500/20 text-rose-300 border border-rose-400/30";
+      badgeOperasional.className = "px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-800 border border-rose-300";
       badgeOperasional.innerHTML = "🛑 Tutup (Libur Minggu)";
     }
     if (banner) {
-      banner.className = "mt-4 p-4 rounded-xl border bg-rose-950/40 border-rose-500/40 transition-all block";
+      banner.className = "mt-4 p-4 rounded-xl border bg-rose-50 border-rose-200 transition-all block";
       if (bannerIcon) bannerIcon.innerText = "🛑";
-      if (bannerJudul) bannerJudul.innerText = "Hari Minggu: Klinik Libur Rutin";
-      if (bannerKet) bannerKet.innerText = "Sesuai jadwal klinik, hari Minggu libur operasional. Presensi shift default Tidak Hadir / Libur.";
+      if (bannerJudul) {
+        bannerJudul.className = "text-sm font-bold text-rose-900";
+        bannerJudul.innerText = "Hari Minggu: Klinik Libur Rutin";
+      }
+      if (bannerKet) {
+        bannerKet.className = "text-xs text-rose-700 mt-0.5";
+        bannerKet.innerText = "Sesuai jadwal klinik, hari Minggu libur operasional. Presensi shift default Tidak Hadir.";
+      }
     }
   } else if (infoLibur) {
     let opStatus = infoLibur.statusOperasional || "Tutup";
     let isTutup = (opStatus === "Tutup");
     if (badgeOperasional) {
       badgeOperasional.className = isTutup 
-        ? "px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-400/30"
-        : "px-2.5 py-0.5 rounded-full text-xs font-bold bg-sky-500/20 text-sky-300 border border-sky-400/30";
+        ? "px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-300"
+        : "px-2.5 py-0.5 rounded-full text-xs font-bold bg-sky-100 text-sky-800 border border-sky-300";
       badgeOperasional.innerHTML = (isTutup ? "🏖️ " : "⚡ ") + opStatus + " (" + infoLibur.kategoriLibur + ")";
     }
     if (banner) {
       banner.className = isTutup
-        ? "mt-4 p-4 rounded-xl border bg-amber-950/40 border-amber-500/40 transition-all block"
-        : "mt-4 p-4 rounded-xl border bg-sky-950/40 border-sky-500/40 transition-all block";
+        ? "mt-4 p-4 rounded-xl border bg-amber-50 border-amber-200 transition-all block"
+        : "mt-4 p-4 rounded-xl border bg-sky-50 border-sky-200 transition-all block";
       if (bannerIcon) bannerIcon.innerText = isTutup ? "🏖️" : "🏥";
-      if (bannerJudul) bannerJudul.innerText = infoLibur.namaHariLibur + " (" + opStatus + ")";
-      if (bannerKet) bannerKet.innerText = infoLibur.keterangan || ("Kategori: " + infoLibur.kategoriLibur + " - Status operasional klinik: " + opStatus);
+      if (bannerJudul) {
+        bannerJudul.className = isTutup ? "text-sm font-bold text-amber-900" : "text-sm font-bold text-sky-900";
+        bannerJudul.innerText = infoLibur.namaHariLibur + " (" + opStatus + ")";
+      }
+      if (bannerKet) {
+        bannerKet.className = isTutup ? "text-xs text-amber-700 mt-0.5" : "text-xs text-sky-700 mt-0.5";
+        bannerKet.innerText = infoLibur.keterangan || ("Kategori: " + infoLibur.kategoriLibur + " - Status operasional klinik: " + opStatus);
+      }
     }
   } else {
     if (badgeOperasional) {
-      badgeOperasional.className = "px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30";
+      badgeOperasional.className = "px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300";
       badgeOperasional.innerHTML = "🟢 Buka Normal";
     }
     if (banner) {
@@ -305,6 +321,7 @@ function updateOperasionalBannerUI() {
 /**
  * Render tabel presensi pegawai untuk shift terpilih.
  * Status_Absensi strictly: 'Hadir' atau 'Tidak'.
+ * Default: 'Tidak' (Tidak Hadir).
  */
 function renderAbsensiTable() {
   let tbody = document.getElementById('tbodyAbsensiPegawai');
@@ -314,13 +331,12 @@ function renderAbsensiTable() {
   let curShift = window.AbsensiState.currentShift;
   let jadwal = getJadwalShiftCurrent();
   let presensiSaved = window.AbsensiState.presensiHariIni || [];
-  let isSundayOrHoliday = (window.AbsensiState.isMinggu || (window.AbsensiState.infoLibur && window.AbsensiState.infoLibur.statusOperasional === 'Tutup'));
 
   if (workers.length === 0) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="7" class="px-4 py-8 text-center text-slate-400">
-          <p class="font-bold text-amber-300">Tidak ada pegawai aktif ditemukan di Sheet Pengaturan_Tarif_Shift.</p>
+        <td colspan="5" class="px-4 py-8 text-center text-slate-500">
+          <p class="font-bold text-amber-700">Tidak ada pegawai aktif ditemukan di Sheet Pengaturan_Tarif_Shift.</p>
           <p class="text-[11px] text-slate-500 mt-1">Pastikan nama pekerja telah terdaftar dan berstatus 'Aktif' di Master User & Role.</p>
         </td>
       </tr>
@@ -333,39 +349,44 @@ function renderAbsensiTable() {
   let shiftRecords = presensiSaved.filter(p => (p.shift || '').toLowerCase() === curShift.toLowerCase());
   let savedStatusMap = {};
   shiftRecords.forEach(r => {
-    savedStatusMap[(r.namaPekerja || '').toLowerCase()] = {
-      status: r.statusAbsensi || 'Hadir',
-      keterangan: r.keterangan || ''
-    };
+    let nm = (r.namaPekerja || '').trim().toLowerCase();
+    if (nm) {
+      savedStatusMap[nm] = {
+        status: r.statusAbsensi || 'Tidak',
+        keterangan: r.keterangan || ''
+      };
+    }
   });
 
   // Tampilkan status penyimpanan shift ini
   let statSimpan = document.getElementById('statStatusTersimpan');
   let statWaktu = document.getElementById('statWaktuSimpan');
   if (shiftRecords.length > 0) {
-    if (statSimpan) statSimpan.innerHTML = '<span class="text-emerald-400">✅ Sudah Disimpan</span>';
+    if (statSimpan) statSimpan.innerHTML = '<span class="text-emerald-700 font-extrabold">✅ Sudah Disimpan</span>';
     if (statWaktu) statWaktu.innerText = 'Tersimpan ' + shiftRecords.length + ' pegawai';
   } else {
-    if (statSimpan) statSimpan.innerHTML = '<span class="text-amber-400">⏳ Belum Disimpan</span>';
+    if (statSimpan) statSimpan.innerHTML = '<span class="text-amber-700 font-extrabold">⏳ Belum Disimpan</span>';
     if (statWaktu) statWaktu.innerText = 'Draft belum ke sheet';
   }
 
   let htmlRows = '';
   workers.forEach((w, idx) => {
-    let namaKey = (w.namaPekerja || '').toLowerCase();
+    let namaClean = (w.namaPekerja || w.nama || w.namaLengkap || w.namaPegawai || w.nama_pekerja || '').trim();
+    let namaKey = namaClean.toLowerCase();
     
     // Inisialisasi map input
+    // User request: Default status absensi adalah Tidak hadir.
     if (!window.AbsensiState.attendanceMap[namaKey]) {
       if (savedStatusMap[namaKey]) {
         window.AbsensiState.attendanceMap[namaKey] = {
           status: savedStatusMap[namaKey].status,
-          keterangan: savedStatusMap[namaKey].keterangan
+          keterangan: savedStatusMap[namaKey].keterangan || ''
         };
       } else {
-        // Default: jika hari Minggu / Libur Tutup -> 'Tidak', jika hari kerja -> 'Hadir'
+        // Default strictly 'Tidak' (Tidak Hadir)
         window.AbsensiState.attendanceMap[namaKey] = {
-          status: isSundayOrHoliday ? 'Tidak' : 'Hadir',
-          keterangan: isSundayOrHoliday ? 'Libur Operasional' : ''
+          status: 'Tidak',
+          keterangan: ''
         };
       }
     }
@@ -373,72 +394,51 @@ function renderAbsensiTable() {
     let curAtt = window.AbsensiState.attendanceMap[namaKey];
     let isHadir = (curAtt.status === 'Hadir');
 
-    // Role badge color
-    let rBadge = "bg-slate-800 text-slate-300 border-slate-700";
+    // Role badge color (high contrast light theme)
+    let rBadge = "bg-slate-100 text-slate-700 border-slate-200";
     let roleLower = (w.role || "").toLowerCase();
     if (roleLower.includes("dokter")) {
-      rBadge = "bg-cyan-500/20 text-cyan-300 border-cyan-400/30";
+      rBadge = "bg-indigo-50 text-indigo-700 border-indigo-200";
     } else if (roleLower.includes("perawat")) {
-      rBadge = "bg-emerald-500/20 text-emerald-300 border-emerald-400/30";
-    } else if (roleLower.includes("admin")) {
-      rBadge = "bg-amber-500/20 text-amber-300 border-amber-400/30";
+      rBadge = "bg-emerald-50 text-emerald-700 border-emerald-200";
+    } else if (roleLower.includes("admin") || roleLower.includes("kasir")) {
+      rBadge = "bg-amber-50 text-amber-800 border-amber-200";
     }
 
     htmlRows += `
-      <tr class="hover:bg-slate-800/40 transition-colors ${isHadir ? '' : 'bg-rose-950/10'}">
-        <td class="px-4 py-3 text-center text-slate-400 font-bold">${idx + 1}</td>
+      <tr class="transition-colors ${isHadir ? 'hover:bg-emerald-50/50' : 'hover:bg-slate-50'}">
+        <td class="px-4 py-3.5 text-center text-slate-600 font-bold">${idx + 1}</td>
         
-        <td class="px-4 py-3">
-          <div class="font-bold text-white text-xs">${escapeHtml(w.namaPekerja)}</div>
-          <div class="text-[10px] text-slate-400 font-normal">ID Aturan: ${escapeHtml(w.idAturan || '-')}</div>
+        <td class="px-4 py-3.5">
+          <div class="font-bold text-slate-900 text-sm tracking-tight">${escapeHtml(namaClean)}</div>
         </td>
 
-        <td class="px-4 py-3">
-          <span class="px-2 py-0.5 rounded-full text-[10px] font-bold border ${rBadge}">
+        <td class="px-4 py-3.5">
+          <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold border ${rBadge}">
             ${escapeHtml(w.role || 'Staf')}
           </span>
         </td>
 
-        <td class="px-4 py-3 font-semibold text-slate-300">
+        <td class="px-4 py-3.5 font-bold text-slate-700">
           <div class="flex items-center gap-1.5">
-            <span class="text-xs">${curShift === 'Pagi' ? '☀️' : '🌙'}</span>
-            <span class="text-[11px]">${jadwal.label}</span>
+            <span class="text-sm">${curShift === 'Pagi' ? '☀️' : '🌙'}</span>
+            <span class="text-xs font-semibold text-slate-800">${jadwal.label}</span>
           </div>
         </td>
 
-        <td class="px-4 py-3">
+        <td class="px-4 py-3.5">
           <!-- Status_Absensi strictly: (Hadir / Tidak) -->
           <div class="relative">
-            <select onchange="updateWorkerAbsensi('${escapeHtml(w.namaPekerja)}', this.value)" 
-                    class="absensi-status-select w-full px-2.5 py-1.5 rounded-xl font-bold text-xs border focus:ring-2 focus:outline-none transition-all ${
+            <select onchange="updateWorkerAbsensi('${escapeHtml(namaClean)}', this.value)" 
+                    class="w-full px-3 py-2 rounded-xl font-black text-xs border focus:ring-2 focus:outline-none transition-all cursor-pointer ${
                       isHadir 
-                        ? 'bg-emerald-950/80 text-emerald-300 border-emerald-500/50 focus:ring-emerald-500' 
-                        : 'bg-rose-950/80 text-rose-300 border-rose-500/50 focus:ring-rose-500'
+                        ? 'bg-emerald-50 text-emerald-800 border-emerald-400 focus:ring-emerald-500' 
+                        : 'bg-rose-50 text-rose-800 border-rose-300 focus:ring-rose-500'
                     }">
+              <option value="Tidak" ${!isHadir ? 'selected' : ''}>🔴 Tidak Hadir</option>
               <option value="Hadir" ${isHadir ? 'selected' : ''}>🟢 Hadir</option>
-              <option value="Tidak" ${!isHadir ? 'selected' : ''}>🔴 Tidak</option>
             </select>
           </div>
-        </td>
-
-        <td class="px-4 py-3">
-          <input type="text" 
-                 value="${escapeHtml(curAtt.keterangan || '')}" 
-                 placeholder="${isHadir ? 'Tepat waktu / Tugas' : 'Alasan (Izin / Sakit / Libur)'}" 
-                 onchange="updateWorkerKeterangan('${escapeHtml(w.namaPekerja)}', this.value)"
-                 class="w-full bg-slate-950 border border-slate-700/80 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none">
-        </td>
-
-        <td class="px-4 py-3 text-center">
-          <button onclick="toggleWorkerAbsensi('${escapeHtml(w.namaPekerja)}')" 
-                  title="Klik untuk mengubah Hadir / Tidak"
-                  class="px-2.5 py-1 rounded-lg text-[10px] font-bold border transition-all ${
-                    isHadir 
-                      ? 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border-emerald-500/40' 
-                      : 'bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border-rose-500/40'
-                  }">
-            ${isHadir ? '✓ Hadir' : '✕ Tidak'}
-          </button>
         </td>
       </tr>
     `;
@@ -452,9 +452,9 @@ function renderAbsensiTable() {
  * Update nilai status absensi pekerja individual.
  */
 function updateWorkerAbsensi(namaPekerja, val) {
-  let key = (namaPekerja || '').toLowerCase();
+  let key = (namaPekerja || '').trim().toLowerCase();
   if (!window.AbsensiState.attendanceMap[key]) {
-    window.AbsensiState.attendanceMap[key] = { status: 'Hadir', keterangan: '' };
+    window.AbsensiState.attendanceMap[key] = { status: 'Tidak', keterangan: '' };
   }
   window.AbsensiState.attendanceMap[key].status = (val === 'Hadir' ? 'Hadir' : 'Tidak');
   renderAbsensiTable();
@@ -465,7 +465,7 @@ function updateWorkerAbsensi(namaPekerja, val) {
  */
 function toggleWorkerAbsensi(namaPekerja) {
   let key = (namaPekerja || '').toLowerCase();
-  let cur = window.AbsensiState.attendanceMap[key] ? window.AbsensiState.attendanceMap[key].status : 'Hadir';
+  let cur = window.AbsensiState.attendanceMap[key] ? window.AbsensiState.attendanceMap[key].status : 'Tidak';
   updateWorkerAbsensi(namaPekerja, cur === 'Hadir' ? 'Tidak' : 'Hadir');
 }
 
@@ -556,7 +556,7 @@ function simpanAbsensiShiftCurrent() {
 
   workers.forEach(w => {
     let key = (w.namaPekerja || '').toLowerCase();
-    let att = window.AbsensiState.attendanceMap[key] || { status: 'Hadir', keterangan: '' };
+    let att = window.AbsensiState.attendanceMap[key] || { status: 'Tidak', keterangan: '' };
     records.push({
       idPekerja: w.idAturan || ('STF-' + w.namaPekerja.substring(0, 3).toUpperCase()),
       namaPekerja: w.namaPekerja,
@@ -752,18 +752,18 @@ function renderRekapBulanan() {
     let pct = found ? found.persentase : (hadir > 0 ? '100.0%' : '0%');
 
     html += `
-      <tr class="hover:bg-slate-800/40 transition-colors">
-        <td class="px-4 py-3 text-center text-slate-400 font-bold">${idx + 1}</td>
-        <td class="px-4 py-3 font-bold text-white">${escapeHtml(w.namaPekerja)}</td>
-        <td class="px-4 py-3 text-slate-300">${escapeHtml(w.role || 'Staf')}</td>
-        <td class="px-4 py-3 text-center font-bold text-cyan-300">${hk} Hari</td>
-        <td class="px-4 py-3 text-center font-semibold text-amber-300">${pagi}</td>
-        <td class="px-4 py-3 text-center font-semibold text-indigo-300">${sore}</td>
-        <td class="px-4 py-3 text-center font-bold text-emerald-400">${hadir}</td>
-        <td class="px-4 py-3 text-center font-bold text-rose-400">${tidak}</td>
-        <td class="px-4 py-3 text-center font-bold text-cyan-300">${pct}</td>
-        <td class="px-4 py-3 text-center">
-          <button onclick="lihatDetailPresensiPegawai('${escapeHtml(w.namaPekerja)}')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-[11px] font-semibold border border-slate-700">
+      <tr class="transition-colors hover:bg-slate-50">
+        <td class="px-4 py-3.5 text-center text-slate-600 font-bold">${idx + 1}</td>
+        <td class="px-4 py-3.5 font-bold text-slate-900">${escapeHtml(w.namaPekerja)}</td>
+        <td class="px-4 py-3.5 text-slate-600">${escapeHtml(w.role || 'Staf')}</td>
+        <td class="px-4 py-3.5 text-center font-extrabold text-indigo-700">${hk} Hari</td>
+        <td class="px-4 py-3.5 text-center font-bold text-amber-700">${pagi}</td>
+        <td class="px-4 py-3.5 text-center font-bold text-indigo-700">${sore}</td>
+        <td class="px-4 py-3.5 text-center font-black text-emerald-700">${hadir}</td>
+        <td class="px-4 py-3.5 text-center font-black text-rose-700">${tidak}</td>
+        <td class="px-4 py-3.5 text-center font-black text-cyan-800">${pct}</td>
+        <td class="px-4 py-3.5 text-center">
+          <button onclick="lihatDetailPresensiPegawai('${escapeHtml(w.namaPekerja)}')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold border border-slate-300 transition-all">
             Detail
           </button>
         </td>
@@ -804,24 +804,24 @@ function renderKalenderLibur() {
     let opStatus = item.statusOperasional || 'Tutup';
     let isTutup = (opStatus === 'Tutup');
     let badgeOp = isTutup 
-      ? 'bg-rose-500/20 text-rose-300 border-rose-500/30' 
-      : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30';
+      ? 'bg-rose-50 text-rose-800 border-rose-300' 
+      : 'bg-emerald-50 text-emerald-800 border-emerald-300';
 
     html += `
-      <tr class="hover:bg-slate-800/40 transition-colors">
-        <td class="px-4 py-3 text-center text-slate-400 font-bold">${idx + 1}</td>
-        <td class="px-4 py-3 font-semibold text-white">${escapeHtml(item.tanggal)}</td>
-        <td class="px-4 py-3 text-slate-300">${escapeHtml(item.hari || '-')}</td>
-        <td class="px-4 py-3 font-bold text-amber-200">${escapeHtml(item.namaHariLibur)}</td>
-        <td class="px-4 py-3 text-slate-400">${escapeHtml(item.kategoriLibur)}</td>
-        <td class="px-4 py-3 text-center">
-          <span class="px-2 py-0.5 rounded-full text-[10px] font-bold border ${badgeOp}">
+      <tr class="transition-colors hover:bg-slate-50">
+        <td class="px-4 py-3.5 text-center text-slate-600 font-bold">${idx + 1}</td>
+        <td class="px-4 py-3.5 font-bold text-slate-900">${escapeHtml(item.tanggal)}</td>
+        <td class="px-4 py-3.5 text-slate-600">${escapeHtml(item.hari || '-')}</td>
+        <td class="px-4 py-3.5 font-extrabold text-amber-900">${escapeHtml(item.namaHariLibur)}</td>
+        <td class="px-4 py-3.5 text-slate-600">${escapeHtml(item.kategoriLibur)}</td>
+        <td class="px-4 py-3.5 text-center">
+          <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold border ${badgeOp}">
             ${escapeHtml(opStatus)}
           </span>
         </td>
-        <td class="px-4 py-3 text-slate-300 text-[11px]">${escapeHtml(item.keterangan || '-')}</td>
-        <td class="px-4 py-3 text-center">
-          <button onclick="editHariLiburManual('${escapeHtml(item.tanggal)}')" class="px-2 py-1 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 rounded text-[10px] font-bold">
+        <td class="px-4 py-3.5 text-slate-600 text-xs">${escapeHtml(item.keterangan || '-')}</td>
+        <td class="px-4 py-3.5 text-center">
+          <button onclick="editHariLiburManual('${escapeHtml(item.tanggal)}')" class="px-3 py-1 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 rounded-lg text-xs font-bold transition-all">
             Edit
           </button>
         </td>
@@ -989,8 +989,12 @@ function fallbackLoadAbsensiLocal(queryDate) {
     ];
   }
 
-  // Filter HANYA pekerja Aktif
-  let activeW = workers.filter(w => {
+  // Filter HANYA pekerja Aktif dan pastikan namaPekerja valid
+  let activeW = workers.map(w => {
+    let cleanNama = (w.namaPekerja || w.nama || w.namaLengkap || w.namaPegawai || w.nama_pekerja || '').trim();
+    return Object.assign({}, w, { namaPekerja: cleanNama });
+  }).filter(w => {
+    if (!w.namaPekerja) return false;
     let st = String(w.status || "Aktif").trim().toLowerCase();
     return st !== "tidak aktif" && st !== "non aktif" && st !== "nonaktif" && st !== "inactive";
   });

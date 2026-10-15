@@ -59,36 +59,36 @@
   <!-- ========================================================================= -->
   <div id="tabContentAbsensiHarian" class="space-y-6">
     <!-- PENGATUR TANGGAL & PILIHAN SHIFT -->
-    <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-lg backdrop-blur">
+    <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         
         <!-- Pemilih Tanggal -->
         <div class="flex flex-wrap items-center gap-3">
-          <label class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+          <label class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
             <span>📅</span> Tanggal:
           </label>
-          <input type="date" id="absensiDatePicker" onchange="handleAbsensiDateChange(this.value)" class="bg-slate-950 border border-slate-700 text-white text-xs rounded-xl px-3 py-2 font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-          <span id="labelHariTanggal" class="text-xs font-bold px-3 py-1.5 rounded-lg bg-slate-800 text-indigo-300 border border-slate-700">
+          <input type="date" id="absensiDatePicker" onchange="handleAbsensiDateChange(this.value)" class="bg-white border border-slate-300 text-slate-800 text-xs rounded-xl px-3 py-2 font-bold focus:ring-2 focus:ring-indigo-500 focus:outline-none shadow-sm">
+          <span id="labelHariTanggal" class="text-xs font-extrabold px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-200 shadow-sm">
             Memuat...
           </span>
           <div class="flex items-center gap-1">
-            <button onclick="navigasiHariAbsensi(-1)" title="Hari Sebelumnya" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-bold border border-slate-700">◀</button>
-            <button onclick="setTanggalAbsensiHariIni()" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-bold border border-slate-700">Hari Ini</button>
-            <button onclick="navigasiHariAbsensi(1)" title="Hari Berikutnya" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-bold border border-slate-700">▶</button>
+            <button onclick="navigasiHariAbsensi(-1)" title="Hari Sebelumnya" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold border border-slate-200 shadow-sm transition-all">◀</button>
+            <button onclick="setTanggalAbsensiHariIni()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold border border-slate-200 shadow-sm transition-all">Hari Ini</button>
+            <button onclick="navigasiHariAbsensi(1)" title="Hari Berikutnya" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold border border-slate-200 shadow-sm transition-all">▶</button>
           </div>
         </div>
 
         <!-- Tombol Switch Shift (Pagi vs Sore) -->
-        <div class="flex items-center bg-slate-950/90 p-1.5 rounded-xl border border-slate-800 gap-1.5">
-          <button id="btnShiftPagi" onclick="pilihShiftAbsensi('Pagi')" class="px-4 py-2 rounded-lg text-xs font-bold transition-all bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-sm flex items-center gap-2">
+        <div class="flex items-center bg-slate-100 p-1.5 rounded-xl border border-slate-200 gap-1.5">
+          <button id="btnShiftPagi" onclick="pilihShiftAbsensi('Pagi')" class="px-4 py-2 rounded-lg text-xs font-bold transition-all bg-amber-500 text-white border border-amber-600 shadow-sm flex items-center gap-2">
             <span>☀️</span>
             <span>Shift Pagi</span>
-            <span id="badgeJamShiftPagi" class="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/30 text-amber-200">10:00 - 15:00</span>
+            <span id="badgeJamShiftPagi" class="text-[10px] px-1.5 py-0.5 rounded bg-amber-600/60 text-white font-extrabold">10:00 - 15:00</span>
           </button>
-          <button id="btnShiftSore" onclick="pilihShiftAbsensi('Sore')" class="px-4 py-2 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-slate-200 flex items-center gap-2">
+          <button id="btnShiftSore" onclick="pilihShiftAbsensi('Sore')" class="px-4 py-2 rounded-lg text-xs font-bold transition-all text-slate-600 hover:text-slate-900 flex items-center gap-2">
             <span>🌙</span>
             <span>Shift Sore</span>
-            <span id="badgeJamShiftSore" class="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-300">16:00 - 20:00</span>
+            <span id="badgeJamShiftSore" class="text-[10px] px-1.5 py-0.5 rounded bg-slate-200 text-slate-700 font-extrabold">16:00 - 20:00</span>
           </button>
         </div>
       </div>
@@ -99,11 +99,11 @@
           <div class="flex items-center gap-3">
             <span id="bannerIconLibur" class="text-2xl">🏖️</span>
             <div>
-              <h4 id="bannerJudulLibur" class="text-sm font-bold text-white">Hari Libur</h4>
-              <p id="bannerKeteranganLibur" class="text-xs text-slate-300 mt-0.5">Keterangan status libur.</p>
+              <h4 id="bannerJudulLibur" class="text-sm font-bold text-slate-900">Hari Libur</h4>
+              <p id="bannerKeteranganLibur" class="text-xs text-slate-600 mt-0.5">Keterangan status libur.</p>
             </div>
           </div>
-          <button onclick="bukaModalKelolaLibur()" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-lg text-xs font-semibold transition-all">
+          <button onclick="bukaModalKelolaLibur()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-xs font-semibold transition-all">
             Ubah Jadwal Libur
           </button>
         </div>
@@ -112,70 +112,63 @@
 
     <!-- STATS RINGKASAN SHIFT INI -->
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 shadow-sm">
-        <div class="text-xs font-bold text-slate-400">Total Pegawai Aktif</div>
-        <div id="statTotalPegawai" class="text-2xl font-black text-white mt-1">0</div>
+      <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+        <div class="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Pegawai Aktif</div>
+        <div id="statTotalPegawai" class="text-2xl font-black text-slate-800 mt-1">0</div>
         <div class="text-[10px] text-slate-400 mt-0.5">Master Pengaturan_Tarif_Shift</div>
       </div>
-      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 shadow-sm">
-        <div class="text-xs font-bold text-emerald-400">Hadir di Shift Ini</div>
-        <div id="statTotalHadir" class="text-2xl font-black text-emerald-400 mt-1">0</div>
-        <div class="text-[10px] text-emerald-300 mt-0.5">Tercatat masuk tugas</div>
+      <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 shadow-sm">
+        <div class="text-xs font-bold text-emerald-800 uppercase tracking-wider">Hadir di Shift Ini</div>
+        <div id="statTotalHadir" class="text-2xl font-black text-emerald-700 mt-1">0</div>
+        <div class="text-[10px] text-emerald-600 mt-0.5">Tercatat masuk tugas</div>
       </div>
-      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 shadow-sm">
-        <div class="text-xs font-bold text-rose-400">Tidak Hadir</div>
-        <div id="statTotalTidakHadir" class="text-2xl font-black text-rose-400 mt-1">0</div>
-        <div class="text-[10px] text-rose-300 mt-0.5">Izin / Sakit / Off</div>
+      <div class="bg-rose-50 border border-rose-200 rounded-2xl p-4 shadow-sm">
+        <div class="text-xs font-bold text-rose-800 uppercase tracking-wider">Tidak Hadir</div>
+        <div id="statTotalTidakHadir" class="text-2xl font-black text-rose-700 mt-1">0</div>
+        <div class="text-[10px] text-rose-600 mt-0.5">Izin / Sakit / Off</div>
       </div>
-      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 shadow-sm">
-        <div class="text-xs font-bold text-indigo-400">Status Penyimpanan</div>
-        <div id="statStatusTersimpan" class="text-xs font-bold text-amber-300 mt-2 flex items-center gap-1">
+      <div class="bg-indigo-50 border border-indigo-200 rounded-2xl p-4 shadow-sm">
+        <div class="text-xs font-bold text-indigo-800 uppercase tracking-wider">Status Penyimpanan</div>
+        <div id="statStatusTersimpan" class="text-xs font-extrabold text-amber-700 mt-2 flex items-center gap-1">
           <span>⏳</span> Belum Disimpan
         </div>
-        <div id="statWaktuSimpan" class="text-[10px] text-slate-400 mt-0.5">-</div>
+        <div id="statWaktuSimpan" class="text-[10px] text-indigo-600 mt-0.5 font-medium">-</div>
       </div>
     </div>
 
     <!-- ACTION BAR DI ATAS TABEL -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-sm">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
       <div class="flex items-center gap-2">
-        <span class="text-xs font-bold text-slate-300">Aksi Cepat Presensi:</span>
-        <button onclick="quickMarkAllHadir()" class="px-3 py-1.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-1">
-          <span>⚡</span> Tandai Semua Hadir
-        </button>
-        <button onclick="quickMarkAllTidak()" class="px-3 py-1.5 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-1">
-          <span>❌</span> Reset ke Tidak Hadir
-        </button>
+        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block animate-pulse"></span>
+        <span class="text-xs font-black text-slate-800 uppercase tracking-wider">Daftar Kehadiran Pegawai</span>
       </div>
 
-      <div class="flex items-center gap-2">
-        <span id="autosaveIndicator" class="text-[11px] text-slate-400 font-medium"></span>
-        <button onclick="simpanAbsensiShiftCurrent()" id="btnSimpanAbsensi" class="px-5 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-emerald-600/20 transition-all flex items-center gap-2 hover:scale-[1.02]">
+      <div class="flex items-center gap-3">
+        <span id="autosaveIndicator" class="text-xs text-slate-500 font-semibold"></span>
+        <button onclick="simpanAbsensiShiftCurrent()" id="btnSimpanAbsensi" class="px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-600/20 transition-all flex items-center gap-2 hover:scale-[1.02]">
           <span>💾</span> Simpan Presensi Shift
         </button>
       </div>
     </div>
 
-    <!-- TABEL DAFTAR PRESENSI PEGAWAI -->
-    <div class="bg-slate-900/90 border border-slate-800 rounded-2xl overflow-hidden shadow-lg">
+    <!-- TABEL DAFTAR PRESENSI PEGAWAI (5 KOLOM BERSIH) -->
+    <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
       <div class="overflow-x-auto">
-        <table class="w-full text-left text-xs text-slate-200">
-          <thead class="bg-slate-950/80 text-slate-400 font-bold border-b border-slate-800 uppercase tracking-wider text-[11px]">
+        <table class="w-full text-left text-xs text-slate-800">
+          <thead class="bg-slate-100 text-slate-700 font-extrabold border-b border-slate-200 uppercase tracking-wider text-[11px]">
             <tr>
               <th class="px-4 py-3.5 w-12 text-center">No</th>
-              <th class="px-4 py-3.5 min-w-[200px]">Nama Pegawai</th>
-              <th class="px-4 py-3.5 min-w-[140px]">Role / Kategori</th>
-              <th class="px-4 py-3.5 min-w-[130px]">Jadwal Shift</th>
-              <th class="px-4 py-3.5 min-w-[150px]">Status Absensi</th>
-              <th class="px-4 py-3.5 min-w-[220px]">Keterangan</th>
-              <th class="px-4 py-3.5 text-center w-28">Aksi Cepat</th>
+              <th class="px-4 py-3.5 min-w-[220px]">Nama Pegawai</th>
+              <th class="px-4 py-3.5 min-w-[150px]">Role / Kategori</th>
+              <th class="px-4 py-3.5 min-w-[150px]">Jadwal Shift</th>
+              <th class="px-4 py-3.5 min-w-[160px]">Status Absensi</th>
             </tr>
           </thead>
-          <tbody id="tbodyAbsensiPegawai" class="divide-y divide-slate-800/60 font-medium">
+          <tbody id="tbodyAbsensiPegawai" class="divide-y divide-slate-100 font-medium">
             <tr>
-              <td colspan="7" class="px-4 py-12 text-center text-slate-400">
+              <td colspan="5" class="px-4 py-12 text-center text-slate-500">
                 <div class="inline-block animate-spin text-xl mb-2">⏳</div>
-                <p>Memuat daftar pegawai aktif klinik...</p>
+                <p class="font-semibold">Memuat daftar pegawai aktif klinik...</p>
               </td>
             </tr>
           </tbody>
@@ -188,25 +181,25 @@
   <!-- TAB 2: REKAP KEHADIRAN BULANAN                                            -->
   <!-- ========================================================================= -->
   <div id="tabContentAbsensiRekap" class="space-y-6 hidden">
-    <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-lg">
+    <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h3 class="text-base font-bold text-white flex items-center gap-2">
+          <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
             <span>📊</span> Rekap Kehadiran Bulanan Pegawai
           </h3>
-          <p class="text-xs text-slate-400 mt-0.5">Akumulasi shift pagi, shift sore, dan persentase kehadiran untuk perhitungan gaji/honor.</p>
+          <p class="text-xs text-slate-600 mt-0.5">Akumulasi shift pagi, shift sore, dan persentase kehadiran untuk perhitungan gaji/honor.</p>
         </div>
         <div class="flex items-center gap-2">
-          <span id="badgeHariKerjaRekap" class="text-xs font-bold px-3 py-1.5 rounded-lg bg-indigo-500/20 text-indigo-300 border border-indigo-400/30">
+          <span id="badgeHariKerjaRekap" class="text-xs font-bold px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-200">
             📅 Hari Kerja: 27 Hari
           </span>
-          <label class="text-xs font-bold text-slate-300">Bulan:</label>
-          <select id="selectBulanRekap" onchange="filterRekapBulanan(this.value)" class="bg-slate-950 border border-slate-700 text-white text-xs rounded-xl px-3 py-2 font-medium focus:ring-2 focus:ring-indigo-500">
+          <label class="text-xs font-bold text-slate-700">Bulan:</label>
+          <select id="selectBulanRekap" onchange="filterRekapBulanan(this.value)" class="bg-white border border-slate-300 text-slate-800 text-xs rounded-xl px-3 py-2 font-medium focus:ring-2 focus:ring-indigo-500">
             <option value="Oktober 2026">Oktober 2026</option>
             <option value="September 2026">September 2026</option>
             <option value="November 2026">November 2026</option>
           </select>
-          <button onclick="refreshAbsensiData()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-bold">
+          <button onclick="refreshAbsensiData()" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 rounded-xl text-xs font-bold transition-all">
             🔄 Refresh
           </button>
         </div>
@@ -214,26 +207,26 @@
     </div>
 
     <!-- Tabel Rekap Bulanan -->
-    <div class="bg-slate-900/90 border border-slate-800 rounded-2xl overflow-hidden shadow-lg">
+    <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
       <div class="overflow-x-auto">
-        <table class="w-full text-left text-xs text-slate-200">
-          <thead class="bg-slate-950/80 text-slate-400 font-bold border-b border-slate-800 uppercase tracking-wider text-[11px]">
+        <table class="w-full text-left text-xs text-slate-800">
+          <thead class="bg-slate-100 text-slate-700 font-extrabold border-b border-slate-200 uppercase tracking-wider text-[11px]">
             <tr>
               <th class="px-4 py-3.5 w-12 text-center">No</th>
               <th class="px-4 py-3.5">Nama Pegawai</th>
               <th class="px-4 py-3.5">Role</th>
-              <th class="px-4 py-3.5 text-center text-cyan-300">Hari Kerja</th>
+              <th class="px-4 py-3.5 text-center text-indigo-700">Hari Kerja</th>
               <th class="px-4 py-3.5 text-center">Shift Pagi</th>
               <th class="px-4 py-3.5 text-center">Shift Sore</th>
-              <th class="px-4 py-3.5 text-center text-emerald-400">Total Hadir</th>
-              <th class="px-4 py-3.5 text-center text-rose-400">Tidak Hadir</th>
+              <th class="px-4 py-3.5 text-center text-emerald-700">Total Hadir</th>
+              <th class="px-4 py-3.5 text-center text-rose-700">Tidak Hadir</th>
               <th class="px-4 py-3.5 text-center">Persentase</th>
               <th class="px-4 py-3.5 text-center">Aksi</th>
             </tr>
           </thead>
-          <tbody id="tbodyRekapBulanan" class="divide-y divide-slate-800/60 font-medium">
+          <tbody id="tbodyRekapBulanan" class="divide-y divide-slate-100 font-medium">
             <tr>
-              <td colspan="10" class="px-4 py-8 text-center text-slate-400">Memuat rekap kehadiran...</td>
+              <td colspan="10" class="px-4 py-8 text-center text-slate-500">Memuat rekap kehadiran...</td>
             </tr>
           </tbody>
         </table>
@@ -245,25 +238,25 @@
   <!-- TAB 3: KALENDER HARI LIBUR & OPERASIONAL                                  -->
   <!-- ========================================================================= -->
   <div id="tabContentAbsensiLibur" class="space-y-6 hidden">
-    <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-lg">
+    <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h3 class="text-base font-bold text-white flex items-center gap-2">
+          <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
             <span>🗓️</span> Kalender Hari Libur Nasional & Khusus Klinik
           </h3>
-          <p class="text-xs text-slate-400 mt-0.5">Daftar hari libur nasional, cuti bersama, dan hari libur khusus internal klinik Sheldon.</p>
+          <p class="text-xs text-slate-600 mt-0.5">Daftar hari libur nasional, cuti bersama, dan hari libur khusus internal klinik Sheldon.</p>
         </div>
-        <button onclick="bukaModalKelolaLibur()" class="px-4 py-2 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white rounded-xl text-xs font-bold shadow-lg shadow-amber-600/20 transition-all flex items-center gap-2">
+        <button onclick="bukaModalKelolaLibur()" class="px-4 py-2 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white rounded-xl text-xs font-bold shadow-md shadow-amber-600/20 transition-all flex items-center gap-2">
           <span>➕</span> Tambah Hari Libur / Cuti
         </button>
       </div>
     </div>
 
     <!-- Tabel Kalender Libur -->
-    <div class="bg-slate-900/90 border border-slate-800 rounded-2xl overflow-hidden shadow-lg">
+    <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
       <div class="overflow-x-auto">
-        <table class="w-full text-left text-xs text-slate-200">
-          <thead class="bg-slate-950/80 text-slate-400 font-bold border-b border-slate-800 uppercase tracking-wider text-[11px]">
+        <table class="w-full text-left text-xs text-slate-800">
+          <thead class="bg-slate-100 text-slate-700 font-extrabold border-b border-slate-200 uppercase tracking-wider text-[11px]">
             <tr>
               <th class="px-4 py-3.5 w-12 text-center">No</th>
               <th class="px-4 py-3.5 min-w-[110px]">Tanggal</th>
@@ -275,9 +268,9 @@
               <th class="px-4 py-3.5 text-center w-28">Aksi</th>
             </tr>
           </thead>
-          <tbody id="tbodyKalenderLibur" class="divide-y divide-slate-800/60 font-medium">
+          <tbody id="tbodyKalenderLibur" class="divide-y divide-slate-100 font-medium">
             <tr>
-              <td colspan="8" class="px-4 py-8 text-center text-slate-400">Memuat kalender libur...</td>
+              <td colspan="8" class="px-4 py-8 text-center text-slate-500">Memuat kalender libur...</td>
             </tr>
           </tbody>
         </table>
@@ -289,30 +282,30 @@
 <!-- ========================================================================= -->
 <!-- MODAL KELOLA / TAMBAH HARI LIBUR MANUAL                                   -->
 <!-- ========================================================================= -->
-<div id="modalKelolaLibur" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
-  <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl relative space-y-4">
-    <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-      <h3 class="text-base font-bold text-white flex items-center gap-2">
+<div id="modalKelolaLibur" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+  <div class="bg-white border border-slate-200 rounded-2xl max-w-lg w-full p-6 shadow-2xl relative space-y-4">
+    <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+      <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
         <span>⚙️</span> Atur Hari Libur / Operasional Klinik
       </h3>
-      <button onclick="tutupModalKelolaLibur()" class="text-slate-400 hover:text-white text-lg font-bold">✕</button>
+      <button onclick="tutupModalKelolaLibur()" class="text-slate-400 hover:text-slate-700 text-lg font-bold">✕</button>
     </div>
 
     <form id="formHariLibur" onsubmit="handleSimpanHariLibur(event)" class="space-y-4 text-xs">
       <div>
-        <label class="block font-bold text-slate-300 mb-1">Tanggal Libur <span class="text-rose-400">*</span></label>
-        <input type="date" id="inputTglLibur" required class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-white font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+        <label class="block font-bold text-slate-700 mb-1">Tanggal Libur <span class="text-rose-500">*</span></label>
+        <input type="date" id="inputTglLibur" required class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2.5 text-slate-800 font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none">
       </div>
 
       <div>
-        <label class="block font-bold text-slate-300 mb-1">Nama Hari Libur / Acara <span class="text-rose-400">*</span></label>
-        <input type="text" id="inputNamaLibur" required placeholder="Contoh: Renovasi Klinik / Cuti Bersama" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-white font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+        <label class="block font-bold text-slate-700 mb-1">Nama Hari Libur / Acara <span class="text-rose-500">*</span></label>
+        <input type="text" id="inputNamaLibur" required placeholder="Contoh: Renovasi Klinik / Cuti Bersama" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2.5 text-slate-800 font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none">
       </div>
 
       <div class="grid grid-cols-2 gap-3">
         <div>
-          <label class="block font-bold text-slate-300 mb-1">Kategori Libur</label>
-          <select id="inputKategoriLibur" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-white font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          <label class="block font-bold text-slate-700 mb-1">Kategori Libur</label>
+          <select id="inputKategoriLibur" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2.5 text-slate-800 font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none">
             <option value="Libur Khusus Klinik">Libur Khusus Klinik</option>
             <option value="Libur Nasional">Libur Nasional</option>
             <option value="Cuti Bersama">Cuti Bersama</option>
@@ -321,8 +314,8 @@
         </div>
 
         <div>
-          <label class="block font-bold text-slate-300 mb-1">Status Operasional</label>
-          <select id="inputStatusOperasional" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-white font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          <label class="block font-bold text-slate-700 mb-1">Status Operasional</label>
+          <select id="inputStatusOperasional" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2.5 text-slate-800 font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none">
             <option value="Tutup">Tutup (Libur Penuh)</option>
             <option value="Buka Terbatas">Buka Terbatas (1 Shift)</option>
             <option value="Buka Normal">Buka Normal</option>
@@ -331,15 +324,15 @@
       </div>
 
       <div>
-        <label class="block font-bold text-slate-300 mb-1">Keterangan / Catatan Tambahan</label>
-        <textarea id="inputKeteranganLibur" rows="2" placeholder="Catatan operasional untuk dokter & staf..." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none"></textarea>
+        <label class="block font-bold text-slate-700 mb-1">Keterangan / Catatan Tambahan</label>
+        <textarea id="inputKeteranganLibur" rows="2" placeholder="Catatan operasional untuk dokter & staf..." class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-slate-800 font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none"></textarea>
       </div>
 
-      <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-800">
-        <button type="button" onclick="tutupModalKelolaLibur()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl font-bold">
+      <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
+        <button type="button" onclick="tutupModalKelolaLibur()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold transition-all">
           Batal
         </button>
-        <button type="submit" id="btnSubmitLibur" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold shadow-lg shadow-indigo-600/30">
+        <button type="submit" id="btnSubmitLibur" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold shadow-md shadow-indigo-600/30 transition-all">
           Simpan Jadwal Libur
         </button>
       </div>

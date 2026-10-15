@@ -1500,10 +1500,17 @@ var activeWorkerInAbsensi = (window.AbsensiState.activeWorkers || []).find(funct
 assert("ABSENSI-5: Pekerja Berstatus 'Tidak Aktif' TIDAK MUNCUL di Daftar Absen", inactiveWorkerInAbsensi === undefined);
 assert("ABSENSI-5: Pekerja Berstatus 'Aktif' MUNCUL di Daftar Absen", activeWorkerInAbsensi !== undefined);
 
-// ABSENSI-6: Status_Absensi Strictly Hanya Opsi (Hadir / Tidak)
+// ABSENSI-6: Status_Absensi Strictly Hanya Opsi (Hadir / Tidak) & Default 'Tidak'
 renderAbsensiTable();
-quickMarkAllHadir();
 var activeKey = "staf aktif terdaftar";
+assert("ABSENSI-6: Default Status Absensi adalah 'Tidak' (Tidak Hadir)", window.AbsensiState.attendanceMap[activeKey] && window.AbsensiState.attendanceMap[activeKey].status === "Tidak");
+
+var tbodyContent = document.getElementById('tbodyAbsensiPegawai') ? document.getElementById('tbodyAbsensiPegawai').innerHTML : "";
+assert("ABSENSI-6: Tabel Tidak Menampilkan ID Aturan", tbodyContent.indexOf("ID Aturan:") === -1);
+assert("ABSENSI-6: Tabel Tidak Menampilkan Input Keterangan", tbodyContent.indexOf("updateWorkerKeterangan") === -1);
+assert("ABSENSI-6: Tabel Menampilkan Nama Pegawai Jelas", tbodyContent.indexOf("Staf Aktif Terdaftar") !== -1);
+
+quickMarkAllHadir();
 assert("ABSENSI-6: Tandai Semua Hadir Menghasilkan Status 'Hadir'", window.AbsensiState.attendanceMap[activeKey] && window.AbsensiState.attendanceMap[activeKey].status === "Hadir");
 
 quickMarkAllTidak();

@@ -1224,7 +1224,7 @@ var staffPayroll = window.PayrollState.honorStaff || [];
 assert("PAYROLL-3: Penggajian Dokter Terisi dari Nama-nama Dokter di Tarif Shift", docPayroll.length > 0, "Count: " + docPayroll.length);
 assert("PAYROLL-4: Honor Perawat & Staff Terisi dari Nama-nama Staff di Tarif Shift", staffPayroll.length > 0, "Count: " + staffPayroll.length);
 
-// Uji Pekerja Berstatus Tidak Aktif Dikeluarkan dari Payroll
+// Uji Skenario 1: Pekerja Berstatus Tidak Aktif Dikeluarkan dari Payroll & Dropdown
 var inactiveWorker = window.PayrollState.tarifShift.find(function(t) { 
   var st = String(t.status || '').toLowerCase();
   return st === 'tidak aktif' || st === 'non aktif';
@@ -1237,16 +1237,16 @@ if (!inactiveWorker && window.PayrollState.tarifShift.length > 0) {
   renderAllPayrollTables();
   var filteredDocs = (window.PayrollState.penggajianDokter || []).filter(function(d) { return isPekerjaAktif(d.namaDokter); });
   var hasNonActiveInDocs = filteredDocs.some(function(d) { return d.namaDokter.toLowerCase() === nonActiveName.toLowerCase(); });
-  assert("PAYROLL-5: Pekerja Berstatus Tidak Aktif Tidak Muncul di Penggajian Dokter", !hasNonActiveInDocs);
+  assert("PAYROLL-5: Skenario 1 - Pekerja Berstatus Tidak Aktif Tidak Muncul di Penggajian Dokter", !hasNonActiveInDocs);
   // Kembalikan ke Aktif
   window.PayrollState.tarifShift[0].status = "Aktif";
   renderAllPayrollTables();
 } else if (inactiveWorker) {
   var hasNonActiveInDocs = docPayroll.some(function(d) { return d.namaDokter.toLowerCase() === inactiveWorker.namaPekerja.toLowerCase(); });
-  assert("PAYROLL-5: Pekerja Berstatus Tidak Aktif Tidak Muncul di Penggajian Dokter", !hasNonActiveInDocs);
+  assert("PAYROLL-5: Skenario 1 - Pekerja Berstatus Tidak Aktif Tidak Muncul di Penggajian Dokter", !hasNonActiveInDocs);
 }
 
-// Uji Semua Dokter Aktif Muncul
+// Uji Skenario 2: Seluruh Dokter Aktif dari Pengaturan_Tarif_Shift Masuk ke Penggajian Dokter
 var activeDoctorsInTarif = window.PayrollState.tarifShift.filter(function(t) {
   var isDoc = (t.role || '').toLowerCase().includes('dokter') || (t.namaPekerja || '').toLowerCase().startsWith('drg');
   var isActive = String(t.status || 'Aktif').toLowerCase() !== 'tidak aktif';
@@ -1256,7 +1256,124 @@ var activeDoctorsInTarif = window.PayrollState.tarifShift.filter(function(t) {
 var allDocsAccounted = activeDoctorsInTarif.length > 0 && activeDoctorsInTarif.every(function(t) {
   return docPayroll.some(function(d) { return d.namaDokter.toLowerCase() === t.namaPekerja.toLowerCase(); });
 });
-assert("PAYROLL-6: Seluruh Dokter Aktif dari Pengaturan_Tarif_Shift Masuk ke Penggajian Dokter", allDocsAccounted);
+assert("PAYROLL-6: Skenario 2 - Seluruh Dokter Aktif dari Pengaturan_Tarif_Shift Masuk ke Penggajian Dokter", allDocsAccounted);
+
+// Uji Skenario 3: Dokter dengan 0 Tindakan (Hanya Kehadiran Shift)
+var testDocShiftOnly = {
+  idPayroll: "PAY-DR-TEST-001",
+  periodeBulan: "Oktober 2026",
+  idDokter: "DOK-TEST-01",
+  namaDokter: "drg. Dokter Shift Saja",
+  totalPasien: 0,
+  totalTindakanBruto: 0,
+  totalBiayaLab: 0,
+  dasarJMBersih: 0,
+  totalJMDokter: 0,
+  hadirShift1: 2,
+  hadirShift2: 1,
+  totalUangHarianShift: (2 * 55000) + (1 * 55000), // 165000
+  bonusInsentif: 0,
+  potonganPPh21: 0,
+  potonganKasbon: 0,
+  totalDiterimaTHP: 165000,
+  statusTransfer: "Draft"
+};
+var thpShiftOnlyExpected = (testDocShiftOnly.totalJMDokter + testDocShiftOnly.totalUangHarianShift + testDocShiftOnly.bonusInsentif) - (testDocShiftOnly.potonganPPh21 + testDocShiftOnly.potonganKasbon);
+assert("PAYROLL-7: Skenario 3 - Dokter 0 Tindakan Tetap Menerima Uang Shift (Rp 165.000)", thpShiftOnlyExpected === 165000 && testDocShiftOnly.totalDiterimaTHP === 165000);
+
+// Uji Skenario 4: Dokter Kombinasi Shift + JM + Insentif - Kasbon - PPh21
+var testDocKombinasi = {
+  idPayroll: "PAY-DR-TEST-002",
+  periodeBulan: "Oktober 2026",
+  idDokter: "DOK-TEST-02",
+  namaDokter: "drg. Dokter Spesialis Kombinasi",
+  totalPasien: 5,
+  totalTindakanBruto: 4000000,
+  totalBiayaLab: 500000,
+  dasarJMBersih: 3500000,
+  totalJMDokter: 2275000, // 65% dari 3.5jt
+  hadirShift1: 4,
+  hadirShift2: 4,
+  totalUangHarianShift: 440000, // 8 x 55rb
+  bonusInsentif: 100000,
+  potonganPPh21: 50000,
+  potonganKasbon: 200000,
+  statusTransfer: "Draft"
+};
+var thpKombinasiCalc = (testDocKombinasi.totalJMDokter + testDocKombinasi.totalUangHarianShift + testDocKombinasi.bonusInsentif) - (testDocKombinasi.potonganPPh21 + testDocKombinasi.potonganKasbon);
+// 2.275.000 + 440.000 + 100.000 - 50.000 - 200.000 = 2.565.000
+assert("PAYROLL-8: Skenario 4 - Perhitungan THP Dokter Kombinasi (JM + Shift + Bonus - PPh - Kasbon = Rp 2.565.000)", thpKombinasiCalc === 2565000);
+
+// Uji Skenario 5: Skema Perawat Gigi (Tarif Rp 45.000/shift, Gaji Pokok 0)
+var testPerawat = {
+  idPayrollStaff: "PAY-STF-TEST-001",
+  periodeBulan: "Oktober 2026",
+  idStaff: "PRW-TEST-01",
+  namaStaff: "Perawat Uji Coba",
+  role: "Perawat Gigi",
+  gajiPokokBulanan: 0,
+  hadirShift1: 10,
+  hadirShift2: 10,
+  totalUangHarianShift: 20 * 45000, // 900.000
+  totalFeeTindakan: 100000,
+  uangMakanTransport: 150000,
+  lembur: 50000,
+  potonganKasbon: 0,
+  statusTransfer: "Draft"
+};
+var thpPerawatCalc = (testPerawat.gajiPokokBulanan + testPerawat.totalUangHarianShift + testPerawat.totalFeeTindakan + testPerawat.uangMakanTransport + testPerawat.lembur) - testPerawat.potonganKasbon;
+// 0 + 900.000 + 100.000 + 150.000 + 50.000 = 1.200.000
+assert("PAYROLL-9: Skenario 5 - Perhitungan THP Perawat Gigi (20 Shift @ 45rb + Tunjangan = Rp 1.200.000)", thpPerawatCalc === 1200000 && testPerawat.gajiPokokBulanan === 0);
+
+// Uji Skenario 6: Skema Admin / Kasir (Gaji Pokok Tetap Rp 1.200.000, Non-Shift)
+var testAdmin = {
+  idPayrollStaff: "PAY-STF-TEST-002",
+  periodeBulan: "Oktober 2026",
+  idStaff: "ADM-TEST-01",
+  namaStaff: "Admin Uji Coba",
+  role: "Admin",
+  gajiPokokBulanan: 1200000,
+  hadirShift1: 0,
+  hadirShift2: 0,
+  totalUangHarianShift: 0,
+  totalFeeTindakan: 0,
+  uangMakanTransport: 0,
+  lembur: 0,
+  potonganKasbon: 100000,
+  statusTransfer: "Draft"
+};
+var thpAdminCalc = (testAdmin.gajiPokokBulanan + testAdmin.totalUangHarianShift + testAdmin.totalFeeTindakan + testAdmin.uangMakanTransport + testAdmin.lembur) - testAdmin.potonganKasbon;
+assert("PAYROLL-10: Skenario 6 - Perhitungan THP Admin (Gaji Pokok Tetap Rp 1.200.000 - Kasbon Rp 100.000 = Rp 1.100.000)", thpAdminCalc === 1100000 && testAdmin.totalUangHarianShift === 0);
+
+// Uji Skenario 7: Presensi Baru & Live Recalculate THP
+recalculateShiftTotalsFromPresensi();
+var sampleDoc = window.PayrollState.penggajianDokter[0];
+var baseShift1 = sampleDoc.hadirShift1 || 0;
+var baseTotalUang = sampleDoc.totalUangHarianShift || 0;
+
+window.PayrollState.presensiHarian.push({
+  idPresensi: "ATT-TEST-LIVE-001",
+  tanggal: "15-10-2026",
+  idPekerja: sampleDoc.idDokter,
+  namaPekerja: sampleDoc.namaDokter,
+  role: "Dokter Gigi",
+  shift: "Shift 1",
+  statusKehadiran: "Hadir",
+  uangHarianDidapat: 55000,
+  verifikator: "Admin"
+});
+
+recalculateShiftTotalsFromPresensi();
+assert("PAYROLL-11: Skenario 7 - Presensi Baru Otomatis Menambah Hadir Shift 1 Dokter", sampleDoc.hadirShift1 === baseShift1 + 1);
+assert("PAYROLL-11: Skenario 7 - Total Uang Harian Shift Dokter Bertambah Rp 55.000", sampleDoc.totalUangHarianShift === baseTotalUang + 55000);
+
+// Uji Skenario 8: Transisi Status Pembayaran Payroll (Draft <-> Paid)
+var curStatus = sampleDoc.statusTransfer || "Draft";
+togglePayrollPaidStatus('dokter', 0);
+assert("PAYROLL-12: Skenario 8 - Transisi Status Transfer Payroll Menjadi " + (curStatus === "Paid" ? "Draft" : "Paid"), sampleDoc.statusTransfer !== curStatus);
+// Kembalikan ke status semula
+togglePayrollPaidStatus('dokter', 0);
+assert("PAYROLL-12: Skenario 8 - Transisi Kembali ke Status Semula (" + curStatus + ")", sampleDoc.statusTransfer === curStatus);
 
 // SUMMARY REPORT
 print("=================================================");

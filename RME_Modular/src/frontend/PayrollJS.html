@@ -176,21 +176,20 @@
 
     (window.PayrollState.penggajianDokter || []).forEach(d => {
       let st = mapShift[d.namaDokter];
-      if (st) {
-        d.hadirShift1 = st.s1;
-        d.hadirShift2 = st.s2;
-        d.totalUangHarianShift = st.uang;
-      }
+      d.hadirShift1 = st ? st.s1 : 0;
+      d.hadirShift2 = st ? st.s2 : 0;
+      d.totalUangHarianShift = st ? st.uang : 0;
       let potongan = (Number(d.potonganPPh21) || 0) + (Number(d.potonganKasbon) || 0);
       d.totalDiterimaTHP = (Number(d.totalJMDokter) || 0) + (Number(d.totalUangHarianShift) || 0) + (Number(d.bonusInsentif) || 0) - potongan;
     });
 
     (window.PayrollState.honorStaff || []).forEach(s => {
       let st = mapShift[s.namaStaff];
-      if (st && !String(s.role || '').toLowerCase().includes('admin')) {
-        s.hadirShift1 = st.s1;
-        s.hadirShift2 = st.s2;
-        s.totalUangHarianShift = st.uang;
+      let isAdmin = String(s.role || '').toLowerCase().includes('admin');
+      if (!isAdmin) {
+        s.hadirShift1 = st ? st.s1 : 0;
+        s.hadirShift2 = st ? st.s2 : 0;
+        s.totalUangHarianShift = st ? st.uang : 0;
       }
       let tunjangan = (Number(s.totalFeeTindakan) || 0) + (Number(s.uangMakanTransport) || 0) + (Number(s.lembur) || 0);
       s.totalDiterimaTHP = (Number(s.gajiPokokBulanan) || 0) + (Number(s.totalUangHarianShift) || 0) + tunjangan - (Number(s.potonganKasbon) || 0);

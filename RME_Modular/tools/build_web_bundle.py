@@ -240,27 +240,53 @@ staff_csv = read_csv_rows('MASTER', 'Data.csv')
 staff_list = []
 for idx_st, r in enumerate(staff_csv):
     if len(r) >= 5:
-        pjm_val = float(r[7]) if len(r) > 7 and r[7] else 0
+        has_id_col = (len(r) >= 10 or ("-" in r[0] and not r[0].startswith("drg") and not " " in r[0]))
+        if has_id_col:
+            id_pek = r[0].strip()
+            nama_pek = r[1].strip()
+            user_pek = r[2].lower().strip()
+            role_pek = r[3].strip()
+            pass_pek = r[4].strip()
+            stat_pek = r[5].strip() if len(r) > 5 and r[5] else "Aktif"
+            sip_pek = r[6].strip() if len(r) > 6 and r[6] else "-"
+            hp_pek = r[7].strip() if len(r) > 7 and r[7] else ""
+            pjm_val = float(r[8]) if len(r) > 8 and r[8] else 0
+            email_pek = r[9].strip() if len(r) > 9 and r[9] else ""
+        else:
+            id_pek = f"STF-{idx_st:03d}"
+            nama_pek = r[0].strip()
+            user_pek = r[1].lower().strip()
+            role_pek = r[2].strip()
+            pass_pek = r[3].strip()
+            stat_pek = r[4].strip() if len(r) > 4 and r[4] else "Aktif"
+            sip_pek = r[5].strip() if len(r) > 5 and r[5] else "-"
+            hp_pek = r[6].strip() if len(r) > 6 and r[6] else ""
+            pjm_val = float(r[7]) if len(r) > 7 and r[7] else 0
+            email_pek = r[8].strip() if len(r) > 8 and r[8] else ""
+
         staff_list.append({
-            "id": f"STF-{idx_st:03d}",
-            "username": r[1].lower().strip(),
-            "nama": r[0].strip(),
-            "role": r[2].strip(),
-            "pass": r[3].strip(),
-            "pin": r[3].strip(),
-            "status": r[4].strip() if len(r) > 4 and r[4] else "Aktif",
-            "sip": r[5].strip() if len(r) > 5 and r[5] else "-",
-            "noHp": r[6].strip() if len(r) > 6 and r[6] else "",
+            "id": id_pek,
+            "idPekerja": id_pek,
+            "username": user_pek,
+            "nama": nama_pek,
+            "role": role_pek,
+            "pass": pass_pek,
+            "pin": pass_pek,
+            "status": stat_pek,
+            "sip": sip_pek,
+            "noHp": hp_pek,
             "persenJM": pjm_val,
-            "email": r[8].strip() if len(r) > 8 and r[8] else ""
+            "email": email_pek
         })
 
 tarif_csv = read_csv_rows('MASTER', 'Pengaturan_Tarif_Shift.csv')
 tarif_list = []
 for r in tarif_csv:
     if len(r) >= 8:
+        id_pek = r[0].strip()
         tarif_list.append({
-            "idAturan": r[0].strip(),
+            "idAturan": id_pek,
+            "idPekerja": id_pek,
             "role": r[1].strip(),
             "namaPekerja": r[2].strip(),
             "tipeKompensasi": r[3].strip(),
@@ -386,7 +412,7 @@ mock_gas_script = '''
         this._successHandler({ 
           success: true, 
           userData: { 
-            username: cleanUser, 
+            username: (cleanUser === "stf-001") ? "STF-001" : cleanUser, 
             namaAccount: user, 
             role: autoRole 
           } 

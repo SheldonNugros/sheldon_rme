@@ -1537,6 +1537,7 @@
         <table class="w-full text-left whitespace-nowrap">
           <thead class="bg-slate-50 text-[10px] uppercase font-bold text-slate-500 border-b border-slate-200 sticky top-0 z-10">
             <tr>
+              <th class="p-3">ID Pekerja</th>
               <th class="p-3">Nama Pekerja</th>
               <th class="p-3">Username</th>
               <th class="p-3">Kategori Role</th>
@@ -1550,7 +1551,7 @@
             </tr>
           </thead>
           <tbody id="tbodyDbUser" class="divide-y divide-slate-100 text-xs">
-            <tr><td colspan="10" class="text-center py-6 text-slate-400 font-bold">Memuat daftar user...</td></tr>
+            <tr><td colspan="11" class="text-center py-6 text-slate-400 font-bold">Memuat daftar user...</td></tr>
           </tbody>
         </table>
       </div>
@@ -13183,6 +13184,7 @@ function getFallbackUserList() {
 
   if (window.KlinikData && Array.isArray(window.KlinikData.staff) && window.KlinikData.staff.length > 0) {
     return window.KlinikData.staff.map((s, idx) => ({
+      idPekerja: s.idPekerja || s.id || ('STF-' + (idx + 1)),
       nama: s.nama || ('Staff ' + (idx + 1)),
       username: (s.username || String(s.nama || '').toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 12) || ('user' + (idx + 1))),
       role: s.role || 'Staff',
@@ -13197,14 +13199,14 @@ function getFallbackUserList() {
   }
 
   return [
-    { nama: "Administrator Sistem", username: "admin", role: "Owner", hasPassword: true, isHashed: true, status: "Aktif", noReg: "-", noHp: "081234567890", email: "admin@sheldon.id", persenJM: 0 },
-    { nama: "drg. V. Asung Nugroho, Sp.Ort", username: "asung", role: "Owner", hasPassword: true, isHashed: true, status: "Aktif", noReg: "503/SIP-DRG/001/2024", noHp: "081298765432", email: "v.asungnugroho@gmail.com", persenJM: 0.50 },
-    { nama: "drg. Rahma Yulinda D, Sp. BMM", username: "rahma", role: "Dokter Gigi Spesialis", hasPassword: true, isHashed: false, status: "Aktif", noReg: "503/SIP-DRG/001/2026", noHp: "081234567801", email: "rahma@sheldon.id", persenJM: 0.65 },
-    { nama: "drg. Regyana Oktavaria", username: "regyana", role: "Dokter Gigi Umum", hasPassword: true, isHashed: false, status: "Aktif", noReg: "503/SIP-DRG/002/2026", noHp: "081234567802", email: "regyana@sheldon.id", persenJM: 0.40 },
-    { nama: "drg. Latifah Mulyana", username: "latifah", role: "Dokter Gigi Umum", hasPassword: true, isHashed: false, status: "Aktif", noReg: "503/SIP-DRG/003/2026", noHp: "081234567803", email: "latifah@sheldon.id", persenJM: 0.40 },
-    { nama: "drg. Tia Ardhana R", username: "tia", role: "Dokter Gigi Umum", hasPassword: true, isHashed: false, status: "Aktif", noReg: "503/SIP-DRG/004/2026", noHp: "081234567804", email: "tia@sheldon.id", persenJM: 0.50 },
-    { nama: "Bernadette Rostenkowski", username: "bernadette", role: "Perawat Gigi", hasPassword: true, isHashed: false, status: "Aktif", noReg: "503/STR-PRW/003/2024", noHp: "081399001122", email: "bernadette@sheldon.id", persenJM: 0 },
-    { nama: "Howard Wolowitz", username: "howard", role: "Admin", hasPassword: true, isHashed: false, status: "Aktif", noReg: "-", noHp: "081377889900", email: "howard@sheldon.id", persenJM: 0 }
+    { idPekerja: "V4N-01", nama: "Administrator Sistem", username: "admin", role: "Owner", hasPassword: true, isHashed: true, status: "Aktif", noReg: "-", noHp: "081234567890", email: "admin@sheldon.id", persenJM: 0 },
+    { idPekerja: "V4N-02", nama: "drg. V. Asung Nugroho, Sp.Ort", username: "asung", role: "Owner", hasPassword: true, isHashed: true, status: "Aktif", noReg: "503/SIP-DRG/001/2024", noHp: "081298765432", email: "v.asungnugroho@gmail.com", persenJM: 0.50 },
+    { idPekerja: "DS-02", nama: "drg. Rahma Yulinda D, Sp. BMM", username: "rahma", role: "Dokter Gigi Spesialis", hasPassword: true, isHashed: false, status: "Aktif", noReg: "503/SIP-DRG/001/2026", noHp: "081234567801", email: "rahma@sheldon.id", persenJM: 0.65 },
+    { idPekerja: "DU-02", nama: "drg. Regyana Oktavaria", username: "regyana", role: "Dokter Gigi Umum", hasPassword: true, isHashed: false, status: "Aktif", noReg: "503/SIP-DRG/002/2026", noHp: "081234567802", email: "regyana@sheldon.id", persenJM: 0.40 },
+    { idPekerja: "DU-03", nama: "drg. Latifah Mulyana", username: "latifah", role: "Dokter Gigi Umum", hasPassword: true, isHashed: false, status: "Aktif", noReg: "503/SIP-DRG/003/2026", noHp: "081234567803", email: "latifah@sheldon.id", persenJM: 0.40 },
+    { idPekerja: "DU-04", nama: "drg. Tia Ardhana R", username: "tia", role: "Dokter Gigi Umum", hasPassword: true, isHashed: false, status: "Aktif", noReg: "503/SIP-DRG/004/2026", noHp: "081234567804", email: "tia@sheldon.id", persenJM: 0.50 },
+    { idPekerja: "PG-01", nama: "Bernadette Rostenkowski", username: "bernadette", role: "Perawat Gigi", hasPassword: true, isHashed: false, status: "Aktif", noReg: "503/STR-PRW/003/2024", noHp: "081399001122", email: "bernadette@sheldon.id", persenJM: 0 },
+    { idPekerja: "AS-01", nama: "Howard Wolowitz", username: "howard", role: "Admin", hasPassword: true, isHashed: false, status: "Aktif", noReg: "-", noHp: "081377889900", email: "howard@sheldon.id", persenJM: 0 }
   ];
 }
 
@@ -13390,6 +13392,7 @@ function renderTabelUser() {
 
     return `
       <tr class="hover:bg-slate-50 transition-colors ${!isAktif ? 'bg-amber-50/40' : ''}">
+        <td class="p-3 font-mono text-xs font-bold text-indigo-700">${u.idPekerja || '-'}</td>
         <td class="p-3 font-bold text-slate-800">${u.nama || '-'}</td>
         <td class="p-3 font-mono text-slate-700 text-xs font-semibold">${u.username || '-'}</td>
         <td class="p-3"><span class="px-2.5 py-1 rounded-lg text-xs ${roleBadge}">${u.role || '-'}</span></td>
@@ -13438,9 +13441,30 @@ function syncUserToClientPayroll(nama, role, status) {
         s1 = 55000; s2 = 55000; gp = 0;
         ket = "Shift Rp 55.000/shift + JM";
       }
-      let newId = "TARIF-" + String(window.PayrollState.tarifShift.length + 1).padStart(3, '0');
+      const getPfx = function(r) {
+        let rl = String(r || '').toLowerCase();
+        if (rl.includes('owner')) return 'V4N-';
+        if (rl.includes('spesialis')) return 'DS-';
+        if (rl.includes('dokter')) return 'DU-';
+        if (rl.includes('perawat gigi')) return 'PG-';
+        if (rl.includes('perawat')) return 'PU-';
+        if (rl.includes('admin')) return 'AS-';
+        if (rl.includes('office')) return 'OS-';
+        return 'ST-';
+      };
+      let pfx = getPfx(cleanRole);
+      let maxN = 0;
+      (window.PayrollState.tarifShift || []).forEach(t => {
+        let tid = String(t.idPekerja || t.idAturan || '');
+        if (tid.toUpperCase().startsWith(pfx)) {
+          let numPart = parseInt(tid.substring(pfx.length), 10);
+          if (!isNaN(numPart) && numPart > maxN) maxN = numPart;
+        }
+      });
+      let newId = pfx + String(maxN + 1).padStart(2, '0');
       window.PayrollState.tarifShift.push({
         idAturan: newId,
+        idPekerja: newId,
         role: cleanRole || "Staff",
         namaPekerja: cleanNama,
         tipeKompensasi: tipeKomp,
@@ -15449,23 +15473,39 @@ function renderInfoBmhp() {
     // 2. Masukkan secara otomatis Role dari Nama Pekerja (dari Sheet Data)
     const autoRole = foundStaff ? foundStaff.role : ((document.getElementById('tarifRole') || {}).value || 'Admin');
 
-    // 3. Isi ID_Aturan secara otomatis (TARIF-001, TARIF-002, dst)
+    // 3. Isi ID_Pekerja / ID_Aturan secara otomatis berdasarkan Role atau Sheet Data
     let exTarif = (window.PayrollState.tarifShift || []).find(x => String(x.namaPekerja || '').toLowerCase() === namaPekerja.toLowerCase());
-    let idAturan = exTarif ? exTarif.idAturan : '';
+    let idAturan = exTarif ? (exTarif.idPekerja || exTarif.idAturan) : '';
+    if (!idAturan && foundStaff) {
+      idAturan = foundStaff.idPekerja || foundStaff.id;
+    }
     if (!idAturan) {
+      const getPfx = function(r) {
+        let rl = String(r || '').toLowerCase();
+        if (rl.includes('owner')) return 'V4N-';
+        if (rl.includes('spesialis')) return 'DS-';
+        if (rl.includes('dokter')) return 'DU-';
+        if (rl.includes('perawat gigi')) return 'PG-';
+        if (rl.includes('perawat')) return 'PU-';
+        if (rl.includes('admin')) return 'AS-';
+        if (rl.includes('office')) return 'OS-';
+        return 'ST-';
+      };
+      let pfx = getPfx(autoRole);
       let maxN = 0;
       (window.PayrollState.tarifShift || []).forEach(t => {
-        let m = String(t.idAturan || '').match(/TARIF-(\d+)/i);
-        if (m) {
-          let n = parseInt(m[1], 10);
-          if (n > maxN) maxN = n;
+        let tid = String(t.idPekerja || t.idAturan || '');
+        if (tid.toUpperCase().startsWith(pfx)) {
+          let numPart = parseInt(tid.substring(pfx.length), 10);
+          if (!isNaN(numPart) && numPart > maxN) maxN = numPart;
         }
       });
-      idAturan = 'TARIF-' + String(maxN + 1).padStart(3, '0');
+      idAturan = pfx + String(maxN + 1).padStart(2, '0');
     }
 
     const payload = {
       idAturan: idAturan,
+      idPekerja: idAturan,
       namaPekerja: foundStaff ? foundStaff.nama : namaPekerja,
       role: autoRole,
       tipeKompensasi: (document.getElementById('tarifTipe') || {}).value,

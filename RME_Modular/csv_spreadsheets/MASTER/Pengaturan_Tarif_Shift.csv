@@ -1,23 +1,23 @@
-ID_Aturan,Role,Nama_Pekerja,Tipe_Kompensasi,Tarif_Shift_1,Tarif_Shift_2,Gaji_Pokok_Bulanan,Keterangan,Status
-TARIF-001,Owner,Administrator Sistem,Kombinasi Shift & Tindakan,55000,55000,0,2 Shift: Rp 55.000/shift + JM 65%,Aktif
-TARIF-002,Owner,"drg. V. Asung Nugroho, Sp.Ort",Kombinasi Shift & Tindakan,55000,55000,0,2 Shift: Rp 55.000/shift + JM 65%,Aktif
-TARIF-003,Dokter Gigi Spesialis,"drg. Sheldon Cooper, Sp.Ort",Kombinasi Shift & Tindakan,55000,55000,0,2 Shift: Rp 55.000/shift + JM 50% (Rontgen 15%),Aktif
-TARIF-004,Dokter Gigi Umum,drg. Leonard Hofstadter,Kombinasi Shift & Tindakan,55000,55000,0,2 Shift: Rp 55.000/shift + JM 40% (Rontgen 15%),Aktif
-TARIF-005,Dokter Gigi Spesialis,"drg. Rahma Yulinda D, Sp. BMM",Kombinasi Shift & Tindakan,55000,55000,0,2 Shift: Rp 55.000/shift + JM 65% (Rontgen 15%),Aktif
-TARIF-006,Dokter Gigi Umum,drg. Regyana Oktavaria,Kombinasi Shift & Tindakan,55000,55000,0,2 Shift: Rp 55.000/shift + JM 40% (Rontgen 15%),Aktif
-TARIF-007,Dokter Gigi Umum,drg. Latifah Mulyana,Kombinasi Shift & Tindakan,55000,55000,0,2 Shift: Rp 55.000/shift + JM 40% (Rontgen 15%),Aktif
-TARIF-008,Dokter Gigi Umum,drg. Tia Ardhana R,Kombinasi Shift & Tindakan,55000,55000,0,2 Shift: Rp 55.000/shift + JM 50% (Rontgen 15%),Aktif
-TARIF-009,Dokter Gigi Umum,drg. Danny,Kombinasi Shift & Tindakan,55000,55000,0,2 Shift: Rp 55.000/shift + JM 65% (Rontgen 15%),Aktif
-TARIF-010,Dokter Gigi Umum,drg. Astri,Kombinasi Shift & Tindakan,55000,55000,0,2 Shift: Rp 55.000/shift + JM 65% (Rontgen 15%),Aktif
-TARIF-011,Dokter Gigi Umum,drg. Rizka,Kombinasi Shift & Tindakan,55000,55000,0,2 Shift: Rp 55.000/shift + JM 65% (Rontgen 15%),Aktif
-TARIF-012,Dokter Gigi Umum,drg. Nanda,Kombinasi Shift & Tindakan,55000,55000,0,2 Shift: Rp 55.000/shift + JM 65% (Rontgen 15%),Aktif
-TARIF-013,Dokter Gigi Umum,drg. Aviva,Kombinasi Shift & Tindakan,55000,55000,0,2 Shift: Rp 55.000/shift + JM 65% (Rontgen 15%),Aktif
-TARIF-014,Dokter Gigi Umum,drg. Erien,Kombinasi Shift & Tindakan,55000,55000,0,2 Shift: Rp 55.000/shift + JM 50% (Rontgen 15%),Aktif
-TARIF-015,Dokter Gigi Umum,drg.g.p Dinda,Kombinasi Shift & Tindakan,55000,55000,0,2 Shift: Rp 55.000/shift + JM 55% (Rontgen 15%),Aktif
-TARIF-016,Dokter Gigi Umum,drg.g.p Fathya,Kombinasi Shift & Tindakan,55000,55000,0,2 Shift: Rp 55.000/shift + JM 40% (Rontgen 15%),Aktif
-TARIF-017,Dokter Gigi Umum,drg.g.p Belinda,Kombinasi Shift & Tindakan,55000,55000,0,2 Shift: Rp 55.000/shift + JM 40% (Rontgen 15%),Aktif
-TARIF-018,Perawat Gigi,Bernadette Rostenkowski,Uang Harian Shift,45000,45000,0,2 Shift: Rp 45.000/shift (dihitung berdasarkan absensi kehadiran),Aktif
-TARIF-019,Perawat Gigi,Wulan,Uang Harian Shift,45000,45000,0,2 Shift: Rp 45.000/shift (dihitung berdasarkan absensi kehadiran),Aktif
-TARIF-020,Perawat Gigi,Dina,Uang Harian Shift,45000,45000,0,2 Shift: Rp 45.000/shift (dihitung berdasarkan absensi kehadiran),Aktif
-TARIF-021,Perawat Umum,Penny Teller,Uang Harian Shift,45000,45000,0,2 Shift: Rp 45.000/shift (dihitung berdasarkan absensi kehadiran),Aktif
-TARIF-022,Admin,Howard Wolowitz,Gaji Bulanan Tetap,0,0,1200000,Gaji Bulanan Tetap Rp 1.200.000/bulan (Non-Shift),Aktif
+ID_Pekerja,Role,Nama_Pekerja,Tipe_Kompensasi,Tarif_Shift_1,Tarif_Shift_2,Gaji_Pokok_Bulanan,Keterangan,Status
+V4N-01,Owner,Administrator Sistem,Kombinasi Shift & Tindakan,55000,55000,0,2 Shift: Rp 55.000/shift + JM 65%,Aktif
+V4N-02,Owner,"drg. V. Asung Nugroho, Sp.Ort",Kombinasi Shift & Tindakan,55000,55000,0,2 Shift: Rp 55.000/shift + JM 65%,Aktif
+DS-01,Dokter Gigi Spesialis,"drg. Sheldon Cooper, Sp.Ort",Kombinasi Shift & Tindakan,55000,55000,0,2 Shift: Rp 55.000/shift + JM 50% (Rontgen 15%),Aktif
+DU-01,Dokter Gigi Umum,drg. Leonard Hofstadter,Kombinasi Shift & Tindakan,55000,55000,0,2 Shift: Rp 55.000/shift + JM 40% (Rontgen 15%),Aktif
+DS-02,Dokter Gigi Spesialis,"drg. Rahma Yulinda D, Sp. BMM",Kombinasi Shift & Tindakan,55000,55000,0,2 Shift: Rp 55.000/shift + JM 65% (Rontgen 15%),Aktif
+DU-02,Dokter Gigi Umum,drg. Regyana Oktavaria,Kombinasi Shift & Tindakan,55000,55000,0,2 Shift: Rp 55.000/shift + JM 40% (Rontgen 15%),Aktif
+DU-03,Dokter Gigi Umum,drg. Latifah Mulyana,Kombinasi Shift & Tindakan,55000,55000,0,2 Shift: Rp 55.000/shift + JM 40% (Rontgen 15%),Aktif
+DU-04,Dokter Gigi Umum,drg. Tia Ardhana R,Kombinasi Shift & Tindakan,55000,55000,0,2 Shift: Rp 55.000/shift + JM 50% (Rontgen 15%),Aktif
+DU-05,Dokter Gigi Umum,drg. Danny,Kombinasi Shift & Tindakan,55000,55000,0,2 Shift: Rp 55.000/shift + JM 65% (Rontgen 15%),Aktif
+DU-06,Dokter Gigi Umum,drg. Astri,Kombinasi Shift & Tindakan,55000,55000,0,2 Shift: Rp 55.000/shift + JM 65% (Rontgen 15%),Aktif
+DU-07,Dokter Gigi Umum,drg. Rizka,Kombinasi Shift & Tindakan,55000,55000,0,2 Shift: Rp 55.000/shift + JM 65% (Rontgen 15%),Aktif
+DU-08,Dokter Gigi Umum,drg. Nanda,Kombinasi Shift & Tindakan,55000,55000,0,2 Shift: Rp 55.000/shift + JM 65% (Rontgen 15%),Aktif
+DU-09,Dokter Gigi Umum,drg. Aviva,Kombinasi Shift & Tindakan,55000,55000,0,2 Shift: Rp 55.000/shift + JM 65% (Rontgen 15%),Aktif
+DU-10,Dokter Gigi Umum,drg. Erien,Kombinasi Shift & Tindakan,55000,55000,0,2 Shift: Rp 55.000/shift + JM 50% (Rontgen 15%),Aktif
+DU-11,Dokter Gigi Umum,drg.g.p Dinda,Kombinasi Shift & Tindakan,55000,55000,0,2 Shift: Rp 55.000/shift + JM 55% (Rontgen 15%),Aktif
+DU-12,Dokter Gigi Umum,drg.g.p Fathya,Kombinasi Shift & Tindakan,55000,55000,0,2 Shift: Rp 55.000/shift + JM 40% (Rontgen 15%),Aktif
+DU-13,Dokter Gigi Umum,drg.g.p Belinda,Kombinasi Shift & Tindakan,55000,55000,0,2 Shift: Rp 55.000/shift + JM 40% (Rontgen 15%),Aktif
+PG-01,Perawat Gigi,Bernadette Rostenkowski,Uang Harian Shift,45000,45000,0,2 Shift: Rp 45.000/shift (dihitung berdasarkan absensi kehadiran),Aktif
+PG-02,Perawat Gigi,Wulan,Uang Harian Shift,45000,45000,0,2 Shift: Rp 45.000/shift (dihitung berdasarkan absensi kehadiran),Aktif
+PG-03,Perawat Gigi,Dina,Uang Harian Shift,45000,45000,0,2 Shift: Rp 45.000/shift (dihitung berdasarkan absensi kehadiran),Aktif
+PU-01,Perawat Umum,Penny Teller,Uang Harian Shift,45000,45000,0,2 Shift: Rp 45.000/shift (dihitung berdasarkan absensi kehadiran),Aktif
+AS-01,Admin,Howard Wolowitz,Gaji Bulanan Tetap,0,0,1200000,Gaji Bulanan Tetap Rp 1.200.000/bulan (Non-Shift),Aktif

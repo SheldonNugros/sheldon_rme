@@ -1414,8 +1414,15 @@ var savedTarif = (window.PayrollState.tarifShift || []).find(function(t) {
 });
 assert("PAYROLL-15: Skenario 11 - Pendaftaran Berhasil & Role Otomatis Sesuai Sheet Data", savedTarif && savedTarif.role === targetValidStaff.role);
 
-// Uji Skenario 12: ID_Aturan Terisi Otomatis dengan Format TARIF-XXX
-assert("PAYROLL-16: Skenario 12 - ID_Aturan Terisi Otomatis dengan Format TARIF-XXX", savedTarif && /^TARIF-\d{3,}$/.test(savedTarif.idAturan));
+// Uji Skenario 12: ID_Aturan / ID_Pekerja Terisi Otomatis dengan Format Role Prefix (V4N/DS/DU/PG/PU/AS/OS-XX)
+assert("PAYROLL-16: Skenario 12 - ID_Aturan Terisi Otomatis dengan Format Role ID (V4N/DS/DU/PG/PU/AS/OS-XX)", savedTarif && /^(V4N|DS|DU|PG|PU|AS|OS|TARIF)-\d{2,}$/.test(savedTarif.idAturan || savedTarif.idPekerja));
+
+// Uji Skenario 13: Verifikasi ID_Pekerja pada Staff Master User Mengikuti Aturan Prefix Role
+var sampleStaff = window.KlinikData && window.KlinikData.staff ? window.KlinikData.staff : [];
+var validStaffIds = sampleStaff.every(function(s) {
+  return !s.idPekerja || /^(V4N|DS|DU|PG|PU|AS|OS)-\d{2}$/.test(s.idPekerja);
+});
+assert("MASTER-ID-1: Format ID_Pekerja Seluruh Staff Mengikuti Prefix Role (V4N/DS/DU/PG/PU/AS/OS-XX)", sampleStaff.length > 0 && validStaffIds);
 
 // --- TEST: Sistem Presensi & Absensi Pegawai ---
 print("\n--- TEST: Sistem Presensi & Absensi Pegawai ---");

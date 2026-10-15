@@ -22,6 +22,7 @@ const MASTER_USER_CONFIG = {
   // ID Spreadsheet RME Sheldon - 06 Master User & Role
   SPREADSHEET_ID: "1e_UqCBpqs-YBF2XRsaoW3yG1r8o3nNDI1vGPQyp8nCE",
   HEADERS: [
+    "ID_Pekerja",
     "Nama_Pekerja",
     "Username",
     "Kategori_Role",
@@ -29,7 +30,8 @@ const MASTER_USER_CONFIG = {
     "Status",
     "No_Registrasi",
     "No_HP",
-    "Persen_JM_Dokter"
+    "Persen_JM_Dokter",
+    "Email"
   ],
   ROLES: [
     "Owner",
@@ -52,10 +54,163 @@ function onOpen() {
       .addItem("➕ Buka Form Tambah/Edit User", "bukaFormUserMasterDialog")
       .addItem("📋 Buka Sidebar Kelola User", "bukaFormUserMasterSidebar")
       .addSeparator()
+      .addItem("🆔 Generate/Update Seluruh ID Pekerja", "generateAllIdPekerja")
       .addItem("⚙️ Setup Header & Format Sheet Data", "initFormatSheetUserMaster")
       .addToUi();
   } catch (e) {
     Logger.log("onOpen non-UI context: " + e.message);
+  }
+}
+
+/**
+ * TRIGGER OTOMATIS: onEdit
+ * Mengisi otomatis ID_Pekerja pada baris baru jika user mengetik langsung di Spreadsheet
+ */
+function onEdit(e) {
+  try {
+    if (!e || !e.range) return;
+    const sheet = e.range.getSheet();
+    if (sheet.getName() !== MASTER_USER_CONFIG.SHEET_NAME) return;
+
+    const row = e.range.getRow();
+    if (row <= 1) return;
+
+    const data = sheet.getDataRange().getValues();
+    const headers = data[0].map(h => String(h || "").trim().toLowerCase());
+    let colId = headers.indexOf("id_pekerja");
+    let colRole = headers.indexOf("kategori_role");
+    let colNama = headers.indexOf("nama_pekerja");
+
+    if (colId === -1 || colRole === -1) return;
+
+    let currentId = String(sheet.getRange(row, colId + 1).getValue() || "").trim();
+    let currentRole = String(sheet.getRange(row, colRole + 1).getValue() || "").trim();
+    let currentNama = colNama !== -1 ? String(sheet.getRange(row, colNama + 1).getValue() || "").trim() : "";
+
+    if (currentNama && currentRole && !currentId) {
+      let newId = generateNextIdPekerja(currentRole, sheet);
+      sheet.getRange(row, colId + 1).setValue(newId).setNumberFormat("@");
+    }
+  } catch (err) {
+    Logger.log("onEdit Error: " + err.message);
+  }
+}
+
+function getPrefixRole(role) {
+  const r = String(role || "").trim().toLowerCase();
+  if (r === "owner") return "V4N-";
+  if (r === "dokter gigi spesialis") return "DS-";
+  if (r === "dokter gigi umum") return "DU-";
+  if (r === "perawat gigi") return "PG-";
+  if (r === "perawat umum") return "PU-";
+  if (r === "admin") return "AS-";
+  if (r === "office") return "OS-";
+  return "ST-";
+}
+
+function generateNextIdPekerja(role, sheet) {
+  const prefix = getPrefixRole(role);
+  let maxNum = 0;
+  if (!sheet) sheet = getSheetUserMaster();
+  const data = sheet.getDataRange().getValues();
+  if (data.length <= 1) return prefix + "01";
+  
+  const headers = data[0].map(h => String(h || "").trim().toLowerCase());
+  let colId = headers.indexOf("id_pekerja");
+  if (colId === -1) colId = 0;
+
+  for (let i = 1; i < data.length; i++) {
+    let val = String(data[i][colId] || "").trim();
+    if (val.toUpperCase().startsWith(prefix.toUpperCase())) {
+      let numPart = val.substring(prefix.length);
+      let n = parseInt(numPart, 10);
+      if (!isNaN(n) && n > maxNum) {
+        maxNum = n;
+      }
+    }
+  }
+  return prefix + String(maxNum + 1).padStart(2, '0');
+}
+
+/**
+ * GENERATE & UPDATE SELURUH ID PEKERJA BERDASARKAN ROLE
+ * Mengisi ID_Pekerja di sheet 'Data' dan memperbarui ID di sheet 'Pengaturan_Tarif_Shift'
+ */
+function generateAllIdPekerja() {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet() || SpreadsheetApp.openById(MASTER_USER_CONFIG.SPREADSHEET_ID);
+    let sheetData = ss.getSheetByName(MASTER_USER_CONFIG.SHEET_NAME);
+    if (!sheetData) return { success: false, message: "Sheet Data tidak ditemukan!" };
+
+    let data = sheetData.getDataRange().getValues();
+    if (data.length === 0) return { success: false, message: "Sheet Data kosong!" };
+
+    let headers = data[0].map(h => String(h || "").trim());
+    let headersLow = headers.map(h => h.toLowerCase());
+    let colId = headersLow.indexOf("id_pekerja");
+
+    if (colId === -1) {
+      sheetData.insertColumnBefore(1);
+      sheetData.getRange(1, 1).setValue("ID_Pekerja").setFontWeight("bold").setBackground("#e2e8f0");
+      colId = 0;
+      data = sheetData.getDataRange().getValues();
+      headers = data[0].map(h => String(h || "").trim());
+      headersLow = headers.map(h => h.toLowerCase());
+    }
+
+    let colNama = headersLow.indexOf("nama_pekerja"); if (colNama === -1) colNama = 1;
+    let colRole = headersLow.indexOf("kategori_role"); if (colRole === -1) colRole = 3;
+
+    const counters = {
+      "V4N-": 0, "DS-": 0, "DU-": 0, "PG-": 0, "PU-": 0, "AS-": 0, "OS-": 0, "ST-": 0
+    };
+
+    const idMapByNama = {};
+
+    for (let i = 1; i < data.length; i++) {
+      let r = data[i];
+      let nama = String(r[colNama] || "").trim();
+      let role = String(r[colRole] || "").trim();
+      if (!nama) continue;
+
+      let prefix = getPrefixRole(role);
+      counters[prefix] = (counters[prefix] || 0) + 1;
+      let newId = prefix + String(counters[prefix]).padStart(2, '0');
+
+      sheetData.getRange(i + 1, colId + 1).setValue(newId);
+      idMapByNama[nama.toLowerCase()] = newId;
+    }
+
+    let shTarif = ss.getSheetByName("Pengaturan_Tarif_Shift");
+    if (shTarif && shTarif.getLastRow() > 1) {
+      let tData = shTarif.getDataRange().getValues();
+      let tHeaders = tData[0].map(h => String(h || "").trim().toLowerCase());
+      let tColId = tHeaders.indexOf("id_pekerja");
+      if (tColId === -1) tColId = tHeaders.indexOf("id_aturan");
+      if (tColId === -1) tColId = 0;
+
+      shTarif.getRange(1, tColId + 1).setValue("ID_Pekerja").setFontWeight("bold").setBackground("#e2e8f0");
+
+      let tColNama = tHeaders.indexOf("nama_pekerja");
+      if (tColNama === -1) tColNama = 2;
+
+      for (let j = 1; j < tData.length; j++) {
+        let tNama = String(tData[j][tColNama] || "").trim().toLowerCase();
+        if (idMapByNama[tNama]) {
+          shTarif.getRange(j + 1, tColId + 1).setValue(idMapByNama[tNama]);
+        }
+      }
+    }
+
+    sheetData.getRange(2, colId + 1, sheetData.getLastRow() - 1, 1).setNumberFormat("@");
+
+    const msg = "✅ Berhasil membuat & memperbarui seluruh ID_Pekerja di Sheet Data dan Pengaturan_Tarif_Shift!";
+    try { SpreadsheetApp.getUi().alert(msg); } catch (e) { Logger.log(msg); }
+    return { success: true, message: msg };
+  } catch (err) {
+    const errMsg = "Gagal generateAllIdPekerja: " + err.message;
+    try { SpreadsheetApp.getUi().alert(errMsg); } catch (e) { Logger.log(errMsg); }
+    return { success: false, message: errMsg };
   }
 }
 
@@ -156,14 +311,15 @@ function getDaftarUserMaster() {
     if (data.length <= 1) return [];
 
     const headers = data[0].map(h => String(h || "").trim().toLowerCase());
-    let colNama = headers.indexOf("nama_pekerja"); if (colNama === -1) colNama = 0;
-    let colUser = headers.indexOf("username"); if (colUser === -1) colUser = 1;
-    let colRole = headers.indexOf("kategori_role"); if (colRole === -1) colRole = 2;
-    let colPass = headers.indexOf("password"); if (colPass === -1) colPass = 3;
-    let colStatus = headers.indexOf("status"); if (colStatus === -1) colStatus = 4;
-    let colReg = headers.indexOf("no_registrasi"); if (colReg === -1) colReg = 5;
-    let colHp = headers.indexOf("no_hp"); if (colHp === -1) colHp = 6;
-    let colJM = headers.indexOf("persen_jm_dokter"); if (colJM === -1) colJM = 7;
+    let colId = headers.indexOf("id_pekerja");
+    let colNama = headers.indexOf("nama_pekerja"); if (colNama === -1) colNama = (colId === 0 ? 1 : 0);
+    let colUser = headers.indexOf("username"); if (colUser === -1) colUser = (colId === 0 ? 2 : 1);
+    let colRole = headers.indexOf("kategori_role"); if (colRole === -1) colRole = (colId === 0 ? 3 : 2);
+    let colPass = headers.indexOf("password"); if (colPass === -1) colPass = (colId === 0 ? 4 : 3);
+    let colStatus = headers.indexOf("status"); if (colStatus === -1) colStatus = (colId === 0 ? 5 : 4);
+    let colReg = headers.indexOf("no_registrasi"); if (colReg === -1) colReg = (colId === 0 ? 6 : 5);
+    let colHp = headers.indexOf("no_hp"); if (colHp === -1) colHp = (colId === 0 ? 7 : 6);
+    let colJM = headers.indexOf("persen_jm_dokter"); if (colJM === -1) colJM = (colId === 0 ? 8 : 7);
 
     let result = [];
     for (let i = 1; i < data.length; i++) {
@@ -176,8 +332,10 @@ function getDaftarUserMaster() {
       let hasPass = passVal.length > 0;
       let isHashed = passVal.length === 64;
       let jmVal = (colJM !== -1 && r[colJM] !== "" && r[colJM] !== null && r[colJM] !== undefined) ? Number(r[colJM]) : 0;
+      let idPek = (colId !== -1 && r[colId]) ? String(r[colId]).trim() : "";
 
       result.push({
+        idPekerja: idPek,
         nama: nama,
         username: username,
         role: String(r[colRole] || "Staff").trim(),
@@ -212,14 +370,16 @@ function simpanUserMaster(payload) {
     const data = sheet.getDataRange().getValues();
     const headers = data[0].map(h => String(h || "").trim().toLowerCase());
 
-    let colNama = headers.indexOf("nama_pekerja"); if (colNama === -1) colNama = 0;
-    let colUser = headers.indexOf("username"); if (colUser === -1) colUser = 1;
-    let colRole = headers.indexOf("kategori_role"); if (colRole === -1) colRole = 2;
-    let colPass = headers.indexOf("password"); if (colPass === -1) colPass = 3;
-    let colStatus = headers.indexOf("status"); if (colStatus === -1) colStatus = 4;
-    let colReg = headers.indexOf("no_registrasi"); if (colReg === -1) colReg = 5;
-    let colHp = headers.indexOf("no_hp"); if (colHp === -1) colHp = 6;
-    let colJM = headers.indexOf("persen_jm_dokter"); if (colJM === -1) colJM = 7;
+    let colId = headers.indexOf("id_pekerja");
+    let colNama = headers.indexOf("nama_pekerja"); if (colNama === -1) colNama = (colId === 0 ? 1 : 0);
+    let colUser = headers.indexOf("username"); if (colUser === -1) colUser = (colId === 0 ? 2 : 1);
+    let colRole = headers.indexOf("kategori_role"); if (colRole === -1) colRole = (colId === 0 ? 3 : 2);
+    let colPass = headers.indexOf("password"); if (colPass === -1) colPass = (colId === 0 ? 4 : 3);
+    let colStatus = headers.indexOf("status"); if (colStatus === -1) colStatus = (colId === 0 ? 5 : 4);
+    let colReg = headers.indexOf("no_registrasi"); if (colReg === -1) colReg = (colId === 0 ? 6 : 5);
+    let colHp = headers.indexOf("no_hp"); if (colHp === -1) colHp = (colId === 0 ? 7 : 6);
+    let colJM = headers.indexOf("persen_jm_dokter"); if (colJM === -1) colJM = (colId === 0 ? 8 : 7);
+    let colEmail = headers.indexOf("email");
 
     let cleanUser = String(payload.username).trim().toLowerCase().replace(/\s+/g, '');
     let rowIndex = -1;
@@ -243,6 +403,17 @@ function simpanUserMaster(payload) {
       sheet.getRange(rowIndex, colHp + 1).setValue(payload.noHp || "");
       sheet.getRange(rowIndex, colJM + 1).setValue(pjmVal);
 
+      if (colId !== -1) {
+        let curIdVal = String(sheet.getRange(rowIndex, colId + 1).getValue() || "").trim();
+        if (!curIdVal) {
+          sheet.getRange(rowIndex, colId + 1).setValue(generateNextIdPekerja(payload.role, sheet)).setNumberFormat("@");
+        }
+      }
+
+      if (colEmail !== -1 && payload.email !== undefined) {
+        sheet.getRange(rowIndex, colEmail + 1).setValue(String(payload.email || "").trim());
+      }
+
       if (payload.password && String(payload.password).trim() !== "") {
         let cellPass = sheet.getRange(rowIndex, colPass + 1);
         cellPass.setNumberFormat("@"); // Format Plain Text
@@ -256,7 +427,9 @@ function simpanUserMaster(payload) {
         return { success: false, message: "Password wajib diisi untuk pengguna baru!" };
       }
 
-      let newRow = new Array(Math.max(8, headers.length)).fill("");
+      let newRow = new Array(Math.max(10, headers.length)).fill("");
+      let newId = payload.idPekerja || generateNextIdPekerja(payload.role, sheet);
+      if (colId !== -1) newRow[colId] = newId;
       newRow[colNama] = payload.nama.trim();
       newRow[colUser] = cleanUser;
       newRow[colRole] = payload.role.trim();
@@ -265,13 +438,15 @@ function simpanUserMaster(payload) {
       newRow[colReg] = payload.noReg || "-";
       newRow[colHp] = payload.noHp || "";
       newRow[colJM] = pjmVal;
+      if (colEmail !== -1) newRow[colEmail] = String(payload.email || "").trim();
 
       sheet.appendRow(newRow);
       let lastRow = sheet.getLastRow();
+      if (colId !== -1) sheet.getRange(lastRow, colId + 1).setNumberFormat("@");
       sheet.getRange(lastRow, colPass + 1).setNumberFormat("@");
       sheet.getRange(lastRow, colJM + 1).setNumberFormat("0.0%");
 
-      return { success: true, message: "Pengguna baru '" + cleanUser + "' (" + payload.role + ") berhasil ditambahkan!" };
+      return { success: true, message: "Pengguna baru '" + cleanUser + "' (" + payload.role + ", ID: " + newId + ") berhasil ditambahkan!" };
     }
   } catch (err) {
     return { success: false, message: "Gagal menyimpan user: " + err.message };
@@ -328,18 +503,19 @@ function initFormatSheetUserMaster() {
       .requireValueInList(MASTER_USER_CONFIG.ROLES, true)
       .setAllowInvalid(false)
       .build();
-    sheet.getRange(2, 3, 100, 1).setDataValidation(ruleRole);
+    sheet.getRange(2, 4, 100, 1).setDataValidation(ruleRole); // Column D: Kategori_Role
 
     const ruleStatus = SpreadsheetApp.newDataValidation()
       .requireValueInList(["Aktif", "Tidak Aktif"], true)
       .setAllowInvalid(false)
       .build();
-    sheet.getRange(2, 5, 100, 1).setDataValidation(ruleStatus);
+    sheet.getRange(2, 6, 100, 1).setDataValidation(ruleStatus); // Column F: Status
 
-    sheet.getRange(2, 4, 100, 1).setNumberFormat("@");
-    sheet.getRange(2, 8, 100, 1).setNumberFormat("0.0%");
+    sheet.getRange(2, 1, 100, 1).setNumberFormat("@"); // Column A: ID_Pekerja plain text
+    sheet.getRange(2, 5, 100, 1).setNumberFormat("@"); // Column E: Password plain text
+    sheet.getRange(2, 9, 100, 1).setNumberFormat("0.0%"); // Column I: Persen JM
 
-    SpreadsheetApp.getUi().alert("✅ Format sheet 'Data' dan validasi 7 Kategori Role berhasil disiapkan!");
+    SpreadsheetApp.getUi().alert("✅ Format sheet 'Data' (termasuk ID_Pekerja & Email) dan validasi 7 Kategori Role berhasil disiapkan!");
   } catch (err) {
     SpreadsheetApp.getUi().alert("Gagal format: " + err.message);
   }
@@ -455,6 +631,7 @@ function getHtmlFormUserMasterContent() {
 '        <table class="w-full text-left whitespace-nowrap text-xs">' +
 '          <thead class="bg-slate-50 text-[10px] uppercase font-bold text-slate-500 border-b border-slate-200 sticky top-0">' +
 '            <tr>' +
+'              <th class="p-2.5">ID Pekerja</th>' +
 '              <th class="p-2.5">Nama</th>' +
 '              <th class="p-2.5">Username</th>' +
 '              <th class="p-2.5">Role</th>' +
@@ -466,7 +643,7 @@ function getHtmlFormUserMasterContent() {
 '            </tr>' +
 '          </thead>' +
 '          <tbody id="tbodyUser" class="divide-y divide-slate-100">' +
-'            <tr><td colspan="8" class="text-center py-6 text-slate-400 font-bold">Memuat akun pengguna...</td></tr>' +
+'            <tr><td colspan="9" class="text-center py-6 text-slate-400 font-bold">Memuat akun pengguna...</td></tr>' +
 '          </tbody>' +
 '        </table>' +
 '      </div>' +
@@ -488,10 +665,10 @@ function getHtmlFormUserMasterContent() {
 '    }' +
 '    function muatUser() {' +
 '      const tbody = document.getElementById("tbodyUser");' +
-'      tbody.innerHTML = "<tr><td colspan=\'8\' class=\'text-center py-6 text-slate-400 font-bold\'>Memuat dari spreadsheet...</td></tr>";' +
+'      tbody.innerHTML = "<tr><td colspan=\'9\' class=\'text-center py-6 text-slate-400 font-bold\'>Memuat dari spreadsheet...</td></tr>";' +
 '      google.script.run' +
 '        .withSuccessHandler(function(res) { listUsers = res || []; renderTabel(); })' +
-'        .withFailureHandler(function(err) { tbody.innerHTML = "<tr><td colspan=\'8\' class=\'text-center py-6 text-rose-500 font-bold\'>Gagal: " + (err.message || err) + "</td></tr>"; })' +
+'        .withFailureHandler(function(err) { tbody.innerHTML = "<tr><td colspan=\'9\' class=\'text-center py-6 text-rose-500 font-bold\'>Gagal: " + (err.message || err) + "</td></tr>"; })' +
 '        .getDaftarUserMaster();' +
 '    }' +
 '    function renderTabel() {' +
@@ -499,9 +676,9 @@ function getHtmlFormUserMasterContent() {
 '      const q = (document.getElementById("inCari").value || "").toLowerCase().trim();' +
 '      let filtered = listUsers.filter(function(u) {' +
 '        if (!q) return true;' +
-'        return (u.nama || "").toLowerCase().indexOf(q) !== -1 || (u.username || "").toLowerCase().indexOf(q) !== -1 || (u.role || "").toLowerCase().indexOf(q) !== -1;' +
+'        return (u.nama || "").toLowerCase().indexOf(q) !== -1 || (u.username || "").toLowerCase().indexOf(q) !== -1 || (u.role || "").toLowerCase().indexOf(q) !== -1 || (u.idPekerja || "").toLowerCase().indexOf(q) !== -1;' +
 '      });' +
-'      if (filtered.length === 0) { tbody.innerHTML = "<tr><td colspan=\'8\' class=\'text-center py-6 text-slate-400 font-bold\'>Tidak ada data.</td></tr>"; return; }' +
+'      if (filtered.length === 0) { tbody.innerHTML = "<tr><td colspan=\'9\' class=\'text-center py-6 text-slate-400 font-bold\'>Tidak ada data.</td></tr>"; return; }' +
 '      tbody.innerHTML = filtered.map(function(u) {' +
 '        let badgeColor = "bg-slate-100 text-slate-700";' +
 '        let rLow = (u.role || "").toLowerCase();' +
@@ -514,6 +691,7 @@ function getHtmlFormUserMasterContent() {
 '        if (rLow.indexOf("dokter") === -1) jmVal = "-";' +
 '        let safeUser = String(u.username).replace(/\'/g, "\\\\\'");' +
 '        return "<tr class=\'hover:bg-slate-50 transition-colors\'>" +' +
+'          "<td class=\'p-2.5 font-mono font-bold text-indigo-700\'>" + (u.idPekerja || "-") + "</td>" +' +
 '          "<td class=\'p-2.5 font-bold text-slate-800\'>" + (u.nama || "-") + "</td>" +' +
 '          "<td class=\'p-2.5 font-mono text-slate-600\'>" + (u.username || "-") + "</td>" +' +
 '          "<td class=\'p-2.5\'><span class=\'px-2 py-0.5 rounded text-[11px] " + badgeColor + "\'>" + (u.role || "-") + "</span></td>" +' +

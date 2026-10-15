@@ -2198,22 +2198,23 @@ function simpanUserMaster(payload) {
     const sheet = ss.getSheetByName("Data") || ss.insertSheet("Data");
     const v = sheet.getDataRange().getValues();
     if (v.length === 0) {
-      sheet.appendRow(["Nama_Pekerja", "Username", "Kategori_Role", "Password", "Status", "No_Registrasi", "No_HP", "Persen_JM_Dokter", "Email"]);
+      sheet.appendRow(["ID_Pekerja", "Nama_Pekerja", "Username", "Kategori_Role", "Password", "Status", "No_Registrasi", "No_HP", "Persen_JM_Dokter", "Email"]);
     }
 
     let h = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
-    let idNama = getColIdx(h, ['namapekerja', 'nama']); if (idNama === -1) idNama = 0;
-    let idUser = getColIdx(h, ['username', 'user']); if (idUser === -1) idUser = 1;
-    let idRole = getColIdx(h, ['kategorirole', 'role', 'kategori']); if (idRole === -1) idRole = 2;
-    let idPass = getColIdx(h, ['password', 'pass']); if (idPass === -1) idPass = 3;
-    let idStatus = getColIdx(h, ['status']); if (idStatus === -1) idStatus = 4;
-    let idSIP = getColIdx(h, ['noregistrasi', 'sip', 'noreg']); if (idSIP === -1) idSIP = 5;
-    let idHP = getColIdx(h, ['nohp', 'no_hp', 'telepon', 'wa']); if (idHP === -1) idHP = 6;
-    let idJM = getColIdx(h, ['persen_jm_dokter', 'persen_jm', 'persenjm']); if (idJM === -1) idJM = 7;
+    let idCol = getColIdx(h, ['idpekerja', 'id_pekerja', 'id']);
+    let idNama = getColIdx(h, ['namapekerja', 'nama']); if (idNama === -1) idNama = (idCol === 0 ? 1 : 0);
+    let idUser = getColIdx(h, ['username', 'user']); if (idUser === -1) idUser = (idCol === 0 ? 2 : 1);
+    let idRole = getColIdx(h, ['kategorirole', 'role', 'kategori']); if (idRole === -1) idRole = (idCol === 0 ? 3 : 2);
+    let idPass = getColIdx(h, ['password', 'pass']); if (idPass === -1) idPass = (idCol === 0 ? 4 : 3);
+    let idStatus = getColIdx(h, ['status']); if (idStatus === -1) idStatus = (idCol === 0 ? 5 : 4);
+    let idSIP = getColIdx(h, ['noregistrasi', 'sip', 'noreg']); if (idSIP === -1) idSIP = (idCol === 0 ? 6 : 5);
+    let idHP = getColIdx(h, ['nohp', 'no_hp', 'telepon', 'wa']); if (idHP === -1) idHP = (idCol === 0 ? 7 : 6);
+    let idJM = getColIdx(h, ['persen_jm_dokter', 'persen_jm', 'persenjm']); if (idJM === -1) idJM = (idCol === 0 ? 8 : 7);
     let idEmail = getColIdx(h, ['email', 'surel', 'e-mail']);
 
     if (idEmail === -1) {
-      idEmail = Math.max(8, h.length);
+      idEmail = Math.max(9, h.length);
       sheet.getRange(1, idEmail + 1).setValue("Email").setFontWeight("bold").setBackground("#e2e8f0");
       h = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
     }
@@ -2274,7 +2275,9 @@ function simpanUserMaster(payload) {
         return { success: false, message: "Password wajib diisi untuk user baru!" };
       }
 
-      let newRow = new Array(Math.max(9, h.length, idEmail + 1)).fill("");
+      let newRow = new Array(Math.max(10, h.length, idEmail + 1)).fill("");
+      let newId = payload.idPekerja || generateNextIdPekerja(payload.role, sheet);
+      if (idCol !== -1) newRow[idCol] = newId;
       newRow[idNama] = payload.nama.trim();
       newRow[idUser] = cleanUser;
       newRow[idRole] = payload.role.trim();
@@ -2287,6 +2290,7 @@ function simpanUserMaster(payload) {
 
       sheet.appendRow(newRow);
       let lastRow = sheet.getLastRow();
+      if (idCol !== -1) sheet.getRange(lastRow, idCol + 1).setNumberFormat("@");
       sheet.getRange(lastRow, idPass + 1).setNumberFormat("@");
       sheet.getRange(lastRow, idJM + 1).setNumberFormat("0.0%");
 
@@ -2745,6 +2749,130 @@ function getHtmlFormTarifShiftContent() {
 '</html>';
 }
 
+function getPrefixRole(role) {
+  const r = String(role || "").trim().toLowerCase();
+  if (r === "owner") return "V4N-";
+  if (r === "dokter gigi spesialis") return "DS-";
+  if (r === "dokter gigi umum") return "DU-";
+  if (r === "perawat gigi") return "PG-";
+  if (r === "perawat umum") return "PU-";
+  if (r === "admin") return "AS-";
+  if (r === "office") return "OS-";
+  return "ST-";
+}
+
+function generateNextIdPekerja(role, sheet) {
+  const prefix = getPrefixRole(role);
+  let maxNum = 0;
+  if (!sheet) {
+    try {
+      const ss = SpreadsheetApp.openById(DB_CONFIG.MASTER.trim());
+      sheet = ss.getSheetByName("Data");
+    } catch(e) {}
+  }
+  if (!sheet) return prefix + "01";
+  const data = sheet.getDataRange().getValues();
+  if (data.length <= 1) return prefix + "01";
+  
+  const headers = data[0].map(h => String(h || "").trim().toLowerCase());
+  let colId = headers.indexOf("id_pekerja");
+  if (colId === -1) colId = 0;
+
+  for (let i = 1; i < data.length; i++) {
+    let val = String(data[i][colId] || "").trim();
+    if (val.toUpperCase().startsWith(prefix.toUpperCase())) {
+      let numPart = val.substring(prefix.length);
+      let n = parseInt(numPart, 10);
+      if (!isNaN(n) && n > maxNum) {
+        maxNum = n;
+      }
+    }
+  }
+  return prefix + String(maxNum + 1).padStart(2, '0');
+}
+
+/**
+ * GENERATE & UPDATE SELURUH ID PEKERJA BERDASARKAN ROLE
+ * Mengisi ID_Pekerja di sheet 'Data' dan memperbarui ID di sheet 'Pengaturan_Tarif_Shift'
+ */
+function generateAllIdPekerja() {
+  try {
+    const ss = SpreadsheetApp.openById(DB_CONFIG.MASTER.trim());
+    let sheetData = ss.getSheetByName("Data");
+    if (!sheetData) return { success: false, message: "Sheet Data tidak ditemukan!" };
+
+    let data = sheetData.getDataRange().getValues();
+    if (data.length === 0) return { success: false, message: "Sheet Data kosong!" };
+
+    let headers = data[0].map(h => String(h || "").trim());
+    let headersLow = headers.map(h => h.toLowerCase());
+    let colId = headersLow.indexOf("id_pekerja");
+
+    if (colId === -1) {
+      sheetData.insertColumnBefore(1);
+      sheetData.getRange(1, 1).setValue("ID_Pekerja").setFontWeight("bold").setBackground("#e2e8f0");
+      colId = 0;
+      data = sheetData.getDataRange().getValues();
+      headers = data[0].map(h => String(h || "").trim());
+      headersLow = headers.map(h => h.toLowerCase());
+    }
+
+    let colNama = headersLow.indexOf("nama_pekerja"); if (colNama === -1) colNama = 1;
+    let colRole = headersLow.indexOf("kategori_role"); if (colRole === -1) colRole = 3;
+
+    const counters = {
+      "V4N-": 0, "DS-": 0, "DU-": 0, "PG-": 0, "PU-": 0, "AS-": 0, "OS-": 0, "ST-": 0
+    };
+
+    const idMapByNama = {};
+
+    for (let i = 1; i < data.length; i++) {
+      let r = data[i];
+      let nama = String(r[colNama] || "").trim();
+      let role = String(r[colRole] || "").trim();
+      if (!nama) continue;
+
+      let prefix = getPrefixRole(role);
+      counters[prefix] = (counters[prefix] || 0) + 1;
+      let newId = prefix + String(counters[prefix]).padStart(2, '0');
+
+      sheetData.getRange(i + 1, colId + 1).setValue(newId);
+      idMapByNama[nama.toLowerCase()] = newId;
+    }
+
+    let shTarif = ss.getSheetByName("Pengaturan_Tarif_Shift");
+    if (shTarif && shTarif.getLastRow() > 1) {
+      let tData = shTarif.getDataRange().getValues();
+      let tHeaders = tData[0].map(h => String(h || "").trim().toLowerCase());
+      let tColId = tHeaders.indexOf("id_pekerja");
+      if (tColId === -1) tColId = tHeaders.indexOf("id_aturan");
+      if (tColId === -1) tColId = 0;
+
+      shTarif.getRange(1, tColId + 1).setValue("ID_Pekerja").setFontWeight("bold").setBackground("#e2e8f0");
+
+      let tColNama = tHeaders.indexOf("nama_pekerja");
+      if (tColNama === -1) tColNama = 2;
+
+      for (let j = 1; j < tData.length; j++) {
+        let tNama = String(tData[j][tColNama] || "").trim().toLowerCase();
+        if (idMapByNama[tNama]) {
+          shTarif.getRange(j + 1, tColId + 1).setValue(idMapByNama[tNama]);
+        }
+      }
+    }
+
+    sheetData.getRange(2, colId + 1, sheetData.getLastRow() - 1, 1).setNumberFormat("@");
+
+    const msg = "✅ Berhasil membuat & memperbarui seluruh ID_Pekerja di Sheet Data dan Pengaturan_Tarif_Shift!";
+    try { SpreadsheetApp.getUi().alert(msg); } catch (e) { Logger.log(msg); }
+    return { success: true, message: msg };
+  } catch (err) {
+    const errMsg = "Gagal generateAllIdPekerja: " + err.message;
+    try { SpreadsheetApp.getUi().alert(errMsg); } catch (e) { Logger.log(errMsg); }
+    return { success: false, message: errMsg };
+  }
+}
+
 /**
  * Format Header dan Validasi Dropdown Role pada Sheet Data (RME Sheldon - 06 Master User & Role)
  */
@@ -2753,7 +2881,7 @@ function initFormatSheetUserMaster() {
     const ss = SpreadsheetApp.openById(DB_CONFIG.MASTER.trim());
     let sheet = ss.getSheetByName("Data") || ss.insertSheet("Data");
     
-    const headers = ["Nama_Pekerja", "Username", "Kategori_Role", "Password", "Status", "No_Registrasi", "No_HP", "Persen_JM_Dokter", "Email"];
+    const headers = ["ID_Pekerja", "Nama_Pekerja", "Username", "Kategori_Role", "Password", "Status", "No_Registrasi", "No_HP", "Persen_JM_Dokter", "Email"];
     sheet.getRange(1, 1, 1, headers.length).setValues([headers]).setFontWeight("bold").setBackground("#e2e8f0");
     sheet.setFrozenRows(1);
 
@@ -2771,18 +2899,19 @@ function initFormatSheetUserMaster() {
       .requireValueInList(validRoles, true)
       .setAllowInvalid(false)
       .build();
-    sheet.getRange(2, 3, 100, 1).setDataValidation(ruleRole);
+    sheet.getRange(2, 4, 100, 1).setDataValidation(ruleRole); // Column D
 
     const ruleStatus = SpreadsheetApp.newDataValidation()
       .requireValueInList(["Aktif", "Tidak Aktif"], true)
       .setAllowInvalid(false)
       .build();
-    sheet.getRange(2, 5, 100, 1).setDataValidation(ruleStatus);
+    sheet.getRange(2, 6, 100, 1).setDataValidation(ruleStatus); // Column F
 
-    sheet.getRange(2, 4, 100, 1).setNumberFormat("@"); // Password plain text format
-    sheet.getRange(2, 8, 100, 1).setNumberFormat("0.0%"); // Persen JM format
+    sheet.getRange(2, 1, 100, 1).setNumberFormat("@"); // ID_Pekerja plain text format
+    sheet.getRange(2, 5, 100, 1).setNumberFormat("@"); // Password plain text format
+    sheet.getRange(2, 9, 100, 1).setNumberFormat("0.0%"); // Persen JM format
 
-    SpreadsheetApp.getUi().alert("✅ Berhasil menyiapkan format sheet 'Data' (termasuk kolom Email) dan validasi Kategori Role di Spreadsheet RME Sheldon - 06 Master User & Role!");
+    SpreadsheetApp.getUi().alert("✅ Berhasil menyiapkan format sheet 'Data' (termasuk kolom ID_Pekerja & Email) dan validasi Kategori Role di Spreadsheet RME Sheldon - 06 Master User & Role!");
   } catch (e) {
     try {
       SpreadsheetApp.getUi().alert("Gagal format sheet: " + e.message);
@@ -4303,38 +4432,38 @@ const SPREADSHEET_DEFINITIONS = {
       "sheets": [
         {
           "name": "Data",
-          "headers": ["Nama_Pekerja", "Username", "Kategori_Role", "Password", "Status", "No_Registrasi", "No_HP", "Persen_JM_Dokter", "Email"],
-          "formats": { "H": "0.0%" },
+          "headers": ["ID_Pekerja", "Nama_Pekerja", "Username", "Kategori_Role", "Password", "Status", "No_Registrasi", "No_HP", "Persen_JM_Dokter", "Email"],
+          "formats": { "A": "@", "I": "0.0%" },
           "seedRows": [
-            ["Administrator Sistem", "admin", "Owner", "admin123", "Aktif", "-", "08123456789", "", "admin@sheldon.id"],
-            ["drg. Rahma Yulinda D, Sp. BMM", "rahma", "Dokter Gigi Spesialis", "1234", "Aktif", "503/SIP-DRG/001/2026", "081234567801", 0.65, "rahma@sheldon.id"],
-            ["drg. Regyana Oktavaria", "regyana", "Dokter Gigi Umum", "1234", "Aktif", "503/SIP-DRG/002/2026", "081234567802", 0.40, "regyana@sheldon.id"],
-            ["drg. Latifah Mulyana", "latifah", "Dokter Gigi Umum", "1234", "Aktif", "503/SIP-DRG/003/2026", "081234567803", 0.40, "latifah@sheldon.id"],
-            ["drg. Tia Ardhana R", "tia", "Dokter Gigi Umum", "1234", "Aktif", "503/SIP-DRG/004/2026", "081234567804", 0.50, "tia@sheldon.id"],
-            ["Bernadette Rostenkowski", "bernadette", "Perawat Gigi", "3333", "Aktif", "503/STR-PRW/003/2024", "081234567893", "", "bernadette@sheldon.id"],
-            ["Howard Wolowitz", "howard", "Admin", "4444", "Aktif", "-", "081234567894", "", "howard@sheldon.id"]
+            ["V4N-01", "Administrator Sistem", "admin", "Owner", "admin123", "Aktif", "-", "08123456789", "", "admin@sheldon.id"],
+            ["DS-01", "drg. Rahma Yulinda D, Sp. BMM", "rahma", "Dokter Gigi Spesialis", "1234", "Aktif", "503/SIP-DRG/001/2026", "081234567801", 0.65, "rahma@sheldon.id"],
+            ["DU-01", "drg. Regyana Oktavaria", "regyana", "Dokter Gigi Umum", "1234", "Aktif", "503/SIP-DRG/002/2026", "081234567802", 0.40, "regyana@sheldon.id"],
+            ["DU-02", "drg. Latifah Mulyana", "latifah", "Dokter Gigi Umum", "1234", "Aktif", "503/SIP-DRG/003/2026", "081234567803", 0.40, "latifah@sheldon.id"],
+            ["DU-03", "drg. Tia Ardhana R", "tia", "Dokter Gigi Umum", "1234", "Aktif", "503/SIP-DRG/004/2026", "081234567804", 0.50, "tia@sheldon.id"],
+            ["PG-01", "Bernadette Rostenkowski", "bernadette", "Perawat Gigi", "3333", "Aktif", "503/STR-PRW/003/2024", "081234567893", "", "bernadette@sheldon.id"],
+            ["AS-01", "Howard Wolowitz", "howard", "Admin", "4444", "Aktif", "-", "081234567894", "", "howard@sheldon.id"]
           ],
           "validations": {
-            "C": ["Owner", "Dokter Gigi Spesialis", "Dokter Gigi Umum", "Perawat Gigi", "Perawat Umum", "Admin", "Office"],
-            "E": ["Aktif", "Tidak Aktif"]
+            "D": ["Owner", "Dokter Gigi Spesialis", "Dokter Gigi Umum", "Perawat Gigi", "Perawat Umum", "Admin", "Office"],
+            "F": ["Aktif", "Tidak Aktif"]
           }
         },
         {
           "name": "Pengaturan_Tarif_Shift",
-          "headers": ["ID_Aturan", "Role", "Nama_Pekerja", "Tipe_Kompensasi", "Tarif_Shift_1", "Tarif_Shift_2", "Gaji_Pokok_Bulanan", "Keterangan", "Status"],
-          "formats": { "E": "#,##0", "F": "#,##0", "G": "#,##0" },
+          "headers": ["ID_Pekerja", "Role", "Nama_Pekerja", "Tipe_Kompensasi", "Tarif_Shift_1", "Tarif_Shift_2", "Gaji_Pokok_Bulanan", "Keterangan", "Status"],
+          "formats": { "A": "@", "E": "#,##0", "F": "#,##0", "G": "#,##0" },
           "validations": {
             "B": ["Owner", "Dokter Gigi Spesialis", "Dokter Gigi Umum", "Perawat Gigi", "Perawat Umum", "Admin", "Office"],
             "D": ["Uang Harian Shift", "Gaji Bulanan Tetap", "Kombinasi Shift & Tindakan"],
             "I": ["Aktif", "Tidak Aktif"]
           },
           "seedRows": [
-            ["TARIF-001", "Dokter Gigi Spesialis", "drg. Rahma Yulinda D, Sp. BMM", "Kombinasi Shift & Tindakan", 55000, 55000, 0, "2 Shift: Rp 55.000/shift (berdasarkan absensi) + JM 65% (Rontgen 15%)", "Aktif"],
-            ["TARIF-002", "Dokter Gigi Umum", "drg. Regyana Oktavaria", "Kombinasi Shift & Tindakan", 55000, 55000, 0, "2 Shift: Rp 55.000/shift (berdasarkan absensi) + JM 40% (Rontgen 15%)", "Aktif"],
-            ["TARIF-003", "Dokter Gigi Umum", "drg. Latifah Mulyana", "Kombinasi Shift & Tindakan", 55000, 55000, 0, "2 Shift: Rp 55.000/shift (berdasarkan absensi) + JM 40% (Rontgen 15%)", "Aktif"],
-            ["TARIF-004", "Dokter Gigi Umum", "drg. Tia Ardhana R", "Kombinasi Shift & Tindakan", 55000, 55000, 0, "2 Shift: Rp 55.000/shift (berdasarkan absensi) + JM 50% / 55% (Rontgen 15%)", "Aktif"],
-            ["TARIF-005", "Perawat Gigi", "Bernadette Rostenkowski", "Uang Harian Shift", 45000, 45000, 0, "2 Shift: Rp 45.000/shift (dihitung berdasarkan absensi kehadiran)", "Aktif"],
-            ["TARIF-006", "Admin", "Howard Wolowitz", "Gaji Bulanan Tetap", 0, 0, 1200000, "Gaji Bulanan Tetap Rp 1.200.000/bulan (Non-Shift)", "Aktif"]
+            ["DS-01", "Dokter Gigi Spesialis", "drg. Rahma Yulinda D, Sp. BMM", "Kombinasi Shift & Tindakan", 55000, 55000, 0, "2 Shift: Rp 55.000/shift (berdasarkan absensi) + JM 65% (Rontgen 15%)", "Aktif"],
+            ["DU-01", "Dokter Gigi Umum", "drg. Regyana Oktavaria", "Kombinasi Shift & Tindakan", 55000, 55000, 0, "2 Shift: Rp 55.000/shift (berdasarkan absensi) + JM 40% (Rontgen 15%)", "Aktif"],
+            ["DU-02", "Dokter Gigi Umum", "drg. Latifah Mulyana", "Kombinasi Shift & Tindakan", 55000, 55000, 0, "2 Shift: Rp 55.000/shift (berdasarkan absensi) + JM 40% (Rontgen 15%)", "Aktif"],
+            ["DU-03", "Dokter Gigi Umum", "drg. Tia Ardhana R", "Kombinasi Shift & Tindakan", 55000, 55000, 0, "2 Shift: Rp 55.000/shift (berdasarkan absensi) + JM 50% / 55% (Rontgen 15%)", "Aktif"],
+            ["PG-01", "Perawat Gigi", "Bernadette Rostenkowski", "Uang Harian Shift", 45000, 45000, 0, "2 Shift: Rp 45.000/shift (dihitung berdasarkan absensi kehadiran)", "Aktif"],
+            ["AS-01", "Admin", "Howard Wolowitz", "Gaji Bulanan Tetap", 0, 0, 1200000, "Gaji Bulanan Tetap Rp 1.200.000/bulan (Non-Shift)", "Aktif"]
           ]
         }
       ]
@@ -6593,35 +6722,52 @@ function simpanTarifShift(payload) {
 
     // Pastikan header lengkap
     if (sh.getLastRow() === 0) {
-      const headers = ["ID_Aturan", "Role", "Nama_Pekerja", "Tipe_Kompensasi", "Tarif_Shift_1", "Tarif_Shift_2", "Gaji_Pokok_Bulanan", "Keterangan", "Status"];
+      const headers = ["ID_Pekerja", "Role", "Nama_Pekerja", "Tipe_Kompensasi", "Tarif_Shift_1", "Tarif_Shift_2", "Gaji_Pokok_Bulanan", "Keterangan", "Status"];
       sh.getRange(1, 1, 1, headers.length).setValues([headers]).setFontWeight("bold").setBackground("#e2e8f0");
       sh.setFrozenRows(1);
     }
 
     let data = sh.getDataRange().getValues();
     let foundRow = -1;
-    let maxIdNum = 0;
     for (let i = 1; i < data.length; i++) {
-      let curId = String(data[i][0] || "");
-      let match = curId.match(/TARIF-(\d+)/i);
-      if (match) {
-        let n = parseInt(match[1], 10);
-        if (n > maxIdNum) maxIdNum = n;
-      }
       if (String(data[i][2] || "").trim().toLowerCase() === namaPekerja.toLowerCase()) {
         foundRow = i + 1;
       }
     }
 
-    // 3. Isi ID_Aturan secara otomatis (TARIF-001, TARIF-002, dst)
-    let idAturan = "";
-    if (foundRow > 1) {
-      idAturan = String(data[foundRow - 1][0] || "").trim();
+    // 3. Isi ID_Pekerja secara otomatis berdasarkan Role atau Sheet Data
+    let idPekerja = "";
+    if (payload.idPekerja) {
+      idPekerja = String(payload.idPekerja).trim();
+    } else if (foundInSheetData && foundInSheetData.idPekerja) {
+      idPekerja = String(foundInSheetData.idPekerja).trim();
+    } else if (foundRow > 1) {
+      idPekerja = String(data[foundRow - 1][0] || "").trim();
     }
-    if (!idAturan) {
-      maxIdNum++;
-      idAturan = "TARIF-" + String(maxIdNum).padStart(3, '0');
+    if (!idPekerja || idPekerja.startsWith("TARIF-")) {
+      const getPfx = function(r) {
+        let rl = String(r || '').toLowerCase();
+        if (rl.includes('owner')) return 'V4N-';
+        if (rl.includes('spesialis')) return 'DS-';
+        if (rl.includes('dokter')) return 'DU-';
+        if (rl.includes('perawat gigi')) return 'PG-';
+        if (rl.includes('perawat')) return 'PU-';
+        if (rl.includes('admin')) return 'AS-';
+        if (rl.includes('office')) return 'OS-';
+        return 'ST-';
+      };
+      let pfx = getPfx(role);
+      let maxN = 0;
+      for (let i = 1; i < data.length; i++) {
+        let tid = String(data[i][0] || '');
+        if (tid.toUpperCase().startsWith(pfx)) {
+          let numPart = parseInt(tid.substring(pfx.length), 10);
+          if (!isNaN(numPart) && numPart > maxN) maxN = numPart;
+        }
+      }
+      idPekerja = pfx + String(maxN + 1).padStart(2, '0');
     }
+    let idAturan = idPekerja;
 
     let tipe = String(payload.tipeKompensasi || "").trim();
     if (!tipe) {

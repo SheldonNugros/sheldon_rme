@@ -31,11 +31,21 @@ def main():
 
     # -------------------------------------------------------------------------
     # 1. 06 MASTER USER & ROLE (MASTER/Data.csv)
-    # Headers: ["Nama_Pekerja", "Username", "Kategori_Role", "Password", "Status", "No_Registrasi", "No_HP", "Persen_JM_Dokter", "Email"]
+    # Headers: ["ID_Pekerja", "Nama_Pekerja", "Username", "Kategori_Role", "Password", "Status", "No_Registrasi", "No_HP", "Persen_JM_Dokter", "Email"]
     # -------------------------------------------------------------------------
-    master_headers = ["Nama_Pekerja", "Username", "Kategori_Role", "Password", "Status", "No_Registrasi", "No_HP", "Persen_JM_Dokter", "Email"]
-    master_rows = [
-        ["Administrator Sistem", "admin", "Super User", "admin123", "Aktif", "-", "081234567890", "0", "vembrian@gmail.com"],
+    ROLE_PREFIXES = {
+        "Owner": "V4N-",
+        "Dokter Gigi Spesialis": "DS-",
+        "Dokter Gigi Umum": "DU-",
+        "Perawat Gigi": "PG-",
+        "Perawat Umum": "PU-",
+        "Admin": "AS-",
+        "Office": "OS-"
+    }
+
+    master_headers = ["ID_Pekerja", "Nama_Pekerja", "Username", "Kategori_Role", "Password", "Status", "No_Registrasi", "No_HP", "Persen_JM_Dokter", "Email"]
+    master_raw_rows = [
+        ["Administrator Sistem", "admin", "Owner", "admin123", "Aktif", "-", "081234567890", "0", "vembrian@gmail.com"],
         ["drg. V. Asung Nugroho, Sp.Ort", "asung", "Owner", "admin123", "Aktif", "503/SIP-DRG/000/2026", "081234567800", "0.65", "v.asungnugroho@gmail.com"],
         ["drg. Sheldon Cooper, Sp.Ort", "sheldon", "Dokter Gigi Spesialis", "1234", "Aktif", "503/SIP-DRG/001/2026", "081234567801", "0.50", "sheldon@sheldon.id"],
         ["drg. Leonard Hofstadter", "leonard", "Dokter Gigi Umum", "1111", "Aktif", "503/SIP-DRG/002/2026", "081234567802", "0.40", "leonard@sheldon.id"],
@@ -58,6 +68,21 @@ def main():
         ["Penny Teller", "penny", "Perawat Umum", "2222", "Aktif", "-", "081234567892", "0", "penny@sheldon.id"],
         ["Howard Wolowitz", "howard", "Admin", "4444", "Aktif", "-", "081234567894", "0", "howard@sheldon.id"]
     ]
+
+    role_counters = {pfx: 0 for pfx in ROLE_PREFIXES.values()}
+    master_rows = []
+    id_map_by_name = {}
+    for r in master_raw_rows:
+        nama = r[0]
+        role = r[2]
+        pfx = ROLE_PREFIXES.get(role, "ST-")
+        if pfx not in role_counters:
+            role_counters[pfx] = 0
+        role_counters[pfx] += 1
+        id_pek = f"{pfx}{role_counters[pfx]:02d}"
+        id_map_by_name[nama] = id_pek
+        master_rows.append([id_pek] + r)
+
     write_csv("MASTER", "Data.csv", master_headers, master_rows)
 
     # -------------------------------------------------------------------------
@@ -463,13 +488,14 @@ def main():
     # -------------------------------------------------------------------------
     # 7. 11 PAYROLL & HONOR DOKTER (PAYROLL/*.csv)
     # -------------------------------------------------------------------------
-    tarif_headers = ["ID_Aturan", "Role", "Nama_Pekerja", "Tipe_Kompensasi", "Tarif_Shift_1", "Tarif_Shift_2", "Gaji_Pokok_Bulanan", "Keterangan", "Status"]
+    tarif_headers = ["ID_Pekerja", "Role", "Nama_Pekerja", "Tipe_Kompensasi", "Tarif_Shift_1", "Tarif_Shift_2", "Gaji_Pokok_Bulanan", "Keterangan", "Status"]
     tarif_rows = []
-    for u_idx, u in enumerate(master_rows):
-        nama_u = u[0]
-        role_u = u[2]
-        status_u = u[4] or "Aktif"
-        id_at = f"TARIF-{u_idx+1:03d}"
+    for u in master_rows:
+        id_pek = u[0]
+        nama_u = u[1]
+        role_u = u[3]
+        status_u = u[5] or "Aktif"
+        id_at = id_pek
         r_low = role_u.lower()
         if "dokter" in r_low or "spesialis" in r_low:
             tipe = "Kombinasi Shift & Tindakan"
@@ -477,7 +503,7 @@ def main():
             s2 = "55000"
             gp = "0"
             try:
-                pjm_val = float(u[7]) if u[7] else 0.40
+                pjm_val = float(u[8]) if len(u) > 8 and u[8] else 0.40
                 pct = int(pjm_val * 100) if pjm_val <= 1 else int(pjm_val)
             except Exception:
                 pct = 40
@@ -494,7 +520,7 @@ def main():
             s2 = "0"
             gp = "1200000"
             ket = "Gaji Bulanan Tetap Rp 1.200.000/bulan (Non-Shift)"
-        else: # Owner / Super User
+        else: # Owner / Office
             tipe = "Kombinasi Shift & Tindakan"
             s1 = "55000"
             s2 = "55000"
@@ -511,10 +537,14 @@ def main():
         dok_s2 = dokter_pool[(d_idx + 1) % len(dokter_pool)][0]
         prw_s1 = perawat_pool[d_idx % len(perawat_pool)]
         prw_s2 = perawat_pool[(d_idx + 1) % len(perawat_pool)]
-        presensi_rows.append([f"ATT-202601-{len(presensi_rows)+1:03d}", tgl_p, f"DOK-{(d_idx%6)+1:03d}", dok_s1, "Dokter Gigi Umum", "Shift 1", "09:00", "15:00", "Hadir", "55000", "Howard Wolowitz", f"{tgl_p} 15:05:00"])
-        presensi_rows.append([f"ATT-202601-{len(presensi_rows)+1:03d}", tgl_p, f"DOK-{((d_idx+1)%6)+1:03d}", dok_s2, "Dokter Gigi Umum", "Shift 2", "15:00", "21:00", "Hadir", "55000", "Howard Wolowitz", f"{tgl_p} 21:05:00"])
-        presensi_rows.append([f"ATT-202601-{len(presensi_rows)+1:03d}", tgl_p, f"PRW-{(d_idx%3)+1:03d}", prw_s1, "Perawat Gigi", "Shift 1", "08:50", "15:00", "Hadir", "45000", "Howard Wolowitz", f"{tgl_p} 15:05:00"])
-        presensi_rows.append([f"ATT-202601-{len(presensi_rows)+1:03d}", tgl_p, f"PRW-{((d_idx+1)%3)+1:03d}", prw_s2, "Perawat Gigi", "Shift 2", "14:55", "21:05", "Hadir", "45000", "Howard Wolowitz", f"{tgl_p} 21:05:00"])
+        id_dok1 = id_map_by_name.get(dok_s1, f"DU-{(d_idx%6)+1:02d}")
+        id_dok2 = id_map_by_name.get(dok_s2, f"DU-{((d_idx+1)%6)+1:02d}")
+        id_prw1 = id_map_by_name.get(prw_s1, f"PG-{(d_idx%3)+1:02d}")
+        id_prw2 = id_map_by_name.get(prw_s2, f"PG-{((d_idx+1)%3)+1:02d}")
+        presensi_rows.append([f"ATT-202601-{len(presensi_rows)+1:03d}", tgl_p, id_dok1, dok_s1, "Dokter Gigi Umum", "Shift 1", "09:00", "15:00", "Hadir", "55000", "Howard Wolowitz", f"{tgl_p} 15:05:00"])
+        presensi_rows.append([f"ATT-202601-{len(presensi_rows)+1:03d}", tgl_p, id_dok2, dok_s2, "Dokter Gigi Umum", "Shift 2", "15:00", "21:00", "Hadir", "55000", "Howard Wolowitz", f"{tgl_p} 21:05:00"])
+        presensi_rows.append([f"ATT-202601-{len(presensi_rows)+1:03d}", tgl_p, id_prw1, prw_s1, "Perawat Gigi", "Shift 1", "08:50", "15:00", "Hadir", "45000", "Howard Wolowitz", f"{tgl_p} 15:05:00"])
+        presensi_rows.append([f"ATT-202601-{len(presensi_rows)+1:03d}", tgl_p, id_prw2, prw_s2, "Perawat Gigi", "Shift 2", "14:55", "21:05", "Hadir", "45000", "Howard Wolowitz", f"{tgl_p} 21:05:00"])
     write_csv("PAYROLL", "Presensi_Shift_Harian.csv", presensi_headers, presensi_rows)
 
     print(f"✅ Selesai! Pasien: {len(pasien_rows)} | Pembayaran: {len(bayar_rows)} | JM: {len(jm_rows)} | EMR: {len(rm_rows)} | Tindakan: {len(tindakan_catalog)} | Presensi: {len(presensi_rows)}")

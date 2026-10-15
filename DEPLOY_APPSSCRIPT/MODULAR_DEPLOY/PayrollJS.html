@@ -732,23 +732,39 @@
     // 2. Masukkan secara otomatis Role dari Nama Pekerja (dari Sheet Data)
     const autoRole = foundStaff ? foundStaff.role : ((document.getElementById('tarifRole') || {}).value || 'Admin');
 
-    // 3. Isi ID_Aturan secara otomatis (TARIF-001, TARIF-002, dst)
+    // 3. Isi ID_Pekerja / ID_Aturan secara otomatis berdasarkan Role atau Sheet Data
     let exTarif = (window.PayrollState.tarifShift || []).find(x => String(x.namaPekerja || '').toLowerCase() === namaPekerja.toLowerCase());
-    let idAturan = exTarif ? exTarif.idAturan : '';
+    let idAturan = exTarif ? (exTarif.idPekerja || exTarif.idAturan) : '';
+    if (!idAturan && foundStaff) {
+      idAturan = foundStaff.idPekerja || foundStaff.id;
+    }
     if (!idAturan) {
+      const getPfx = function(r) {
+        let rl = String(r || '').toLowerCase();
+        if (rl.includes('owner')) return 'V4N-';
+        if (rl.includes('spesialis')) return 'DS-';
+        if (rl.includes('dokter')) return 'DU-';
+        if (rl.includes('perawat gigi')) return 'PG-';
+        if (rl.includes('perawat')) return 'PU-';
+        if (rl.includes('admin')) return 'AS-';
+        if (rl.includes('office')) return 'OS-';
+        return 'ST-';
+      };
+      let pfx = getPfx(autoRole);
       let maxN = 0;
       (window.PayrollState.tarifShift || []).forEach(t => {
-        let m = String(t.idAturan || '').match(/TARIF-(\d+)/i);
-        if (m) {
-          let n = parseInt(m[1], 10);
-          if (n > maxN) maxN = n;
+        let tid = String(t.idPekerja || t.idAturan || '');
+        if (tid.toUpperCase().startsWith(pfx)) {
+          let numPart = parseInt(tid.substring(pfx.length), 10);
+          if (!isNaN(numPart) && numPart > maxN) maxN = numPart;
         }
       });
-      idAturan = 'TARIF-' + String(maxN + 1).padStart(3, '0');
+      idAturan = pfx + String(maxN + 1).padStart(2, '0');
     }
 
     const payload = {
       idAturan: idAturan,
+      idPekerja: idAturan,
       namaPekerja: foundStaff ? foundStaff.nama : namaPekerja,
       role: autoRole,
       tipeKompensasi: (document.getElementById('tarifTipe') || {}).value,

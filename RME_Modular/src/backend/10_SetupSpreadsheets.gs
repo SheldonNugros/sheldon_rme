@@ -162,38 +162,38 @@ const SPREADSHEET_DEFINITIONS = {
       "sheets": [
         {
           "name": "Data",
-          "headers": ["Nama_Pekerja", "Username", "Kategori_Role", "Password", "Status", "No_Registrasi", "No_HP", "Persen_JM_Dokter", "Email"],
-          "formats": { "H": "0.0%" },
+          "headers": ["ID_Pekerja", "Nama_Pekerja", "Username", "Kategori_Role", "Password", "Status", "No_Registrasi", "No_HP", "Persen_JM_Dokter", "Email"],
+          "formats": { "A": "@", "I": "0.0%" },
           "seedRows": [
-            ["Administrator Sistem", "admin", "Owner", "admin123", "Aktif", "-", "08123456789", "", "admin@sheldon.id"],
-            ["drg. Rahma Yulinda D, Sp. BMM", "rahma", "Dokter Gigi Spesialis", "1234", "Aktif", "503/SIP-DRG/001/2026", "081234567801", 0.65, "rahma@sheldon.id"],
-            ["drg. Regyana Oktavaria", "regyana", "Dokter Gigi Umum", "1234", "Aktif", "503/SIP-DRG/002/2026", "081234567802", 0.40, "regyana@sheldon.id"],
-            ["drg. Latifah Mulyana", "latifah", "Dokter Gigi Umum", "1234", "Aktif", "503/SIP-DRG/003/2026", "081234567803", 0.40, "latifah@sheldon.id"],
-            ["drg. Tia Ardhana R", "tia", "Dokter Gigi Umum", "1234", "Aktif", "503/SIP-DRG/004/2026", "081234567804", 0.50, "tia@sheldon.id"],
-            ["Bernadette Rostenkowski", "bernadette", "Perawat Gigi", "3333", "Aktif", "503/STR-PRW/003/2024", "081234567893", "", "bernadette@sheldon.id"],
-            ["Howard Wolowitz", "howard", "Admin", "4444", "Aktif", "-", "081234567894", "", "howard@sheldon.id"]
+            ["V4N-01", "Administrator Sistem", "admin", "Owner", "admin123", "Aktif", "-", "08123456789", "", "admin@sheldon.id"],
+            ["DS-01", "drg. Rahma Yulinda D, Sp. BMM", "rahma", "Dokter Gigi Spesialis", "1234", "Aktif", "503/SIP-DRG/001/2026", "081234567801", 0.65, "rahma@sheldon.id"],
+            ["DU-01", "drg. Regyana Oktavaria", "regyana", "Dokter Gigi Umum", "1234", "Aktif", "503/SIP-DRG/002/2026", "081234567802", 0.40, "regyana@sheldon.id"],
+            ["DU-02", "drg. Latifah Mulyana", "latifah", "Dokter Gigi Umum", "1234", "Aktif", "503/SIP-DRG/003/2026", "081234567803", 0.40, "latifah@sheldon.id"],
+            ["DU-03", "drg. Tia Ardhana R", "tia", "Dokter Gigi Umum", "1234", "Aktif", "503/SIP-DRG/004/2026", "081234567804", 0.50, "tia@sheldon.id"],
+            ["PG-01", "Bernadette Rostenkowski", "bernadette", "Perawat Gigi", "3333", "Aktif", "503/STR-PRW/003/2024", "081234567893", "", "bernadette@sheldon.id"],
+            ["AS-01", "Howard Wolowitz", "howard", "Admin", "4444", "Aktif", "-", "081234567894", "", "howard@sheldon.id"]
           ],
           "validations": {
-            "C": ["Owner", "Dokter Gigi Spesialis", "Dokter Gigi Umum", "Perawat Gigi", "Perawat Umum", "Admin", "Office"],
-            "E": ["Aktif", "Tidak Aktif"]
+            "D": ["Owner", "Dokter Gigi Spesialis", "Dokter Gigi Umum", "Perawat Gigi", "Perawat Umum", "Admin", "Office"],
+            "F": ["Aktif", "Tidak Aktif"]
           }
         },
         {
           "name": "Pengaturan_Tarif_Shift",
-          "headers": ["ID_Aturan", "Role", "Nama_Pekerja", "Tipe_Kompensasi", "Tarif_Shift_1", "Tarif_Shift_2", "Gaji_Pokok_Bulanan", "Keterangan", "Status"],
-          "formats": { "E": "#,##0", "F": "#,##0", "G": "#,##0" },
+          "headers": ["ID_Pekerja", "Role", "Nama_Pekerja", "Tipe_Kompensasi", "Tarif_Shift_1", "Tarif_Shift_2", "Gaji_Pokok_Bulanan", "Keterangan", "Status"],
+          "formats": { "A": "@", "E": "#,##0", "F": "#,##0", "G": "#,##0" },
           "validations": {
             "B": ["Owner", "Dokter Gigi Spesialis", "Dokter Gigi Umum", "Perawat Gigi", "Perawat Umum", "Admin", "Office"],
             "D": ["Uang Harian Shift", "Gaji Bulanan Tetap", "Kombinasi Shift & Tindakan"],
             "I": ["Aktif", "Tidak Aktif"]
           },
           "seedRows": [
-            ["TARIF-001", "Dokter Gigi Spesialis", "drg. Rahma Yulinda D, Sp. BMM", "Kombinasi Shift & Tindakan", 55000, 55000, 0, "2 Shift: Rp 55.000/shift (berdasarkan absensi) + JM 65% (Rontgen 15%)", "Aktif"],
-            ["TARIF-002", "Dokter Gigi Umum", "drg. Regyana Oktavaria", "Kombinasi Shift & Tindakan", 55000, 55000, 0, "2 Shift: Rp 55.000/shift (berdasarkan absensi) + JM 40% (Rontgen 15%)", "Aktif"],
-            ["TARIF-003", "Dokter Gigi Umum", "drg. Latifah Mulyana", "Kombinasi Shift & Tindakan", 55000, 55000, 0, "2 Shift: Rp 55.000/shift (berdasarkan absensi) + JM 40% (Rontgen 15%)", "Aktif"],
-            ["TARIF-004", "Dokter Gigi Umum", "drg. Tia Ardhana R", "Kombinasi Shift & Tindakan", 55000, 55000, 0, "2 Shift: Rp 55.000/shift (berdasarkan absensi) + JM 50% / 55% (Rontgen 15%)", "Aktif"],
-            ["TARIF-005", "Perawat Gigi", "Bernadette Rostenkowski", "Uang Harian Shift", 45000, 45000, 0, "2 Shift: Rp 45.000/shift (dihitung berdasarkan absensi kehadiran)", "Aktif"],
-            ["TARIF-006", "Admin", "Howard Wolowitz", "Gaji Bulanan Tetap", 0, 0, 1200000, "Gaji Bulanan Tetap Rp 1.200.000/bulan (Non-Shift)", "Aktif"]
+            ["DS-01", "Dokter Gigi Spesialis", "drg. Rahma Yulinda D, Sp. BMM", "Kombinasi Shift & Tindakan", 55000, 55000, 0, "2 Shift: Rp 55.000/shift (berdasarkan absensi) + JM 65% (Rontgen 15%)", "Aktif"],
+            ["DU-01", "Dokter Gigi Umum", "drg. Regyana Oktavaria", "Kombinasi Shift & Tindakan", 55000, 55000, 0, "2 Shift: Rp 55.000/shift (berdasarkan absensi) + JM 40% (Rontgen 15%)", "Aktif"],
+            ["DU-02", "Dokter Gigi Umum", "drg. Latifah Mulyana", "Kombinasi Shift & Tindakan", 55000, 55000, 0, "2 Shift: Rp 55.000/shift (berdasarkan absensi) + JM 40% (Rontgen 15%)", "Aktif"],
+            ["DU-03", "Dokter Gigi Umum", "drg. Tia Ardhana R", "Kombinasi Shift & Tindakan", 55000, 55000, 0, "2 Shift: Rp 55.000/shift (berdasarkan absensi) + JM 50% / 55% (Rontgen 15%)", "Aktif"],
+            ["PG-01", "Perawat Gigi", "Bernadette Rostenkowski", "Uang Harian Shift", 45000, 45000, 0, "2 Shift: Rp 45.000/shift (dihitung berdasarkan absensi kehadiran)", "Aktif"],
+            ["AS-01", "Admin", "Howard Wolowitz", "Gaji Bulanan Tetap", 0, 0, 1200000, "Gaji Bulanan Tetap Rp 1.200.000/bulan (Non-Shift)", "Aktif"]
           ]
         }
       ]
@@ -2452,35 +2452,52 @@ function simpanTarifShift(payload) {
 
     // Pastikan header lengkap
     if (sh.getLastRow() === 0) {
-      const headers = ["ID_Aturan", "Role", "Nama_Pekerja", "Tipe_Kompensasi", "Tarif_Shift_1", "Tarif_Shift_2", "Gaji_Pokok_Bulanan", "Keterangan", "Status"];
+      const headers = ["ID_Pekerja", "Role", "Nama_Pekerja", "Tipe_Kompensasi", "Tarif_Shift_1", "Tarif_Shift_2", "Gaji_Pokok_Bulanan", "Keterangan", "Status"];
       sh.getRange(1, 1, 1, headers.length).setValues([headers]).setFontWeight("bold").setBackground("#e2e8f0");
       sh.setFrozenRows(1);
     }
 
     let data = sh.getDataRange().getValues();
     let foundRow = -1;
-    let maxIdNum = 0;
     for (let i = 1; i < data.length; i++) {
-      let curId = String(data[i][0] || "");
-      let match = curId.match(/TARIF-(\d+)/i);
-      if (match) {
-        let n = parseInt(match[1], 10);
-        if (n > maxIdNum) maxIdNum = n;
-      }
       if (String(data[i][2] || "").trim().toLowerCase() === namaPekerja.toLowerCase()) {
         foundRow = i + 1;
       }
     }
 
-    // 3. Isi ID_Aturan secara otomatis (TARIF-001, TARIF-002, dst)
-    let idAturan = "";
-    if (foundRow > 1) {
-      idAturan = String(data[foundRow - 1][0] || "").trim();
+    // 3. Isi ID_Pekerja secara otomatis berdasarkan Role atau Sheet Data
+    let idPekerja = "";
+    if (payload.idPekerja) {
+      idPekerja = String(payload.idPekerja).trim();
+    } else if (foundInSheetData && foundInSheetData.idPekerja) {
+      idPekerja = String(foundInSheetData.idPekerja).trim();
+    } else if (foundRow > 1) {
+      idPekerja = String(data[foundRow - 1][0] || "").trim();
     }
-    if (!idAturan) {
-      maxIdNum++;
-      idAturan = "TARIF-" + String(maxIdNum).padStart(3, '0');
+    if (!idPekerja || idPekerja.startsWith("TARIF-")) {
+      const getPfx = function(r) {
+        let rl = String(r || '').toLowerCase();
+        if (rl.includes('owner')) return 'V4N-';
+        if (rl.includes('spesialis')) return 'DS-';
+        if (rl.includes('dokter')) return 'DU-';
+        if (rl.includes('perawat gigi')) return 'PG-';
+        if (rl.includes('perawat')) return 'PU-';
+        if (rl.includes('admin')) return 'AS-';
+        if (rl.includes('office')) return 'OS-';
+        return 'ST-';
+      };
+      let pfx = getPfx(role);
+      let maxN = 0;
+      for (let i = 1; i < data.length; i++) {
+        let tid = String(data[i][0] || '');
+        if (tid.toUpperCase().startsWith(pfx)) {
+          let numPart = parseInt(tid.substring(pfx.length), 10);
+          if (!isNaN(numPart) && numPart > maxN) maxN = numPart;
+        }
+      }
+      idPekerja = pfx + String(maxN + 1).padStart(2, '0');
     }
+    let idAturan = idPekerja;
 
     let tipe = String(payload.tipeKompensasi || "").trim();
     if (!tipe) {

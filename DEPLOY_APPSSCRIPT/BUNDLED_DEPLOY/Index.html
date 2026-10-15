@@ -15722,8 +15722,8 @@ window.AbsensiState = {
   activeWorkers: [],     // Hanya pekerja yang berstatus Aktif
   presensiHariIni: [],   // Presensi tersimpan di tanggal ini
   kalenderLibur: [],     // Daftar hari libur
-  rekapBulanan: [],      // Data rekap kehadiran
-  attendanceMap: {},     // { [namaPekerja]: { status: 'Hadir'|'Tidak', keterangan: '' } }
+  shiftAttendance: { pagi: {}, sore: {} }, // Cache input form terpisah per shift (Pagi & Sore)
+  attendanceMap: {},     // { [namaPekerja]: { status: 'Hadir'|'Tidak', keterangan: '' } } untuk shift aktif
   isMinggu: false,
   isLibur: false,
   infoLibur: null,
@@ -15812,7 +15812,21 @@ function handleAbsensiDateChange(newDateStr) {
  * Memilih shift Pagi atau Sore dan memperbarui tombol & jadwal jam kerja.
  */
 function pilihShiftAbsensi(shiftName) {
+  let oldShiftKey = (window.AbsensiState.currentShift || 'Pagi').toLowerCase();
+  if (!window.AbsensiState.shiftAttendance) {
+    window.AbsensiState.shiftAttendance = { pagi: {}, sore: {} };
+  }
+  // Simpan state shift yang baru saja aktif
+  window.AbsensiState.shiftAttendance[oldShiftKey] = Object.assign({}, window.AbsensiState.attendanceMap);
+
   window.AbsensiState.currentShift = shiftName;
+  let newShiftKey = shiftName.toLowerCase();
+  if (!window.AbsensiState.shiftAttendance[newShiftKey]) {
+    window.AbsensiState.shiftAttendance[newShiftKey] = {};
+  }
+  // Hubungkan attendanceMap ke shift yang baru dipilih
+  window.AbsensiState.attendanceMap = window.AbsensiState.shiftAttendance[newShiftKey];
+
   updateShiftSelectorUI();
   renderAbsensiTable();
 }
@@ -15957,6 +15971,11 @@ function applyAbsensiDataToState(res) {
   // Tampilkan status banner libur operasional
   updateOperasionalBannerUI();
 
+  // Reset cache input form per shift saat data tanggal dimuat
+  window.AbsensiState.shiftAttendance = { pagi: {}, sore: {} };
+  let curShiftKey = (window.AbsensiState.currentShift || 'Pagi').toLowerCase();
+  window.AbsensiState.attendanceMap = window.AbsensiState.shiftAttendance[curShiftKey];
+
   // Update jadwal shift sesuai hari
   updateShiftSelectorUI();
 
@@ -16038,9 +16057,18 @@ function renderAbsensiTable() {
   if (!tbody) return;
 
   let workers = window.AbsensiState.activeWorkers || [];
-  let curShift = window.AbsensiState.currentShift;
+  let curShift = window.AbsensiState.currentShift || 'Pagi';
+  let curShiftKey = curShift.toLowerCase();
   let jadwal = getJadwalShiftCurrent();
   let presensiSaved = window.AbsensiState.presensiHariIni || [];
+
+  if (!window.AbsensiState.shiftAttendance) {
+    window.AbsensiState.shiftAttendance = { pagi: {}, sore: {} };
+  }
+  if (!window.AbsensiState.shiftAttendance[curShiftKey]) {
+    window.AbsensiState.shiftAttendance[curShiftKey] = {};
+  }
+  window.AbsensiState.attendanceMap = window.AbsensiState.shiftAttendance[curShiftKey];
 
   if (workers.length === 0) {
     tbody.innerHTML = `

@@ -27,7 +27,7 @@ const DB_CONFIG = {
   "ICD10": "19BRjI5Pya3GY-C2epylK0IsHTkYIhAszXw-UFDAzFwE",
   "ICD9": "19BRjI5Pya3GY-C2epylK0IsHTkYIhAszXw-UFDAzFwE",
   "PAYROLL": "1v6fSKLLokBNNXOJAS7A-7RKnI9YtHlcZbeCTsNmYjkk",
-  "ABSENSI": "",
+  "ABSENSI": "1e9-Hzz9wk3X-6Yw1kd82mRvpSZ_HxM_JUCKfI1kJCtQ",
   "SOURCE_BULK_2026": "1BaMZosOuB6eu5kV0sIiFMCLNBer1e4X7gibmBoKweV0"
 };
 
@@ -4658,7 +4658,7 @@ function _findOrCreateSpreadsheetInFolder(key, title) {
 
   // 2. Cek dari ScriptProperties
   if (!ss) {
-    let savedId = prop.getProperty(propKey) || (key === "PAYROLL" ? prop.getProperty("RME_PAYROLL_SS_ID") : "");
+    let savedId = prop.getProperty(propKey) || (key === "PAYROLL" ? prop.getProperty("RME_PAYROLL_SS_ID") : (key === "ABSENSI" ? prop.getProperty("RME_ABSENSI_SS_ID") : ""));
     if (savedId && savedId.trim() !== "") {
       try {
         let f = DriveApp.getFileById(savedId.trim());

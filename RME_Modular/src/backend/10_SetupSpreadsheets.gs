@@ -517,7 +517,7 @@ function _findOrCreateSpreadsheetInFolder(key, title) {
 
   // 2. Cek dari ScriptProperties
   if (!ss) {
-    let savedId = prop.getProperty(propKey) || (key === "PAYROLL" ? prop.getProperty("RME_PAYROLL_SS_ID") : "");
+    let savedId = prop.getProperty(propKey) || (key === "PAYROLL" ? prop.getProperty("RME_PAYROLL_SS_ID") : (key === "ABSENSI" ? prop.getProperty("RME_ABSENSI_SS_ID") : ""));
     if (savedId && savedId.trim() !== "") {
       try {
         let f = DriveApp.getFileById(savedId.trim());

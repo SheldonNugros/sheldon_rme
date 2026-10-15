@@ -2598,9 +2598,16 @@ function syncUserToPayrollTarifShift(userData) {
     }
 
     if (foundRow > 1) {
-      // Update data: Role dan Status selalu di-sync
+      // Update data: Role di-sync jika ada perubahan di sheet Data
       sh.getRange(foundRow, idRoleCol + 1).setValue(role);
-      sh.getRange(foundRow, idStatCol + 1).setValue(status);
+      // PENTING: Status di Pengaturan_Tarif_Shift adalah status aktivasi payroll,
+      // INDEPENDEN dari status login di sheet Data. JANGAN menimpa status yang sudah disetel user
+      // kecuali jika payload secara spesifik mengirimkan statusPayroll
+      if (userData.statusPayroll !== undefined) {
+        let rawStP = String(userData.statusPayroll).trim().toLowerCase();
+        let normStP = (rawStP === "tidak aktif" || rawStP === "non aktif" || rawStP === "nonaktif" || rawStP === "inactive") ? "Tidak Aktif" : "Aktif";
+        sh.getRange(foundRow, idStatCol + 1).setValue(normStP);
+      }
       let curIdVal = String(data[foundRow - 1][idIdCol] || "").trim();
       if (!curIdVal) {
         maxIdNum++;
@@ -2810,7 +2817,11 @@ function syncAllUsersToPayrollTarifShift() {
         }
         curr.role = role;
         curr.namaPekerja = nama;
-        curr.status = status;
+        // PENTING: Status di Pengaturan_Tarif_Shift adalah status aktivasi payroll,
+        // INDEPENDEN dari status login di sheet Data. Pertahankan status payroll yang sudah ada!
+        if (!curr.status) {
+          curr.status = "Aktif";
+        }
         finalRows.push([
           curr.idAturan,
           curr.role,
@@ -2833,6 +2844,7 @@ function syncAllUsersToPayrollTarifShift() {
         let ket = "";
 
         let rLower = role.toLowerCase();
+        let newWorkerStatus = "Aktif";
         if (rLower.includes("dokter")) {
           tipeKompensasi = "Kombinasi Shift & Tindakan";
           s1 = 55000;
@@ -2852,6 +2864,7 @@ function syncAllUsersToPayrollTarifShift() {
           gp = 1200000;
           ket = "Gaji Bulanan Tetap Rp 1.200.000/bulan (Non-Shift)";
         } else if (rLower.includes("owner")) {
+          newWorkerStatus = "Tidak Aktif"; // Default Owner non-aktif di hitungan payroll kecuali diaktifkan manual
           if (nama.toLowerCase().startsWith("drg")) {
             tipeKompensasi = "Kombinasi Shift & Tindakan";
             s1 = 55000;
@@ -2882,7 +2895,7 @@ function syncAllUsersToPayrollTarifShift() {
           s2,
           gp,
           ket,
-          status
+          newWorkerStatus
         ]);
       }
     }

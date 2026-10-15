@@ -424,7 +424,8 @@
     if (tbTarif) {
       const listTarif = window.PayrollState.tarifShift || [];
       tbTarif.innerHTML = listTarif.map((t, idx) => {
-        let isAktif = isPekerjaAktif(t.namaPekerja);
+        let st = String(t.status || 'Aktif').trim().toLowerCase();
+        let isAktif = (st !== 'tidak aktif' && st !== 'non aktif' && st !== 'nonaktif' && st !== 'inactive');
         let badgeStatus = isAktif
           ? '<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-extrabold text-[10px] border border-emerald-300">Aktif</span>'
           : '<span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 font-bold text-[10px] border border-rose-300">Tidak Aktif</span>';
@@ -694,7 +695,9 @@
     document.getElementById('tarifKeterangan').value = item.keterangan || '';
     const statEl = document.getElementById('tarifStatus');
     if (statEl) {
-      statEl.value = isPekerjaAktif(item.namaPekerja) ? 'Aktif' : 'Tidak Aktif';
+      let curSt = String(item.status || 'Aktif').trim().toLowerCase();
+      let isInactive = (curSt === 'tidak aktif' || curSt === 'non aktif' || curSt === 'nonaktif' || curSt === 'inactive');
+      statEl.value = isInactive ? 'Tidak Aktif' : 'Aktif';
     }
     const hint = document.getElementById('tarifNamaHint');
     if (hint) {
@@ -751,7 +754,7 @@
       tarifShift2: Number((document.getElementById('tarifShift2') || {}).value) || 0,
       gajiPokokBulanan: Number((document.getElementById('tarifGajiPokok') || {}).value) || 0,
       keterangan: ((document.getElementById('tarifKeterangan') || {}).value || '').trim(),
-      status: (document.getElementById('tarifStatus') || {}).value || (foundStaff ? foundStaff.status : 'Aktif')
+      status: (document.getElementById('tarifStatus') || {}).value || 'Aktif'
     };
 
     let exIdx = (window.PayrollState.tarifShift || []).findIndex(x => String(x.namaPekerja || '').toLowerCase() === payload.namaPekerja.toLowerCase());

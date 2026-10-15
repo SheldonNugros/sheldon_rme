@@ -562,14 +562,14 @@ function getHtmlFormTarifShiftContent() {
 '        <input type="number" id="diagGajiPokok" value="0" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-bold text-slate-800 text-xs">' +
 '      </div>' +
 '      <div>' +
-'        <label class="block font-black text-slate-700 mb-1 uppercase text-[10px]">Keterangan Aturan</label>' +
-'        <input type="text" id="diagKeterangan" placeholder="Contoh: 2 Shift Rp 55.000/shift + JM" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-bold text-slate-800 text-xs">' +
+'        <label class="block font-black text-slate-700 mb-1 uppercase text-[10px]">Keterangan (Opsional)</label>' +
+'        <input type="text" id="diagKeterangan" placeholder="Catatan tambahan bila diperlukan (opsional)" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-bold text-slate-800 text-xs">' +
 '      </div>' +
 '      <div>' +
-'        <label class="block font-black text-slate-700 mb-1 uppercase text-[10px]">Status Keaktifan *</label>' +
+'        <label class="block font-black text-slate-700 mb-1 uppercase text-[10px]">Status Aktivasi Payroll *</label>' +
 '        <select id="diagStatus" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-bold text-slate-800 text-xs">' +
-'          <option value="Aktif" selected>Aktif (Muncul di Payroll)</option>' +
-'          <option value="Tidak Aktif">Tidak Aktif (Tidak Muncul di Payroll)</option>' +
+'          <option value="Aktif" selected>Aktif (Dihitung di Payroll & Slip Gaji)</option>' +
+'          <option value="Tidak Aktif">Tidak Aktif (Tidak Dihitung di Payroll)</option>' +
 '        </select>' +
 '      </div>' +
 '      <div id="diagAlert" class="hidden p-3 rounded-xl text-xs font-bold"></div>' +

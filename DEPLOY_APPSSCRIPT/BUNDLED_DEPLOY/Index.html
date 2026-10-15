@@ -4543,20 +4543,16 @@
 
         <form onsubmit="handleSimpanTarifShift(event)" class="space-y-3.5">
           <div>
-            <label class="block text-[11px] font-extrabold text-slate-700 mb-1">Nama Pekerja *</label>
-            <input type="text" id="tarifNamaPekerja" required placeholder="Contoh: drg. Rahma Yulinda D, Sp. BMM" class="w-full px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-800">
+            <label class="block text-[11px] font-extrabold text-slate-700 mb-1">Nama Pekerja (Wajib terdaftar di Sheet Data) *</label>
+            <input type="text" id="tarifNamaPekerja" required list="listStaffMasterData" oninput="handleTarifNamaPekerjaChange()" onchange="handleTarifNamaPekerjaChange()" placeholder="Pilih atau ketik nama pekerja terdaftar..." class="w-full px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-800">
+            <datalist id="listStaffMasterData"></datalist>
+            <p id="tarifNamaHint" class="text-[10px] text-slate-500 mt-1">Nama harus sesuai dengan yang ada di Master User & Role</p>
           </div>
 
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block text-[11px] font-extrabold text-slate-700 mb-1">Role Jabatan *</label>
-              <select id="tarifRole" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-800">
-                <option value="Dokter Gigi Spesialis">Dokter Gigi Spesialis</option>
-                <option value="Dokter Gigi Umum">Dokter Gigi Umum</option>
-                <option value="Perawat Gigi">Perawat Gigi</option>
-                <option value="Perawat Umum">Perawat Umum</option>
-                <option value="Admin">Admin</option>
-              </select>
+              <label class="block text-[11px] font-extrabold text-slate-700 mb-1">Role Jabatan (Otomatis dari Sheet Data)</label>
+              <input type="text" id="tarifRole" readonly placeholder="(Otomatis terisi)" class="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl text-xs font-bold text-slate-600">
             </div>
             <div>
               <label class="block text-[11px] font-extrabold text-slate-700 mb-1">Tipe Kompensasi *</label>
@@ -14622,7 +14618,15 @@ function renderInfoBmhp() {
     handlePresPekerjaChange();
   }
 
+  function populateStaffDatalist() {
+    const dl = document.getElementById('listStaffMasterData');
+    if (!dl) return;
+    const staffList = (window.KlinikData && Array.isArray(window.KlinikData.staff)) ? window.KlinikData.staff : [];
+    dl.innerHTML = staffList.map(s => `<option value="${s.nama}">${s.nama} (${s.role || 'Staff'})</option>`).join('');
+  }
+
   function renderAllPayrollTables() {
+    populateStaffDatalist();
     populatePresensiPekerjaDropdown();
     recalculateShiftTotalsFromPresensi();
 
@@ -14984,6 +14988,57 @@ function renderInfoBmhp() {
     }
   }
 
+  function handleTarifNamaPekerjaChange() {
+    const namaInput = document.getElementById('tarifNamaPekerja');
+    const roleInput = document.getElementById('tarifRole');
+    const hint = document.getElementById('tarifNamaHint');
+    if (!namaInput || !roleInput) return;
+
+    const val = namaInput.value.trim();
+    if (!val) {
+      roleInput.value = '';
+      if (hint) { hint.textContent = 'Nama harus sesuai dengan yang ada di Master User & Role'; hint.className = 'text-[10px] text-slate-500 mt-1'; }
+      return;
+    }
+
+    const staffList = (window.KlinikData && Array.isArray(window.KlinikData.staff)) ? window.KlinikData.staff : [];
+    const found = staffList.find(s => (s.nama || '').trim().toLowerCase() === val.toLowerCase());
+
+    if (found) {
+      roleInput.value = found.role || 'Admin';
+      if (hint) {
+        hint.textContent = '✓ Terverifikasi di Sheet Data (' + found.role + ')';
+        hint.className = 'text-[10px] text-emerald-600 font-bold mt-1';
+      }
+      const tipeEl = document.getElementById('tarifTipe');
+      if (tipeEl) {
+        let rLow = (found.role || '').toLowerCase();
+        if (rLow.includes('dokter')) {
+          tipeEl.value = 'Kombinasi Shift & Tindakan';
+          let s1El = document.getElementById('tarifShift1'); if (s1El) s1El.value = 55000;
+          let s2El = document.getElementById('tarifShift2'); if (s2El) s2El.value = 55000;
+          let gpEl = document.getElementById('tarifGajiPokok'); if (gpEl) gpEl.value = 0;
+        } else if (rLow.includes('perawat')) {
+          tipeEl.value = 'Uang Harian Shift';
+          let s1El = document.getElementById('tarifShift1'); if (s1El) s1El.value = 45000;
+          let s2El = document.getElementById('tarifShift2'); if (s2El) s2El.value = 45000;
+          let gpEl = document.getElementById('tarifGajiPokok'); if (gpEl) gpEl.value = 0;
+        } else if (rLow.includes('admin') || rLow.includes('kasir')) {
+          tipeEl.value = 'Gaji Bulanan Tetap';
+          let s1El = document.getElementById('tarifShift1'); if (s1El) s1El.value = 0;
+          let s2El = document.getElementById('tarifShift2'); if (s2El) s2El.value = 0;
+          let gpEl = document.getElementById('tarifGajiPokok'); if (gpEl) gpEl.value = 1200000;
+        }
+      }
+    } else {
+      roleInput.value = '';
+      if (hint) {
+        hint.textContent = '⚠️ Nama tidak terdaftar di Sheet Data. Pendaftaran akan ditolak!';
+        hint.className = 'text-[10px] text-rose-600 font-bold mt-1';
+      }
+    }
+  }
+
   function pilihTarifShiftToEdit(idx) {
     const item = (window.PayrollState.tarifShift || [])[idx];
     if (!item) return;
@@ -14998,28 +15053,68 @@ function renderInfoBmhp() {
     if (statEl) {
       statEl.value = isPekerjaAktif(item.namaPekerja) ? 'Aktif' : 'Tidak Aktif';
     }
+    const hint = document.getElementById('tarifNamaHint');
+    if (hint) {
+      hint.textContent = '✓ Mengedit aturan: ' + item.namaPekerja + ' (' + (item.idAturan || '-') + ')';
+      hint.className = 'text-[10px] text-indigo-600 font-bold mt-1';
+    }
   }
 
   function handleSimpanTarifShift(e) {
     if (e) e.preventDefault();
+    const namaPekerja = ((document.getElementById('tarifNamaPekerja') || {}).value || '').trim();
+    if (!namaPekerja) {
+      if (typeof showToast === 'function') showToast('error', 'Nama pekerja wajib diisi!');
+      return;
+    }
+
+    // 1. Validasi: Nama harus sudah terdaftar di Sheet Data. Jika namanya tidak ada di sheet data, TOLAK!
+    const staffList = (window.KlinikData && Array.isArray(window.KlinikData.staff)) ? window.KlinikData.staff : [];
+    let foundStaff = null;
+    if (staffList.length > 0) {
+      foundStaff = staffList.find(s => (s.nama || '').trim().toLowerCase() === namaPekerja.toLowerCase());
+      if (!foundStaff) {
+        if (typeof showToast === 'function') {
+          showToast('error', 'Nama [' + namaPekerja + '] belum terdaftar di Sheet Data. Pendaftaran ditolak! Silakan daftarkan pekerja di Master User terlebih dahulu.');
+        }
+        return;
+      }
+    }
+
+    // 2. Masukkan secara otomatis Role dari Nama Pekerja (dari Sheet Data)
+    const autoRole = foundStaff ? foundStaff.role : ((document.getElementById('tarifRole') || {}).value || 'Admin');
+
+    // 3. Isi ID_Aturan secara otomatis (TARIF-001, TARIF-002, dst)
+    let exTarif = (window.PayrollState.tarifShift || []).find(x => String(x.namaPekerja || '').toLowerCase() === namaPekerja.toLowerCase());
+    let idAturan = exTarif ? exTarif.idAturan : '';
+    if (!idAturan) {
+      let maxN = 0;
+      (window.PayrollState.tarifShift || []).forEach(t => {
+        let m = String(t.idAturan || '').match(/TARIF-(\d+)/i);
+        if (m) {
+          let n = parseInt(m[1], 10);
+          if (n > maxN) maxN = n;
+        }
+      });
+      idAturan = 'TARIF-' + String(maxN + 1).padStart(3, '0');
+    }
+
     const payload = {
-      namaPekerja: (document.getElementById('tarifNamaPekerja') || {}).value.trim(),
-      role: (document.getElementById('tarifRole') || {}).value,
+      idAturan: idAturan,
+      namaPekerja: foundStaff ? foundStaff.nama : namaPekerja,
+      role: autoRole,
       tipeKompensasi: (document.getElementById('tarifTipe') || {}).value,
       tarifShift1: Number((document.getElementById('tarifShift1') || {}).value) || 0,
       tarifShift2: Number((document.getElementById('tarifShift2') || {}).value) || 0,
       gajiPokokBulanan: Number((document.getElementById('tarifGajiPokok') || {}).value) || 0,
-      keterangan: (document.getElementById('tarifKeterangan') || {}).value.trim(),
-      status: (document.getElementById('tarifStatus') || {}).value || 'Aktif'
+      keterangan: ((document.getElementById('tarifKeterangan') || {}).value || '').trim(),
+      status: (document.getElementById('tarifStatus') || {}).value || (foundStaff ? foundStaff.status : 'Aktif')
     };
-
-    if (!payload.namaPekerja) return;
 
     let exIdx = (window.PayrollState.tarifShift || []).findIndex(x => String(x.namaPekerja || '').toLowerCase() === payload.namaPekerja.toLowerCase());
     if (exIdx >= 0) {
       window.PayrollState.tarifShift[exIdx] = Object.assign(window.PayrollState.tarifShift[exIdx], payload);
     } else {
-      payload.idAturan = 'TARIF-00' + ((window.PayrollState.tarifShift || []).length + 1);
       window.PayrollState.tarifShift.push(payload);
     }
     savePayrollCacheLocal();
@@ -15033,16 +15128,20 @@ function renderInfoBmhp() {
       google.script.run
         .withSuccessHandler(res => {
           if (btn) { btn.disabled = false; btn.innerHTML = orig; }
-          if (typeof showToast === 'function') showToast('success', (res && res.message) ? res.message : 'Aturan tarif shift disimpan!');
+          if (res && res.success) {
+            if (typeof showToast === 'function') showToast('success', res.message || 'Aturan tarif shift disimpan!');
+          } else {
+            if (typeof showToast === 'function') showToast('error', (res && res.message) ? res.message : 'Gagal menyimpan aturan tarif shift.');
+          }
         })
-        .withFailureHandler(() => {
+        .withFailureHandler(err => {
           if (btn) { btn.disabled = false; btn.innerHTML = orig; }
-          if (typeof showToast === 'function') showToast('success', 'Aturan tarif shift & gaji berhasil diperbarui!');
+          if (typeof showToast === 'function') showToast('error', 'Gagal menyimpan: ' + (err.message || err));
         })
         .simpanTarifShift(payload);
     } else {
       if (btn) { btn.disabled = false; btn.innerHTML = orig; }
-      if (typeof showToast === 'function') showToast('success', 'Aturan tarif shift & gaji berhasil diperbarui!');
+      if (typeof showToast === 'function') showToast('success', 'Aturan tarif shift & gaji untuk ' + payload.namaPekerja + ' (' + idAturan + ') berhasil disimpan!');
     }
   }
 
@@ -15232,6 +15331,7 @@ function renderInfoBmhp() {
   window.switchPayrollTab = switchPayrollTab;
   window.loadPayrollModuleData = loadPayrollModuleData;
   window.handlePresPekerjaChange = handlePresPekerjaChange;
+  window.handleTarifNamaPekerjaChange = handleTarifNamaPekerjaChange;
   window.updatePreviewUangShift = updatePreviewUangShift;
   window.handleSimpanPresensiShift = handleSimpanPresensiShift;
   window.pilihTarifShiftToEdit = pilihTarifShiftToEdit;

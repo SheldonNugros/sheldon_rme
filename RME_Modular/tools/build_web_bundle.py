@@ -832,17 +832,32 @@ mock_gas_script = '''
 
     simpanTarifShift(payload) {
       setTimeout(() => {
-        if (payload && payload.namaPekerja) {
-          let ex = (mockDb.tarifShift || []).find(t => (t.namaPekerja || "").toLowerCase() === String(payload.namaPekerja).toLowerCase());
-          if (ex) {
-            Object.assign(ex, payload);
-          } else {
-            mockDb.tarifShift.push(payload);
-          }
+        if (!payload || !payload.namaPekerja) {
+          this._successHandler({ success: false, message: "Nama pekerja wajib diisi!" });
+          return;
+        }
+        let cleanNama = String(payload.namaPekerja).trim();
+        let foundStaff = (mockDb.staff || []).find(s => (s.nama || "").toLowerCase() === cleanNama.toLowerCase());
+        if (!foundStaff) {
+          this._successHandler({
+            success: false,
+            message: 'Nama [' + cleanNama + '] belum terdaftar di Sheet Data. Pendaftaran tarif shift ditolak! Daftarkan pekerja di Master User terlebih dahulu.'
+          });
+          return;
+        }
+
+        payload.role = foundStaff.role || "Staf";
+        let ex = (mockDb.tarifShift || []).find(t => (t.namaPekerja || "").toLowerCase() === cleanNama.toLowerCase());
+        if (ex) {
+          payload.idAturan = ex.idAturan || ("TARIF-" + String((mockDb.tarifShift || []).length + 1).padStart(3, '0'));
+          Object.assign(ex, payload);
+        } else {
+          payload.idAturan = payload.idAturan || ("TARIF-" + String((mockDb.tarifShift || []).length + 1).padStart(3, '0'));
+          mockDb.tarifShift.push(payload);
         }
         this._successHandler({
           success: true,
-          message: "Pengaturan tarif shift & gaji untuk " + (payload && payload.namaPekerja ? payload.namaPekerja : "") + " berhasil disimpan!"
+          message: "Pengaturan tarif shift & gaji untuk " + cleanNama + " berhasil disimpan!"
         });
       }, 50);
     }

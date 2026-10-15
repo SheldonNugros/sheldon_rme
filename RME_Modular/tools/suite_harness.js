@@ -821,17 +821,32 @@ var console = {
 
     simpanTarifShift(payload) {
       setTimeout(() => {
-        if (payload && payload.namaPekerja) {
-          let ex = (mockDb.tarifShift || []).find(t => (t.namaPekerja || "").toLowerCase() === String(payload.namaPekerja).toLowerCase());
-          if (ex) {
-            Object.assign(ex, payload);
-          } else {
-            mockDb.tarifShift.push(payload);
-          }
+        if (!payload || !payload.namaPekerja) {
+          this._successHandler({ success: false, message: "Nama pekerja wajib diisi!" });
+          return;
+        }
+        let cleanNama = String(payload.namaPekerja).trim();
+        let foundStaff = (mockDb.staff || []).find(s => (s.nama || "").toLowerCase() === cleanNama.toLowerCase());
+        if (!foundStaff) {
+          this._successHandler({
+            success: false,
+            message: 'Nama [' + cleanNama + '] belum terdaftar di Sheet Data. Pendaftaran tarif shift ditolak! Daftarkan pekerja di Master User terlebih dahulu.'
+          });
+          return;
+        }
+
+        payload.role = foundStaff.role || "Staf";
+        let ex = (mockDb.tarifShift || []).find(t => (t.namaPekerja || "").toLowerCase() === cleanNama.toLowerCase());
+        if (ex) {
+          payload.idAturan = ex.idAturan || ("TARIF-" + String((mockDb.tarifShift || []).length + 1).padStart(3, '0'));
+          Object.assign(ex, payload);
+        } else {
+          payload.idAturan = payload.idAturan || ("TARIF-" + String((mockDb.tarifShift || []).length + 1).padStart(3, '0'));
+          mockDb.tarifShift.push(payload);
         }
         this._successHandler({
           success: true,
-          message: "Pengaturan tarif shift & gaji untuk " + (payload && payload.namaPekerja ? payload.namaPekerja : "") + " berhasil disimpan!"
+          message: "Pengaturan tarif shift & gaji untuk " + cleanNama + " berhasil disimpan!"
         });
       }, 50);
     }
@@ -11460,7 +11475,15 @@ function renderInfoBmhp() {
     handlePresPekerjaChange();
   }
 
+  function populateStaffDatalist() {
+    const dl = document.getElementById('listStaffMasterData');
+    if (!dl) return;
+    const staffList = (window.KlinikData && Array.isArray(window.KlinikData.staff)) ? window.KlinikData.staff : [];
+    dl.innerHTML = staffList.map(s => `<option value="${s.nama}">${s.nama} (${s.role || 'Staff'})</option>`).join('');
+  }
+
   function renderAllPayrollTables() {
+    populateStaffDatalist();
     populatePresensiPekerjaDropdown();
     recalculateShiftTotalsFromPresensi();
 
@@ -11822,6 +11845,57 @@ function renderInfoBmhp() {
     }
   }
 
+  function handleTarifNamaPekerjaChange() {
+    const namaInput = document.getElementById('tarifNamaPekerja');
+    const roleInput = document.getElementById('tarifRole');
+    const hint = document.getElementById('tarifNamaHint');
+    if (!namaInput || !roleInput) return;
+
+    const val = namaInput.value.trim();
+    if (!val) {
+      roleInput.value = '';
+      if (hint) { hint.textContent = 'Nama harus sesuai dengan yang ada di Master User & Role'; hint.className = 'text-[10px] text-slate-500 mt-1'; }
+      return;
+    }
+
+    const staffList = (window.KlinikData && Array.isArray(window.KlinikData.staff)) ? window.KlinikData.staff : [];
+    const found = staffList.find(s => (s.nama || '').trim().toLowerCase() === val.toLowerCase());
+
+    if (found) {
+      roleInput.value = found.role || 'Admin';
+      if (hint) {
+        hint.textContent = '✓ Terverifikasi di Sheet Data (' + found.role + ')';
+        hint.className = 'text-[10px] text-emerald-600 font-bold mt-1';
+      }
+      const tipeEl = document.getElementById('tarifTipe');
+      if (tipeEl) {
+        let rLow = (found.role || '').toLowerCase();
+        if (rLow.includes('dokter')) {
+          tipeEl.value = 'Kombinasi Shift & Tindakan';
+          let s1El = document.getElementById('tarifShift1'); if (s1El) s1El.value = 55000;
+          let s2El = document.getElementById('tarifShift2'); if (s2El) s2El.value = 55000;
+          let gpEl = document.getElementById('tarifGajiPokok'); if (gpEl) gpEl.value = 0;
+        } else if (rLow.includes('perawat')) {
+          tipeEl.value = 'Uang Harian Shift';
+          let s1El = document.getElementById('tarifShift1'); if (s1El) s1El.value = 45000;
+          let s2El = document.getElementById('tarifShift2'); if (s2El) s2El.value = 45000;
+          let gpEl = document.getElementById('tarifGajiPokok'); if (gpEl) gpEl.value = 0;
+        } else if (rLow.includes('admin') || rLow.includes('kasir')) {
+          tipeEl.value = 'Gaji Bulanan Tetap';
+          let s1El = document.getElementById('tarifShift1'); if (s1El) s1El.value = 0;
+          let s2El = document.getElementById('tarifShift2'); if (s2El) s2El.value = 0;
+          let gpEl = document.getElementById('tarifGajiPokok'); if (gpEl) gpEl.value = 1200000;
+        }
+      }
+    } else {
+      roleInput.value = '';
+      if (hint) {
+        hint.textContent = '⚠️ Nama tidak terdaftar di Sheet Data. Pendaftaran akan ditolak!';
+        hint.className = 'text-[10px] text-rose-600 font-bold mt-1';
+      }
+    }
+  }
+
   function pilihTarifShiftToEdit(idx) {
     const item = (window.PayrollState.tarifShift || [])[idx];
     if (!item) return;
@@ -11836,28 +11910,68 @@ function renderInfoBmhp() {
     if (statEl) {
       statEl.value = isPekerjaAktif(item.namaPekerja) ? 'Aktif' : 'Tidak Aktif';
     }
+    const hint = document.getElementById('tarifNamaHint');
+    if (hint) {
+      hint.textContent = '✓ Mengedit aturan: ' + item.namaPekerja + ' (' + (item.idAturan || '-') + ')';
+      hint.className = 'text-[10px] text-indigo-600 font-bold mt-1';
+    }
   }
 
   function handleSimpanTarifShift(e) {
     if (e) e.preventDefault();
+    const namaPekerja = ((document.getElementById('tarifNamaPekerja') || {}).value || '').trim();
+    if (!namaPekerja) {
+      if (typeof showToast === 'function') showToast('error', 'Nama pekerja wajib diisi!');
+      return;
+    }
+
+    // 1. Validasi: Nama harus sudah terdaftar di Sheet Data. Jika namanya tidak ada di sheet data, TOLAK!
+    const staffList = (window.KlinikData && Array.isArray(window.KlinikData.staff)) ? window.KlinikData.staff : [];
+    let foundStaff = null;
+    if (staffList.length > 0) {
+      foundStaff = staffList.find(s => (s.nama || '').trim().toLowerCase() === namaPekerja.toLowerCase());
+      if (!foundStaff) {
+        if (typeof showToast === 'function') {
+          showToast('error', 'Nama [' + namaPekerja + '] belum terdaftar di Sheet Data. Pendaftaran ditolak! Silakan daftarkan pekerja di Master User terlebih dahulu.');
+        }
+        return;
+      }
+    }
+
+    // 2. Masukkan secara otomatis Role dari Nama Pekerja (dari Sheet Data)
+    const autoRole = foundStaff ? foundStaff.role : ((document.getElementById('tarifRole') || {}).value || 'Admin');
+
+    // 3. Isi ID_Aturan secara otomatis (TARIF-001, TARIF-002, dst)
+    let exTarif = (window.PayrollState.tarifShift || []).find(x => String(x.namaPekerja || '').toLowerCase() === namaPekerja.toLowerCase());
+    let idAturan = exTarif ? exTarif.idAturan : '';
+    if (!idAturan) {
+      let maxN = 0;
+      (window.PayrollState.tarifShift || []).forEach(t => {
+        let m = String(t.idAturan || '').match(/TARIF-(\d+)/i);
+        if (m) {
+          let n = parseInt(m[1], 10);
+          if (n > maxN) maxN = n;
+        }
+      });
+      idAturan = 'TARIF-' + String(maxN + 1).padStart(3, '0');
+    }
+
     const payload = {
-      namaPekerja: (document.getElementById('tarifNamaPekerja') || {}).value.trim(),
-      role: (document.getElementById('tarifRole') || {}).value,
+      idAturan: idAturan,
+      namaPekerja: foundStaff ? foundStaff.nama : namaPekerja,
+      role: autoRole,
       tipeKompensasi: (document.getElementById('tarifTipe') || {}).value,
       tarifShift1: Number((document.getElementById('tarifShift1') || {}).value) || 0,
       tarifShift2: Number((document.getElementById('tarifShift2') || {}).value) || 0,
       gajiPokokBulanan: Number((document.getElementById('tarifGajiPokok') || {}).value) || 0,
-      keterangan: (document.getElementById('tarifKeterangan') || {}).value.trim(),
-      status: (document.getElementById('tarifStatus') || {}).value || 'Aktif'
+      keterangan: ((document.getElementById('tarifKeterangan') || {}).value || '').trim(),
+      status: (document.getElementById('tarifStatus') || {}).value || (foundStaff ? foundStaff.status : 'Aktif')
     };
-
-    if (!payload.namaPekerja) return;
 
     let exIdx = (window.PayrollState.tarifShift || []).findIndex(x => String(x.namaPekerja || '').toLowerCase() === payload.namaPekerja.toLowerCase());
     if (exIdx >= 0) {
       window.PayrollState.tarifShift[exIdx] = Object.assign(window.PayrollState.tarifShift[exIdx], payload);
     } else {
-      payload.idAturan = 'TARIF-00' + ((window.PayrollState.tarifShift || []).length + 1);
       window.PayrollState.tarifShift.push(payload);
     }
     savePayrollCacheLocal();
@@ -11871,16 +11985,20 @@ function renderInfoBmhp() {
       google.script.run
         .withSuccessHandler(res => {
           if (btn) { btn.disabled = false; btn.innerHTML = orig; }
-          if (typeof showToast === 'function') showToast('success', (res && res.message) ? res.message : 'Aturan tarif shift disimpan!');
+          if (res && res.success) {
+            if (typeof showToast === 'function') showToast('success', res.message || 'Aturan tarif shift disimpan!');
+          } else {
+            if (typeof showToast === 'function') showToast('error', (res && res.message) ? res.message : 'Gagal menyimpan aturan tarif shift.');
+          }
         })
-        .withFailureHandler(() => {
+        .withFailureHandler(err => {
           if (btn) { btn.disabled = false; btn.innerHTML = orig; }
-          if (typeof showToast === 'function') showToast('success', 'Aturan tarif shift & gaji berhasil diperbarui!');
+          if (typeof showToast === 'function') showToast('error', 'Gagal menyimpan: ' + (err.message || err));
         })
         .simpanTarifShift(payload);
     } else {
       if (btn) { btn.disabled = false; btn.innerHTML = orig; }
-      if (typeof showToast === 'function') showToast('success', 'Aturan tarif shift & gaji berhasil diperbarui!');
+      if (typeof showToast === 'function') showToast('success', 'Aturan tarif shift & gaji untuk ' + payload.namaPekerja + ' (' + idAturan + ') berhasil disimpan!');
     }
   }
 
@@ -12070,6 +12188,7 @@ function renderInfoBmhp() {
   window.switchPayrollTab = switchPayrollTab;
   window.loadPayrollModuleData = loadPayrollModuleData;
   window.handlePresPekerjaChange = handlePresPekerjaChange;
+  window.handleTarifNamaPekerjaChange = handleTarifNamaPekerjaChange;
   window.updatePreviewUangShift = updatePreviewUangShift;
   window.handleSimpanPresensiShift = handleSimpanPresensiShift;
   window.pilihTarifShiftToEdit = pilihTarifShiftToEdit;
@@ -13250,6 +13369,8 @@ var sampleDoc = window.PayrollState.penggajianDokter[0];
 var baseShift1 = sampleDoc.hadirShift1 || 0;
 var baseTotalUang = sampleDoc.totalUangHarianShift || 0;
 
+print("DEBUG sampleDoc: " + JSON.stringify(sampleDoc));
+
 window.PayrollState.presensiHarian.push({
   idPresensi: "ATT-TEST-LIVE-001",
   tanggal: "15-10-2026",
@@ -13263,6 +13384,7 @@ window.PayrollState.presensiHarian.push({
 });
 
 recalculateShiftTotalsFromPresensi();
+print("DEBUG after recalc sampleDoc: " + JSON.stringify(sampleDoc));
 assert("PAYROLL-11: Skenario 7 - Presensi Baru Otomatis Menambah Hadir Shift 1 Dokter", sampleDoc.hadirShift1 === baseShift1 + 1);
 assert("PAYROLL-11: Skenario 7 - Total Uang Harian Shift Dokter Bertambah Rp 55.000", sampleDoc.totalUangHarianShift === baseTotalUang + 55000);
 
@@ -13273,6 +13395,42 @@ assert("PAYROLL-12: Skenario 8 - Transisi Status Transfer Payroll Menjadi " + (c
 // Kembalikan ke status semula
 togglePayrollPaidStatus('dokter', 0);
 assert("PAYROLL-12: Skenario 8 - Transisi Kembali ke Status Semula (" + curStatus + ")", sampleDoc.statusTransfer === curStatus);
+
+// Uji Skenario 9: Penolakan Pendaftaran Tarif Shift jika Nama Tidak Terdaftar di Sheet Data (Master User)
+var initialTarifCount = (window.PayrollState.tarifShift || []).length;
+document.getElementById('tarifNamaPekerja').value = "Pekerja Fiktif Antah Berantah";
+document.getElementById('tarifRole').value = "Staff";
+handleSimpanTarifShift();
+var afterRejectCount = (window.PayrollState.tarifShift || []).length;
+var rejectWorkerExists = (window.PayrollState.tarifShift || []).some(function(t) {
+  return (t.namaPekerja || '').toLowerCase() === "pekerja fiktif antah berantah";
+});
+assert("PAYROLL-13: Skenario 9 - Penolakan Pendaftaran Tarif Shift jika Nama Belum Terdaftar di Sheet Data", !rejectWorkerExists && afterRejectCount === initialTarifCount);
+
+// Uji Skenario 10: Event Autofill Otomatis Mengisi Role dari Sheet Data saat Nama Dipilih
+var targetValidStaff = (window.KlinikData.staff || []).find(function(s) {
+  return !(window.PayrollState.tarifShift || []).some(function(t) {
+    return (t.namaPekerja || '').toLowerCase() === (s.nama || '').toLowerCase();
+  });
+});
+if (!targetValidStaff && window.KlinikData.staff && window.KlinikData.staff.length > 0) {
+  targetValidStaff = window.KlinikData.staff[0];
+}
+
+document.getElementById('tarifNamaPekerja').value = targetValidStaff.nama;
+document.getElementById('tarifRole').value = "RoleSembaranganManual";
+handleTarifNamaPekerjaChange();
+assert("PAYROLL-14: Skenario 10 - Autofill Event Mengisi Role dari Sheet Data Saat Nama Terpilih", document.getElementById('tarifRole').value === targetValidStaff.role);
+
+// Uji Skenario 11: Pendaftaran Berhasil & Role Otomatis Sesuai Sheet Data
+handleSimpanTarifShift();
+var savedTarif = (window.PayrollState.tarifShift || []).find(function(t) {
+  return (t.namaPekerja || '').toLowerCase() === targetValidStaff.nama.toLowerCase();
+});
+assert("PAYROLL-15: Skenario 11 - Pendaftaran Berhasil & Role Otomatis Sesuai Sheet Data", savedTarif && savedTarif.role === targetValidStaff.role);
+
+// Uji Skenario 12: ID_Aturan Terisi Otomatis dengan Format TARIF-XXX
+assert("PAYROLL-16: Skenario 12 - ID_Aturan Terisi Otomatis dengan Format TARIF-XXX", savedTarif && /^TARIF-\d{3,}$/.test(savedTarif.idAturan));
 
 // SUMMARY REPORT
 print("=================================================");

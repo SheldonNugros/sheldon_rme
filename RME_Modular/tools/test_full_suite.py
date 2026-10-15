@@ -1351,6 +1351,8 @@ var sampleDoc = window.PayrollState.penggajianDokter[0];
 var baseShift1 = sampleDoc.hadirShift1 || 0;
 var baseTotalUang = sampleDoc.totalUangHarianShift || 0;
 
+print("DEBUG sampleDoc: " + JSON.stringify(sampleDoc));
+
 window.PayrollState.presensiHarian.push({
   idPresensi: "ATT-TEST-LIVE-001",
   tanggal: "15-10-2026",
@@ -1364,6 +1366,7 @@ window.PayrollState.presensiHarian.push({
 });
 
 recalculateShiftTotalsFromPresensi();
+print("DEBUG after recalc sampleDoc: " + JSON.stringify(sampleDoc));
 assert("PAYROLL-11: Skenario 7 - Presensi Baru Otomatis Menambah Hadir Shift 1 Dokter", sampleDoc.hadirShift1 === baseShift1 + 1);
 assert("PAYROLL-11: Skenario 7 - Total Uang Harian Shift Dokter Bertambah Rp 55.000", sampleDoc.totalUangHarianShift === baseTotalUang + 55000);
 
@@ -1374,6 +1377,42 @@ assert("PAYROLL-12: Skenario 8 - Transisi Status Transfer Payroll Menjadi " + (c
 // Kembalikan ke status semula
 togglePayrollPaidStatus('dokter', 0);
 assert("PAYROLL-12: Skenario 8 - Transisi Kembali ke Status Semula (" + curStatus + ")", sampleDoc.statusTransfer === curStatus);
+
+// Uji Skenario 9: Penolakan Pendaftaran Tarif Shift jika Nama Tidak Terdaftar di Sheet Data (Master User)
+var initialTarifCount = (window.PayrollState.tarifShift || []).length;
+document.getElementById('tarifNamaPekerja').value = "Pekerja Fiktif Antah Berantah";
+document.getElementById('tarifRole').value = "Staff";
+handleSimpanTarifShift();
+var afterRejectCount = (window.PayrollState.tarifShift || []).length;
+var rejectWorkerExists = (window.PayrollState.tarifShift || []).some(function(t) {
+  return (t.namaPekerja || '').toLowerCase() === "pekerja fiktif antah berantah";
+});
+assert("PAYROLL-13: Skenario 9 - Penolakan Pendaftaran Tarif Shift jika Nama Belum Terdaftar di Sheet Data", !rejectWorkerExists && afterRejectCount === initialTarifCount);
+
+// Uji Skenario 10: Event Autofill Otomatis Mengisi Role dari Sheet Data saat Nama Dipilih
+var targetValidStaff = (window.KlinikData.staff || []).find(function(s) {
+  return !(window.PayrollState.tarifShift || []).some(function(t) {
+    return (t.namaPekerja || '').toLowerCase() === (s.nama || '').toLowerCase();
+  });
+});
+if (!targetValidStaff && window.KlinikData.staff && window.KlinikData.staff.length > 0) {
+  targetValidStaff = window.KlinikData.staff[0];
+}
+
+document.getElementById('tarifNamaPekerja').value = targetValidStaff.nama;
+document.getElementById('tarifRole').value = "RoleSembaranganManual";
+handleTarifNamaPekerjaChange();
+assert("PAYROLL-14: Skenario 10 - Autofill Event Mengisi Role dari Sheet Data Saat Nama Terpilih", document.getElementById('tarifRole').value === targetValidStaff.role);
+
+// Uji Skenario 11: Pendaftaran Berhasil & Role Otomatis Sesuai Sheet Data
+handleSimpanTarifShift();
+var savedTarif = (window.PayrollState.tarifShift || []).find(function(t) {
+  return (t.namaPekerja || '').toLowerCase() === targetValidStaff.nama.toLowerCase();
+});
+assert("PAYROLL-15: Skenario 11 - Pendaftaran Berhasil & Role Otomatis Sesuai Sheet Data", savedTarif && savedTarif.role === targetValidStaff.role);
+
+// Uji Skenario 12: ID_Aturan Terisi Otomatis dengan Format TARIF-XXX
+assert("PAYROLL-16: Skenario 12 - ID_Aturan Terisi Otomatis dengan Format TARIF-XXX", savedTarif && /^TARIF-\d{3,}$/.test(savedTarif.idAturan));
 
 // SUMMARY REPORT
 print("=================================================");

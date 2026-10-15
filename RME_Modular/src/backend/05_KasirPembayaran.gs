@@ -2,10 +2,6 @@
 // FUNGSI PEMBAYARAN, KASIR & INVOICE
 // =========================================================================
 
-function getInitBayar() {
-  return getDaftarPembayaran();
-}
-
 function getDaftarPembayaran() {
   try {
     const v = readFast(DB_CONFIG.PEMBAYARAN, "Data_Pembayaran");

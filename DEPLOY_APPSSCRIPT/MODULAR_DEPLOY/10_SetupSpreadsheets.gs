@@ -693,100 +693,6 @@ function setupAllSpreadsheets() {
   return newConfig;
 }
 
-/**
- * FUNGSI LANGSUNG (SATU KLIK):
- * Menghapus sheet Presensi_Shift_Harian pada spreadsheet RME Sheldon - 06 Master User & Role.
- * Menghapus sheet Pengaturan_Tarif_Shift pada spreadsheet RME Sheldon - 11 Payroll & Honor Dokter.
- * 
- * Buka Apps Script Editor -> Pilih fungsi `hapusSheetPresensiMasterDanTarifPayroll` -> Klik Run.
- */
-function hapusSheetPresensiMasterDanTarifPayroll() {
-  Logger.log("=== MEMULAI PEMBERSIHAN SHEET SESUAI INSTRUKSI ARSITEKTUR ===");
-  let hasilLog = [];
-
-  try {
-    // 1. Spreadsheet 06 Master User & Role: Hapus Presensi_Shift_Harian
-    let masterId = (DB_CONFIG && DB_CONFIG.MASTER) ? DB_CONFIG.MASTER.trim() : "";
-    let ssMaster = null;
-    if (masterId) {
-      try { ssMaster = SpreadsheetApp.openById(masterId); } catch (eM) {}
-    }
-    if (!ssMaster) {
-      let foundM = _findOrCreateSpreadsheetInFolder("MASTER", SPREADSHEET_DEFINITIONS["MASTER"].title);
-      ssMaster = foundM.ss;
-    }
-
-    if (ssMaster) {
-      let shPres = ssMaster.getSheetByName("Presensi_Shift_Harian");
-      if (shPres) {
-        if (ssMaster.getSheets().length > 1) {
-          ssMaster.deleteSheet(shPres);
-          let msg1 = "🗑️ Berhasil MENGHAPUS sheet [Presensi_Shift_Harian] dari spreadsheet: " + ssMaster.getName();
-          Logger.log(msg1);
-          hasilLog.push(msg1);
-        } else {
-          let msg1 = "⚠️ Sheet [Presensi_Shift_Harian] adalah satu-satunya sheet di 06 Master, tidak dapat dihapus sebelum ada sheet lain.";
-          Logger.log(msg1);
-          hasilLog.push(msg1);
-        }
-      } else {
-        let msg1 = "ℹ️ Sheet [Presensi_Shift_Harian] sudah tidak ada (bersih) di spreadsheet: " + ssMaster.getName();
-        Logger.log(msg1);
-        hasilLog.push(msg1);
-      }
-
-      // Pastikan sheet Pengaturan_Tarif_Shift ada di 06 Master
-      let shTarifM = ssMaster.getSheetByName("Pengaturan_Tarif_Shift");
-      if (!shTarifM) {
-        _sinkronkanShiftKeMasterUser();
-        let msgTarif = "✅ Berhasil memastikan sheet [Pengaturan_Tarif_Shift] dibuat dan tersimpan di: " + ssMaster.getName();
-        Logger.log(msgTarif);
-        hasilLog.push(msgTarif);
-      }
-    }
-
-    // 2. Spreadsheet 11 Payroll & Honor Dokter: Hapus Pengaturan_Tarif_Shift
-    let payrollId = (DB_CONFIG && DB_CONFIG.PAYROLL) ? DB_CONFIG.PAYROLL.trim() : "";
-    let ssPayroll = null;
-    if (payrollId) {
-      try { ssPayroll = SpreadsheetApp.openById(payrollId); } catch (eP) {}
-    }
-    if (!ssPayroll) {
-      let foundP = _findOrCreateSpreadsheetInFolder("PAYROLL", SPREADSHEET_DEFINITIONS["PAYROLL"].title);
-      ssPayroll = foundP.ss;
-    }
-
-    if (ssPayroll) {
-      let shTarif = ssPayroll.getSheetByName("Pengaturan_Tarif_Shift");
-      if (shTarif) {
-        if (ssPayroll.getSheets().length > 1) {
-          ssPayroll.deleteSheet(shTarif);
-          let msg2 = "🗑️ Berhasil MENGHAPUS sheet [Pengaturan_Tarif_Shift] dari spreadsheet: " + ssPayroll.getName();
-          Logger.log(msg2);
-          hasilLog.push(msg2);
-        } else {
-          let msg2 = "⚠️ Sheet [Pengaturan_Tarif_Shift] adalah satu-satunya sheet di 11 Payroll, tidak dapat dihapus sebelum ada sheet lain.";
-          Logger.log(msg2);
-          hasilLog.push(msg2);
-        }
-      } else {
-        let msg2 = "ℹ️ Sheet [Pengaturan_Tarif_Shift] sudah tidak ada (bersih) di spreadsheet: " + ssPayroll.getName();
-        Logger.log(msg2);
-        hasilLog.push(msg2);
-      }
-    }
-
-    SpreadsheetApp.flush();
-    return {
-      success: true,
-      message: hasilLog.join("\n")
-    };
-  } catch (err) {
-    let errMsg = "❌ Gagal menghapus sheet: " + err.message;
-    Logger.log(errMsg);
-    return { success: false, message: errMsg };
-  }
-}
 
 /**
  * FUNGSI MIGRASI / SETUP LANGSUNG:
@@ -1093,10 +999,6 @@ function sinkronkanSemuaSheetOtomatis() {
     }
   }
 
-  // Panggil pembersihan terpusat agar kedua spreadsheet dijamin 100% bersih
-  try {
-    hapusSheetPresensiMasterDanTarifPayroll();
-  } catch (eClean) {}
 
   SpreadsheetApp.flush();
   Logger.log("Laporan Sinkronisasi:\n" + laporan.join("\n"));

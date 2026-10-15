@@ -2,10 +2,6 @@
 // FUNGSI REKAM MEDIS (EMR), ODONTOGRAM, DAN ICD-10
 // =========================================================================
 
-function getInitEMR() {
-  return getDaftarRekamMedis();
-}
-
 function getDaftarICD10() {
   try {
     const idICD = DB_CONFIG.ICD10;

@@ -2190,27 +2190,9 @@
    <button onclick="changeDBMenu('obat')" id="btnDbObat" class="px-5 py-2.5 bg-white text-slate-600 font-bold rounded-lg hover:bg-slate-50 transition-all flex-shrink-0">DB Obat</button>
    <button onclick="changeDBMenu('bmhp')" id="btnDbBmhp" class="px-5 py-2.5 bg-white text-slate-600 font-bold rounded-lg hover:bg-slate-50 transition-all flex-shrink-0">DB BMHP</button>
    <button onclick="changeDBMenu('user')" id="btnDbUser" class="px-5 py-2.5 bg-white text-slate-600 font-bold rounded-lg hover:bg-slate-50 transition-all flex-shrink-0">👥 Master User & Role</button>
- </div>
+  </div>
 
- <!-- QUICK SYSTEM & SYNC ACTIONS (SUPER USER & OWNER) -->
- <div id="dbSystemActionsBar" class="bg-white p-3.5 rounded-xl shadow-sm border border-slate-200 flex items-center gap-2.5 flex-wrap">
-   <span class="text-[11px] font-black text-slate-500 uppercase tracking-wider mr-1 flex items-center gap-1">⚙️ Aksi Cepat:</span>
-   <button id="btnDbImportBulk" type="button" onclick="triggerImportBulkSheldon2026()" class="px-3.5 py-2 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-extrabold rounded-lg text-xs shadow-sm transition-all flex items-center gap-1.5 active:scale-95" title="Impor & Sinkronkan Bulk Data dari SHELDON 2026 ke 11 Spreadsheet Database">
-     <span>📥</span> Import Bulk Data 2026
-   </button>
-   <button id="btnDbSinkronSheet" type="button" onclick="triggerSinkronSemuaSheet()" class="px-3 py-2 bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 font-bold rounded-lg text-xs transition-all flex items-center gap-1.5" title="Otomatis sinkronkan dan perbarui seluruh sheet database dan bersihkan sheet usang">
-     <span>🔄</span> Sinkronkan Sheet
-   </button>
-   <button id="btnDbBackup" type="button" onclick="triggerManualBackup()" class="px-3 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-lg text-xs shadow-sm transition-all flex items-center gap-1.5" title="Cadangkan seluruh database ke Google Drive">
-     <span>💾</span> Backup Sekarang
-   </button>
-   <button id="btnDbDownloadCSV" type="button" onclick="triggerBackupDownloadCSV()" class="px-3 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold rounded-lg text-xs shadow-sm transition-all flex items-center gap-1.5" title="Unduh cadangan database format CSV">
-     <span>📥</span> Download CSV
-   </button>
- </div>
-
-
- <!-- PANEL DB TINDAKAN -->
+  <!-- PANEL DB TINDAKAN -->
  <div id="panelDbTindakan" class="space-y-6">
   
    <!-- FORM TAMBAH / EDIT TINDAKAN -->
@@ -6255,8 +6237,6 @@
     let btnFilterDuplikat = document.getElementById('btnFilterDuplikat');
     let btnDbUser = document.getElementById('btnDbUser');
     if (btnDbUser) btnDbUser.classList.add('hidden');
-    let dbSysBar = document.getElementById('dbSystemActionsBar');
-    if (dbSysBar) dbSysBar.classList.add('hidden');
 
     // 1. SUPER USER / OWNER: Bisa membuka, edit, dan delete modul utama & manajemen user
     if (r === 'super user' || r === 'owner') {
@@ -6266,7 +6246,6 @@
       let navUM = document.getElementById('nav-user-master');
       if (navUM) navUM.classList.remove('hidden');
       if (btnDbUser) btnDbUser.classList.remove('hidden');
-      if (dbSysBar) dbSysBar.classList.remove('hidden');
 
       document.getElementById('section-transaksi').classList.remove('hidden');
       if (btnTambahPasien) btnTambahPasien.classList.remove('hidden');
@@ -6397,10 +6376,6 @@
     document.getElementById('mainContentScroll').scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  function bukaMenuMasterUser() {
-    switchMenu('user-master');
-  }
-
   function logout() {
     const modal = document.getElementById('logoutModal');
     const modalContent = document.getElementById('logoutModalContent');
@@ -6432,8 +6407,6 @@
     if (ribuan) { var separator = sisa ? '.' : ''; rupiah += separator + ribuan.join('.'); }
     return split[1] != undefined ? rupiah + ',' + split[1] : rupiah;
   }
-
-  let _dbSyncTicker = null;
 
   function showDbSyncOverlay(initialStatus) {
     const overlay = document.getElementById('dbSyncOverlay');
@@ -6474,10 +6447,6 @@
   }
 
   function hideDbSyncOverlay() {
-    if (_dbSyncTicker) {
-      clearInterval(_dbSyncTicker);
-      _dbSyncTicker = null;
-    }
     const overlay = document.getElementById('dbSyncOverlay');
     const card = document.getElementById('dbSyncCard');
     if (!overlay) return;

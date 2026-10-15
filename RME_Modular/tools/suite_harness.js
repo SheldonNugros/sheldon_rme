@@ -1740,8 +1740,6 @@ var console = {
     let btnFilterDuplikat = document.getElementById('btnFilterDuplikat');
     let btnDbUser = document.getElementById('btnDbUser');
     if (btnDbUser) btnDbUser.classList.add('hidden');
-    let dbSysBar = document.getElementById('dbSystemActionsBar');
-    if (dbSysBar) dbSysBar.classList.add('hidden');
 
     // 1. SUPER USER / OWNER: Bisa membuka, edit, dan delete modul utama & manajemen user
     if (r === 'super user' || r === 'owner') {
@@ -1751,7 +1749,6 @@ var console = {
       let navUM = document.getElementById('nav-user-master');
       if (navUM) navUM.classList.remove('hidden');
       if (btnDbUser) btnDbUser.classList.remove('hidden');
-      if (dbSysBar) dbSysBar.classList.remove('hidden');
 
       document.getElementById('section-transaksi').classList.remove('hidden');
       if (btnTambahPasien) btnTambahPasien.classList.remove('hidden');
@@ -1882,10 +1879,6 @@ var console = {
     document.getElementById('mainContentScroll').scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  function bukaMenuMasterUser() {
-    switchMenu('user-master');
-  }
-
   function logout() {
     const modal = document.getElementById('logoutModal');
     const modalContent = document.getElementById('logoutModalContent');
@@ -1917,8 +1910,6 @@ var console = {
     if (ribuan) { var separator = sisa ? '.' : ''; rupiah += separator + ribuan.join('.'); }
     return split[1] != undefined ? rupiah + ',' + split[1] : rupiah;
   }
-
-  let _dbSyncTicker = null;
 
   function showDbSyncOverlay(initialStatus) {
     const overlay = document.getElementById('dbSyncOverlay');
@@ -1959,10 +1950,6 @@ var console = {
   }
 
   function hideDbSyncOverlay() {
-    if (_dbSyncTicker) {
-      clearInterval(_dbSyncTicker);
-      _dbSyncTicker = null;
-    }
     const overlay = document.getElementById('dbSyncOverlay');
     const card = document.getElementById('dbSyncCard');
     if (!overlay) return;

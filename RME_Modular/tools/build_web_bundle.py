@@ -325,8 +325,8 @@ mock_gas_script = '''
       { tanggal: "25-12-2026", hari: "Jumat", kategoriLibur: "Libur Nasional", namaHariLibur: "Hari Raya Natal", statusOperasional: "Tutup", keterangan: "Libur Nasional Kalender", dibuatOleh: "Sistem", waktuUpdate: "01-01-2026 00:00:00" }
     ],
     rekapBulananAbsensi: [
-      { periodeBulan: "Oktober 2026", namaPekerja: "Bernadette Rostenkowski", role: "Perawat", totalShiftPagi: 10, totalShiftSore: 8, totalHadir: 18, totalTidakHadir: 0, persentase: "100.0%", terakhirUpdate: "15-10-2026 15:00:00" },
-      { periodeBulan: "Oktober 2026", namaPekerja: "Howard Wolowitz", role: "Admin", totalShiftPagi: 12, totalShiftSore: 6, totalHadir: 18, totalTidakHadir: 0, persentase: "100.0%", terakhirUpdate: "15-10-2026 15:00:00" }
+      { periodeBulan: "Oktober 2026", namaPekerja: "Bernadette Rostenkowski", role: "Perawat", hariKerja: 27, totalShiftPagi: 10, totalShiftSore: 8, totalHadir: 18, totalTidakHadir: 0, persentase: "100.0%", terakhirUpdate: "15-10-2026 15:00:00" },
+      { periodeBulan: "Oktober 2026", namaPekerja: "Howard Wolowitz", role: "Admin", hariKerja: 27, totalShiftPagi: 12, totalShiftSore: 6, totalHadir: 18, totalTidakHadir: 0, persentase: "100.0%", terakhirUpdate: "15-10-2026 15:00:00" }
     ]
   };
 

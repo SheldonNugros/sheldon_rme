@@ -418,14 +418,14 @@ const SPREADSHEET_DEFINITIONS = {
         },
         {
           "name": "Rekap_Bulanan",
-          "headers": ["Periode_Bulan", "Nama_Pekerja", "Role", "Total_Shift_Pagi", "Total_Shift_Sore", "Total_Hadir", "Total_Tidak_Hadir", "Persentase_Kehadiran", "Terakhir_Diperbarui"],
-          "formats": { "H": "0.0%", "I": "dd-mm-yyyy hh:mm:ss" },
+          "headers": ["Periode_Bulan", "Nama_Pekerja", "Role", "Hari_Kerja", "Total_Shift_Pagi", "Total_Shift_Sore", "Total_Hadir", "Total_Tidak_Hadir", "Persentase_Kehadiran", "Terakhir_Diperbarui"],
+          "formats": { "D": "0", "I": "0.0%", "J": "dd-mm-yyyy hh:mm:ss" },
           "validations": {
             "C": ["Dokter Spesialis", "Dokter Gigi", "Perawat", "Admin", "Staff"]
           },
           "seedRows": [
-            ["Oktober 2026", "Bernadette Rostenkowski", "Perawat", 10, 8, 18, 0, "100.0%", "15-10-2026 15:00:00"],
-            ["Oktober 2026", "Howard Wolowitz", "Admin", 12, 6, 18, 0, "100.0%", "15-10-2026 15:00:00"]
+            ["Oktober 2026", "Bernadette Rostenkowski", "Perawat", 27, 10, 8, 18, 0, "100.0%", "15-10-2026 15:00:00"],
+            ["Oktober 2026", "Howard Wolowitz", "Admin", 27, 12, 6, 18, 0, "100.0%", "15-10-2026 15:00:00"]
           ]
         }
       ]
@@ -1514,21 +1514,30 @@ function getAbsensiModuleData(dateStr) {
     }
 
     // 6. Ambil Rekap Bulanan
+    let targetPeriodeBulan = Utilities.formatDate(targetDate, "Asia/Jakarta", "MMMM yyyy");
+    let infoHariKerjaBulanIni = hitungHariKerjaBulan_(targetPeriodeBulan, kalenderLibur);
+
     let rekapBulanan = [];
     let shRekap = ssA.getSheetByName("Rekap_Bulanan");
     if (shRekap && shRekap.getLastRow() > 1) {
       let vRekap = shRekap.getRange(2, 1, shRekap.getLastRow() - 1, shRekap.getLastColumn()).getValues();
       vRekap.forEach(r => {
+        let pBulan = String(r[0] || targetPeriodeBulan);
+        let hk = Number(r[3]);
+        if (isNaN(hk) || hk <= 0) {
+          hk = hitungHariKerjaBulan_(pBulan, kalenderLibur).hariKerja;
+        }
         rekapBulanan.push({
-          periodeBulan: String(r[0] || ""),
+          periodeBulan: pBulan,
           namaPekerja: String(r[1] || ""),
           role: String(r[2] || ""),
-          totalShiftPagi: Number(r[3]) || 0,
-          totalShiftSore: Number(r[4]) || 0,
-          totalHadir: Number(r[5]) || 0,
-          totalTidakHadir: Number(r[6]) || 0,
-          persentase: String(r[7] || "100%"),
-          terakhirUpdate: String(r[8] || "")
+          hariKerja: hk,
+          totalShiftPagi: Number(r[4]) || 0,
+          totalShiftSore: Number(r[5]) || 0,
+          totalHadir: Number(r[6]) || 0,
+          totalTidakHadir: Number(r[7]) || 0,
+          persentase: String(r[8] || "100%"),
+          terakhirUpdate: String(r[9] || "")
         });
       });
     }
@@ -1546,10 +1555,88 @@ function getAbsensiModuleData(dateStr) {
       activeWorkers: activeWorkers,
       presensiHariIni: presensiHariIni,
       kalenderLibur: kalenderLibur,
-      rekapBulanan: rekapBulanan
+      rekapBulanan: rekapBulanan,
+      infoHariKerja: infoHariKerjaBulanIni
     };
   } catch (err) {
     return { success: false, message: "Gagal memuat modul Absensi: " + err.message };
+  }
+}
+
+/**
+ * Helper: Menghitung jumlah Hari Kerja dalam suatu bulan.
+ * Hari Kerja = (Jumlah hari dalam bulan tersebut) - (Jumlah hari libur).
+ * Hari libur meliputi:
+ * - Setiap hari Minggu rutin pada bulan tersebut
+ * - Setiap tanggal libur nasional / cuti / khusus klinik yang berstatus "Tutup"
+ *   (tidak dihitung dobel jika hari libur bertepatan dengan hari Minggu).
+ */
+function hitungHariKerjaBulan_(periodeBulan, kalenderLibur) {
+  try {
+    let now = new Date();
+    let monthIdx = now.getMonth();
+    let year = now.getFullYear();
+
+    const bulanIndoMap = {
+      "januari": 0, "februari": 1, "maret": 2, "april": 3, "mei": 4, "juni": 5,
+      "juli": 6, "agustus": 7, "september": 8, "oktober": 9, "november": 10, "desember": 11
+    };
+
+    if (periodeBulan) {
+      let parts = String(periodeBulan).trim().toLowerCase().split(/\s+/);
+      if (parts.length >= 2) {
+        if (bulanIndoMap[parts[0]] !== undefined) monthIdx = bulanIndoMap[parts[0]];
+        let yParsed = parseInt(parts[1], 10);
+        if (!isNaN(yParsed)) year = yParsed;
+      }
+    }
+
+    // Jumlah hari dalam bulan tersebut (misal 31 untuk Oktober)
+    let totalDaysInMonth = new Date(year, monthIdx + 1, 0).getDate();
+
+    // Kumpulkan set tanggal libur unik dalam format DD-MM-YYYY
+    let holidayDatesSet = {};
+
+    // 1. Hari Minggu rutin
+    for (let day = 1; day <= totalDaysInMonth; day++) {
+      let d = new Date(year, monthIdx, day);
+      if (d.getDay() === 0) { // 0 = Minggu
+        let key = String(day).padStart(2, '0') + '-' + String(monthIdx + 1).padStart(2, '0') + '-' + year;
+        holidayDatesSet[key] = true;
+      }
+    }
+
+    // 2. Hari Libur dari Kalender_Hari_Libur dengan statusOperasional === "Tutup"
+    if (Array.isArray(kalenderLibur)) {
+      kalenderLibur.forEach(h => {
+        let opStatus = String(h.statusOperasional || "Tutup").trim();
+        if (opStatus.toLowerCase() === "tutup") {
+          let tglStr = String(h.tanggal || "").trim();
+          if (tglStr.indexOf('-') !== -1) {
+            let p = tglStr.split('-');
+            let dObj = (p[0].length === 4)
+              ? new Date(parseInt(p[0], 10), parseInt(p[1], 10) - 1, parseInt(p[2], 10))
+              : new Date(parseInt(p[2], 10), parseInt(p[1], 10) - 1, parseInt(p[0], 10));
+
+            if (dObj.getMonth() === monthIdx && dObj.getFullYear() === year) {
+              let key = String(dObj.getDate()).padStart(2, '0') + '-' + String(monthIdx + 1).padStart(2, '0') + '-' + year;
+              holidayDatesSet[key] = true;
+            }
+          }
+        }
+      });
+    }
+
+    let totalHariLibur = Object.keys(holidayDatesSet).length;
+    let hariKerja = Math.max(0, totalDaysInMonth - totalHariLibur);
+
+    return {
+      totalDaysInMonth: totalDaysInMonth,
+      totalHariLibur: totalHariLibur,
+      hariKerja: hariKerja
+    };
+  } catch (e) {
+    return { totalDaysInMonth: 30, totalHariLibur: 4, hariKerja: 26 };
   }
 }
 

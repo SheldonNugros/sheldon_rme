@@ -244,8 +244,8 @@
       { tanggal: "25-12-2026", hari: "Jumat", kategoriLibur: "Libur Nasional", namaHariLibur: "Hari Raya Natal", statusOperasional: "Tutup", keterangan: "Libur Nasional Kalender", dibuatOleh: "Sistem", waktuUpdate: "01-01-2026 00:00:00" }
     ],
     rekapBulananAbsensi: [
-      { periodeBulan: "Oktober 2026", namaPekerja: "Bernadette Rostenkowski", role: "Perawat", totalShiftPagi: 10, totalShiftSore: 8, totalHadir: 18, totalTidakHadir: 0, persentase: "100.0%", terakhirUpdate: "15-10-2026 15:00:00" },
-      { periodeBulan: "Oktober 2026", namaPekerja: "Howard Wolowitz", role: "Admin", totalShiftPagi: 12, totalShiftSore: 6, totalHadir: 18, totalTidakHadir: 0, persentase: "100.0%", terakhirUpdate: "15-10-2026 15:00:00" }
+      { periodeBulan: "Oktober 2026", namaPekerja: "Bernadette Rostenkowski", role: "Perawat", hariKerja: 27, totalShiftPagi: 10, totalShiftSore: 8, totalHadir: 18, totalTidakHadir: 0, persentase: "100.0%", terakhirUpdate: "15-10-2026 15:00:00" },
+      { periodeBulan: "Oktober 2026", namaPekerja: "Howard Wolowitz", role: "Admin", hariKerja: 27, totalShiftPagi: 12, totalShiftSore: 6, totalHadir: 18, totalTidakHadir: 0, persentase: "100.0%", terakhirUpdate: "15-10-2026 15:00:00" }
     ]
   };
 
@@ -6083,6 +6083,9 @@
           <p class="text-xs text-slate-400 mt-0.5">Akumulasi shift pagi, shift sore, dan persentase kehadiran untuk perhitungan gaji/honor.</p>
         </div>
         <div class="flex items-center gap-2">
+          <span id="badgeHariKerjaRekap" class="text-xs font-bold px-3 py-1.5 rounded-lg bg-indigo-500/20 text-indigo-300 border border-indigo-400/30">
+            📅 Hari Kerja: 27 Hari
+          </span>
           <label class="text-xs font-bold text-slate-300">Bulan:</label>
           <select id="selectBulanRekap" onchange="filterRekapBulanan(this.value)" class="bg-slate-950 border border-slate-700 text-white text-xs rounded-xl px-3 py-2 font-medium focus:ring-2 focus:ring-indigo-500">
             <option value="Oktober 2026">Oktober 2026</option>
@@ -6105,6 +6108,7 @@
               <th class="px-4 py-3.5 w-12 text-center">No</th>
               <th class="px-4 py-3.5">Nama Pegawai</th>
               <th class="px-4 py-3.5">Role</th>
+              <th class="px-4 py-3.5 text-center text-cyan-300">Hari Kerja</th>
               <th class="px-4 py-3.5 text-center">Shift Pagi</th>
               <th class="px-4 py-3.5 text-center">Shift Sore</th>
               <th class="px-4 py-3.5 text-center text-emerald-400">Total Hadir</th>
@@ -6115,7 +6119,7 @@
           </thead>
           <tbody id="tbodyRekapBulanan" class="divide-y divide-slate-800/60 font-medium">
             <tr>
-              <td colspan="9" class="px-4 py-8 text-center text-slate-400">Memuat rekap kehadiran...</td>
+              <td colspan="10" class="px-4 py-8 text-center text-slate-400">Memuat rekap kehadiran...</td>
             </tr>
           </tbody>
         </table>
@@ -17545,6 +17549,77 @@ function simpanAbsensiShiftCurrent() {
 }
 
 /**
+ * Menghitung jumlah Hari Kerja dalam suatu bulan:
+ * Hari Kerja = (Jumlah hari dalam bulan tersebut) - (Jumlah hari libur).
+ * Hari libur meliputi:
+ * - Setiap hari Minggu rutin pada bulan tersebut
+ * - Setiap tanggal libur nasional / cuti / khusus klinik yang berstatus "Tutup"
+ *   (tidak dihitung dobel jika hari libur bertepatan dengan hari Minggu).
+ */
+function hitungHariKerjaBulan(periodeBulan, kalenderLibur) {
+  let now = new Date();
+  let monthIdx = now.getMonth();
+  let year = now.getFullYear();
+
+  const bulanMap = {
+    "januari": 0, "februari": 1, "maret": 2, "april": 3, "mei": 4, "juni": 5,
+    "juli": 6, "agustus": 7, "september": 8, "oktober": 9, "november": 10, "desember": 11
+  };
+
+  if (periodeBulan) {
+    let p = String(periodeBulan).trim().toLowerCase().split(/\s+/);
+    if (p.length >= 2) {
+      if (bulanMap[p[0]] !== undefined) monthIdx = bulanMap[p[0]];
+      let y = parseInt(p[1], 10);
+      if (!isNaN(y)) year = y;
+    }
+  }
+
+  // Jumlah hari dalam bulan
+  let totalDays = new Date(year, monthIdx + 1, 0).getDate();
+  let holidaySet = {};
+
+  // 1. Hari Minggu
+  for (let day = 1; day <= totalDays; day++) {
+    let d = new Date(year, monthIdx, day);
+    if (d.getDay() === 0) {
+      let key = String(day).padStart(2, '0') + '-' + String(monthIdx + 1).padStart(2, '0') + '-' + year;
+      holidaySet[key] = true;
+    }
+  }
+
+  // 2. Hari Libur yang status Operasionalnya Tutup
+  let kList = kalenderLibur || (window.AbsensiState && window.AbsensiState.kalenderLibur) || [];
+  if (Array.isArray(kList)) {
+    kList.forEach(h => {
+      let st = String(h.statusOperasional || "Tutup").trim().toLowerCase();
+      if (st === "tutup") {
+        let tgl = String(h.tanggal || "").trim();
+        if (tgl.indexOf('-') !== -1) {
+          let sp = tgl.split('-');
+          let dObj = (sp[0].length === 4)
+            ? new Date(parseInt(sp[0], 10), parseInt(sp[1], 10) - 1, parseInt(sp[2], 10))
+            : new Date(parseInt(sp[2], 10), parseInt(sp[1], 10) - 1, parseInt(sp[0], 10));
+
+          if (dObj.getMonth() === monthIdx && dObj.getFullYear() === year) {
+            let key = String(dObj.getDate()).padStart(2, '0') + '-' + String(monthIdx + 1).padStart(2, '0') + '-' + year;
+            holidaySet[key] = true;
+          }
+        }
+      }
+    });
+  }
+
+  let totalLibur = Object.keys(holidaySet).length;
+  let hariKerja = Math.max(0, totalDays - totalLibur);
+  return {
+    totalDays: totalDays,
+    totalLibur: totalLibur,
+    hariKerja: hariKerja
+  };
+}
+
+/**
  * Render Tabel Rekap Kehadiran Bulanan.
  */
 function renderRekapBulanan() {
@@ -17553,11 +17628,18 @@ function renderRekapBulanan() {
 
   let rekap = window.AbsensiState.rekapBulanan || [];
   let workers = window.AbsensiState.activeWorkers || [];
+  let curBulan = document.getElementById('selectBulanRekap') ? document.getElementById('selectBulanRekap').value : "Oktober 2026";
+  let infoHK = hitungHariKerjaBulan(curBulan, window.AbsensiState.kalenderLibur);
+
+  let badgeHK = document.getElementById('badgeHariKerjaRekap');
+  if (badgeHK) {
+    badgeHK.innerText = "📅 Hari Kerja: " + infoHK.hariKerja + " Hari (Total " + infoHK.totalDays + " - Libur " + infoHK.totalLibur + ")";
+  }
 
   if (rekap.length === 0 && workers.length === 0) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="9" class="px-4 py-8 text-center text-slate-400">Belum ada data rekap kehadiran bulanan.</td>
+        <td colspan="10" class="px-4 py-8 text-center text-slate-400">Belum ada data rekap kehadiran bulanan.</td>
       </tr>
     `;
     return;
@@ -17571,6 +17653,7 @@ function renderRekapBulanan() {
     let sore = found ? found.totalShiftSore : 0;
     let hadir = found ? found.totalHadir : (pagi + sore);
     let tidak = found ? found.totalTidakHadir : 0;
+    let hk = (found && found.hariKerja) ? found.hariKerja : infoHK.hariKerja;
     let pct = found ? found.persentase : (hadir > 0 ? '100.0%' : '0%');
 
     html += `
@@ -17578,6 +17661,7 @@ function renderRekapBulanan() {
         <td class="px-4 py-3 text-center text-slate-400 font-bold">${idx + 1}</td>
         <td class="px-4 py-3 font-bold text-white">${escapeHtml(w.namaPekerja)}</td>
         <td class="px-4 py-3 text-slate-300">${escapeHtml(w.role || 'Staf')}</td>
+        <td class="px-4 py-3 text-center font-bold text-cyan-300">${hk} Hari</td>
         <td class="px-4 py-3 text-center font-semibold text-amber-300">${pagi}</td>
         <td class="px-4 py-3 text-center font-semibold text-indigo-300">${sore}</td>
         <td class="px-4 py-3 text-center font-bold text-emerald-400">${hadir}</td>

@@ -197,6 +197,9 @@
           <p class="text-xs text-slate-400 mt-0.5">Akumulasi shift pagi, shift sore, dan persentase kehadiran untuk perhitungan gaji/honor.</p>
         </div>
         <div class="flex items-center gap-2">
+          <span id="badgeHariKerjaRekap" class="text-xs font-bold px-3 py-1.5 rounded-lg bg-indigo-500/20 text-indigo-300 border border-indigo-400/30">
+            📅 Hari Kerja: 27 Hari
+          </span>
           <label class="text-xs font-bold text-slate-300">Bulan:</label>
           <select id="selectBulanRekap" onchange="filterRekapBulanan(this.value)" class="bg-slate-950 border border-slate-700 text-white text-xs rounded-xl px-3 py-2 font-medium focus:ring-2 focus:ring-indigo-500">
             <option value="Oktober 2026">Oktober 2026</option>
@@ -219,6 +222,7 @@
               <th class="px-4 py-3.5 w-12 text-center">No</th>
               <th class="px-4 py-3.5">Nama Pegawai</th>
               <th class="px-4 py-3.5">Role</th>
+              <th class="px-4 py-3.5 text-center text-cyan-300">Hari Kerja</th>
               <th class="px-4 py-3.5 text-center">Shift Pagi</th>
               <th class="px-4 py-3.5 text-center">Shift Sore</th>
               <th class="px-4 py-3.5 text-center text-emerald-400">Total Hadir</th>
@@ -229,7 +233,7 @@
           </thead>
           <tbody id="tbodyRekapBulanan" class="divide-y divide-slate-800/60 font-medium">
             <tr>
-              <td colspan="9" class="px-4 py-8 text-center text-slate-400">Memuat rekap kehadiran...</td>
+              <td colspan="10" class="px-4 py-8 text-center text-slate-400">Memuat rekap kehadiran...</td>
             </tr>
           </tbody>
         </table>

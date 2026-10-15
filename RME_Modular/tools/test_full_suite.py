@@ -1536,6 +1536,24 @@ var savedLibur = (window.AbsensiState.kalenderLibur || []).find(function(k) {
 assert("ABSENSI-8: Hari Libur Manual Berhasil Ditambahkan ke Kalender Libur", savedLibur !== undefined && savedLibur.namaHariLibur === "Hari Libur Khusus Klinik Sheldon");
 assert("ABSENSI-8: Status Operasional Hari Libur Tersimpan 'Tutup'", savedLibur && savedLibur.statusOperasional === "Tutup");
 
+// ABSENSI-9: Header Hari_Kerja di Rekap_Bulanan & Formula (Hari Kerja = Hari Bulan - Hari Libur)
+switchTabAbsensi('rekap');
+renderRekapBulanan();
+var infoHkOkt = hitungHariKerjaBulan("Oktober 2026", window.AbsensiState.kalenderLibur);
+// Oktober 2026 memiliki 31 hari, 4 hari Minggu, 0 libur nasional = 27 hari kerja
+assert("ABSENSI-9: Total Hari Bulan Oktober 2026 adalah 31 Hari", infoHkOkt.totalDays === 31);
+assert("ABSENSI-9: Total Hari Libur Oktober 2026 adalah 4 Hari (Minggu)", infoHkOkt.totalLibur === 4);
+assert("ABSENSI-9: Hari Kerja Dihitung Akurat (31 - 4 = 27 Hari)", infoHkOkt.hariKerja === 27);
+
+// Uji jika ada libur khusus tambahan pada hari kerja (20-11-2026 yang jatuh pada hari Jumat)
+var infoHkNov = hitungHariKerjaBulan("November 2026", window.AbsensiState.kalenderLibur);
+// November 2026 memiliki 30 hari, 5 hari Minggu (1, 8, 15, 22, 29), + 1 libur klinik tgl 20 Nov = 6 libur -> 24 hari kerja
+assert("ABSENSI-9: Hari Kerja November 2026 Terhitung Akurat Dikurangi Libur Tambahan (30 - 6 = 24 Hari)", infoHkNov.hariKerja === 24);
+
+// Verifikasi badge dan kolom tabel Rekap Bulanan
+var badgeHkEl = document.getElementById('badgeHariKerjaRekap');
+assert("ABSENSI-9: Badge Hari Kerja Tersedia dan Tampil di UI Rekap", badgeHkEl !== null && badgeHkEl.innerText.indexOf('27') !== -1);
+
 // SUMMARY REPORT
 print("=================================================");
 var passedTotal = results.filter(r => r.passed).length;

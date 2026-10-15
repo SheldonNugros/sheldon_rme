@@ -314,8 +314,8 @@ var console = {
       { tanggal: "25-12-2026", hari: "Jumat", kategoriLibur: "Libur Nasional", namaHariLibur: "Hari Raya Natal", statusOperasional: "Tutup", keterangan: "Libur Nasional Kalender", dibuatOleh: "Sistem", waktuUpdate: "01-01-2026 00:00:00" }
     ],
     rekapBulananAbsensi: [
-      { periodeBulan: "Oktober 2026", namaPekerja: "Bernadette Rostenkowski", role: "Perawat", totalShiftPagi: 10, totalShiftSore: 8, totalHadir: 18, totalTidakHadir: 0, persentase: "100.0%", terakhirUpdate: "15-10-2026 15:00:00" },
-      { periodeBulan: "Oktober 2026", namaPekerja: "Howard Wolowitz", role: "Admin", totalShiftPagi: 12, totalShiftSore: 6, totalHadir: 18, totalTidakHadir: 0, persentase: "100.0%", terakhirUpdate: "15-10-2026 15:00:00" }
+      { periodeBulan: "Oktober 2026", namaPekerja: "Bernadette Rostenkowski", role: "Perawat", hariKerja: 27, totalShiftPagi: 10, totalShiftSore: 8, totalHadir: 18, totalTidakHadir: 0, persentase: "100.0%", terakhirUpdate: "15-10-2026 15:00:00" },
+      { periodeBulan: "Oktober 2026", namaPekerja: "Howard Wolowitz", role: "Admin", hariKerja: 27, totalShiftPagi: 12, totalShiftSore: 6, totalHadir: 18, totalTidakHadir: 0, persentase: "100.0%", terakhirUpdate: "15-10-2026 15:00:00" }
     ]
   };
 
@@ -13019,6 +13019,77 @@ function simpanAbsensiShiftCurrent() {
 }
 
 /**
+ * Menghitung jumlah Hari Kerja dalam suatu bulan:
+ * Hari Kerja = (Jumlah hari dalam bulan tersebut) - (Jumlah hari libur).
+ * Hari libur meliputi:
+ * - Setiap hari Minggu rutin pada bulan tersebut
+ * - Setiap tanggal libur nasional / cuti / khusus klinik yang berstatus "Tutup"
+ *   (tidak dihitung dobel jika hari libur bertepatan dengan hari Minggu).
+ */
+function hitungHariKerjaBulan(periodeBulan, kalenderLibur) {
+  let now = new Date();
+  let monthIdx = now.getMonth();
+  let year = now.getFullYear();
+
+  const bulanMap = {
+    "januari": 0, "februari": 1, "maret": 2, "april": 3, "mei": 4, "juni": 5,
+    "juli": 6, "agustus": 7, "september": 8, "oktober": 9, "november": 10, "desember": 11
+  };
+
+  if (periodeBulan) {
+    let p = String(periodeBulan).trim().toLowerCase().split(/\s+/);
+    if (p.length >= 2) {
+      if (bulanMap[p[0]] !== undefined) monthIdx = bulanMap[p[0]];
+      let y = parseInt(p[1], 10);
+      if (!isNaN(y)) year = y;
+    }
+  }
+
+  // Jumlah hari dalam bulan
+  let totalDays = new Date(year, monthIdx + 1, 0).getDate();
+  let holidaySet = {};
+
+  // 1. Hari Minggu
+  for (let day = 1; day <= totalDays; day++) {
+    let d = new Date(year, monthIdx, day);
+    if (d.getDay() === 0) {
+      let key = String(day).padStart(2, '0') + '-' + String(monthIdx + 1).padStart(2, '0') + '-' + year;
+      holidaySet[key] = true;
+    }
+  }
+
+  // 2. Hari Libur yang status Operasionalnya Tutup
+  let kList = kalenderLibur || (window.AbsensiState && window.AbsensiState.kalenderLibur) || [];
+  if (Array.isArray(kList)) {
+    kList.forEach(h => {
+      let st = String(h.statusOperasional || "Tutup").trim().toLowerCase();
+      if (st === "tutup") {
+        let tgl = String(h.tanggal || "").trim();
+        if (tgl.indexOf('-') !== -1) {
+          let sp = tgl.split('-');
+          let dObj = (sp[0].length === 4)
+            ? new Date(parseInt(sp[0], 10), parseInt(sp[1], 10) - 1, parseInt(sp[2], 10))
+            : new Date(parseInt(sp[2], 10), parseInt(sp[1], 10) - 1, parseInt(sp[0], 10));
+
+          if (dObj.getMonth() === monthIdx && dObj.getFullYear() === year) {
+            let key = String(dObj.getDate()).padStart(2, '0') + '-' + String(monthIdx + 1).padStart(2, '0') + '-' + year;
+            holidaySet[key] = true;
+          }
+        }
+      }
+    });
+  }
+
+  let totalLibur = Object.keys(holidaySet).length;
+  let hariKerja = Math.max(0, totalDays - totalLibur);
+  return {
+    totalDays: totalDays,
+    totalLibur: totalLibur,
+    hariKerja: hariKerja
+  };
+}
+
+/**
  * Render Tabel Rekap Kehadiran Bulanan.
  */
 function renderRekapBulanan() {
@@ -13027,11 +13098,18 @@ function renderRekapBulanan() {
 
   let rekap = window.AbsensiState.rekapBulanan || [];
   let workers = window.AbsensiState.activeWorkers || [];
+  let curBulan = document.getElementById('selectBulanRekap') ? document.getElementById('selectBulanRekap').value : "Oktober 2026";
+  let infoHK = hitungHariKerjaBulan(curBulan, window.AbsensiState.kalenderLibur);
+
+  let badgeHK = document.getElementById('badgeHariKerjaRekap');
+  if (badgeHK) {
+    badgeHK.innerText = "📅 Hari Kerja: " + infoHK.hariKerja + " Hari (Total " + infoHK.totalDays + " - Libur " + infoHK.totalLibur + ")";
+  }
 
   if (rekap.length === 0 && workers.length === 0) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="9" class="px-4 py-8 text-center text-slate-400">Belum ada data rekap kehadiran bulanan.</td>
+        <td colspan="10" class="px-4 py-8 text-center text-slate-400">Belum ada data rekap kehadiran bulanan.</td>
       </tr>
     `;
     return;
@@ -13045,6 +13123,7 @@ function renderRekapBulanan() {
     let sore = found ? found.totalShiftSore : 0;
     let hadir = found ? found.totalHadir : (pagi + sore);
     let tidak = found ? found.totalTidakHadir : 0;
+    let hk = (found && found.hariKerja) ? found.hariKerja : infoHK.hariKerja;
     let pct = found ? found.persentase : (hadir > 0 ? '100.0%' : '0%');
 
     html += `
@@ -13052,6 +13131,7 @@ function renderRekapBulanan() {
         <td class="px-4 py-3 text-center text-slate-400 font-bold">${idx + 1}</td>
         <td class="px-4 py-3 font-bold text-white">${escapeHtml(w.namaPekerja)}</td>
         <td class="px-4 py-3 text-slate-300">${escapeHtml(w.role || 'Staf')}</td>
+        <td class="px-4 py-3 text-center font-bold text-cyan-300">${hk} Hari</td>
         <td class="px-4 py-3 text-center font-semibold text-amber-300">${pagi}</td>
         <td class="px-4 py-3 text-center font-semibold text-indigo-300">${sore}</td>
         <td class="px-4 py-3 text-center font-bold text-emerald-400">${hadir}</td>
@@ -14683,6 +14763,24 @@ var savedLibur = (window.AbsensiState.kalenderLibur || []).find(function(k) {
 });
 assert("ABSENSI-8: Hari Libur Manual Berhasil Ditambahkan ke Kalender Libur", savedLibur !== undefined && savedLibur.namaHariLibur === "Hari Libur Khusus Klinik Sheldon");
 assert("ABSENSI-8: Status Operasional Hari Libur Tersimpan 'Tutup'", savedLibur && savedLibur.statusOperasional === "Tutup");
+
+// ABSENSI-9: Header Hari_Kerja di Rekap_Bulanan & Formula (Hari Kerja = Hari Bulan - Hari Libur)
+switchTabAbsensi('rekap');
+renderRekapBulanan();
+var infoHkOkt = hitungHariKerjaBulan("Oktober 2026", window.AbsensiState.kalenderLibur);
+// Oktober 2026 memiliki 31 hari, 4 hari Minggu, 0 libur nasional = 27 hari kerja
+assert("ABSENSI-9: Total Hari Bulan Oktober 2026 adalah 31 Hari", infoHkOkt.totalDays === 31);
+assert("ABSENSI-9: Total Hari Libur Oktober 2026 adalah 4 Hari (Minggu)", infoHkOkt.totalLibur === 4);
+assert("ABSENSI-9: Hari Kerja Dihitung Akurat (31 - 4 = 27 Hari)", infoHkOkt.hariKerja === 27);
+
+// Uji jika ada libur khusus tambahan pada hari kerja (20-11-2026 yang jatuh pada hari Jumat)
+var infoHkNov = hitungHariKerjaBulan("November 2026", window.AbsensiState.kalenderLibur);
+// November 2026 memiliki 30 hari, 5 hari Minggu (1, 8, 15, 22, 29), + 1 libur klinik tgl 20 Nov = 6 libur -> 24 hari kerja
+assert("ABSENSI-9: Hari Kerja November 2026 Terhitung Akurat Dikurangi Libur Tambahan (30 - 6 = 24 Hari)", infoHkNov.hariKerja === 24);
+
+// Verifikasi badge dan kolom tabel Rekap Bulanan
+var badgeHkEl = document.getElementById('badgeHariKerjaRekap');
+assert("ABSENSI-9: Badge Hari Kerja Tersedia dan Tampil di UI Rekap", badgeHkEl !== null && badgeHkEl.innerText.indexOf('27') !== -1);
 
 // SUMMARY REPORT
 print("=================================================");

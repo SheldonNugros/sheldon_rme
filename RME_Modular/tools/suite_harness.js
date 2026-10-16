@@ -2047,6 +2047,12 @@ var console = {
       if (pUser) pUser.classList.remove('hidden');
       if (typeof handleRoleChange === 'function') handleRoleChange();
       if (typeof loadDaftarUserMaster === 'function') loadDaftarUserMaster(true);
+      if (typeof switchMasterUserSubTab === 'function') switchMasterUserSubTab('user');
+    }
+    if (menuId === 'payroll') {
+      switchMenu('user-master');
+      if (typeof switchMasterUserSubTab === 'function') switchMasterUserSubTab('payroll');
+      return;
     }
     if (menuId === 'inventory') {
       switchMenu('database');
@@ -2057,7 +2063,6 @@ var console = {
     if (menuId === 'kasir' && typeof initKasirDropdowns === 'function') initKasirDropdowns();
     if (menuId === 'riwayat-invoice' && typeof initRiwayatInvoiceModule === 'function') initRiwayatInvoiceModule();
     if (menuId === 'surat' && typeof initSuratModule === 'function') initSuratModule();
-    if (menuId === 'payroll' && typeof initPayrollModule === 'function') initPayrollModule();
     if (menuId === 'absensi' && typeof initAbsensiModule === 'function') initAbsensiModule();
   
     document.getElementById('mainContentScroll').scrollTo({ top: 0, behavior: 'smooth' });
@@ -10086,13 +10091,88 @@ function triggerSinkronSemuaSheet() {
 // ==========================================
 
 function ensureUserPanelVisible() {
-  ['view-user-master', 'panelDbUser', 'cardFormUser', 'cardTabelUser'].forEach(id => {
+  ['view-user-master', 'panelDbUser', 'subpanelMasterUser', 'cardTabelUser'].forEach(id => {
     const el = document.getElementById(id);
     if (el && id !== 'view-user-master') {
       el.classList.remove('hidden');
     }
   });
 }
+
+function toggleFormUser(forceShow) {
+  const card = document.getElementById('cardFormUser');
+  const btn = document.getElementById('btnToggleFormUser');
+  const icon = document.getElementById('iconToggleUser');
+  const label = document.getElementById('labelToggleUser');
+  if (!card) return;
+
+  const isHidden = card.classList.contains('hidden');
+  const show = typeof forceShow === 'boolean' ? forceShow : isHidden;
+
+  if (show) {
+    card.classList.remove('hidden');
+    if (btn) {
+      btn.classList.remove('from-indigo-600', 'to-purple-600', 'hover:from-indigo-700', 'hover:to-purple-700', 'text-white');
+      btn.classList.add('bg-slate-100', 'hover:bg-slate-200', 'text-slate-700', 'border', 'border-slate-300');
+    }
+    if (icon) icon.innerText = '✖️';
+    if (label) label.innerText = 'Tutup Form Pengguna';
+    const inp = document.getElementById('dbUserNama');
+    if (inp) {
+      setTimeout(() => inp.focus(), 80);
+    }
+    if (typeof card.scrollIntoView === 'function') {
+      try { card.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {}
+    }
+  } else {
+    card.classList.add('hidden');
+    if (btn) {
+      btn.classList.remove('bg-slate-100', 'hover:bg-slate-200', 'text-slate-700', 'border', 'border-slate-300');
+      btn.classList.add('from-indigo-600', 'to-purple-600', 'hover:from-indigo-700', 'hover:to-purple-700', 'text-white');
+    }
+    if (icon) icon.innerText = '➕';
+    if (label) label.innerText = 'Input / Tambah User Baru';
+  }
+}
+window.toggleFormUser = toggleFormUser;
+
+function switchMasterUserSubTab(tab) {
+  const pUser = document.getElementById('subpanelMasterUser');
+  const pPay = document.getElementById('subpanelMasterPayroll');
+  const btnU = document.getElementById('btnTabMasterUser');
+  const btnP = document.getElementById('btnTabMasterPayroll');
+
+  if (tab === 'payroll') {
+    if (pUser) pUser.classList.add('hidden');
+    if (pPay) pPay.classList.remove('hidden');
+
+    if (btnU) {
+      btnU.classList.remove('text-indigo-700', 'border-indigo-200/80', 'ring-2', 'ring-indigo-500/30', 'shadow-md');
+      btnU.classList.add('text-slate-600', 'border-slate-200/80', 'shadow-sm');
+    }
+    if (btnP) {
+      btnP.classList.remove('text-slate-600', 'border-slate-200/80', 'shadow-sm');
+      btnP.classList.add('text-cyan-700', 'border-cyan-200/80', 'ring-2', 'ring-cyan-500/30', 'shadow-md');
+    }
+
+    if (typeof initPayrollModule === 'function') {
+      initPayrollModule();
+    }
+  } else {
+    if (pPay) pPay.classList.add('hidden');
+    if (pUser) pUser.classList.remove('hidden');
+
+    if (btnP) {
+      btnP.classList.remove('text-cyan-700', 'border-cyan-200/80', 'ring-2', 'ring-cyan-500/30', 'shadow-md');
+      btnP.classList.add('text-slate-600', 'border-slate-200/80', 'shadow-sm');
+    }
+    if (btnU) {
+      btnU.classList.remove('text-slate-600', 'border-slate-200/80', 'shadow-sm');
+      btnU.classList.add('text-indigo-700', 'border-indigo-200/80', 'ring-2', 'ring-indigo-500/30', 'shadow-md');
+    }
+  }
+}
+window.switchMasterUserSubTab = switchMasterUserSubTab;
 
 function getFallbackUserList() {
   try {
@@ -10562,6 +10642,7 @@ function simpanDbUser(e) {
 
 function editDbUser(username) {
   ensureUserPanelVisible();
+  if (typeof toggleFormUser === 'function') toggleFormUser(true);
   if (!Array.isArray(listMasterUser)) listMasterUser = getFallbackUserList();
   const user = listMasterUser.find(u => String(u.username || '').toLowerCase() === String(username).toLowerCase());
   if (!user) {
@@ -15386,6 +15467,28 @@ nonDokterRoles.forEach(function(r) {
 // Kembalikan ke default tambah user
 batalEditDbUser(false);
 assert("ROLE-JM-4: Form Baru Mereset JM ke 0 dan Tersembunyi", wrapJM.classList.contains('hidden') && inputJM.value === "0");
+
+// 4. Uji Integrasi Tab Master User & Payroll dalam Master User & Role
+assert("USER-PAYROLL-1: Tab Master User Tersedia", document.getElementById('btnTabMasterUser') !== null);
+assert("USER-PAYROLL-1: Tab Payroll & Honor Tersedia di Master User", document.getElementById('btnTabMasterPayroll') !== null);
+assert("USER-PAYROLL-1: Tombol Toggle User Form Tersedia", document.getElementById('btnToggleFormUser') !== null);
+
+// Uji Toggle Form User: Klik memunculkan form di atas
+toggleFormUser(true);
+assert("USER-PAYROLL-2: Form User Tampil saat Tombol User Diklik", !document.getElementById('cardFormUser').classList.contains('hidden'));
+
+// Uji Toggle Tutup Form
+toggleFormUser(false);
+assert("USER-PAYROLL-2: Form User Tersembunyi saat Ditutup", document.getElementById('cardFormUser').classList.contains('hidden'));
+
+// Uji Beralih ke Tab Payroll di dalam Master User & Role
+switchMasterUserSubTab('payroll');
+assert("USER-PAYROLL-3: Panel Payroll Aktif di dalam Master User", !document.getElementById('subpanelMasterPayroll').classList.contains('hidden'));
+assert("USER-PAYROLL-3: Panel User Tersembunyi saat Tab Payroll Aktif", document.getElementById('subpanelMasterUser').classList.contains('hidden'));
+
+// Kembalikan ke Tab User
+switchMasterUserSubTab('user');
+assert("USER-PAYROLL-4: Panel User Kembali Aktif", !document.getElementById('subpanelMasterUser').classList.contains('hidden'));
 
 // SUMMARY REPORT
 print("=================================================");

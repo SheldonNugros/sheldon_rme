@@ -1078,13 +1078,88 @@ function triggerSinkronSemuaSheet() {
 // ==========================================
 
 function ensureUserPanelVisible() {
-  ['view-user-master', 'panelDbUser', 'cardFormUser', 'cardTabelUser'].forEach(id => {
+  ['view-user-master', 'panelDbUser', 'subpanelMasterUser', 'cardTabelUser'].forEach(id => {
     const el = document.getElementById(id);
     if (el && id !== 'view-user-master') {
       el.classList.remove('hidden');
     }
   });
 }
+
+function toggleFormUser(forceShow) {
+  const card = document.getElementById('cardFormUser');
+  const btn = document.getElementById('btnToggleFormUser');
+  const icon = document.getElementById('iconToggleUser');
+  const label = document.getElementById('labelToggleUser');
+  if (!card) return;
+
+  const isHidden = card.classList.contains('hidden');
+  const show = typeof forceShow === 'boolean' ? forceShow : isHidden;
+
+  if (show) {
+    card.classList.remove('hidden');
+    if (btn) {
+      btn.classList.remove('from-indigo-600', 'to-purple-600', 'hover:from-indigo-700', 'hover:to-purple-700', 'text-white');
+      btn.classList.add('bg-slate-100', 'hover:bg-slate-200', 'text-slate-700', 'border', 'border-slate-300');
+    }
+    if (icon) icon.innerText = '✖️';
+    if (label) label.innerText = 'Tutup Form Pengguna';
+    const inp = document.getElementById('dbUserNama');
+    if (inp) {
+      setTimeout(() => inp.focus(), 80);
+    }
+    if (typeof card.scrollIntoView === 'function') {
+      try { card.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {}
+    }
+  } else {
+    card.classList.add('hidden');
+    if (btn) {
+      btn.classList.remove('bg-slate-100', 'hover:bg-slate-200', 'text-slate-700', 'border', 'border-slate-300');
+      btn.classList.add('from-indigo-600', 'to-purple-600', 'hover:from-indigo-700', 'hover:to-purple-700', 'text-white');
+    }
+    if (icon) icon.innerText = '➕';
+    if (label) label.innerText = 'Input / Tambah User Baru';
+  }
+}
+window.toggleFormUser = toggleFormUser;
+
+function switchMasterUserSubTab(tab) {
+  const pUser = document.getElementById('subpanelMasterUser');
+  const pPay = document.getElementById('subpanelMasterPayroll');
+  const btnU = document.getElementById('btnTabMasterUser');
+  const btnP = document.getElementById('btnTabMasterPayroll');
+
+  if (tab === 'payroll') {
+    if (pUser) pUser.classList.add('hidden');
+    if (pPay) pPay.classList.remove('hidden');
+
+    if (btnU) {
+      btnU.classList.remove('text-indigo-700', 'border-indigo-200/80', 'ring-2', 'ring-indigo-500/30', 'shadow-md');
+      btnU.classList.add('text-slate-600', 'border-slate-200/80', 'shadow-sm');
+    }
+    if (btnP) {
+      btnP.classList.remove('text-slate-600', 'border-slate-200/80', 'shadow-sm');
+      btnP.classList.add('text-cyan-700', 'border-cyan-200/80', 'ring-2', 'ring-cyan-500/30', 'shadow-md');
+    }
+
+    if (typeof initPayrollModule === 'function') {
+      initPayrollModule();
+    }
+  } else {
+    if (pPay) pPay.classList.add('hidden');
+    if (pUser) pUser.classList.remove('hidden');
+
+    if (btnP) {
+      btnP.classList.remove('text-cyan-700', 'border-cyan-200/80', 'ring-2', 'ring-cyan-500/30', 'shadow-md');
+      btnP.classList.add('text-slate-600', 'border-slate-200/80', 'shadow-sm');
+    }
+    if (btnU) {
+      btnU.classList.remove('text-slate-600', 'border-slate-200/80', 'shadow-sm');
+      btnU.classList.add('text-indigo-700', 'border-indigo-200/80', 'ring-2', 'ring-indigo-500/30', 'shadow-md');
+    }
+  }
+}
+window.switchMasterUserSubTab = switchMasterUserSubTab;
 
 function getFallbackUserList() {
   try {
@@ -1554,6 +1629,7 @@ function simpanDbUser(e) {
 
 function editDbUser(username) {
   ensureUserPanelVisible();
+  if (typeof toggleFormUser === 'function') toggleFormUser(true);
   if (!Array.isArray(listMasterUser)) listMasterUser = getFallbackUserList();
   const user = listMasterUser.find(u => String(u.username || '').toLowerCase() === String(username).toLowerCase());
   if (!user) {

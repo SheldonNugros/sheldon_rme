@@ -1717,6 +1717,28 @@ nonDokterRoles.forEach(function(r) {
 batalEditDbUser(false);
 assert("ROLE-JM-4: Form Baru Mereset JM ke 0 dan Tersembunyi", wrapJM.classList.contains('hidden') && inputJM.value === "0");
 
+// 4. Uji Integrasi Tab Master User & Payroll dalam Master User & Role
+assert("USER-PAYROLL-1: Tab Master User Tersedia", document.getElementById('btnTabMasterUser') !== null);
+assert("USER-PAYROLL-1: Tab Payroll & Honor Tersedia di Master User", document.getElementById('btnTabMasterPayroll') !== null);
+assert("USER-PAYROLL-1: Tombol Toggle User Form Tersedia", document.getElementById('btnToggleFormUser') !== null);
+
+// Uji Toggle Form User: Klik memunculkan form di atas
+toggleFormUser(true);
+assert("USER-PAYROLL-2: Form User Tampil saat Tombol User Diklik", !document.getElementById('cardFormUser').classList.contains('hidden'));
+
+// Uji Toggle Tutup Form
+toggleFormUser(false);
+assert("USER-PAYROLL-2: Form User Tersembunyi saat Ditutup", document.getElementById('cardFormUser').classList.contains('hidden'));
+
+// Uji Beralih ke Tab Payroll di dalam Master User & Role
+switchMasterUserSubTab('payroll');
+assert("USER-PAYROLL-3: Panel Payroll Aktif di dalam Master User", !document.getElementById('subpanelMasterPayroll').classList.contains('hidden'));
+assert("USER-PAYROLL-3: Panel User Tersembunyi saat Tab Payroll Aktif", document.getElementById('subpanelMasterUser').classList.contains('hidden'));
+
+// Kembalikan ke Tab User
+switchMasterUserSubTab('user');
+assert("USER-PAYROLL-4: Panel User Kembali Aktif", !document.getElementById('subpanelMasterUser').classList.contains('hidden'));
+
 // SUMMARY REPORT
 print("=================================================");
 var passedTotal = results.filter(r => r.passed).length;

@@ -195,10 +195,8 @@
           <span class="text-base group-hover:scale-110 transition-transform">📄</span>
           <span class="flex-1">Riwayat Invoice</span>
         </button>
-        <button onclick="switchMenu('payroll')" id="nav-payroll" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-300 hover:text-white hover:bg-slate-800/90 transition-all text-left group">
-          <span class="text-base group-hover:scale-110 transition-transform">💰</span>
-          <span class="flex-1">Payroll & Honor</span>
-        </button>
+        <!-- Tombol Payroll & Honor dipindahkan ke dalam Master User & Role; hidden dummy dipertahankan untuk kompatibilitas RBAC -->
+        <button onclick="switchMenu('payroll')" id="nav-payroll" class="hidden" style="display:none !important;" aria-hidden="true"></button>
         <button onclick="switchMenu('absensi')" id="nav-absensi" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-300 hover:text-white hover:bg-slate-800/90 transition-all text-left group">
           <span class="text-base group-hover:scale-110 transition-transform">📅</span>
           <span class="flex-1">Absensi Pegawai</span>
@@ -317,7 +315,8 @@
       <div id="view-surat" class="module-view hidden"><?!= include('SuratView'); ?></div>
       <div id="view-kasir" class="module-view hidden"><?!= include('PembayaranView'); ?></div>
       <div id="view-riwayat-invoice" class="module-view hidden"><?!= include('RiwayatInvoiceView'); ?></div>
-      <div id="view-payroll" class="module-view hidden"><?!= include('PayrollView'); ?></div>
+      <!-- Modul Payroll kini terintegrasi di dalam Master User & Role (Tab Payroll & Honor) -->
+      <div id="view-payroll" class="module-view hidden"></div>
       <div id="view-absensi" class="module-view hidden"><?!= include('AbsensiView'); ?></div>
     </div>
   </main>
@@ -530,6 +529,12 @@
       if (pUser) pUser.classList.remove('hidden');
       if (typeof handleRoleChange === 'function') handleRoleChange();
       if (typeof loadDaftarUserMaster === 'function') loadDaftarUserMaster(true);
+      if (typeof switchMasterUserSubTab === 'function') switchMasterUserSubTab('user');
+    }
+    if (menuId === 'payroll') {
+      switchMenu('user-master');
+      if (typeof switchMasterUserSubTab === 'function') switchMasterUserSubTab('payroll');
+      return;
     }
     if (menuId === 'inventory') {
       switchMenu('database');
@@ -540,7 +545,6 @@
     if (menuId === 'kasir' && typeof initKasirDropdowns === 'function') initKasirDropdowns();
     if (menuId === 'riwayat-invoice' && typeof initRiwayatInvoiceModule === 'function') initRiwayatInvoiceModule();
     if (menuId === 'surat' && typeof initSuratModule === 'function') initSuratModule();
-    if (menuId === 'payroll' && typeof initPayrollModule === 'function') initPayrollModule();
     if (menuId === 'absensi' && typeof initAbsensiModule === 'function') initAbsensiModule();
   
     document.getElementById('mainContentScroll').scrollTo({ top: 0, behavior: 'smooth' });

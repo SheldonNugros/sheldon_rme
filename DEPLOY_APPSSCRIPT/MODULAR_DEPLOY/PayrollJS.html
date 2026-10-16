@@ -60,18 +60,65 @@
   }
 
   function switchPayrollTab(tabKey) {
+    let targetSubMode = null;
+    if (tabKey === 'dokter') {
+      tabKey = 'gaji-jm';
+      targetSubMode = 'dokter';
+    } else if (tabKey === 'staff') {
+      tabKey = 'gaji-jm';
+      targetSubMode = 'staff';
+    } else if (tabKey === 'gaji-jm') {
+      targetSubMode = 'all';
+    }
+
     document.querySelectorAll('.payroll-tab-panel').forEach(el => el.classList.add('hidden'));
     document.querySelectorAll('.payroll-tab-btn').forEach(btn => {
-      btn.classList.remove('bg-indigo-600', 'text-white', 'shadow-sm', 'font-black');
-      btn.classList.add('text-slate-600', 'hover:bg-slate-100', 'font-bold');
+      btn.classList.remove('bg-gradient-to-r', 'from-indigo-600', 'to-blue-600', 'text-white', 'shadow-lg', 'shadow-indigo-500/30', 'ring-2', 'ring-indigo-400/50', 'scale-[1.02]');
+      btn.classList.add('bg-white/10', 'text-slate-200', 'hover:bg-white/15', 'hover:text-white', 'border', 'border-white/10');
     });
 
     const panel = document.getElementById('panelPay-' + tabKey);
     const activeBtn = document.getElementById('tabBtnPay-' + tabKey);
     if (panel) panel.classList.remove('hidden');
     if (activeBtn) {
-      activeBtn.classList.remove('text-slate-600', 'hover:bg-slate-100', 'font-bold');
-      activeBtn.classList.add('bg-indigo-600', 'text-white', 'shadow-sm', 'font-black');
+      activeBtn.classList.remove('bg-white/10', 'text-slate-200', 'hover:bg-white/15', 'hover:text-white', 'border', 'border-white/10');
+      activeBtn.classList.add('bg-gradient-to-r', 'from-indigo-600', 'to-blue-600', 'text-white', 'shadow-lg', 'shadow-indigo-500/30', 'ring-2', 'ring-indigo-400/50', 'scale-[1.02]');
+    }
+
+    if (targetSubMode && typeof filterGajiJmView === 'function') {
+      filterGajiJmView(targetSubMode);
+    }
+  }
+
+  function filterGajiJmView(mode) {
+    const dokterSec = document.getElementById('panelPay-dokter');
+    const staffSec = document.getElementById('panelPay-staff');
+    const btnAll = document.getElementById('btnFilterGajiJm-all');
+    const btnDokter = document.getElementById('btnFilterGajiJm-dokter');
+    const btnStaff = document.getElementById('btnFilterGajiJm-staff');
+
+    const inactiveClass = 'px-3.5 py-2 rounded-xl font-bold text-xs text-slate-600 hover:text-indigo-600 hover:bg-white/60 transition-all flex items-center gap-1.5 cursor-pointer';
+    const activeClassAll = 'px-3.5 py-2 rounded-xl font-black text-xs bg-white text-indigo-700 shadow-md border border-indigo-100 transition-all flex items-center gap-1.5 cursor-pointer';
+    const activeClassDok = 'px-3.5 py-2 rounded-xl font-black text-xs bg-white text-indigo-700 shadow-md border border-indigo-100 transition-all flex items-center gap-1.5 cursor-pointer';
+    const activeClassStf = 'px-3.5 py-2 rounded-xl font-black text-xs bg-white text-cyan-700 shadow-md border border-cyan-100 transition-all flex items-center gap-1.5 cursor-pointer';
+
+    if (btnAll) btnAll.className = inactiveClass;
+    if (btnDokter) btnDokter.className = inactiveClass;
+    if (btnStaff) btnStaff.className = inactiveClass;
+
+    if (mode === 'dokter') {
+      if (dokterSec) dokterSec.classList.remove('hidden');
+      if (staffSec) staffSec.classList.add('hidden');
+      if (btnDokter) btnDokter.className = activeClassDok;
+    } else if (mode === 'staff') {
+      if (dokterSec) dokterSec.classList.add('hidden');
+      if (staffSec) staffSec.classList.remove('hidden');
+      if (btnStaff) btnStaff.className = activeClassStf;
+    } else {
+      // 'all'
+      if (dokterSec) dokterSec.classList.remove('hidden');
+      if (staffSec) staffSec.classList.remove('hidden');
+      if (btnAll) btnAll.className = activeClassAll;
     }
   }
 
@@ -812,6 +859,7 @@
 
   window.initPayrollModule = initPayrollModule;
   window.switchPayrollTab = switchPayrollTab;
+  window.filterGajiJmView = filterGajiJmView;
   window.loadPayrollModuleData = loadPayrollModuleData;
   window.handleTarifNamaPekerjaChange = handleTarifNamaPekerjaChange;
   window.pilihTarifShiftToEdit = pilihTarifShiftToEdit;

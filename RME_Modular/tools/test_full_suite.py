@@ -45,6 +45,8 @@ t_info = trans_html.find('id="nav-informasi"')
 t_db = trans_html.find('id="nav-database"')
 t_um = trans_html.find('id="nav-user-master"')
 is_admin_ordered = (0 <= t_abs < t_info < t_db < t_um)
+is_tab_btn_pay_in_html = ('id="tabBtnPay-gaji-jm"' in html and '1. Gaji & Jasa Medis' in html)
+is_panel_pay_in_html = ('id="panelPay-gaji-jm"' in html)
 
 test_harness_file = os.path.join(BASE_DIR, 'tools', 'suite_harness.js')
 
@@ -1777,6 +1779,39 @@ assert("SIDEBAR-ORDER-1: Urutan Tombol Pelayanan Pasien Sesuai Spesifikasi (Pasi
 assert("SIDEBAR-ORDER-2: Label Kelompok Administrasi Berubah Menjadi ADMINISTRASI", isAdminHeaderInHtml);
 assert("SIDEBAR-ORDER-3: Urutan Tombol Administrasi Sesuai Spesifikasi (Absensi, Informasi, DB Master, Master User)", isAdminOrderedInHtml);
 
+// 7. Uji Penyatuan Tab Payroll: 'Gaji & Jasa Medis'
+assert("PAYROLL-UNIFIED-1: Tombol Tab Gaji & Jasa Medis (tabBtnPay-gaji-jm) Tersedia", document.getElementById('tabBtnPay-gaji-jm') !== null);
+assert("PAYROLL-UNIFIED-1: Teks Tombol Berisi '1. Gaji & Jasa Medis'", isTabBtnPayInHtml);
+assert("PAYROLL-UNIFIED-2: Panel Terpadu panelPay-gaji-jm Tersedia di HTML", isPanelPayInHtml);
+assert("PAYROLL-UNIFIED-2: Filter Cepat Tampilan Tersedia", document.getElementById('btnFilterGajiJm-all') !== null && document.getElementById('btnFilterGajiJm-dokter') !== null && document.getElementById('btnFilterGajiJm-staff') !== null);
+
+// Inisialisasi class payroll-tab-panel pada mock element agar querySelectorAll('.payroll-tab-panel') mengenali
+document.getElementById('panelPay-gaji-jm').classList.add('payroll-tab-panel');
+document.getElementById('panelPay-tarif').classList.add('payroll-tab-panel');
+document.getElementById('panelPay-rincian-jm').classList.add('payroll-tab-panel');
+
+// Uji Filter Tampilan: Khusus Dokter
+filterGajiJmView('dokter');
+assert("PAYROLL-UNIFIED-3: Filter Khusus Dokter Menampilkan Card Dokter", !document.getElementById('panelPay-dokter').classList.contains('hidden'));
+assert("PAYROLL-UNIFIED-3: Filter Khusus Dokter Menyembunyikan Card Staff", document.getElementById('panelPay-staff').classList.contains('hidden'));
+
+// Uji Filter Tampilan: Khusus Staff / Perawat & Admin
+filterGajiJmView('staff');
+assert("PAYROLL-UNIFIED-4: Filter Khusus Staff Menyembunyikan Card Dokter", document.getElementById('panelPay-dokter').classList.contains('hidden'));
+assert("PAYROLL-UNIFIED-4: Filter Khusus Staff Menampilkan Card Staff", !document.getElementById('panelPay-staff').classList.contains('hidden'));
+
+// Uji Filter Tampilan: Semua
+filterGajiJmView('all');
+assert("PAYROLL-UNIFIED-5: Filter Semua Menampilkan Keduanya", !document.getElementById('panelPay-dokter').classList.contains('hidden') && !document.getElementById('panelPay-staff').classList.contains('hidden'));
+
+// Uji Switch Tab Payroll
+switchPayrollTab('tarif');
+assert("PAYROLL-UNIFIED-6: Beralih ke Tab Tarif Menyembunyikan panelPay-gaji-jm", document.getElementById('panelPay-gaji-jm').classList.contains('hidden'));
+assert("PAYROLL-UNIFIED-6: Beralih ke Tab Tarif Menampilkan panelPay-tarif", !document.getElementById('panelPay-tarif').classList.contains('hidden'));
+
+switchPayrollTab('gaji-jm');
+assert("PAYROLL-UNIFIED-7: Beralih Kembali ke Gaji & JM Menampilkan panelPay-gaji-jm", !document.getElementById('panelPay-gaji-jm').classList.contains('hidden'));
+
 // SUMMARY REPORT
 print("=================================================");
 var passedTotal = results.filter(r => r.passed).length;
@@ -1791,7 +1826,7 @@ if (failedTotal > 0) {
 }
 '''
 
-full_test_script = f"var isButtonKonsultasiRemoved = {str(is_kon_removed).lower()};\nvar isModalResetPerioInHtml = {str(is_modal_perio_in_html).lower()};\nvar roleSelectOptionsFromHtml = {json.dumps(role_options)};\nvar isDatePickerLargeInHtml = {str(is_date_picker_large).lower()};\nvar isPaginasiHariIniRemoved = {str(is_paginasi_hari_ini_removed).lower()};\nvar isSubtitleAbsensiRemoved = {str(is_subtitle_absensi_removed).lower()};\nvar isTercatatMasukRemoved = {str(is_tercatat_masuk_removed).lower()};\nvar isIzinSakitOffRemoved = {str(is_izin_sakit_off_removed).lower()};\nvar isBtnDbUserRemoved = {str(is_btn_db_user_removed).lower()};\nvar isPelayananOrderedInHtml = {str(is_pelayanan_ordered).lower()};\nvar isAdminHeaderInHtml = {str(is_admin_header).lower()};\nvar isAdminOrderedInHtml = {str(is_admin_ordered).lower()};\n" + dom_shim + "\n" + all_js + "\n" + test_runner_js
+full_test_script = f"var isButtonKonsultasiRemoved = {str(is_kon_removed).lower()};\nvar isModalResetPerioInHtml = {str(is_modal_perio_in_html).lower()};\nvar roleSelectOptionsFromHtml = {json.dumps(role_options)};\nvar isDatePickerLargeInHtml = {str(is_date_picker_large).lower()};\nvar isPaginasiHariIniRemoved = {str(is_paginasi_hari_ini_removed).lower()};\nvar isSubtitleAbsensiRemoved = {str(is_subtitle_absensi_removed).lower()};\nvar isTercatatMasukRemoved = {str(is_tercatat_masuk_removed).lower()};\nvar isIzinSakitOffRemoved = {str(is_izin_sakit_off_removed).lower()};\nvar isBtnDbUserRemoved = {str(is_btn_db_user_removed).lower()};\nvar isPelayananOrderedInHtml = {str(is_pelayanan_ordered).lower()};\nvar isAdminHeaderInHtml = {str(is_admin_header).lower()};\nvar isAdminOrderedInHtml = {str(is_admin_ordered).lower()};\nvar isTabBtnPayInHtml = {str(is_tab_btn_pay_in_html).lower()};\nvar isPanelPayInHtml = {str(is_panel_pay_in_html).lower()};\n" + dom_shim + "\n" + all_js + "\n" + test_runner_js
 
 with open(test_harness_file, 'w', encoding='utf-8') as f:
     f.write(full_test_script)

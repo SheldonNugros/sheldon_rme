@@ -77,107 +77,157 @@
   </div>
 
   <!-- TAB NAVIGATION PAYROLL -->
-  <div class="bg-white p-2 rounded-2xl shadow-sm border border-slate-200 flex flex-wrap gap-2">
-    <button type="button" onclick="switchPayrollTab('dokter')" id="tabBtnPay-dokter" class="payroll-tab-btn px-4 py-2.5 rounded-xl text-xs font-black bg-indigo-600 text-white shadow-sm transition-all flex items-center gap-2">
-      <span>🩺</span> 1. Penggajian & JM Dokter
+  <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 p-2.5 rounded-2xl shadow-lg border border-indigo-900/40 flex flex-wrap items-center gap-2.5">
+    <button type="button" onclick="switchPayrollTab('gaji-jm')" id="tabBtnPay-gaji-jm" class="payroll-tab-btn group relative px-5 py-3 rounded-xl text-xs font-black bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 ring-2 ring-indigo-400/50 scale-[1.02] transition-all flex items-center gap-3 cursor-pointer">
+      <span class="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center text-base shadow-inner">💰</span>
+      <div class="text-left">
+        <div class="flex items-center gap-2">
+          <span>1. Gaji & Jasa Medis</span>
+          <span class="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-emerald-400/20 text-emerald-200 border border-emerald-400/30">Utama</span>
+        </div>
+        <div class="text-[10px] font-medium text-indigo-100 opacity-90">Dokter, Perawat & Staf Admin</div>
+      </div>
     </button>
-    <button type="button" onclick="switchPayrollTab('staff')" id="tabBtnPay-staff" class="payroll-tab-btn px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition-all flex items-center gap-2">
-      <span>👩‍⚕️</span> 2. Honor Perawat & Gaji Admin
+
+    <button type="button" onclick="switchPayrollTab('tarif')" id="tabBtnPay-tarif" class="payroll-tab-btn group relative px-5 py-3 rounded-xl text-xs font-bold bg-white/10 hover:bg-white/15 text-slate-200 hover:text-white border border-white/10 transition-all flex items-center gap-3 cursor-pointer">
+      <span class="w-8 h-8 rounded-lg bg-white/10 group-hover:bg-white/20 flex items-center justify-center text-base shadow-inner">⚙️</span>
+      <div class="text-left">
+        <div class="flex items-center gap-2">
+          <span>2. Pengaturan Tarif Shift & Gaji</span>
+        </div>
+        <div class="text-[10px] font-normal text-slate-300 opacity-80">Tarif Shift, Honor & Gaji Pokok</div>
+      </div>
     </button>
-    <button type="button" onclick="switchPayrollTab('tarif')" id="tabBtnPay-tarif" class="payroll-tab-btn px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition-all flex items-center gap-2">
-      <span>⚙️</span> 3. Pengaturan Tarif Shift & Gaji
+
+    <button type="button" onclick="switchPayrollTab('rincian-jm')" id="tabBtnPay-rincian-jm" class="payroll-tab-btn group relative px-5 py-3 rounded-xl text-xs font-bold bg-white/10 hover:bg-white/15 text-slate-200 hover:text-white border border-white/10 transition-all flex items-center gap-3 cursor-pointer">
+      <span class="w-8 h-8 rounded-lg bg-white/10 group-hover:bg-white/20 flex items-center justify-center text-base shadow-inner">📋</span>
+      <div class="text-left">
+        <div class="flex items-center gap-2">
+          <span>3. Rincian Bagi Hasil JM Tindakan</span>
+        </div>
+        <div class="text-[10px] font-normal text-slate-300 opacity-80">Audit Rincian per Pasien & Tindakan</div>
+      </div>
     </button>
-    <button type="button" onclick="switchPayrollTab('rincian-jm')" id="tabBtnPay-rincian-jm" class="payroll-tab-btn px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition-all flex items-center gap-2">
-      <span>📋</span> 4. Rincian Bagi Hasil JM Tindakan
-    </button>
+
+    <!-- Hidden compatibility buttons -->
+    <button type="button" onclick="switchPayrollTab('gaji-jm'); filterGajiJmView('dokter');" id="tabBtnPay-dokter" class="hidden"></button>
+    <button type="button" onclick="switchPayrollTab('gaji-jm'); filterGajiJmView('staff');" id="tabBtnPay-staff" class="hidden"></button>
   </div>
 
   <!-- ======================================================================= -->
-  <!-- TAB 1: PENGGAJIAN & JM DOKTER                                           -->
+  <!-- TAB 1: GAJI & JASA MEDIS (DOKTER, PERAWAT & ADMIN)                      -->
   <!-- ======================================================================= -->
-  <div id="panelPay-dokter" class="payroll-tab-panel space-y-4">
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-      <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/60">
-        <div>
-          <h3 class="text-sm font-black text-slate-800">Daftar Penggajian & Bagi Hasil Jasa Medis (JM) Dokter</h3>
-          <p class="text-[11px] text-slate-500">Rumus THP: <b>Total JM Dokter Bersih + Total Uang Harian Shift (Rp 55.000/shift) + Bonus - Potongan</b></p>
+  <div id="panelPay-gaji-jm" class="payroll-tab-panel space-y-6">
+    <!-- Quick Filter & Action Bar -->
+    <div class="bg-gradient-to-r from-indigo-50/80 via-white to-sky-50/80 p-4 rounded-2xl shadow-sm border border-indigo-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-blue-600 text-white flex items-center justify-center text-xl shadow-md">
+          💳
         </div>
-        <div class="flex items-center gap-2">
-          <button type="button" onclick="switchPayrollTab('tarif')" class="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-sm transition-all flex items-center gap-1.5">
-            <span>⚙️</span> Atur / Tambah Tarif Shift
-          </button>
-          <span class="px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 text-[11px] font-extrabold">
-            Sheet: Penggajian_Dokter
-          </span>
+        <div>
+          <h3 class="text-sm font-black text-slate-800">Modul Gaji & Jasa Medis</h3>
+          <p class="text-[11px] text-slate-500">Tampilkan seluruh penggajian dokter (JM + shift) dan honor perawat serta staf admin dalam satu tempat terpadu.</p>
         </div>
       </div>
 
-      <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse">
-          <thead>
-            <tr class="bg-slate-900 text-white text-[10px] font-extrabold uppercase tracking-wider">
-              <th class="py-3.5 px-4">ID & Periode</th>
-              <th class="py-3.5 px-4">Nama Dokter</th>
-              <th class="py-3.5 px-3 text-center">Pasien</th>
-              <th class="py-3.5 px-4 text-right">Bruto Tindakan</th>
-              <th class="py-3.5 px-4 text-right">Total JM Bersih</th>
-              <th class="py-3.5 px-3 text-center">Hadir Shift (S1 / S2)</th>
-              <th class="py-3.5 px-4 text-right">Uang Shift (55rb)</th>
-              <th class="py-3.5 px-4 text-right">Potongan</th>
-              <th class="py-3.5 px-4 text-right bg-indigo-950">Total Diterima (THP)</th>
-              <th class="py-3.5 px-3 text-center">Status</th>
-              <th class="py-3.5 px-4 text-center">Aksi / Slip</th>
-            </tr>
-          </thead>
-          <tbody id="tbodyPayrollDokter" class="divide-y divide-slate-200 text-xs">
-            <tr><td colspan="11" class="py-8 text-center text-slate-400 font-bold">Memuat data penggajian dokter...</td></tr>
-          </tbody>
-        </table>
+      <!-- Filter View Mode -->
+      <div class="flex items-center gap-1.5 bg-slate-200/70 p-1.5 rounded-2xl border border-slate-300/60 text-xs">
+        <span class="text-[10px] font-black uppercase text-slate-500 px-2">Filter:</span>
+        <button type="button" id="btnFilterGajiJm-all" onclick="filterGajiJmView('all')" class="px-3.5 py-2 rounded-xl font-black text-xs bg-white text-indigo-700 shadow-md border border-indigo-100 transition-all flex items-center gap-1.5 cursor-pointer">
+          <span>👥</span> Semua (Dokter & Staf)
+        </button>
+        <button type="button" id="btnFilterGajiJm-dokter" onclick="filterGajiJmView('dokter')" class="px-3.5 py-2 rounded-xl font-bold text-xs text-slate-600 hover:text-indigo-600 hover:bg-white/60 transition-all flex items-center gap-1.5 cursor-pointer">
+          <span>🩺</span> Khusus Dokter
+        </button>
+        <button type="button" id="btnFilterGajiJm-staff" onclick="filterGajiJmView('staff')" class="px-3.5 py-2 rounded-xl font-bold text-xs text-slate-600 hover:text-cyan-600 hover:bg-white/60 transition-all flex items-center gap-1.5 cursor-pointer">
+          <span>👩‍⚕️</span> Khusus Perawat & Admin
+        </button>
       </div>
     </div>
-  </div>
 
-  <!-- ======================================================================= -->
-  <!-- TAB 2: HONOR PERAWAT & GAJI ADMIN                                       -->
-  <!-- ======================================================================= -->
-  <div id="panelPay-staff" class="payroll-tab-panel hidden space-y-4">
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-      <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/60">
-        <div>
-          <h3 class="text-sm font-black text-slate-800">Daftar Honor Perawat (Berbasis Shift) & Gaji Bulanan Admin</h3>
-          <p class="text-[11px] text-slate-500">Perawat: <b>Rp 45.000 / shift hadir</b> (2 shift) • Admin: <b>Gaji Pokok Tetap Rp 1.200.000 / bulan</b> (Non-Shift)</p>
+    <!-- Sub-Section Dokter -->
+    <div id="panelPay-dokter" class="space-y-4">
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/60">
+          <div>
+            <h3 class="text-sm font-black text-slate-800">Daftar Penggajian & Bagi Hasil Jasa Medis (JM) Dokter</h3>
+            <p class="text-[11px] text-slate-500">Rumus THP: <b>Total JM Dokter Bersih + Total Uang Harian Shift (Rp 55.000/shift) + Bonus - Potongan</b></p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="switchPayrollTab('tarif')" class="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-sm transition-all flex items-center gap-1.5 cursor-pointer">
+              <span>⚙️</span> Atur / Tambah Tarif Shift
+            </button>
+            <span class="px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 text-[11px] font-extrabold">
+              Sheet: Penggajian_Dokter
+            </span>
+          </div>
         </div>
-        <div class="flex items-center gap-2">
-          <button type="button" onclick="switchPayrollTab('tarif')" class="px-3.5 py-1.5 bg-cyan-700 hover:bg-cyan-800 text-white rounded-xl text-xs font-bold shadow-sm transition-all flex items-center gap-1.5">
-            <span>⚙️</span> Atur / Tambah Tarif Shift
-          </button>
-          <span class="px-3 py-1 rounded-full bg-cyan-50 text-cyan-700 border border-cyan-200 text-[11px] font-extrabold">
-            Sheet: Honor_Perawat_Staff
-          </span>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-slate-900 text-white text-[10px] font-extrabold uppercase tracking-wider">
+                <th class="py-3.5 px-4">ID & Periode</th>
+                <th class="py-3.5 px-4">Nama Dokter</th>
+                <th class="py-3.5 px-3 text-center">Pasien</th>
+                <th class="py-3.5 px-4 text-right">Bruto Tindakan</th>
+                <th class="py-3.5 px-4 text-right">Total JM Bersih</th>
+                <th class="py-3.5 px-3 text-center">Hadir Shift (S1 / S2)</th>
+                <th class="py-3.5 px-4 text-right">Uang Shift (55rb)</th>
+                <th class="py-3.5 px-4 text-right">Potongan</th>
+                <th class="py-3.5 px-4 text-right bg-indigo-950">Total Diterima (THP)</th>
+                <th class="py-3.5 px-3 text-center">Status</th>
+                <th class="py-3.5 px-4 text-center">Aksi / Slip</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyPayrollDokter" class="divide-y divide-slate-200 text-xs">
+              <tr><td colspan="11" class="py-8 text-center text-slate-400 font-bold">Memuat data penggajian dokter...</td></tr>
+            </tbody>
+          </table>
         </div>
       </div>
+    </div>
 
-      <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse">
-          <thead>
-            <tr class="bg-slate-900 text-white text-[10px] font-extrabold uppercase tracking-wider">
-              <th class="py-3.5 px-4">ID & Periode</th>
-              <th class="py-3.5 px-4">Nama Pekerja</th>
-              <th class="py-3.5 px-3">Role / Jabatan</th>
-              <th class="py-3.5 px-4 text-right">Gaji Pokok Tetap</th>
-              <th class="py-3.5 px-3 text-center">Hadir Shift (S1 / S2)</th>
-              <th class="py-3.5 px-4 text-right">Total Uang Shift</th>
-              <th class="py-3.5 px-4 text-right">Tunjangan / Lembur</th>
-              <th class="py-3.5 px-4 text-right">Potongan Kasbon</th>
-              <th class="py-3.5 px-4 text-right bg-cyan-950">Total Diterima (THP)</th>
-              <th class="py-3.5 px-3 text-center">Status</th>
-              <th class="py-3.5 px-4 text-center">Aksi / Slip</th>
-            </tr>
-          </thead>
-          <tbody id="tbodyPayrollStaff" class="divide-y divide-slate-200 text-xs">
-            <tr><td colspan="11" class="py-8 text-center text-slate-400 font-bold">Memuat data honor perawat & admin...</td></tr>
-          </tbody>
-        </table>
+    <!-- Sub-Section Perawat & Admin -->
+    <div id="panelPay-staff" class="space-y-4">
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/60">
+          <div>
+            <h3 class="text-sm font-black text-slate-800">Daftar Honor Perawat (Berbasis Shift) & Gaji Bulanan Admin</h3>
+            <p class="text-[11px] text-slate-500">Perawat: <b>Rp 45.000 / shift hadir</b> (2 shift) • Admin: <b>Gaji Pokok Tetap Rp 1.200.000 / bulan</b> (Non-Shift)</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="switchPayrollTab('tarif')" class="px-3.5 py-1.5 bg-cyan-700 hover:bg-cyan-800 text-white rounded-xl text-xs font-bold shadow-sm transition-all flex items-center gap-1.5 cursor-pointer">
+              <span>⚙️</span> Atur / Tambah Tarif Shift
+            </button>
+            <span class="px-3 py-1 rounded-full bg-cyan-50 text-cyan-700 border border-cyan-200 text-[11px] font-extrabold">
+              Sheet: Honor_Perawat_Staff
+            </span>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-slate-900 text-white text-[10px] font-extrabold uppercase tracking-wider">
+                <th class="py-3.5 px-4">ID & Periode</th>
+                <th class="py-3.5 px-4">Nama Pekerja</th>
+                <th class="py-3.5 px-3">Role / Jabatan</th>
+                <th class="py-3.5 px-4 text-right">Gaji Pokok Tetap</th>
+                <th class="py-3.5 px-3 text-center">Hadir Shift (S1 / S2)</th>
+                <th class="py-3.5 px-4 text-right">Total Uang Shift</th>
+                <th class="py-3.5 px-4 text-right">Tunjangan / Lembur</th>
+                <th class="py-3.5 px-4 text-right">Potongan Kasbon</th>
+                <th class="py-3.5 px-4 text-right bg-cyan-950">Total Diterima (THP)</th>
+                <th class="py-3.5 px-3 text-center">Status</th>
+                <th class="py-3.5 px-4 text-center">Aksi / Slip</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyPayrollStaff" class="divide-y divide-slate-200 text-xs">
+              <tr><td colspan="11" class="py-8 text-center text-slate-400 font-bold">Memuat data honor perawat & admin...</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>

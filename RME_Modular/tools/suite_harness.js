@@ -10,6 +10,8 @@ var isBtnDbUserRemoved = true;
 var isPelayananOrderedInHtml = true;
 var isAdminHeaderInHtml = true;
 var isAdminOrderedInHtml = true;
+var isTabBtnPayInHtml = true;
+var isPanelPayInHtml = true;
 
 // Enhanced DOM Mock for JavaScriptCore
 var window = this;
@@ -11827,18 +11829,65 @@ function renderInfoBmhp() {
   }
 
   function switchPayrollTab(tabKey) {
+    let targetSubMode = null;
+    if (tabKey === 'dokter') {
+      tabKey = 'gaji-jm';
+      targetSubMode = 'dokter';
+    } else if (tabKey === 'staff') {
+      tabKey = 'gaji-jm';
+      targetSubMode = 'staff';
+    } else if (tabKey === 'gaji-jm') {
+      targetSubMode = 'all';
+    }
+
     document.querySelectorAll('.payroll-tab-panel').forEach(el => el.classList.add('hidden'));
     document.querySelectorAll('.payroll-tab-btn').forEach(btn => {
-      btn.classList.remove('bg-indigo-600', 'text-white', 'shadow-sm', 'font-black');
-      btn.classList.add('text-slate-600', 'hover:bg-slate-100', 'font-bold');
+      btn.classList.remove('bg-gradient-to-r', 'from-indigo-600', 'to-blue-600', 'text-white', 'shadow-lg', 'shadow-indigo-500/30', 'ring-2', 'ring-indigo-400/50', 'scale-[1.02]');
+      btn.classList.add('bg-white/10', 'text-slate-200', 'hover:bg-white/15', 'hover:text-white', 'border', 'border-white/10');
     });
 
     const panel = document.getElementById('panelPay-' + tabKey);
     const activeBtn = document.getElementById('tabBtnPay-' + tabKey);
     if (panel) panel.classList.remove('hidden');
     if (activeBtn) {
-      activeBtn.classList.remove('text-slate-600', 'hover:bg-slate-100', 'font-bold');
-      activeBtn.classList.add('bg-indigo-600', 'text-white', 'shadow-sm', 'font-black');
+      activeBtn.classList.remove('bg-white/10', 'text-slate-200', 'hover:bg-white/15', 'hover:text-white', 'border', 'border-white/10');
+      activeBtn.classList.add('bg-gradient-to-r', 'from-indigo-600', 'to-blue-600', 'text-white', 'shadow-lg', 'shadow-indigo-500/30', 'ring-2', 'ring-indigo-400/50', 'scale-[1.02]');
+    }
+
+    if (targetSubMode && typeof filterGajiJmView === 'function') {
+      filterGajiJmView(targetSubMode);
+    }
+  }
+
+  function filterGajiJmView(mode) {
+    const dokterSec = document.getElementById('panelPay-dokter');
+    const staffSec = document.getElementById('panelPay-staff');
+    const btnAll = document.getElementById('btnFilterGajiJm-all');
+    const btnDokter = document.getElementById('btnFilterGajiJm-dokter');
+    const btnStaff = document.getElementById('btnFilterGajiJm-staff');
+
+    const inactiveClass = 'px-3.5 py-2 rounded-xl font-bold text-xs text-slate-600 hover:text-indigo-600 hover:bg-white/60 transition-all flex items-center gap-1.5 cursor-pointer';
+    const activeClassAll = 'px-3.5 py-2 rounded-xl font-black text-xs bg-white text-indigo-700 shadow-md border border-indigo-100 transition-all flex items-center gap-1.5 cursor-pointer';
+    const activeClassDok = 'px-3.5 py-2 rounded-xl font-black text-xs bg-white text-indigo-700 shadow-md border border-indigo-100 transition-all flex items-center gap-1.5 cursor-pointer';
+    const activeClassStf = 'px-3.5 py-2 rounded-xl font-black text-xs bg-white text-cyan-700 shadow-md border border-cyan-100 transition-all flex items-center gap-1.5 cursor-pointer';
+
+    if (btnAll) btnAll.className = inactiveClass;
+    if (btnDokter) btnDokter.className = inactiveClass;
+    if (btnStaff) btnStaff.className = inactiveClass;
+
+    if (mode === 'dokter') {
+      if (dokterSec) dokterSec.classList.remove('hidden');
+      if (staffSec) staffSec.classList.add('hidden');
+      if (btnDokter) btnDokter.className = activeClassDok;
+    } else if (mode === 'staff') {
+      if (dokterSec) dokterSec.classList.add('hidden');
+      if (staffSec) staffSec.classList.remove('hidden');
+      if (btnStaff) btnStaff.className = activeClassStf;
+    } else {
+      // 'all'
+      if (dokterSec) dokterSec.classList.remove('hidden');
+      if (staffSec) staffSec.classList.remove('hidden');
+      if (btnAll) btnAll.className = activeClassAll;
     }
   }
 
@@ -12579,6 +12628,7 @@ function renderInfoBmhp() {
 
   window.initPayrollModule = initPayrollModule;
   window.switchPayrollTab = switchPayrollTab;
+  window.filterGajiJmView = filterGajiJmView;
   window.loadPayrollModuleData = loadPayrollModuleData;
   window.handleTarifNamaPekerjaChange = handleTarifNamaPekerjaChange;
   window.pilihTarifShiftToEdit = pilihTarifShiftToEdit;
@@ -15540,6 +15590,39 @@ assert("OWNER-UTIL-3: Panel Owner Utility Kembali Tersembunyi", document.getElem
 assert("SIDEBAR-ORDER-1: Urutan Tombol Pelayanan Pasien Sesuai Spesifikasi (Pasien, EMR, Kasir, Invoice, Surat)", isPelayananOrderedInHtml);
 assert("SIDEBAR-ORDER-2: Label Kelompok Administrasi Berubah Menjadi ADMINISTRASI", isAdminHeaderInHtml);
 assert("SIDEBAR-ORDER-3: Urutan Tombol Administrasi Sesuai Spesifikasi (Absensi, Informasi, DB Master, Master User)", isAdminOrderedInHtml);
+
+// 7. Uji Penyatuan Tab Payroll: 'Gaji & Jasa Medis'
+assert("PAYROLL-UNIFIED-1: Tombol Tab Gaji & Jasa Medis (tabBtnPay-gaji-jm) Tersedia", document.getElementById('tabBtnPay-gaji-jm') !== null);
+assert("PAYROLL-UNIFIED-1: Teks Tombol Berisi '1. Gaji & Jasa Medis'", isTabBtnPayInHtml);
+assert("PAYROLL-UNIFIED-2: Panel Terpadu panelPay-gaji-jm Tersedia di HTML", isPanelPayInHtml);
+assert("PAYROLL-UNIFIED-2: Filter Cepat Tampilan Tersedia", document.getElementById('btnFilterGajiJm-all') !== null && document.getElementById('btnFilterGajiJm-dokter') !== null && document.getElementById('btnFilterGajiJm-staff') !== null);
+
+// Inisialisasi class payroll-tab-panel pada mock element agar querySelectorAll('.payroll-tab-panel') mengenali
+document.getElementById('panelPay-gaji-jm').classList.add('payroll-tab-panel');
+document.getElementById('panelPay-tarif').classList.add('payroll-tab-panel');
+document.getElementById('panelPay-rincian-jm').classList.add('payroll-tab-panel');
+
+// Uji Filter Tampilan: Khusus Dokter
+filterGajiJmView('dokter');
+assert("PAYROLL-UNIFIED-3: Filter Khusus Dokter Menampilkan Card Dokter", !document.getElementById('panelPay-dokter').classList.contains('hidden'));
+assert("PAYROLL-UNIFIED-3: Filter Khusus Dokter Menyembunyikan Card Staff", document.getElementById('panelPay-staff').classList.contains('hidden'));
+
+// Uji Filter Tampilan: Khusus Staff / Perawat & Admin
+filterGajiJmView('staff');
+assert("PAYROLL-UNIFIED-4: Filter Khusus Staff Menyembunyikan Card Dokter", document.getElementById('panelPay-dokter').classList.contains('hidden'));
+assert("PAYROLL-UNIFIED-4: Filter Khusus Staff Menampilkan Card Staff", !document.getElementById('panelPay-staff').classList.contains('hidden'));
+
+// Uji Filter Tampilan: Semua
+filterGajiJmView('all');
+assert("PAYROLL-UNIFIED-5: Filter Semua Menampilkan Keduanya", !document.getElementById('panelPay-dokter').classList.contains('hidden') && !document.getElementById('panelPay-staff').classList.contains('hidden'));
+
+// Uji Switch Tab Payroll
+switchPayrollTab('tarif');
+assert("PAYROLL-UNIFIED-6: Beralih ke Tab Tarif Menyembunyikan panelPay-gaji-jm", document.getElementById('panelPay-gaji-jm').classList.contains('hidden'));
+assert("PAYROLL-UNIFIED-6: Beralih ke Tab Tarif Menampilkan panelPay-tarif", !document.getElementById('panelPay-tarif').classList.contains('hidden'));
+
+switchPayrollTab('gaji-jm');
+assert("PAYROLL-UNIFIED-7: Beralih Kembali ke Gaji & JM Menampilkan panelPay-gaji-jm", !document.getElementById('panelPay-gaji-jm').classList.contains('hidden'));
 
 // SUMMARY REPORT
 print("=================================================");

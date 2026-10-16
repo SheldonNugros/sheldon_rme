@@ -207,10 +207,8 @@
           <span class="text-base group-hover:scale-110 transition-transform">ℹ️</span>
           <span class="flex-1">Informasi Tarif & Stok</span>
         </button>
-        <button onclick="switchMenu('inventory')" id="nav-inventory" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-300 hover:text-white hover:bg-slate-800/90 transition-all text-left group">
-          <span class="text-base group-hover:scale-110 transition-transform">📦</span>
-          <span class="flex-1">Gudang & Restock</span>
-        </button>
+        <!-- Tombol Gudang & Restock dipindahkan ke dalam Database Master; hidden dummy dipertahankan untuk kompatibilitas RBAC -->
+        <button onclick="switchMenu('inventory')" id="nav-inventory" class="hidden" style="display:none !important;" aria-hidden="true"></button>
         <button onclick="switchMenu('database')" id="nav-database" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-300 hover:text-white hover:bg-slate-800/90 transition-all text-left group">
           <span class="text-base group-hover:scale-110 transition-transform">🗄️</span>
           <span class="flex-1">Database Master</span>
@@ -311,7 +309,8 @@
       <div id="view-ai" class="module-view hidden"><?!= include('AIView'); ?></div>
       <div id="view-database" class="module-view hidden"><?!= include('DatabaseView'); ?></div>
       <div id="view-user-master" class="module-view hidden"><?!= include('UserMasterView'); ?></div>
-      <div id="view-inventory" class="module-view hidden"><?!= include('InventoryView'); ?></div>
+      <!-- Modul Gudang & Restock kini menyatu di dalam Database Master (Tab Gudang & Restock) -->
+      <div id="view-inventory" class="module-view hidden"></div>
       <div id="view-informasi" class="module-view hidden"><?!= include('InformasiView'); ?></div>
       <div id="view-pasien" class="module-view hidden"><?!= include('PasienView'); ?></div>
       <div id="view-rekam-medis" class="module-view hidden"><?!= include('RekamMedisView'); ?></div>
@@ -532,7 +531,11 @@
       if (typeof handleRoleChange === 'function') handleRoleChange();
       if (typeof loadDaftarUserMaster === 'function') loadDaftarUserMaster(true);
     }
-    if (menuId === 'inventory' && typeof initInventoryModule === 'function') initInventoryModule();
+    if (menuId === 'inventory') {
+      switchMenu('database');
+      if (typeof changeDBMenu === 'function') changeDBMenu('gudang');
+      return;
+    }
     if (menuId === 'informasi' && typeof initInformasiModule === 'function') initInformasiModule();
     if (menuId === 'kasir' && typeof initKasirDropdowns === 'function') initKasirDropdowns();
     if (menuId === 'riwayat-invoice' && typeof initRiwayatInvoiceModule === 'function') initRiwayatInvoiceModule();

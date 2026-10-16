@@ -1904,10 +1904,8 @@
           <span class="text-base group-hover:scale-110 transition-transform">ℹ️</span>
           <span class="flex-1">Informasi Tarif & Stok</span>
         </button>
-        <button onclick="switchMenu('inventory')" id="nav-inventory" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-300 hover:text-white hover:bg-slate-800/90 transition-all text-left group">
-          <span class="text-base group-hover:scale-110 transition-transform">📦</span>
-          <span class="flex-1">Gudang & Restock</span>
-        </button>
+        <!-- Tombol Gudang & Restock dipindahkan ke dalam Database Master; hidden dummy dipertahankan untuk kompatibilitas RBAC -->
+        <button onclick="switchMenu('inventory')" id="nav-inventory" class="hidden" style="display:none !important;" aria-hidden="true"></button>
         <button onclick="switchMenu('database')" id="nav-database" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-300 hover:text-white hover:bg-slate-800/90 transition-all text-left group">
           <span class="text-base group-hover:scale-110 transition-transform">🗄️</span>
           <span class="flex-1">Database Master</span>
@@ -2303,11 +2301,63 @@
 </div>
 </div>
       <div id="view-database" class="module-view hidden"><div class="space-y-6 text-xs relative text-slate-800">
- <!-- TAB NAVIGASI -->
- <div class="flex gap-3 bg-white p-2 rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
-   <button onclick="changeDBMenu('tindakan')" id="btnDbTindakan" class="px-5 py-2.5 bg-indigo-50 text-indigo-700 font-bold rounded-lg transition-all flex-shrink-0">DB Tindakan</button>
-   <button onclick="changeDBMenu('obat')" id="btnDbObat" class="px-5 py-2.5 bg-white text-slate-600 font-bold rounded-lg hover:bg-slate-50 transition-all flex-shrink-0">DB Obat</button>
-   <button onclick="changeDBMenu('bmhp')" id="btnDbBmhp" class="px-5 py-2.5 bg-white text-slate-600 font-bold rounded-lg hover:bg-slate-50 transition-all flex-shrink-0">DB BMHP</button>
+  <!-- TAB NAVIGASI DATABASE MASTER & GUDANG -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 bg-slate-100/90 p-2.5 rounded-2xl border border-slate-200/90 shadow-sm">
+    <!-- 1. DB TINDAKAN -->
+    <button type="button" onclick="changeDBMenu('tindakan')" id="btnDbTindakan" class="db-tab-btn flex items-center gap-3.5 px-4 py-3 bg-white text-indigo-700 font-bold rounded-xl border border-indigo-200/80 shadow-md ring-2 ring-indigo-500/30 transition-all text-left group cursor-pointer">
+      <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl shadow-inner group-hover:scale-110 transition-transform flex-shrink-0">
+        🩺
+      </div>
+      <div class="min-w-0 flex-1">
+        <div class="text-xs font-black tracking-wide text-slate-800 group-hover:text-indigo-600 transition-colors flex items-center justify-between">
+          <span>DB Tindakan</span>
+          <span class="text-[9px] px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 font-extrabold uppercase">Tarif</span>
+        </div>
+        <p class="text-[10px] text-slate-400 font-medium truncate mt-0.5">Katalog tindakan & lab</p>
+      </div>
+    </button>
+
+    <!-- 2. DB OBAT -->
+    <button type="button" onclick="changeDBMenu('obat')" id="btnDbObat" class="db-tab-btn flex items-center gap-3.5 px-4 py-3 bg-white text-slate-600 font-bold rounded-xl border border-slate-200/80 shadow-sm hover:border-slate-300 hover:shadow-md transition-all text-left group cursor-pointer">
+      <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl shadow-inner group-hover:scale-110 transition-transform flex-shrink-0">
+        💊
+      </div>
+      <div class="min-w-0 flex-1">
+        <div class="text-xs font-black tracking-wide text-slate-800 group-hover:text-emerald-600 transition-colors flex items-center justify-between">
+          <span>DB Obat</span>
+          <span class="text-[9px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-extrabold uppercase">Farmasi</span>
+        </div>
+        <p class="text-[10px] text-slate-400 font-medium truncate mt-0.5">Master obat, HPP & jual</p>
+      </div>
+    </button>
+
+    <!-- 3. DB BMHP -->
+    <button type="button" onclick="changeDBMenu('bmhp')" id="btnDbBmhp" class="db-tab-btn flex items-center gap-3.5 px-4 py-3 bg-white text-slate-600 font-bold rounded-xl border border-slate-200/80 shadow-sm hover:border-slate-300 hover:shadow-md transition-all text-left group cursor-pointer">
+      <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-xl shadow-inner group-hover:scale-110 transition-transform flex-shrink-0">
+        💉
+      </div>
+      <div class="min-w-0 flex-1">
+        <div class="text-xs font-black tracking-wide text-slate-800 group-hover:text-purple-600 transition-colors flex items-center justify-between">
+          <span>DB BMHP</span>
+          <span class="text-[9px] px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 font-extrabold uppercase">Alkes</span>
+        </div>
+        <p class="text-[10px] text-slate-400 font-medium truncate mt-0.5">Bahan medis habis pakai</p>
+      </div>
+    </button>
+
+    <!-- 4. GUDANG & RESTOCK -->
+    <button type="button" onclick="changeDBMenu('gudang')" id="btnDbGudang" class="db-tab-btn flex items-center gap-3.5 px-4 py-3 bg-white text-slate-600 font-bold rounded-xl border border-slate-200/80 shadow-sm hover:border-slate-300 hover:shadow-md transition-all text-left group cursor-pointer">
+      <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl shadow-inner group-hover:scale-110 transition-transform flex-shrink-0">
+        📦
+      </div>
+      <div class="min-w-0 flex-1">
+        <div class="text-xs font-black tracking-wide text-slate-800 group-hover:text-amber-600 transition-colors flex items-center justify-between">
+          <span>Gudang & Restock</span>
+          <span class="text-[9px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 font-extrabold uppercase">Stok</span>
+        </div>
+        <p class="text-[10px] text-slate-400 font-medium truncate mt-0.5">Kontrol stok & restock</p>
+      </div>
+    </button>
   </div>
 
   <!-- PANEL DB TINDAKAN -->
@@ -2644,6 +2694,123 @@
     </div>
   </div>
 
+
+  <!-- PANEL GUDANG & RESTOCK -->
+  <div id="panelDbGudang" class="hidden space-y-6">
+    <div class="space-y-6 text-xs text-slate-800">
+  <!-- HEADER MODUL -->
+ <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-6 rounded-2xl shadow-sm border border-slate-200 gap-4">
+   <div>
+     <h2 class="text-lg font-black text-slate-900 flex items-center gap-2">
+       <span class="text-2xl">📦</span> Manajemen Gudang (Obat & BMHP)
+     </h2>
+     <p class="text-slate-500 mt-1">Kontrol stok real-time, tanggal kadaluarsa, dan pencatatan barang masuk.</p>
+   </div>
+   <div class="flex gap-2">
+     <button onclick="bukaModalRestock()" class="px-4 py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl transition-all shadow-sm flex items-center gap-2">
+       📥 + Restock Barang Masuk
+     </button>
+     <button onclick="loadInventoryData()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-all">
+       🔄 Refresh
+     </button>
+   </div>
+ </div>
+
+
+ <!-- TABEL INVENTORY -->
+ <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+   <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+     <div class="flex items-center gap-2">
+       <span class="font-bold text-slate-700">Daftar Stok Gudang</span>
+       <span id="badgeTotalGudang" class="px-2.5 py-0.5 bg-indigo-100 text-indigo-700 rounded-full font-black text-[10px]">0 Item</span>
+     </div>
+     <input type="text" id="cariGudangInput" oninput="filterGudangTable()" placeholder="🔍 Cari nama obat / BMHP..." class="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs outline-none w-64">
+   </div>
+  
+   <div class="overflow-x-auto max-h-[65vh]">
+     <table class="w-full text-left border-collapse">
+       <thead class="bg-slate-100 text-slate-600 uppercase text-[10px] font-black sticky top-0 z-10">
+         <tr>
+           <th class="p-3">Kode / Kategori</th>
+           <th class="p-3">Nama Barang</th>
+           <th class="p-3 text-center">Satuan</th>
+           <th class="p-3 text-right">HPP (Modal)</th>
+           <th class="p-3 text-right">Margin / Jual</th>
+           <th class="p-3 text-center">Sisa Stok</th>
+           <th class="p-3 text-center">Status</th>
+         </tr>
+       </thead>
+       <tbody id="tbodyInventory" class="divide-y divide-slate-100">
+         <tr><td colspan="7" class="text-center py-10 text-slate-400 font-bold">Memuat data gudang...</td></tr>
+       </tbody>
+     </table>
+   </div>
+ </div>
+
+
+ <!-- MODAL RESTOCK BARANG MASUK -->
+ <div id="modalRestock" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm hidden">
+   <div class="bg-white rounded-2xl w-full max-w-lg p-6 shadow-2xl space-y-4">
+     <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+       <h3 class="text-base font-black text-slate-900">Form Restock Barang Masuk</h3>
+       <button onclick="tutupModalRestock()" class="text-slate-400 hover:text-rose-500 font-bold text-lg">&times;</button>
+     </div>
+    
+     <form id="formRestock" onsubmit="handleSimpanRestock(event)" class="space-y-3">
+       <div class="grid grid-cols-2 gap-3">
+         <div>
+           <label class="block font-bold text-slate-700 mb-1">Tanggal Masuk *</label>
+           <input type="date" id="restockTanggal" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg font-bold">
+         </div>
+         <div>
+           <label class="block font-bold text-slate-700 mb-1">No. Faktur / Batch *</label>
+           <input type="text" id="restockNoFaktur" required placeholder="Misal: INV-2026-001" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg font-bold">
+         </div>
+       </div>
+       <div>
+         <label class="block font-bold text-slate-700 mb-1">Pilih / Cari Item Obat & BMHP *</label>
+         <select id="restockPilihItem" required onchange="onItemRestockSelect(this)" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg font-bold">
+           <option value="" disabled selected>-- Pilih Item dari Master --</option>
+         </select>
+       </div>
+       <div class="grid grid-cols-2 gap-3">
+         <div>
+           <label class="block font-bold text-slate-700 mb-1">Jumlah Masuk (Qty Beli) *</label>
+           <input type="number" id="restockQty" min="1" required placeholder="0" oninput="updateRestockConversionPreview()" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg font-bold">
+         </div>
+         <div>
+           <label class="block font-bold text-slate-700 mb-1">Harga Beli Satuan *</label>
+           <input type="number" id="restockHargaBeli" min="0" required placeholder="0" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg font-bold">
+         </div>
+       </div>
+       <div id="restockKonversiBox" class="p-2.5 bg-emerald-50 border border-emerald-200 rounded-lg text-xs text-emerald-800 hidden">
+         <span class="font-bold">Konversi Masuk Gudang: </span>
+         <span id="restockKonversiText">1 Box &times; 100 Pcs = 100 Pcs</span>
+       </div>
+       <div class="grid grid-cols-2 gap-3">
+         <div>
+           <label class="block font-bold text-slate-700 mb-1">Supplier / PBF *</label>
+           <input type="text" id="restockSupplier" required placeholder="Nama Apotek/PBF" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg">
+         </div>
+         <div>
+           <label class="block font-bold text-slate-700 mb-1">Tanggal Kadaluarsa (ED) *</label>
+           <input type="date" id="restockExpired" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg font-bold">
+         </div>
+       </div>
+
+
+       <div class="flex justify-end gap-2 pt-4 border-t border-slate-100">
+         <button type="button" onclick="tutupModalRestock()" class="px-4 py-2 bg-slate-100 font-bold text-slate-600 rounded-xl">Batal</button>
+         <button type="submit" id="btnSimpanRestock" class="px-5 py-2 bg-teal-600 hover:bg-teal-700 text-white font-black rounded-xl shadow-sm">Simpan & Masukkan Stok</button>
+       </div>
+     </form>
+   </div>
+ </div>
+
+
+</div>
+  </div>
+
 </div>
 </div>
       <div id="view-user-master" class="module-view hidden"><div class="space-y-6 text-xs relative text-slate-800">
@@ -2839,118 +3006,8 @@
   </div>
 </div>
 </div>
-      <div id="view-inventory" class="module-view hidden"><div class="space-y-6 text-xs text-slate-800">
-  <!-- HEADER MODUL -->
- <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-6 rounded-2xl shadow-sm border border-slate-200 gap-4">
-   <div>
-     <h2 class="text-lg font-black text-slate-900 flex items-center gap-2">
-       <span class="text-2xl">📦</span> Manajemen Gudang (Obat & BMHP)
-     </h2>
-     <p class="text-slate-500 mt-1">Kontrol stok real-time, tanggal kadaluarsa, dan pencatatan barang masuk.</p>
-   </div>
-   <div class="flex gap-2">
-     <button onclick="bukaModalRestock()" class="px-4 py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl transition-all shadow-sm flex items-center gap-2">
-       📥 + Restock Barang Masuk
-     </button>
-     <button onclick="loadInventoryData()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-all">
-       🔄 Refresh
-     </button>
-   </div>
- </div>
-
-
- <!-- TABEL INVENTORY -->
- <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-   <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-     <div class="flex items-center gap-2">
-       <span class="font-bold text-slate-700">Daftar Stok Gudang</span>
-       <span id="badgeTotalGudang" class="px-2.5 py-0.5 bg-indigo-100 text-indigo-700 rounded-full font-black text-[10px]">0 Item</span>
-     </div>
-     <input type="text" id="cariGudangInput" oninput="filterGudangTable()" placeholder="🔍 Cari nama obat / BMHP..." class="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs outline-none w-64">
-   </div>
-  
-   <div class="overflow-x-auto max-h-[65vh]">
-     <table class="w-full text-left border-collapse">
-       <thead class="bg-slate-100 text-slate-600 uppercase text-[10px] font-black sticky top-0 z-10">
-         <tr>
-           <th class="p-3">Kode / Kategori</th>
-           <th class="p-3">Nama Barang</th>
-           <th class="p-3 text-center">Satuan</th>
-           <th class="p-3 text-right">HPP (Modal)</th>
-           <th class="p-3 text-right">Margin / Jual</th>
-           <th class="p-3 text-center">Sisa Stok</th>
-           <th class="p-3 text-center">Status</th>
-         </tr>
-       </thead>
-       <tbody id="tbodyInventory" class="divide-y divide-slate-100">
-         <tr><td colspan="7" class="text-center py-10 text-slate-400 font-bold">Memuat data gudang...</td></tr>
-       </tbody>
-     </table>
-   </div>
- </div>
-
-
- <!-- MODAL RESTOCK BARANG MASUK -->
- <div id="modalRestock" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm hidden">
-   <div class="bg-white rounded-2xl w-full max-w-lg p-6 shadow-2xl space-y-4">
-     <div class="flex justify-between items-center border-b border-slate-100 pb-3">
-       <h3 class="text-base font-black text-slate-900">Form Restock Barang Masuk</h3>
-       <button onclick="tutupModalRestock()" class="text-slate-400 hover:text-rose-500 font-bold text-lg">&times;</button>
-     </div>
-    
-     <form id="formRestock" onsubmit="handleSimpanRestock(event)" class="space-y-3">
-       <div class="grid grid-cols-2 gap-3">
-         <div>
-           <label class="block font-bold text-slate-700 mb-1">Tanggal Masuk *</label>
-           <input type="date" id="restockTanggal" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg font-bold">
-         </div>
-         <div>
-           <label class="block font-bold text-slate-700 mb-1">No. Faktur / Batch *</label>
-           <input type="text" id="restockNoFaktur" required placeholder="Misal: INV-2026-001" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg font-bold">
-         </div>
-       </div>
-       <div>
-         <label class="block font-bold text-slate-700 mb-1">Pilih / Cari Item Obat & BMHP *</label>
-         <select id="restockPilihItem" required onchange="onItemRestockSelect(this)" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg font-bold">
-           <option value="" disabled selected>-- Pilih Item dari Master --</option>
-         </select>
-       </div>
-       <div class="grid grid-cols-2 gap-3">
-         <div>
-           <label class="block font-bold text-slate-700 mb-1">Jumlah Masuk (Qty Beli) *</label>
-           <input type="number" id="restockQty" min="1" required placeholder="0" oninput="updateRestockConversionPreview()" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg font-bold">
-         </div>
-         <div>
-           <label class="block font-bold text-slate-700 mb-1">Harga Beli Satuan *</label>
-           <input type="number" id="restockHargaBeli" min="0" required placeholder="0" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg font-bold">
-         </div>
-       </div>
-       <div id="restockKonversiBox" class="p-2.5 bg-emerald-50 border border-emerald-200 rounded-lg text-xs text-emerald-800 hidden">
-         <span class="font-bold">Konversi Masuk Gudang: </span>
-         <span id="restockKonversiText">1 Box &times; 100 Pcs = 100 Pcs</span>
-       </div>
-       <div class="grid grid-cols-2 gap-3">
-         <div>
-           <label class="block font-bold text-slate-700 mb-1">Supplier / PBF *</label>
-           <input type="text" id="restockSupplier" required placeholder="Nama Apotek/PBF" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg">
-         </div>
-         <div>
-           <label class="block font-bold text-slate-700 mb-1">Tanggal Kadaluarsa (ED) *</label>
-           <input type="date" id="restockExpired" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg font-bold">
-         </div>
-       </div>
-
-
-       <div class="flex justify-end gap-2 pt-4 border-t border-slate-100">
-         <button type="button" onclick="tutupModalRestock()" class="px-4 py-2 bg-slate-100 font-bold text-slate-600 rounded-xl">Batal</button>
-         <button type="submit" id="btnSimpanRestock" class="px-5 py-2 bg-teal-600 hover:bg-teal-700 text-white font-black rounded-xl shadow-sm">Simpan & Masukkan Stok</button>
-       </div>
-     </form>
-   </div>
- </div>
-
-
-</div></div>
+      <!-- Modul Gudang & Restock kini menyatu di dalam Database Master (Tab Gudang & Restock) -->
+      <div id="view-inventory" class="module-view hidden"></div>
       <div id="view-informasi" class="module-view hidden"><!-- MODUL INFORMASI (TINDAKAN, OBAT, BMHP) -->
 <div class="space-y-6">
   <!-- TAB HEADER INFORMASI -->
@@ -6416,7 +6473,11 @@
       if (typeof handleRoleChange === 'function') handleRoleChange();
       if (typeof loadDaftarUserMaster === 'function') loadDaftarUserMaster(true);
     }
-    if (menuId === 'inventory' && typeof initInventoryModule === 'function') initInventoryModule();
+    if (menuId === 'inventory') {
+      switchMenu('database');
+      if (typeof changeDBMenu === 'function') changeDBMenu('gudang');
+      return;
+    }
     if (menuId === 'informasi' && typeof initInformasiModule === 'function') initInformasiModule();
     if (menuId === 'kasir' && typeof initKasirDropdowns === 'function') initKasirDropdowns();
     if (menuId === 'riwayat-invoice' && typeof initRiwayatInvoiceModule === 'function') initRiwayatInvoiceModule();
@@ -13518,15 +13579,15 @@ function loadDaftarBmhpMaster() {
 // LOGIKA TAMPILAN / MENU TAB
 // ==========================================
 function changeDBMenu(menu) {
-   ['panelDbTindakan', 'panelDbObat', 'panelDbBmhp'].forEach(id => {
+   ['panelDbTindakan', 'panelDbObat', 'panelDbBmhp', 'panelDbGudang'].forEach(id => {
        const el = document.getElementById(id);
        if (el) el.classList.add('hidden');
    });
-   ['btnDbTindakan', 'btnDbObat', 'btnDbBmhp'].forEach(id => {
+   ['btnDbTindakan', 'btnDbObat', 'btnDbBmhp', 'btnDbGudang'].forEach(id => {
        let btn = document.getElementById(id);
        if (btn) {
-           btn.classList.remove('bg-indigo-50', 'text-indigo-700');
-           btn.classList.add('bg-white', 'text-slate-600');
+           btn.classList.remove('bg-indigo-50', 'text-indigo-700', 'bg-emerald-50', 'text-emerald-700', 'bg-purple-50', 'text-purple-700', 'bg-amber-50', 'text-amber-700', 'ring-2', 'ring-indigo-500/30', 'ring-emerald-500/30', 'ring-purple-500/30', 'ring-amber-500/30', 'border-indigo-200/80', 'border-emerald-200/80', 'border-purple-200/80', 'border-amber-200/80', 'shadow-md');
+           btn.classList.add('bg-white', 'text-slate-600', 'border-slate-200/80', 'shadow-sm');
        }
    });
 
@@ -13535,16 +13596,16 @@ function changeDBMenu(menu) {
        if (el) el.classList.remove('hidden');
        let btn = document.getElementById('btnDbTindakan');
        if (btn) {
-           btn.classList.remove('bg-white', 'text-slate-600');
-           btn.classList.add('bg-indigo-50', 'text-indigo-700');
+           btn.classList.remove('bg-white', 'text-slate-600', 'border-slate-200/80', 'shadow-sm');
+           btn.classList.add('bg-indigo-50', 'text-indigo-700', 'border-indigo-200/80', 'ring-2', 'ring-indigo-500/30', 'shadow-md');
        }
    } else if(menu === 'obat') {
        const el = document.getElementById('panelDbObat');
        if (el) el.classList.remove('hidden');
        let btn = document.getElementById('btnDbObat');
        if (btn) {
-           btn.classList.remove('bg-white', 'text-slate-600');
-           btn.classList.add('bg-indigo-50', 'text-indigo-700');
+           btn.classList.remove('bg-white', 'text-slate-600', 'border-slate-200/80', 'shadow-sm');
+           btn.classList.add('bg-emerald-50', 'text-emerald-700', 'border-emerald-200/80', 'ring-2', 'ring-emerald-500/30', 'shadow-md');
        }
        if (listMasterObat.length === 0) {
            loadDaftarObatMaster();
@@ -13557,14 +13618,25 @@ function changeDBMenu(menu) {
        if (el) el.classList.remove('hidden');
        let btn = document.getElementById('btnDbBmhp');
        if (btn) {
-           btn.classList.remove('bg-white', 'text-slate-600');
-           btn.classList.add('bg-indigo-50', 'text-indigo-700');
+           btn.classList.remove('bg-white', 'text-slate-600', 'border-slate-200/80', 'shadow-sm');
+           btn.classList.add('bg-purple-50', 'text-purple-700', 'border-purple-200/80', 'ring-2', 'ring-purple-500/30', 'shadow-md');
        }
        if (listMasterBmhp.length === 0) {
            loadDaftarBmhpMaster();
        } else {
            renderTabelBmhp();
            generateKodeBmhp();
+       }
+   } else if(menu === 'gudang') {
+       const el = document.getElementById('panelDbGudang');
+       if (el) el.classList.remove('hidden');
+       let btn = document.getElementById('btnDbGudang');
+       if (btn) {
+           btn.classList.remove('bg-white', 'text-slate-600', 'border-slate-200/80', 'shadow-sm');
+           btn.classList.add('bg-amber-50', 'text-amber-700', 'border-amber-200/80', 'ring-2', 'ring-amber-500/30', 'shadow-md');
+       }
+       if (typeof initInventoryModule === 'function') {
+           initInventoryModule();
        }
    } else if(menu === 'user') {
        if (typeof switchMenu === 'function') {

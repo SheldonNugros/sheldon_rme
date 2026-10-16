@@ -2048,7 +2048,11 @@ var console = {
       if (typeof handleRoleChange === 'function') handleRoleChange();
       if (typeof loadDaftarUserMaster === 'function') loadDaftarUserMaster(true);
     }
-    if (menuId === 'inventory' && typeof initInventoryModule === 'function') initInventoryModule();
+    if (menuId === 'inventory') {
+      switchMenu('database');
+      if (typeof changeDBMenu === 'function') changeDBMenu('gudang');
+      return;
+    }
     if (menuId === 'informasi' && typeof initInformasiModule === 'function') initInformasiModule();
     if (menuId === 'kasir' && typeof initKasirDropdowns === 'function') initKasirDropdowns();
     if (menuId === 'riwayat-invoice' && typeof initRiwayatInvoiceModule === 'function') initRiwayatInvoiceModule();
@@ -9139,15 +9143,15 @@ function loadDaftarBmhpMaster() {
 // LOGIKA TAMPILAN / MENU TAB
 // ==========================================
 function changeDBMenu(menu) {
-   ['panelDbTindakan', 'panelDbObat', 'panelDbBmhp'].forEach(id => {
+   ['panelDbTindakan', 'panelDbObat', 'panelDbBmhp', 'panelDbGudang'].forEach(id => {
        const el = document.getElementById(id);
        if (el) el.classList.add('hidden');
    });
-   ['btnDbTindakan', 'btnDbObat', 'btnDbBmhp'].forEach(id => {
+   ['btnDbTindakan', 'btnDbObat', 'btnDbBmhp', 'btnDbGudang'].forEach(id => {
        let btn = document.getElementById(id);
        if (btn) {
-           btn.classList.remove('bg-indigo-50', 'text-indigo-700');
-           btn.classList.add('bg-white', 'text-slate-600');
+           btn.classList.remove('bg-indigo-50', 'text-indigo-700', 'bg-emerald-50', 'text-emerald-700', 'bg-purple-50', 'text-purple-700', 'bg-amber-50', 'text-amber-700', 'ring-2', 'ring-indigo-500/30', 'ring-emerald-500/30', 'ring-purple-500/30', 'ring-amber-500/30', 'border-indigo-200/80', 'border-emerald-200/80', 'border-purple-200/80', 'border-amber-200/80', 'shadow-md');
+           btn.classList.add('bg-white', 'text-slate-600', 'border-slate-200/80', 'shadow-sm');
        }
    });
 
@@ -9156,16 +9160,16 @@ function changeDBMenu(menu) {
        if (el) el.classList.remove('hidden');
        let btn = document.getElementById('btnDbTindakan');
        if (btn) {
-           btn.classList.remove('bg-white', 'text-slate-600');
-           btn.classList.add('bg-indigo-50', 'text-indigo-700');
+           btn.classList.remove('bg-white', 'text-slate-600', 'border-slate-200/80', 'shadow-sm');
+           btn.classList.add('bg-indigo-50', 'text-indigo-700', 'border-indigo-200/80', 'ring-2', 'ring-indigo-500/30', 'shadow-md');
        }
    } else if(menu === 'obat') {
        const el = document.getElementById('panelDbObat');
        if (el) el.classList.remove('hidden');
        let btn = document.getElementById('btnDbObat');
        if (btn) {
-           btn.classList.remove('bg-white', 'text-slate-600');
-           btn.classList.add('bg-indigo-50', 'text-indigo-700');
+           btn.classList.remove('bg-white', 'text-slate-600', 'border-slate-200/80', 'shadow-sm');
+           btn.classList.add('bg-emerald-50', 'text-emerald-700', 'border-emerald-200/80', 'ring-2', 'ring-emerald-500/30', 'shadow-md');
        }
        if (listMasterObat.length === 0) {
            loadDaftarObatMaster();
@@ -9178,14 +9182,25 @@ function changeDBMenu(menu) {
        if (el) el.classList.remove('hidden');
        let btn = document.getElementById('btnDbBmhp');
        if (btn) {
-           btn.classList.remove('bg-white', 'text-slate-600');
-           btn.classList.add('bg-indigo-50', 'text-indigo-700');
+           btn.classList.remove('bg-white', 'text-slate-600', 'border-slate-200/80', 'shadow-sm');
+           btn.classList.add('bg-purple-50', 'text-purple-700', 'border-purple-200/80', 'ring-2', 'ring-purple-500/30', 'shadow-md');
        }
        if (listMasterBmhp.length === 0) {
            loadDaftarBmhpMaster();
        } else {
            renderTabelBmhp();
            generateKodeBmhp();
+       }
+   } else if(menu === 'gudang') {
+       const el = document.getElementById('panelDbGudang');
+       if (el) el.classList.remove('hidden');
+       let btn = document.getElementById('btnDbGudang');
+       if (btn) {
+           btn.classList.remove('bg-white', 'text-slate-600', 'border-slate-200/80', 'shadow-sm');
+           btn.classList.add('bg-amber-50', 'text-amber-700', 'border-amber-200/80', 'ring-2', 'ring-amber-500/30', 'shadow-md');
+       }
+       if (typeof initInventoryModule === 'function') {
+           initInventoryModule();
        }
    } else if(menu === 'user') {
        if (typeof switchMenu === 'function') {
@@ -14237,6 +14252,8 @@ assert("Tabel BMHP Rendered Matching Item", document.getElementById('tbodyDbBmhp
 switchMenu('inventory');
 runAllTimers();
 assert("Inventory Gudang Initialized Cleanly", typeof initInventoryModule === 'function');
+assert("Tombol Tab Gudang & Restock Tersedia di Database Master", document.getElementById('btnDbGudang') !== null);
+assert("Panel DB Gudang Active setelah changeDBMenu('gudang')", !document.getElementById('panelDbGudang').classList.contains('hidden'));
 
 // 15. TEST MODUL INFORMASI (TINDAKAN, OBAT, BMHP)
 switchMenu('informasi');

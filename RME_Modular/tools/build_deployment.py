@@ -67,8 +67,10 @@ def replace_include(match):
             return f.read()
     return f"<!-- Include failed: {inc_name} not found -->"
 
-# Standalone inlined HTML
-bundled_html = re.sub(r'<\?!=\s*include\([\'"]([^\'"]+)[\'"]\);\s*\?>', replace_include, index_content)
+# Standalone inlined HTML (including nested includes)
+bundled_html = index_content
+while re.search(r'<\?!=\s*include\([\'"]([^\'"]+)[\'"]\);\s*\?>', bundled_html):
+    bundled_html = re.sub(r'<\?!=\s*include\([\'"]([^\'"]+)[\'"]\);\s*\?>', replace_include, bundled_html)
 
 bundled_html_path = os.path.join(BUNDLED_DIR, 'Index.html')
 with open(bundled_html_path, 'w', encoding='utf-8') as f:

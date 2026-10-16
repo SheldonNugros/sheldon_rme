@@ -22,8 +22,9 @@ def replace_include(match):
     else:
         return f"<!-- Include failed: {filename} not found -->"
 
-# Replace all <?!= include('...'); ?>
-bundle = re.sub(r'<\?!=\s*include\([\'"]([^\'"]+)[\'"]\);\s*\?>', replace_include, bundle)
+# Replace all <?!= include('...'); ?> including nested includes
+while re.search(r'<\?!=\s*include\([\'"]([^\'"]+)[\'"]\);\s*\?>', bundle):
+    bundle = re.sub(r'<\?!=\s*include\([\'"]([^\'"]+)[\'"]\);\s*\?>', replace_include, bundle)
 
 def read_csv_rows(sub, fname):
     p = os.path.join(csv_dir, sub, fname)

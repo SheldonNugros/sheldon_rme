@@ -582,6 +582,8 @@ assert("Tabel BMHP Rendered Matching Item", document.getElementById('tbodyDbBmhp
 switchMenu('inventory');
 runAllTimers();
 assert("Inventory Gudang Initialized Cleanly", typeof initInventoryModule === 'function');
+assert("Tombol Tab Gudang & Restock Tersedia di Database Master", document.getElementById('btnDbGudang') !== null);
+assert("Panel DB Gudang Active setelah changeDBMenu('gudang')", !document.getElementById('panelDbGudang').classList.contains('hidden'));
 
 // 15. TEST MODUL INFORMASI (TINDAKAN, OBAT, BMHP)
 switchMenu('informasi');

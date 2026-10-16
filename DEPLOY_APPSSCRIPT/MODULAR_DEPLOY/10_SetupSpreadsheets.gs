@@ -1818,7 +1818,18 @@ function generatePayrollPeriode(periodeBulan) {
     // 1. Baca Rekap_Jasa_Medis jika ada
     let dokterMap = {};
     try {
-      const rawJM = readFast(DB_CONFIG.PEMBAYARAN, "Rekap_Jasa_Medis");
+      let rawJM = [];
+      try {
+        const defBayar = (typeof SPREADSHEET_DEFINITIONS !== 'undefined' && SPREADSHEET_DEFINITIONS["PEMBAYARAN"]) ? SPREADSHEET_DEFINITIONS["PEMBAYARAN"] : null;
+        let foundBayar = defBayar ? _findOrCreateSpreadsheetInFolder("PEMBAYARAN", defBayar.title) : null;
+        let shJM = foundBayar ? foundBayar.ss.getSheetByName("Rekap_Jasa_Medis") : null;
+        if (shJM && shJM.getLastRow() > 1) {
+          rawJM = shJM.getRange(1, 1, shJM.getLastRow(), shJM.getLastColumn()).getValues();
+        }
+      } catch (eF) {}
+      if (rawJM.length === 0) {
+        rawJM = readFast(DB_CONFIG.PEMBAYARAN, "Rekap_Jasa_Medis");
+      }
       if (rawJM && rawJM.length > 1) {
         const hJM = rawJM[0];
         const idxDokter = getColIdx(hJM, ['dokter', 'nama_dokter']);
@@ -2362,7 +2373,18 @@ function getPayrollModuleData() {
 
     let rekapJM = [];
     try {
-      const rawJM = readFast(DB_CONFIG.PEMBAYARAN, "Rekap_Jasa_Medis");
+      let rawJM = [];
+      try {
+        const defBayar = (typeof SPREADSHEET_DEFINITIONS !== 'undefined' && SPREADSHEET_DEFINITIONS["PEMBAYARAN"]) ? SPREADSHEET_DEFINITIONS["PEMBAYARAN"] : null;
+        let foundBayar = defBayar ? _findOrCreateSpreadsheetInFolder("PEMBAYARAN", defBayar.title) : null;
+        let shJM = foundBayar ? foundBayar.ss.getSheetByName("Rekap_Jasa_Medis") : null;
+        if (shJM && shJM.getLastRow() > 1) {
+          rawJM = shJM.getRange(1, 1, shJM.getLastRow(), shJM.getLastColumn()).getValues();
+        }
+      } catch (eF) {}
+      if (rawJM.length === 0) {
+        rawJM = readFast(DB_CONFIG.PEMBAYARAN, "Rekap_Jasa_Medis");
+      }
       for (let i = 1; i < rawJM.length; i++) {
         let r = rawJM[i];
         if (!r[0] && !r[2]) continue;

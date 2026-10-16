@@ -4,7 +4,18 @@
 
 function getDaftarPembayaran() {
   try {
-    const v = readFast(DB_CONFIG.PEMBAYARAN, "Data_Pembayaran");
+    let v = [];
+    try {
+      const defBayar = (typeof SPREADSHEET_DEFINITIONS !== 'undefined' && SPREADSHEET_DEFINITIONS["PEMBAYARAN"]) ? SPREADSHEET_DEFINITIONS["PEMBAYARAN"] : null;
+      let foundBayar = defBayar ? _findOrCreateSpreadsheetInFolder("PEMBAYARAN", defBayar.title) : null;
+      let sh = foundBayar ? (foundBayar.ss.getSheetByName("Data_Pembayaran") || foundBayar.ss.getSheetByName("Pembayaran")) : null;
+      if (sh && sh.getLastRow() > 1) {
+        v = sh.getRange(1, 1, sh.getLastRow(), sh.getLastColumn()).getValues();
+      }
+    } catch (eF) {}
+    if (v.length === 0) {
+      v = readFast(DB_CONFIG.PEMBAYARAN, "Data_Pembayaran");
+    }
     if (v.length <= 1) return [];
     
     let h = v[0];
@@ -415,7 +426,18 @@ function hitungDanCatatJasaMedis(ctx) {
 
 function getRekapJasaMedis(filterBulanTahun) {
   try {
-    const v = readFast(DB_CONFIG.PEMBAYARAN, "Rekap_Jasa_Medis");
+    let v = [];
+    try {
+      const defBayar = (typeof SPREADSHEET_DEFINITIONS !== 'undefined' && SPREADSHEET_DEFINITIONS["PEMBAYARAN"]) ? SPREADSHEET_DEFINITIONS["PEMBAYARAN"] : null;
+      let foundBayar = defBayar ? _findOrCreateSpreadsheetInFolder("PEMBAYARAN", defBayar.title) : null;
+      let sh = foundBayar ? foundBayar.ss.getSheetByName("Rekap_Jasa_Medis") : null;
+      if (sh && sh.getLastRow() > 1) {
+        v = sh.getRange(1, 1, sh.getLastRow(), sh.getLastColumn()).getValues();
+      }
+    } catch (eF) {}
+    if (v.length === 0) {
+      v = readFast(DB_CONFIG.PEMBAYARAN, "Rekap_Jasa_Medis");
+    }
     if (!v || v.length <= 1) return [];
     let h = v[0];
     let idInv = getColIdx(h, ['idinvoice', 'id_invoice']); if (idInv === -1) idInv = 0;

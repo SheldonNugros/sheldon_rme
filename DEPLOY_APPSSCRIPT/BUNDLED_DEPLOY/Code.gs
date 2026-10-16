@@ -2370,7 +2370,9 @@ function simpanUserMaster(payload) {
       }
     }
 
-    let pjmVal = payload.persenJM !== undefined && payload.persenJM !== "" ? Number(payload.persenJM) : 0;
+    let rClean = String(payload.role || "").trim();
+    let isDokterRole = (rClean === "Dokter Gigi Spesialis" || rClean === "Dokter Gigi Umum");
+    let pjmVal = isDokterRole && payload.persenJM !== undefined && payload.persenJM !== "" ? Number(payload.persenJM) : 0;
     if (pjmVal > 1) pjmVal = pjmVal / 100;
 
     let rawSt = String(payload.status || "Aktif").trim().toLowerCase();
@@ -3194,14 +3196,18 @@ function getHtmlFormUserMasterContent() {
 '    window.onload = function() { handleRoleChange(); muatUser(); };' +
 '    function togglePassVisibility() { const inp = document.getElementById("inPassword"); inp.type = inp.type === "password" ? "text" : "password"; }' +
 '    function handleRoleChange() {' +
-'      const role = document.getElementById("inRole").value;' +
+'      const role = (document.getElementById("inRole").value || "").trim();' +
 '      const wrap = document.getElementById("wrapJM");' +
 '      const jmInput = document.getElementById("inPersenJM");' +
-'      if (role.toLowerCase().includes("dokter")) {' +
+'      const isDokter = (role === "Dokter Gigi Spesialis" || role === "Dokter Gigi Umum");' +
+'      if (isDokter) {' +
 '        wrap.classList.remove("hidden");' +
-'        if (role.includes("Spesialis")) jmInput.value = "50";' +
-'        else if (role.includes("Umum")) jmInput.value = "40";' +
-'      } else { wrap.classList.add("hidden"); }' +
+'        if (role === "Dokter Gigi Spesialis") jmInput.value = "50";' +
+'        else if (role === "Dokter Gigi Umum") jmInput.value = "40";' +
+'      } else {' +
+'        wrap.classList.add("hidden");' +
+'        if (jmInput) jmInput.value = "0";' +
+'      }' +
 '    }' +
 '    function muatUser() {' +
 '      const tbody = document.getElementById("tbodyUser");' +

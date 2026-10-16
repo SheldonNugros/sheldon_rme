@@ -1681,6 +1681,37 @@ assert("ROLE-4: Role Office Menyembunyikan Menu Kasir & Payroll", document.getEl
 terapkanRoleAkses("Owner");
 assert("ROLE-5: Role Owner Menampilkan Seluruh Menu Termasuk User Master", !document.getElementById('nav-user-master').classList.contains('hidden') && !document.getElementById('nav-dashboard').classList.contains('hidden'));
 
+// --- TEST: Pengaturan Jasa Medis (JM) Dokter Hanya Tampil untuk Dokter Gigi Spesialis & Umum ---
+var wrapJM = document.getElementById('wrapperDokterJM');
+var inputJM = document.getElementById('dbUserPersenJM');
+var roleSelect = document.getElementById('dbUserRole');
+
+// 1. Uji saat Dokter Gigi Spesialis dipilih -> wrapper tampil, default 50%
+roleSelect.value = "Dokter Gigi Spesialis";
+handleRoleChange();
+assert("ROLE-JM-1: Pengaturan JM Tampil saat Role Dokter Gigi Spesialis", !wrapJM.classList.contains('hidden'));
+assert("ROLE-JM-1: Default JM Dokter Gigi Spesialis adalah 50%", inputJM.value === "50");
+
+// 2. Uji saat Dokter Gigi Umum dipilih -> wrapper tampil, default 40%
+inputJM.value = "0";
+roleSelect.value = "Dokter Gigi Umum";
+handleRoleChange();
+assert("ROLE-JM-2: Pengaturan JM Tampil saat Role Dokter Gigi Umum", !wrapJM.classList.contains('hidden'));
+assert("ROLE-JM-2: Default JM Dokter Gigi Umum adalah 40%", inputJM.value === "40");
+
+// 3. Uji saat Role Selain Dokter dipilih (Owner, Perawat Gigi, Perawat Umum, Admin, Office) -> wrapper tersembunyi, default 0
+var nonDokterRoles = ["Perawat Gigi", "Perawat Umum", "Admin", "Office", "Owner"];
+nonDokterRoles.forEach(function(r) {
+  roleSelect.value = r;
+  handleRoleChange();
+  assert("ROLE-JM-3: Pengaturan JM Tidak Tampil untuk Role " + r, wrapJM.classList.contains('hidden'));
+  assert("ROLE-JM-3: Default JM untuk Role " + r + " adalah 0", inputJM.value === "0");
+});
+
+// Kembalikan ke default tambah user
+batalEditDbUser(false);
+assert("ROLE-JM-4: Form Baru Mereset JM ke 0 dan Tersembunyi", wrapJM.classList.contains('hidden') && inputJM.value === "0");
+
 // SUMMARY REPORT
 print("=================================================");
 var passedTotal = results.filter(r => r.passed).length;

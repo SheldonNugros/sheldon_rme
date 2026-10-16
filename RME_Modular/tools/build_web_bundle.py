@@ -1417,7 +1417,9 @@ mock_gas_script = '''
       setTimeout(() => {
         let cleanUser = String(payload.username || "").trim().toLowerCase().replace(/\\s+/g, "");
         let idx = mockDb.staff.findIndex(s => (s.username || "").toLowerCase() === cleanUser);
-        let pjmVal = payload.persenJM ? Number(payload.persenJM) : 0;
+        let rClean = String(payload.role || '').trim();
+        let isDokterRole = (rClean === 'Dokter Gigi Spesialis' || rClean === 'Dokter Gigi Umum');
+        let pjmVal = isDokterRole && payload.persenJM ? Number(payload.persenJM) : 0;
         if (pjmVal > 1) pjmVal = pjmVal / 100;
         let genId = "SN-" + String(mockDb.staff.length + 1).padStart(2, '0');
         let item = {

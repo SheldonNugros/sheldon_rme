@@ -88,9 +88,9 @@ function handleApiRequest(action, params) {
       }
     }
 
-    const fn = this[action];
+    const fn = (typeof globalThis !== 'undefined' && globalThis[action]) || (typeof this !== 'undefined' && this[action]);
     if (typeof fn === 'function') {
-      let result = fn.apply(this, args);
+      let result = fn.apply(typeof globalThis !== 'undefined' ? globalThis : this, args);
       return ContentService.createTextOutput(JSON.stringify(result))
         .setMimeType(ContentService.MimeType.JSON);
     } else {

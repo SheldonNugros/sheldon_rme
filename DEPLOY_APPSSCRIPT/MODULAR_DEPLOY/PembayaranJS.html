@@ -280,12 +280,18 @@
  }
 
 
- function bukaRiwayatInvoice() {
-   groupRiwayatInvoices();
+ function initRiwayatInvoiceModule() {
+   if (typeof groupRiwayatInvoices === 'function') groupRiwayatInvoices();
    let inputEl = document.getElementById('inputCariRiwayat');
-   if(inputEl) inputEl.value = '';
-   resetPageAndSearch();
-   if(typeof switchMenu === 'function') switchMenu('riwayat-invoice');
+   if (inputEl) inputEl.value = '';
+   if (typeof resetPageAndSearch === 'function') resetPageAndSearch();
+ }
+
+ function bukaRiwayatInvoice() {
+   initRiwayatInvoiceModule();
+   if (window.activeMenuId !== 'riwayat-invoice' && typeof switchMenu === 'function') {
+     switchMenu('riwayat-invoice');
+   }
  }
 
 

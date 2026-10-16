@@ -521,6 +521,8 @@
 
     if (typeof window.syncGasBadgeVisibility === 'function') window.syncGasBadgeVisibility();
   
+    if (menuId === 'pasien' && typeof initPasienModule === 'function') initPasienModule();
+    if (menuId === 'rekam-medis' && typeof initRekamMedisApp === 'function') initRekamMedisApp();
     if (menuId === 'ai' && typeof loadAIInsights === 'function') loadAIInsights();
     if (menuId === 'database' && typeof initDatabaseModule === 'function') initDatabaseModule();
     if (menuId === 'user-master') {
@@ -532,6 +534,8 @@
     }
     if (menuId === 'inventory' && typeof initInventoryModule === 'function') initInventoryModule();
     if (menuId === 'informasi' && typeof initInformasiModule === 'function') initInformasiModule();
+    if (menuId === 'kasir' && typeof initKasirDropdowns === 'function') initKasirDropdowns();
+    if (menuId === 'riwayat-invoice' && typeof initRiwayatInvoiceModule === 'function') initRiwayatInvoiceModule();
     if (menuId === 'surat' && typeof initSuratModule === 'function') initSuratModule();
     if (menuId === 'payroll' && typeof initPayrollModule === 'function') initPayrollModule();
     if (menuId === 'absensi' && typeof initAbsensiModule === 'function') initAbsensiModule();

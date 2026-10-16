@@ -2037,6 +2037,8 @@ var console = {
 
     if (typeof window.syncGasBadgeVisibility === 'function') window.syncGasBadgeVisibility();
   
+    if (menuId === 'pasien' && typeof initPasienModule === 'function') initPasienModule();
+    if (menuId === 'rekam-medis' && typeof initRekamMedisApp === 'function') initRekamMedisApp();
     if (menuId === 'ai' && typeof loadAIInsights === 'function') loadAIInsights();
     if (menuId === 'database' && typeof initDatabaseModule === 'function') initDatabaseModule();
     if (menuId === 'user-master') {
@@ -2048,6 +2050,8 @@ var console = {
     }
     if (menuId === 'inventory' && typeof initInventoryModule === 'function') initInventoryModule();
     if (menuId === 'informasi' && typeof initInformasiModule === 'function') initInformasiModule();
+    if (menuId === 'kasir' && typeof initKasirDropdowns === 'function') initKasirDropdowns();
+    if (menuId === 'riwayat-invoice' && typeof initRiwayatInvoiceModule === 'function') initRiwayatInvoiceModule();
     if (menuId === 'surat' && typeof initSuratModule === 'function') initSuratModule();
     if (menuId === 'payroll' && typeof initPayrollModule === 'function') initPayrollModule();
     if (menuId === 'absensi' && typeof initAbsensiModule === 'function') initAbsensiModule();
@@ -2658,6 +2662,30 @@ function hitungUmurOtomatis() {
   if (m < 0 || (m === 0 && hariIni.getDate() < tglLahir.getDate())) { umur--; }
   document.getElementById('pasUmur').value = umur > 0 ? umur + " Tahun" : "0 Tahun";
 }
+
+let pendingEditPasienId = null;
+function konfirmasiEditPasien(idPasien) {
+  pendingEditPasienId = idPasien;
+  let m = document.getElementById('modalConfirmEdit');
+  if (m) m.classList.remove('hidden');
+}
+function cancelEditPasien() {
+  pendingEditPasienId = null;
+  let m = document.getElementById('modalConfirmEdit');
+  if (m) m.classList.add('hidden');
+}
+function proceedEditPasien() {
+  let m = document.getElementById('modalConfirmEdit');
+  if (m) m.classList.add('hidden');
+  if (pendingEditPasienId) {
+    editPasien(pendingEditPasienId);
+    pendingEditPasienId = null;
+  }
+}
+window.konfirmasiEditPasien = konfirmasiEditPasien;
+window.cancelEditPasien = cancelEditPasien;
+window.proceedEditPasien = proceedEditPasien;
+
 function editPasien(idPasien) {
   if (window.activeUserRole && (window.activeUserRole.toLowerCase().includes('dokter') || window.activeUserRole.toLowerCase().includes('staff'))) {
     showToast('warning', 'Role Anda hanya memiliki akses View pada Database Pasien.');
@@ -6887,12 +6915,18 @@ function bukaModalOhisHistory(idx) {
  }
 
 
- function bukaRiwayatInvoice() {
-   groupRiwayatInvoices();
+ function initRiwayatInvoiceModule() {
+   if (typeof groupRiwayatInvoices === 'function') groupRiwayatInvoices();
    let inputEl = document.getElementById('inputCariRiwayat');
-   if(inputEl) inputEl.value = '';
-   resetPageAndSearch();
-   if(typeof switchMenu === 'function') switchMenu('riwayat-invoice');
+   if (inputEl) inputEl.value = '';
+   if (typeof resetPageAndSearch === 'function') resetPageAndSearch();
+ }
+
+ function bukaRiwayatInvoice() {
+   initRiwayatInvoiceModule();
+   if (window.activeMenuId !== 'riwayat-invoice' && typeof switchMenu === 'function') {
+     switchMenu('riwayat-invoice');
+   }
  }
 
 
@@ -8367,7 +8401,7 @@ function renderDatalistKasir(tindakanTersaring = null) {
 
 
  function loadAllRiwayatSurat() {
-   if (typeof google !== 'undefined' && google.script && google.script.run && google.script.run.getSemuaRiwayatSurat) {
+   if (typeof google !== 'undefined' && google.script && google.script.run) {
        google.script.run.withSuccessHandler(res => {
            dataSuratGlobal = res || [];
            
@@ -8590,7 +8624,7 @@ function renderDatalistKasir(tindakanTersaring = null) {
    let urutStr = ("000" + (rawListSKS.length + 1)).slice(-3); 
    let fallbackNo = "SKS/SHELDON/" + urutStr + "/" + blnRomawi + "-" + thn4Digit;
    
-   if (typeof google !== 'undefined' && google.script && google.script.run && google.script.run.simpanSuratSakit) {
+   if (typeof google !== 'undefined' && google.script && google.script.run) {
        google.script.run.withSuccessHandler(res => {
          btn.innerHTML = 'SIMPAN & CETAK SKS'; btn.disabled = false;
          if (res.success) {
@@ -8653,7 +8687,7 @@ function renderDatalistKasir(tindakanTersaring = null) {
    let blnStr = ("0" + (new Date().getMonth() + 1)).slice(-2); let blnRomawi = getBulanRomawi(blnStr); let thn4Digit = new Date().getFullYear().toString(); let urutStr = ("000" + (rawListSKP.length + 1)).slice(-3); 
    let fallbackNo = "SKP/SHELDON/" + urutStr + "/" + blnRomawi + "-" + thn4Digit; 
    
-   if (typeof google !== 'undefined' && google.script && google.script.run && google.script.run.simpanSuratKontrol) {
+   if (typeof google !== 'undefined' && google.script && google.script.run) {
        google.script.run.withSuccessHandler(res => {
          btn.innerHTML = 'SIMPAN & CETAK SKP'; btn.disabled = false;
          if (res.success) {
@@ -8733,7 +8767,7 @@ function renderDatalistKasir(tindakanTersaring = null) {
    for (let key in payload) { if (!payload[key] || payload[key].trim() === "") { showToast('error', 'Semua isian pada Resume Medis wajib diisi lengkap!'); return; } }
    let btn = document.getElementById('btnCetakRSM'); btn.innerHTML = 'MENYIMPAN...'; btn.disabled = true;
    let blnStr = ("0" + (new Date().getMonth() + 1)).slice(-2); let blnRomawi = getBulanRomawi(blnStr); let thn4Digit = new Date().getFullYear().toString(); let urutStr = ("000" + (rawListRSM.length + 1)).slice(-3); let fallbackNo = "RMP/SHELDON/" + urutStr + "/" + blnRomawi + "-" + thn4Digit;
-   if (typeof google !== 'undefined' && google.script && google.script.run && google.script.run.simpanResumeMedis) {
+   if (typeof google !== 'undefined' && google.script && google.script.run) {
        google.script.run.withSuccessHandler(res => {
          btn.innerHTML = 'SIMPAN & CETAK RESUME'; btn.disabled = false;
          if (res.success) {
@@ -8809,7 +8843,7 @@ function renderDatalistKasir(tindakanTersaring = null) {
    let fallbackNo = "SRP/SHELDON/" + urutStr + "/" + blnRomawi + "-" + thn4Digit; 
    let formattedTglCetak = formatTglIndo(payload.tglCetakOri);
    
-   if (typeof google !== 'undefined' && google.script && google.script.run && google.script.run.simpanSuratRujukan) {
+   if (typeof google !== 'undefined' && google.script && google.script.run) {
        google.script.run.withSuccessHandler(res => {
          btn.innerHTML = 'SIMPAN & CETAK SRP'; btn.disabled = false;
          if (res.success) {
@@ -8875,7 +8909,7 @@ function renderDatalistKasir(tindakanTersaring = null) {
    let teksPemeriksaanCetak = payload.pemeriksaan.replace(/\n/g, '<br>');
 
 
-   if (typeof google !== 'undefined' && google.script && google.script.run && google.script.run.simpanSuratLab) {
+   if (typeof google !== 'undefined' && google.script && google.script.run) {
        google.script.run.withSuccessHandler(res => {
          btn.innerHTML = 'SIMPAN & CETAK LAB'; btn.disabled = false;
          if (res.success) {
@@ -8947,7 +8981,7 @@ function renderDatalistKasir(tindakanTersaring = null) {
 
    let teksPemeriksaanCetak = payload.pemeriksaan.replace(/\n/g, '<br>');
    
-   if (typeof google !== 'undefined' && google.script && google.script.run && google.script.run.simpanSuratRadiologi) {
+   if (typeof google !== 'undefined' && google.script && google.script.run) {
        google.script.run.withSuccessHandler(res => {
          btn.innerHTML = 'SIMPAN & CETAK RADIOLOGI'; btn.disabled = false;
          if (res.success) {
@@ -12505,6 +12539,10 @@ function initAbsensiModule() {
     let m = String(now.getMonth() + 1).padStart(2, '0');
     let d = String(now.getDate()).padStart(2, '0');
     window.AbsensiState.currentDate = y + '-' + m + '-' + d;
+    window.AbsensiState.formattedDate = d + '-' + m + '-' + y;
+  } else if (!window.AbsensiState.formattedDate && window.AbsensiState.currentDate) {
+    let p = window.AbsensiState.currentDate.split('-');
+    window.AbsensiState.formattedDate = (p[0].length === 4) ? (p[2] + '-' + p[1] + '-' + p[0]) : window.AbsensiState.currentDate;
   }
   let datePicker = document.getElementById('absensiDatePicker');
   if (datePicker) {
@@ -12568,6 +12606,8 @@ function setTanggalAbsensiHariIni() {
 function handleAbsensiDateChange(newDateStr) {
   if (!newDateStr) return;
   window.AbsensiState.currentDate = newDateStr;
+  let p = newDateStr.split('-');
+  window.AbsensiState.formattedDate = (p[0].length === 4) ? (p[2] + '-' + p[1] + '-' + p[0]) : newDateStr;
   let datePicker = document.getElementById('absensiDatePicker');
   if (datePicker) datePicker.value = newDateStr;
   loadAbsensiData(newDateStr);

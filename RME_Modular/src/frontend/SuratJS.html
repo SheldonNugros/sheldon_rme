@@ -358,7 +358,7 @@
 
 
  function loadAllRiwayatSurat() {
-   if (typeof google !== 'undefined' && google.script && google.script.run && google.script.run.getSemuaRiwayatSurat) {
+   if (typeof google !== 'undefined' && google.script && google.script.run) {
        google.script.run.withSuccessHandler(res => {
            dataSuratGlobal = res || [];
            
@@ -581,7 +581,7 @@
    let urutStr = ("000" + (rawListSKS.length + 1)).slice(-3); 
    let fallbackNo = "SKS/SHELDON/" + urutStr + "/" + blnRomawi + "-" + thn4Digit;
    
-   if (typeof google !== 'undefined' && google.script && google.script.run && google.script.run.simpanSuratSakit) {
+   if (typeof google !== 'undefined' && google.script && google.script.run) {
        google.script.run.withSuccessHandler(res => {
          btn.innerHTML = 'SIMPAN & CETAK SKS'; btn.disabled = false;
          if (res.success) {
@@ -644,7 +644,7 @@
    let blnStr = ("0" + (new Date().getMonth() + 1)).slice(-2); let blnRomawi = getBulanRomawi(blnStr); let thn4Digit = new Date().getFullYear().toString(); let urutStr = ("000" + (rawListSKP.length + 1)).slice(-3); 
    let fallbackNo = "SKP/SHELDON/" + urutStr + "/" + blnRomawi + "-" + thn4Digit; 
    
-   if (typeof google !== 'undefined' && google.script && google.script.run && google.script.run.simpanSuratKontrol) {
+   if (typeof google !== 'undefined' && google.script && google.script.run) {
        google.script.run.withSuccessHandler(res => {
          btn.innerHTML = 'SIMPAN & CETAK SKP'; btn.disabled = false;
          if (res.success) {
@@ -724,7 +724,7 @@
    for (let key in payload) { if (!payload[key] || payload[key].trim() === "") { showToast('error', 'Semua isian pada Resume Medis wajib diisi lengkap!'); return; } }
    let btn = document.getElementById('btnCetakRSM'); btn.innerHTML = 'MENYIMPAN...'; btn.disabled = true;
    let blnStr = ("0" + (new Date().getMonth() + 1)).slice(-2); let blnRomawi = getBulanRomawi(blnStr); let thn4Digit = new Date().getFullYear().toString(); let urutStr = ("000" + (rawListRSM.length + 1)).slice(-3); let fallbackNo = "RMP/SHELDON/" + urutStr + "/" + blnRomawi + "-" + thn4Digit;
-   if (typeof google !== 'undefined' && google.script && google.script.run && google.script.run.simpanResumeMedis) {
+   if (typeof google !== 'undefined' && google.script && google.script.run) {
        google.script.run.withSuccessHandler(res => {
          btn.innerHTML = 'SIMPAN & CETAK RESUME'; btn.disabled = false;
          if (res.success) {
@@ -800,7 +800,7 @@
    let fallbackNo = "SRP/SHELDON/" + urutStr + "/" + blnRomawi + "-" + thn4Digit; 
    let formattedTglCetak = formatTglIndo(payload.tglCetakOri);
    
-   if (typeof google !== 'undefined' && google.script && google.script.run && google.script.run.simpanSuratRujukan) {
+   if (typeof google !== 'undefined' && google.script && google.script.run) {
        google.script.run.withSuccessHandler(res => {
          btn.innerHTML = 'SIMPAN & CETAK SRP'; btn.disabled = false;
          if (res.success) {
@@ -866,7 +866,7 @@
    let teksPemeriksaanCetak = payload.pemeriksaan.replace(/\n/g, '<br>');
 
 
-   if (typeof google !== 'undefined' && google.script && google.script.run && google.script.run.simpanSuratLab) {
+   if (typeof google !== 'undefined' && google.script && google.script.run) {
        google.script.run.withSuccessHandler(res => {
          btn.innerHTML = 'SIMPAN & CETAK LAB'; btn.disabled = false;
          if (res.success) {
@@ -938,7 +938,7 @@
 
    let teksPemeriksaanCetak = payload.pemeriksaan.replace(/\n/g, '<br>');
    
-   if (typeof google !== 'undefined' && google.script && google.script.run && google.script.run.simpanSuratRadiologi) {
+   if (typeof google !== 'undefined' && google.script && google.script.run) {
        google.script.run.withSuccessHandler(res => {
          btn.innerHTML = 'SIMPAN & CETAK RADIOLOGI'; btn.disabled = false;
          if (res.success) {

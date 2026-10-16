@@ -73,6 +73,10 @@ function initAbsensiModule() {
     let m = String(now.getMonth() + 1).padStart(2, '0');
     let d = String(now.getDate()).padStart(2, '0');
     window.AbsensiState.currentDate = y + '-' + m + '-' + d;
+    window.AbsensiState.formattedDate = d + '-' + m + '-' + y;
+  } else if (!window.AbsensiState.formattedDate && window.AbsensiState.currentDate) {
+    let p = window.AbsensiState.currentDate.split('-');
+    window.AbsensiState.formattedDate = (p[0].length === 4) ? (p[2] + '-' + p[1] + '-' + p[0]) : window.AbsensiState.currentDate;
   }
   let datePicker = document.getElementById('absensiDatePicker');
   if (datePicker) {
@@ -136,6 +140,8 @@ function setTanggalAbsensiHariIni() {
 function handleAbsensiDateChange(newDateStr) {
   if (!newDateStr) return;
   window.AbsensiState.currentDate = newDateStr;
+  let p = newDateStr.split('-');
+  window.AbsensiState.formattedDate = (p[0].length === 4) ? (p[2] + '-' + p[1] + '-' + p[0]) : newDateStr;
   let datePicker = document.getElementById('absensiDatePicker');
   if (datePicker) datePicker.value = newDateStr;
   loadAbsensiData(newDateStr);

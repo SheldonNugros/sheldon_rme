@@ -505,13 +505,18 @@ function _findOrCreateSpreadsheetInFolder(key, title) {
   if (DB_CONFIG && DB_CONFIG[key] && String(DB_CONFIG[key]).trim() !== "") {
     let candidateId = String(DB_CONFIG[key]).trim();
     try {
-      let f = DriveApp.getFileById(candidateId);
-      if (!f.isTrashed()) {
-        ss = SpreadsheetApp.openById(candidateId);
-        ssId = candidateId;
-      }
+      ss = SpreadsheetApp.openById(candidateId);
+      ssId = candidateId;
     } catch (e) {
-      ss = null;
+      try {
+        let f = DriveApp.getFileById(candidateId);
+        if (!f.isTrashed()) {
+          ss = SpreadsheetApp.openById(candidateId);
+          ssId = candidateId;
+        }
+      } catch (e2) {
+        ss = null;
+      }
     }
   }
 
@@ -520,13 +525,18 @@ function _findOrCreateSpreadsheetInFolder(key, title) {
     let savedId = prop.getProperty(propKey) || (key === "PAYROLL" ? prop.getProperty("RME_PAYROLL_SS_ID") : (key === "ABSENSI" ? prop.getProperty("RME_ABSENSI_SS_ID") : ""));
     if (savedId && savedId.trim() !== "") {
       try {
-        let f = DriveApp.getFileById(savedId.trim());
-        if (!f.isTrashed()) {
-          ss = SpreadsheetApp.openById(savedId.trim());
-          ssId = savedId.trim();
-        }
+        ss = SpreadsheetApp.openById(savedId.trim());
+        ssId = savedId.trim();
       } catch (e) {
-        ss = null;
+        try {
+          let f = DriveApp.getFileById(savedId.trim());
+          if (!f.isTrashed()) {
+            ss = SpreadsheetApp.openById(savedId.trim());
+            ssId = savedId.trim();
+          }
+        } catch (e2) {
+          ss = null;
+        }
       }
     }
   }
@@ -1172,6 +1182,24 @@ function setupPayrollSpreadsheet() {
 }
 
 /**
+ * Helper: Menormalisasi format tanggal ke dd-MM-yyyy untuk perbandingan akurat.
+ */
+function _normalizeDateStr(val) {
+  if (!val) return "";
+  if (val instanceof Date) {
+    return Utilities.formatDate(val, "Asia/Jakarta", "dd-MM-yyyy");
+  }
+  let s = String(val).trim().replace(/\//g, '-');
+  if (s.indexOf('-') !== -1) {
+    let p = s.split('-');
+    if (p[0].length === 4) { // YYYY-MM-DD
+      return p[2] + '-' + p[1] + '-' + p[0];
+    }
+  }
+  return s;
+}
+
+/**
  * Helper: Mengambil atau membuat Spreadsheet 12 Presensi & Absensi Pegawai.
  */
 function getSpreadsheetAbsensi_() {
@@ -1387,21 +1415,31 @@ function getAbsensiModuleData(dateStr) {
     if (shPres) {
       migrasiFormatPresensiHarian_(shPres);
       if (shPres.getLastRow() > 1) {
+        let curH = shPres.getRange(1, 1, 1, shPres.getLastColumn()).getValues()[0];
+        let cTgl = (typeof getColIdx === 'function') ? getColIdx(curH, ['Tanggal', 'Tgl']) : 0; if (cTgl === -1) cTgl = 0;
+        let cHari = (typeof getColIdx === 'function') ? getColIdx(curH, ['Hari']) : 1; if (cHari === -1) cHari = 1;
+        let cShift = (typeof getColIdx === 'function') ? getColIdx(curH, ['Shift']) : 2; if (cShift === -1) cShift = 2;
+        let cIdP = (typeof getColIdx === 'function') ? getColIdx(curH, ['ID_Pekerja', 'ID Pekerja']) : 3; if (cIdP === -1) cIdP = 3;
+        let cNama = (typeof getColIdx === 'function') ? getColIdx(curH, ['Nama_Pekerja', 'Nama Pekerja', 'Nama']) : 4; if (cNama === -1) cNama = 4;
+        let cRole = (typeof getColIdx === 'function') ? getColIdx(curH, ['Role']) : 5; if (cRole === -1) cRole = 5;
+        let cStatus = (typeof getColIdx === 'function') ? getColIdx(curH, ['Status_Absensi', 'Status']) : 6; if (cStatus === -1) cStatus = 6;
+        let cVerif = (typeof getColIdx === 'function') ? getColIdx(curH, ['Verifikator']) : 7; if (cVerif === -1) cVerif = 7;
+        let cWaktu = (typeof getColIdx === 'function') ? getColIdx(curH, ['Waktu_Input', 'Waktu']) : 8; if (cWaktu === -1) cWaktu = 8;
+
         let vPres = shPres.getRange(2, 1, shPres.getLastRow() - 1, shPres.getLastColumn()).getValues();
         vPres.forEach(r => {
-          let tglPres = r[0];
-          let tglPresStr = (tglPres instanceof Date) ? Utilities.formatDate(tglPres, "Asia/Jakarta", "dd-MM-yyyy") : String(tglPres || "").trim();
-          if (tglPresStr === formattedDate) {
+          let tglPresStr = _normalizeDateStr(r[cTgl]);
+          if (tglPresStr === _normalizeDateStr(formattedDate)) {
             presensiHariIni.push({
               tanggal: tglPresStr,
-              hari: String(r[1] || ""),
-              shift: String(r[2] || ""),
-              idPekerja: String(r[3] || ""),
-              namaPekerja: String(r[4] || ""),
-              role: String(r[5] || ""),
-              statusAbsensi: String(r[6] || "Hadir"),
-              verifikator: String(r[7] || ""),
-              waktuInput: String(r[8] || "")
+              hari: String(r[cHari] || ""),
+              shift: String(r[cShift] || ""),
+              idPekerja: String(r[cIdP] || ""),
+              namaPekerja: String(r[cNama] || ""),
+              role: String(r[cRole] || ""),
+              statusAbsensi: String(r[cStatus] || "Hadir"),
+              verifikator: String(r[cVerif] || ""),
+              waktuInput: String(r[cWaktu] || "")
             });
           }
         });
@@ -1533,15 +1571,15 @@ function migrasiFormatPresensiHarian_(sh) {
     });
 
     if (needsMigration) {
-      let idxTgl = curHeaders.indexOf("Tanggal");
-      let idxHari = curHeaders.indexOf("Hari");
-      let idxShift = curHeaders.indexOf("Shift");
-      let idxIdP = curHeaders.indexOf("ID_Pekerja");
-      let idxNama = curHeaders.indexOf("Nama_Pekerja");
-      let idxRole = curHeaders.indexOf("Role");
-      let idxStatus = curHeaders.indexOf("Status_Absensi");
-      let idxVerif = curHeaders.indexOf("Verifikator");
-      let idxWaktu = curHeaders.indexOf("Waktu_Input");
+      let idxTgl = (typeof getColIdx === 'function') ? getColIdx(curHeaders, ["Tanggal", "Tgl"]) : curHeaders.indexOf("Tanggal");
+      let idxHari = (typeof getColIdx === 'function') ? getColIdx(curHeaders, ["Hari"]) : curHeaders.indexOf("Hari");
+      let idxShift = (typeof getColIdx === 'function') ? getColIdx(curHeaders, ["Shift"]) : curHeaders.indexOf("Shift");
+      let idxIdP = (typeof getColIdx === 'function') ? getColIdx(curHeaders, ["ID_Pekerja", "ID Pekerja", "ID"]) : curHeaders.indexOf("ID_Pekerja");
+      let idxNama = (typeof getColIdx === 'function') ? getColIdx(curHeaders, ["Nama_Pekerja", "Nama Pekerja", "Nama"]) : curHeaders.indexOf("Nama_Pekerja");
+      let idxRole = (typeof getColIdx === 'function') ? getColIdx(curHeaders, ["Role", "Jabatan"]) : curHeaders.indexOf("Role");
+      let idxStatus = (typeof getColIdx === 'function') ? getColIdx(curHeaders, ["Status_Absensi", "Status Absensi", "Status"]) : curHeaders.indexOf("Status_Absensi");
+      let idxVerif = (typeof getColIdx === 'function') ? getColIdx(curHeaders, ["Verifikator", "Petugas"]) : curHeaders.indexOf("Verifikator");
+      let idxWaktu = (typeof getColIdx === 'function') ? getColIdx(curHeaders, ["Waktu_Input", "Waktu Input", "Waktu_Sistem", "Waktu"]) : curHeaders.indexOf("Waktu_Input");
 
       let oldRows = [];
       if (sh.getLastRow() > 1) {
@@ -1846,13 +1884,30 @@ function simpanAbsensiShift(payload) {
     // Pastikan sheet menggunakan format 9 kolom ringkas
     migrasiFormatPresensiHarian_(sh);
 
+    // Dapatkan pemetaan indeks kolom aktual
+    let curH = [];
+    if (sh.getLastColumn() > 0) {
+      curH = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0];
+    }
+    let cTgl = getColIdx(curH, ['Tanggal', 'Tgl']); if (cTgl === -1) cTgl = 0;
+    let cHari = getColIdx(curH, ['Hari']); if (cHari === -1) cHari = 1;
+    let cShift = getColIdx(curH, ['Shift']); if (cShift === -1) cShift = 2;
+    let cIdP = getColIdx(curH, ['ID_Pekerja', 'ID Pekerja']); if (cIdP === -1) cIdP = 3;
+    let cNama = getColIdx(curH, ['Nama_Pekerja', 'Nama Pekerja', 'Nama']); if (cNama === -1) cNama = 4;
+    let cRole = getColIdx(curH, ['Role']); if (cRole === -1) cRole = 5;
+    let cStatus = getColIdx(curH, ['Status_Absensi', 'Status']); if (cStatus === -1) cStatus = 6;
+    let cVerif = getColIdx(curH, ['Verifikator']); if (cVerif === -1) cVerif = 7;
+    let cWaktu = getColIdx(curH, ['Waktu_Input', 'Waktu']); if (cWaktu === -1) cWaktu = 8;
+
     // Baca data yang ada untuk menghindari duplikasi
     let existingValues = [];
-    if (sh.getLastRow() > 1) {
+    if (sh.getLastRow() > 1 && sh.getLastColumn() > 0) {
       existingValues = sh.getRange(2, 1, sh.getLastRow() - 1, sh.getLastColumn()).getValues();
     }
 
     let savedCount = 0;
+    let targetTglNorm = _normalizeDateStr(tanggal);
+
     records.forEach(rec => {
       let namaPekerja = String(rec.namaPekerja || "").trim();
       if (!namaPekerja) return;
@@ -1868,37 +1923,42 @@ function simpanAbsensiShift(payload) {
       // Cek apakah sudah ada baris (Tanggal, Shift, Nama_Pekerja)
       let matchedRowIdx = -1;
       for (let i = 0; i < existingValues.length; i++) {
-        let rowTgl = existingValues[i][0];
-        let rowTglStr = (rowTgl instanceof Date) ? Utilities.formatDate(rowTgl, "Asia/Jakarta", "dd-MM-yyyy") : String(rowTgl || "").trim();
-        let rowShift = String(existingValues[i][2] || "").trim();
-        let rowNama = String(existingValues[i][4] || "").trim();
+        let rowTglStr = _normalizeDateStr(existingValues[i][cTgl]);
+        let rowShift = String(existingValues[i][cShift] || "").trim();
+        let rowNama = String(existingValues[i][cNama] || "").trim();
 
-        if (rowTglStr === tanggal && rowShift.toLowerCase() === shift.toLowerCase() && rowNama.toLowerCase() === namaPekerja.toLowerCase()) {
+        if (rowTglStr === targetTglNorm && 
+            (rowShift.toLowerCase() === shift.toLowerCase() || rowShift.toLowerCase().indexOf(shift.toLowerCase()) !== -1) && 
+            rowNama.toLowerCase() === namaPekerja.toLowerCase()) {
           matchedRowIdx = i + 2;
           break;
         }
       }
 
       if (matchedRowIdx !== -1) {
-        // Update baris yang sudah ada (9 kolom)
-        sh.getRange(matchedRowIdx, 4).setValue(idPekerja);
-        sh.getRange(matchedRowIdx, 6).setValue(role);
-        sh.getRange(matchedRowIdx, 7).setValue(statusAbsensi);
-        sh.getRange(matchedRowIdx, 8).setValue(verifikator);
-        sh.getRange(matchedRowIdx, 9).setValue(waktuInput);
+        // Update baris yang sudah ada
+        if (cIdP >= 0) sh.getRange(matchedRowIdx, cIdP + 1).setValue(idPekerja);
+        if (cRole >= 0) sh.getRange(matchedRowIdx, cRole + 1).setValue(role);
+        if (cStatus >= 0) sh.getRange(matchedRowIdx, cStatus + 1).setValue(statusAbsensi);
+        if (cVerif >= 0) sh.getRange(matchedRowIdx, cVerif + 1).setValue(verifikator);
+        if (cWaktu >= 0) sh.getRange(matchedRowIdx, cWaktu + 1).setValue(waktuInput);
       } else {
         // Baris baru (9 kolom ringkas tanpa ID_Presensi, Jam_Mulai, Jam_Selesai, Keterangan)
-        sh.appendRow([
-          tanggal,
-          hari,
-          shift,
-          idPekerja,
-          namaPekerja,
-          role,
-          statusAbsensi,
-          verifikator,
-          waktuInput
-        ]);
+        let newRow = [];
+        let maxCols = Math.max(sh.getLastColumn(), 9);
+        for (let col = 0; col < maxCols; col++) {
+          newRow.push("");
+        }
+        newRow[cTgl] = tanggal;
+        newRow[cHari] = hari;
+        newRow[cShift] = shift;
+        newRow[cIdP] = idPekerja;
+        newRow[cNama] = namaPekerja;
+        newRow[cRole] = role;
+        newRow[cStatus] = statusAbsensi;
+        newRow[cVerif] = verifikator;
+        newRow[cWaktu] = waktuInput;
+        sh.appendRow(newRow);
       }
       savedCount++;
     });
@@ -1953,12 +2013,11 @@ function simpanAbsensiShift(payload) {
 
         let matchedPayRow = -1;
         for (let j = 0; j < payValues.length; j++) {
-          let rTgl = payValues[j][1];
-          let rTglStr = (rTgl instanceof Date) ? Utilities.formatDate(rTgl, "Asia/Jakarta", "dd-MM-yyyy") : String(rTgl || "").trim();
+          let rTglStr = _normalizeDateStr(payValues[j][1]);
           let rShift = String(payValues[j][5] || "").trim();
           let rNama = String(payValues[j][3] || "").trim();
 
-          if (rTglStr === tanggal && rShift.toLowerCase() === shiftNormalized.toLowerCase() && rNama.toLowerCase() === namaPekerja.toLowerCase()) {
+          if (rTglStr === targetTglNorm && rShift.toLowerCase() === shiftNormalized.toLowerCase() && rNama.toLowerCase() === namaPekerja.toLowerCase()) {
             matchedPayRow = j + 2;
             break;
           }

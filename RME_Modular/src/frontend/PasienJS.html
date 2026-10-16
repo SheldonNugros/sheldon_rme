@@ -344,6 +344,30 @@ function hitungUmurOtomatis() {
   if (m < 0 || (m === 0 && hariIni.getDate() < tglLahir.getDate())) { umur--; }
   document.getElementById('pasUmur').value = umur > 0 ? umur + " Tahun" : "0 Tahun";
 }
+
+let pendingEditPasienId = null;
+function konfirmasiEditPasien(idPasien) {
+  pendingEditPasienId = idPasien;
+  let m = document.getElementById('modalConfirmEdit');
+  if (m) m.classList.remove('hidden');
+}
+function cancelEditPasien() {
+  pendingEditPasienId = null;
+  let m = document.getElementById('modalConfirmEdit');
+  if (m) m.classList.add('hidden');
+}
+function proceedEditPasien() {
+  let m = document.getElementById('modalConfirmEdit');
+  if (m) m.classList.add('hidden');
+  if (pendingEditPasienId) {
+    editPasien(pendingEditPasienId);
+    pendingEditPasienId = null;
+  }
+}
+window.konfirmasiEditPasien = konfirmasiEditPasien;
+window.cancelEditPasien = cancelEditPasien;
+window.proceedEditPasien = proceedEditPasien;
+
 function editPasien(idPasien) {
   if (window.activeUserRole && (window.activeUserRole.toLowerCase().includes('dokter') || window.activeUserRole.toLowerCase().includes('staff'))) {
     showToast('warning', 'Role Anda hanya memiliki akses View pada Database Pasien.');

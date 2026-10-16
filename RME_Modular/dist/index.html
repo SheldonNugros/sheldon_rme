@@ -5475,14 +5475,11 @@
     <button type="button" onclick="switchPayrollTab('staff')" id="tabBtnPay-staff" class="payroll-tab-btn px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition-all flex items-center gap-2">
       <span>👩‍⚕️</span> 2. Honor Perawat & Gaji Admin
     </button>
-    <button type="button" onclick="switchPayrollTab('presensi')" id="tabBtnPay-presensi" class="payroll-tab-btn px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition-all flex items-center gap-2">
-      <span>📋</span> 3. Riwayat Presensi Shift Harian
-    </button>
     <button type="button" onclick="switchPayrollTab('tarif')" id="tabBtnPay-tarif" class="payroll-tab-btn px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition-all flex items-center gap-2">
-      <span>⚙️</span> 4. Pengaturan Tarif Shift & Gaji
+      <span>⚙️</span> 3. Pengaturan Tarif Shift & Gaji
     </button>
     <button type="button" onclick="switchPayrollTab('rincian-jm')" id="tabBtnPay-rincian-jm" class="payroll-tab-btn px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition-all flex items-center gap-2">
-      <span>📋</span> 5. Rincian Bagi Hasil JM Tindakan
+      <span>📋</span> 4. Rincian Bagi Hasil JM Tindakan
     </button>
   </div>
 
@@ -5577,53 +5574,7 @@
   </div>
 
   <!-- ======================================================================= -->
-  <!-- TAB 3: PRESENSI SHIFT HARIAN (INPUT & TABEL ABSENSI)                    -->
-  <!-- ======================================================================= -->
-  <div id="panelPay-presensi" class="payroll-tab-panel hidden space-y-6">
-    <!-- Tabel Log Presensi Shift Harian (Full Width) -->
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
-      <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/60">
-        <div>
-          <div class="flex items-center gap-2">
-            <span class="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-base font-black border border-amber-200">📋</span>
-            <h3 class="text-sm font-black text-slate-800">Riwayat & Rekap Presensi Shift Harian (Dokter & Perawat)</h3>
-          </div>
-          <p class="text-[11px] text-slate-500 mt-1">Setiap baris <b>Hadir</b> otomatis menambah hitungan shift & uang harian di rekap gaji. Pencatatan presensi terpusat di modul <b>Presensi Pegawai</b>.</p>
-        </div>
-        <div class="flex items-center gap-2">
-          <button type="button" onclick="switchMenu('absensi')" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs rounded-xl shadow-sm transition-all flex items-center gap-1.5">
-            <span>📅</span> Buka Modul Presensi Pegawai
-          </button>
-          <span class="px-3 py-1.5 rounded-xl bg-amber-50 text-amber-700 border border-amber-200 text-[11px] font-extrabold">
-            Sheet: Presensi_Shift_Harian
-          </span>
-        </div>
-      </div>
-
-      <div class="overflow-x-auto flex-1">
-        <table class="w-full text-left border-collapse">
-          <thead>
-            <tr class="bg-slate-900 text-white text-[10px] font-extrabold uppercase tracking-wider">
-              <th class="py-3 px-4">ID Presensi</th>
-              <th class="py-3 px-3">Tanggal</th>
-              <th class="py-3 px-4">Nama Pekerja</th>
-              <th class="py-3 px-3">Role</th>
-              <th class="py-3 px-3 text-center">Shift</th>
-              <th class="py-3 px-3 text-center">Jam Kerja</th>
-              <th class="py-3 px-3 text-center">Status</th>
-              <th class="py-3 px-4 text-right">Uang Shift Didapat</th>
-            </tr>
-          </thead>
-          <tbody id="tbodyPresensiHarian" class="divide-y divide-slate-200 text-xs">
-            <tr><td colspan="8" class="py-8 text-center text-slate-400 font-bold">Memuat data presensi shift...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- ======================================================================= -->
-  <!-- TAB 4: PENGATURAN TARIF SHIFT & GAJI POKOK                              -->
+  <!-- TAB 3: PENGATURAN TARIF SHIFT & GAJI POKOK                              -->
   <!-- ======================================================================= -->
   <div id="panelPay-tarif" class="payroll-tab-panel hidden space-y-6">
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -5738,7 +5689,7 @@
   </div>
 
   <!-- ======================================================================= -->
-  <!-- TAB 5: RINCIAN BAGI HASIL JM TINDAKAN (REKAP_JASA_MEDIS)                -->
+  <!-- TAB 4: RINCIAN BAGI HASIL JM TINDAKAN (REKAP_JASA_MEDIS)                -->
   <!-- ======================================================================= -->
   <div id="panelPay-rincian-jm" class="payroll-tab-panel hidden space-y-4">
     <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">

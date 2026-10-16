@@ -746,6 +746,55 @@ function simpanAbsensiShiftCurrent() {
           });
         }
       });
+
+      // Sinkronkan ke modul Payroll jika window.PayrollState aktif
+      if (window.PayrollState && Array.isArray(window.PayrollState.presensiHarian)) {
+        let sNorm = (shiftName.toLowerCase().indexOf('sore') !== -1 || shiftName.indexOf('2') !== -1) ? 'Shift 2' : 'Shift 1';
+        records.forEach(r => {
+          let nama = String(r.namaPekerja || '').trim();
+          let isHadir = String(r.statusAbsensi || '').toLowerCase() === 'hadir';
+          let uangHarian = 0;
+          if (isHadir) {
+            let foundT = (window.PayrollState.tarifShift || []).find(t => String(t.namaPekerja || '').toLowerCase() === nama.toLowerCase());
+            if (foundT) {
+              uangHarian = (sNorm === 'Shift 2') ? (Number(foundT.tarifShift2) || 0) : (Number(foundT.tarifShift1) || 0);
+            } else {
+              uangHarian = (r.role || '').toLowerCase().indexOf('dokter') !== -1 ? 55000 : 45000;
+            }
+          }
+
+          let exPay = window.PayrollState.presensiHarian.find(x => 
+            (x.namaPekerja || '').toLowerCase() === nama.toLowerCase() &&
+            (x.tanggal || '') === window.AbsensiState.formattedDate &&
+            (x.shift || '').toLowerCase() === sNorm.toLowerCase()
+          );
+
+          if (exPay) {
+            exPay.statusKehadiran = r.statusAbsensi;
+            exPay.uangHarianDidapat = uangHarian;
+            exPay.jamMasuk = jadwal.jamMulai;
+            exPay.jamPulang = jadwal.jamSelesai;
+          } else {
+            window.PayrollState.presensiHarian.unshift({
+              idPresensi: 'ATT-' + Date.now().toString().slice(-6),
+              tanggal: window.AbsensiState.formattedDate,
+              idPekerja: r.idPekerja || 'STF-001',
+              namaPekerja: nama,
+              role: r.role || 'Staff',
+              shift: sNorm,
+              jamMasuk: jadwal.jamMulai,
+              jamPulang: jadwal.jamSelesai,
+              statusKehadiran: r.statusAbsensi,
+              uangHarianDidapat: uangHarian,
+              verifikator: 'Admin'
+            });
+          }
+        });
+        if (typeof renderAllPayrollTables === 'function') {
+          renderAllPayrollTables();
+        }
+      }
+
       renderAbsensiTable();
     }, 100);
   }

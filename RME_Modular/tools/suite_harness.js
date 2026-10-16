@@ -11441,6 +11441,16 @@ function renderInfoBmhp() {
     return 'Rp ' + n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
   }
 
+  function fmtTimePayroll(val) {
+    if (!val) return '';
+    let s = String(val).trim();
+    if (s.includes('1899') || s.includes('GMT') || s.length > 10) {
+      let m = s.match(/(\d{1,2}):(\d{2})/);
+      if (m) return m[1].padStart(2, '0') + ':' + m[2];
+    }
+    return s;
+  }
+
   function initPayrollModule() {
     const presTgl = document.getElementById('presTanggal');
     if (presTgl && !presTgl.value) {
@@ -11782,6 +11792,9 @@ function renderInfoBmhp() {
           let badgeSt = isHadir
             ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
             : 'bg-rose-100 text-rose-800 border-rose-300';
+          let jMasuk = fmtTimePayroll(p.jamMasuk);
+          let jPulang = fmtTimePayroll(p.jamPulang);
+          let jamKerjaStr = (jMasuk || jPulang) ? (jMasuk + ' - ' + jPulang) : '-';
           return `
             <tr>
               <td class="py-2.5 px-4 font-mono font-bold text-slate-600 text-[11px]">${p.idPresensi}</td>
@@ -11791,7 +11804,7 @@ function renderInfoBmhp() {
               <td class="py-2.5 px-3 text-center">
                 <span class="px-2.5 py-0.5 rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-200 font-extrabold text-[11px]">${p.shift}</span>
               </td>
-              <td class="py-2.5 px-3 text-center font-mono text-[11px] text-slate-600">${p.jamMasuk} - ${p.jamPulang}</td>
+              <td class="py-2.5 px-3 text-center font-mono text-[11px] text-slate-600">${jamKerjaStr}</td>
               <td class="py-2.5 px-3 text-center">
                 <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black border ${badgeSt}">${p.statusKehadiran}</span>
               </td>
@@ -13126,6 +13139,55 @@ function simpanAbsensiShiftCurrent() {
           });
         }
       });
+
+      // Sinkronkan ke modul Payroll jika window.PayrollState aktif
+      if (window.PayrollState && Array.isArray(window.PayrollState.presensiHarian)) {
+        let sNorm = (shiftName.toLowerCase().indexOf('sore') !== -1 || shiftName.indexOf('2') !== -1) ? 'Shift 2' : 'Shift 1';
+        records.forEach(r => {
+          let nama = String(r.namaPekerja || '').trim();
+          let isHadir = String(r.statusAbsensi || '').toLowerCase() === 'hadir';
+          let uangHarian = 0;
+          if (isHadir) {
+            let foundT = (window.PayrollState.tarifShift || []).find(t => String(t.namaPekerja || '').toLowerCase() === nama.toLowerCase());
+            if (foundT) {
+              uangHarian = (sNorm === 'Shift 2') ? (Number(foundT.tarifShift2) || 0) : (Number(foundT.tarifShift1) || 0);
+            } else {
+              uangHarian = (r.role || '').toLowerCase().indexOf('dokter') !== -1 ? 55000 : 45000;
+            }
+          }
+
+          let exPay = window.PayrollState.presensiHarian.find(x => 
+            (x.namaPekerja || '').toLowerCase() === nama.toLowerCase() &&
+            (x.tanggal || '') === window.AbsensiState.formattedDate &&
+            (x.shift || '').toLowerCase() === sNorm.toLowerCase()
+          );
+
+          if (exPay) {
+            exPay.statusKehadiran = r.statusAbsensi;
+            exPay.uangHarianDidapat = uangHarian;
+            exPay.jamMasuk = jadwal.jamMulai;
+            exPay.jamPulang = jadwal.jamSelesai;
+          } else {
+            window.PayrollState.presensiHarian.unshift({
+              idPresensi: 'ATT-' + Date.now().toString().slice(-6),
+              tanggal: window.AbsensiState.formattedDate,
+              idPekerja: r.idPekerja || 'STF-001',
+              namaPekerja: nama,
+              role: r.role || 'Staff',
+              shift: sNorm,
+              jamMasuk: jadwal.jamMulai,
+              jamPulang: jadwal.jamSelesai,
+              statusKehadiran: r.statusAbsensi,
+              uangHarianDidapat: uangHarian,
+              verifikator: 'Admin'
+            });
+          }
+        });
+        if (typeof renderAllPayrollTables === 'function') {
+          renderAllPayrollTables();
+        }
+      }
+
       renderAbsensiTable();
     }, 100);
   }

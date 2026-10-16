@@ -1632,6 +1632,96 @@ function simpanAbsensiShift(payload) {
       savedCount++;
     });
 
+    // Sinkronkan ke Presensi_Shift_Harian di Spreadsheet 11 Payroll
+    try {
+      const defPay = SPREADSHEET_DEFINITIONS["PAYROLL"];
+      const foundPay = _findOrCreateSpreadsheetInFolder("PAYROLL", defPay.title);
+      let shPay = foundPay.ss.getSheetByName("Presensi_Shift_Harian") || foundPay.ss.insertSheet("Presensi_Shift_Harian");
+      
+      let mapTarifShift = {};
+      try {
+        const defM = SPREADSHEET_DEFINITIONS["MASTER"];
+        const foundM = _findOrCreateSpreadsheetInFolder("MASTER", defM.title);
+        const shTarif = foundM.ss.getSheetByName("Pengaturan_Tarif_Shift");
+        if (shTarif && shTarif.getLastRow() > 1) {
+          let tData = shTarif.getRange(2, 1, shTarif.getLastRow() - 1, shTarif.getLastColumn()).getValues();
+          tData.forEach(tr => {
+            let n = String(tr[2] || "").trim().toLowerCase();
+            if (n) {
+              mapTarifShift[n] = {
+                shift1: Number(tr[4]) || 0,
+                shift2: Number(tr[5]) || 0
+              };
+            }
+          });
+        }
+      } catch (eTarif) {}
+
+      let payValues = shPay.getLastRow() > 1 ? shPay.getRange(2, 1, shPay.getLastRow() - 1, shPay.getLastColumn()).getValues() : [];
+      let shiftNormalized = (shift.toLowerCase().indexOf("sore") !== -1 || shift.indexOf("2") !== -1) ? "Shift 2" : "Shift 1";
+
+      records.forEach(rec => {
+        let namaPekerja = String(rec.namaPekerja || "").trim();
+        if (!namaPekerja) return;
+        let idPekerja = String(rec.idPekerja || "STF-001").trim();
+        let role = String(rec.role || "Staff").trim();
+        let statusAbsensi = String(rec.statusAbsensi || "Hadir").trim();
+        if (statusAbsensi !== "Hadir" && statusAbsensi !== "Tidak") {
+          statusAbsensi = (statusAbsensi.toLowerCase().indexOf("hadir") !== -1) ? "Hadir" : "Tidak";
+        }
+
+        let uangHarian = 0;
+        if (statusAbsensi === "Hadir") {
+          let tConf = mapTarifShift[namaPekerja.toLowerCase()];
+          if (tConf) {
+            uangHarian = (shiftNormalized === "Shift 2") ? tConf.shift2 : tConf.shift1;
+          } else {
+            uangHarian = role.toLowerCase().indexOf("dokter") !== -1 ? 55000 : (role.toLowerCase().indexOf("perawat") !== -1 ? 45000 : 0);
+          }
+        }
+
+        let matchedPayRow = -1;
+        for (let j = 0; j < payValues.length; j++) {
+          let rTgl = payValues[j][1];
+          let rTglStr = (rTgl instanceof Date) ? Utilities.formatDate(rTgl, "Asia/Jakarta", "dd-MM-yyyy") : String(rTgl || "").trim();
+          let rShift = String(payValues[j][5] || "").trim();
+          let rNama = String(payValues[j][3] || "").trim();
+
+          if (rTglStr === tanggal && rShift.toLowerCase() === shiftNormalized.toLowerCase() && rNama.toLowerCase() === namaPekerja.toLowerCase()) {
+            matchedPayRow = j + 2;
+            break;
+          }
+        }
+
+        if (matchedPayRow !== -1) {
+          shPay.getRange(matchedPayRow, 7).setValue(jamMulai);
+          shPay.getRange(matchedPayRow, 8).setValue(jamSelesai);
+          shPay.getRange(matchedPayRow, 9).setValue(statusAbsensi);
+          shPay.getRange(matchedPayRow, 10).setValue(uangHarian);
+          shPay.getRange(matchedPayRow, 11).setValue(verifikator);
+          shPay.getRange(matchedPayRow, 12).setValue(waktuInput);
+        } else {
+          let newPayId = "ATT-" + tanggal.replace(/[^0-9]/g, '') + "-" + String(shPay.getLastRow()).padStart(3, '0');
+          shPay.appendRow([
+            newPayId,
+            tanggal,
+            idPekerja,
+            namaPekerja,
+            role,
+            shiftNormalized,
+            jamMulai,
+            jamSelesai,
+            statusAbsensi,
+            uangHarian,
+            verifikator,
+            waktuInput
+          ]);
+        }
+      });
+    } catch (eSyncPay) {
+      Logger.log("Sync ke Presensi_Shift_Harian error: " + eSyncPay.message);
+    }
+
     SpreadsheetApp.flush();
     return {
       success: true,
@@ -2153,8 +2243,8 @@ function getPayrollModuleData() {
       namaPekerja: String(r[3] || ""),
       role: String(r[4] || ""),
       shift: String(r[5] || ""),
-      jamMasuk: String(r[6] || ""),
-      jamPulang: String(r[7] || ""),
+      jamMasuk: fTime(r[6]),
+      jamPulang: fTime(r[7]),
       statusKehadiran: String(r[8] || "Hadir"),
       uangHarianDidapat: Number(r[9]) || 0,
       verifikator: String(r[10] || "")

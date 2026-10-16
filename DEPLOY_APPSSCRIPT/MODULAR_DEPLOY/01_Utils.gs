@@ -227,6 +227,26 @@ function fDateTime(d) {
   return String(d).trim();
 }
 
+function fTime(d) {
+  if (!d) return "";
+  if (Object.prototype.toString.call(d) === "[object Date]" && !isNaN(d.getTime())) {
+    let h = d.getHours(), m = d.getMinutes();
+    let hh = h < 10 ? "0" + h : h;
+    let mm = m < 10 ? "0" + m : m;
+    return hh + ":" + mm;
+  }
+  let str = String(d).trim();
+  if (str.includes("1899") || str.includes("GMT") || str.length > 10) {
+    let match = str.match(/(\d{1,2}):(\d{2})(?::\d{2})?/);
+    if (match) {
+      let hh = match[1].padStart(2, '0');
+      let mm = match[2];
+      return hh + ":" + mm;
+    }
+  }
+  return str;
+}
+
 function parseHarga(val) {
   if (val === null || val === undefined) return 0;
   if (typeof val === 'number') return Math.round(val);

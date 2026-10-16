@@ -24,6 +24,8 @@ role_options = re.findall(r'<option[^>]*value=["\']([^"\']+)["\']', role_select_
 is_date_picker_large = bool(re.search(r'id=["\']absensiDatePicker["\'][^>]*text-base', html))
 is_paginasi_hari_ini_removed = ('onclick="setTanggalAbsensiHariIni()"' not in html)
 is_subtitle_absensi_removed = ('Pencatatan absensi pegawai klinik (2 Shift' not in html)
+is_tercatat_masuk_removed = ('Tercatat masuk tugas' not in html)
+is_izin_sakit_off_removed = ('Izin / Sakit / Off' not in html)
 
 test_harness_file = os.path.join(BASE_DIR, 'tools', 'suite_harness.js')
 
@@ -1615,6 +1617,28 @@ assert("ABSENSI-12: Input Pemilih Tanggal Berukuran Besar di HTML", isDatePicker
 assert("ABSENSI-12: Tombol Paginasi Hari Ini Dihilangkan dari UI", isPaginasiHariIniRemoved === true);
 assert("ABSENSI-12: Subtitle Keterangan Absensi Dihilangkan dari UI", isSubtitleAbsensiRemoved === true);
 
+// ABSENSI-13: UI Minimalis & Compact - Subtitle Tercatat & Izin Dihilangkan, Jam pada Button Shift Dihilangkan, Tanggal & Hari pada View Ditampilkan, Shift Tampil Sesuai Shift Aktif
+assert("ABSENSI-13: Subtitle 'Tercatat masuk tugas' Dihilangkan", isTercatatMasukRemoved === true);
+assert("ABSENSI-13: Subtitle 'Izin / Sakit / Off' Dihilangkan", isIzinSakitOffRemoved === true);
+var btnPagiInner = document.getElementById('btnShiftPagi') ? document.getElementById('btnShiftPagi').innerHTML : "";
+var btnSoreInner = document.getElementById('btnShiftSore') ? document.getElementById('btnShiftSore').innerHTML : "";
+assert("ABSENSI-13: Jam pada Tombol Shift Pagi Dihilangkan", btnPagiInner.indexOf("10:00 - 15:00") === -1 && btnPagiInner.indexOf("10.00 - 15.00") === -1);
+assert("ABSENSI-13: Jam pada Tombol Shift Sore Dihilangkan", btnSoreInner.indexOf("16:00 - 20:00") === -1 && btnSoreInner.indexOf("16.00 - 20.00") === -1);
+
+var viewHeaderTgl = document.getElementById('viewHeaderTanggalText');
+assert("ABSENSI-13: Tanggal dan Hari Ditampilkan pada View Absensi", viewHeaderTgl !== null && viewHeaderTgl.innerText.length > 5);
+
+pilihShiftAbsensi('Pagi');
+renderAbsensiTable();
+var tbodyPagiHtml = document.getElementById('tbodyAbsensiPegawai') ? document.getElementById('tbodyAbsensiPegawai').innerHTML : "";
+assert("ABSENSI-13: Kolom Shift Menampilkan 'Shift Pagi' saat Shift Pagi Terpilih", tbodyPagiHtml.indexOf("Shift Pagi") !== -1);
+
+pilihShiftAbsensi('Sore');
+renderAbsensiTable();
+var tbodySoreHtml = document.getElementById('tbodyAbsensiPegawai') ? document.getElementById('tbodyAbsensiPegawai').innerHTML : "";
+assert("ABSENSI-13: Kolom Shift Menampilkan 'Shift Sore' saat Shift Sore Terpilih", tbodySoreHtml.indexOf("Shift Sore") !== -1);
+pilihShiftAbsensi('Pagi'); // Kembalikan ke Shift Pagi
+
 // --- TEST: Kategori Role (Owner, Dokter Gigi Spesialis, Dokter Gigi Umum, Perawat Gigi, Perawat Umum, Admin, Office) ---
 var selectRoleEl = document.getElementById('dbUserRole');
 assert("ROLE-1: Dropdown Kategori Role Tersedia", selectRoleEl !== null);
@@ -1662,7 +1686,7 @@ if (failedTotal > 0) {
 }
 '''
 
-full_test_script = f"var isButtonKonsultasiRemoved = {str(is_kon_removed).lower()};\nvar isModalResetPerioInHtml = {str(is_modal_perio_in_html).lower()};\nvar roleSelectOptionsFromHtml = {json.dumps(role_options)};\nvar isDatePickerLargeInHtml = {str(is_date_picker_large).lower()};\nvar isPaginasiHariIniRemoved = {str(is_paginasi_hari_ini_removed).lower()};\nvar isSubtitleAbsensiRemoved = {str(is_subtitle_absensi_removed).lower()};\n" + dom_shim + "\n" + all_js + "\n" + test_runner_js
+full_test_script = f"var isButtonKonsultasiRemoved = {str(is_kon_removed).lower()};\nvar isModalResetPerioInHtml = {str(is_modal_perio_in_html).lower()};\nvar roleSelectOptionsFromHtml = {json.dumps(role_options)};\nvar isDatePickerLargeInHtml = {str(is_date_picker_large).lower()};\nvar isPaginasiHariIniRemoved = {str(is_paginasi_hari_ini_removed).lower()};\nvar isSubtitleAbsensiRemoved = {str(is_subtitle_absensi_removed).lower()};\nvar isTercatatMasukRemoved = {str(is_tercatat_masuk_removed).lower()};\nvar isIzinSakitOffRemoved = {str(is_izin_sakit_off_removed).lower()};\n" + dom_shim + "\n" + all_js + "\n" + test_runner_js
 
 with open(test_harness_file, 'w', encoding='utf-8') as f:
     f.write(full_test_script)

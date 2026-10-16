@@ -4,6 +4,8 @@ var roleSelectOptionsFromHtml = ["Owner", "Dokter Gigi Spesialis", "Dokter Gigi 
 var isDatePickerLargeInHtml = true;
 var isPaginasiHariIniRemoved = true;
 var isSubtitleAbsensiRemoved = true;
+var isTercatatMasukRemoved = true;
+var isIzinSakitOffRemoved = true;
 
 // Enhanced DOM Mock for JavaScriptCore
 var window = this;
@@ -12516,7 +12518,6 @@ function pilihShiftAbsensi(shiftName) {
  * Mengupdate tampilan UI selector Shift (Jam shift Senin-Jumat vs Sabtu).
  */
 function updateShiftSelectorUI() {
-  let dayIdx = window.AbsensiState.currentDayIndex; // 6 = Sabtu
   let btnPagi = document.getElementById('btnShiftPagi');
   let btnSore = document.getElementById('btnShiftSore');
   let badgePagi = document.getElementById('badgeJamShiftPagi');
@@ -12525,6 +12526,7 @@ function updateShiftSelectorUI() {
   // Aturan Jadwal:
   // Senin - Jumat : Pagi (10.00 - 15.00), Sore (16.00 - 20.00)
   // Sabtu         : Pagi (10.00 - 14.00), Sore (14.00 - 18.00)
+  let dayIdx = window.AbsensiState.currentDayIndex; // 6 = Sabtu
   let jamPagi = (dayIdx === 6) ? "10.00 - 14.00" : "10.00 - 15.00";
   let jamSore = (dayIdx === 6) ? "14.00 - 18.00" : "16.00 - 20.00";
 
@@ -12534,17 +12536,17 @@ function updateShiftSelectorUI() {
   let isPagi = (window.AbsensiState.currentShift === 'Pagi');
   if (btnPagi) {
     if (isPagi) {
-      btnPagi.className = "px-5 py-2.5 rounded-xl text-sm font-extrabold transition-all bg-amber-500 text-white border border-amber-600 shadow-md flex items-center gap-2.5 hover:scale-[1.02]";
+      btnPagi.className = "px-5 py-2.5 rounded-xl text-sm font-black transition-all bg-amber-500 text-white border border-amber-600 shadow-md flex items-center gap-2 hover:scale-[1.02]";
     } else {
-      btnPagi.className = "px-5 py-2.5 rounded-xl text-sm font-extrabold transition-all text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 flex items-center gap-2.5";
+      btnPagi.className = "px-5 py-2.5 rounded-xl text-sm font-black transition-all text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 flex items-center gap-2";
     }
   }
 
   if (btnSore) {
     if (!isPagi) {
-      btnSore.className = "px-5 py-2.5 rounded-xl text-sm font-extrabold transition-all bg-indigo-600 text-white border border-indigo-700 shadow-md flex items-center gap-2.5 hover:scale-[1.02]";
+      btnSore.className = "px-5 py-2.5 rounded-xl text-sm font-black transition-all bg-indigo-600 text-white border border-indigo-700 shadow-md flex items-center gap-2 hover:scale-[1.02]";
     } else {
-      btnSore.className = "px-5 py-2.5 rounded-xl text-sm font-extrabold transition-all text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 flex items-center gap-2.5";
+      btnSore.className = "px-5 py-2.5 rounded-xl text-sm font-black transition-all text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 flex items-center gap-2";
     }
   }
 }
@@ -12644,9 +12646,14 @@ function applyAbsensiDataToState(res) {
   });
 
   // Tampilkan label tanggal & hari
+  let strHariTanggal = window.AbsensiState.currentDayName + ', ' + window.AbsensiState.formattedDate;
   let lbl = document.getElementById('labelHariTanggal');
   if (lbl) {
-    lbl.innerText = window.AbsensiState.currentDayName + ', ' + window.AbsensiState.formattedDate;
+    lbl.innerText = strHariTanggal;
+  }
+  let lblView = document.getElementById('viewHeaderTanggalText');
+  if (lblView) {
+    lblView.innerText = strHariTanggal;
   }
 
   // Tampilkan status banner libur operasional
@@ -12889,11 +12896,10 @@ function renderAbsensiTable() {
           </span>
         </td>
 
-        <td class="px-4 py-3.5 font-bold text-slate-700">
-          <div class="flex items-center gap-1.5">
-            <span class="text-sm">${curShift === 'Pagi' ? '☀️' : '🌙'}</span>
-            <span class="text-xs font-semibold text-slate-800">${jadwal.label}</span>
-          </div>
+        <td class="px-4 py-3 font-bold text-slate-700">
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold border ${curShift === 'Pagi' ? 'bg-amber-50 text-amber-800 border-amber-200' : 'bg-indigo-50 text-indigo-800 border-indigo-200'}">
+            <span>${curShift === 'Pagi' ? '☀️ Shift Pagi' : '🌙 Shift Sore'}</span>
+          </span>
         </td>
 
         <td class="px-4 py-3.5">
@@ -15015,6 +15021,28 @@ assert("ABSENSI-11: Tombol Simpan Presensi Shift Berukuran Besar", btnSimpanEl !
 assert("ABSENSI-12: Input Pemilih Tanggal Berukuran Besar di HTML", isDatePickerLargeInHtml === true);
 assert("ABSENSI-12: Tombol Paginasi Hari Ini Dihilangkan dari UI", isPaginasiHariIniRemoved === true);
 assert("ABSENSI-12: Subtitle Keterangan Absensi Dihilangkan dari UI", isSubtitleAbsensiRemoved === true);
+
+// ABSENSI-13: UI Minimalis & Compact - Subtitle Tercatat & Izin Dihilangkan, Jam pada Button Shift Dihilangkan, Tanggal & Hari pada View Ditampilkan, Shift Tampil Sesuai Shift Aktif
+assert("ABSENSI-13: Subtitle 'Tercatat masuk tugas' Dihilangkan", isTercatatMasukRemoved === true);
+assert("ABSENSI-13: Subtitle 'Izin / Sakit / Off' Dihilangkan", isIzinSakitOffRemoved === true);
+var btnPagiInner = document.getElementById('btnShiftPagi') ? document.getElementById('btnShiftPagi').innerHTML : "";
+var btnSoreInner = document.getElementById('btnShiftSore') ? document.getElementById('btnShiftSore').innerHTML : "";
+assert("ABSENSI-13: Jam pada Tombol Shift Pagi Dihilangkan", btnPagiInner.indexOf("10:00 - 15:00") === -1 && btnPagiInner.indexOf("10.00 - 15.00") === -1);
+assert("ABSENSI-13: Jam pada Tombol Shift Sore Dihilangkan", btnSoreInner.indexOf("16:00 - 20:00") === -1 && btnSoreInner.indexOf("16.00 - 20.00") === -1);
+
+var viewHeaderTgl = document.getElementById('viewHeaderTanggalText');
+assert("ABSENSI-13: Tanggal dan Hari Ditampilkan pada View Absensi", viewHeaderTgl !== null && viewHeaderTgl.innerText.length > 5);
+
+pilihShiftAbsensi('Pagi');
+renderAbsensiTable();
+var tbodyPagiHtml = document.getElementById('tbodyAbsensiPegawai') ? document.getElementById('tbodyAbsensiPegawai').innerHTML : "";
+assert("ABSENSI-13: Kolom Shift Menampilkan 'Shift Pagi' saat Shift Pagi Terpilih", tbodyPagiHtml.indexOf("Shift Pagi") !== -1);
+
+pilihShiftAbsensi('Sore');
+renderAbsensiTable();
+var tbodySoreHtml = document.getElementById('tbodyAbsensiPegawai') ? document.getElementById('tbodyAbsensiPegawai').innerHTML : "";
+assert("ABSENSI-13: Kolom Shift Menampilkan 'Shift Sore' saat Shift Sore Terpilih", tbodySoreHtml.indexOf("Shift Sore") !== -1);
+pilihShiftAbsensi('Pagi'); // Kembalikan ke Shift Pagi
 
 // --- TEST: Kategori Role (Owner, Dokter Gigi Spesialis, Dokter Gigi Umum, Perawat Gigi, Perawat Umum, Admin, Office) ---
 var selectRoleEl = document.getElementById('dbUserRole');

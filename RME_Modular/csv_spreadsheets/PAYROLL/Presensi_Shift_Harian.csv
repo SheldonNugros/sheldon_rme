@@ -1,121 +1,121 @@
 ID_Presensi,Tanggal,ID_Pekerja,Nama_Pekerja,Role,Shift,Jam_Masuk,Jam_Pulang,Status_Kehadiran,Uang_Harian_Didapat,Verifikator,Waktu_Sistem
-ATT-202601-001,01-01-2026,DU-06,drg. Astri,Dokter Gigi Umum,Shift 1,09:00,15:00,Hadir,55000,Howard Wolowitz,01-01-2026 15:05:00
-ATT-202601-002,01-01-2026,DU-07,drg. Rizka,Dokter Gigi Umum,Shift 2,15:00,21:00,Hadir,55000,Howard Wolowitz,01-01-2026 21:05:00
-ATT-202601-003,01-01-2026,PG-03,Dina,Perawat Gigi,Shift 1,08:50,15:00,Hadir,45000,Howard Wolowitz,01-01-2026 15:05:00
-ATT-202601-004,01-01-2026,PG-01,Bernadette Rostenkowski,Perawat Gigi,Shift 2,14:55,21:05,Hadir,45000,Howard Wolowitz,01-01-2026 21:05:00
-ATT-202601-005,02-01-2026,DU-07,drg. Rizka,Dokter Gigi Umum,Shift 1,09:00,15:00,Hadir,55000,Howard Wolowitz,02-01-2026 15:05:00
-ATT-202601-006,02-01-2026,DU-08,drg. Nanda,Dokter Gigi Umum,Shift 2,15:00,21:00,Hadir,55000,Howard Wolowitz,02-01-2026 21:05:00
-ATT-202601-007,02-01-2026,PG-01,Bernadette Rostenkowski,Perawat Gigi,Shift 1,08:50,15:00,Hadir,45000,Howard Wolowitz,02-01-2026 15:05:00
-ATT-202601-008,02-01-2026,PG-02,Wulan,Perawat Gigi,Shift 2,14:55,21:05,Hadir,45000,Howard Wolowitz,02-01-2026 21:05:00
-ATT-202601-009,03-01-2026,DU-08,drg. Nanda,Dokter Gigi Umum,Shift 1,09:00,15:00,Hadir,55000,Howard Wolowitz,03-01-2026 15:05:00
-ATT-202601-010,03-01-2026,DU-09,drg. Aviva,Dokter Gigi Umum,Shift 2,15:00,21:00,Hadir,55000,Howard Wolowitz,03-01-2026 21:05:00
-ATT-202601-011,03-01-2026,PG-02,Wulan,Perawat Gigi,Shift 1,08:50,15:00,Hadir,45000,Howard Wolowitz,03-01-2026 15:05:00
-ATT-202601-012,03-01-2026,PG-03,Dina,Perawat Gigi,Shift 2,14:55,21:05,Hadir,45000,Howard Wolowitz,03-01-2026 21:05:00
-ATT-202601-013,04-01-2026,DU-09,drg. Aviva,Dokter Gigi Umum,Shift 1,09:00,15:00,Hadir,55000,Howard Wolowitz,04-01-2026 15:05:00
-ATT-202601-014,04-01-2026,DU-10,drg. Erien,Dokter Gigi Umum,Shift 2,15:00,21:00,Hadir,55000,Howard Wolowitz,04-01-2026 21:05:00
-ATT-202601-015,04-01-2026,PG-03,Dina,Perawat Gigi,Shift 1,08:50,15:00,Hadir,45000,Howard Wolowitz,04-01-2026 15:05:00
-ATT-202601-016,04-01-2026,PG-01,Bernadette Rostenkowski,Perawat Gigi,Shift 2,14:55,21:05,Hadir,45000,Howard Wolowitz,04-01-2026 21:05:00
-ATT-202601-017,05-01-2026,DU-10,drg. Erien,Dokter Gigi Umum,Shift 1,09:00,15:00,Hadir,55000,Howard Wolowitz,05-01-2026 15:05:00
-ATT-202601-018,05-01-2026,DU-11,drg.g.p Dinda,Dokter Gigi Umum,Shift 2,15:00,21:00,Hadir,55000,Howard Wolowitz,05-01-2026 21:05:00
-ATT-202601-019,05-01-2026,PG-01,Bernadette Rostenkowski,Perawat Gigi,Shift 1,08:50,15:00,Hadir,45000,Howard Wolowitz,05-01-2026 15:05:00
-ATT-202601-020,05-01-2026,PG-02,Wulan,Perawat Gigi,Shift 2,14:55,21:05,Hadir,45000,Howard Wolowitz,05-01-2026 21:05:00
-ATT-202601-021,06-01-2026,DU-11,drg.g.p Dinda,Dokter Gigi Umum,Shift 1,09:00,15:00,Hadir,55000,Howard Wolowitz,06-01-2026 15:05:00
-ATT-202601-022,06-01-2026,DU-12,drg.g.p Fathya,Dokter Gigi Umum,Shift 2,15:00,21:00,Hadir,55000,Howard Wolowitz,06-01-2026 21:05:00
-ATT-202601-023,06-01-2026,PG-02,Wulan,Perawat Gigi,Shift 1,08:50,15:00,Hadir,45000,Howard Wolowitz,06-01-2026 15:05:00
-ATT-202601-024,06-01-2026,PG-03,Dina,Perawat Gigi,Shift 2,14:55,21:05,Hadir,45000,Howard Wolowitz,06-01-2026 21:05:00
-ATT-202601-025,07-01-2026,DU-12,drg.g.p Fathya,Dokter Gigi Umum,Shift 1,09:00,15:00,Hadir,55000,Howard Wolowitz,07-01-2026 15:05:00
-ATT-202601-026,07-01-2026,DU-13,drg.g.p Belinda,Dokter Gigi Umum,Shift 2,15:00,21:00,Hadir,55000,Howard Wolowitz,07-01-2026 21:05:00
-ATT-202601-027,07-01-2026,PG-03,Dina,Perawat Gigi,Shift 1,08:50,15:00,Hadir,45000,Howard Wolowitz,07-01-2026 15:05:00
-ATT-202601-028,07-01-2026,PG-01,Bernadette Rostenkowski,Perawat Gigi,Shift 2,14:55,21:05,Hadir,45000,Howard Wolowitz,07-01-2026 21:05:00
-ATT-202601-029,08-01-2026,DU-13,drg.g.p Belinda,Dokter Gigi Umum,Shift 1,09:00,15:00,Hadir,55000,Howard Wolowitz,08-01-2026 15:05:00
-ATT-202601-030,08-01-2026,DS-02,"drg. Rahma Yulinda D, Sp. BMM",Dokter Gigi Umum,Shift 2,15:00,21:00,Hadir,55000,Howard Wolowitz,08-01-2026 21:05:00
-ATT-202601-031,08-01-2026,PG-01,Bernadette Rostenkowski,Perawat Gigi,Shift 1,08:50,15:00,Hadir,45000,Howard Wolowitz,08-01-2026 15:05:00
-ATT-202601-032,08-01-2026,PG-02,Wulan,Perawat Gigi,Shift 2,14:55,21:05,Hadir,45000,Howard Wolowitz,08-01-2026 21:05:00
-ATT-202601-033,09-01-2026,DS-02,"drg. Rahma Yulinda D, Sp. BMM",Dokter Gigi Umum,Shift 1,09:00,15:00,Hadir,55000,Howard Wolowitz,09-01-2026 15:05:00
-ATT-202601-034,09-01-2026,DU-04,drg. Tia Ardhana R,Dokter Gigi Umum,Shift 2,15:00,21:00,Hadir,55000,Howard Wolowitz,09-01-2026 21:05:00
-ATT-202601-035,09-01-2026,PG-02,Wulan,Perawat Gigi,Shift 1,08:50,15:00,Hadir,45000,Howard Wolowitz,09-01-2026 15:05:00
-ATT-202601-036,09-01-2026,PG-03,Dina,Perawat Gigi,Shift 2,14:55,21:05,Hadir,45000,Howard Wolowitz,09-01-2026 21:05:00
-ATT-202601-037,10-01-2026,DU-04,drg. Tia Ardhana R,Dokter Gigi Umum,Shift 1,09:00,15:00,Hadir,55000,Howard Wolowitz,10-01-2026 15:05:00
-ATT-202601-038,10-01-2026,DU-05,drg. Danny,Dokter Gigi Umum,Shift 2,15:00,21:00,Hadir,55000,Howard Wolowitz,10-01-2026 21:05:00
-ATT-202601-039,10-01-2026,PG-03,Dina,Perawat Gigi,Shift 1,08:50,15:00,Hadir,45000,Howard Wolowitz,10-01-2026 15:05:00
-ATT-202601-040,10-01-2026,PG-01,Bernadette Rostenkowski,Perawat Gigi,Shift 2,14:55,21:05,Hadir,45000,Howard Wolowitz,10-01-2026 21:05:00
-ATT-202601-041,11-01-2026,DU-05,drg. Danny,Dokter Gigi Umum,Shift 1,09:00,15:00,Hadir,55000,Howard Wolowitz,11-01-2026 15:05:00
-ATT-202601-042,11-01-2026,DU-06,drg. Astri,Dokter Gigi Umum,Shift 2,15:00,21:00,Hadir,55000,Howard Wolowitz,11-01-2026 21:05:00
-ATT-202601-043,11-01-2026,PG-01,Bernadette Rostenkowski,Perawat Gigi,Shift 1,08:50,15:00,Hadir,45000,Howard Wolowitz,11-01-2026 15:05:00
-ATT-202601-044,11-01-2026,PG-02,Wulan,Perawat Gigi,Shift 2,14:55,21:05,Hadir,45000,Howard Wolowitz,11-01-2026 21:05:00
-ATT-202601-045,12-01-2026,DU-06,drg. Astri,Dokter Gigi Umum,Shift 1,09:00,15:00,Hadir,55000,Howard Wolowitz,12-01-2026 15:05:00
-ATT-202601-046,12-01-2026,DU-07,drg. Rizka,Dokter Gigi Umum,Shift 2,15:00,21:00,Hadir,55000,Howard Wolowitz,12-01-2026 21:05:00
-ATT-202601-047,12-01-2026,PG-02,Wulan,Perawat Gigi,Shift 1,08:50,15:00,Hadir,45000,Howard Wolowitz,12-01-2026 15:05:00
-ATT-202601-048,12-01-2026,PG-03,Dina,Perawat Gigi,Shift 2,14:55,21:05,Hadir,45000,Howard Wolowitz,12-01-2026 21:05:00
-ATT-202601-049,13-01-2026,DU-07,drg. Rizka,Dokter Gigi Umum,Shift 1,09:00,15:00,Hadir,55000,Howard Wolowitz,13-01-2026 15:05:00
-ATT-202601-050,13-01-2026,DU-08,drg. Nanda,Dokter Gigi Umum,Shift 2,15:00,21:00,Hadir,55000,Howard Wolowitz,13-01-2026 21:05:00
-ATT-202601-051,13-01-2026,PG-03,Dina,Perawat Gigi,Shift 1,08:50,15:00,Hadir,45000,Howard Wolowitz,13-01-2026 15:05:00
-ATT-202601-052,13-01-2026,PG-01,Bernadette Rostenkowski,Perawat Gigi,Shift 2,14:55,21:05,Hadir,45000,Howard Wolowitz,13-01-2026 21:05:00
-ATT-202601-053,14-01-2026,DU-08,drg. Nanda,Dokter Gigi Umum,Shift 1,09:00,15:00,Hadir,55000,Howard Wolowitz,14-01-2026 15:05:00
-ATT-202601-054,14-01-2026,DU-09,drg. Aviva,Dokter Gigi Umum,Shift 2,15:00,21:00,Hadir,55000,Howard Wolowitz,14-01-2026 21:05:00
-ATT-202601-055,14-01-2026,PG-01,Bernadette Rostenkowski,Perawat Gigi,Shift 1,08:50,15:00,Hadir,45000,Howard Wolowitz,14-01-2026 15:05:00
-ATT-202601-056,14-01-2026,PG-02,Wulan,Perawat Gigi,Shift 2,14:55,21:05,Hadir,45000,Howard Wolowitz,14-01-2026 21:05:00
-ATT-202601-057,15-01-2026,DU-09,drg. Aviva,Dokter Gigi Umum,Shift 1,09:00,15:00,Hadir,55000,Howard Wolowitz,15-01-2026 15:05:00
-ATT-202601-058,15-01-2026,DU-10,drg. Erien,Dokter Gigi Umum,Shift 2,15:00,21:00,Hadir,55000,Howard Wolowitz,15-01-2026 21:05:00
-ATT-202601-059,15-01-2026,PG-02,Wulan,Perawat Gigi,Shift 1,08:50,15:00,Hadir,45000,Howard Wolowitz,15-01-2026 15:05:00
-ATT-202601-060,15-01-2026,PG-03,Dina,Perawat Gigi,Shift 2,14:55,21:05,Hadir,45000,Howard Wolowitz,15-01-2026 21:05:00
-ATT-202601-061,16-01-2026,DU-10,drg. Erien,Dokter Gigi Umum,Shift 1,09:00,15:00,Hadir,55000,Howard Wolowitz,16-01-2026 15:05:00
-ATT-202601-062,16-01-2026,DU-11,drg.g.p Dinda,Dokter Gigi Umum,Shift 2,15:00,21:00,Hadir,55000,Howard Wolowitz,16-01-2026 21:05:00
-ATT-202601-063,16-01-2026,PG-03,Dina,Perawat Gigi,Shift 1,08:50,15:00,Hadir,45000,Howard Wolowitz,16-01-2026 15:05:00
-ATT-202601-064,16-01-2026,PG-01,Bernadette Rostenkowski,Perawat Gigi,Shift 2,14:55,21:05,Hadir,45000,Howard Wolowitz,16-01-2026 21:05:00
-ATT-202601-065,17-01-2026,DU-11,drg.g.p Dinda,Dokter Gigi Umum,Shift 1,09:00,15:00,Hadir,55000,Howard Wolowitz,17-01-2026 15:05:00
-ATT-202601-066,17-01-2026,DU-12,drg.g.p Fathya,Dokter Gigi Umum,Shift 2,15:00,21:00,Hadir,55000,Howard Wolowitz,17-01-2026 21:05:00
-ATT-202601-067,17-01-2026,PG-01,Bernadette Rostenkowski,Perawat Gigi,Shift 1,08:50,15:00,Hadir,45000,Howard Wolowitz,17-01-2026 15:05:00
-ATT-202601-068,17-01-2026,PG-02,Wulan,Perawat Gigi,Shift 2,14:55,21:05,Hadir,45000,Howard Wolowitz,17-01-2026 21:05:00
-ATT-202601-069,18-01-2026,DU-12,drg.g.p Fathya,Dokter Gigi Umum,Shift 1,09:00,15:00,Hadir,55000,Howard Wolowitz,18-01-2026 15:05:00
-ATT-202601-070,18-01-2026,DU-13,drg.g.p Belinda,Dokter Gigi Umum,Shift 2,15:00,21:00,Hadir,55000,Howard Wolowitz,18-01-2026 21:05:00
-ATT-202601-071,18-01-2026,PG-02,Wulan,Perawat Gigi,Shift 1,08:50,15:00,Hadir,45000,Howard Wolowitz,18-01-2026 15:05:00
-ATT-202601-072,18-01-2026,PG-03,Dina,Perawat Gigi,Shift 2,14:55,21:05,Hadir,45000,Howard Wolowitz,18-01-2026 21:05:00
-ATT-202601-073,19-01-2026,DU-13,drg.g.p Belinda,Dokter Gigi Umum,Shift 1,09:00,15:00,Hadir,55000,Howard Wolowitz,19-01-2026 15:05:00
-ATT-202601-074,19-01-2026,DS-02,"drg. Rahma Yulinda D, Sp. BMM",Dokter Gigi Umum,Shift 2,15:00,21:00,Hadir,55000,Howard Wolowitz,19-01-2026 21:05:00
-ATT-202601-075,19-01-2026,PG-03,Dina,Perawat Gigi,Shift 1,08:50,15:00,Hadir,45000,Howard Wolowitz,19-01-2026 15:05:00
-ATT-202601-076,19-01-2026,PG-01,Bernadette Rostenkowski,Perawat Gigi,Shift 2,14:55,21:05,Hadir,45000,Howard Wolowitz,19-01-2026 21:05:00
-ATT-202601-077,20-01-2026,DS-02,"drg. Rahma Yulinda D, Sp. BMM",Dokter Gigi Umum,Shift 1,09:00,15:00,Hadir,55000,Howard Wolowitz,20-01-2026 15:05:00
-ATT-202601-078,20-01-2026,DU-04,drg. Tia Ardhana R,Dokter Gigi Umum,Shift 2,15:00,21:00,Hadir,55000,Howard Wolowitz,20-01-2026 21:05:00
-ATT-202601-079,20-01-2026,PG-01,Bernadette Rostenkowski,Perawat Gigi,Shift 1,08:50,15:00,Hadir,45000,Howard Wolowitz,20-01-2026 15:05:00
-ATT-202601-080,20-01-2026,PG-02,Wulan,Perawat Gigi,Shift 2,14:55,21:05,Hadir,45000,Howard Wolowitz,20-01-2026 21:05:00
-ATT-202601-081,21-01-2026,DU-04,drg. Tia Ardhana R,Dokter Gigi Umum,Shift 1,09:00,15:00,Hadir,55000,Howard Wolowitz,21-01-2026 15:05:00
-ATT-202601-082,21-01-2026,DU-05,drg. Danny,Dokter Gigi Umum,Shift 2,15:00,21:00,Hadir,55000,Howard Wolowitz,21-01-2026 21:05:00
-ATT-202601-083,21-01-2026,PG-02,Wulan,Perawat Gigi,Shift 1,08:50,15:00,Hadir,45000,Howard Wolowitz,21-01-2026 15:05:00
-ATT-202601-084,21-01-2026,PG-03,Dina,Perawat Gigi,Shift 2,14:55,21:05,Hadir,45000,Howard Wolowitz,21-01-2026 21:05:00
-ATT-202601-085,22-01-2026,DU-05,drg. Danny,Dokter Gigi Umum,Shift 1,09:00,15:00,Hadir,55000,Howard Wolowitz,22-01-2026 15:05:00
-ATT-202601-086,22-01-2026,DU-06,drg. Astri,Dokter Gigi Umum,Shift 2,15:00,21:00,Hadir,55000,Howard Wolowitz,22-01-2026 21:05:00
-ATT-202601-087,22-01-2026,PG-03,Dina,Perawat Gigi,Shift 1,08:50,15:00,Hadir,45000,Howard Wolowitz,22-01-2026 15:05:00
-ATT-202601-088,22-01-2026,PG-01,Bernadette Rostenkowski,Perawat Gigi,Shift 2,14:55,21:05,Hadir,45000,Howard Wolowitz,22-01-2026 21:05:00
-ATT-202601-089,23-01-2026,DU-06,drg. Astri,Dokter Gigi Umum,Shift 1,09:00,15:00,Hadir,55000,Howard Wolowitz,23-01-2026 15:05:00
-ATT-202601-090,23-01-2026,DU-07,drg. Rizka,Dokter Gigi Umum,Shift 2,15:00,21:00,Hadir,55000,Howard Wolowitz,23-01-2026 21:05:00
-ATT-202601-091,23-01-2026,PG-01,Bernadette Rostenkowski,Perawat Gigi,Shift 1,08:50,15:00,Hadir,45000,Howard Wolowitz,23-01-2026 15:05:00
-ATT-202601-092,23-01-2026,PG-02,Wulan,Perawat Gigi,Shift 2,14:55,21:05,Hadir,45000,Howard Wolowitz,23-01-2026 21:05:00
-ATT-202601-093,24-01-2026,DU-07,drg. Rizka,Dokter Gigi Umum,Shift 1,09:00,15:00,Hadir,55000,Howard Wolowitz,24-01-2026 15:05:00
-ATT-202601-094,24-01-2026,DU-08,drg. Nanda,Dokter Gigi Umum,Shift 2,15:00,21:00,Hadir,55000,Howard Wolowitz,24-01-2026 21:05:00
-ATT-202601-095,24-01-2026,PG-02,Wulan,Perawat Gigi,Shift 1,08:50,15:00,Hadir,45000,Howard Wolowitz,24-01-2026 15:05:00
-ATT-202601-096,24-01-2026,PG-03,Dina,Perawat Gigi,Shift 2,14:55,21:05,Hadir,45000,Howard Wolowitz,24-01-2026 21:05:00
-ATT-202601-097,25-01-2026,DU-08,drg. Nanda,Dokter Gigi Umum,Shift 1,09:00,15:00,Hadir,55000,Howard Wolowitz,25-01-2026 15:05:00
-ATT-202601-098,25-01-2026,DU-09,drg. Aviva,Dokter Gigi Umum,Shift 2,15:00,21:00,Hadir,55000,Howard Wolowitz,25-01-2026 21:05:00
-ATT-202601-099,25-01-2026,PG-03,Dina,Perawat Gigi,Shift 1,08:50,15:00,Hadir,45000,Howard Wolowitz,25-01-2026 15:05:00
-ATT-202601-100,25-01-2026,PG-01,Bernadette Rostenkowski,Perawat Gigi,Shift 2,14:55,21:05,Hadir,45000,Howard Wolowitz,25-01-2026 21:05:00
-ATT-202601-101,26-01-2026,DU-09,drg. Aviva,Dokter Gigi Umum,Shift 1,09:00,15:00,Hadir,55000,Howard Wolowitz,26-01-2026 15:05:00
-ATT-202601-102,26-01-2026,DU-10,drg. Erien,Dokter Gigi Umum,Shift 2,15:00,21:00,Hadir,55000,Howard Wolowitz,26-01-2026 21:05:00
-ATT-202601-103,26-01-2026,PG-01,Bernadette Rostenkowski,Perawat Gigi,Shift 1,08:50,15:00,Hadir,45000,Howard Wolowitz,26-01-2026 15:05:00
-ATT-202601-104,26-01-2026,PG-02,Wulan,Perawat Gigi,Shift 2,14:55,21:05,Hadir,45000,Howard Wolowitz,26-01-2026 21:05:00
-ATT-202601-105,27-01-2026,DU-10,drg. Erien,Dokter Gigi Umum,Shift 1,09:00,15:00,Hadir,55000,Howard Wolowitz,27-01-2026 15:05:00
-ATT-202601-106,27-01-2026,DU-11,drg.g.p Dinda,Dokter Gigi Umum,Shift 2,15:00,21:00,Hadir,55000,Howard Wolowitz,27-01-2026 21:05:00
-ATT-202601-107,27-01-2026,PG-02,Wulan,Perawat Gigi,Shift 1,08:50,15:00,Hadir,45000,Howard Wolowitz,27-01-2026 15:05:00
-ATT-202601-108,27-01-2026,PG-03,Dina,Perawat Gigi,Shift 2,14:55,21:05,Hadir,45000,Howard Wolowitz,27-01-2026 21:05:00
-ATT-202601-109,28-01-2026,DU-11,drg.g.p Dinda,Dokter Gigi Umum,Shift 1,09:00,15:00,Hadir,55000,Howard Wolowitz,28-01-2026 15:05:00
-ATT-202601-110,28-01-2026,DU-12,drg.g.p Fathya,Dokter Gigi Umum,Shift 2,15:00,21:00,Hadir,55000,Howard Wolowitz,28-01-2026 21:05:00
-ATT-202601-111,28-01-2026,PG-03,Dina,Perawat Gigi,Shift 1,08:50,15:00,Hadir,45000,Howard Wolowitz,28-01-2026 15:05:00
-ATT-202601-112,28-01-2026,PG-01,Bernadette Rostenkowski,Perawat Gigi,Shift 2,14:55,21:05,Hadir,45000,Howard Wolowitz,28-01-2026 21:05:00
-ATT-202601-113,29-01-2026,DU-12,drg.g.p Fathya,Dokter Gigi Umum,Shift 1,09:00,15:00,Hadir,55000,Howard Wolowitz,29-01-2026 15:05:00
-ATT-202601-114,29-01-2026,DU-13,drg.g.p Belinda,Dokter Gigi Umum,Shift 2,15:00,21:00,Hadir,55000,Howard Wolowitz,29-01-2026 21:05:00
-ATT-202601-115,29-01-2026,PG-01,Bernadette Rostenkowski,Perawat Gigi,Shift 1,08:50,15:00,Hadir,45000,Howard Wolowitz,29-01-2026 15:05:00
-ATT-202601-116,29-01-2026,PG-02,Wulan,Perawat Gigi,Shift 2,14:55,21:05,Hadir,45000,Howard Wolowitz,29-01-2026 21:05:00
-ATT-202601-117,30-01-2026,DU-13,drg.g.p Belinda,Dokter Gigi Umum,Shift 1,09:00,15:00,Hadir,55000,Howard Wolowitz,30-01-2026 15:05:00
-ATT-202601-118,30-01-2026,DS-02,"drg. Rahma Yulinda D, Sp. BMM",Dokter Gigi Umum,Shift 2,15:00,21:00,Hadir,55000,Howard Wolowitz,30-01-2026 21:05:00
-ATT-202601-119,30-01-2026,PG-02,Wulan,Perawat Gigi,Shift 1,08:50,15:00,Hadir,45000,Howard Wolowitz,30-01-2026 15:05:00
-ATT-202601-120,30-01-2026,PG-03,Dina,Perawat Gigi,Shift 2,14:55,21:05,Hadir,45000,Howard Wolowitz,30-01-2026 21:05:00
+ATT-202601-001,01-01-2026,SN-10,drg. Astri,Dokter Gigi Umum,Shift 1,09:00,15:00,Hadir,55000,Howard Wolowitz,01-01-2026 15:05:00
+ATT-202601-002,01-01-2026,SN-11,drg. Rizka,Dokter Gigi Umum,Shift 2,15:00,21:00,Hadir,55000,Howard Wolowitz,01-01-2026 21:05:00
+ATT-202601-003,01-01-2026,SN-20,Dina,Perawat Gigi,Shift 1,08:50,15:00,Hadir,45000,Howard Wolowitz,01-01-2026 15:05:00
+ATT-202601-004,01-01-2026,SN-18,Bernadette Rostenkowski,Perawat Gigi,Shift 2,14:55,21:05,Hadir,45000,Howard Wolowitz,01-01-2026 21:05:00
+ATT-202601-005,02-01-2026,SN-11,drg. Rizka,Dokter Gigi Umum,Shift 1,09:00,15:00,Hadir,55000,Howard Wolowitz,02-01-2026 15:05:00
+ATT-202601-006,02-01-2026,SN-12,drg. Nanda,Dokter Gigi Umum,Shift 2,15:00,21:00,Hadir,55000,Howard Wolowitz,02-01-2026 21:05:00
+ATT-202601-007,02-01-2026,SN-18,Bernadette Rostenkowski,Perawat Gigi,Shift 1,08:50,15:00,Hadir,45000,Howard Wolowitz,02-01-2026 15:05:00
+ATT-202601-008,02-01-2026,SN-19,Wulan,Perawat Gigi,Shift 2,14:55,21:05,Hadir,45000,Howard Wolowitz,02-01-2026 21:05:00
+ATT-202601-009,03-01-2026,SN-12,drg. Nanda,Dokter Gigi Umum,Shift 1,09:00,15:00,Hadir,55000,Howard Wolowitz,03-01-2026 15:05:00
+ATT-202601-010,03-01-2026,SN-13,drg. Aviva,Dokter Gigi Umum,Shift 2,15:00,21:00,Hadir,55000,Howard Wolowitz,03-01-2026 21:05:00
+ATT-202601-011,03-01-2026,SN-19,Wulan,Perawat Gigi,Shift 1,08:50,15:00,Hadir,45000,Howard Wolowitz,03-01-2026 15:05:00
+ATT-202601-012,03-01-2026,SN-20,Dina,Perawat Gigi,Shift 2,14:55,21:05,Hadir,45000,Howard Wolowitz,03-01-2026 21:05:00
+ATT-202601-013,04-01-2026,SN-13,drg. Aviva,Dokter Gigi Umum,Shift 1,09:00,15:00,Hadir,55000,Howard Wolowitz,04-01-2026 15:05:00
+ATT-202601-014,04-01-2026,SN-14,drg. Erien,Dokter Gigi Umum,Shift 2,15:00,21:00,Hadir,55000,Howard Wolowitz,04-01-2026 21:05:00
+ATT-202601-015,04-01-2026,SN-20,Dina,Perawat Gigi,Shift 1,08:50,15:00,Hadir,45000,Howard Wolowitz,04-01-2026 15:05:00
+ATT-202601-016,04-01-2026,SN-18,Bernadette Rostenkowski,Perawat Gigi,Shift 2,14:55,21:05,Hadir,45000,Howard Wolowitz,04-01-2026 21:05:00
+ATT-202601-017,05-01-2026,SN-14,drg. Erien,Dokter Gigi Umum,Shift 1,09:00,15:00,Hadir,55000,Howard Wolowitz,05-01-2026 15:05:00
+ATT-202601-018,05-01-2026,SN-15,drg.g.p Dinda,Dokter Gigi Umum,Shift 2,15:00,21:00,Hadir,55000,Howard Wolowitz,05-01-2026 21:05:00
+ATT-202601-019,05-01-2026,SN-18,Bernadette Rostenkowski,Perawat Gigi,Shift 1,08:50,15:00,Hadir,45000,Howard Wolowitz,05-01-2026 15:05:00
+ATT-202601-020,05-01-2026,SN-19,Wulan,Perawat Gigi,Shift 2,14:55,21:05,Hadir,45000,Howard Wolowitz,05-01-2026 21:05:00
+ATT-202601-021,06-01-2026,SN-15,drg.g.p Dinda,Dokter Gigi Umum,Shift 1,09:00,15:00,Hadir,55000,Howard Wolowitz,06-01-2026 15:05:00
+ATT-202601-022,06-01-2026,SN-16,drg.g.p Fathya,Dokter Gigi Umum,Shift 2,15:00,21:00,Hadir,55000,Howard Wolowitz,06-01-2026 21:05:00
+ATT-202601-023,06-01-2026,SN-19,Wulan,Perawat Gigi,Shift 1,08:50,15:00,Hadir,45000,Howard Wolowitz,06-01-2026 15:05:00
+ATT-202601-024,06-01-2026,SN-20,Dina,Perawat Gigi,Shift 2,14:55,21:05,Hadir,45000,Howard Wolowitz,06-01-2026 21:05:00
+ATT-202601-025,07-01-2026,SN-16,drg.g.p Fathya,Dokter Gigi Umum,Shift 1,09:00,15:00,Hadir,55000,Howard Wolowitz,07-01-2026 15:05:00
+ATT-202601-026,07-01-2026,SN-17,drg.g.p Belinda,Dokter Gigi Umum,Shift 2,15:00,21:00,Hadir,55000,Howard Wolowitz,07-01-2026 21:05:00
+ATT-202601-027,07-01-2026,SN-20,Dina,Perawat Gigi,Shift 1,08:50,15:00,Hadir,45000,Howard Wolowitz,07-01-2026 15:05:00
+ATT-202601-028,07-01-2026,SN-18,Bernadette Rostenkowski,Perawat Gigi,Shift 2,14:55,21:05,Hadir,45000,Howard Wolowitz,07-01-2026 21:05:00
+ATT-202601-029,08-01-2026,SN-17,drg.g.p Belinda,Dokter Gigi Umum,Shift 1,09:00,15:00,Hadir,55000,Howard Wolowitz,08-01-2026 15:05:00
+ATT-202601-030,08-01-2026,SN-05,"drg. Rahma Yulinda D, Sp. BMM",Dokter Gigi Umum,Shift 2,15:00,21:00,Hadir,55000,Howard Wolowitz,08-01-2026 21:05:00
+ATT-202601-031,08-01-2026,SN-18,Bernadette Rostenkowski,Perawat Gigi,Shift 1,08:50,15:00,Hadir,45000,Howard Wolowitz,08-01-2026 15:05:00
+ATT-202601-032,08-01-2026,SN-19,Wulan,Perawat Gigi,Shift 2,14:55,21:05,Hadir,45000,Howard Wolowitz,08-01-2026 21:05:00
+ATT-202601-033,09-01-2026,SN-05,"drg. Rahma Yulinda D, Sp. BMM",Dokter Gigi Umum,Shift 1,09:00,15:00,Hadir,55000,Howard Wolowitz,09-01-2026 15:05:00
+ATT-202601-034,09-01-2026,SN-08,drg. Tia Ardhana R,Dokter Gigi Umum,Shift 2,15:00,21:00,Hadir,55000,Howard Wolowitz,09-01-2026 21:05:00
+ATT-202601-035,09-01-2026,SN-19,Wulan,Perawat Gigi,Shift 1,08:50,15:00,Hadir,45000,Howard Wolowitz,09-01-2026 15:05:00
+ATT-202601-036,09-01-2026,SN-20,Dina,Perawat Gigi,Shift 2,14:55,21:05,Hadir,45000,Howard Wolowitz,09-01-2026 21:05:00
+ATT-202601-037,10-01-2026,SN-08,drg. Tia Ardhana R,Dokter Gigi Umum,Shift 1,09:00,15:00,Hadir,55000,Howard Wolowitz,10-01-2026 15:05:00
+ATT-202601-038,10-01-2026,SN-09,drg. Danny,Dokter Gigi Umum,Shift 2,15:00,21:00,Hadir,55000,Howard Wolowitz,10-01-2026 21:05:00
+ATT-202601-039,10-01-2026,SN-20,Dina,Perawat Gigi,Shift 1,08:50,15:00,Hadir,45000,Howard Wolowitz,10-01-2026 15:05:00
+ATT-202601-040,10-01-2026,SN-18,Bernadette Rostenkowski,Perawat Gigi,Shift 2,14:55,21:05,Hadir,45000,Howard Wolowitz,10-01-2026 21:05:00
+ATT-202601-041,11-01-2026,SN-09,drg. Danny,Dokter Gigi Umum,Shift 1,09:00,15:00,Hadir,55000,Howard Wolowitz,11-01-2026 15:05:00
+ATT-202601-042,11-01-2026,SN-10,drg. Astri,Dokter Gigi Umum,Shift 2,15:00,21:00,Hadir,55000,Howard Wolowitz,11-01-2026 21:05:00
+ATT-202601-043,11-01-2026,SN-18,Bernadette Rostenkowski,Perawat Gigi,Shift 1,08:50,15:00,Hadir,45000,Howard Wolowitz,11-01-2026 15:05:00
+ATT-202601-044,11-01-2026,SN-19,Wulan,Perawat Gigi,Shift 2,14:55,21:05,Hadir,45000,Howard Wolowitz,11-01-2026 21:05:00
+ATT-202601-045,12-01-2026,SN-10,drg. Astri,Dokter Gigi Umum,Shift 1,09:00,15:00,Hadir,55000,Howard Wolowitz,12-01-2026 15:05:00
+ATT-202601-046,12-01-2026,SN-11,drg. Rizka,Dokter Gigi Umum,Shift 2,15:00,21:00,Hadir,55000,Howard Wolowitz,12-01-2026 21:05:00
+ATT-202601-047,12-01-2026,SN-19,Wulan,Perawat Gigi,Shift 1,08:50,15:00,Hadir,45000,Howard Wolowitz,12-01-2026 15:05:00
+ATT-202601-048,12-01-2026,SN-20,Dina,Perawat Gigi,Shift 2,14:55,21:05,Hadir,45000,Howard Wolowitz,12-01-2026 21:05:00
+ATT-202601-049,13-01-2026,SN-11,drg. Rizka,Dokter Gigi Umum,Shift 1,09:00,15:00,Hadir,55000,Howard Wolowitz,13-01-2026 15:05:00
+ATT-202601-050,13-01-2026,SN-12,drg. Nanda,Dokter Gigi Umum,Shift 2,15:00,21:00,Hadir,55000,Howard Wolowitz,13-01-2026 21:05:00
+ATT-202601-051,13-01-2026,SN-20,Dina,Perawat Gigi,Shift 1,08:50,15:00,Hadir,45000,Howard Wolowitz,13-01-2026 15:05:00
+ATT-202601-052,13-01-2026,SN-18,Bernadette Rostenkowski,Perawat Gigi,Shift 2,14:55,21:05,Hadir,45000,Howard Wolowitz,13-01-2026 21:05:00
+ATT-202601-053,14-01-2026,SN-12,drg. Nanda,Dokter Gigi Umum,Shift 1,09:00,15:00,Hadir,55000,Howard Wolowitz,14-01-2026 15:05:00
+ATT-202601-054,14-01-2026,SN-13,drg. Aviva,Dokter Gigi Umum,Shift 2,15:00,21:00,Hadir,55000,Howard Wolowitz,14-01-2026 21:05:00
+ATT-202601-055,14-01-2026,SN-18,Bernadette Rostenkowski,Perawat Gigi,Shift 1,08:50,15:00,Hadir,45000,Howard Wolowitz,14-01-2026 15:05:00
+ATT-202601-056,14-01-2026,SN-19,Wulan,Perawat Gigi,Shift 2,14:55,21:05,Hadir,45000,Howard Wolowitz,14-01-2026 21:05:00
+ATT-202601-057,15-01-2026,SN-13,drg. Aviva,Dokter Gigi Umum,Shift 1,09:00,15:00,Hadir,55000,Howard Wolowitz,15-01-2026 15:05:00
+ATT-202601-058,15-01-2026,SN-14,drg. Erien,Dokter Gigi Umum,Shift 2,15:00,21:00,Hadir,55000,Howard Wolowitz,15-01-2026 21:05:00
+ATT-202601-059,15-01-2026,SN-19,Wulan,Perawat Gigi,Shift 1,08:50,15:00,Hadir,45000,Howard Wolowitz,15-01-2026 15:05:00
+ATT-202601-060,15-01-2026,SN-20,Dina,Perawat Gigi,Shift 2,14:55,21:05,Hadir,45000,Howard Wolowitz,15-01-2026 21:05:00
+ATT-202601-061,16-01-2026,SN-14,drg. Erien,Dokter Gigi Umum,Shift 1,09:00,15:00,Hadir,55000,Howard Wolowitz,16-01-2026 15:05:00
+ATT-202601-062,16-01-2026,SN-15,drg.g.p Dinda,Dokter Gigi Umum,Shift 2,15:00,21:00,Hadir,55000,Howard Wolowitz,16-01-2026 21:05:00
+ATT-202601-063,16-01-2026,SN-20,Dina,Perawat Gigi,Shift 1,08:50,15:00,Hadir,45000,Howard Wolowitz,16-01-2026 15:05:00
+ATT-202601-064,16-01-2026,SN-18,Bernadette Rostenkowski,Perawat Gigi,Shift 2,14:55,21:05,Hadir,45000,Howard Wolowitz,16-01-2026 21:05:00
+ATT-202601-065,17-01-2026,SN-15,drg.g.p Dinda,Dokter Gigi Umum,Shift 1,09:00,15:00,Hadir,55000,Howard Wolowitz,17-01-2026 15:05:00
+ATT-202601-066,17-01-2026,SN-16,drg.g.p Fathya,Dokter Gigi Umum,Shift 2,15:00,21:00,Hadir,55000,Howard Wolowitz,17-01-2026 21:05:00
+ATT-202601-067,17-01-2026,SN-18,Bernadette Rostenkowski,Perawat Gigi,Shift 1,08:50,15:00,Hadir,45000,Howard Wolowitz,17-01-2026 15:05:00
+ATT-202601-068,17-01-2026,SN-19,Wulan,Perawat Gigi,Shift 2,14:55,21:05,Hadir,45000,Howard Wolowitz,17-01-2026 21:05:00
+ATT-202601-069,18-01-2026,SN-16,drg.g.p Fathya,Dokter Gigi Umum,Shift 1,09:00,15:00,Hadir,55000,Howard Wolowitz,18-01-2026 15:05:00
+ATT-202601-070,18-01-2026,SN-17,drg.g.p Belinda,Dokter Gigi Umum,Shift 2,15:00,21:00,Hadir,55000,Howard Wolowitz,18-01-2026 21:05:00
+ATT-202601-071,18-01-2026,SN-19,Wulan,Perawat Gigi,Shift 1,08:50,15:00,Hadir,45000,Howard Wolowitz,18-01-2026 15:05:00
+ATT-202601-072,18-01-2026,SN-20,Dina,Perawat Gigi,Shift 2,14:55,21:05,Hadir,45000,Howard Wolowitz,18-01-2026 21:05:00
+ATT-202601-073,19-01-2026,SN-17,drg.g.p Belinda,Dokter Gigi Umum,Shift 1,09:00,15:00,Hadir,55000,Howard Wolowitz,19-01-2026 15:05:00
+ATT-202601-074,19-01-2026,SN-05,"drg. Rahma Yulinda D, Sp. BMM",Dokter Gigi Umum,Shift 2,15:00,21:00,Hadir,55000,Howard Wolowitz,19-01-2026 21:05:00
+ATT-202601-075,19-01-2026,SN-20,Dina,Perawat Gigi,Shift 1,08:50,15:00,Hadir,45000,Howard Wolowitz,19-01-2026 15:05:00
+ATT-202601-076,19-01-2026,SN-18,Bernadette Rostenkowski,Perawat Gigi,Shift 2,14:55,21:05,Hadir,45000,Howard Wolowitz,19-01-2026 21:05:00
+ATT-202601-077,20-01-2026,SN-05,"drg. Rahma Yulinda D, Sp. BMM",Dokter Gigi Umum,Shift 1,09:00,15:00,Hadir,55000,Howard Wolowitz,20-01-2026 15:05:00
+ATT-202601-078,20-01-2026,SN-08,drg. Tia Ardhana R,Dokter Gigi Umum,Shift 2,15:00,21:00,Hadir,55000,Howard Wolowitz,20-01-2026 21:05:00
+ATT-202601-079,20-01-2026,SN-18,Bernadette Rostenkowski,Perawat Gigi,Shift 1,08:50,15:00,Hadir,45000,Howard Wolowitz,20-01-2026 15:05:00
+ATT-202601-080,20-01-2026,SN-19,Wulan,Perawat Gigi,Shift 2,14:55,21:05,Hadir,45000,Howard Wolowitz,20-01-2026 21:05:00
+ATT-202601-081,21-01-2026,SN-08,drg. Tia Ardhana R,Dokter Gigi Umum,Shift 1,09:00,15:00,Hadir,55000,Howard Wolowitz,21-01-2026 15:05:00
+ATT-202601-082,21-01-2026,SN-09,drg. Danny,Dokter Gigi Umum,Shift 2,15:00,21:00,Hadir,55000,Howard Wolowitz,21-01-2026 21:05:00
+ATT-202601-083,21-01-2026,SN-19,Wulan,Perawat Gigi,Shift 1,08:50,15:00,Hadir,45000,Howard Wolowitz,21-01-2026 15:05:00
+ATT-202601-084,21-01-2026,SN-20,Dina,Perawat Gigi,Shift 2,14:55,21:05,Hadir,45000,Howard Wolowitz,21-01-2026 21:05:00
+ATT-202601-085,22-01-2026,SN-09,drg. Danny,Dokter Gigi Umum,Shift 1,09:00,15:00,Hadir,55000,Howard Wolowitz,22-01-2026 15:05:00
+ATT-202601-086,22-01-2026,SN-10,drg. Astri,Dokter Gigi Umum,Shift 2,15:00,21:00,Hadir,55000,Howard Wolowitz,22-01-2026 21:05:00
+ATT-202601-087,22-01-2026,SN-20,Dina,Perawat Gigi,Shift 1,08:50,15:00,Hadir,45000,Howard Wolowitz,22-01-2026 15:05:00
+ATT-202601-088,22-01-2026,SN-18,Bernadette Rostenkowski,Perawat Gigi,Shift 2,14:55,21:05,Hadir,45000,Howard Wolowitz,22-01-2026 21:05:00
+ATT-202601-089,23-01-2026,SN-10,drg. Astri,Dokter Gigi Umum,Shift 1,09:00,15:00,Hadir,55000,Howard Wolowitz,23-01-2026 15:05:00
+ATT-202601-090,23-01-2026,SN-11,drg. Rizka,Dokter Gigi Umum,Shift 2,15:00,21:00,Hadir,55000,Howard Wolowitz,23-01-2026 21:05:00
+ATT-202601-091,23-01-2026,SN-18,Bernadette Rostenkowski,Perawat Gigi,Shift 1,08:50,15:00,Hadir,45000,Howard Wolowitz,23-01-2026 15:05:00
+ATT-202601-092,23-01-2026,SN-19,Wulan,Perawat Gigi,Shift 2,14:55,21:05,Hadir,45000,Howard Wolowitz,23-01-2026 21:05:00
+ATT-202601-093,24-01-2026,SN-11,drg. Rizka,Dokter Gigi Umum,Shift 1,09:00,15:00,Hadir,55000,Howard Wolowitz,24-01-2026 15:05:00
+ATT-202601-094,24-01-2026,SN-12,drg. Nanda,Dokter Gigi Umum,Shift 2,15:00,21:00,Hadir,55000,Howard Wolowitz,24-01-2026 21:05:00
+ATT-202601-095,24-01-2026,SN-19,Wulan,Perawat Gigi,Shift 1,08:50,15:00,Hadir,45000,Howard Wolowitz,24-01-2026 15:05:00
+ATT-202601-096,24-01-2026,SN-20,Dina,Perawat Gigi,Shift 2,14:55,21:05,Hadir,45000,Howard Wolowitz,24-01-2026 21:05:00
+ATT-202601-097,25-01-2026,SN-12,drg. Nanda,Dokter Gigi Umum,Shift 1,09:00,15:00,Hadir,55000,Howard Wolowitz,25-01-2026 15:05:00
+ATT-202601-098,25-01-2026,SN-13,drg. Aviva,Dokter Gigi Umum,Shift 2,15:00,21:00,Hadir,55000,Howard Wolowitz,25-01-2026 21:05:00
+ATT-202601-099,25-01-2026,SN-20,Dina,Perawat Gigi,Shift 1,08:50,15:00,Hadir,45000,Howard Wolowitz,25-01-2026 15:05:00
+ATT-202601-100,25-01-2026,SN-18,Bernadette Rostenkowski,Perawat Gigi,Shift 2,14:55,21:05,Hadir,45000,Howard Wolowitz,25-01-2026 21:05:00
+ATT-202601-101,26-01-2026,SN-13,drg. Aviva,Dokter Gigi Umum,Shift 1,09:00,15:00,Hadir,55000,Howard Wolowitz,26-01-2026 15:05:00
+ATT-202601-102,26-01-2026,SN-14,drg. Erien,Dokter Gigi Umum,Shift 2,15:00,21:00,Hadir,55000,Howard Wolowitz,26-01-2026 21:05:00
+ATT-202601-103,26-01-2026,SN-18,Bernadette Rostenkowski,Perawat Gigi,Shift 1,08:50,15:00,Hadir,45000,Howard Wolowitz,26-01-2026 15:05:00
+ATT-202601-104,26-01-2026,SN-19,Wulan,Perawat Gigi,Shift 2,14:55,21:05,Hadir,45000,Howard Wolowitz,26-01-2026 21:05:00
+ATT-202601-105,27-01-2026,SN-14,drg. Erien,Dokter Gigi Umum,Shift 1,09:00,15:00,Hadir,55000,Howard Wolowitz,27-01-2026 15:05:00
+ATT-202601-106,27-01-2026,SN-15,drg.g.p Dinda,Dokter Gigi Umum,Shift 2,15:00,21:00,Hadir,55000,Howard Wolowitz,27-01-2026 21:05:00
+ATT-202601-107,27-01-2026,SN-19,Wulan,Perawat Gigi,Shift 1,08:50,15:00,Hadir,45000,Howard Wolowitz,27-01-2026 15:05:00
+ATT-202601-108,27-01-2026,SN-20,Dina,Perawat Gigi,Shift 2,14:55,21:05,Hadir,45000,Howard Wolowitz,27-01-2026 21:05:00
+ATT-202601-109,28-01-2026,SN-15,drg.g.p Dinda,Dokter Gigi Umum,Shift 1,09:00,15:00,Hadir,55000,Howard Wolowitz,28-01-2026 15:05:00
+ATT-202601-110,28-01-2026,SN-16,drg.g.p Fathya,Dokter Gigi Umum,Shift 2,15:00,21:00,Hadir,55000,Howard Wolowitz,28-01-2026 21:05:00
+ATT-202601-111,28-01-2026,SN-20,Dina,Perawat Gigi,Shift 1,08:50,15:00,Hadir,45000,Howard Wolowitz,28-01-2026 15:05:00
+ATT-202601-112,28-01-2026,SN-18,Bernadette Rostenkowski,Perawat Gigi,Shift 2,14:55,21:05,Hadir,45000,Howard Wolowitz,28-01-2026 21:05:00
+ATT-202601-113,29-01-2026,SN-16,drg.g.p Fathya,Dokter Gigi Umum,Shift 1,09:00,15:00,Hadir,55000,Howard Wolowitz,29-01-2026 15:05:00
+ATT-202601-114,29-01-2026,SN-17,drg.g.p Belinda,Dokter Gigi Umum,Shift 2,15:00,21:00,Hadir,55000,Howard Wolowitz,29-01-2026 21:05:00
+ATT-202601-115,29-01-2026,SN-18,Bernadette Rostenkowski,Perawat Gigi,Shift 1,08:50,15:00,Hadir,45000,Howard Wolowitz,29-01-2026 15:05:00
+ATT-202601-116,29-01-2026,SN-19,Wulan,Perawat Gigi,Shift 2,14:55,21:05,Hadir,45000,Howard Wolowitz,29-01-2026 21:05:00
+ATT-202601-117,30-01-2026,SN-17,drg.g.p Belinda,Dokter Gigi Umum,Shift 1,09:00,15:00,Hadir,55000,Howard Wolowitz,30-01-2026 15:05:00
+ATT-202601-118,30-01-2026,SN-05,"drg. Rahma Yulinda D, Sp. BMM",Dokter Gigi Umum,Shift 2,15:00,21:00,Hadir,55000,Howard Wolowitz,30-01-2026 21:05:00
+ATT-202601-119,30-01-2026,SN-19,Wulan,Perawat Gigi,Shift 1,08:50,15:00,Hadir,45000,Howard Wolowitz,30-01-2026 15:05:00
+ATT-202601-120,30-01-2026,SN-20,Dina,Perawat Gigi,Shift 2,14:55,21:05,Hadir,45000,Howard Wolowitz,30-01-2026 21:05:00

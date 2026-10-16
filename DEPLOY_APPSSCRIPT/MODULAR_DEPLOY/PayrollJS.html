@@ -739,18 +739,7 @@
       idAturan = foundStaff.idPekerja || foundStaff.id;
     }
     if (!idAturan) {
-      const getPfx = function(r) {
-        let rl = String(r || '').toLowerCase();
-        if (rl.includes('owner')) return 'V4N-';
-        if (rl.includes('spesialis')) return 'DS-';
-        if (rl.includes('dokter')) return 'DU-';
-        if (rl.includes('perawat gigi')) return 'PG-';
-        if (rl.includes('perawat')) return 'PU-';
-        if (rl.includes('admin')) return 'AS-';
-        if (rl.includes('office')) return 'OS-';
-        return 'ST-';
-      };
-      let pfx = getPfx(autoRole);
+      let pfx = 'SN-';
       let maxN = 0;
       (window.PayrollState.tarifShift || []).forEach(t => {
         let tid = String(t.idPekerja || t.idAturan || '');

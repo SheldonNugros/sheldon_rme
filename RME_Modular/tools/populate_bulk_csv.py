@@ -33,16 +33,6 @@ def main():
     # 1. 06 MASTER USER & ROLE (MASTER/Data.csv)
     # Headers: ["ID_Pekerja", "Nama_Pekerja", "Username", "Kategori_Role", "Password", "Status", "No_Registrasi", "No_HP", "Persen_JM_Dokter", "Email"]
     # -------------------------------------------------------------------------
-    ROLE_PREFIXES = {
-        "Owner": "V4N-",
-        "Dokter Gigi Spesialis": "DS-",
-        "Dokter Gigi Umum": "DU-",
-        "Perawat Gigi": "PG-",
-        "Perawat Umum": "PU-",
-        "Admin": "AS-",
-        "Office": "OS-"
-    }
-
     master_headers = ["ID_Pekerja", "Nama_Pekerja", "Username", "Kategori_Role", "Password", "Status", "No_Registrasi", "No_HP", "Persen_JM_Dokter", "Email"]
     master_raw_rows = [
         ["Administrator Sistem", "admin", "Owner", "admin123", "Aktif", "-", "081234567890", "0", "vembrian@gmail.com"],
@@ -69,17 +59,11 @@ def main():
         ["Howard Wolowitz", "howard", "Admin", "4444", "Aktif", "-", "081234567894", "0", "howard@sheldon.id"]
     ]
 
-    role_counters = {pfx: 0 for pfx in ROLE_PREFIXES.values()}
     master_rows = []
     id_map_by_name = {}
-    for r in master_raw_rows:
+    for idx_pek, r in enumerate(master_raw_rows, start=1):
         nama = r[0]
-        role = r[2]
-        pfx = ROLE_PREFIXES.get(role, "ST-")
-        if pfx not in role_counters:
-            role_counters[pfx] = 0
-        role_counters[pfx] += 1
-        id_pek = f"{pfx}{role_counters[pfx]:02d}"
+        id_pek = f"SN-{idx_pek:02d}"
         id_map_by_name[nama] = id_pek
         master_rows.append([id_pek] + r)
 

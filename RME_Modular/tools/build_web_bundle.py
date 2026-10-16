@@ -253,7 +253,7 @@ for idx_st, r in enumerate(staff_csv):
             pjm_val = float(r[8]) if len(r) > 8 and r[8] else 0
             email_pek = r[9].strip() if len(r) > 9 and r[9] else ""
         else:
-            id_pek = f"STF-{idx_st:03d}"
+            id_pek = f"SN-{idx_st:02d}"
             nama_pek = r[0].strip()
             user_pek = r[1].lower().strip()
             role_pek = r[2].strip()
@@ -1044,7 +1044,7 @@ mock_gas_script = '''
               shift: payload.shift,
               jamMulai: payload.jamMulai || "10:00",
               jamSelesai: payload.jamSelesai || "15:00",
-              idPekerja: r.idPekerja || "STF-001",
+              idPekerja: r.idPekerja || "SN-01",
               namaPekerja: r.namaPekerja,
               role: r.role || "Staff",
               statusAbsensi: st,
@@ -1227,8 +1227,10 @@ mock_gas_script = '''
         let idx = mockDb.staff.findIndex(s => (s.username || "").toLowerCase() === cleanUser);
         let pjmVal = payload.persenJM ? Number(payload.persenJM) : 0;
         if (pjmVal > 1) pjmVal = pjmVal / 100;
+        let genId = "SN-" + String(mockDb.staff.length + 1).padStart(2, '0');
         let item = {
-          id: idx !== -1 ? mockDb.staff[idx].id : ("STF-" + String(mockDb.staff.length + 1).padStart(3, '0')),
+          id: idx !== -1 ? mockDb.staff[idx].id : genId,
+          idPekerja: idx !== -1 ? (mockDb.staff[idx].idPekerja || mockDb.staff[idx].id) : genId,
           username: cleanUser,
           nama: payload.nama,
           role: payload.role,
@@ -1297,8 +1299,10 @@ mock_gas_script = '''
         }
         let role = payload.role || "Admin";
         let pjmVal = role === "Dokter Gigi Spesialis" ? 0.50 : (role === "Dokter Gigi Umum" ? 0.40 : 0);
+        let genId = "SN-" + String(mockDb.staff.length + 1).padStart(2, '0');
         let item = {
-          id: "STF-" + String(mockDb.staff.length + 1).padStart(3, '0'),
+          id: genId,
+          idPekerja: genId,
           username: cleanUser,
           nama: payload.nama,
           role: role,

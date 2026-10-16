@@ -97,19 +97,11 @@ function onEdit(e) {
 }
 
 function getPrefixRole(role) {
-  const r = String(role || "").trim().toLowerCase();
-  if (r === "owner") return "V4N-";
-  if (r === "dokter gigi spesialis") return "DS-";
-  if (r === "dokter gigi umum") return "DU-";
-  if (r === "perawat gigi") return "PG-";
-  if (r === "perawat umum") return "PU-";
-  if (r === "admin") return "AS-";
-  if (r === "office") return "OS-";
-  return "ST-";
+  return "SN-";
 }
 
 function generateNextIdPekerja(role, sheet) {
-  const prefix = getPrefixRole(role);
+  const prefix = "SN-";
   let maxNum = 0;
   if (!sheet) sheet = getSheetUserMaster();
   const data = sheet.getDataRange().getValues();
@@ -133,7 +125,7 @@ function generateNextIdPekerja(role, sheet) {
 }
 
 /**
- * GENERATE & UPDATE SELURUH ID PEKERJA BERDASARKAN ROLE
+ * GENERATE & UPDATE SELURUH ID PEKERJA DENGAN FORMAT SN-XX (2 DIGIT)
  * Mengisi ID_Pekerja di sheet 'Data' dan memperbarui ID di sheet 'Pengaturan_Tarif_Shift'
  */
 function generateAllIdPekerja() {
@@ -161,23 +153,18 @@ function generateAllIdPekerja() {
     let colNama = headersLow.indexOf("nama_pekerja"); if (colNama === -1) colNama = 1;
     let colRole = headersLow.indexOf("kategori_role"); if (colRole === -1) colRole = 3;
 
-    const counters = {
-      "V4N-": 0, "DS-": 0, "DU-": 0, "PG-": 0, "PU-": 0, "AS-": 0, "OS-": 0, "ST-": 0
-    };
-
+    let counter = 0;
     const idMapByNama = {};
 
     for (let i = 1; i < data.length; i++) {
       let r = data[i];
       let nama = String(r[colNama] || "").trim();
-      let role = String(r[colRole] || "").trim();
       if (!nama) continue;
 
-      let prefix = getPrefixRole(role);
-      counters[prefix] = (counters[prefix] || 0) + 1;
-      let newId = prefix + String(counters[prefix]).padStart(2, '0');
+      counter++;
+      let newId = "SN-" + String(counter).padStart(2, '0');
 
-      sheetData.getRange(i + 1, colId + 1).setValue(newId);
+      sheetData.getRange(i + 1, colId + 1).setValue(newId).setNumberFormat("@");
       idMapByNama[nama.toLowerCase()] = newId;
     }
 

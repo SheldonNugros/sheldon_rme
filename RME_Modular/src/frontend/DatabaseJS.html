@@ -1101,14 +1101,14 @@ function getFallbackUserList() {
   }
 
   return [
-    { idPekerja: "V4N-01", nama: "Administrator Sistem", username: "admin", role: "Owner", hasPassword: true, isHashed: true, status: "Aktif", noReg: "-", noHp: "081234567890", email: "admin@sheldon.id", persenJM: 0 },
-    { idPekerja: "V4N-02", nama: "drg. V. Asung Nugroho, Sp.Ort", username: "asung", role: "Owner", hasPassword: true, isHashed: true, status: "Aktif", noReg: "503/SIP-DRG/001/2024", noHp: "081298765432", email: "v.asungnugroho@gmail.com", persenJM: 0.50 },
-    { idPekerja: "DS-02", nama: "drg. Rahma Yulinda D, Sp. BMM", username: "rahma", role: "Dokter Gigi Spesialis", hasPassword: true, isHashed: false, status: "Aktif", noReg: "503/SIP-DRG/001/2026", noHp: "081234567801", email: "rahma@sheldon.id", persenJM: 0.65 },
-    { idPekerja: "DU-02", nama: "drg. Regyana Oktavaria", username: "regyana", role: "Dokter Gigi Umum", hasPassword: true, isHashed: false, status: "Aktif", noReg: "503/SIP-DRG/002/2026", noHp: "081234567802", email: "regyana@sheldon.id", persenJM: 0.40 },
-    { idPekerja: "DU-03", nama: "drg. Latifah Mulyana", username: "latifah", role: "Dokter Gigi Umum", hasPassword: true, isHashed: false, status: "Aktif", noReg: "503/SIP-DRG/003/2026", noHp: "081234567803", email: "latifah@sheldon.id", persenJM: 0.40 },
-    { idPekerja: "DU-04", nama: "drg. Tia Ardhana R", username: "tia", role: "Dokter Gigi Umum", hasPassword: true, isHashed: false, status: "Aktif", noReg: "503/SIP-DRG/004/2026", noHp: "081234567804", email: "tia@sheldon.id", persenJM: 0.50 },
-    { idPekerja: "PG-01", nama: "Bernadette Rostenkowski", username: "bernadette", role: "Perawat Gigi", hasPassword: true, isHashed: false, status: "Aktif", noReg: "503/STR-PRW/003/2024", noHp: "081399001122", email: "bernadette@sheldon.id", persenJM: 0 },
-    { idPekerja: "AS-01", nama: "Howard Wolowitz", username: "howard", role: "Admin", hasPassword: true, isHashed: false, status: "Aktif", noReg: "-", noHp: "081377889900", email: "howard@sheldon.id", persenJM: 0 }
+    { idPekerja: "SN-01", nama: "Administrator Sistem", username: "admin", role: "Owner", hasPassword: true, isHashed: true, status: "Aktif", noReg: "-", noHp: "081234567890", email: "admin@sheldon.id", persenJM: 0 },
+    { idPekerja: "SN-02", nama: "drg. V. Asung Nugroho, Sp.Ort", username: "asung", role: "Owner", hasPassword: true, isHashed: true, status: "Aktif", noReg: "503/SIP-DRG/001/2024", noHp: "081298765432", email: "v.asungnugroho@gmail.com", persenJM: 0.50 },
+    { idPekerja: "SN-03", nama: "drg. Rahma Yulinda D, Sp. BMM", username: "rahma", role: "Dokter Gigi Spesialis", hasPassword: true, isHashed: false, status: "Aktif", noReg: "503/SIP-DRG/001/2026", noHp: "081234567801", email: "rahma@sheldon.id", persenJM: 0.65 },
+    { idPekerja: "SN-04", nama: "drg. Regyana Oktavaria", username: "regyana", role: "Dokter Gigi Umum", hasPassword: true, isHashed: false, status: "Aktif", noReg: "503/SIP-DRG/002/2026", noHp: "081234567802", email: "regyana@sheldon.id", persenJM: 0.40 },
+    { idPekerja: "SN-05", nama: "drg. Latifah Mulyana", username: "latifah", role: "Dokter Gigi Umum", hasPassword: true, isHashed: false, status: "Aktif", noReg: "503/SIP-DRG/003/2026", noHp: "081234567803", email: "latifah@sheldon.id", persenJM: 0.40 },
+    { idPekerja: "SN-06", nama: "drg. Tia Ardhana R", username: "tia", role: "Dokter Gigi Umum", hasPassword: true, isHashed: false, status: "Aktif", noReg: "503/SIP-DRG/004/2026", noHp: "081234567804", email: "tia@sheldon.id", persenJM: 0.50 },
+    { idPekerja: "SN-07", nama: "Bernadette Rostenkowski", username: "bernadette", role: "Perawat Gigi", hasPassword: true, isHashed: false, status: "Aktif", noReg: "503/STR-PRW/003/2024", noHp: "081399001122", email: "bernadette@sheldon.id", persenJM: 0 },
+    { idPekerja: "SN-08", nama: "Howard Wolowitz", username: "howard", role: "Admin", hasPassword: true, isHashed: false, status: "Aktif", noReg: "-", noHp: "081377889900", email: "howard@sheldon.id", persenJM: 0 }
   ];
 }
 
@@ -1343,18 +1343,7 @@ function syncUserToClientPayroll(nama, role, status) {
         s1 = 55000; s2 = 55000; gp = 0;
         ket = "Shift Rp 55.000/shift + JM";
       }
-      const getPfx = function(r) {
-        let rl = String(r || '').toLowerCase();
-        if (rl.includes('owner')) return 'V4N-';
-        if (rl.includes('spesialis')) return 'DS-';
-        if (rl.includes('dokter')) return 'DU-';
-        if (rl.includes('perawat gigi')) return 'PG-';
-        if (rl.includes('perawat')) return 'PU-';
-        if (rl.includes('admin')) return 'AS-';
-        if (rl.includes('office')) return 'OS-';
-        return 'ST-';
-      };
-      let pfx = getPfx(cleanRole);
+      let pfx = 'SN-';
       let maxN = 0;
       (window.PayrollState.tarifShift || []).forEach(t => {
         let tid = String(t.idPekerja || t.idAturan || '');

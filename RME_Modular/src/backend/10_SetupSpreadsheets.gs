@@ -165,13 +165,13 @@ const SPREADSHEET_DEFINITIONS = {
           "headers": ["ID_Pekerja", "Nama_Pekerja", "Username", "Kategori_Role", "Password", "Status", "No_Registrasi", "No_HP", "Persen_JM_Dokter", "Email"],
           "formats": { "A": "@", "I": "0.0%" },
           "seedRows": [
-            ["V4N-01", "Administrator Sistem", "admin", "Owner", "admin123", "Aktif", "-", "08123456789", "", "admin@sheldon.id"],
-            ["DS-01", "drg. Rahma Yulinda D, Sp. BMM", "rahma", "Dokter Gigi Spesialis", "1234", "Aktif", "503/SIP-DRG/001/2026", "081234567801", 0.65, "rahma@sheldon.id"],
-            ["DU-01", "drg. Regyana Oktavaria", "regyana", "Dokter Gigi Umum", "1234", "Aktif", "503/SIP-DRG/002/2026", "081234567802", 0.40, "regyana@sheldon.id"],
-            ["DU-02", "drg. Latifah Mulyana", "latifah", "Dokter Gigi Umum", "1234", "Aktif", "503/SIP-DRG/003/2026", "081234567803", 0.40, "latifah@sheldon.id"],
-            ["DU-03", "drg. Tia Ardhana R", "tia", "Dokter Gigi Umum", "1234", "Aktif", "503/SIP-DRG/004/2026", "081234567804", 0.50, "tia@sheldon.id"],
-            ["PG-01", "Bernadette Rostenkowski", "bernadette", "Perawat Gigi", "3333", "Aktif", "503/STR-PRW/003/2024", "081234567893", "", "bernadette@sheldon.id"],
-            ["AS-01", "Howard Wolowitz", "howard", "Admin", "4444", "Aktif", "-", "081234567894", "", "howard@sheldon.id"]
+            ["SN-01", "Administrator Sistem", "admin", "Owner", "admin123", "Aktif", "-", "08123456789", "", "admin@sheldon.id"],
+            ["SN-02", "drg. Rahma Yulinda D, Sp. BMM", "rahma", "Dokter Gigi Spesialis", "1234", "Aktif", "503/SIP-DRG/001/2026", "081234567801", 0.65, "rahma@sheldon.id"],
+            ["SN-03", "drg. Regyana Oktavaria", "regyana", "Dokter Gigi Umum", "1234", "Aktif", "503/SIP-DRG/002/2026", "081234567802", 0.40, "regyana@sheldon.id"],
+            ["SN-04", "drg. Latifah Mulyana", "latifah", "Dokter Gigi Umum", "1234", "Aktif", "503/SIP-DRG/003/2026", "081234567803", 0.40, "latifah@sheldon.id"],
+            ["SN-05", "drg. Tia Ardhana R", "tia", "Dokter Gigi Umum", "1234", "Aktif", "503/SIP-DRG/004/2026", "081234567804", 0.50, "tia@sheldon.id"],
+            ["SN-06", "Bernadette Rostenkowski", "bernadette", "Perawat Gigi", "3333", "Aktif", "503/STR-PRW/003/2024", "081234567893", "", "bernadette@sheldon.id"],
+            ["SN-07", "Howard Wolowitz", "howard", "Admin", "4444", "Aktif", "-", "081234567894", "", "howard@sheldon.id"]
           ],
           "validations": {
             "D": ["Owner", "Dokter Gigi Spesialis", "Dokter Gigi Umum", "Perawat Gigi", "Perawat Umum", "Admin", "Office"],
@@ -2475,18 +2475,7 @@ function simpanTarifShift(payload) {
       idPekerja = String(data[foundRow - 1][0] || "").trim();
     }
     if (!idPekerja || idPekerja.startsWith("TARIF-")) {
-      const getPfx = function(r) {
-        let rl = String(r || '').toLowerCase();
-        if (rl.includes('owner')) return 'V4N-';
-        if (rl.includes('spesialis')) return 'DS-';
-        if (rl.includes('dokter')) return 'DU-';
-        if (rl.includes('perawat gigi')) return 'PG-';
-        if (rl.includes('perawat')) return 'PU-';
-        if (rl.includes('admin')) return 'AS-';
-        if (rl.includes('office')) return 'OS-';
-        return 'ST-';
-      };
-      let pfx = getPfx(role);
+      let pfx = "SN-";
       let maxN = 0;
       for (let i = 1; i < data.length; i++) {
         let tid = String(data[i][0] || '');

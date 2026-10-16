@@ -1,23 +1,23 @@
 ID_Pekerja,Nama_Pekerja,Username,Kategori_Role,Password,Status,No_Registrasi,No_HP,Persen_JM_Dokter,Email
-V4N-01,Administrator Sistem,admin,Owner,admin123,Aktif,-,081234567890,0,vembrian@gmail.com
-V4N-02,"drg. V. Asung Nugroho, Sp.Ort",asung,Owner,admin123,Aktif,503/SIP-DRG/000/2026,081234567800,0.65,v.asungnugroho@gmail.com
-DS-01,"drg. Sheldon Cooper, Sp.Ort",sheldon,Dokter Gigi Spesialis,1234,Aktif,503/SIP-DRG/001/2026,081234567801,0.50,sheldon@sheldon.id
-DU-01,drg. Leonard Hofstadter,leonard,Dokter Gigi Umum,1111,Aktif,503/SIP-DRG/002/2026,081234567802,0.40,leonard@sheldon.id
-DS-02,"drg. Rahma Yulinda D, Sp. BMM",rahma,Dokter Gigi Spesialis,1234,Aktif,503/SIP-DRG/003/2026,081234567803,0.65,rahma@sheldon.id
-DU-02,drg. Regyana Oktavaria,regyana,Dokter Gigi Umum,1234,Aktif,503/SIP-DRG/004/2026,081234567804,0.40,regyana@sheldon.id
-DU-03,drg. Latifah Mulyana,latifah,Dokter Gigi Umum,1234,Aktif,503/SIP-DRG/005/2026,081234567805,0.40,latifah@sheldon.id
-DU-04,drg. Tia Ardhana R,tia,Dokter Gigi Umum,1234,Aktif,503/SIP-DRG/006/2026,081234567806,0.50,tia@sheldon.id
-DU-05,drg. Danny,danny,Dokter Gigi Umum,1234,Aktif,503/SIP-DRG/007/2026,081234567807,0.65,danny@sheldon.id
-DU-06,drg. Astri,astri,Dokter Gigi Umum,1234,Aktif,503/SIP-DRG/008/2026,081234567808,0.65,astri@sheldon.id
-DU-07,drg. Rizka,rizka,Dokter Gigi Umum,1234,Aktif,503/SIP-DRG/009/2026,081234567809,0.65,rizka@sheldon.id
-DU-08,drg. Nanda,nanda,Dokter Gigi Umum,1234,Aktif,503/SIP-DRG/010/2026,081234567810,0.65,nanda@sheldon.id
-DU-09,drg. Aviva,aviva,Dokter Gigi Umum,1234,Aktif,503/SIP-DRG/011/2026,081234567811,0.65,aviva@sheldon.id
-DU-10,drg. Erien,erien,Dokter Gigi Umum,1234,Aktif,503/SIP-DRG/012/2026,081234567812,0.50,erien@sheldon.id
-DU-11,drg.g.p Dinda,dinda,Dokter Gigi Umum,1234,Aktif,503/SIP-DRG/013/2026,081234567813,0.55,dinda@sheldon.id
-DU-12,drg.g.p Fathya,fathya,Dokter Gigi Umum,1234,Aktif,503/SIP-DRG/014/2026,081234567814,0.40,fathya@sheldon.id
-DU-13,drg.g.p Belinda,belinda,Dokter Gigi Umum,1234,Aktif,503/SIP-DRG/015/2026,081234567815,0.40,belinda@sheldon.id
-PG-01,Bernadette Rostenkowski,bernadette,Perawat Gigi,3333,Aktif,503/STR-PRW/001/2026,081234567893,0,bernadette@sheldon.id
-PG-02,Wulan,wulan,Perawat Gigi,3333,Aktif,503/STR-PRW/002/2026,081234567895,0,wulan@sheldon.id
-PG-03,Dina,dina,Perawat Gigi,3333,Aktif,503/STR-PRW/003/2026,081234567896,0,dina@sheldon.id
-PU-01,Penny Teller,penny,Perawat Umum,2222,Aktif,-,081234567892,0,penny@sheldon.id
-AS-01,Howard Wolowitz,howard,Admin,4444,Aktif,-,081234567894,0,howard@sheldon.id
+SN-01,Administrator Sistem,admin,Owner,admin123,Aktif,-,081234567890,0,vembrian@gmail.com
+SN-02,"drg. V. Asung Nugroho, Sp.Ort",asung,Owner,admin123,Aktif,503/SIP-DRG/000/2026,081234567800,0.65,v.asungnugroho@gmail.com
+SN-03,"drg. Sheldon Cooper, Sp.Ort",sheldon,Dokter Gigi Spesialis,1234,Aktif,503/SIP-DRG/001/2026,081234567801,0.50,sheldon@sheldon.id
+SN-04,drg. Leonard Hofstadter,leonard,Dokter Gigi Umum,1111,Aktif,503/SIP-DRG/002/2026,081234567802,0.40,leonard@sheldon.id
+SN-05,"drg. Rahma Yulinda D, Sp. BMM",rahma,Dokter Gigi Spesialis,1234,Aktif,503/SIP-DRG/003/2026,081234567803,0.65,rahma@sheldon.id
+SN-06,drg. Regyana Oktavaria,regyana,Dokter Gigi Umum,1234,Aktif,503/SIP-DRG/004/2026,081234567804,0.40,regyana@sheldon.id
+SN-07,drg. Latifah Mulyana,latifah,Dokter Gigi Umum,1234,Aktif,503/SIP-DRG/005/2026,081234567805,0.40,latifah@sheldon.id
+SN-08,drg. Tia Ardhana R,tia,Dokter Gigi Umum,1234,Aktif,503/SIP-DRG/006/2026,081234567806,0.50,tia@sheldon.id
+SN-09,drg. Danny,danny,Dokter Gigi Umum,1234,Aktif,503/SIP-DRG/007/2026,081234567807,0.65,danny@sheldon.id
+SN-10,drg. Astri,astri,Dokter Gigi Umum,1234,Aktif,503/SIP-DRG/008/2026,081234567808,0.65,astri@sheldon.id
+SN-11,drg. Rizka,rizka,Dokter Gigi Umum,1234,Aktif,503/SIP-DRG/009/2026,081234567809,0.65,rizka@sheldon.id
+SN-12,drg. Nanda,nanda,Dokter Gigi Umum,1234,Aktif,503/SIP-DRG/010/2026,081234567810,0.65,nanda@sheldon.id
+SN-13,drg. Aviva,aviva,Dokter Gigi Umum,1234,Aktif,503/SIP-DRG/011/2026,081234567811,0.65,aviva@sheldon.id
+SN-14,drg. Erien,erien,Dokter Gigi Umum,1234,Aktif,503/SIP-DRG/012/2026,081234567812,0.50,erien@sheldon.id
+SN-15,drg.g.p Dinda,dinda,Dokter Gigi Umum,1234,Aktif,503/SIP-DRG/013/2026,081234567813,0.55,dinda@sheldon.id
+SN-16,drg.g.p Fathya,fathya,Dokter Gigi Umum,1234,Aktif,503/SIP-DRG/014/2026,081234567814,0.40,fathya@sheldon.id
+SN-17,drg.g.p Belinda,belinda,Dokter Gigi Umum,1234,Aktif,503/SIP-DRG/015/2026,081234567815,0.40,belinda@sheldon.id
+SN-18,Bernadette Rostenkowski,bernadette,Perawat Gigi,3333,Aktif,503/STR-PRW/001/2026,081234567893,0,bernadette@sheldon.id
+SN-19,Wulan,wulan,Perawat Gigi,3333,Aktif,503/STR-PRW/002/2026,081234567895,0,wulan@sheldon.id
+SN-20,Dina,dina,Perawat Gigi,3333,Aktif,503/STR-PRW/003/2026,081234567896,0,dina@sheldon.id
+SN-21,Penny Teller,penny,Perawat Umum,2222,Aktif,-,081234567892,0,penny@sheldon.id
+SN-22,Howard Wolowitz,howard,Admin,4444,Aktif,-,081234567894,0,howard@sheldon.id

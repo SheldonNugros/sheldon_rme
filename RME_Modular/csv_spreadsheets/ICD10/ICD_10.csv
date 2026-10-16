@@ -1,24 +1,307 @@
-ICD10_Code,Disease_Description
-K00.0,Anodontia
+﻿ICD10_Code,Disease_Description
+C00,Malignant neoplasm of lip
+C01,Malignant neoplasm of base of tongue
+C03,Malignant neoplasm of gum
+C04,Malignant neoplasm of floor of mouth
+C06,Malignant neoplasm of other and unspecified parts of mouth
+C41.0,Malignant neoplasm of bones of skull and face
+C41.1,Malignant neoplasm of lower jaw bone
+D10,Benign neoplasm of mouth and pharynx
+D10.0,"Benign neoplasm, lip"
+D10.1,"Benign neoplasm, tongue"
+D10.2,Benign neoplasm of floor of mouth
+D10.3,"Benign neoplasm, other and unspecified parts of mouth"
+D11,Benign neoplasm of major salivary glands
+D11.0,"Benign neoplasm, parotid gland"
+D11.7,"Benign neoplasm, other major salivary glands"
+D11.9,"Benign neoplasm, major salivary gland, unspecified"
+D16,Benign neoplasm of bone and articular cartilage
+D16.4,"Benign neoplasm, bones of skull and face"
+D16.5,Benign neoplasm of lower jaw bone
+D18,"Haemangioma and lymphangioma, any site"
+D18.0,"Haemangioma, any site"
+D18.1,"Lymphangioma, any site"
+D36.7,Benign neoplasm of other specified sites
+D66,Hereditary factor VIII deficiency
+D67,Hereditary factor ix deficiency
+D68.9,"Coagulation defect, unspecified"
+D69,Purpura and other haemorrhagic conditions
+D69.0,Allergic purpura
+D69.1,Qualitative platelet defects
+D69.2,Other nonthrombocytopenic purpura
+D69.3,Idiopathic thrombocytopenic purpura
+D69.4,Other primary thrombocytopenia
+D69.5,Secondary thrombocytopenia
+D69.6,"Thrombocytopenia, unspecified"
+D69.8,Other specified haemorrhagic conditions
+D69.9,"Haemorrhagic condition, unspecified"
+E10,Insulin-dependent diabetes mellitus
+E10.0,Insulin-dependent diabetes mellitus with coma
+E10.1,Insulin-dependent diabetes mellitus with ketoacidosis
+E10.2,Insulin-dependent diabetes mellitus with renal complications
+E10.3,Insulin-dependent diabetes mellitus with ophthalmic complications
+E10.4,Insulin-dependent diabetes mellitus with neurological complications
+E10.5,Insulin-dependent diabetes mellitus with peripheral circulatory complications
+E10.6,Insulin-dependent diabetes mellitus with other specified complications
+E10.7,Insulin-dependent diabetes mellitus with multiple complications
+E10.8,Insulin-dependent diabetes mellitus with unspecified complications
+E10.9,Insulin-dependent diabetes mellitus without complications
+E11,Non-insulin-dependent diabetes mellitus
+E11.0,Non-insulin-dependent diabetes mellitus with coma
+E11.1,Non-insulin-dependent diabetes mellitus with ketoacidosis
+E11.2,Non-insulin-dependent diabetes mellitus with renal complications
+E11.3,Non-insulin-dependent diabetes mellitus with ophthalmic complications
+E11.4,Non-insulin-dependent diabetes mellitus with neurological complications
+E11.5,Non-insulin-dependent diabetes mellitus with peripheral circulatory complications
+E11.6,Non-insulin-dependent diabetes mellitus with other specified complications
+E11.7,Non-insulin-dependent diabetes mellitus with multiple complications
+E11.8,Non-insulin-dependent diabetes mellitus with unspecified complications
+E11.9,Non-insulin-dependent diabetes mellitus without complications
+E16,Other disorders of pancreatic internal secretion
+E16.0,Drug-induced hypoglycaemia without coma
+E16.1,Other hypoglycaemia
+E16.2,"Hypoglycaemia, unspecified"
+E16.3,Increased secretion of glucagon
+E16.4,Abnormal secretion of gastrin
+E16.8,Other specified disorders of pancreatic internal secretion
+E16.9,"Disorder of pancreatic internal secretion, unspecified"
+G50.0,Trigeminal neuralgia
+G51.0,Bell's palsy
+G51.8,Other disorders of facial nerve
+J01.0,Acute maxillary sinusitis
+J32.0,Chronic maxillary sinusitis
+K00,Disorders of tooth development and eruption
+K00.0,"Anodontia (Hypodontia, oligodontia)"
+K00.1,Supernumerary teeth
+K00.2,Abnormalities of size and form of teeth
+K00.3,Mottled teeth
+K00.4,Disturbances in tooth formation
+K00.5,Hereditary disturbances in tooth structure nec
 K00.6,Disturbances in tooth eruption
+K00.7,Teething syndrome
+K00.8,Other disorders of tooth development
+K00.9,"Disorder of tooth development, unspecified"
+K01,Embedded and impacted teeth
+K01.0,Embedded teeth
 K01.1,Impacted teeth
+K02,Dental caries
 K02.0,Caries limited to enamel
 K02.1,Caries of dentine
 K02.2,Caries of cementum
+K02.3,Arrested dental caries
+K02.4,Odontoclasia
+K02.5,Dental caries with pulp exposure
+K02.6,Dental caries penetrating into dentin
+K02.7,Dental caries penetrating into cementum
+K02.8,Other dental caries
+K02.9,"Dental caries, unspecified"
+K03,Other diseases of hard tissues of teeth
 K03.0,Excessive attrition of teeth
+K03.1,Abrasion of teeth
+K03.2,Erosion of teeth
+K03.3,Pathological resorption of teeth
+K03.4,Hypercementosis
+K03.5,Ankylosis of teeth
 K03.6,Deposits [accretions] on teeth
+K03.7,Posteruptive colour changes of dental hard tissues
+K03.8,Other specified diseases of hard tissues of teeth
+K03.9,"Disease of hard tissues of teeth, unspecified"
+K04,Diseases of pulp and periapical tissues
 K04.0,Pulpitis
 K04.1,Necrosis of pulp
+K04.2,Pulp degeneration
+K04.3,Abnormal hard tissue formation in pulp
 K04.4,Acute apical periodontitis of pulpal origin
 K04.5,Chronic apical periodontitis
 K04.6,Periapical abscess with sinus
 K04.7,Periapical abscess without sinus
+K04.8,Radicular cyst
+K04.9,Other and unspec diseases of pulp and periapical tissues
+K05,Gingivitis and periodontal diseases
 K05.0,Acute gingivitis
 K05.1,Chronic gingivitis
 K05.2,Acute periodontitis
 K05.3,Chronic periodontitis
+K05.4,Periodontosis
+K05.5,Other periodontal diseases
+K05.6,"Periodontal disease, unspecified"
+K06,Other disorders of gingiva and edentulous alveolar ridge
 K06.0,Gingival recession
+K06.1,Gingival enlargement
+K06.2,Gingival and edentulous alveolar ridge les assoc with traum
+K06.8,Other specified disorder of gingiva and edentulous alveolar ridge
+K06.9,"Disorder of gingiva and edentulous alveolar ridge, unspec act"
+K07,Dentofacial anomalies [including malocclusion]
+K07.0,Major anomalies of jaw size
+K07.1,Anomalies of jaw-cranial base relationship
+K07.2,Anomalies of dental arch relationship
 K07.3,Anomalies of tooth position
-K08.1,"Loss of teeth due to accident, extraction or local periodontal disease"
+K07.4,"Malocclusion, unspecified"
+K07.5,Dentofacial functional abnormalities
+K07.6,Temporomandibular joint disorders
+K07.8,Other dentofacial anomalies
+K07.9,"Dentofacial anomaly, unspecified"
+K08,Other disorders of teeth and supporting structures
+K08.0,Exfoliation of teeth due to systemic causes
+K08.1,Loss of teeth accident extraction or local periodontal dis
+K08.2,Atrophy of edentulous alveolar ridge
+K08.3,Retained dental root
+K08.4,Partial loss of teeth
+K08.5,Unsatisfactory restoration of tooth
+K08.8,Other specified disorders of teeth and supporting structures
+K08.9,"Disorder of teeth and supporting structures, unspecified"
+K09,"Cysts of oral region, not elsewhere classified"
+K09.0,Developmental odontogenic cysts
+K09.1,Developmental (nonodontogenic) cysts of oral region
+K09.2,Other cysts of jaw
+K09.8,"Other cysts of oral region, not elsewhere classified"
+K09.9,"Cyst of oral region, unspecified"
+K10,Other diseases of jaws
+K10.0,Developmental disorders of jaws
+K10.1,"Giant cell granuloma, central"
+K10.2,Inflammatory conditions of jaws
+K10.3,Alveolitis of jaws
+K10.8,Other specified diseases of jaws
+K10.9,"Disease of jaws, unspecified"
+K11,Diseases of salivary glands
+K11.0,Atrophy of salivary gland
+K11.1,Hypertrophy of salivary gland
+K11.2,Sialoadenitis
+K11.3,Abscess of salivary gland
+K11.4,Fistula of salivary gland
+K11.5,Sialolithiasis
+K11.6,Mucocele of salivary gland
+K11.7,Disturbances of salivary secretion
+K11.8,Other diseases of salivary glands
+K11.9,"Disease of salivary gland, unspecified"
+K12,Stomatitis and related lesions
 K12.0,Recurrent oral aphthae
+K12.1,Other forms of stomatitis
+K12.2,Cellulitis and abscess of mouth
+K12.3,Oral mucositis (ulcerative)
+K13,Other diseases of lip and oral mucosa
+K13.0,Diseases of lips
+K13.1,Cheek and lip biting
+K13.2,"Leukoplakia and other disturbances of oral epithelium, including tongue"
+K13.3,Hairy leukoplakia
+K13.4,Granuloma and granuloma-like lesions of oral mucosa
+K13.5,Oral submucous fibrosis
+K13.6,Irritative hyperplasia of oral mucosa
+K13.7,Other and unspecified lesions of oral mucosa
+K14,Diseases of tongue
+K14.0,Glossitis
+K14.1,Geographic tongue
+K14.2,Median rhomboid glossitis
+K14.3,Hypertrophy of tongue papillae
+K14.4,Atrophy of tongue papillae
+K14.5,Plicated tongue
+K14.6,Glossodynia
+K14.8,Other diseases of tongue
+K14.9,"Disease of tongue, unspecified"
+L02.0,"Cutaneous abscess, furuncle and carbuncle of face"
+L03.2,Cellulitis of face
+M26,Dentofacial anomalies [including malocclusion]
+M26.0,Major anomalies of jaw size
+M26.1,Anomalies of jaw-cranial base relationship
+M26.5,Dentofacial functional abnormalities
+M26.6,Temporomandibular joint disorders
+M27,Other diseases of jaws
+M27.1,"Giant cell granuloma, central"
+M27.2,Inflammatory conditions of jaws
+M27.4,Other and unspecified cysts of jaw
+M79.1,Myalgia
+M79.10,"Myalgia, multiple sites"
+M79.2,"Neuralgia and neuritis, unspecified"
+Q35,Cleft palate
+Q35.0,"Cleft hard palate, bilateral*"
+Q35.1,Cleft hard palate
+Q35.2,"Cleft soft palate, bilateral*"
+Q35.3,Cleft soft palate
+Q35.4,"Cleft hard palate with cleft soft palate, bilateral*"
+Q35.5,Cleft hard palate with cleft soft palate
+Q35.6,"Cleft palate, medial"
+Q35.7,Cleft uvula
+Q35.8,"Cleft palate, unspecified, bilateral*"
+Q35.9,"Cleft palate, unspecified"
+Q36,Cleft lip
+Q36.0,"Cleft lip, bilateral"
+Q36.1,"Cleft lip, median"
+Q36.9,"Cleft lip, unilateral"
+Q37,Cleft palate with cleft lip
+Q37.0,Cleft hard palate with  bilateral cleft lip
+Q37.1,Cleft hard palate with unilateral cleft lip
+Q37.2,Cleft soft palate with bilateral  cleft lip
+Q37.3,Cleft soft palate with unilateral cleft lip
+Q37.4,Cleft hard and soft palate with bilateral cleft lip
+Q37.5,Cleft hard and soft palate with  unilateral cleft lip
+Q37.8,Unspecified cleft palate with bilateral cleft  lip
+Q37.9,Unspecified cleft palate with unilateral cleft lip
+Q38,"Other congenital malformations of tongue, mouth and pharynx"
+Q38.0,"Congenital malformations of lips, not elsewhere classified"
+Q38.1,Ankyloglossia
+Q38.2,Macroglossia
+Q38.3,Other congenital malformations of tongue
+Q38.4,Congenital malformations of salivary glands and ducts
+Q38.5,"Congenital malformations of palate, not elsewhere classified"
+Q38.6,Other congenital malformations of mouth
+Q38.7,Pharyngeal pouch
+Q38.8,Other congenital malformations of pharynx
+S00,Superficial injury of head
+S00.0,Superficial injury of scalp
+S00.1,Contusion of eyelid and periocular area
+S00.2,Other superficial injuries of eyelid and periocular area
+S00.3,Superficial injury of nose
+S00.4,Superficial injury of ear
+S00.5,Superficial injury of lip and oral cavity
+S00.7,Multiple superficial injuries of head
+S00.8,Superficial injury of other parts of head
+S00.9,"Superficial injury of head, part unspecified"
+S01,Open wound of head
+S01.0,Open wound of scalp
+S01.1,Open wound of eyelid and periocular area
+S01.2,Open wound of nose
+S01.3,Open wound of ear
+S01.4,Open wound of cheek and temporomandibular area
+S01.5,Open wound of lip and oral cavity
+S01.7,Multiple open wounds of head
+S01.8,Open wound of other parts of head
+S01.9,"Open wound of head, part unspecified"
+S02,Fracture of skull and facial bones
+S02.0,Fracture of vault of skull
+S02.00,"Fracture of vault of skull, closed"
+S02.01,"Fracture of vault of skull, open"
+S02.1,Fracture of base of skull
+S02.10,"Fracture of base of skull, closed"
+S02.11,"Fracture of base of skull, open"
+S02.2,Fracture of nasal bones
+S02.20,"Fracture of nasal bones, closed"
+S02.21,"Fracture of nasal bones, open"
+S02.3,Fracture of orbital floor
+S02.30,"Fracture of orbital floor, closed"
+S02.31,"Fracture of orbital floor, open"
+S02.4,Fracture of malar and maxillary bones
+S02.40,"Fracture of malar and maxillary bones, closed"
+S02.41,"Fracture of malar and maxillary bones, open"
 S02.5,Fracture of tooth
+S02.50,"Fracture of tooth, closed"
+S02.51,"Fracture of tooth, open"
+S02.6,Fracture of mandible
+S02.60,"Fracture of mandible, closed"
+S02.61,"Fracture of mandible, open"
+S02.7,Multiple fractures involving skull and facial bones
+S02.70,"Multiple fractures involving skull and facial bones, closed"
+S02.71,"Multiple fractures involving skull and facial bones, open"
+S02.8,Fractures of other skull and facial bones
+S02.80,"Fractures of other skull and facial bones, closed"
+S02.81,"Fractures of other skull and facial bones, open"
+S02.9,"Fracture of skull and facial bones, part unspecified"
+S02.90,"Fracture of skull and facial bones, part unspecified, closed"
+S02.91,"Fracture of skull and facial bones, part unspecified, open"
+S03,"Dislocation, sprain and strain of joints and ligaments of head"
+S03.0,Dislocation of jaw
+S03.1,Dislocation of septal cartilage of nose
+S03.2,Dislocation of tooth
+S03.3,Dislocation of other and unspecified parts of head
+S03.4,Sprain and strain of jaw
+S03.5,Sprain and strain joints ligs other and unspec parts head
+Z09.0,Follow-up examination after surgery for other conditions

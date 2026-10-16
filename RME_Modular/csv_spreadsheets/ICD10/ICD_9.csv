@@ -1,0 +1,186 @@
+﻿ICD9_Code,Disease_Description
+23,Removal and restoration of teeth
+23.0,Forceps extraction of tooth
+23.01,Extraction of deciduous tooth
+23.09,Extraction of other tooth
+23.1,Surgical removal of tooth
+23.11,Removal of residual root
+23.19,Other surgical extraction of tooth
+23.2,Restoration of tooth by filling
+23.3,Restoration of tooth by inlay
+23.4,Other dental restoration
+23.41,Application of crown
+23.42,Insertion of fixed bridge
+23.43,Insertion of removable bridge
+23.49,Other dental restoration
+23.5,Implantation of tooth
+23.6,Prosthetic dental implant
+23.7,Apicoectomy and root canal therapy
+23.70,"Root canal, not otherwise specified"
+23.71,Root canal therapy with irrigation
+23.72,Root canal therapy with apicoectomy
+23.73,Apicoectomy
+24,"Other operations on teeth, gums, and alveoli"
+24.0,Incision of gum or alveolar bone
+24.1,"Diagnostic procedures on teeth, gums, and alveoli"
+24.11,Biopsy of gum
+24.12,Biopsy of alveolus
+24.19,"Other diagnostic procedures on teeth, gums, and alveoli"
+24.2,Gingivoplasty
+24.3,Other operations on gum
+24.31,Excision of lesion or tissue of gum
+24.32,Suture of laceration of gum
+24.39,Other operations on gum
+24.4,Excision of dental lesion of jaw
+24.5,Alveoloplasty
+24.6,Exposure of tooth
+24.7,Application of orthodontic appliance
+24.8,Other orthodontic operation
+24.9,Other dental operations
+24.91,Extension or deepening of buccolabial or lingual sulcus
+24.99,Other dental operations
+25,Operations on tongue
+25.0,Diagnostic procedures on tongue
+25.01,Closed (needle) biopsy of tongue
+25.02,Open biopsy of tongue
+25.09,Other diagnostic procedures on tongue
+25.1,Excision or destruction of lesion or tissue of tongue
+25.2,Partial glossectomy
+25.3,Complete glossectomy
+25.4,Radical glossectomy
+25.5,Repair of tongue and glossoplasty
+25.51,Suture of laceration of tongue
+25.59,Other repair and plastic operations on tongue
+25.9,Other operations on tongue
+25.91,Lingual frenotomy
+25.92,Lingual frenectomy
+25.93,Lysis of adhesions of tongue
+25.94,Other glossotomy
+25.99,Other operations on tongue
+26,Operations on salivary glands and ducts
+26.0,Incision of salivary gland or duct
+26.1,Diagnostic procedures on salivary glands and ducts
+26.11,Closed (needle) biopsy of salivary gland or duct
+26.12,Open biopsy of salivary gland or duct
+26.19,Other diagnostic procedures on salivary glands and ducts
+26.2,Excision of lesion of salivary gland
+26.21,Marsupialization of salivary gland cyst
+26.29,Other excision of salivary gland lesion
+26.3,Sialoadenectomy
+26.30,"Sialoadenectomy, not otherwise specified"
+26.31,Partial sialoadenectomy
+26.32,Complete sialoadenectomy
+26.4,Repair of salivary gland or duct
+26.41,Suture of laceration of salivary gland
+26.42,Closure of salivary fistula
+26.49,Other repair and plastic operations on salivary gland or duct
+26.9,Other operations on salivary gland or duct
+26.91,Probing of salivary duct
+26.99,Other operations on salivary gland or duct
+27,Other operations on mouth and face
+27.0,Drainage of face and floor of mouth
+27.1,Incision of palate
+27.2,Diagnostic procedures on oral cavity
+27.21,Biopsy of bony palate
+27.22,Biopsy of uvula and soft palate
+27.23,Biopsy of lip
+27.24,"Biopsy of mouth, unspecified structure"
+27.29,Other diagnostic procedures on oral cavity
+27.3,Excision of lesion or tissue of bony palate
+27.31,Local excision or destruction of lesion or tissue of bony palate
+27.32,Wide excision or destruction of lesion or tissue of bony palate
+27.4,Excision of other parts of mouth
+27.41,Labial frenectomy
+27.42,Wide excision of lesion of lip
+27.43,Other excision of lesion or tissue of lip
+27.49,Other excision of mouth
+27.5,Plastic repair of mouth
+27.51,Suture of laceration of lip
+27.52,Suture of laceration of other part of mouth
+27.53,Closure of fistula of mouth
+27.54,Repair of cleft lip
+27.55,Full-thickness skin graft to lip and mouth
+27.56,Other skin graft to lip and mouth
+27.57,Attachment of pedicle or flap graft to lip and mouth
+27.59,Other plastic repair of mouth
+27.6,Palatoplasty
+27.61,Suture of laceration of palate
+27.62,Correction of cleft palate
+27.63,Revision of cleft palate repair
+27.64,Insertion of palatal implant
+27.69,Other plastic repair of palate
+27.7,Operations on uvula
+27.71,Incision of uvula
+27.72,Excision of uvula
+27.73,Repair of uvula
+27.79,Other operations on uvula
+27.9,Other operations on mouth and face
+27.91,Labial frenotomy
+27.92,"Incision of mouth, unspecified structure"
+27.99,Other operations on oral cavity
+76.2,Local excision or destruction of lesion of facial bone
+76.3,Partial ostectomy of facial bone
+76.31,Partial mandibulectomy
+76.39,Partial ostectomy of other facial bone
+76.4,Excision and reconstruction of facial bones
+76.41,Total mandibulectomy with synchronous reconstruction
+76.42,Other total mandibulectomy
+76.43,Other reconstruction of mandible
+76.44,Total ostectomy of other facial bone with synchronous reconstruction
+76.45,Other total ostectomy of other facial bone
+76.46,Other reconstruction of other facial bone
+76.5,Temporomandibular arthroplasty
+76.6,Other facial bone repair and orthognathic surgery
+76.61,Closed osteoplasty (osteotomy) of mandibular ramus
+76.62,Open osteoplasty (osteotomy) of mandibular ramus
+76.63,Osteoplasty (osteotomy) of body of mandible
+76.64,Other orthognathic surgery on mandible
+76.65,Segmental osteoplasty (osteotomy) of maxilla
+76.66,Total osteoplasty (osteotomy) of maxilla
+76.67,Reduction genioplasty
+76.68,Augmentation genioplasty
+76.69,Other facial bone repair
+76.7,Reduction of facial fracture
+76.70,"Reduction of facial fracture, not otherwise specified"
+76.71,Closed reduction of malar and zygomatic fracture
+76.72,Open reduction of malar and zygomatic fracture
+76.73,Closed reduction of maxillary fracture
+76.74,Open reduction of maxillary fracture
+76.75,Closed reduction of mandibular fracture
+76.76,Open reduction of mandibular fracture
+76.77,Open reduction of alveolar fracture
+76.78,Other closed reduction of facial fracture
+76.79,Other open reduction of facial fracture
+76.9,Other operations on facial bones and joints
+76.91,Bone graft to facial bone
+76.92,Insertion of synthetic implant in facial bone
+76.93,Closed reduction of temporomandibular dislocation
+76.94,Open reduction of temporomandibular dislocation
+76.95,Other manipulation of temporomandibular joint
+76.96,Injection of therapeutic substance into temporomandibular joint
+76.97,Removal of internal fixation device from facial bone
+76.99,Other operations on facial bones and joints
+87.11,Full-mouth x-ray of teeth
+87.12,Other dental x-ray
+87.13,Temporomandibular contrast arthrogram
+87.14,Contrast radiogram of orbit
+87.15,Contrast radiogram of sinus
+87.16,Other x-ray of facial bones
+87.17,Other x-ray of skull
+89,"Interview, evaluation, consultation, and examination"
+89.0,"Diagnostic interview, consultation, and evaluation"
+89.01,"Interview and evaluation, described as brief"
+89.02,"Interview and evaluation, described as limited"
+89.03,"Interview and evaluation, described as comprehensive"
+89.04,Other interview and evaluation
+89.05,"Diagnostic interview and evaluation, not otherwise specified"
+89.06,"Consultation, described as limited"
+89.07,"Consultation, described as comprehensive"
+89.08,Other consultation
+89.09,"Consultation, not otherwise specified"
+89.31,Dental examination
+89.32,Esophageal manometry
+89.33,Digital examination of enterostomy stoma
+89.34,Digital examination of rectum
+89.35,Transillumination of nasal sinuses
+99.97,Fitting of denture

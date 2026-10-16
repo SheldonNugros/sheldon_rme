@@ -1,11 +1,3 @@
-Kode_Item,Nama_Barang,Satuan,HPP,Harga_Jual,Stok_Tersedia,Stok_Minimum,Total_Terjual,Expired_Date,Supplier
-BMH-0001,Sarung Tangan Lateks (Handscoon),Pasang,1500,5000,500,100,120,30-06-2028,PT Medika Alkesindo
-BMH-0002,Masker Medis 3-Ply Earloop,Pcs,700,2500,500,100,140,30-06-2028,PT Medika Alkesindo
-BMH-0003,Cotton Roll Dental,Pcs,100,500,1000,200,310,30-06-2028,PT Dental Jaya
-BMH-0004,Lidocaine Compositum Cartridge,Cartridge,6000,15000,180,30,45,30-06-2027,PT Septodont Indo
-BMH-0005,Needle Disposable Citoject 30G,Pcs,1500,5000,250,40,45,30-06-2028,PT Septodont Indo
-BMH-0006,Saliva Ejector Suction Tip,Pcs,800,2000,400,80,110,30-12-2028,PT Dental Jaya
-BMH-0007,Spuit Disposable 3cc OneMed,Pcs,1200,3500,300,50,60,30-12-2028,PT Medika Alkesindo
-BMH-0008,Gelas Kumur Plastik Disposable,Pcs,300,1000,800,150,220,30-12-2029,PT Dental Jaya
-BMH-0009,Polibib / Dental Bib Celemek,Lembar,600,2000,450,80,130,30-12-2029,PT Dental Jaya
-BMH-0010,Spons Hemostatik (Spongostan),Cube,12000,25000,60,15,14,30-06-2027,PT Medika Alkesindo
+﻿Kode_Item,Nama_Barang,Satuan,HPP,Harga_Jual,Stok_Tersedia,Stok_Minimum,Total_Terjual,Expired_Date,Supplier
+BMH-0001,Sarung Tangan Lateks,Pasang,"1,500","5,000",500,100,0,30-06-2028,SUPPLIER ALKES
+BMH-0002,Masker Medis,Pcs,700,"2,500",500,100,0,30-06-2028,SUPPLIER ALKES

@@ -2142,16 +2142,35 @@ function getInitMaster() {
 
 function getDaftarStaffLengkap() {
   try {
-    const v = readFast(DB_CONFIG.MASTER, "Data");
+    let v = readFast(DB_CONFIG.MASTER, "Data");
     if (v.length <= 1) return [];
     let h = v[0];
-    let idN = getColIdx(h, ['namapekerja', 'nama', 'namalengkap']); if (idN === -1) idN = 0;
-    let idR = getColIdx(h, ['kategorirole', 'role', 'kategori']); if (idR === -1) idR = 2;
-    
-    return v.slice(1).filter(r => r[idN]).map(r => ({
-      nama: String(r[idN]).trim(),
-      role: r[idR] ? String(r[idR]).trim() : ""
-    }));
+    let idPek = getColIdx(h, ['idpekerja', 'id_pekerja', 'id']);
+    let idN = getColIdx(h, ['namapekerja', 'nama', 'namalengkap']); if (idN === -1) idN = (idPek === 0 ? 1 : 0);
+    let idU = getColIdx(h, ['username', 'user']); if (idU === -1) idU = (idPek === 0 ? 2 : 1);
+    let idR = getColIdx(h, ['kategorirole', 'role', 'kategori']); if (idR === -1) idR = (idPek === 0 ? 3 : 2);
+    let idSt = getColIdx(h, ['status']); if (idSt === -1) idSt = (idPek === 0 ? 5 : 4);
+    let idSIP = getColIdx(h, ['noregistrasi', 'no_registrasi', 'sip', 'noreg']); if (idSIP === -1) idSIP = (idPek === 0 ? 6 : 5);
+    let idHP = getColIdx(h, ['nohp', 'no_hp', 'telepon', 'wa']); if (idHP === -1) idHP = (idPek === 0 ? 7 : 6);
+    let idJM = getColIdx(h, ['persen_jm_dokter', 'persen_jm', 'persenjm']); if (idJM === -1) idJM = (idPek === 0 ? 8 : 7);
+    let idEm = getColIdx(h, ['email', 'surel', 'e-mail']); if (idEm === -1) idEm = (idPek === 0 ? 9 : 8);
+
+    return v.slice(1).filter(r => r[idN]).map((r, idx) => {
+      let rawId = (idPek !== -1 && r[idPek]) ? String(r[idPek]).trim() : "";
+      let snId = (rawId && rawId.toUpperCase().startsWith("SN-")) ? rawId : ("SN-" + String(idx + 1).padStart(2, '0'));
+      return {
+        id: snId,
+        idPekerja: snId,
+        nama: String(r[idN]).trim(),
+        username: r[idU] ? String(r[idU]).trim() : "",
+        role: r[idR] ? String(r[idR]).trim() : "",
+        status: r[idSt] ? String(r[idSt]).trim() : "Aktif",
+        sip: r[idSIP] ? String(r[idSIP]).trim() : "-",
+        noHp: r[idHP] ? String(r[idHP]).trim() : "",
+        persenJM: (idJM !== -1 && r[idJM] !== "" && r[idJM] !== null && r[idJM] !== undefined) ? Number(r[idJM]) : 0,
+        email: r[idEm] ? String(r[idEm]).trim() : ""
+      };
+    });
   } catch (e) {
     return [];
   }
@@ -2193,10 +2212,31 @@ function getDaftarDokterSIP() {
  */
 function getDaftarUserMaster() {
   try {
-    const v = readFast(DB_CONFIG.MASTER, "Data");
+    let v = readFast(DB_CONFIG.MASTER, "Data");
     if (v.length <= 1) return [];
     let h = v[0];
     let idPek = getColIdx(h, ['idpekerja', 'id_pekerja', 'id']);
+
+    // Jika kolom ID_Pekerja belum ada atau ada baris yang belum berformat SN-XX, jalankan migrasi otomatis
+    let needsIdMigration = (idPek === -1);
+    if (!needsIdMigration) {
+      for (let k = 1; k < v.length; k++) {
+        let cellId = String(v[k][idPek] || "").trim().toUpperCase();
+        if (!cellId.startsWith("SN-")) {
+          needsIdMigration = true;
+          break;
+        }
+      }
+    }
+    if (needsIdMigration && typeof generateAllIdPekerja === "function") {
+      try {
+        generateAllIdPekerja();
+        v = readFast(DB_CONFIG.MASTER, "Data");
+        h = v[0];
+        idPek = getColIdx(h, ['idpekerja', 'id_pekerja', 'id']);
+      } catch (eMig) {}
+    }
+
     let idNama = getColIdx(h, ['namapekerja', 'nama_pekerja', 'nama', 'namalengkap']); if (idNama === -1) idNama = (idPek === 0 ? 1 : 0);
     let idUser = getColIdx(h, ['username', 'user']); if (idUser === -1) idUser = (idPek === 0 ? 2 : 1);
     let idRole = getColIdx(h, ['kategorirole', 'kategori_role', 'role', 'kategori']); if (idRole === -1) idRole = (idPek === 0 ? 3 : 2);
@@ -2208,15 +2248,19 @@ function getDaftarUserMaster() {
     let idEmail = getColIdx(h, ['email', 'surel', 'e-mail']); if (idEmail === -1) idEmail = (idPek === 0 ? 9 : 8);
 
     let users = [];
+    let counter = 0;
     for (let i = 1; i < v.length; i++) {
       let r = v[i];
       if (!r[idUser] && !r[idNama]) continue;
+      counter++;
       let pVal = String(r[idPass] !== null && r[idPass] !== undefined ? r[idPass] : "").trim();
       let hasPass = pVal.length > 0;
       let isHashed = pVal.length === 64;
+      let rawId = (idPek !== -1 && r[idPek]) ? String(r[idPek]).trim() : "";
+      let snId = (rawId && rawId.toUpperCase().startsWith("SN-")) ? rawId : ("SN-" + String(counter).padStart(2, '0'));
       
       users.push({
-        idPekerja: (idPek !== -1 && r[idPek]) ? String(r[idPek]).trim() : "",
+        idPekerja: snId,
         nama: String(r[idNama] || "").trim(),
         username: String(r[idUser] || "").trim(),
         role: String(r[idRole] || "Staff").trim(),

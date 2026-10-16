@@ -1,8 +1,8 @@
-Metrik,Nilai,Keterangan
-Total Macam Obat,"=COUNTA(Master_Obat!B2:B)",Jenis Obat Terdaftar
-Total Fisik Stok Tersedia (Pcs),"=SUM(Master_Obat!J2:J)",Unit Pcs Siap Pakai
-Total Obat Terjual (Pcs),"=SUM(Master_Obat!L2:L)",Unit Pcs Terjual/Terpakai
-Total Nilai Persediaan (Rp),"=SUMPRODUCT(Master_Obat!J2:J,Master_Obat!G2:G)",Berdasarkan HPP Pcs
-Stok Kritis,"=COUNTIFS(Master_Obat!J2:J,""<=""&Master_Obat!K2:K,Master_Obat!J2:J,"">0"")",Perlu Segera Restock
-Stok Habis,"=COUNTIF(Master_Obat!J2:J,""<=0"")",Stok Kosong (0)
-Total Pengeluaran Pembelian (Rp),"=SUM(Riwayat_Pembelian!D2:D*Riwayat_Pembelian!F2:F)",Akumulasi Pembelian Obat
+﻿Metrik,Nilai,,ID_Obat,Nama_Obat,Stock_Tersedia,Stock_Minimum,Status_Stok
+Total Item Obat,186,,,,,,
+Total Fisik Stok Tersedia (Pcs),9200,,,,,,
+Total Obat Terjual (Pcs),0,,,,,,
+Jumlah Stok Kritis,0,,,,,,
+Jumlah Stok Habis,0,,,,,,
+Total Nilai Persediaan (Rp),"2,200,000",,,,,,
+Total Pengeluaran Pembelian (Rp),0,,,,,,

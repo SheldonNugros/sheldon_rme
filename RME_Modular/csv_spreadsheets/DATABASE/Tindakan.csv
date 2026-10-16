@@ -1,68 +1,146 @@
-Kode_Tindakan,Nama_Tindakan,Kategori,Tarif,Labor,Persen_JM_Default
-TND-001,Scaling Gigi Rahang Atas & Bawah,Dokter Gigi Umum,250000,Tidak,
-TND-002,Penambalan Komposit Light-Cure,Dokter Gigi Umum,300000,Tidak,
-TND-003,Pencabutan Gigi Permanen Ringan,Dokter Gigi Umum,200000,Tidak,
-TND-004,Pemasangan Kawat Gigi Ortho Standard,Dokter Gigi Spesialis Ortodonti,5000000,Tidak,
-TND-005,Foto Rontgen Periapikal Digital,Umum,100000,Tidak,0.15
-TND-006,Perawatan Saluran Akar (PSA) Molar,Dokter Gigi Spesialis Ortodonti,1200000,Tidak,
-TND-007,Pemasangan Mahkota PFM (Crown),Dokter Gigi Spesialis Ortodonti,1500000,Ya,
-DGU-0001,Tumpat Komposit Kecil,Dokter Gigi Umum,250000,Tidak,
-DGU-0002,Tumpat Komposit Sedang,Dokter Gigi Umum,300000,Tidak,
-DGU-0003,Tumpat Komposit Besar,Dokter Gigi Umum,350000,Tidak,
-DGU-0004,Tumpat GIC Kecil,Dokter Gigi Umum,200000,Tidak,
-DGU-0005,Tumpat GIC Sedang,Dokter Gigi Umum,250000,Tidak,
-DGU-0006,Tumpat GIC Besar,Dokter Gigi Umum,300000,Tidak,
-DGU-0007,Veneer Direct Composite,Dokter Gigi Umum,600000,Tidak,
-DGS-0008,Veneer Indirect Porcelain,Dokter Gigi Spesialis,2500000,Ya,
-DGU-0009,Scalling Ringan,Dokter Gigi Umum,200000,Tidak,
-DGU-0010,Scalling Sedang,Dokter Gigi Umum,250000,Tidak,
-DGU-0011,Scalling Berat,Dokter Gigi Umum,350000,Tidak,
-DGU-0012,Scalling Perawat,Dokter Gigi Umum,150000,Tidak,
-DGU-0013,Stain Remover,Dokter Gigi Umum,150000,Tidak,
-DGU-0014,Kuretase Gingiva per Regio,Dokter Gigi Umum,300000,Tidak,
-DGU-0015,Splinting Periodontal,Dokter Gigi Umum,450000,Tidak,
-DGU-0016,Open Bur + Medikasi,Dokter Gigi Umum,150000,Tidak,
-DGU-0017,Devitalisasi Pulpa,Dokter Gigi Umum,150000,Tidak,
-DGU-0018,Pulpectomi / Ekstirpasi Pulpa,Dokter Gigi Umum,200000,Tidak,
-DGU-0019,Sterilisasi Saluran Akar (Dressing),Dokter Gigi Umum,150000,Tidak,
-DGU-0020,Obturasi Saluran Akar Tunggal,Dokter Gigi Umum,350000,Tidak,
-DGS-0021,Obturasi Saluran Akar Ganda/Molar,Dokter Gigi Spesialis,550000,Tidak,
-DGS-0022,PSA 1x Kunjungan (One Visit Endodontic),Dokter Gigi Spesialis,1500000,Tidak,
-DGU-0023,Pasak Fiber (Fiber Post),Dokter Gigi Umum,450000,Tidak,
-DGU-0024,Exo Anak Tanpa Injeksi (Topikal),Dokter Gigi Umum,100000,Tidak,
-DGU-0025,Exo Anak Dengan Injeksi,Dokter Gigi Umum,150000,Tidak,
-DGU-0026,Exo Dewasa Ringan (Akar Tunggal),Dokter Gigi Umum,250000,Tidak,
-DGU-0027,Exo Dewasa Sedang (Molar/Premolar),Dokter Gigi Umum,350000,Tidak,
-DGS-0028,Exo Dewasa Komplikasi / Separasi,Dokter Gigi Spesialis,500000,Tidak,
-DGS-0029,Odontektomi Kelas I Ringan,Dokter Gigi Spesialis,1800000,Tidak,
-DGS-0030,Odontektomi Kelas II/III Impaksi,Dokter Gigi Spesialis,2500000,Tidak,
-DGU-0031,Operculektomi,Dokter Gigi Umum,350000,Tidak,
-DGS-0032,Alveolektomi per Regio,Dokter Gigi Spesialis,600000,Tidak,
-DGU-0033,Insisi Abses Intraoral,Dokter Gigi Umum,250000,Tidak,
-DGU-0034,Hecting / Jahit Luka,Dokter Gigi Umum,150000,Tidak,
-DGU-0035,Aff Hecting / Lepas Jahitan,Dokter Gigi Umum,100000,Tidak,
-DGS-0036,Pemasangan Ortho Metal Standar RA+RB,Dokter Gigi Spesialis,4500000,Tidak,
-DGS-0037,Pemasangan Ortho Ceramic Estetik RA+RB,Dokter Gigi Spesialis,6500000,Tidak,
-DGS-0038,Pemasangan Ortho Self-Ligating Damon,Dokter Gigi Spesialis,9500000,Tidak,
-DGU-0039,Kontrol Ortho Rutin (Ganti Karet/Power O),Dokter Gigi Umum,150000,Tidak,
-DGU-0040,Kontrol Ortho Ganti Kawat (NiTi/SS),Dokter Gigi Umum,200000,Tidak,
-DGU-0041,Lem Bracket Lepas per Gigi,Dokter Gigi Umum,50000,Tidak,
-DGU-0042,Lepas Bracket Ortho RA+RB,Dokter Gigi Umum,500000,Tidak,
-DGS-0043,Retainer Clear / Hawley per Rahang,Dokter Gigi Spesialis,750000,Ya,
-DGS-0044,Crown PFM (Porcelain Fused to Metal),Dokter Gigi Spesialis,1500000,Ya,
-DGS-0045,Crown Zirconia All-Ceramic,Dokter Gigi Spesialis,2800000,Ya,
-DGS-0046,Crown E-Max Full Porcelain,Dokter Gigi Spesialis,2600000,Ya,
-DGU-0047,Crown Acrylic Sementara (Temporary),Dokter Gigi Umum,350000,Ya,
-DGS-0048,GTSL Acrylic Plat Dasar + 1 Gigi,Dokter Gigi Spesialis,900000,Ya,
-DGS-0049,GTSL Valplast Fleksibel + 1 Gigi,Dokter Gigi Spesialis,1800000,Ya,
-DGS-0050,GTL (Gigi Tiruan Lengkap) 1 Rahang,Dokter Gigi Spesialis,3000000,Ya,
-DGS-0051,GTL (Gigi Tiruan Lengkap) RA + RB,Dokter Gigi Spesialis,5500000,Ya,
-DGU-0052,Rebasing / Relining Protesa,Dokter Gigi Umum,450000,Ya,
-DGU-0053,Reparasi Protesa Patah,Dokter Gigi Umum,350000,Ya,
-DGU-0054,Bleaching Office (In-Office Whitening),Dokter Gigi Umum,1800000,Tidak,
-DGU-0055,Bleaching Home Kit + Tray,Dokter Gigi Umum,1200000,Ya,
-DGU-0056,Pasang Diamond Gigi (Skyce),Dokter Gigi Umum,200000,Tidak,
-DGU-0057,Fissure Sealant Gigi Anak,Dokter Gigi Umum,200000,Tidak,
-DGU-0058,Topikal Aplikasi Fluor (TAF) RA+RB,Dokter Gigi Umum,250000,Tidak,
-UMM-0059,Rontgen Periapikal Digital,Umum,100000,Tidak,0.15
-UMM-0060,Konsultasi & Pemeriksaan Lengkap,Umum,50000,Tidak,
+﻿Kode_Tindakan,Nama_Tindakan,Kategori,Tarif,Labor,Persen_JM_Default,Deskripsi
+UMM-0001,Konsultasi Dokter Gigi,Umum,"50,000",Tidak,,
+DGU-0001,Penambalan Komposit Light-Cure,Dokter Gigi Umum,"250,000",Tidak,,
+DGU-0002,Scaling Rahang Atas & Bawah,Dokter Gigi Umum,"300,000",Tidak,,
+DGU-0003,Pencabutan Gigi Permanen Ringan,Dokter Gigi Umum,"250,000",Tidak,,
+DGU-0004,Penerbitan Surat Keterangan / Rujukan,Dokter Gigi Umum,"300,000",Tidak,,Surat keterangan sakit atau rujukan ke dokter spesialis
+DGU-0005,Scaling (Pembersihan Karang Gigi),Dokter Gigi Umum,"350,000",Tidak,,Pembersihan plak dan kalkulus menggunakan ultrasonic scaler
+DGU-0006,Topikal Aplikasi Fluoride (TAF),Dokter Gigi Umum,"400,000",Tidak,,Pengaplikasian fluor pada gigi untuk mencegah karies (umumnya pada anak)
+DGU-0007,Fissure Sealant,Dokter Gigi Umum,"100,000",Tidak,,Penutupan pit dan fissure (cekungan) gigi yang dalam untuk mencegah gigi berlubang
+DGU-0008,Tambalan Sementara,Dokter Gigi Umum,"400,000",Tidak,,Penambalan sementara di sela-sela perawatan atau sebelum tambalan permanen
+DGU-0009,Tambalan Komposit (Light Cure),Dokter Gigi Umum,"450,000",Tidak,,Penambalan estetik sewarna gigi dengan sinar laser/UV (Kelas I hingga V)
+DGU-0010,Tambalan Glass Ionomer Cement (GIC),Dokter Gigi Umum,"500,000",Tidak,,Penambalan gigi dengan bahan GIC yang dapat melepaskan fluor
+DGU-0011,Perawatan Saluran Akar (Kunjungan Pertama/Devitalisasi),Dokter Gigi Umum,"650,000",Ya,,Mematikan saraf gigi yang meradang atau infeksi
+DGU-0012,Perawatan Saluran Akar (Sterilisasi),Dokter Gigi Umum,"1,300,000",Ya,,Pembersihan dan sterilisasi saluran akar gigi
+DGU-0013,Perawatan Saluran Akar (Obturasi/Pengisian),Dokter Gigi Umum,"1,500,000",Ya,,Pengisian saluran akar secara permanen
+DGU-0014,Pencabutan Gigi Sulung (Topikal),Dokter Gigi Umum,"150,000",Ya,,Pencabutan gigi anak yang sudah goyang (dengan anastesi oles/spray)
+DGU-0015,Pencabutan Gigi Sulung (Infiltrasi),Dokter Gigi Umum,"150,000",Ya,,Pencabutan gigi anak dengan suntikan anastesi lokal
+DGU-0016,Pencabutan Gigi Permanen Tanpa Komplikasi,Dokter Gigi Umum,"200,000",Ya,,Pencabutan gigi dewasa biasa/normal
+DGU-0017,Pencabutan Gigi Permanen Dengan Komplikasi,Dokter Gigi Umum,"150,000",Ya,,Pencabutan gigi yang sisa akar atau butuh separasi sederhana
+DGU-0018,Odontektomi Sederhana (Kelas I),Dokter Gigi Umum,"300,000",Ya,,Pencabutan gigi bungsu impaksi tingkat sederhana (non-spesialistik kompleks)
+DGU-0019,Kuretase Gingiva,Dokter Gigi Umum,"1,900,000",Ya,,Pembersihan jaringan infeksi di bawah gusi (poket periodontal)
+DGU-0020,Splinting Gigi Goyang,Dokter Gigi Umum,"3,900,000",Ya,,Pengikatan gigi yang goyang agar stabil (biasanya dengan wire & komposit)
+DGU-0021,Perawatan Abses (Insisi dan Drainase),Dokter Gigi Umum,"4,900,000",Ya,,Tindakan pembukaan abses/nanah pada gusi
+DGU-0022,Gigi Tiruan Sebagian Lepasan (Akrilik/Valplast),Dokter Gigi Umum,"250,000",Ya,,Pembuatan gigi palsu lepasan sebagian
+DGU-0023,Gigi Tiruan Lengkap (GTL),Dokter Gigi Umum,"250,000",Ya,,Pembuatan gigi palsu untuk seluruh rahang atas dan/atau bawah
+DGU-0024,Sementasi Mahkota / Bridge Lepas,Dokter Gigi Umum,"300,000",Ya,,Pemasangan kembali crown/jembatan gigi yang terlepas
+DGU-0025,Bleaching (Pemutihan Gigi) In-Office,Dokter Gigi Umum,"400,000",Ya,,Pemutihan warna gigi dilakukan di klinik oleh dokter gigi
+DGU-0026,Perawatan Orthodontik Sederhana / Removable,Dokter Gigi Umum,"200,000",Ya,,Pemasangan alat perata gigi lepasan (kawat aktif/aligner sederhana)
+DGS-0001,Perawatan Saluran Akar (PSA) Molar,Dokter Gigi Spesialis,"1,500,000",Tidak,,
+DGS-0002,Odontektomi Gigi Impaksi M3,Dokter Gigi Spesialis,"2,500,000",Tidak,,
+DGS-0003,Apeksreseksi,Dokter Gigi Spesialis,"1,500,000",Ya,,Pemotongan dan pengangkatan ujung akar gigi beserta jaringan infeksi/kista di sekitarnya.
+DGS-0004,Alveolektomi / Alveoloplasti,Dokter Gigi Spesialis,"150,000",Ya,,Tindakan pembedahan untuk merapikan atau membentuk ulang tulang rahang (alveolar) sebelum pemasangan gigi palsu.
+DGS-0005,Frenuektomi,Dokter Gigi Spesialis,"300,000",Ya,,Pemotongan perlekatan jaringan otot (frenulum) pada bibir atau lidah yang terlalu tinggi atau pendek (tongue-tie).
+DGS-0006,Torus Removal,Dokter Gigi Spesialis,"350,000",Ya,,Pengangkatan tonjolan tulang rahang (torus palatinus/mandibularis) yang mengganggu pemasangan gigi tiruan.
+DGS-0007,Pemasangan Implan Gigi,Dokter Gigi Spesialis,"1,500,000",Ya,,Penanaman akar gigi buatan (fixture titanium) ke dalam tulang rahang.
+DGS-0008,Bone Grafting (Cangkok Tulang),Dokter Gigi Spesialis,"150,000",Ya,,Penambahan material tulang (buatan/alami) untuk memperbaiki dan memperkuat defek tulang rahang sebelum implan.
+DGS-0009,Sinus Lift,Dokter Gigi Spesialis,"2,200,000",Ya,,Prosedur pengangkatan membran dasar sinus maksilaris untuk memberikan ruang tulang tambahan bagi implan di rahang atas belakang.
+DGS-0010,Enukleasi Kista Rahang,Dokter Gigi Spesialis,"500,000",Ya,,Pengangkatan kista yang tumbuh pada tulang rahang atau jaringan lunak mulut.
+DGS-0011,Eksisi Tumor Jinak / Epulis,Dokter Gigi Spesialis,"250,000",Ya,,Pembedahan untuk mengangkat tumor jinak atau benjolan daging pada gusi dan jaringan mulut lainnya.
+DGS-0012,Biopsi (Insisional/Eksisional),Dokter Gigi Spesialis,"350,000",Ya,,Pengambilan sampel jaringan rongga mulut yang mencurigakan untuk keperluan pemeriksaan laboratorium (patologi anatomi).
+DGS-0013,Fiksasi Fraktur Rahang,Dokter Gigi Spesialis,"450,000",Ya,,Penanganan bedah (pemasangan plat/kawat) untuk menyambung dan menstabilkan tulang rahang atau tulang wajah yang patah.
+DGS-0014,Penjahitan Luka Jaringan Lunak Kompleks,Dokter Gigi Spesialis,"550,000",Ya,,Penanganan bedah pada luka robek yang dalam/luas pada area wajah dan rongga mulut akibat kecelakaan atau trauma.
+DGS-0015,Insisi dan Drainase Abses Ekstraoral/Spasia,Dokter Gigi Spesialis,"550,000",Ya,,"Sayatan bedah untuk mengeluarkan nanah pada kasus infeksi/abses yang sudah meluas ke area wajah, leher (spasia leher dalam)."
+DGS-0016,Bedah Ortognatik,Dokter Gigi Spesialis,"150,000",Ya,,"Operasi korektif untuk memperbaiki kelainan kerangka rahang yang ekstrem (asimetri wajah, rahang cakil, tonggos parah)."
+DGS-0017,Operasi Celah Bibir & Langit-langit (Cleft),Dokter Gigi Spesialis,"150,000",Ya,,Pembedahan rekonstruksi pada kasus bibir sumbing (labioplasti) atau celah pada langit-langit mulut (palatoplasti).
+DGS-0018,Penutupan Fistula Oroantral,Dokter Gigi Spesialis,"100,000",Ya,,Pembedahan untuk menutup lubang tembus abnormal yang menghubungkan rongga mulut dengan rongga sinus maksilaris.
+DGS-0019,Konsultasi Dokter Gigi Spesialis,Dokter Gigi Spesialis,"250,000",Ya,,
+DGU-0027,Tumpatan Sementara,Dokter Gigi Umum,"300,000",Ya,,
+DGU-0028,Trepanasi,Dokter Gigi Umum,"300,000",Ya,,
+DGU-0029,Proteksi / Devitalisasi + Tumpatan Sementara,Dokter Gigi Umum,"300,000",Ya,,
+DGU-0030,Caping Pulpa + Tumpatan Sementara,Dokter Gigi Umum,"250,000",Ya,,
+DGU-0031,Tumpatan Dengan Class Ionomer Cementkecil,Dokter Gigi Umum,"900,000",Ya,,
+DGU-0032,Tumpatan Dengan Class Ionomer Cementsedang,Dokter Gigi Umum,"150,000",Ya,,
+DGU-0033,Tumpatan Dengan Class Ionomer Cementbesar,Dokter Gigi Umum,"250,000",Ya,,
+DGU-0034,Tambah Kariestop,Dokter Gigi Umum,"250,000",Ya,,
+DGU-0035,Tumpatan Dengan Resin Komposit Kecil,Dokter Gigi Umum,"350,000",Ya,,
+DGU-0036,Tumpatan Dengan Resin Komposit Sedang,Dokter Gigi Umum,"450,000",Ya,,
+DGU-0037,Tumpatan Dengan Resin Komposit Besar,Dokter Gigi Umum,"200,000",Ya,,
+DGU-0038,Tumpatan Dengan Resin Komposit Estetik,Dokter Gigi Umum,"100,000",Ya,,
+DGS-0019,Tumpatan Dengan Resin Komposit Diastema Closure Kecil,Dokter Gigi Spesialis,"200,000",Ya,,
+DGS-0020,Tumpatan Dengan Resin Komposit Diastema Closure Besar,Dokter Gigi Spesialis,"250,000",Ya,,
+DGU-0039,BAP / Saluran Akar,Dokter Gigi Umum,"100,000",Ya,,
+DGU-0040,Preparasi Saluran Akar / Saluran Akar,Dokter Gigi Umum,"150,000",Ya,,
+DGU-0041,Ganti Dressing Dengan CaOH / Gigi,Dokter Gigi Umum,"200,000",Ya,,
+DGU-0042,Ganti Dressing Tanpa CaOH / Gigi,Dokter Gigi Umum,"150,000",Ya,,
+DGU-0043,Obturasi / Saluran Akar,Dokter Gigi Umum,"200,000",Ya,,
+DGS-0021,PFM / Gigi,Dokter Gigi Spesialis,"950,000",Ya,,
+DGS-0022,EMAX / Gigi,Dokter Gigi Spesialis,"350,000",Ya,,
+DGS-0023,ZIRCONIA / Gigi,Dokter Gigi Spesialis,"2,000,000",Ya,,
+DGU-0044,Preparasi,Dokter Gigi Umum,"350,000",Ya,,
+DGU-0045,Sementasi Ulang GC,Dokter Gigi Umum,"1,900,000",Ya,,
+DGU-0046,Sementasi Ulang Allcem,Dokter Gigi Umum,"430,000",Ya,,
+DGU-0047,Sementasi Ulang Dgn Bahan Sementase Implant,Dokter Gigi Umum,"1,900,000",Ya,,
+DGU-0048,Cetak Double Impression / Rahang,Dokter Gigi Umum,"3,900,000",Ya,,
+DGU-0049,Crown Sementara / Gigi,Dokter Gigi Umum,"4,900,000",Ya,,
+DGS-0024,Veneer Indirect,Dokter Gigi Spesialis,"150,000",Ya,,
+DGS-0025,Veneer Direct,Dokter Gigi Spesialis,"350,000",Ya,,
+DGU-0050,Buka Veneer / Gigi,Dokter Gigi Umum,"500,000",Ya,,
+DGU-0051,Pasak Fiber Simpel / Gigi,Dokter Gigi Umum,"750,000",Ya,,
+DGU-0052,Pasak Fiber Kompleks / Gigi,Dokter Gigi Umum,"350,000",Ya,,
+DGS-0026,Pasak Tuang / Gigi,Dokter Gigi Spesialis,"150,000",Ya,,
+DGU-0053,Pengolesan Toothmouse,Dokter Gigi Umum,"1,500,000",Ya,,
+DGS-0027,Maryland 1 Unit,Dokter Gigi Spesialis,"2,500,000",Ya,,
+DGU-0054,Bleaching Internal / Gigi,Dokter Gigi Umum,"1,000,000",Ya,,
+DGU-0055,Scalling Ringan,Dokter Gigi Umum,"200,000",Ya,,
+DGU-0056,Scalling Sedang,Dokter Gigi Umum,"150,000",Ya,,
+DGU-0057,Scalling Berat 1,Dokter Gigi Umum,"4,700,000",Ya,,
+DGU-0058,Scalling Berat 2,Dokter Gigi Umum,"10,000,000",Ya,,
+DGU-0059,Perawatan Root Planning,Dokter Gigi Umum,"5,700,000",Ya,,
+DGU-0060,Kuretase / Gigi,Dokter Gigi Umum,"18,000,000",Ya,,
+DGU-0061,Desensitivisasi / Gigi,Dokter Gigi Umum,"120,000",Ya,,
+DGU-0062,Occlusal Adjustment / Gigi,Dokter Gigi Umum,"170,000",Ya,,
+DGU-0063,Splinting (Wire + Komposit) / Gigi,Dokter Gigi Umum,"50,000",Ya,,
+DGU-0064,Splinting (Wire + Fiber) / Gigi,Dokter Gigi Umum,"1,000,000",Ya,,
+DGU-0065,Fissure Sealant,Dokter Gigi Umum,"600,000",Ya,,
+DGU-0066,Topikal Aplikasi Flour / Rahang,Dokter Gigi Umum,"75,000",Ya,,
+DGU-0067,Scalling Pada Gigi Susu,Dokter Gigi Umum,"75,000",Ya,,
+DGU-0068,Space Maintener / Rahang,Dokter Gigi Umum,"75,000",Ya,,
+DGU-0069,Pencabutan Gigi Susu Dengan Topical Anestesi / CE,Dokter Gigi Umum,"100,000",Ya,,
+DGU-0070,Pencabutan Gigi Susu Dengan Anestesi Infiltasi,Dokter Gigi Umum,"250,000",Ya,,
+DGU-0071,Pencabutan Gigi Dewasa Tanpa Penyulit,Dokter Gigi Umum,"250,000",Ya,,
+DGU-0072,Pencabutan Gigi Dewasa Dengan Penyulit,Dokter Gigi Umum,"350,000",Ya,,
+DGU-0073,Pencabutan Gigi Dewasa Dengan Penyulit + Hecting,Dokter Gigi Umum,"450,000",Ya,,
+DGU-0074,Incise Abses Simpel,Dokter Gigi Umum,"200,000",Ya,,
+DGU-0075,Perawatan Dry Soket,Dokter Gigi Umum,"100,000",Ya,,
+DGU-0076,Hecting < 10 Simpul,Dokter Gigi Umum,"200,000",Ya,,
+DGU-0077,Hecting > 10 Simpul,Dokter Gigi Umum,"250,000",Ya,,
+DGU-0078,Hecting Aff <10 Simpul,Dokter Gigi Umum,"100,000",Ya,,
+DGU-0079,Hecting Aff >10 Simpul,Dokter Gigi Umum,"150,000",Ya,,
+DGU-0080,Eksisi Polip,Dokter Gigi Umum,"200,000",Ya,,
+DGU-0081,Cetak  Alginat / Rahang,Dokter Gigi Umum,"150,000",Ya,,
+DGU-0082,Cetak Double Impression / Rahang,Dokter Gigi Umum,"200,000",Ya,,
+DGU-0083,GTSL Akrilik Plat + Gigi Pertama,Dokter Gigi Umum,"950,000",Ya,,
+DGU-0084,GTSL Akrilik Gigi Berikutnya,Dokter Gigi Umum,"350,000",Ya,,
+DGS-0028,GTSL Akrilik Kombinasi Fleksi Plat + Gigi Pertama,Dokter Gigi Spesialis,"2,000,000",Ya,,
+DGU-0085,GTSL Akrilik Kombinasi Fleksi Gigi Berikutnya,Dokter Gigi Umum,"350,000",Ya,,
+DGU-0086,Gigi Tiruan Fleksy Plat + Gigi Pertama,Dokter Gigi Umum,"1,900,000",Ya,,
+DGU-0087,Gigi Tiruan Fleksy Gigi Berikutnya,Dokter Gigi Umum,"430,000",Ya,,
+DGS-0029,PFM / Gigi,Dokter Gigi Spesialis,"1,900,000",Ya,,
+DGS-0030,EMAX / Gigi,Dokter Gigi Spesialis,"3,900,000",Ya,,
+DGS-0031,ZIRCONIA / Gigi,Dokter Gigi Spesialis,"4,900,000",Ya,,
+DGU-0088,Kontrol Gigi Tiruan,Dokter Gigi Umum,"150,000",Ya,,
+DGU-0089,Bongkar Protesa Tukang Gigi Simpel,Dokter Gigi Umum,"350,000",Ya,,
+DGU-0090,Bongkar Protesa Tukang Gigi Kompleks,Dokter Gigi Umum,"500,000",Ya,,
+DGU-0091,Reparasi GT Kompleks,Dokter Gigi Umum,"750,000",Ya,,
+DGU-0092,Reparasi GT Simpel,Dokter Gigi Umum,"350,000",Ya,,
+DGU-0093,Cetak Alginat / Rahang,Dokter Gigi Umum,"150,000",Ya,,
+DGS-0032,Ortondonsi Lepasan Satu Rahang,Dokter Gigi Spesialis,"1,500,000",Ya,,
+DGS-0033,Ortondonsi Lepasan Dua Rahang,Dokter Gigi Spesialis,"2,500,000",Ya,,
+DGS-0034,Ortondonsi Lepasan Pergantian Alat,Dokter Gigi Spesialis,"1,000,000",Ya,,
+DGU-0094,Ortondonsi Lepasan Reparasi Alat,Dokter Gigi Umum,"200,000",Ya,,
+DGU-0095,Ortondonsi Lepasan Kontrol,Dokter Gigi Umum,"150,000",Ya,,
+DGS-0035,Ortodonsi Cekat Rahang Atas Dan Bawah Kasus Biasa (Metal),Dokter Gigi Spesialis,"4,700,000",Ya,,
+DGS-0036,Ortodonsi Cekat Rahang Atas Dan Bawah Kasus Biasa (Ceramic),Dokter Gigi Spesialis,"10,000,000",Ya,,
+DGU-0096,"Ortodonsi Cekat Rahang Atas Dan Bawah Kasus Sulit, Termasuk Kasus Windowing (Metal)",Dokter Gigi Umum,"5,700,000",Ya,,
+DGU-0097,Ortodonsi Cekat Dymond System,Dokter Gigi Spesialis,"18,000,000",Ya,,
+DGU-0098,Ortodonsi Cekat Kontrol (Ganti Power “O” Atau Chain),Dokter Gigi Umum,"120,000",Ya,,
+DGU-0099,Ortodonsi Cekat Kontrol Dengan Ganti Niti,Dokter Gigi Umum,"170,000",Ya,,
+DGU-0100,Ortodonsi Cekat Bracket Atau Bukal Tube Lepas / Gigi,Dokter Gigi Umum,"50,000",Ya,,
+DGS-0037,Retainer/  Rahang,Dokter Gigi Spesialis,"1,000,000",Ya,,
+DGU-0101,Buka Bracket + Scalling + Bersihin Lem / Rahang,Dokter Gigi Umum,"600,000",Ya,,
+UMM-0002,Foto Rontgen Periapikal Digital,Umum,"100,000",Tidak,15.0%,
+UMM-0003,Foto Rontgen Panoramik,Umum,"200,000",Tidak,15.0%,
+UMM-0004,Pemeriksaan Asam Urat,Umum,"75,000",Tidak,,
+DGU-0105,Ro Periapikal / Slice,Dokter Gigi Umum,"100,000",Ya,,
+LAB-0001,Pemasangan Mahkota PFM (Crown),Dokter Gigi Spesialis,"1,500,000",Ya,,

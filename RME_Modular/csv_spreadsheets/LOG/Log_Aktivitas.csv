@@ -1,1 +1,88 @@
-Waktu_Aktivitas,Nama_Account,Aksi,Detail
+﻿Waktu_Aktivitas,Nama_Account,Aksi,Detail
+03-10-2026 21:30:00,Administrator Sistem,Login,Berhasil login dengan hak akses: Super User
+03-10-2026 21:53:36,Administrator Sistem,Pendaftaran Pasien,Mendaftarkan pasien baru: Vembrian Asung (RM: V-0001)
+03-10-2026 21:55:46,Administrator Sistem,Update Pasien,Memperbarui data pasien: Vembrian Asung (RM: V-0001)
+03-10-2026 22:20:15,Administrator Sistem,Update Pasien,Memperbarui data pasien: Rafiq Reno Arzan (RM: R-2285)
+03-10-2026 22:22:30,Administrator Sistem,Update Pasien,Memperbarui data pasien: Rafiq Reno Arzan (RM: R-2285)
+03-10-2026 23:42:58,Administrator Sistem,Surat Sakit,Menerbitkan SKS (SKS/SHELDON/001/X-2026) untuk: Sri Joko Purwanto
+03-10-2026 23:43:36,Administrator Sistem,Surat Kontrol,Menerbitkan SKP (SKP/SHELDON/001/X-2026) untuk: Sri Joko Purwanto
+03-10-2026 23:44:24,Administrator Sistem,Resume Medis,Menerbitkan RSM (RMP/SHELDON/001/X-2026) untuk: Sri Joko Purwanto
+03-10-2026 23:45:07,Administrator Sistem,Surat Rujukan,Menerbitkan SRP (SRP/SHELDON/001/X-2026) untuk: Sri Joko Purwanto
+03-10-2026 23:46:07,Administrator Sistem,Pengantar Lab,Menerbitkan LAB (SPL/SHELDON/001/X-2026) untuk: Sri Joko Purwanto
+03-10-2026 23:46:48,Administrator Sistem,Pengantar Radiologi,Menerbitkan RAD (SPR/SHELDON/001/X-2026) untuk: Sri Joko Purwanto
+04-10-2026 1:38:47,Rahma Yulinda D,Login,Berhasil login dengan hak akses: Dokter Gigi Spesialis
+04-10-2026 2:05:01,Vembrian Asung,Login,Berhasil login dengan hak akses: Super User
+04-10-2026 3:32:41,Vembrian Asung,Login,Berhasil login dengan hak akses: Super User
+04-10-2026 4:39:51,Rahma Yulinda D,Login,Berhasil login dengan hak akses: Dokter Gigi Spesialis
+04-10-2026 4:42:07,Sri Purwanti,Login,Berhasil login dengan hak akses: Admin
+04-10-2026 4:43:02,Vembrian Asung,Login,Berhasil login dengan hak akses: Super User
+04-10-2026 21:47:17,Vembrian Asung,Login,Berhasil login dengan hak akses: Super User
+04-10-2026 21:49:29,Vembrian Asung,Surat Sakit,Menerbitkan SKS (SKS/SHELDON/002/X-2026) untuk: Athaya Shazia Sheldon
+04-10-2026 21:49:59,Vembrian Asung,Surat Kontrol,Menerbitkan SKP (SKP/SHELDON/002/X-2026) untuk: Athaya Shazia Sheldon
+04-10-2026 23:02:05,Vembrian Asung,Surat Sakit,Menerbitkan SKS (SKS/SHELDON/003/X-2026) untuk: Zaskia Madina
+05-10-2026 1:06:49,Vembrian Asung,Login,Berhasil login dengan hak akses: Super User
+05-10-2026 1:08:17,Vembrian Asung,Terima Pembayaran,Invoice: INV/SHELDON/0001/1026 (Total Item: 1)
+05-10-2026 1:09:44,Vembrian Asung,Surat Sakit,Menerbitkan SKS (SKS/SHELDON/004/X-2026) untuk: Zeino Fridsto Zein
+05-10-2026 19:38:16,Vembrian Asung,Login,Berhasil login dengan hak akses: Super User
+05-10-2026 19:39:21,Vembrian Asung,Login,Berhasil login dengan hak akses: Super User
+05-10-2026 19:45:27,Vembrian Asung,Input EMR,Rekam Medis & Odontogram disimpan untuk: Athaya Shazia Sheldon (RM: A-2153)
+05-10-2026 19:47:00,drg. Regyana Oktavaria,Login,Berhasil login dengan hak akses: Dokter Gigi Umum
+05-10-2026 19:49:46,Sri Purwanti,Login,Berhasil login dengan hak akses: Admin
+06-10-2026 0:55:13,drg. Regyana Oktavaria,Login,Berhasil login dengan hak akses: Dokter Gigi Umum
+06-10-2026 23:18:23,Vembrian Asung,Login,Berhasil login dengan hak akses: Super User
+06-10-2026 23:35:12,Vembrian Asung,Login,Berhasil login dengan hak akses: Super User
+06-10-2026 23:35:31,Vembrian Asung,Login,Berhasil login dengan hak akses: Super User
+07-10-2026 17:49:35,Vembrian Asung,Input EMR,Rekam Medis & Odontogram disimpan untuk: Athaya Shazia Sheldon (RM: A-2153)
+07-10-2026 22:54:18,Vembrian Asung,Input EMR,Rekam Medis & Odontogram disimpan untuk: Athaya Shazia Sheldon (RM: A-2153)
+07-10-2026 23:22:46,Vembrian Asung,Input EMR,Rekam Medis & Odontogram disimpan untuk: Sri Joko Purwanto (RM: S-0085)
+07-10-2026 23:23:37,Vembrian Asung,Input EMR,Rekam Medis & Odontogram disimpan untuk: Sri Joko Purwanto (RM: S-0085)
+08-10-2026 0:25:30,Vembrian Asung,Input EMR,Rekam Medis & Odontogram disimpan untuk: Athaya Shazia Sheldon (RM: A-2153)
+08-10-2026 0:26:45,Vembrian Asung,Input EMR,Rekam Medis & Odontogram disimpan untuk: Athaya Shazia Sheldon (RM: A-2153)
+08-10-2026 11:49:19,Vembrian Asung,Login,Berhasil login dengan hak akses: Super User
+08-10-2026 12:18:32,Vembrian Asung,Login,Berhasil login dengan hak akses: Super User
+08-10-2026 14:34:36,System,,
+08-10-2026 17:24:29,Vembrian Asung,Input EMR,Rekam Medis & Odontogram disimpan untuk: Athaya Shazia Sheldon (RM: A-2153)
+08-10-2026 19:48:13,Vembrian Asung,Update Pasien,Memperbarui data pasien: Elmi Suswati (RM: E-1225)
+08-10-2026 20:01:35,Vembrian Asung,Update Pasien,Memperbarui data pasien: Elmi Suswati (RM: E-1225)
+09-10-2026 0:04:26,Vembrian Asung,Update Pasien,Memperbarui data pasien: Elmi Suswati (RM: E-1225)
+09-10-2026 0:07:26,Vembrian Asung,Update Pasien,Memperbarui data pasien: Elmi Suswati (RM: E-1225)
+09-10-2026 0:08:23,Vembrian Asung,Update Pasien,Memperbarui data pasien: Elmi Suswati (RM: E-1225)
+09-10-2026 0:09:33,Vembrian Asung,Update Pasien,Memperbarui data pasien: Elmi Suswati (RM: E-1225)
+09-10-2026 0:10:10,Vembrian Asung,Update Pasien,Memperbarui data pasien: Fendou Arahan Muhammad (RM: F-1252)
+09-10-2026 0:10:24,Vembrian Asung,Hapus Pasien,Super User menonaktifkan pasien (Soft-Delete aman): Elmi Suswati (ID: PS-0925-1727)
+09-10-2026 0:10:38,Vembrian Asung,Hapus Pasien,Super User menonaktifkan pasien (Soft-Delete aman): Fendou Arahan Muhammad (ID: PS-0725-1610)
+09-10-2026 0:11:13,Vembrian Asung,Update Pasien,Memperbarui data pasien: Ghaisa Andafa Adiatdo (RM: G-0453)
+09-10-2026 0:11:21,Vembrian Asung,Hapus Pasien,Super User menonaktifkan pasien (Soft-Delete aman): Ghaisa Andafa Adiatdo (ID: PS-0626-2130)
+09-10-2026 0:11:42,Vembrian Asung,Update Pasien,Memperbarui data pasien: Hayatun Nufus (RM: H-0283)
+09-10-2026 0:12:20,Vembrian Asung,Hapus Pasien,Super User menonaktifkan pasien (Soft-Delete aman): Hayatun Nufus (ID: PS-1224-1333)
+09-10-2026 0:12:46,Vembrian Asung,Update Pasien,Memperbarui data pasien: Herda Roza (RM: H-0831)
+09-10-2026 0:12:56,Vembrian Asung,Hapus Pasien,Super User menonaktifkan pasien (Soft-Delete aman): Herda Roza (ID: PS-0826-2241)
+09-10-2026 0:13:21,Vembrian Asung,Update Pasien,Memperbarui data pasien: Herry (RM: H-1622)
+09-10-2026 0:13:36,Vembrian Asung,Hapus Pasien,Super User menonaktifkan pasien (Soft-Delete aman): Herry (ID: PS-0926-2280)
+09-10-2026 0:14:09,Vembrian Asung,Update Pasien,Memperbarui data pasien: Oki Harkam (RM: O-0520)
+09-10-2026 0:14:17,Vembrian Asung,Hapus Pasien,Super User menonaktifkan pasien (Soft-Delete aman): Oki Harkam (ID: PS-0723-0658)
+09-10-2026 0:14:38,Vembrian Asung,Update Pasien,Memperbarui data pasien: Rosita Asmakalbu Edwar (RM: R-0501)
+09-10-2026 0:14:57,Vembrian Asung,Hapus Pasien,Super User menonaktifkan pasien (Soft-Delete aman): Rosita Asmakalbu Edwar (ID: PS-0723-0689)
+09-10-2026 7:43:48,Vembrian Asung,Update Tindakan,Mengubah data tindakan: Pemeriksaan Asam Urat (Kode: UMM-0004)
+10-10-2026 15:00:40,Vembrian Asung,Login,Berhasil login dengan hak akses: Super User
+10-10-2026 15:14:31,Vembrian Asung,Login,Berhasil login dengan hak akses: Super User
+10-10-2026 15:28:31,Vembrian Asung,Login,Berhasil login dengan hak akses: Super User
+10-10-2026 18:06:07,Vembrian Asung,Login,Berhasil login dengan hak akses: Super User
+10-10-2026 18:48:09,Vembrian Asung,Login,Berhasil login dengan hak akses: Super User
+11-10-2026 0:52:53,Vembrian Asung,Login,Berhasil login dengan hak akses: Super User
+11-10-2026 7:59:04,Vembrian Asung,Master User,Edit user: linda (Dokter Gigi Spesialis)
+11-10-2026 7:59:31,Vembrian Asung,Master User,Edit user: regy (Dokter Gigi Umum)
+11-10-2026 7:59:42,Vembrian Asung,Master User,Edit user: tifa (Dokter Gigi Umum)
+11-10-2026 8:00:09,Vembrian Asung,Master User,Edit user: tia (Dokter Gigi Umum)
+11-10-2026 8:00:41,Vembrian Asung,Master User,Edit user: tia (Dokter Gigi Umum)
+11-10-2026 8:00:52,Vembrian Asung,Master User,Edit user: tia (Dokter Gigi Umum)
+11-10-2026 8:12:35,Vembrian Asung,Master User,Edit user: linda (Dokter Gigi Spesialis)
+11-10-2026 21:46:11,Vembrian Asung,Login,Berhasil login dengan hak akses: Super User
+11-10-2026 21:48:56,Vembrian Asung,Login,Berhasil login dengan hak akses: Super User
+11-10-2026 21:49:37,drg. Regyana Oktavaria,Login,Berhasil login dengan hak akses: Dokter Gigi Umum
+11-10-2026 21:50:12,Vembrian Asung,Login,Berhasil login dengan hak akses: Super User
+14-10-2026 17:06:57,"drg. V. Asung Nugroho, Sp.Ort",Master User,Edit user: asung (Super User)
+14-10-2026 17:10:04,Vembrian Asung,Login,Berhasil login dengan hak akses: Super User
+14-10-2026 23:58:30,Vembrian Asung,Login,Berhasil login dengan hak akses: Super User
+16-10-2026 00:34:26,Vembrian Asung,Master User,Edit user: asung (Super User)
+16-10-2026 01:35:32,Vembrian Asung Nugroho,Login,Berhasil login dengan hak akses: Owner

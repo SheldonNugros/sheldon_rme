@@ -1,8 +1,8 @@
-Metrik,Nilai,,"=IFERROR(QUERY(Master_BMHP!A1:M,""select A, B, F, G, I, L where L = 'KRITIS' or L = 'HABIS' or L = 'KADALUARSA' order by F asc"",1),""Semua stok aman"")"
-Total Item,=COUNTA(Master_BMHP!B2:B)
-Stok Kritis,"=COUNTIF(Master_BMHP!L2:L,""KRITIS"")"
-Stok Habis,"=COUNTIF(Master_BMHP!L2:L,""HABIS"")"
-Kadaluarsa,"=COUNTIF(Master_BMHP!L2:L,""KADALUARSA"")"
-Nilai Persediaan (HPP),=SUM(Master_BMHP!M2:M)
-Total Terjual (Unit),=SUM(Master_BMHP!H2:H)
-Pembelian Bulan Ini (Rp),"=SUMIFS(Riwayat_Pembelian!F2:F,Riwayat_Pembelian!A2:A,"">=""&(EOMONTH(TODAY(),-1)+1),Riwayat_Pembelian!A2:A,""<=""&EOMONTH(TODAY(),0))"
+﻿Metrik,Nilai,,Kode_Item,Nama_Barang,Stok_Tersedia,Stok_Minimum,Expired_Date,
+Total Item,2,,,,,,,
+Stok Kritis,0,,,,,,,
+Stok Habis,0,,,,,,,
+Kadaluarsa,0,,,,,,,
+Nilai Persediaan (HPP),0,,,,,,,
+Total Terjual (Unit),0,,,,,,,
+Pembelian Bulan Ini (Rp),0,,,,,,,

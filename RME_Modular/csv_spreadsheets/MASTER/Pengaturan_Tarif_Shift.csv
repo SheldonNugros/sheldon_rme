@@ -1,23 +1,12 @@
 ID_Pekerja,Role,Nama_Pekerja,Tipe_Kompensasi,Tarif_Shift_1,Tarif_Shift_2,Gaji_Pokok_Bulanan,Keterangan,Status
-SN-01,Owner,Administrator Sistem,Kombinasi Shift & Tindakan,55000,55000,0,2 Shift: Rp 55.000/shift + JM 65%,Aktif
-SN-02,Owner,"drg. V. Asung Nugroho, Sp.Ort",Kombinasi Shift & Tindakan,55000,55000,0,2 Shift: Rp 55.000/shift + JM 65%,Aktif
-SN-03,Dokter Gigi Spesialis,"drg. Sheldon Cooper, Sp.Ort",Kombinasi Shift & Tindakan,55000,55000,0,2 Shift: Rp 55.000/shift + JM 50% (Rontgen 15%),Aktif
-SN-04,Dokter Gigi Umum,drg. Leonard Hofstadter,Kombinasi Shift & Tindakan,55000,55000,0,2 Shift: Rp 55.000/shift + JM 40% (Rontgen 15%),Aktif
-SN-05,Dokter Gigi Spesialis,"drg. Rahma Yulinda D, Sp. BMM",Kombinasi Shift & Tindakan,55000,55000,0,2 Shift: Rp 55.000/shift + JM 65% (Rontgen 15%),Aktif
-SN-06,Dokter Gigi Umum,drg. Regyana Oktavaria,Kombinasi Shift & Tindakan,55000,55000,0,2 Shift: Rp 55.000/shift + JM 40% (Rontgen 15%),Aktif
-SN-07,Dokter Gigi Umum,drg. Latifah Mulyana,Kombinasi Shift & Tindakan,55000,55000,0,2 Shift: Rp 55.000/shift + JM 40% (Rontgen 15%),Aktif
-SN-08,Dokter Gigi Umum,drg. Tia Ardhana R,Kombinasi Shift & Tindakan,55000,55000,0,2 Shift: Rp 55.000/shift + JM 50% (Rontgen 15%),Aktif
-SN-09,Dokter Gigi Umum,drg. Danny,Kombinasi Shift & Tindakan,55000,55000,0,2 Shift: Rp 55.000/shift + JM 65% (Rontgen 15%),Aktif
-SN-10,Dokter Gigi Umum,drg. Astri,Kombinasi Shift & Tindakan,55000,55000,0,2 Shift: Rp 55.000/shift + JM 65% (Rontgen 15%),Aktif
-SN-11,Dokter Gigi Umum,drg. Rizka,Kombinasi Shift & Tindakan,55000,55000,0,2 Shift: Rp 55.000/shift + JM 65% (Rontgen 15%),Aktif
-SN-12,Dokter Gigi Umum,drg. Nanda,Kombinasi Shift & Tindakan,55000,55000,0,2 Shift: Rp 55.000/shift + JM 65% (Rontgen 15%),Aktif
-SN-13,Dokter Gigi Umum,drg. Aviva,Kombinasi Shift & Tindakan,55000,55000,0,2 Shift: Rp 55.000/shift + JM 65% (Rontgen 15%),Aktif
-SN-14,Dokter Gigi Umum,drg. Erien,Kombinasi Shift & Tindakan,55000,55000,0,2 Shift: Rp 55.000/shift + JM 50% (Rontgen 15%),Aktif
-SN-15,Dokter Gigi Umum,drg.g.p Dinda,Kombinasi Shift & Tindakan,55000,55000,0,2 Shift: Rp 55.000/shift + JM 55% (Rontgen 15%),Aktif
-SN-16,Dokter Gigi Umum,drg.g.p Fathya,Kombinasi Shift & Tindakan,55000,55000,0,2 Shift: Rp 55.000/shift + JM 40% (Rontgen 15%),Aktif
-SN-17,Dokter Gigi Umum,drg.g.p Belinda,Kombinasi Shift & Tindakan,55000,55000,0,2 Shift: Rp 55.000/shift + JM 40% (Rontgen 15%),Aktif
-SN-18,Perawat Gigi,Bernadette Rostenkowski,Uang Harian Shift,45000,45000,0,2 Shift: Rp 45.000/shift (dihitung berdasarkan absensi kehadiran),Aktif
-SN-19,Perawat Gigi,Wulan,Uang Harian Shift,45000,45000,0,2 Shift: Rp 45.000/shift (dihitung berdasarkan absensi kehadiran),Aktif
-SN-20,Perawat Gigi,Dina,Uang Harian Shift,45000,45000,0,2 Shift: Rp 45.000/shift (dihitung berdasarkan absensi kehadiran),Aktif
-SN-21,Perawat Umum,Penny Teller,Uang Harian Shift,45000,45000,0,2 Shift: Rp 45.000/shift (dihitung berdasarkan absensi kehadiran),Aktif
-SN-22,Admin,Howard Wolowitz,Gaji Bulanan Tetap,0,0,1200000,Gaji Bulanan Tetap Rp 1.200.000/bulan (Non-Shift),Aktif
+SN-01,Owner,Vembrian Asung Nugroho,Uang Harian Shift,40000,40000,0,,Tidak Aktif
+SN-02,Dokter Gigi Spesialis,"drg. Rahma Yulinda D, Sp. BMM",Kombinasi Shift & Tindakan,0,0,0,,Aktif
+SN-03,Dokter Gigi Umum,drg. Regyana Oktavaria,Kombinasi Shift & Tindakan,62500,55000,0,,Aktif
+SN-04,Dokter Gigi Umum,drg. Tia Ardhana R,Kombinasi Shift & Tindakan,0,0,0,,Aktif
+SN-05,Dokter Gigi Umum,drg. Latifah Mulyana,Kombinasi Shift & Tindakan,62500,55000,0,,Aktif
+SN-06,Perawat Gigi,"Eva Nurmiza, AMKG",Uang Harian Shift,50000,50000,0,,Aktif
+SN-07,Perawat Gigi,"Fitriyati, AMKG",Uang Harian Shift,50000,50000,0,,Aktif
+SN-08,Perawat Umum,Riri Afriyanti,Uang Harian Shift,45000,45000,0,,Aktif
+SN-09,Admin,Sri Purwanti,Gaji Bulanan Tetap,0,0,1150000,,Aktif
+SN-10,Office,Indah Hapsari,Gaji Bulanan Tetap,0,0,0,,Tidak Aktif
+SN-11,Office,Atika Maysaroh,Gaji Bulanan Tetap,0,0,0,,Tidak Aktif

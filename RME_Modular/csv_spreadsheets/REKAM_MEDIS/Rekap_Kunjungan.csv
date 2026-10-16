@@ -1,1 +1,2 @@
-"=IFERROR(QUERY(Data_Rekam_Medis!A1:M,""select F, count(A) where A is not null group by F order by count(A) desc label count(A) 'Jumlah_Pemeriksaan'"",1),""-"")",,,"=IFERROR(QUERY(Data_Rekam_Medis!A1:M,""select year(E), month(E)+1, count(A) where E is not null group by year(E), month(E)+1 order by year(E) desc, month(E)+1 desc label year(E) 'Tahun', month(E)+1 'Bulan', count(A) 'Jumlah_Kunjungan'"",1),""Kolom Tanggal_Pemeriksaan harus berformat tanggal"")",,,,"=IFERROR(QUERY(Data_Rekam_Medis!A1:M,""select B, D, count(A), max(E) where A is not null group by B, D order by count(A) desc label count(A) 'Total_Kunjungan', max(E) 'Kunjungan_Terakhir'"",1),""-"")"
+﻿Dokter_Pemeriksa,Jumlah_Pemeriksaan,,Tahun,Bulan,Jumlah_Kunjungan
+Vembrian Asung,8,,2026,10,8

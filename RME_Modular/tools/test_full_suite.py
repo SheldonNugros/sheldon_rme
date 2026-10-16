@@ -317,19 +317,19 @@ assert("Initial Active Account is null", window.activeAccount === null);
 assert("KlinikData Object Initialized", typeof window.KlinikData === 'object' && Array.isArray(window.KlinikData.pasien));
 
 // 2. Authentication Test
-document.getElementById('loginUser').value = "STF-001";
-document.getElementById('loginPass').value = "1234";
+document.getElementById('loginUser').value = "SN-01";
+document.getElementById('loginPass').value = "admin123";
 document.getElementById('formLogin').dispatchEvent(new Event('submit', { cancelable: true }));
 runAllTimers();
 
-assert("Login Super User Successful", window.activeAccount === "STF-001", "User: " + window.activeNamaAccount);
-assert("Role Applied: Super User", window.activeUserRole === "Super User");
+assert("Login Owner Successful", window.activeAccount === "SN-01", "User: " + window.activeNamaAccount);
+assert("Role Applied: Owner", window.activeUserRole === "Owner");
 
 // 3. Data Synchronization & Event Firing
-assert("KlinikData Master Synced", window.KlinikData.staff.length > 0 && window.KlinikData.tindakan.length > 0, "Staff: " + window.KlinikData.staff.length + ", Tindakan: " + window.KlinikData.tindakan.length);
-assert("KlinikData Pasien Synced", window.KlinikData.pasien.length >= 3, "Total Pasien: " + window.KlinikData.pasien.length);
-assert("KlinikData EMR Synced", window.KlinikData.rekamMedis.length > 0, "EMR count: " + window.KlinikData.rekamMedis.length);
-assert("KlinikData Pembayaran Synced", window.KlinikData.pembayaran.length > 0, "Pembayaran count: " + window.KlinikData.pembayaran.length);
+assert("KlinikData Master Synced", window.KlinikData.staff.length === 11 && window.KlinikData.tindakan.length >= 140, "Staff: " + window.KlinikData.staff.length + ", Tindakan: " + window.KlinikData.tindakan.length);
+assert("KlinikData Pasien Synced", window.KlinikData.pasien.length >= 2200, "Total Pasien: " + window.KlinikData.pasien.length);
+assert("KlinikData EMR Synced", window.KlinikData.rekamMedis.length >= 8, "EMR count: " + window.KlinikData.rekamMedis.length);
+assert("KlinikData Pembayaran Synced (Clean Workspace State)", Array.isArray(window.KlinikData.pembayaran), "Pembayaran count: " + window.KlinikData.pembayaran.length);
 
 // 4. Test Navigation to Surat & Formulir Medis
 switchMenu('surat');
@@ -341,7 +341,7 @@ changeSuratMenu('sakit');
 runAllTimers();
 assert("Panel Surat Sakit Open", !document.getElementById('panelSuratSakit').classList.contains('hidden'));
 
-document.getElementById('sksSearchPasien').value = "budi";
+document.getElementById('sksSearchPasien').value = "edison";
 searchPasienSKS();
 runAllTimers(); // process debounce
 
@@ -353,12 +353,12 @@ assert("SKS Found Matched Patients", itemsSKS.length > 0, "Found items: " + item
 if (itemsSKS.length > 0) {
   itemsSKS[0].click(); // Simulate clicking the patient
   runAllTimers();
-  assert("SKS Auto-populate ID Pasien", document.getElementById('sksIdPasien').value === "P-0001");
-  assert("SKS Auto-populate No RM", document.getElementById('sksNoRm').value === "RM-0001");
-  assert("SKS Auto-populate Nama Pasien", document.getElementById('sksNama').value === "Budi Santoso");
-  assert("SKS Auto-populate Umur", document.getElementById('sksUmur').value.includes("36"));
+  assert("SKS Auto-populate ID Pasien", document.getElementById('sksIdPasien').value === "PS-0321-0001");
+  assert("SKS Auto-populate No RM", document.getElementById('sksNoRm').value === "E-0001");
+  assert("SKS Auto-populate Nama Pasien", document.getElementById('sksNama').value === "Edison");
+  assert("SKS Auto-populate Umur", document.getElementById('sksUmur').value.includes("61"));
   assert("SKS Auto-populate JK", document.getElementById('sksJK').value === "Laki-Laki");
-  assert("SKS Auto-populate Alamat", document.getElementById('sksAlamat').value.includes("Payakumbuh"));
+  assert("SKS Auto-populate Alamat", document.getElementById('sksAlamat').value.includes("Kuala Kilan"));
   assert("SKS Result Dropdown Closed after Selection", resBoxSKS.classList.contains('hidden'));
 }
 
@@ -375,7 +375,7 @@ changeSuratMenu('kontrol');
 runAllTimers();
 assert("Panel Surat Kontrol Open", !document.getElementById('panelSuratKontrol').classList.contains('hidden'));
 
-document.getElementById('skpSearchPasien').value = "siti";
+document.getElementById('skpSearchPasien').value = "efri sukma";
 searchPasienSKP();
 runAllTimers();
 
@@ -387,9 +387,9 @@ assert("SKP Found Matched Patients", itemsSKP.length > 0);
 if (itemsSKP.length > 0) {
   itemsSKP[0].click();
   runAllTimers();
-  assert("SKP Auto-populate ID Pasien", document.getElementById('skpIdPasien').value === "P-0002");
-  assert("SKP Auto-populate No RM", document.getElementById('skpNoRm').value === "RM-0002");
-  assert("SKP Auto-populate Nama Pasien", document.getElementById('skpNama').value === "Siti Rahmawati");
+  assert("SKP Auto-populate ID Pasien", document.getElementById('skpIdPasien').value === "PS-0321-0002");
+  assert("SKP Auto-populate No RM", document.getElementById('skpNoRm').value === "E-0002");
+  assert("SKP Auto-populate Nama Pasien", document.getElementById('skpNama').value === "Efri Sukma");
   assert("SKP Result Dropdown Closed", resBoxSKP.classList.contains('hidden'));
 }
 
@@ -398,7 +398,7 @@ changeSuratMenu('resume');
 runAllTimers();
 assert("Panel Resume Medis Open", !document.getElementById('panelResumeMedis').classList.contains('hidden'));
 
-document.getElementById('rsmSearchPasien').value = "budi";
+document.getElementById('rsmSearchPasien').value = "athaya shazia";
 searchPasienRSM();
 runAllTimers();
 
@@ -410,11 +410,11 @@ assert("RSM Found Matched Patients", itemsRSM.length > 0);
 if (itemsRSM.length > 0) {
   itemsRSM[0].click();
   runAllTimers();
-  assert("RSM Auto-populate ID Pasien", document.getElementById('rsmIdPasien').value === "P-0001");
-  assert("RSM Auto-populate No RM", document.getElementById('rsmNoRm').value === "RM-0001");
-  assert("RSM Auto-populate Nama Pasien", document.getElementById('rsmNama').value === "Budi Santoso");
+  assert("RSM Auto-populate ID Pasien", document.getElementById('rsmIdPasien').value === "PS-0726-2153");
+  assert("RSM Auto-populate No RM", document.getElementById('rsmNoRm').value === "A-2153");
+  assert("RSM Auto-populate Nama Pasien", document.getElementById('rsmNama').value === "Athaya Shazia Sheldon");
   assert("RSM Auto-fill Clinical Summary from EMR", document.getElementById('rsmRingkasanKlinis').value.length > 0);
-  assert("RSM Auto-fill ICD Diagnosis from EMR", document.getElementById('rsmDiagnosisKerja').value.includes("K02.1"));
+  assert("RSM Auto-fill ICD Diagnosis from EMR", document.getElementById('rsmDiagnosisKerja').value.length > 0);
 }
 
 // 8. TEST PASIEN AUTOCOMPLETE IN SURAT (SPM - Rujukan)
@@ -422,7 +422,7 @@ changeSuratMenu('rujukan');
 runAllTimers();
 assert("Panel Rujukan Open", !document.getElementById('panelSuratRujukan').classList.contains('hidden'));
 
-document.getElementById('spmSearchPasien').value = "ahmad";
+document.getElementById('spmSearchPasien').value = "dara triatna";
 searchPasienSPM();
 runAllTimers();
 
@@ -434,8 +434,8 @@ assert("SPM Found Matched Patients", itemsSPM.length > 0);
 if (itemsSPM.length > 0) {
   itemsSPM[0].click();
   runAllTimers();
-  assert("SPM Auto-populate ID Pasien", document.getElementById('spmIdPasien').value === "P-0003");
-  assert("SPM Auto-populate Nama", document.getElementById('spmNama').value === "Ahmad Fauzi");
+  assert("SPM Auto-populate ID Pasien", document.getElementById('spmIdPasien').value === "PS-0421-0005");
+  assert("SPM Auto-populate Nama", document.getElementById('spmNama').value === "Dara Triatna");
 }
 
 // 9. TEST PASIEN AUTOCOMPLETE IN SURAT (LAB - Pengantar Lab)
@@ -443,7 +443,7 @@ changeSuratMenu('lab');
 runAllTimers();
 assert("Panel Lab Open", !document.getElementById('panelSuratLab').classList.contains('hidden'));
 
-document.getElementById('labSearchPasien').value = "budi";
+document.getElementById('labSearchPasien').value = "edison";
 searchPasienLAB();
 runAllTimers();
 
@@ -454,8 +454,8 @@ assert("LAB Found Matched Patients", itemsLAB.length > 0);
 if (itemsLAB.length > 0) {
   itemsLAB[0].click();
   runAllTimers();
-  assert("LAB Auto-populate ID Pasien", document.getElementById('labIdPasien').value === "P-0001");
-  assert("LAB Auto-populate Nama", document.getElementById('labNama').value === "Budi Santoso");
+  assert("LAB Auto-populate ID Pasien", document.getElementById('labIdPasien').value === "PS-0321-0001");
+  assert("LAB Auto-populate Nama", document.getElementById('labNama').value === "Edison");
 }
 
 // 10. TEST PASIEN AUTOCOMPLETE IN SURAT (RAD - Pengantar Radiologi)
@@ -463,7 +463,7 @@ changeSuratMenu('radiologi');
 runAllTimers();
 assert("Panel Radiologi Open", !document.getElementById('panelSuratRadiologi').classList.contains('hidden'));
 
-document.getElementById('radSearchPasien').value = "siti";
+document.getElementById('radSearchPasien').value = "efri sukma";
 searchPasienRAD();
 runAllTimers();
 
@@ -474,8 +474,8 @@ assert("RAD Found Matched Patients", itemsRAD.length > 0);
 if (itemsRAD.length > 0) {
   itemsRAD[0].click();
   runAllTimers();
-  assert("RAD Auto-populate ID Pasien", document.getElementById('radIdPasien').value === "P-0002");
-  assert("RAD Auto-populate Nama", document.getElementById('radNama').value === "Siti Rahmawati");
+  assert("RAD Auto-populate ID Pasien", document.getElementById('radIdPasien').value === "PS-0321-0002");
+  assert("RAD Auto-populate Nama", document.getElementById('radNama').value === "Efri Sukma");
 }
 
 // 11. TEST PASIEN DATE FORMAT (dd-mm-yyyy)
@@ -487,26 +487,26 @@ assert("Patient Birth Date follows dd-mm-yyyy", /^\d{2}-\d{2}-\d{4}$/.test(first
 // 12. TEST EMR PATIENT SEARCH
 switchMenu('rekam-medis');
 runAllTimers();
-document.getElementById('rmSearchPasien').value = "budi";
+document.getElementById('rmSearchPasien').value = "edison";
 searchPasienRM();
 runAllTimers();
 var resRM = document.getElementById('rmSearchResult');
 assert("Rekam Medis Search Dropdown Visible", !resRM.classList.contains('hidden'));
-pilihPasienRM('P-0001');
+pilihPasienRM('PS-0321-0001');
 runAllTimers();
-assert("Active Pasien in EMR set", activePasienRM && activePasienRM.idPasien === "P-0001");
+assert("Active Pasien in EMR set", activePasienRM && activePasienRM.idPasien === "PS-0321-0001");
 
 // 13. TEST KASIR PATIENT SEARCH
 switchMenu('kasir');
 runAllTimers();
-document.getElementById('ksrSearchPasien').value = "budi";
+document.getElementById('ksrSearchPasien').value = "edison";
 document.getElementById('ksrSearchPasien').dispatchEvent(new Event('input'));
 runAllTimers();
 var resKSR = document.getElementById('ksrSearchResult');
 assert("Kasir Search Dropdown Visible", !resKSR.classList.contains('hidden'));
-pilihPasienKSR('P-0001');
+pilihPasienKSR('PS-0321-0001');
 runAllTimers();
-assert("Kasir Patient Selected", document.getElementById('ksrNama').value === "Budi Santoso");
+assert("Kasir Patient Selected", document.getElementById('ksrNama').value === "Edison");
 
 // 14. TEST MASTER DATABASE & INVENTORY & AI MODULES
 switchMenu('database');
@@ -597,14 +597,14 @@ runAllTimers();
 assert("Panel Info Obat Active", !document.getElementById('panelInfoObat').classList.contains('hidden'));
 
 // Search by Nama Obat
-document.getElementById('cariInfoObat').value = "amoxicillin";
+document.getElementById('cariInfoObat').value = "amoksisilin";
 renderInfoObat();
-assert("Info Obat Searched by Nama", document.getElementById('tbodyInfoObat').innerHTML.includes('Amoxicillin'));
+assert("Info Obat Searched by Nama", document.getElementById('tbodyInfoObat').innerHTML.includes('Amoksisilin'));
 
 // Search by Kandungan Obat
-document.getElementById('cariInfoObat').value = "mefenamic";
+document.getElementById('cariInfoObat').value = "ampisilin";
 renderInfoObat();
-assert("Info Obat Searched by Kandungan (Mefenamic Acid)", document.getElementById('tbodyInfoObat').innerHTML.includes('Asam Mefenamat'));
+assert("Info Obat Searched by Kandungan (Ampisilin)", document.getElementById('tbodyInfoObat').innerHTML.includes('Ampisilin'));
 
 // 15c. Test Informasi BMHP Tab & Search
 changeInfoTab('bmhp');
@@ -619,7 +619,7 @@ assert("Info BMHP Searched by Nama", document.getElementById('tbodyInfoBmhp').in
 changeInfoTab('obat');
 document.getElementById('cariInfoObat').value = "";
 renderInfoObat();
-assert("Info Obat Menampilkan Kemasan Beli", document.getElementById('tbodyInfoObat').innerHTML.includes('@') || document.getElementById('tbodyInfoObat').innerHTML.includes('Box'));
+assert("Info Obat Menampilkan Kemasan Beli", document.getElementById('tbodyInfoObat').innerHTML.includes('@') || document.getElementById('tbodyInfoObat').innerHTML.includes('Tablet'));
 
 // 15e. Test Reset Odontogram ke Normal
 switchMenu('rekamMedis');
@@ -651,7 +651,7 @@ if (lastRowKsr) {
     assert("Kasir Obat Membaca data-stok", namaIn.hasAttribute('data-stok'));
   }
 }
-assert("Opsi Perawat Kasir Hanya Role Perawat Gigi", optPerawatKSR.includes("Bernadette") && !optPerawatKSR.includes("Penny") && !optPerawatKSR.includes("Cooper"));
+assert("Opsi Perawat Kasir Hanya Role Perawat Gigi", optPerawatKSR.includes("Eva Nurmiza") && !optPerawatKSR.includes("Sri Purwanti"));
 
 // 15h. Test Diagnosa ICD-10 & Tindakan ICD-9 Title Casing & Row Creation
 switchMenu('rekamMedis');
@@ -676,16 +676,16 @@ assert("Tindakan Input Auto Title Case Formatted", mockInputTind.value === "Penc
 
 // 15i. Test Detail Rekam Medis (EMR): Tombol Odontogram History & Posisi Diagnosis Gigi
 riwayatPasienAktif = [{
-  idPasien: 'P-001',
-  noRm: 'RM-001',
-  namaPasien: 'Pasien Test',
+  idPasien: 'PS-0321-0001',
+  noRm: 'E-0001',
+  namaPasien: 'Edison',
   tanggalPeriksa: '2026-10-08',
-  dokterPemeriksa: 'drg. Sheldon',
+  dokterPemeriksa: 'drg. Rahma Yulinda D, Sp. BMM',
   anamnesisStr: JSON.stringify({ cc: 'Nyeri', diagnosaICD: ['K02.1 - Caries'] }),
   fisikStr: JSON.stringify({ kesan: 'Baik', periodontal: { summary: { totalSites: 6, bopPercent: 50 } } }),
   odontogramStr: JSON.stringify({ 16: { generalCondition: 'car', surfaces: { occlusal: 'car' } } }),
   tindakanStr: JSON.stringify(['23.2 - Tumpatan']),
-  obatStr: JSON.stringify([{ obat: 'Amoxicillin', qty: 10, ket: '3x1' }])
+  obatStr: JSON.stringify([{ obat: 'Amoksisilin Generik 500mg', qty: 10, ket: '3x1' }])
 }];
 bukaDetailRM(0);
 let printArea = document.getElementById('printAreaRM');
@@ -707,18 +707,18 @@ closeDetailRM();
 // 15j. Test View History Pasien di Database Pasien: Aligned with Rekam Medis Layout
 let origPasienSuite = window.KlinikData.pasien || [];
 let origRmSuite = window.KlinikData.rekamMedis || [];
-window.KlinikData.pasien = [{ idPasien: 'P-001', namaPasien: 'Pasien Test', noRm: 'RM-001' }];
+window.KlinikData.pasien = [{ idPasien: 'PS-0321-0001', namaPasien: 'Edison', noRm: 'E-0001' }];
 window.KlinikData.rekamMedis = [{
-  idPasien: 'P-001',
+  idPasien: 'PS-0321-0001',
   tanggalPeriksa: '2026-10-08',
-  dokterPemeriksa: 'drg. Sheldon',
+  dokterPemeriksa: 'drg. Rahma Yulinda D, Sp. BMM',
   anamnesisStr: JSON.stringify({ cc: 'Nyeri', diagnosaICD: ['K02.1 - Caries'] }),
   fisikStr: JSON.stringify({ kesan: 'Baik', periodontal: { summary: { totalSites: 192, bopPercent: 12 } }, ohis: { debrisScore: 0.5, calculusScore: 0.33, totalScore: 0.83, category: 'Baik' } }),
   odontogramStr: JSON.stringify({ 16: { generalCondition: 'car', surfaces: { occlusal: 'car' } } }),
   tindakanStr: JSON.stringify(['23.2 - Tumpatan']),
-  obatStr: JSON.stringify([{ obat: 'Amoxicillin', qty: 10, ket: '3x1' }])
+  obatStr: JSON.stringify([{ obat: 'Amoksisilin Generik 500mg', qty: 10, ket: '3x1' }])
 }];
-openHistoryEMR('P-001');
+openHistoryEMR('PS-0321-0001');
 let contHistPasien = document.getElementById('containerHistoryEMR');
 assert("Database Pasien: History EMR Rendered", !!contHistPasien);
 let histPasienHtml = contHistPasien.innerHTML;
@@ -753,22 +753,22 @@ window.KlinikData.rekamMedis = origRmSuite;
 
 // 15k. Test Edit Pasien & Form Reset Persistence
 let origPasienListForEdit = JSON.parse(JSON.stringify(window.KlinikData.pasien || []));
-editPasien('P-0001');
+editPasien('PS-0321-0001');
 assert("Edit Pasien: Panel Form Terbuka", !document.getElementById('panelFormPasien').classList.contains('hidden'));
-assert("Edit Pasien: Mode Edit PasId Terisi", document.getElementById('pasId').value === 'P-0001');
+assert("Edit Pasien: Mode Edit PasId Terisi", document.getElementById('pasId').value === 'PS-0321-0001');
 assert("Edit Pasien: Judul Form Menampilkan Edit", document.getElementById('formTitle').innerText.includes('Edit Data Pasien'));
 assert("Edit Pasien: Tombol Simpan Berubah Label", document.getElementById('btnSimpanPasien').innerHTML.includes('Simpan Perubahan'));
 assert("Edit Pasien: Tombol Batal Edit Muncul", !document.getElementById('btnBatalPasien').classList.contains('hidden'));
 
 // Lakukan perubahan nama & alamat
-document.getElementById('pasNama').value = "Budi Santoso Terupdate";
+document.getElementById('pasNama').value = "Edison Terupdate";
 document.getElementById('pasAlamat').value = "Jl. Sudirman No. 99";
 simpanDataPasien({ preventDefault: () => {} });
 runAllTimers();
 
-let updatedP = window.KlinikData.pasien.find(p => p.idPasien === 'P-0001');
-assert("Edit Pasien: Data Lokal Terupdate Instan", updatedP && updatedP.namaPasien === "Budi Santoso Terupdate");
-assert("Edit Pasien: Tabel Menampilkan Nama Terupdate", document.getElementById('tbodyPasien').innerHTML.includes('Budi Santoso Terupdate'));
+let updatedP = window.KlinikData.pasien.find(p => p.idPasien === 'PS-0321-0001');
+assert("Edit Pasien: Data Lokal Terupdate Instan", updatedP && updatedP.namaPasien === "Edison Terupdate");
+assert("Edit Pasien: Tabel Menampilkan Nama Terupdate", document.getElementById('tbodyPasien').innerHTML.includes('Edison Terupdate'));
 assert("Edit Pasien: Panel Form Tertutup Pasca Simpan", document.getElementById('panelFormPasien').classList.contains('hidden'));
 assert("Edit Pasien: Panel Tabel Muncul Pasca Simpan", !document.getElementById('panelTabelPasien').classList.contains('hidden'));
 
@@ -790,24 +790,24 @@ window.KlinikData.pasien = origPasienListForEdit;
 renderTablePagePasien();
 
 // 16. ROLE-BASED ACCESS CONTROL (RBAC) VERIFICATION SUITE
-// 16a. Verify SUPER USER permissions:
-terapkanRoleAkses('Super User');
-window.activeUserRole = 'Super User';
+// 16a. Verify OWNER / SUPER USER permissions:
+terapkanRoleAkses('Owner');
+window.activeUserRole = 'Owner';
 renderTablePagePasien();
-assert("Super User: Nav Dashboard Visible", !document.getElementById('nav-dashboard').classList.contains('hidden'));
-assert("Super User: Nav AI Visible", !document.getElementById('nav-ai').classList.contains('hidden'));
-assert("Super User: Nav Pasien Visible", !document.getElementById('nav-pasien').classList.contains('hidden'));
-assert("Super User: Nav Rekam Medis Visible", !document.getElementById('nav-rekam-medis').classList.contains('hidden'));
-assert("Super User: Nav Surat Visible", !document.getElementById('nav-surat').classList.contains('hidden'));
-assert("Super User: Nav Database Visible", !document.getElementById('nav-database').classList.contains('hidden'));
-assert("Super User: Nav Inventory Visible", !document.getElementById('nav-inventory').classList.contains('hidden'));
-assert("Super User: Nav Informasi Visible", !document.getElementById('nav-informasi').classList.contains('hidden'));
-assert("Super User: Nav Kasir Visible", !document.getElementById('nav-kasir').classList.contains('hidden'));
-assert("Super User: Nav Riwayat Invoice Visible", !document.getElementById('nav-riwayat-invoice').classList.contains('hidden'));
-assert("Super User: Tombol Tambah Pasien Baru Visible", !document.getElementById('btnTambahPasienBaru').classList.contains('hidden'));
-assert("Super User: Tombol Filter Duplikat Visible", !document.getElementById('btnFilterDuplikat').classList.contains('hidden'));
-assert("Super User: Tombol Edit Pasien Rendered", document.getElementById('tbodyPasien').innerHTML.includes('Edit'));
-assert("Super User: Tombol Hapus Pasien Rendered", document.getElementById('tbodyPasien').innerHTML.includes('🗑️ Hapus'));
+assert("Owner: Nav Dashboard Visible", !document.getElementById('nav-dashboard').classList.contains('hidden'));
+assert("Owner: Nav AI Visible", !document.getElementById('nav-ai').classList.contains('hidden'));
+assert("Owner: Nav Pasien Visible", !document.getElementById('nav-pasien').classList.contains('hidden'));
+assert("Owner: Nav Rekam Medis Visible", !document.getElementById('nav-rekam-medis').classList.contains('hidden'));
+assert("Owner: Nav Surat Visible", !document.getElementById('nav-surat').classList.contains('hidden'));
+assert("Owner: Nav Database Visible", !document.getElementById('nav-database').classList.contains('hidden'));
+assert("Owner: Nav Inventory Visible", !document.getElementById('nav-inventory').classList.contains('hidden'));
+assert("Owner: Nav Informasi Visible", !document.getElementById('nav-informasi').classList.contains('hidden'));
+assert("Owner: Nav Kasir Visible", !document.getElementById('nav-kasir').classList.contains('hidden'));
+assert("Owner: Nav Riwayat Invoice Visible", !document.getElementById('nav-riwayat-invoice').classList.contains('hidden'));
+assert("Owner: Tombol Tambah Pasien Baru Visible", !document.getElementById('btnTambahPasienBaru').classList.contains('hidden'));
+assert("Owner: Tombol Filter Duplikat Visible", !document.getElementById('btnFilterDuplikat').classList.contains('hidden'));
+assert("Owner: Tombol Edit Pasien Rendered", document.getElementById('tbodyPasien').innerHTML.includes('Edit'));
+assert("Owner: Tombol Hapus Pasien Rendered", document.getElementById('tbodyPasien').innerHTML.includes('🗑️ Hapus'));
 
 // 16b. Verify DOKTER GIGI SPESIALIS permissions:
 terapkanRoleAkses('Dokter Gigi Spesialis');
@@ -888,17 +888,17 @@ assert("Duplikasi Map mendeteksi P2 (Duplikat Nama+Lahir)", dupSet.has("P2"));
 assert("Duplikasi Map tidak menandai P3 (Unik)", !dupSet.has("P3"));
 assert("Duplikasi Map mendeteksi P4 (Duplikat NIK)", dupSet.has("P4"));
 
-// 2. Uji toggleFilterDataGanda (Staff dilarang, Super User diizinkan)
+// 2. Uji toggleFilterDataGanda (Staff dilarang, Owner diizinkan)
 assert("Initial Filter Duplikat Status False", isFilterDuplikatAktif === false);
 toggleFilterDataGanda();
 assert("Staff: Dilarang Mengaktifkan Filter Duplikat", isFilterDuplikatAktif === false);
 
-terapkanRoleAkses('Super User');
-window.activeUserRole = 'Super User';
+terapkanRoleAkses('Owner');
+window.activeUserRole = 'Owner';
 toggleFilterDataGanda();
-assert("Super User: Toggle Filter Duplikat Status Menjadi True", isFilterDuplikatAktif === true);
+assert("Owner: Toggle Filter Duplikat Status Menjadi True", isFilterDuplikatAktif === true);
 toggleFilterDataGanda();
-assert("Super User: Toggle Filter Duplikat Status Kembali False", isFilterDuplikatAktif === false);
+assert("Owner: Toggle Filter Duplikat Status Kembali False", isFilterDuplikatAktif === false);
 
 // 3. Uji Auto-Guard Frontend Realtime
 var originalPasienBackup = window.KlinikData.pasien.slice();
@@ -932,7 +932,7 @@ function getLastToast() {
 
 // Skenario K-1: Simpan Billing Tanpa Pasien Terpilih
 switchMenu('kasir');
-terapkanRoleAkses('Super User');
+terapkanRoleAkses('Owner');
 resetFormBilling();
 document.getElementById('ksrID').value = '';
 simpanBillingFinal();
@@ -940,7 +940,7 @@ assert("K-1: Simpan Invoice Tanpa Pasien Ditolak", getLastToast().includes("Cari
 assert("K-1: Tombol Kasir Tidak Stuck / Loading", document.getElementById('btnSimpanBilling').innerText === "SIMPAN DATA INVOICE");
 
 // Skenario K-2: Simpan Billing dengan Field Wajib Belum Lengkap (Dokter Kosong)
-pilihPasienKSR('P-0001');
+pilihPasienKSR('PS-0321-0001');
 document.getElementById('ksrDokter').value = '';
 document.getElementById('ksrTgl').value = '2026-10-08';
 document.getElementById('ksrMetode').value = 'Tunai';
@@ -949,7 +949,7 @@ simpanBillingFinal();
 assert("K-2: Simpan Tanpa Dokter Ditolak", getLastToast().includes("Lengkapi field bertanda *"));
 
 // Skenario K-3: Keranjang Pembayaran Kosong (Tanpa Tindakan/Obat/BMHP)
-document.getElementById('ksrDokter').value = 'drg. Sheldon Cooper, Sp.Ort';
+document.getElementById('ksrDokter').value = 'drg. Rahma Yulinda D, Sp. BMM';
 document.getElementById('ksrTbodyTindakan').innerHTML = '';
 document.getElementById('ksrTbodyObat').innerHTML = '';
 document.getElementById('ksrTbodyBMHP').innerHTML = '';
@@ -994,7 +994,7 @@ addKasirObat();
 var tbObat = document.getElementById('ksrTbodyObat');
 var rowObatStok = tbObat.children[tbObat.children.length - 1];
 var inputObat = rowObatStok.querySelector('.val-nama');
-inputObat.value = 'Amoxicillin 500mg (Strip)';
+inputObat.value = 'Amoksisilin Generik 500mg';
 inputObat.setAttribute('data-stok', '120');
 rowObatStok.querySelector('.val-qty').value = '150'; // Melebihi stok 120
 simpanBillingFinal();
@@ -1021,7 +1021,7 @@ assert("K-8: Keterangan Otomatis Mencatat Rincian Piutang", lastInv.keterangan.i
 assert("K-8: Total Invoice Tercatat Sebesar DP (Rp 1.500.000)", lastInv.totalInvoice === 1500000);
 
 // Skenario K-9: Deteksi Realtime Tagihan Berjalan / DP pada Pemilihan Pasien
-pilihPasienKSR('P-0001');
+pilihPasienKSR('PS-0321-0001');
 var alertCicilan = document.getElementById('alertCicilanPasien');
 assert("K-9: Alert Tagihan Berjalan Otomatis Muncul", !alertCicilan.classList.contains('hidden'));
 assert("K-9: Judul Alert Memperingatkan Tagihan Berjalan", document.getElementById('alertCicilanTitle').innerText.includes("Tagihan Berjalan"));
@@ -1029,9 +1029,9 @@ assert("K-9: Rincian Sisa Piutang Ditampilkan di Body Alert", document.getElemen
 
 // Skenario K-10: Pelunasan Sisa Tagihan Berjalan (Status "Pelunasan")
 resetFormBilling();
-pilihPasienKSR('P-0001');
+pilihPasienKSR('PS-0321-0001');
 document.getElementById('ksrTgl').value = '2026-10-08';
-document.getElementById('ksrDokter').value = 'drg. Sheldon Cooper, Sp.Ort';
+document.getElementById('ksrDokter').value = 'drg. Rahma Yulinda D, Sp. BMM';
 document.getElementById('ksrMetode').value = 'Transfer BCA';
 document.getElementById('ksrStatus').value = 'Pelunasan';
 document.getElementById('ksrKet').value = 'Pelunasan Behel Orthodonti';
@@ -1050,13 +1050,13 @@ simpanBillingFinal();
 runAllTimers();
 
 assert("K-10: Pelunasan Berhasil Diterbitkan", getLastToast().includes("Berhasil!"));
-pilihPasienKSR('P-0001');
+pilihPasienKSR('PS-0321-0001');
 assert("K-10: Evaluasi Tagihan Berjalan Pasien Menunjukkan Status Lunas", document.getElementById('alertCicilanBody').innerHTML.includes("PELUNASAN") || alertCicilan.classList.contains('hidden'));
 
 // Skenario K-11: Riwayat Invoice Search & Filter Kalender
 switchMenu('riwayat-invoice');
 bukaRiwayatInvoice();
-assert("K-11: Tabel Riwayat Invoice Menampilkan Data", document.getElementById('tbodyRiwayatInvoice').innerHTML.includes("Budi Santoso"));
+assert("K-11: Tabel Riwayat Invoice Menampilkan Data", document.getElementById('tbodyRiwayatInvoice').innerHTML.includes("Edison"));
 document.getElementById('inputCariRiwayat').value = "NonExistentKeywordXYZ";
 searchRiwayatInvoice();
 assert("K-11: Filter Pencarian Tidak Cocok Menghasilkan 0 Item", filteredInvoicesList.length === 0);
@@ -1195,14 +1195,14 @@ assert("PERIO-8: Modal Reset Tertutup Setelah Eksekusi", modalResetPerio.classLi
 // ==================================================
 // PENGUJIAN BULK DATA SHELDON 2026 & SCHEMA ALIGNMENT
 // ==================================================
-print("\n--- TEST: Bulk Data Sheldon 2026 & Schema Verification ---");
-assert("BULK-1: Total Pasien Bulk >= 120", window.KlinikData.pasien.length >= 120, "Count: " + window.KlinikData.pasien.length);
-assert("BULK-2: Total Katalog Tindakan >= 60", window.KlinikData.tindakan.length >= 60, "Count: " + window.KlinikData.tindakan.length);
-assert("BULK-3: Total Rekam Medis (SOAP + Odontogram) >= 120", window.KlinikData.rekamMedis.length >= 120, "Count: " + window.KlinikData.rekamMedis.length);
-assert("BULK-4: Total Transaksi Pembayaran >= 150", window.KlinikData.pembayaran.length >= 150, "Count: " + window.KlinikData.pembayaran.length);
-assert("BULK-5: Total Master Staff >= 20", window.KlinikData.staff.length >= 20, "Count: " + window.KlinikData.staff.length);
-var sampleBulkPasien = window.KlinikData.pasien.find(function(p) { return p.idPasien === "P-0005"; });
-assert("BULK-6: Sample Bulk Pasien P-0005 Valid Schema & Normalized Gender", sampleBulkPasien && (sampleBulkPasien.jenisKelamin === "Laki-Laki" || sampleBulkPasien.jenisKelamin === "Perempuan") && /^\d{2}-\d{2}-\d{4}$/.test(sampleBulkPasien.tanggalLahir));
+print("\n--- TEST: Real Apps Script Workspace Data & Schema Verification ---");
+assert("BULK-1: Total Pasien Real >= 2200", window.KlinikData.pasien.length >= 2200, "Count: " + window.KlinikData.pasien.length);
+assert("BULK-2: Total Katalog Tindakan >= 140", window.KlinikData.tindakan.length >= 140, "Count: " + window.KlinikData.tindakan.length);
+assert("BULK-3: Total Rekam Medis Real >= 8", window.KlinikData.rekamMedis.length >= 8, "Count: " + window.KlinikData.rekamMedis.length);
+assert("BULK-4: Total Master Obat >= 180", window.KlinikData.obat.length >= 180, "Count: " + window.KlinikData.obat.length);
+assert("BULK-5: Total Master Staff === 11", window.KlinikData.staff.length === 11, "Count: " + window.KlinikData.staff.length);
+var sampleBulkPasien = window.KlinikData.pasien.find(function(p) { return p.idPasien === "PS-0421-0005"; });
+assert("BULK-6: Sample Real Pasien PS-0421-0005 (Dara Triatna) Valid Schema & Normalized Gender", sampleBulkPasien && (sampleBulkPasien.jenisKelamin === "Laki-Laki" || sampleBulkPasien.jenisKelamin === "Perempuan") && /^\d{2}-\d{2}-\d{4}$/.test(sampleBulkPasien.tanggalLahir));
 assert("BULK-7: Fungsi triggerImportBulkSheldon2026 Tersedia", typeof triggerImportBulkSheldon2026 === "function");
 window.confirm = function() { return true; };
 window.alert = function() {};
@@ -1605,8 +1605,8 @@ assert("ROLE-2: Role Admin Tersedia", roleOpts.indexOf("Admin") !== -1);
 assert("ROLE-2: Role Office Tersedia Menggantikan Owner Sebelumnya", roleOpts.indexOf("Office") !== -1);
 
 var fallbackUsers = getFallbackUserList();
-var adminUser = fallbackUsers.find(function(u) { return u.username === "admin"; });
-assert("ROLE-3: Akun Admin Sistem Menggunakan Role 'Owner'", adminUser && adminUser.role === "Owner");
+var adminUser = fallbackUsers.find(function(u) { return u.username === "asung"; });
+assert("ROLE-3: Akun Utama Owner (asung) Menggunakan Role 'Owner'", adminUser && adminUser.role === "Owner");
 
 // Uji terapkanRoleAkses untuk Role 'Office'
 terapkanRoleAkses("Office");

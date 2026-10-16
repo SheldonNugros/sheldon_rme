@@ -33,6 +33,23 @@ def read_csv_rows(sub, fname):
         rows = list(csv.reader(fp))
         return rows[1:] if len(rows) > 1 else []
 
+def clean_float(val, default=0.0):
+    if val is None:
+        return default
+    s = str(val).replace(',', '').replace('%', '').strip()
+    if not s:
+        return default
+    try:
+        v = float(s)
+        if '%' in str(val) and v > 1:
+            return v / 100.0
+        return v
+    except Exception:
+        return default
+
+def clean_int(val, default=0):
+    return int(round(clean_float(val, float(default))))
+
 # Load bulk data from Antigravity RME/RME_Modular/csv_spreadsheets/
 pasien_csv = read_csv_rows('PASIEN', 'Data_Pasien.csv')
 pasien_list = []
@@ -65,9 +82,9 @@ for r in pasien_csv:
 tindakan_csv = read_csv_rows('DATABASE', 'Tindakan.csv')
 tindakan_list = []
 for r in tindakan_csv:
-    if len(r) >= 6:
-        tarif_val = int(float(r[3])) if r[3] else 0
-        jm_def = float(r[5]) if r[5] and r[5] != "" else None
+    if len(r) >= 5:
+        tarif_val = clean_int(r[3], 0)
+        jm_def = clean_float(r[5], None) if len(r) > 5 and r[5] and r[5].strip() != "" else None
         tindakan_list.append({
             "kode": r[0],
             "id": r[0],
@@ -79,62 +96,64 @@ for r in tindakan_csv:
             "persenJMDefault": jm_def
         })
 
+kategori_csv = read_csv_rows('DATABASE', 'Kategori.csv')
+kategori_list = []
+for r in kategori_csv:
+    if len(r) >= 2 and r[0].strip():
+        kategori_list.append({
+            "kategori": r[0].strip(),
+            "kode": r[1].strip()
+        })
+
+tarif_khusus_csv = read_csv_rows('DATABASE', 'Tarif_Khusus_Dokter.csv')
+tarif_khusus_list = []
+for r in tarif_khusus_csv:
+    if len(r) >= 5 and r[0].strip():
+        tarif_khusus_list.append({
+            "idAturan": r[0].strip(),
+            "namaDokter": r[1].strip(),
+            "kodeTindakan": r[2].strip(),
+            "namaTindakan": r[3].strip(),
+            "persenJM": clean_float(r[4], 0.55),
+            "keterangan": r[5].strip() if len(r) > 5 else ""
+        })
+
 obat_csv = read_csv_rows('OBAT', 'Master_Obat.csv')
-obat_list = [
-    {
-        "kode": "OBT-001", "id": "OBT-001", "nama": "Amoxicillin 500mg (Strip)",
-        "kandungan": "Amoxicillin Trihydrate 500mg", "satuanBeli": "Box", "isiPerSatuan": 10,
-        "hargaBeliSatuan": 100000, "harga": 15000, "hargaJual": 15000, "hpp": 10000,
-        "stok": 120, "stokMin": 20, "unit": "Strip", "satuan": "Strip"
-    },
-    {
-        "kode": "OBT-002", "id": "OBT-002", "nama": "Asam Mefenamat 500mg (Strip)",
-        "kandungan": "Mefenamic Acid 500mg", "satuanBeli": "Box", "isiPerSatuan": 10,
-        "hargaBeliSatuan": 80000, "harga": 12000, "hargaJual": 12000, "hpp": 8000,
-        "stok": 85, "stokMin": 15, "unit": "Strip", "satuan": "Strip"
-    },
-    {
-        "kode": "OBT-003", "id": "OBT-003", "nama": "Chlorhexidine Gluconate 0.2% Gargle",
-        "kandungan": "Chlorhexidine Digluconate 0.2%", "satuanBeli": "Botol", "isiPerSatuan": 1,
-        "hargaBeliSatuan": 22000, "harga": 35000, "hargaJual": 35000, "hpp": 22000,
-        "stok": 40, "stokMin": 10, "unit": "Botol", "satuan": "Botol"
-    }
-]
+obat_list = []
 for r in obat_csv:
-    if len(r) >= 11:
-        kode_o = r[0]
+    if len(r) >= 11 and r[0].strip():
+        kode_o = r[0].strip()
         if any(x["kode"] == kode_o for x in obat_list):
             continue
-        hpp_v = int(float(r[6])) if r[6] else 1000
-        hj_v = int(float(r[8])) if r[8] else 2000
-        stk_v = int(float(r[9])) if r[9] else 100
+        hpp_v = clean_int(r[6], 200)
+        hj_v = clean_int(r[8], 1000)
+        stk_v = clean_int(r[9], 100)
+        sat_v = r[3].strip() if r[3].strip() else "Tablet"
         obat_list.append({
-            "kode": kode_o, "id": kode_o, "nama": r[1], "kandungan": r[2],
-            "satuanBeli": r[3] or "Box", "isiPerSatuan": int(float(r[4])) if r[4] else 100,
-            "hargaBeliSatuan": int(float(r[5])) if r[5] else 50000,
+            "kode": kode_o, "id": kode_o, "nama": r[1].strip(), "kandungan": r[2].strip(),
+            "satuanBeli": sat_v, "isiPerSatuan": clean_int(r[4], 100),
+            "hargaBeliSatuan": clean_int(r[5], 2000),
             "harga": hj_v, "hargaJual": hj_v, "hpp": hpp_v,
-            "stok": stk_v, "stokMin": int(float(r[10])) if r[10] else 20,
-            "unit": "Pcs", "satuan": "Pcs"
+            "stok": stk_v, "stokMin": clean_int(r[10], 20),
+            "unit": sat_v, "satuan": sat_v
         })
 
 bmhp_csv = read_csv_rows('BMHP', 'Master_BMHP.csv')
-bmhp_list = [
-    {"kode": "BMH-001", "id": "BMH-001", "nama": "Masker Medis 3-Ply", "harga": 2000, "hargaJual": 2000, "hpp": 1000, "stok": 500, "unit": "Pcs", "satuan": "Pcs"},
-    {"kode": "BMH-002", "id": "BMH-002", "nama": "Handscoon Latex S/M", "harga": 3000, "hargaJual": 3000, "hpp": 1800, "stok": 350, "unit": "Pasang", "satuan": "Pasang"},
-    {"kode": "BMH-003", "id": "BMH-003", "nama": "Saliva Ejector Suction Tip", "harga": 1500, "hargaJual": 1500, "hpp": 800, "stok": 200, "unit": "Pcs", "satuan": "Pcs"}
-]
+bmhp_list = []
 for r in bmhp_csv:
-    if len(r) >= 8:
-        kode_b = r[0]
+    if len(r) >= 6 and r[0].strip():
+        kode_b = r[0].strip()
         if any(x["kode"] == kode_b for x in bmhp_list):
             continue
-        hpp_b = int(float(r[3])) if r[3] else 1000
-        hj_b = int(float(r[4])) if r[4] else 2500
-        stk_b = int(float(r[5])) if r[5] else 200
+        hpp_b = clean_int(r[3], 1000)
+        hj_b = clean_int(r[4], 2500)
+        stk_b = clean_int(r[5], 200)
+        sat_b = r[2].strip() if r[2].strip() else "Pcs"
         bmhp_list.append({
-            "kode": kode_b, "id": kode_b, "nama": r[1],
+            "kode": kode_b, "id": kode_b, "nama": r[1].strip(),
             "harga": hj_b, "hargaJual": hj_b, "hpp": hpp_b,
-            "stok": stk_b, "unit": r[2] or "Pcs", "satuan": r[2] or "Pcs"
+            "stok": stk_b, "stokMin": clean_int(r[6], 100) if len(r) > 6 else 100,
+            "unit": sat_b, "satuan": sat_b
         })
 
 rm_csv = read_csv_rows('REKAM_MEDIS', 'Data_Rekam_Medis.csv')
@@ -184,13 +203,13 @@ for r in rm_csv:
             "pemeriksaanPenunjang": "Pemeriksaan Klinis Intraoral & Perkusi",
             "assessmentICD": icd_val or "K02.1 - Caries of dentine",
             "tindakanHariIni": tind_val or "Perawatan Konservasi Gigi",
-            "resepObat": resep_val or "Asam Mefenamat 500 mg (3x1)"
+            "resepObat": resep_val or "-"
         })
 
 bayar_csv = read_csv_rows('PEMBAYARAN', 'Data_Pembayaran.csv')
 bayar_list = []
 for r in bayar_csv:
-    if len(r) >= 20:
+    if len(r) >= 20 and r[0].strip():
         bayar_list.append({
             "idInvoice": r[0],
             "tanggal": r[1],
@@ -200,13 +219,13 @@ for r in bayar_csv:
             "dokter": r[5],
             "kategori": r[6],
             "item": r[7],
-            "harga": int(float(r[8])) if r[8] else 0,
-            "qty": int(float(r[9])) if r[9] else 1,
-            "biayaLab": int(float(r[10])) if r[10] else 0,
-            "diskon": int(float(r[11])) if r[11] else 0,
-            "grandTotalItem": int(float(r[12])) if r[12] else 0,
+            "harga": clean_int(r[8], 0),
+            "qty": clean_int(r[9], 1),
+            "biayaLab": clean_int(r[10], 0),
+            "diskon": clean_int(r[11], 0),
+            "grandTotalItem": clean_int(r[12], 0),
             "perawat": r[13],
-            "totalInvoice": int(float(r[14])) if r[14] else 0,
+            "totalInvoice": clean_int(r[14], 0),
             "metode": r[15],
             "status": r[16],
             "keterangan": r[17],
@@ -217,7 +236,7 @@ for r in bayar_csv:
 jm_csv = read_csv_rows('PEMBAYARAN', 'Rekap_Jasa_Medis.csv')
 jm_list = []
 for r in jm_csv:
-    if len(r) >= 18:
+    if len(r) >= 17 and r[0].strip():
         jm_list.append({
             "idInvoice": r[0],
             "tanggal": r[1],
@@ -225,24 +244,24 @@ for r in jm_csv:
             "perawat": r[3],
             "kategori": r[4],
             "namaItem": r[5],
-            "totalTindakanBruto": int(float(r[6])) if r[6] else 0,
-            "totalBiayaLab": int(float(r[7])) if r[7] else 0,
-            "dasarJM": int(float(r[8])) if r[8] else 0,
-            "persenJM": float(r[9]) if r[9] else 0,
+            "totalTindakanBruto": clean_int(r[6], 0),
+            "totalBiayaLab": clean_int(r[7], 0),
+            "dasarJM": clean_int(r[8], 0),
+            "persenJM": clean_float(r[9], 0.0),
             "tipeAturan": r[10],
-            "jmDokter": int(float(r[13])) if r[13] else 0,
-            "totalFeePerawat": int(float(r[14])) if r[14] else 0,
-            "jmKlinik": int(float(r[15])) if r[15] else 0,
+            "jmDokter": clean_int(r[13], 0),
+            "totalFeePerawat": clean_int(r[14], 0),
+            "jmKlinik": clean_int(r[15], 0),
             "status": r[16]
         })
 
 staff_csv = read_csv_rows('MASTER', 'Data.csv')
 staff_list = []
 for idx_st, r in enumerate(staff_csv):
-    if len(r) >= 5:
+    if len(r) >= 5 and (r[0].strip() or r[1].strip()):
         has_id_col = (len(r) >= 10 or ("-" in r[0] and not r[0].startswith("drg") and not " " in r[0]))
         if has_id_col:
-            id_pek = r[0].strip()
+            id_pek = r[0].strip() or f"SN-{idx_st+1:02d}"
             nama_pek = r[1].strip()
             user_pek = r[2].lower().strip()
             role_pek = r[3].strip()
@@ -250,10 +269,10 @@ for idx_st, r in enumerate(staff_csv):
             stat_pek = r[5].strip() if len(r) > 5 and r[5] else "Aktif"
             sip_pek = r[6].strip() if len(r) > 6 and r[6] else "-"
             hp_pek = r[7].strip() if len(r) > 7 and r[7] else ""
-            pjm_val = float(r[8]) if len(r) > 8 and r[8] else 0
+            pjm_val = clean_float(r[8], 0.0) if len(r) > 8 and r[8] else 0
             email_pek = r[9].strip() if len(r) > 9 and r[9] else ""
         else:
-            id_pek = f"SN-{idx_st:02d}"
+            id_pek = f"SN-{idx_st+1:02d}"
             nama_pek = r[0].strip()
             user_pek = r[1].lower().strip()
             role_pek = r[2].strip()
@@ -261,7 +280,7 @@ for idx_st, r in enumerate(staff_csv):
             stat_pek = r[4].strip() if len(r) > 4 and r[4] else "Aktif"
             sip_pek = r[5].strip() if len(r) > 5 and r[5] else "-"
             hp_pek = r[6].strip() if len(r) > 6 and r[6] else ""
-            pjm_val = float(r[7]) if len(r) > 7 and r[7] else 0
+            pjm_val = clean_float(r[7], 0.0) if len(r) > 7 and r[7] else 0
             email_pek = r[8].strip() if len(r) > 8 and r[8] else ""
 
         staff_list.append({
@@ -281,32 +300,89 @@ for idx_st, r in enumerate(staff_csv):
 
 tarif_csv = read_csv_rows('MASTER', 'Pengaturan_Tarif_Shift.csv')
 tarif_list = []
-for r in tarif_csv:
-    if len(r) >= 8:
-        id_pek = r[0].strip()
+for idx_tr, r in enumerate(tarif_csv):
+    if len(r) >= 8 and (r[0].strip() or r[2].strip()):
+        id_pek = r[0].strip() or f"SN-{idx_tr+1:02d}"
         tarif_list.append({
             "idAturan": id_pek,
             "idPekerja": id_pek,
             "role": r[1].strip(),
             "namaPekerja": r[2].strip(),
             "tipeKompensasi": r[3].strip(),
-            "tarifShift1": int(float(r[4])) if r[4] else 0,
-            "tarifShift2": int(float(r[5])) if r[5] else 0,
-            "gajiPokokBulanan": int(float(r[6])) if r[6] else 0,
+            "tarifShift1": clean_int(r[4], 0),
+            "tarifShift2": clean_int(r[5], 0),
+            "gajiPokokBulanan": clean_int(r[6], 0),
             "keterangan": r[7].strip() if len(r) > 7 else "",
             "status": r[8].strip() if len(r) > 8 and r[8] else "Aktif"
         })
 
+presensi_csv = read_csv_rows('ABSENSI', 'Presensi_Harian.csv')
+presensi_list = []
+for r in presensi_csv:
+    if len(r) >= 10 and r[0].strip():
+        presensi_list.append({
+            "idPresensi": r[0].strip(),
+            "tanggal": r[1].strip(),
+            "hari": r[2].strip(),
+            "shift": r[3].strip(),
+            "jamMulai": r[4].strip(),
+            "jamSelesai": r[5].strip(),
+            "idPekerja": r[6].strip(),
+            "namaPekerja": r[7].strip(),
+            "role": r[8].strip(),
+            "statusAbsensi": r[9].strip(),
+            "keterangan": r[10].strip() if len(r) > 10 else "",
+            "verifikator": r[11].strip() if len(r) > 11 else "Admin",
+            "waktuInput": r[12].strip() if len(r) > 12 else ""
+        })
+
+libur_csv = read_csv_rows('ABSENSI', 'Kalender_Hari_Libur.csv')
+libur_list = []
+for r in libur_csv:
+    if len(r) >= 5 and r[0].strip():
+        libur_list.append({
+            "tanggal": r[0].strip(),
+            "hari": r[1].strip(),
+            "kategoriLibur": r[2].strip(),
+            "namaHariLibur": r[3].strip(),
+            "statusOperasional": r[4].strip(),
+            "keterangan": r[5].strip() if len(r) > 5 else "",
+            "dibuatOleh": r[6].strip() if len(r) > 6 else "Sistem",
+            "waktuUpdate": r[7].strip() if len(r) > 7 else ""
+        })
+
+pekerjaan_csv = read_csv_rows('LOG', 'pekerjaan.csv')
+pekerjaan_list = [r[0].strip() for r in pekerjaan_csv if r and r[0].strip()]
+
+icd10_csv = read_csv_rows('ICD10', 'ICD_10.csv')
+icd10_list = [
+    {"code": r[0].strip(), "desc": r[1].strip(), "kode": r[0].strip(), "nama": r[1].strip()}
+    for r in icd10_csv if len(r) >= 2 and r[0].strip()
+]
+
+icd9_csv = read_csv_rows('ICD10', 'ICD_9.csv')
+icd9_list = [
+    {"code": r[0].strip(), "desc": r[1].strip(), "kode": r[0].strip(), "nama": r[1].strip()}
+    for r in icd9_csv if len(r) >= 2 and r[0].strip()
+]
+
 mock_db_json = json.dumps({
     "pasien": pasien_list,
     "tindakan": tindakan_list,
+    "kategori": kategori_list,
+    "tarifKhusus": tarif_khusus_list,
     "obat": obat_list,
     "bmhp": bmhp_list,
     "rekamMedis": rm_list,
     "pembayaran": bayar_list,
     "jasaMedis": jm_list,
     "staff": staff_list,
-    "tarifShift": tarif_list
+    "tarifShift": tarif_list,
+    "presensiHarian": presensi_list,
+    "kalenderLibur": libur_list,
+    "pekerjaan": pekerjaan_list,
+    "icd10": icd10_list,
+    "icd9": icd9_list
 }, ensure_ascii=False)
 
 # Mock google.script.run runtime for local testing, browser validation & Live Interactive Simulator
@@ -322,38 +398,30 @@ mock_gas_script = '''
 
   const bulkSeed = ''' + mock_db_json + ''';
 
-  // Realistic database grounded in Sheldon RME multi-spreadsheet architecture + Bulk Data SHELDON 2026
+  // Database grounded 100% in Apps Script Workspace (Sheldon RME 12-Spreadsheet Architecture)
   const mockDb = {
-    staff: (bulkSeed.staff && bulkSeed.staff.length > 0) ? bulkSeed.staff : [
-      { id: "STF-000", username: "admin", email: "vembrian@gmail.com", nama: "Administrator Sistem", role: "Super User", pin: "admin123", pass: "admin123", sip: "-", persenJM: 0 },
-      { id: "STF-000A", username: "asung", email: "v.asungnugroho@gmail.com", nama: "drg. V. Asung Nugroho, Sp.Ort", role: "Owner", pin: "admin123", pass: "admin123", sip: "503/SIP-DRG/000/2026", persenJM: 0.65 },
-      { id: "STF-001", username: "sheldon", email: "sheldon@sheldon.com", nama: "drg. Sheldon Cooper, Sp.Ort", role: "Dokter Gigi Spesialis", pin: "1234", pass: "1234", sip: "503/SIP-DRG/001/2024", persenJM: 0.50 }
-    ],
+    staff: (bulkSeed.staff && bulkSeed.staff.length > 0) ? bulkSeed.staff : [],
     tarifShift: (bulkSeed.tarifShift && bulkSeed.tarifShift.length > 0) ? bulkSeed.tarifShift : [],
-    tarifKhusus: [
-      { idDokter: "STF-001", namaDokter: "drg. Sheldon Cooper, Sp.Ort", kodeTindakan: "TND-006", namaTindakan: "Perawatan Saluran Akar (PSA) Molar", persenJM: 0.55 }
+    tarifKhusus: (bulkSeed.tarifKhusus && bulkSeed.tarifKhusus.length > 0) ? bulkSeed.tarifKhusus : [],
+    kategori: (bulkSeed.kategori && bulkSeed.kategori.length > 0) ? bulkSeed.kategori : [
+      { kategori: "Umum", kode: "UMM" },
+      { kategori: "Dokter Gigi Umum", kode: "DGU" },
+      { kategori: "Dokter Gigi Spesialis", kode: "DGS" }
     ],
-    pasien: bulkSeed.pasien,
-    tindakan: bulkSeed.tindakan,
-    obat: bulkSeed.obat,
-    bmhp: bulkSeed.bmhp,
-    rekamMedis: bulkSeed.rekamMedis,
-    pembayaran: bulkSeed.pembayaran,
-    jasaMedis: bulkSeed.jasaMedis,
+    pasien: bulkSeed.pasien || [],
+    tindakan: bulkSeed.tindakan || [],
+    obat: bulkSeed.obat || [],
+    bmhp: bulkSeed.bmhp || [],
+    rekamMedis: bulkSeed.rekamMedis || [],
+    pembayaran: bulkSeed.pembayaran || [],
+    jasaMedis: bulkSeed.jasaMedis || [],
     surat: [],
-    presensiHarian: [
-      { idPresensi: "ATT-20261015-001", tanggal: "15-10-2026", hari: "Kamis", shift: "Pagi", jamMulai: "10:00", jamSelesai: "15:00", idPekerja: "STF-001", namaPekerja: "Bernadette Rostenkowski", role: "Perawat", statusAbsensi: "Hadir", keterangan: "Tepat waktu", verifikator: "Admin" },
-      { idPresensi: "ATT-20261015-002", tanggal: "15-10-2026", hari: "Kamis", shift: "Pagi", jamMulai: "10:00", jamSelesai: "15:00", idPekerja: "STF-002", namaPekerja: "Howard Wolowitz", role: "Admin", statusAbsensi: "Hadir", keterangan: "Tepat waktu", verifikator: "Admin" }
-    ],
-    kalenderLibur: [
-      { tanggal: "01-01-2026", hari: "Kamis", kategoriLibur: "Libur Nasional", namaHariLibur: "Tahun Baru Masehi 2026", statusOperasional: "Tutup", keterangan: "Libur Nasional Kalender", dibuatOleh: "Sistem", waktuUpdate: "01-01-2026 00:00:00" },
-      { tanggal: "17-08-2026", hari: "Senin", kategoriLibur: "Libur Nasional", namaHariLibur: "Hari Kemerdekaan RI Ke-81", statusOperasional: "Tutup", keterangan: "Libur Nasional Kalender", dibuatOleh: "Sistem", waktuUpdate: "01-01-2026 00:00:00" },
-      { tanggal: "25-12-2026", hari: "Jumat", kategoriLibur: "Libur Nasional", namaHariLibur: "Hari Raya Natal", statusOperasional: "Tutup", keterangan: "Libur Nasional Kalender", dibuatOleh: "Sistem", waktuUpdate: "01-01-2026 00:00:00" }
-    ],
-    rekapBulananAbsensi: [
-      { periodeBulan: "Oktober 2026", namaPekerja: "Bernadette Rostenkowski", role: "Perawat", hariKerja: 27, totalShiftPagi: 10, totalShiftSore: 8, totalHadir: 18, totalTidakHadir: 0, persentase: "100.0%", terakhirUpdate: "15-10-2026 15:00:00" },
-      { periodeBulan: "Oktober 2026", namaPekerja: "Howard Wolowitz", role: "Admin", hariKerja: 27, totalShiftPagi: 12, totalShiftSore: 6, totalHadir: 18, totalTidakHadir: 0, persentase: "100.0%", terakhirUpdate: "15-10-2026 15:00:00" }
-    ]
+    presensiHarian: bulkSeed.presensiHarian || [],
+    kalenderLibur: bulkSeed.kalenderLibur || [],
+    rekapBulananAbsensi: [],
+    pekerjaan: bulkSeed.pekerjaan || [],
+    icd10: bulkSeed.icd10 || [],
+    icd9: bulkSeed.icd9 || []
   };
 
   window._mockDb = mockDb;
@@ -452,12 +520,10 @@ mock_gas_script = '''
 
     getKategoriTindakan() {
       setTimeout(() => {
-        this._successHandler([
+        this._successHandler(mockDb.kategori && mockDb.kategori.length > 0 ? mockDb.kategori : [
           { kategori: "Umum", kode: "UMM" },
           { kategori: "Dokter Gigi Umum", kode: "DGU" },
-          { kategori: "Dokter Gigi Spesialis", kode: "DGS" },
-          { kategori: "Dokter Gigi Spesialis Ortodonti", kode: "ORT" },
-          { kategori: "Bedah Mulut", kode: "BMU" }
+          { kategori: "Dokter Gigi Spesialis", kode: "DGS" }
         ]);
       }, 50);
     }
@@ -527,7 +593,7 @@ mock_gas_script = '''
           Object.assign(mockDb.pasien[idx], payload);
           this._successHandler({ success: true, message: "Data Pasien (" + payload.namaPasien + ") berhasil diperbarui!", idPasien: mockDb.pasien[idx].idPasien, noRm: mockDb.pasien[idx].noRm, isBaru: false });
         } else {
-          let newId = "P-" + String(mockDb.pasien.length + 1).padStart(4, '0');
+          let newId = "PS-1026-" + String(mockDb.pasien.length + 1).padStart(4, '0');
           let newRm = "RM-" + String(mockDb.pasien.length + 1).padStart(4, '0');
           let newP = { idPasien: newId, noRm: newRm, ...payload };
           mockDb.pasien.unshift(newP);
@@ -667,6 +733,7 @@ mock_gas_script = '''
           jmKlinikTotal += jmKli;
         });
 
+        let perawatLabel = (payload.perawat || "Eva Nurmiza, AMKG") + " (Rp " + totalFeePerawat.toLocaleString('id-ID') + ")";
         let rekapJM = {
           idInvoice: idInv,
           tanggal: payload.tglTindakan,
@@ -678,7 +745,7 @@ mock_gas_script = '''
           dasarJM: totalTindakanBruto - totalBiayaLab,
           jmDokter: jmDokterTotal,
           jmKlinik: jmKlinikTotal,
-          perawat: "Bernadette Rostenkowski (Rp " + totalFeePerawat.toLocaleString('id-ID') + ")"
+          perawat: perawatLabel
         };
         mockDb.jasaMedis.push(rekapJM);
 
@@ -709,10 +776,10 @@ mock_gas_script = '''
             tindakanImported: mockDb.tindakan.length,
             pasienImported: mockDb.pasien.length,
             pembayaranImported: mockDb.pembayaran.length,
-            invoiceCount: 124,
+            invoiceCount: mockDb.pembayaran.length,
             jmImported: mockDb.jasaMedis.length,
             emrGenerated: mockDb.rekamMedis.length,
-            presensiImported: 120
+            presensiImported: mockDb.presensiHarian.length
           }
         });
       }, 80);
@@ -722,7 +789,7 @@ mock_gas_script = '''
       setTimeout(() => {
         this._successHandler({
           success: true,
-          message: "Semua 11 spreadsheet dan sheet master (Pasien, Pembayaran, Rekap_Jasa_Medis, Tarif_Khusus_Dokter, Rekam Medis, Tindakan, Obat, BMHP, Gudang, Log) telah tersinkronisasi 100% lengkap!"
+          message: "Semua 12 spreadsheet dan sheet master (Pasien, Pembayaran, Rekap_Jasa_Medis, Tarif_Khusus_Dokter, Rekam Medis, Tindakan, Obat, BMHP, Gudang, Log, Payroll, Absensi) telah tersinkronisasi 100% lengkap!"
         });
       }, 100);
     }
@@ -742,8 +809,8 @@ mock_gas_script = '''
       setTimeout(() => {
         this._successHandler({
           success: true,
-          count: 11,
-          message: "Berhasil menghasilkan 11 draft payroll dokter & staff untuk periode: " + (periodeBulan || "Januari 2026")
+          count: (mockDb.tarifShift || []).length,
+          message: "Berhasil menghasilkan " + (mockDb.tarifShift || []).length + " draft payroll dokter & staff untuk periode: " + (periodeBulan || "Oktober 2026")
         });
       }, 120);
     }
@@ -753,8 +820,8 @@ mock_gas_script = '''
         const dt = new Date().toISOString().slice(0, 10);
         this._successHandler({
           success: true,
-          successCount: 11,
-          csvCount: 28,
+          successCount: 12,
+          csvCount: 19,
           folderNama: "BACKUP_RME_SHELDON",
           csvFolderNama: "CSV_Backup_" + dt,
           folderUrl: "https://drive.google.com/drive/folders/backup-sheldon",
@@ -776,6 +843,8 @@ mock_gas_script = '''
     getPayrollModuleData() {
       setTimeout(() => {
         let tList = mockDb.tarifShift || [];
+        let pList = mockDb.presensiHarian || [];
+        let jmList = mockDb.jasaMedis || [];
         let isWorkerActive = function(t) {
           let st = String(t.status || "Aktif").trim().toLowerCase();
           return st !== "tidak aktif" && st !== "non aktif" && st !== "nonaktif" && st !== "inactive";
@@ -787,26 +856,61 @@ mock_gas_script = '''
         let docCounter = 1;
         let staffCounter = 1;
 
-        activeTarif.forEach(t => {
+        activeTarif.forEach((t, idx) => {
           let roleLower = (t.role || "").toLowerCase();
-          let isDoc = roleLower.includes("dokter") || (t.namaPekerja || "").toLowerCase().startsWith("drg");
+          let namaLower = (t.namaPekerja || "").trim().toLowerCase();
+          let workerId = t.idPekerja || t.idAturan || ("SN-" + String(idx + 1).padStart(2, '0'));
+          let isDoc = roleLower.includes("dokter") || roleLower.includes("owner") || roleLower.includes("super") || namaLower.startsWith("drg");
+
+          // Hitung presensi aktual dari Presensi_Harian
+          let hadirS1 = 0;
+          let hadirS2 = 0;
+          pList.forEach(p => {
+            let pNama = (p.namaPekerja || "").trim().toLowerCase();
+            let pId = (p.idPekerja || "").trim();
+            if ((pNama === namaLower || (pId && pId === workerId)) && String(p.statusAbsensi || "").trim().toLowerCase() === "hadir") {
+              if (String(p.shift || "").toLowerCase().includes("pagi") || String(p.shift || "").includes("1")) {
+                hadirS1++;
+              } else {
+                hadirS2++;
+              }
+            }
+          });
+
           if (isDoc) {
-            let s1 = Number(t.tarifShift1) || 55000;
-            let s2 = Number(t.tarifShift2) || 55000;
-            let thp = 250000 + s1 + s2;
+            let s1 = Number(t.tarifShift1) || 0;
+            let s2 = Number(t.tarifShift2) || 0;
+            let totUangShift = (hadirS1 * s1) + (hadirS2 * s2);
+
+            let totPasien = 0;
+            let totBruto = 0;
+            let totLab = 0;
+            let totJMDok = 0;
+            jmList.forEach(j => {
+              let jDok = String(j.dokter || "").trim().toLowerCase();
+              if (jDok && (jDok === namaLower || namaLower.includes(jDok) || jDok.includes(namaLower))) {
+                totPasien++;
+                totBruto += Number(j.totalTindakanBruto) || 0;
+                totLab += Number(j.totalBiayaLab) || 0;
+                totJMDok += Number(j.jmDokter) || 0;
+              }
+            });
+
+            let thp = totJMDok + totUangShift;
             docList.push({
               idPayroll: "PAY-DR-" + new Date().getFullYear() + String(new Date().getMonth() + 1).padStart(2, '0') + "-" + String(docCounter).padStart(3, '0'),
               periodeBulan: "Oktober 2026",
-              idDokter: "DOK-" + String(docCounter).padStart(3, '0'),
+              idDokter: workerId,
+              idPekerja: workerId,
               namaDokter: t.namaPekerja,
-              totalPasien: 2,
-              totalTindakanBruto: 500000,
-              totalBiayaLab: 0,
-              dasarJMBersih: 500000,
-              totalJMDokter: 250000,
-              hadirShift1: 1,
-              hadirShift2: 1,
-              totalUangHarianShift: s1 + s2,
+              totalPasien: totPasien,
+              totalTindakanBruto: totBruto,
+              totalBiayaLab: totLab,
+              dasarJMBersih: Math.max(0, totBruto - totLab),
+              totalJMDokter: totJMDok,
+              hadirShift1: hadirS1,
+              hadirShift2: hadirS2,
+              totalUangHarianShift: totUangShift,
               bonusInsentif: 0,
               potonganPPh21: 0,
               potonganKasbon: 0,
@@ -815,35 +919,43 @@ mock_gas_script = '''
               noRekening: "-",
               statusTransfer: "Draft",
               tanggalTransfer: "",
-              catatan: "Diambil otomatis dari Pengaturan_Tarif_Shift (06 Master User & Role)"
+              catatan: "Sinkron otomatis dari Pengaturan_Tarif_Shift & Presensi_Harian"
             });
             docCounter++;
           } else {
-            let isAdmin = roleLower.includes("admin");
-            let gp = Number(t.gajiPokokBulanan) || (isAdmin ? 1200000 : 0);
-            let s1 = Number(t.tarifShift1) || (isAdmin ? 0 : 45000);
-            let s2 = Number(t.tarifShift2) || (isAdmin ? 0 : 45000);
-            let uShift = isAdmin ? 0 : (s1 + s2);
+            let isFixed = (t.tipeKompensasi || "").toLowerCase().includes("bulanan") || roleLower.includes("admin") || roleLower.includes("kasir");
+            let gp = Number(t.gajiPokokBulanan) || 0;
+            let s1 = Number(t.tarifShift1) || 0;
+            let s2 = Number(t.tarifShift2) || 0;
+            let uShift = isFixed ? 0 : ((hadirS1 * s1) + (hadirS2 * s2));
+            let totFeePerawat = 0;
+            jmList.forEach(j => {
+              let jPrw = String(j.perawat || "").toLowerCase();
+              if (jPrw && jPrw.includes(namaLower)) {
+                totFeePerawat += Number(j.totalFeePerawat) || 0;
+              }
+            });
             staffList.push({
               idPayrollStaff: "PAY-STF-" + new Date().getFullYear() + String(new Date().getMonth() + 1).padStart(2, '0') + "-" + String(staffCounter).padStart(3, '0'),
               periodeBulan: "Oktober 2026",
-              idStaff: (isAdmin ? "ADM-" : "PRW-") + String(staffCounter).padStart(3, '0'),
+              idStaff: workerId,
+              idPekerja: workerId,
               namaStaff: t.namaPekerja,
               role: t.role,
               gajiPokokBulanan: gp,
-              hadirShift1: isAdmin ? 0 : 1,
-              hadirShift2: isAdmin ? 0 : 1,
+              hadirShift1: hadirS1,
+              hadirShift2: hadirS2,
               totalUangHarianShift: uShift,
-              totalFeeTindakan: 0,
+              totalFeeTindakan: totFeePerawat,
               uangMakanTransport: 0,
               lembur: 0,
               potonganKasbon: 0,
-              totalDiterimaTHP: gp + uShift,
+              totalDiterimaTHP: gp + uShift + totFeePerawat,
               bankTujuan: "Mandiri / BSI",
               noRekening: "-",
               statusTransfer: "Draft",
               tanggalTransfer: "",
-              catatan: "Diambil otomatis dari Pengaturan_Tarif_Shift (06 Master User & Role)"
+              catatan: "Sinkron otomatis dari Pengaturan_Tarif_Shift & Presensi_Harian"
             });
             staffCounter++;
           }
@@ -852,10 +964,10 @@ mock_gas_script = '''
         this._successHandler({
           success: true,
           tarifShift: tList,
-          presensiHarian: mockDb.presensiHarian || [],
+          presensiHarian: pList,
           penggajianDokter: docList,
           honorStaff: staffList,
-          rekapJM: mockDb.jasaMedis || []
+          rekapJM: jmList
         });
       }, 50);
     }
@@ -887,11 +999,14 @@ mock_gas_script = '''
 
         payload.role = foundStaff.role || "Staf";
         let ex = (mockDb.tarifShift || []).find(t => (t.namaPekerja || "").toLowerCase() === cleanNama.toLowerCase());
+        let staffId = foundStaff.idPekerja || foundStaff.id || ("SN-" + String((mockDb.tarifShift || []).length + 1).padStart(2, '0'));
         if (ex) {
-          payload.idAturan = ex.idAturan || ("TARIF-" + String((mockDb.tarifShift || []).length + 1).padStart(3, '0'));
+          payload.idAturan = ex.idAturan || staffId;
+          payload.idPekerja = ex.idPekerja || staffId;
           Object.assign(ex, payload);
         } else {
-          payload.idAturan = payload.idAturan || ("TARIF-" + String((mockDb.tarifShift || []).length + 1).padStart(3, '0'));
+          payload.idAturan = payload.idAturan || staffId;
+          payload.idPekerja = payload.idPekerja || staffId;
           mockDb.tarifShift.push(payload);
         }
         this._successHandler({
@@ -929,9 +1044,10 @@ mock_gas_script = '''
               s1 = 55000; s2 = 55000; gp = 0;
               ket = "Shift Rp 55.000/shift + JM 65%";
             }
-            let newId = "TARIF-" + String((mockDb.tarifShift || []).length + 1).padStart(3, '0');
+            let newId = userData.idPekerja || ("SN-" + String((mockDb.tarifShift || []).length + 1).padStart(2, '0'));
             mockDb.tarifShift.push({
               idAturan: newId,
+              idPekerja: newId,
               role: role,
               namaPekerja: nama,
               tipeKompensasi: tipe,
@@ -1093,29 +1209,23 @@ mock_gas_script = '''
     }
 
     getDaftarPekerjaan() {
-      setTimeout(() => { this._successHandler(["PNS", "Wiraswasta", "Karyawan Swasta", "Mahasiswa", "Pelajar", "Ibu Rumah Tangga", "TNI/Polri", "Guru/Dosen"]); }, 30);
+      setTimeout(() => {
+        this._successHandler(mockDb.pekerjaan && mockDb.pekerjaan.length > 0 ? mockDb.pekerjaan : ["PNS", "Wiraswasta", "Karyawan Swasta", "Mahasiswa", "Pelajar", "Ibu Rumah Tangga", "TNI/Polri", "Guru/Dosen"]);
+      }, 30);
     }
 
     getDaftarICD10() {
       setTimeout(() => {
-        this._successHandler([
-          { code: "K02.1", desc: "Caries of dentine", kode: "K02.1", nama: "Caries of dentine" },
-          { code: "K04.0", desc: "Pulpitis irreversibel", kode: "K04.0", nama: "Pulpitis irreversibel" },
-          { code: "K05.1", desc: "Chronic gingivitis", kode: "K05.1", nama: "Chronic gingivitis" },
-          { code: "K05.3", desc: "Chronic periodontitis", kode: "K05.3", nama: "Chronic periodontitis" },
-          { code: "K07.2", desc: "Anomalies of dental arch relationship", kode: "K07.2", nama: "Anomalies of dental arch relationship" }
+        this._successHandler(mockDb.icd10 && mockDb.icd10.length > 0 ? mockDb.icd10 : [
+          { code: "K02.1", desc: "Caries of dentine", kode: "K02.1", nama: "Caries of dentine" }
         ]);
       }, 30);
     }
 
     getDaftarICD9() {
       setTimeout(() => {
-        this._successHandler([
-          { code: "23.01", desc: "Extraction of other tooth", kode: "23.01", nama: "Extraction of other tooth" },
-          { code: "23.2", desc: "Restoration of tooth by filling", kode: "23.2", nama: "Restoration of tooth by filling" },
-          { code: "23.70", desc: "Root canal therapy (PSA)", kode: "23.70", nama: "Root canal therapy (PSA)" },
-          { code: "89.31", desc: "Dental examination", kode: "89.31", nama: "Dental examination" },
-          { code: "96.54", desc: "Dental scaling and polishing", kode: "96.54", nama: "Dental scaling and polishing" }
+        this._successHandler(mockDb.icd9 && mockDb.icd9.length > 0 ? mockDb.icd9 : [
+          { code: "23.01", desc: "Extraction of other tooth", kode: "23.01", nama: "Extraction of other tooth" }
         ]);
       }, 30);
     }
@@ -1272,9 +1382,10 @@ mock_gas_script = '''
             s1 = 55000; s2 = 55000; gp = 0;
             ket = "Shift Rp 55.000/shift + JM 65%";
           }
-          let newId = "TARIF-" + String((mockDb.tarifShift || []).length + 1).padStart(3, '0');
+          let newId = item.idPekerja || ("SN-" + String((mockDb.tarifShift || []).length + 1).padStart(2, '0'));
           mockDb.tarifShift.push({
             idAturan: newId,
+            idPekerja: newId,
             role: payload.role || 'Staff',
             namaPekerja: payload.nama,
             tipeKompensasi: tipe,
@@ -1335,9 +1446,10 @@ mock_gas_script = '''
             s1 = 0; s2 = 0; gp = 1200000;
             ket = "Gaji Bulanan Tetap Rp 1.200.000/bulan (Non-Shift)";
           }
-          let newId = "TARIF-" + String((mockDb.tarifShift || []).length + 1).padStart(3, '0');
+          let newId = genId;
           mockDb.tarifShift.push({
             idAturan: newId,
+            idPekerja: newId,
             role: role,
             namaPekerja: payload.nama,
             tipeKompensasi: tipe,

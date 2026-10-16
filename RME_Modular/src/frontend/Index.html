@@ -325,6 +325,16 @@
 </div>
 
 <script>
+  try {
+    const SHELDON_DB_SYNC_VERSION = "2026-10-16-APPSCRIPT-SYNC-V2";
+    if (localStorage.getItem("sheldon_db_sync_version") !== SHELDON_DB_SYNC_VERSION) {
+      localStorage.removeItem("sheldon_master_users_cache");
+      localStorage.removeItem("sheldon_payroll_cache");
+      localStorage.removeItem("sheldon_absensi_cache_v1");
+      localStorage.setItem("sheldon_db_sync_version", SHELDON_DB_SYNC_VERSION);
+    }
+  } catch (eCachePurge) {}
+
   window.activeAccount = null;
   window.activeNamaAccount = null;
   window.activeUserRole = null;

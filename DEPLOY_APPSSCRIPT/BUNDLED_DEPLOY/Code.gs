@@ -2146,15 +2146,16 @@ function getDaftarUserMaster() {
     const v = readFast(DB_CONFIG.MASTER, "Data");
     if (v.length <= 1) return [];
     let h = v[0];
-    let idNama = getColIdx(h, ['namapekerja', 'nama', 'namalengkap']); if (idNama === -1) idNama = 0;
-    let idUser = getColIdx(h, ['username', 'user']); if (idUser === -1) idUser = 1;
-    let idRole = getColIdx(h, ['kategorirole', 'role', 'kategori']); if (idRole === -1) idRole = 2;
-    let idPass = getColIdx(h, ['password', 'pass']); if (idPass === -1) idPass = 3;
-    let idStatus = getColIdx(h, ['status']); if (idStatus === -1) idStatus = 4;
-    let idSIP = getColIdx(h, ['noregistrasi', 'sip', 'noreg']); if (idSIP === -1) idSIP = 5;
-    let idHP = getColIdx(h, ['nohp', 'no_hp', 'telepon', 'wa']); if (idHP === -1) idHP = 6;
-    let idJM = getColIdx(h, ['persen_jm_dokter', 'persen_jm', 'persenjm']); if (idJM === -1) idJM = 7;
-    let idEmail = getColIdx(h, ['email', 'surel', 'e-mail']); if (idEmail === -1) idEmail = 8;
+    let idPek = getColIdx(h, ['idpekerja', 'id_pekerja', 'id']);
+    let idNama = getColIdx(h, ['namapekerja', 'nama_pekerja', 'nama', 'namalengkap']); if (idNama === -1) idNama = (idPek === 0 ? 1 : 0);
+    let idUser = getColIdx(h, ['username', 'user']); if (idUser === -1) idUser = (idPek === 0 ? 2 : 1);
+    let idRole = getColIdx(h, ['kategorirole', 'kategori_role', 'role', 'kategori']); if (idRole === -1) idRole = (idPek === 0 ? 3 : 2);
+    let idPass = getColIdx(h, ['password', 'pass']); if (idPass === -1) idPass = (idPek === 0 ? 4 : 3);
+    let idStatus = getColIdx(h, ['status']); if (idStatus === -1) idStatus = (idPek === 0 ? 5 : 4);
+    let idSIP = getColIdx(h, ['noregistrasi', 'no_registrasi', 'sip', 'noreg']); if (idSIP === -1) idSIP = (idPek === 0 ? 6 : 5);
+    let idHP = getColIdx(h, ['nohp', 'no_hp', 'telepon', 'wa']); if (idHP === -1) idHP = (idPek === 0 ? 7 : 6);
+    let idJM = getColIdx(h, ['persen_jm_dokter', 'persen_jm', 'persenjm']); if (idJM === -1) idJM = (idPek === 0 ? 8 : 7);
+    let idEmail = getColIdx(h, ['email', 'surel', 'e-mail']); if (idEmail === -1) idEmail = (idPek === 0 ? 9 : 8);
 
     let users = [];
     for (let i = 1; i < v.length; i++) {
@@ -2165,6 +2166,7 @@ function getDaftarUserMaster() {
       let isHashed = pVal.length === 64;
       
       users.push({
+        idPekerja: (idPek !== -1 && r[idPek]) ? String(r[idPek]).trim() : "",
         nama: String(r[idNama] || "").trim(),
         username: String(r[idUser] || "").trim(),
         role: String(r[idRole] || "Staff").trim(),

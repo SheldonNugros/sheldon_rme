@@ -1170,6 +1170,7 @@ var console = {
     getDaftarUserMaster() {
       setTimeout(() => {
         let users = mockDb.staff.map(s => ({
+          idPekerja: s.idPekerja || s.id || "-",
           nama: s.nama,
           username: s.username,
           role: s.role,
@@ -1873,7 +1874,7 @@ var console = {
       const pUser = document.getElementById('panelDbUser');
       if (pUser) pUser.classList.remove('hidden');
       if (typeof handleRoleChange === 'function') handleRoleChange();
-      if (typeof loadDaftarUserMaster === 'function') loadDaftarUserMaster();
+      if (typeof loadDaftarUserMaster === 'function') loadDaftarUserMaster(true);
     }
     if (menuId === 'inventory' && typeof initInventoryModule === 'function') initInventoryModule();
     if (menuId === 'informasi' && typeof initInformasiModule === 'function') initInformasiModule();
@@ -9915,41 +9916,30 @@ function loadDaftarUserMaster(forceReload) {
   if (forceReload) {
     if (btnTop) { btnTop.disabled = true; btnTop.innerHTML = '<span class="inline-block animate-spin">⏳</span> Memuat...'; }
     if (btnTbl) { btnTbl.disabled = true; btnTbl.innerHTML = '<span class="inline-block animate-spin">⏳</span> Memuat...'; }
-    if (typeof showToast === 'function') showToast('info', '🔄 Memuat data pengguna dari Spreadsheet...');
+    try {
+      localStorage.removeItem('sheldon_master_users_cache');
+    } catch (eClean) {}
+    if (typeof showToast === 'function') showToast('info', '🔄 Menyinkronkan data pengguna langsung dari Spreadsheet...');
   }
 
   if (tbody && (forceReload || !Array.isArray(listMasterUser) || listMasterUser.length === 0)) {
-    tbody.innerHTML = '<tr><td colspan="10" class="text-center py-6 text-slate-400 font-bold"><span class="inline-block animate-spin mr-2">⏳</span>Memuat akun pengguna dari spreadsheet...</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="11" class="text-center py-6 text-slate-400 font-bold"><span class="inline-block animate-spin mr-2">⏳</span>Memuat akun pengguna dari spreadsheet...</td></tr>';
   }
 
   const finishLoad = (usersArr) => {
     if (btnTop) { btnTop.disabled = false; btnTop.innerHTML = origTop; }
     if (btnTbl) { btnTbl.disabled = false; btnTbl.innerHTML = origTbl; }
-    let loaded = (Array.isArray(usersArr) && usersArr.length > 0) ? usersArr : getFallbackUserList();
-
-    // Gabungkan akun yang baru didaftarkan di browser lokal jika belum ada di respon server
-    try {
-      let localCache = JSON.parse(localStorage.getItem('sheldon_master_users_cache') || '[]');
-      if (Array.isArray(localCache)) {
-        localCache.forEach(lu => {
-          if (lu && lu.username) {
-            let ex = loaded.find(su => String(su.username || '').toLowerCase() === String(lu.username).toLowerCase());
-            if (!ex) {
-              loaded.unshift(lu);
-            } else if (!ex.email && lu.email) {
-              ex.email = lu.email;
-            }
-          }
-        });
-      }
-    } catch (eMerge) {}
+    
+    // Spreadsheet adalah sumber data utama (Single Source of Truth)
+    // Jika server mengembalikan array (termasuk array kosong jika seluruh baris dihapus), gunakan data server!
+    let loaded = Array.isArray(usersArr) ? usersArr : getFallbackUserList();
 
     listMasterUser = loaded;
     saveFallbackUserList(listMasterUser);
     renderTabelUser();
     if (forceReload) {
       if (typeof showToast === 'function') {
-        showToast('success', '✅ Berhasil memuat ' + listMasterUser.length + ' akun pengguna!');
+        showToast('success', '✅ Berhasil memuat ' + listMasterUser.length + ' akun pengguna dari Spreadsheet!');
       }
       const tblCard = document.getElementById('cardTabelUser');
       if (tblCard) {
@@ -9964,7 +9954,7 @@ function loadDaftarUserMaster(forceReload) {
   if (typeof google !== 'undefined' && google.script && google.script.run) {
     google.script.run
       .withSuccessHandler(res => {
-        if (Array.isArray(res) && res.length > 0) {
+        if (Array.isArray(res)) {
           finishLoad(res);
         } else {
           finishLoad(getFallbackUserList());
@@ -10009,7 +9999,7 @@ function renderTabelUser() {
   });
 
   if (filtered.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="10" class="text-center py-6 text-slate-400 font-bold">' + (keyword ? 'Tidak ada pengguna cocok dengan pencarian "' + keyword + '"' : 'Belum ada pengguna terdaftar.') + '</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="11" class="text-center py-6 text-slate-400 font-bold">' + (keyword ? 'Tidak ada pengguna cocok dengan pencarian "' + keyword + '"' : 'Belum ada pengguna terdaftar.') + '</td></tr>';
     return;
   }
 

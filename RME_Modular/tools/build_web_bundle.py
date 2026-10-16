@@ -1206,6 +1206,7 @@ mock_gas_script = '''
     getDaftarUserMaster() {
       setTimeout(() => {
         let users = mockDb.staff.map(s => ({
+          idPekerja: s.idPekerja || s.id || "-",
           nama: s.nama,
           username: s.username,
           role: s.role,

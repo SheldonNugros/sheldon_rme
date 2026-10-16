@@ -771,7 +771,7 @@ mock_gas_script = '''
           message: "✅ Agent Nadhif: Import Bulk Data dari 'Copy of SHELDON 2026' (Folder Antigravity RME) berhasil disinkronkan ke seluruh 11 Spreadsheet Database!",
           stats: {
             sourceTitle: "Copy of SHELDON 2026",
-            sourceId: "1BaMZosOuB6eu5kV0sIiFMCLNBer1e4X7gibmBoKweV0",
+            sourceId: "",
             usersImported: mockDb.staff.length,
             tindakanImported: mockDb.tindakan.length,
             pasienImported: mockDb.pasien.length,

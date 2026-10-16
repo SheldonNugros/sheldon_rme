@@ -3410,12 +3410,15 @@ function importBulkDataSheldon2026(options) {
     const maxPembayaran = Number(options.maxPembayaran) || 2500;
     const maxEmr = Number(options.maxEmr) || 400;
 
-    // 1. Buka Spreadsheet Sumber "Copy of SHELDON 2026" HANYA dari folder Antigravity RME / DB_CONFIG.SOURCE_BULK_2026
-    let sourceId = (DB_CONFIG && DB_CONFIG.SOURCE_BULK_2026) ? String(DB_CONFIG.SOURCE_BULK_2026).trim() : "1BaMZosOuB6eu5kV0sIiFMCLNBer1e4X7gibmBoKweV0";
+    // 1. Buka Spreadsheet Sumber "Copy of SHELDON 2026" dari folder Antigravity RME
+    let sourceId = (options && options.sourceId) ? String(options.sourceId).trim() : "";
     let ssSource = null;
-    try {
-      ssSource = SpreadsheetApp.openById(sourceId);
-    } catch (eOpen) {
+    if (sourceId) {
+      try {
+        ssSource = SpreadsheetApp.openById(sourceId);
+      } catch (eOpen) {}
+    }
+    if (!ssSource) {
       let folder = _getDatabaseParentFolder();
       if (folder) {
         let fIter = folder.getFilesByName("Copy of SHELDON 2026");
@@ -3427,7 +3430,7 @@ function importBulkDataSheldon2026(options) {
     if (!ssSource) {
       return {
         success: false,
-        message: "Spreadsheet sumber 'Copy of SHELDON 2026' (ID: " + sourceId + ") tidak ditemukan di folder Antigravity RME."
+        message: "Spreadsheet sumber 'Copy of SHELDON 2026' tidak ditemukan di folder Antigravity RME."
       };
     }
 

@@ -7,6 +7,9 @@ var isSubtitleAbsensiRemoved = true;
 var isTercatatMasukRemoved = true;
 var isIzinSakitOffRemoved = true;
 var isBtnDbUserRemoved = true;
+var isPelayananOrderedInHtml = true;
+var isAdminHeaderInHtml = true;
+var isAdminOrderedInHtml = true;
 
 // Enhanced DOM Mock for JavaScriptCore
 var window = this;
@@ -2052,6 +2055,11 @@ var console = {
     if (menuId === 'payroll') {
       switchMenu('user-master');
       if (typeof switchMasterUserSubTab === 'function') switchMasterUserSubTab('payroll');
+      return;
+    }
+    if (menuId === 'owner-utility' || menuId === 'utility') {
+      switchMenu('user-master');
+      if (typeof switchMasterUserSubTab === 'function') switchMasterUserSubTab('owner-utility');
       return;
     }
     if (menuId === 'inventory') {
@@ -10091,9 +10099,17 @@ function triggerSinkronSemuaSheet() {
 // ==========================================
 
 function ensureUserPanelVisible() {
+  const pPay = document.getElementById('subpanelMasterPayroll');
+  const pUtil = document.getElementById('subpanelMasterOwnerUtility');
+  const isPayrollActive = pPay && !pPay.classList.contains('hidden');
+  const isUtilActive = pUtil && !pUtil.classList.contains('hidden');
+
   ['view-user-master', 'panelDbUser', 'subpanelMasterUser', 'cardTabelUser'].forEach(id => {
     const el = document.getElementById(id);
     if (el && id !== 'view-user-master') {
+      if (id === 'subpanelMasterUser' && (isPayrollActive || isUtilActive)) {
+        return;
+      }
       el.classList.remove('hidden');
     }
   });
@@ -10139,33 +10155,48 @@ window.toggleFormUser = toggleFormUser;
 function switchMasterUserSubTab(tab) {
   const pUser = document.getElementById('subpanelMasterUser');
   const pPay = document.getElementById('subpanelMasterPayroll');
+  const pUtil = document.getElementById('subpanelMasterOwnerUtility');
   const btnU = document.getElementById('btnTabMasterUser');
   const btnP = document.getElementById('btnTabMasterPayroll');
+  const btnUtil = document.getElementById('btnTabMasterOwnerUtility');
+
+  // Reset all tabs to inactive state
+  if (btnU) {
+    btnU.classList.remove('text-indigo-700', 'border-indigo-200/80', 'ring-2', 'ring-indigo-500/30', 'shadow-md');
+    btnU.classList.add('text-slate-600', 'border-slate-200/80', 'shadow-sm');
+  }
+  if (btnP) {
+    btnP.classList.remove('text-cyan-700', 'border-cyan-200/80', 'ring-2', 'ring-cyan-500/30', 'shadow-md');
+    btnP.classList.add('text-slate-600', 'border-slate-200/80', 'shadow-sm');
+  }
+  if (btnUtil) {
+    btnUtil.classList.remove('text-purple-700', 'border-purple-200/80', 'ring-2', 'ring-purple-500/30', 'shadow-md');
+    btnUtil.classList.add('text-slate-600', 'border-slate-200/80', 'shadow-sm');
+  }
+
+  // Hide all subpanels
+  if (pUser) pUser.classList.add('hidden');
+  if (pPay) pPay.classList.add('hidden');
+  if (pUtil) pUtil.classList.add('hidden');
 
   if (tab === 'payroll') {
-    if (pUser) pUser.classList.add('hidden');
     if (pPay) pPay.classList.remove('hidden');
-
-    if (btnU) {
-      btnU.classList.remove('text-indigo-700', 'border-indigo-200/80', 'ring-2', 'ring-indigo-500/30', 'shadow-md');
-      btnU.classList.add('text-slate-600', 'border-slate-200/80', 'shadow-sm');
-    }
     if (btnP) {
       btnP.classList.remove('text-slate-600', 'border-slate-200/80', 'shadow-sm');
       btnP.classList.add('text-cyan-700', 'border-cyan-200/80', 'ring-2', 'ring-cyan-500/30', 'shadow-md');
     }
-
     if (typeof initPayrollModule === 'function') {
       initPayrollModule();
     }
-  } else {
-    if (pPay) pPay.classList.add('hidden');
-    if (pUser) pUser.classList.remove('hidden');
-
-    if (btnP) {
-      btnP.classList.remove('text-cyan-700', 'border-cyan-200/80', 'ring-2', 'ring-cyan-500/30', 'shadow-md');
-      btnP.classList.add('text-slate-600', 'border-slate-200/80', 'shadow-sm');
+  } else if (tab === 'owner-utility' || tab === 'utility') {
+    if (pUtil) pUtil.classList.remove('hidden');
+    if (btnUtil) {
+      btnUtil.classList.remove('text-slate-600', 'border-slate-200/80', 'shadow-sm');
+      btnUtil.classList.add('text-purple-700', 'border-purple-200/80', 'ring-2', 'ring-purple-500/30', 'shadow-md');
     }
+  } else {
+    // default: user
+    if (pUser) pUser.classList.remove('hidden');
     if (btnU) {
       btnU.classList.remove('text-slate-600', 'border-slate-200/80', 'shadow-sm');
       btnU.classList.add('text-indigo-700', 'border-indigo-200/80', 'ring-2', 'ring-indigo-500/30', 'shadow-md');
@@ -15489,6 +15520,26 @@ assert("USER-PAYROLL-3: Panel User Tersembunyi saat Tab Payroll Aktif", document
 // Kembalikan ke Tab User
 switchMasterUserSubTab('user');
 assert("USER-PAYROLL-4: Panel User Kembali Aktif", !document.getElementById('subpanelMasterUser').classList.contains('hidden'));
+
+// 5. Uji Tab Owner Utility di dalam Master User & Role
+assert("OWNER-UTIL-1: Tab Owner Utility Tersedia di Master User", document.getElementById('btnTabMasterOwnerUtility') !== null);
+assert("OWNER-UTIL-1: Subpanel Owner Utility Tersedia", document.getElementById('subpanelMasterOwnerUtility') !== null);
+
+// Uji Beralih ke Tab Owner Utility
+switchMasterUserSubTab('owner-utility');
+assert("OWNER-UTIL-2: Panel Owner Utility Aktif", !document.getElementById('subpanelMasterOwnerUtility').classList.contains('hidden'));
+assert("OWNER-UTIL-2: Panel User Tersembunyi saat Tab Owner Utility Aktif", document.getElementById('subpanelMasterUser').classList.contains('hidden'));
+assert("OWNER-UTIL-2: Panel Payroll Tersembunyi saat Tab Owner Utility Aktif", document.getElementById('subpanelMasterPayroll').classList.contains('hidden'));
+
+// Kembalikan ke Tab User
+switchMasterUserSubTab('user');
+assert("OWNER-UTIL-3: Panel User Kembali Aktif", !document.getElementById('subpanelMasterUser').classList.contains('hidden'));
+assert("OWNER-UTIL-3: Panel Owner Utility Kembali Tersembunyi", document.getElementById('subpanelMasterOwnerUtility').classList.contains('hidden'));
+
+// 6. Uji Urutan Navigasi Sidebar Pelayanan Pasien & Administrasi
+assert("SIDEBAR-ORDER-1: Urutan Tombol Pelayanan Pasien Sesuai Spesifikasi (Pasien, EMR, Kasir, Invoice, Absensi, Surat)", isPelayananOrderedInHtml);
+assert("SIDEBAR-ORDER-2: Label Kelompok Administrasi Berubah Menjadi ADMINISTRASI", isAdminHeaderInHtml);
+assert("SIDEBAR-ORDER-3: Urutan Tombol Administrasi Sesuai Spesifikasi (Informasi, DB Master, Master User)", isAdminOrderedInHtml);
 
 // SUMMARY REPORT
 print("=================================================");

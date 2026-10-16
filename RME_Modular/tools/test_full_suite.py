@@ -28,6 +28,24 @@ is_tercatat_masuk_removed = ('Tercatat masuk tugas' not in html)
 is_izin_sakit_off_removed = ('Izin / Sakit / Off' not in html)
 is_btn_db_user_removed = ('id="btnDbUser"' not in html)
 
+klinis_m = re.search(r'id=["\']section-klinis["\'][^>]*>(.*?)</div>\s*<!-- Group 3', html, re.DOTALL)
+klinis_html = klinis_m.group(1) if klinis_m else ""
+p_pasien = klinis_html.find('id="nav-pasien"')
+p_emr = klinis_html.find('id="nav-rekam-medis"')
+p_kasir = klinis_html.find('id="nav-kasir"')
+p_inv = klinis_html.find('id="nav-riwayat-invoice"')
+p_abs = klinis_html.find('id="nav-absensi"')
+p_surat = klinis_html.find('id="nav-surat"')
+is_pelayanan_ordered = (0 <= p_pasien < p_emr < p_kasir < p_inv < p_abs < p_surat)
+
+trans_m = re.search(r'id=["\']section-transaksi["\'][^>]*>(.*?)</nav>', html, re.DOTALL)
+trans_html = trans_m.group(1) if trans_m else ""
+is_admin_header = ("ADMINISTRASI" in trans_html)
+t_info = trans_html.find('id="nav-informasi"')
+t_db = trans_html.find('id="nav-database"')
+t_um = trans_html.find('id="nav-user-master"')
+is_admin_ordered = (0 <= t_info < t_db < t_um)
+
 test_harness_file = os.path.join(BASE_DIR, 'tools', 'suite_harness.js')
 
 dom_shim = r'''
@@ -1739,6 +1757,26 @@ assert("USER-PAYROLL-3: Panel User Tersembunyi saat Tab Payroll Aktif", document
 switchMasterUserSubTab('user');
 assert("USER-PAYROLL-4: Panel User Kembali Aktif", !document.getElementById('subpanelMasterUser').classList.contains('hidden'));
 
+// 5. Uji Tab Owner Utility di dalam Master User & Role
+assert("OWNER-UTIL-1: Tab Owner Utility Tersedia di Master User", document.getElementById('btnTabMasterOwnerUtility') !== null);
+assert("OWNER-UTIL-1: Subpanel Owner Utility Tersedia", document.getElementById('subpanelMasterOwnerUtility') !== null);
+
+// Uji Beralih ke Tab Owner Utility
+switchMasterUserSubTab('owner-utility');
+assert("OWNER-UTIL-2: Panel Owner Utility Aktif", !document.getElementById('subpanelMasterOwnerUtility').classList.contains('hidden'));
+assert("OWNER-UTIL-2: Panel User Tersembunyi saat Tab Owner Utility Aktif", document.getElementById('subpanelMasterUser').classList.contains('hidden'));
+assert("OWNER-UTIL-2: Panel Payroll Tersembunyi saat Tab Owner Utility Aktif", document.getElementById('subpanelMasterPayroll').classList.contains('hidden'));
+
+// Kembalikan ke Tab User
+switchMasterUserSubTab('user');
+assert("OWNER-UTIL-3: Panel User Kembali Aktif", !document.getElementById('subpanelMasterUser').classList.contains('hidden'));
+assert("OWNER-UTIL-3: Panel Owner Utility Kembali Tersembunyi", document.getElementById('subpanelMasterOwnerUtility').classList.contains('hidden'));
+
+// 6. Uji Urutan Navigasi Sidebar Pelayanan Pasien & Administrasi
+assert("SIDEBAR-ORDER-1: Urutan Tombol Pelayanan Pasien Sesuai Spesifikasi (Pasien, EMR, Kasir, Invoice, Absensi, Surat)", isPelayananOrderedInHtml);
+assert("SIDEBAR-ORDER-2: Label Kelompok Administrasi Berubah Menjadi ADMINISTRASI", isAdminHeaderInHtml);
+assert("SIDEBAR-ORDER-3: Urutan Tombol Administrasi Sesuai Spesifikasi (Informasi, DB Master, Master User)", isAdminOrderedInHtml);
+
 // SUMMARY REPORT
 print("=================================================");
 var passedTotal = results.filter(r => r.passed).length;
@@ -1753,7 +1791,7 @@ if (failedTotal > 0) {
 }
 '''
 
-full_test_script = f"var isButtonKonsultasiRemoved = {str(is_kon_removed).lower()};\nvar isModalResetPerioInHtml = {str(is_modal_perio_in_html).lower()};\nvar roleSelectOptionsFromHtml = {json.dumps(role_options)};\nvar isDatePickerLargeInHtml = {str(is_date_picker_large).lower()};\nvar isPaginasiHariIniRemoved = {str(is_paginasi_hari_ini_removed).lower()};\nvar isSubtitleAbsensiRemoved = {str(is_subtitle_absensi_removed).lower()};\nvar isTercatatMasukRemoved = {str(is_tercatat_masuk_removed).lower()};\nvar isIzinSakitOffRemoved = {str(is_izin_sakit_off_removed).lower()};\nvar isBtnDbUserRemoved = {str(is_btn_db_user_removed).lower()};\n" + dom_shim + "\n" + all_js + "\n" + test_runner_js
+full_test_script = f"var isButtonKonsultasiRemoved = {str(is_kon_removed).lower()};\nvar isModalResetPerioInHtml = {str(is_modal_perio_in_html).lower()};\nvar roleSelectOptionsFromHtml = {json.dumps(role_options)};\nvar isDatePickerLargeInHtml = {str(is_date_picker_large).lower()};\nvar isPaginasiHariIniRemoved = {str(is_paginasi_hari_ini_removed).lower()};\nvar isSubtitleAbsensiRemoved = {str(is_subtitle_absensi_removed).lower()};\nvar isTercatatMasukRemoved = {str(is_tercatat_masuk_removed).lower()};\nvar isIzinSakitOffRemoved = {str(is_izin_sakit_off_removed).lower()};\nvar isBtnDbUserRemoved = {str(is_btn_db_user_removed).lower()};\nvar isPelayananOrderedInHtml = {str(is_pelayanan_ordered).lower()};\nvar isAdminHeaderInHtml = {str(is_admin_header).lower()};\nvar isAdminOrderedInHtml = {str(is_admin_ordered).lower()};\n" + dom_shim + "\n" + all_js + "\n" + test_runner_js
 
 with open(test_harness_file, 'w', encoding='utf-8') as f:
     f.write(full_test_script)

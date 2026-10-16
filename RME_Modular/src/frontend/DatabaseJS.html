@@ -1078,9 +1078,17 @@ function triggerSinkronSemuaSheet() {
 // ==========================================
 
 function ensureUserPanelVisible() {
+  const pPay = document.getElementById('subpanelMasterPayroll');
+  const pUtil = document.getElementById('subpanelMasterOwnerUtility');
+  const isPayrollActive = pPay && !pPay.classList.contains('hidden');
+  const isUtilActive = pUtil && !pUtil.classList.contains('hidden');
+
   ['view-user-master', 'panelDbUser', 'subpanelMasterUser', 'cardTabelUser'].forEach(id => {
     const el = document.getElementById(id);
     if (el && id !== 'view-user-master') {
+      if (id === 'subpanelMasterUser' && (isPayrollActive || isUtilActive)) {
+        return;
+      }
       el.classList.remove('hidden');
     }
   });
@@ -1126,33 +1134,48 @@ window.toggleFormUser = toggleFormUser;
 function switchMasterUserSubTab(tab) {
   const pUser = document.getElementById('subpanelMasterUser');
   const pPay = document.getElementById('subpanelMasterPayroll');
+  const pUtil = document.getElementById('subpanelMasterOwnerUtility');
   const btnU = document.getElementById('btnTabMasterUser');
   const btnP = document.getElementById('btnTabMasterPayroll');
+  const btnUtil = document.getElementById('btnTabMasterOwnerUtility');
+
+  // Reset all tabs to inactive state
+  if (btnU) {
+    btnU.classList.remove('text-indigo-700', 'border-indigo-200/80', 'ring-2', 'ring-indigo-500/30', 'shadow-md');
+    btnU.classList.add('text-slate-600', 'border-slate-200/80', 'shadow-sm');
+  }
+  if (btnP) {
+    btnP.classList.remove('text-cyan-700', 'border-cyan-200/80', 'ring-2', 'ring-cyan-500/30', 'shadow-md');
+    btnP.classList.add('text-slate-600', 'border-slate-200/80', 'shadow-sm');
+  }
+  if (btnUtil) {
+    btnUtil.classList.remove('text-purple-700', 'border-purple-200/80', 'ring-2', 'ring-purple-500/30', 'shadow-md');
+    btnUtil.classList.add('text-slate-600', 'border-slate-200/80', 'shadow-sm');
+  }
+
+  // Hide all subpanels
+  if (pUser) pUser.classList.add('hidden');
+  if (pPay) pPay.classList.add('hidden');
+  if (pUtil) pUtil.classList.add('hidden');
 
   if (tab === 'payroll') {
-    if (pUser) pUser.classList.add('hidden');
     if (pPay) pPay.classList.remove('hidden');
-
-    if (btnU) {
-      btnU.classList.remove('text-indigo-700', 'border-indigo-200/80', 'ring-2', 'ring-indigo-500/30', 'shadow-md');
-      btnU.classList.add('text-slate-600', 'border-slate-200/80', 'shadow-sm');
-    }
     if (btnP) {
       btnP.classList.remove('text-slate-600', 'border-slate-200/80', 'shadow-sm');
       btnP.classList.add('text-cyan-700', 'border-cyan-200/80', 'ring-2', 'ring-cyan-500/30', 'shadow-md');
     }
-
     if (typeof initPayrollModule === 'function') {
       initPayrollModule();
     }
-  } else {
-    if (pPay) pPay.classList.add('hidden');
-    if (pUser) pUser.classList.remove('hidden');
-
-    if (btnP) {
-      btnP.classList.remove('text-cyan-700', 'border-cyan-200/80', 'ring-2', 'ring-cyan-500/30', 'shadow-md');
-      btnP.classList.add('text-slate-600', 'border-slate-200/80', 'shadow-sm');
+  } else if (tab === 'owner-utility' || tab === 'utility') {
+    if (pUtil) pUtil.classList.remove('hidden');
+    if (btnUtil) {
+      btnUtil.classList.remove('text-slate-600', 'border-slate-200/80', 'shadow-sm');
+      btnUtil.classList.add('text-purple-700', 'border-purple-200/80', 'ring-2', 'ring-purple-500/30', 'shadow-md');
     }
+  } else {
+    // default: user
+    if (pUser) pUser.classList.remove('hidden');
     if (btnU) {
       btnU.classList.remove('text-slate-600', 'border-slate-200/80', 'shadow-sm');
       btnU.classList.add('text-indigo-700', 'border-indigo-200/80', 'ring-2', 'ring-indigo-500/30', 'shadow-md');

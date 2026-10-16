@@ -1873,17 +1873,6 @@
           <span class="text-base group-hover:scale-110 transition-transform">🩺</span>
           <span class="flex-1">Rekam Medis & Odonto</span>
         </button>
-        <button onclick="switchMenu('surat')" id="nav-surat" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-300 hover:text-white hover:bg-slate-800/90 transition-all text-left group">
-          <span class="text-base group-hover:scale-110 transition-transform">📝</span>
-          <span class="flex-1">Formulir & Surat</span>
-        </button>
-      </div>
-      
-      <!-- Group 3: Kasir, Billing & Informasi -->
-      <div id="section-transaksi" class="space-y-1 pt-1 border-t border-slate-800/60">
-        <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest px-3 mb-1.5 flex items-center gap-1.5">
-          <span class="w-1 h-1 rounded-full bg-emerald-400"></span> ADMIN & PEMBAYARAN
-        </p>
         <button onclick="switchMenu('kasir')" id="nav-kasir" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-300 hover:text-white hover:bg-slate-800/90 transition-all text-left group">
           <span class="text-base group-hover:scale-110 transition-transform">💳</span>
           <span class="flex-1">Kasir & Billing</span>
@@ -1892,15 +1881,24 @@
           <span class="text-base group-hover:scale-110 transition-transform">📄</span>
           <span class="flex-1">Riwayat Invoice</span>
         </button>
-        <!-- Tombol Payroll & Honor dipindahkan ke dalam Master User & Role; hidden dummy dipertahankan untuk kompatibilitas RBAC -->
-        <button onclick="switchMenu('payroll')" id="nav-payroll" class="hidden" style="display:none !important;" aria-hidden="true"></button>
         <button onclick="switchMenu('absensi')" id="nav-absensi" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-300 hover:text-white hover:bg-slate-800/90 transition-all text-left group">
           <span class="text-base group-hover:scale-110 transition-transform">📅</span>
           <span class="flex-1">Absensi Pegawai</span>
         </button>
+        <button onclick="switchMenu('surat')" id="nav-surat" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-300 hover:text-white hover:bg-slate-800/90 transition-all text-left group">
+          <span class="text-base group-hover:scale-110 transition-transform">📝</span>
+          <span class="flex-1">Formulir & Surat</span>
+        </button>
+      </div>
+      
+      <!-- Group 3: Administrasi -->
+      <div id="section-transaksi" class="space-y-1 pt-1 border-t border-slate-800/60">
+        <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest px-3 mb-1.5 flex items-center gap-1.5">
+          <span class="w-1 h-1 rounded-full bg-emerald-400"></span> ADMINISTRASI
+        </p>
         <button onclick="switchMenu('informasi')" id="nav-informasi" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-300 hover:text-white hover:bg-slate-800/90 transition-all text-left group">
           <span class="text-base group-hover:scale-110 transition-transform">ℹ️</span>
-          <span class="flex-1">Informasi Tarif & Stok</span>
+          <span class="flex-1">Informasi Tarif & Stock</span>
         </button>
         <!-- Tombol Gudang & Restock dipindahkan ke dalam Database Master; hidden dummy dipertahankan untuk kompatibilitas RBAC -->
         <button onclick="switchMenu('inventory')" id="nav-inventory" class="hidden" style="display:none !important;" aria-hidden="true"></button>
@@ -1912,6 +1910,8 @@
           <span class="text-base group-hover:scale-110 transition-transform">👥</span>
           <span class="flex-1">Master User & Role</span>
         </button>
+        <!-- Tombol Payroll & Honor dipindahkan ke dalam Master User & Role; hidden dummy dipertahankan untuk kompatibilitas RBAC -->
+        <button onclick="switchMenu('payroll')" id="nav-payroll" class="hidden" style="display:none !important;" aria-hidden="true"></button>
       </div>
     </nav>
     
@@ -2813,8 +2813,8 @@
 </div>
       <div id="view-user-master" class="module-view hidden"><div class="space-y-6 text-xs relative text-slate-800">
 
-  <!-- TAB NAVIGASI UTAMA MASTER USER & PAYROLL -->
-  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-100/90 p-2.5 rounded-2xl border border-slate-200/90 shadow-sm">
+  <!-- TAB NAVIGASI UTAMA MASTER USER, PAYROLL & OWNER UTILITY -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-3 bg-slate-100/90 p-2.5 rounded-2xl border border-slate-200/90 shadow-sm">
     <!-- 1. TAB MASTER USER & HAK AKSES -->
     <button type="button" onclick="switchMasterUserSubTab('user')" id="btnTabMasterUser" class="mu-tab-btn flex items-center gap-3.5 px-4 py-3 bg-white text-indigo-700 font-bold rounded-xl border border-indigo-200/80 shadow-md ring-2 ring-indigo-500/30 transition-all text-left group cursor-pointer">
       <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl shadow-inner group-hover:scale-110 transition-transform flex-shrink-0">
@@ -2840,6 +2840,20 @@
           <span class="text-[9px] px-2 py-0.5 rounded-full bg-cyan-100 text-cyan-700 font-extrabold uppercase">Gaji & JM</span>
         </div>
         <p class="text-[10px] text-slate-400 font-medium truncate mt-0.5">Slip gaji dokter, staf, tarif shift & bagi hasil</p>
+      </div>
+    </button>
+
+    <!-- 3. TAB OWNER UTILITY -->
+    <button type="button" onclick="switchMasterUserSubTab('owner-utility')" id="btnTabMasterOwnerUtility" class="mu-tab-btn flex items-center gap-3.5 px-4 py-3 bg-white text-slate-600 font-bold rounded-xl border border-slate-200/80 shadow-sm hover:border-slate-300 hover:shadow-md transition-all text-left group cursor-pointer">
+      <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-xl shadow-inner group-hover:scale-110 transition-transform flex-shrink-0">
+        ⚙️
+      </div>
+      <div class="min-w-0 flex-1">
+        <div class="text-xs font-black tracking-wide text-slate-800 group-hover:text-purple-600 transition-colors flex items-center justify-between">
+          <span>Owner Utility</span>
+          <span class="text-[9px] px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 font-extrabold uppercase">Pemeliharaan</span>
+        </div>
+        <p class="text-[10px] text-slate-400 font-medium truncate mt-0.5">Pemeliharaan database, bulk import & backup sistem</p>
       </div>
     </button>
   </div>
@@ -3023,38 +3037,6 @@
       </div>
     </div>
 
-    <!-- TOMBOL SISTEM, SINKRONISASI, & BACKUP (KHUSUS OWNER) -->
-    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 space-y-3">
-      <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
-        <h4 class="font-bold text-xs text-slate-700 flex items-center gap-2">
-          <span>⚙️</span> Pemeliharaan Database, Bulk Import & Backup Sistem
-        </h4>
-        <span class="text-[10px] font-bold text-purple-600 bg-purple-50 px-2 py-0.5 rounded-md border border-purple-200">Owner Utility</span>
-      </div>
-      <div class="flex items-center gap-2.5 flex-wrap">
-        <button id="btnReloadUserMaster" type="button" onclick="loadDaftarUserMaster(true)" class="px-3.5 py-2.5 bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 font-bold rounded-xl text-xs transition-all flex items-center gap-1.5 shadow-sm active:scale-95" title="Muat ulang seluruh daftar pengguna dari Spreadsheet">
-          <span>🔄</span> Muat Ulang Data
-        </button>
-        <button id="btnImportBulk2026" type="button" onclick="triggerImportBulkSheldon2026()" class="px-4 py-2.5 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-extrabold rounded-xl text-xs shadow-md shadow-amber-500/20 transition-all flex items-center gap-1.5 active:scale-95" title="Agent Nadhif: Impor & Sinkronkan Bulk Data dari Copy of SHELDON 2026 (Folder Antigravity RME) ke 11 Spreadsheet Database">
-          <span>📥</span> Import Bulk Data (SHELDON 2026)
-        </button>
-        <button id="btnSinkronSheet" type="button" onclick="triggerSinkronSemuaSheet()" class="px-3.5 py-2.5 bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 font-bold rounded-xl text-xs transition-all flex items-center gap-1.5" title="Otomatis buat & perbarui seluruh sheet database dan bersihkan sheet usang">
-          <span>🔄</span> Sinkronkan Sheet
-        </button>
-        <button id="btnBackupSekarang" type="button" onclick="triggerManualBackup()" class="px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl text-xs shadow-md shadow-blue-500/20 transition-all flex items-center gap-2" title="Cadangkan seluruh Spreadsheet & Ekspor file .CSV otomatis ke folder BACKUP_RME_SHELDON di Google Drive">
-          <span>💾</span> Backup Sekarang
-        </button>
-        <button id="btnBackupDownloadCSV" type="button" onclick="triggerBackupDownloadCSV()" class="px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold rounded-xl text-xs shadow-md shadow-emerald-500/20 transition-all flex items-center gap-2" title="Cadangkan ke Google Drive (.CSV) sekaligus unduh file .CSV database langsung ke perangkat ini">
-          <span>📥</span> Backup & Download CSV
-        </button>
-        <button id="btnPasangTriggerBackup" type="button" onclick="aktifkanAutoBackupTrigger()" class="px-3.5 py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 font-bold rounded-xl text-xs transition-all flex items-center gap-1.5" title="Aktifkan Jadwal Auto-Backup 02.00 Dini Hari (Spreadsheet + CSV)">
-          <span>⏰</span> Auto-Backup (02.00 WIB)
-        </button>
-        <button id="btnPasangTriggerArsip" type="button" onclick="aktifkanArsipTahunanTrigger()" class="px-3.5 py-2.5 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 font-bold rounded-xl text-xs transition-all flex items-center gap-1.5" title="Aktifkan Jadwal Arsip Tahunan 1 Januari Pukul 01.00 WIB">
-          <span>📦</span> Auto-Arsip (1 Jan)
-        </button>
-      </div>
-    </div>
   </div>
 
   <!-- SUBPANEL 2: PAYROLL & HONOR PEGAWAI -->
@@ -3425,6 +3407,49 @@
   </div>
 </div>
 
+  </div>
+
+  <!-- SUBPANEL 3: OWNER UTILITY (PEMELIHARAAN, BULK IMPORT & BACKUP) -->
+  <div id="subpanelMasterOwnerUtility" class="hidden space-y-6">
+    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3 flex-wrap gap-2">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-xl border border-purple-100 shadow-inner">
+            ⚙️
+          </div>
+          <div>
+            <h4 class="font-black text-sm text-slate-800">
+              Pemeliharaan Database, Bulk Import & Backup Sistem
+            </h4>
+            <p class="text-[11px] text-slate-400 mt-0.5">Pusat kendali sinkronisasi multi-spreadsheet, impor data bulk 2026, dan pencadangan otomatis cloud</p>
+          </div>
+        </div>
+        <span class="text-xs font-bold text-purple-600 bg-purple-50 px-3 py-1 rounded-full border border-purple-200">Owner Utility</span>
+      </div>
+      <div class="flex items-center gap-2.5 flex-wrap pt-1">
+        <button id="btnReloadUserMaster" type="button" onclick="loadDaftarUserMaster(true)" class="px-3.5 py-2.5 bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 font-bold rounded-xl text-xs transition-all flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer" title="Muat ulang seluruh daftar pengguna dari Spreadsheet">
+          <span>🔄</span> Muat Ulang Data
+        </button>
+        <button id="btnImportBulk2026" type="button" onclick="triggerImportBulkSheldon2026()" class="px-4 py-2.5 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-extrabold rounded-xl text-xs shadow-md shadow-amber-500/20 transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer" title="Agent Nadhif: Impor & Sinkronkan Bulk Data dari Copy of SHELDON 2026 (Folder Antigravity RME) ke 11 Spreadsheet Database">
+          <span>📥</span> Import Bulk Data (SHELDON 2026)
+        </button>
+        <button id="btnSinkronSheet" type="button" onclick="triggerSinkronSemuaSheet()" class="px-3.5 py-2.5 bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 font-bold rounded-xl text-xs transition-all flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer" title="Otomatis buat & perbarui seluruh sheet database dan bersihkan sheet usang">
+          <span>🔄</span> Sinkronkan Sheet
+        </button>
+        <button id="btnBackupSekarang" type="button" onclick="triggerManualBackup()" class="px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl text-xs shadow-md shadow-blue-500/20 transition-all flex items-center gap-2 cursor-pointer" title="Cadangkan seluruh Spreadsheet & Ekspor file .CSV otomatis ke folder BACKUP_RME_SHELDON di Google Drive">
+          <span>💾</span> Backup Sekarang
+        </button>
+        <button id="btnBackupDownloadCSV" type="button" onclick="triggerBackupDownloadCSV()" class="px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold rounded-xl text-xs shadow-md shadow-emerald-500/20 transition-all flex items-center gap-2 cursor-pointer" title="Cadangkan ke Google Drive (.CSV) sekaligus unduh file .CSV database langsung ke perangkat ini">
+          <span>📥</span> Backup & Download CSV
+        </button>
+        <button id="btnPasangTriggerBackup" type="button" onclick="aktifkanAutoBackupTrigger()" class="px-3.5 py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 font-bold rounded-xl text-xs transition-all flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer" title="Aktifkan Jadwal Auto-Backup 02.00 Dini Hari (Spreadsheet + CSV)">
+          <span>⏰</span> Auto-Backup (02.00 WIB)
+        </button>
+        <button id="btnPasangTriggerArsip" type="button" onclick="aktifkanArsipTahunanTrigger()" class="px-3.5 py-2.5 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 font-bold rounded-xl text-xs transition-all flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer" title="Aktifkan Jadwal Arsip Tahunan 1 Januari Pukul 01.00 WIB">
+          <span>📦</span> Auto-Arsip (1 Jan)
+        </button>
+      </div>
+    </div>
   </div>
 
 </div>
@@ -6536,6 +6561,11 @@
     if (menuId === 'payroll') {
       switchMenu('user-master');
       if (typeof switchMasterUserSubTab === 'function') switchMasterUserSubTab('payroll');
+      return;
+    }
+    if (menuId === 'owner-utility' || menuId === 'utility') {
+      switchMenu('user-master');
+      if (typeof switchMasterUserSubTab === 'function') switchMasterUserSubTab('owner-utility');
       return;
     }
     if (menuId === 'inventory') {
@@ -14586,9 +14616,17 @@ function triggerSinkronSemuaSheet() {
 // ==========================================
 
 function ensureUserPanelVisible() {
+  const pPay = document.getElementById('subpanelMasterPayroll');
+  const pUtil = document.getElementById('subpanelMasterOwnerUtility');
+  const isPayrollActive = pPay && !pPay.classList.contains('hidden');
+  const isUtilActive = pUtil && !pUtil.classList.contains('hidden');
+
   ['view-user-master', 'panelDbUser', 'subpanelMasterUser', 'cardTabelUser'].forEach(id => {
     const el = document.getElementById(id);
     if (el && id !== 'view-user-master') {
+      if (id === 'subpanelMasterUser' && (isPayrollActive || isUtilActive)) {
+        return;
+      }
       el.classList.remove('hidden');
     }
   });
@@ -14634,33 +14672,48 @@ window.toggleFormUser = toggleFormUser;
 function switchMasterUserSubTab(tab) {
   const pUser = document.getElementById('subpanelMasterUser');
   const pPay = document.getElementById('subpanelMasterPayroll');
+  const pUtil = document.getElementById('subpanelMasterOwnerUtility');
   const btnU = document.getElementById('btnTabMasterUser');
   const btnP = document.getElementById('btnTabMasterPayroll');
+  const btnUtil = document.getElementById('btnTabMasterOwnerUtility');
+
+  // Reset all tabs to inactive state
+  if (btnU) {
+    btnU.classList.remove('text-indigo-700', 'border-indigo-200/80', 'ring-2', 'ring-indigo-500/30', 'shadow-md');
+    btnU.classList.add('text-slate-600', 'border-slate-200/80', 'shadow-sm');
+  }
+  if (btnP) {
+    btnP.classList.remove('text-cyan-700', 'border-cyan-200/80', 'ring-2', 'ring-cyan-500/30', 'shadow-md');
+    btnP.classList.add('text-slate-600', 'border-slate-200/80', 'shadow-sm');
+  }
+  if (btnUtil) {
+    btnUtil.classList.remove('text-purple-700', 'border-purple-200/80', 'ring-2', 'ring-purple-500/30', 'shadow-md');
+    btnUtil.classList.add('text-slate-600', 'border-slate-200/80', 'shadow-sm');
+  }
+
+  // Hide all subpanels
+  if (pUser) pUser.classList.add('hidden');
+  if (pPay) pPay.classList.add('hidden');
+  if (pUtil) pUtil.classList.add('hidden');
 
   if (tab === 'payroll') {
-    if (pUser) pUser.classList.add('hidden');
     if (pPay) pPay.classList.remove('hidden');
-
-    if (btnU) {
-      btnU.classList.remove('text-indigo-700', 'border-indigo-200/80', 'ring-2', 'ring-indigo-500/30', 'shadow-md');
-      btnU.classList.add('text-slate-600', 'border-slate-200/80', 'shadow-sm');
-    }
     if (btnP) {
       btnP.classList.remove('text-slate-600', 'border-slate-200/80', 'shadow-sm');
       btnP.classList.add('text-cyan-700', 'border-cyan-200/80', 'ring-2', 'ring-cyan-500/30', 'shadow-md');
     }
-
     if (typeof initPayrollModule === 'function') {
       initPayrollModule();
     }
-  } else {
-    if (pPay) pPay.classList.add('hidden');
-    if (pUser) pUser.classList.remove('hidden');
-
-    if (btnP) {
-      btnP.classList.remove('text-cyan-700', 'border-cyan-200/80', 'ring-2', 'ring-cyan-500/30', 'shadow-md');
-      btnP.classList.add('text-slate-600', 'border-slate-200/80', 'shadow-sm');
+  } else if (tab === 'owner-utility' || tab === 'utility') {
+    if (pUtil) pUtil.classList.remove('hidden');
+    if (btnUtil) {
+      btnUtil.classList.remove('text-slate-600', 'border-slate-200/80', 'shadow-sm');
+      btnUtil.classList.add('text-purple-700', 'border-purple-200/80', 'ring-2', 'ring-purple-500/30', 'shadow-md');
     }
+  } else {
+    // default: user
+    if (pUser) pUser.classList.remove('hidden');
     if (btnU) {
       btnU.classList.remove('text-slate-600', 'border-slate-200/80', 'shadow-sm');
       btnU.classList.add('text-indigo-700', 'border-indigo-200/80', 'ring-2', 'ring-indigo-500/30', 'shadow-md');

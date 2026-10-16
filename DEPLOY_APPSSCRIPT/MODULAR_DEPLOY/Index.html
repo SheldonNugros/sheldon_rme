@@ -176,17 +176,6 @@
           <span class="text-base group-hover:scale-110 transition-transform">🩺</span>
           <span class="flex-1">Rekam Medis & Odonto</span>
         </button>
-        <button onclick="switchMenu('surat')" id="nav-surat" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-300 hover:text-white hover:bg-slate-800/90 transition-all text-left group">
-          <span class="text-base group-hover:scale-110 transition-transform">📝</span>
-          <span class="flex-1">Formulir & Surat</span>
-        </button>
-      </div>
-      
-      <!-- Group 3: Kasir, Billing & Informasi -->
-      <div id="section-transaksi" class="space-y-1 pt-1 border-t border-slate-800/60">
-        <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest px-3 mb-1.5 flex items-center gap-1.5">
-          <span class="w-1 h-1 rounded-full bg-emerald-400"></span> ADMIN & PEMBAYARAN
-        </p>
         <button onclick="switchMenu('kasir')" id="nav-kasir" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-300 hover:text-white hover:bg-slate-800/90 transition-all text-left group">
           <span class="text-base group-hover:scale-110 transition-transform">💳</span>
           <span class="flex-1">Kasir & Billing</span>
@@ -195,15 +184,24 @@
           <span class="text-base group-hover:scale-110 transition-transform">📄</span>
           <span class="flex-1">Riwayat Invoice</span>
         </button>
-        <!-- Tombol Payroll & Honor dipindahkan ke dalam Master User & Role; hidden dummy dipertahankan untuk kompatibilitas RBAC -->
-        <button onclick="switchMenu('payroll')" id="nav-payroll" class="hidden" style="display:none !important;" aria-hidden="true"></button>
         <button onclick="switchMenu('absensi')" id="nav-absensi" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-300 hover:text-white hover:bg-slate-800/90 transition-all text-left group">
           <span class="text-base group-hover:scale-110 transition-transform">📅</span>
           <span class="flex-1">Absensi Pegawai</span>
         </button>
+        <button onclick="switchMenu('surat')" id="nav-surat" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-300 hover:text-white hover:bg-slate-800/90 transition-all text-left group">
+          <span class="text-base group-hover:scale-110 transition-transform">📝</span>
+          <span class="flex-1">Formulir & Surat</span>
+        </button>
+      </div>
+      
+      <!-- Group 3: Administrasi -->
+      <div id="section-transaksi" class="space-y-1 pt-1 border-t border-slate-800/60">
+        <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest px-3 mb-1.5 flex items-center gap-1.5">
+          <span class="w-1 h-1 rounded-full bg-emerald-400"></span> ADMINISTRASI
+        </p>
         <button onclick="switchMenu('informasi')" id="nav-informasi" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-300 hover:text-white hover:bg-slate-800/90 transition-all text-left group">
           <span class="text-base group-hover:scale-110 transition-transform">ℹ️</span>
-          <span class="flex-1">Informasi Tarif & Stok</span>
+          <span class="flex-1">Informasi Tarif & Stock</span>
         </button>
         <!-- Tombol Gudang & Restock dipindahkan ke dalam Database Master; hidden dummy dipertahankan untuk kompatibilitas RBAC -->
         <button onclick="switchMenu('inventory')" id="nav-inventory" class="hidden" style="display:none !important;" aria-hidden="true"></button>
@@ -215,6 +213,8 @@
           <span class="text-base group-hover:scale-110 transition-transform">👥</span>
           <span class="flex-1">Master User & Role</span>
         </button>
+        <!-- Tombol Payroll & Honor dipindahkan ke dalam Master User & Role; hidden dummy dipertahankan untuk kompatibilitas RBAC -->
+        <button onclick="switchMenu('payroll')" id="nav-payroll" class="hidden" style="display:none !important;" aria-hidden="true"></button>
       </div>
     </nav>
     
@@ -534,6 +534,11 @@
     if (menuId === 'payroll') {
       switchMenu('user-master');
       if (typeof switchMasterUserSubTab === 'function') switchMasterUserSubTab('payroll');
+      return;
+    }
+    if (menuId === 'owner-utility' || menuId === 'utility') {
+      switchMenu('user-master');
+      if (typeof switchMasterUserSubTab === 'function') switchMasterUserSubTab('owner-utility');
       return;
     }
     if (menuId === 'inventory') {

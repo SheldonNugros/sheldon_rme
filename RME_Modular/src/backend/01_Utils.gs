@@ -77,8 +77,8 @@ function handleApiRequest(action, params) {
         args = [params.payload || params];
       } else if (action === "getAbsensiModuleData") {
         args = [params.dateStr || params.tanggal || params[0] || ""];
-      } else if (action === "generatePayrollPeriode") {
-        args = [params.periodeBulan || params[0] || ""];
+      } else if (action === "generatePayrollPeriode" || action === "sinkronisasiRekapBulanan") {
+        args = [params.periodeBulan || params.periode || params[0] || ""];
       } else if (action === "hapusUserMaster" || action === "aktifkanUserMaster") {
         args = [params.username || params[0], params.isPermanent || params.currentUser || params[1]];
       } else if (action === "syncAllUsersToPayrollTarifShift" || action === "getPayrollModuleData" || action === "setupPayrollSpreadsheet" || action === "setupAbsensiSpreadsheet") {

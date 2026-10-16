@@ -1639,6 +1639,15 @@ var tbodySoreHtml = document.getElementById('tbodyAbsensiPegawai') ? document.ge
 assert("ABSENSI-13: Kolom Shift Menampilkan 'Shift Sore' saat Shift Sore Terpilih", tbodySoreHtml.indexOf("Shift Sore") !== -1);
 pilihShiftAbsensi('Pagi'); // Kembalikan ke Shift Pagi
 
+// ABSENSI-14: Sinkronisasi Otomatis Rekap Bulanan dari Presensi Harian
+var rekapStaf = (window.AbsensiState.rekapBulanan || []).find(function(r) {
+  return (r.namaPekerja || '').toLowerCase() === "staf aktif terdaftar";
+});
+assert("ABSENSI-14: Rekap Bulanan Pegawai Mencatat Kehadiran setelah Simpan Presensi", rekapStaf !== undefined && rekapStaf.totalHadir >= 1);
+renderRekapBulanan();
+var tbodyRekapHtml = document.getElementById('tbodyRekapBulanan') ? document.getElementById('tbodyRekapBulanan').innerHTML : "";
+assert("ABSENSI-14: Tabel Rekap Bulanan Menampilkan Total Hadir Pegawai", tbodyRekapHtml.indexOf("Staf Aktif Terdaftar") !== -1 && tbodyRekapHtml.indexOf(">1<") !== -1);
+
 // --- TEST: Kategori Role (Owner, Dokter Gigi Spesialis, Dokter Gigi Umum, Perawat Gigi, Perawat Umum, Admin, Office) ---
 var selectRoleEl = document.getElementById('dbUserRole');
 assert("ROLE-1: Dropdown Kategori Role Tersedia", selectRoleEl !== null);

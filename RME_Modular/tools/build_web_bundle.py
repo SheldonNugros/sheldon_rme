@@ -1116,6 +1116,44 @@ mock_gas_script = '''
           "Sore": { jamMulai: (dIdx === 6 ? "14:00" : "16:00"), jamSelesai: (dIdx === 6 ? "18:00" : "20:00") }
         };
 
+        // Agregasi otomatis presensiHarian ke rekapBulanan
+        let aggMap = {};
+        (mockDb.presensiHarian || []).forEach(p => {
+          let n = (p.namaPekerja || "").trim();
+          if (!n) return;
+          let nk = n.toLowerCase();
+          if (!aggMap[nk]) aggMap[nk] = { pagi: 0, sore: 0, hadir: 0, tidak: 0 };
+          let isHadir = (p.statusAbsensi || "").toLowerCase() === "hadir";
+          let sh = (p.shift || "").toLowerCase();
+          if (isHadir) {
+            if (sh.indexOf("pagi") !== -1 || sh === "1") aggMap[nk].pagi++;
+            else if (sh.indexOf("sore") !== -1 || sh === "2") aggMap[nk].sore++;
+            aggMap[nk].hadir++;
+          } else {
+            aggMap[nk].tidak++;
+          }
+        });
+
+        let rekapList = activeTarif.map(w => {
+          let nk = (w.namaPekerja || "").toLowerCase();
+          let st = aggMap[nk] || { pagi: 0, sore: 0, hadir: 0, tidak: 0 };
+          let hariKerja = 27;
+          let pct = st.hadir > 0 ? (Math.min(100, (st.hadir / Math.max(1, hariKerja)) * 100)).toFixed(1) + "%" : "0%";
+          return {
+            periodeBulan: "Oktober 2026",
+            namaPekerja: w.namaPekerja,
+            role: w.role || "Staf",
+            hariKerja: hariKerja,
+            totalShiftPagi: st.pagi,
+            totalShiftSore: st.sore,
+            totalHadir: st.hadir,
+            totalTidakHadir: st.tidak,
+            persentase: pct,
+            terakhirUpdate: "17-10-2026 00:00:00"
+          };
+        });
+        mockDb.rekapBulananAbsensi = rekapList;
+
         this._successHandler({
           success: true,
           date: formattedDate,
@@ -1127,7 +1165,7 @@ mock_gas_script = '''
           activeWorkers: activeTarif,
           presensiHariIni: (mockDb.presensiHarian || []).filter(p => p.tanggal === formattedDate),
           kalenderLibur: kLibur,
-          rekapBulanan: mockDb.rekapBulananAbsensi || []
+          rekapBulanan: rekapList
         });
       }, 50);
     }
@@ -1169,6 +1207,47 @@ mock_gas_script = '''
             });
           }
           count++;
+        });
+
+        // Agregasi otomatis presensiHarian ke rekapBulanan
+        let isWorkerActive = (t) => {
+          let s = String(t.status || "Aktif").trim().toLowerCase();
+          return s !== "tidak aktif" && s !== "non aktif" && s !== "nonaktif" && s !== "inactive";
+        };
+        let activeTarif = (mockDb.tarifPayroll || []).filter(isWorkerActive);
+        let aggMap = {};
+        (mockDb.presensiHarian || []).forEach(p => {
+          let n = (p.namaPekerja || "").trim();
+          if (!n) return;
+          let nk = n.toLowerCase();
+          if (!aggMap[nk]) aggMap[nk] = { pagi: 0, sore: 0, hadir: 0, tidak: 0 };
+          let isHadir = (p.statusAbsensi || "").toLowerCase() === "hadir";
+          let sh = (p.shift || "").toLowerCase();
+          if (isHadir) {
+            if (sh.indexOf("pagi") !== -1 || sh === "1") aggMap[nk].pagi++;
+            else if (sh.indexOf("sore") !== -1 || sh === "2") aggMap[nk].sore++;
+            aggMap[nk].hadir++;
+          } else {
+            aggMap[nk].tidak++;
+          }
+        });
+        mockDb.rekapBulananAbsensi = activeTarif.map(w => {
+          let nk = (w.namaPekerja || "").toLowerCase();
+          let st = aggMap[nk] || { pagi: 0, sore: 0, hadir: 0, tidak: 0 };
+          let hariKerja = 27;
+          let pct = st.hadir > 0 ? (Math.min(100, (st.hadir / Math.max(1, hariKerja)) * 100)).toFixed(1) + "%" : "0%";
+          return {
+            periodeBulan: "Oktober 2026",
+            namaPekerja: w.namaPekerja,
+            role: w.role || "Staf",
+            hariKerja: hariKerja,
+            totalShiftPagi: st.pagi,
+            totalShiftSore: st.sore,
+            totalHadir: st.hadir,
+            totalTidakHadir: st.tidak,
+            persentase: pct,
+            terakhirUpdate: "17-10-2026 00:00:00"
+          };
         });
 
         this._successHandler({

@@ -1009,6 +1009,44 @@ var console = {
           "Sore": { jamMulai: (dIdx === 6 ? "14:00" : "16:00"), jamSelesai: (dIdx === 6 ? "18:00" : "20:00") }
         };
 
+        // Agregasi otomatis presensiHarian ke rekapBulanan
+        let aggMap = {};
+        (mockDb.presensiHarian || []).forEach(p => {
+          let n = (p.namaPekerja || "").trim();
+          if (!n) return;
+          let nk = n.toLowerCase();
+          if (!aggMap[nk]) aggMap[nk] = { pagi: 0, sore: 0, hadir: 0, tidak: 0 };
+          let isHadir = (p.statusAbsensi || "").toLowerCase() === "hadir";
+          let sh = (p.shift || "").toLowerCase();
+          if (isHadir) {
+            if (sh.indexOf("pagi") !== -1 || sh === "1") aggMap[nk].pagi++;
+            else if (sh.indexOf("sore") !== -1 || sh === "2") aggMap[nk].sore++;
+            aggMap[nk].hadir++;
+          } else {
+            aggMap[nk].tidak++;
+          }
+        });
+
+        let rekapList = activeTarif.map(w => {
+          let nk = (w.namaPekerja || "").toLowerCase();
+          let st = aggMap[nk] || { pagi: 0, sore: 0, hadir: 0, tidak: 0 };
+          let hariKerja = 27;
+          let pct = st.hadir > 0 ? (Math.min(100, (st.hadir / Math.max(1, hariKerja)) * 100)).toFixed(1) + "%" : "0%";
+          return {
+            periodeBulan: "Oktober 2026",
+            namaPekerja: w.namaPekerja,
+            role: w.role || "Staf",
+            hariKerja: hariKerja,
+            totalShiftPagi: st.pagi,
+            totalShiftSore: st.sore,
+            totalHadir: st.hadir,
+            totalTidakHadir: st.tidak,
+            persentase: pct,
+            terakhirUpdate: "17-10-2026 00:00:00"
+          };
+        });
+        mockDb.rekapBulananAbsensi = rekapList;
+
         this._successHandler({
           success: true,
           date: formattedDate,
@@ -1020,7 +1058,7 @@ var console = {
           activeWorkers: activeTarif,
           presensiHariIni: (mockDb.presensiHarian || []).filter(p => p.tanggal === formattedDate),
           kalenderLibur: kLibur,
-          rekapBulanan: mockDb.rekapBulananAbsensi || []
+          rekapBulanan: rekapList
         });
       }, 50);
     }
@@ -1062,6 +1100,47 @@ var console = {
             });
           }
           count++;
+        });
+
+        // Agregasi otomatis presensiHarian ke rekapBulanan
+        let isWorkerActive = (t) => {
+          let s = String(t.status || "Aktif").trim().toLowerCase();
+          return s !== "tidak aktif" && s !== "non aktif" && s !== "nonaktif" && s !== "inactive";
+        };
+        let activeTarif = (mockDb.tarifPayroll || []).filter(isWorkerActive);
+        let aggMap = {};
+        (mockDb.presensiHarian || []).forEach(p => {
+          let n = (p.namaPekerja || "").trim();
+          if (!n) return;
+          let nk = n.toLowerCase();
+          if (!aggMap[nk]) aggMap[nk] = { pagi: 0, sore: 0, hadir: 0, tidak: 0 };
+          let isHadir = (p.statusAbsensi || "").toLowerCase() === "hadir";
+          let sh = (p.shift || "").toLowerCase();
+          if (isHadir) {
+            if (sh.indexOf("pagi") !== -1 || sh === "1") aggMap[nk].pagi++;
+            else if (sh.indexOf("sore") !== -1 || sh === "2") aggMap[nk].sore++;
+            aggMap[nk].hadir++;
+          } else {
+            aggMap[nk].tidak++;
+          }
+        });
+        mockDb.rekapBulananAbsensi = activeTarif.map(w => {
+          let nk = (w.namaPekerja || "").toLowerCase();
+          let st = aggMap[nk] || { pagi: 0, sore: 0, hadir: 0, tidak: 0 };
+          let hariKerja = 27;
+          let pct = st.hadir > 0 ? (Math.min(100, (st.hadir / Math.max(1, hariKerja)) * 100)).toFixed(1) + "%" : "0%";
+          return {
+            periodeBulan: "Oktober 2026",
+            namaPekerja: w.namaPekerja,
+            role: w.role || "Staf",
+            hariKerja: hariKerja,
+            totalShiftPagi: st.pagi,
+            totalShiftSore: st.sore,
+            totalHadir: st.hadir,
+            totalTidakHadir: st.tidak,
+            persentase: pct,
+            terakhirUpdate: "17-10-2026 00:00:00"
+          };
         });
 
         this._successHandler({
@@ -12602,6 +12681,31 @@ function loadAbsensiData(dateStr) {
       })
       .getAbsensiModuleData(formattedQueryDate);
   } else {
+    // Mode Vercel / Web Standalone: Coba via Google Apps Script Web App API jika URL tersedia
+    let gasUrl = window.GAS_WEB_APP_URL || (typeof localStorage !== 'undefined' ? localStorage.getItem("sheldon_gas_api_url") : "") || "";
+    if (gasUrl) {
+      fetch(gasUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({
+          action: "getAbsensiModuleData",
+          dateStr: formattedQueryDate
+        })
+      })
+      .then(r => r.json())
+      .then(res => {
+        if (res && res.success) {
+          applyAbsensiDataToState(res);
+        } else {
+          fallbackLoadAbsensiLocal(formattedQueryDate);
+        }
+      })
+      .catch(() => {
+        fallbackLoadAbsensiLocal(formattedQueryDate);
+      });
+      return;
+    }
+
     // Mode Standalone / Test Harness Fallback
     fallbackLoadAbsensiLocal(formattedQueryDate);
   }
@@ -13110,6 +13214,40 @@ function simpanAbsensiShiftCurrent() {
       })
       .simpanAbsensiShift(payload);
   } else {
+    // Mode Vercel / Web Standalone: Coba simpan via Google Apps Script Web App API jika URL tersedia
+    let gasUrl = window.GAS_WEB_APP_URL || (typeof localStorage !== 'undefined' ? localStorage.getItem("sheldon_gas_api_url") : "") || "";
+    if (gasUrl) {
+      fetch(gasUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({
+          action: "simpanAbsensiShift",
+          payload: payload
+        })
+      })
+      .then(r => r.json())
+      .then(res => {
+        if (btnSimpan) {
+          btnSimpan.disabled = false;
+          btnSimpan.innerHTML = '<span>💾</span> Simpan Presensi Shift';
+        }
+        if (!res || !res.success) {
+          showToast('error', res && res.message ? res.message : 'Gagal menyimpan absensi ke Spreadsheet.');
+          return;
+        }
+        showToast('success', res.message || 'Presensi shift berhasil disimpan ke Google Sheets!');
+        loadAbsensiData(window.AbsensiState.currentDate);
+      })
+      .catch(err => {
+        if (btnSimpan) {
+          btnSimpan.disabled = false;
+          btnSimpan.innerHTML = '<span>💾</span> Simpan Presensi Shift';
+        }
+        showToast('error', 'Gagal sync ke server: ' + err.message);
+      });
+      return;
+    }
+
     // Mode Standalone / Test Harness
     setTimeout(function() {
       if (btnSimpan) {
@@ -13142,6 +13280,39 @@ function simpanAbsensiShiftCurrent() {
             verifikator: 'Admin'
           });
         }
+      });
+
+      // Update rekapBulanan di state
+      let curBulan = (document.getElementById('selectBulanRekap') ? document.getElementById('selectBulanRekap').value : "Oktober 2026");
+      if (!window.AbsensiState.rekapBulanan) window.AbsensiState.rekapBulanan = [];
+      let isPagi = shiftName.toLowerCase().indexOf('pagi') !== -1;
+
+      records.forEach(r => {
+        let nama = String(r.namaPekerja || '').trim();
+        let rItem = window.AbsensiState.rekapBulanan.find(x => (x.namaPekerja || '').toLowerCase() === nama.toLowerCase());
+        if (!rItem) {
+          rItem = {
+            periodeBulan: curBulan,
+            namaPekerja: nama,
+            role: r.role || 'Staf',
+            hariKerja: 27,
+            totalShiftPagi: 0,
+            totalShiftSore: 0,
+            totalHadir: 0,
+            totalTidakHadir: 0,
+            persentase: "0%"
+          };
+          window.AbsensiState.rekapBulanan.push(rItem);
+        }
+        if (r.statusAbsensi === 'Hadir') {
+          if (isPagi) rItem.totalShiftPagi++;
+          else rItem.totalShiftSore++;
+          rItem.totalHadir++;
+        } else {
+          rItem.totalTidakHadir++;
+        }
+        let hk = rItem.hariKerja || 27;
+        rItem.persentase = (Math.min(100, (rItem.totalHadir / Math.max(1, hk)) * 100)).toFixed(1) + "%";
       });
 
       // Sinkronkan ke modul Payroll jika window.PayrollState aktif
@@ -13285,7 +13456,46 @@ function renderRekapBulanan() {
     badgeHK.innerText = "📅 Hari Kerja: " + infoHK.hariKerja + " Hari (Total " + infoHK.totalDays + " - Libur " + infoHK.totalLibur + ")";
   }
 
-  if (rekap.length === 0 && workers.length === 0) {
+  // Filter rekap untuk bulan terpilih jika ada field periodeBulan
+  let filteredRekap = rekap.filter(r => !r.periodeBulan || r.periodeBulan.toLowerCase() === curBulan.toLowerCase());
+  if (filteredRekap.length === 0 && rekap.length > 0) {
+    filteredRekap = rekap;
+  }
+
+  let displayList = [];
+  workers.forEach(w => {
+    let cleanNama = (w.namaPekerja || w.nama || '').trim();
+    let found = filteredRekap.find(r => (r.namaPekerja || '').toLowerCase() === cleanNama.toLowerCase());
+    displayList.push({
+      namaPekerja: cleanNama,
+      role: w.role || 'Staf',
+      hariKerja: (found && found.hariKerja) ? found.hariKerja : infoHK.hariKerja,
+      totalShiftPagi: found ? (Number(found.totalShiftPagi) || 0) : 0,
+      totalShiftSore: found ? (Number(found.totalShiftSore) || 0) : 0,
+      totalHadir: found ? (Number(found.totalHadir) || 0) : 0,
+      totalTidakHadir: found ? (Number(found.totalTidakHadir) || 0) : 0,
+      persentase: found ? (found.persentase || '0%') : '0%'
+    });
+  });
+
+  // Tambahkan pekerja di rekap jika belum masuk di activeWorkers
+  filteredRekap.forEach(r => {
+    let exists = displayList.some(d => d.namaPekerja.toLowerCase() === (r.namaPekerja || '').toLowerCase());
+    if (!exists && r.namaPekerja) {
+      displayList.push({
+        namaPekerja: r.namaPekerja,
+        role: r.role || 'Staf',
+        hariKerja: r.hariKerja || infoHK.hariKerja,
+        totalShiftPagi: Number(r.totalShiftPagi) || 0,
+        totalShiftSore: Number(r.totalShiftSore) || 0,
+        totalHadir: Number(r.totalHadir) || 0,
+        totalTidakHadir: Number(r.totalTidakHadir) || 0,
+        persentase: r.persentase || '0%'
+      });
+    }
+  });
+
+  if (displayList.length === 0) {
     tbody.innerHTML = `
       <tr>
         <td colspan="10" class="px-4 py-8 text-center text-slate-400">Belum ada data rekap kehadiran bulanan.</td>
@@ -13294,30 +13504,21 @@ function renderRekapBulanan() {
     return;
   }
 
-  // Gabungkan dengan pekerja aktif
   let html = '';
-  workers.forEach((w, idx) => {
-    let found = rekap.find(r => (r.namaPekerja || '').toLowerCase() === (w.namaPekerja || '').toLowerCase());
-    let pagi = found ? found.totalShiftPagi : 0;
-    let sore = found ? found.totalShiftSore : 0;
-    let hadir = found ? found.totalHadir : (pagi + sore);
-    let tidak = found ? found.totalTidakHadir : 0;
-    let hk = (found && found.hariKerja) ? found.hariKerja : infoHK.hariKerja;
-    let pct = found ? found.persentase : (hadir > 0 ? '100.0%' : '0%');
-
+  displayList.forEach((item, idx) => {
     html += `
       <tr class="transition-colors hover:bg-slate-50">
         <td class="px-4 py-3.5 text-center text-slate-600 font-bold">${idx + 1}</td>
-        <td class="px-4 py-3.5 font-bold text-slate-900">${escapeHtml(w.namaPekerja)}</td>
-        <td class="px-4 py-3.5 text-slate-600">${escapeHtml(w.role || 'Staf')}</td>
-        <td class="px-4 py-3.5 text-center font-extrabold text-indigo-700">${hk} Hari</td>
-        <td class="px-4 py-3.5 text-center font-bold text-amber-700">${pagi}</td>
-        <td class="px-4 py-3.5 text-center font-bold text-indigo-700">${sore}</td>
-        <td class="px-4 py-3.5 text-center font-black text-emerald-700">${hadir}</td>
-        <td class="px-4 py-3.5 text-center font-black text-rose-700">${tidak}</td>
-        <td class="px-4 py-3.5 text-center font-black text-cyan-800">${pct}</td>
+        <td class="px-4 py-3.5 font-bold text-slate-900">${escapeHtml(item.namaPekerja)}</td>
+        <td class="px-4 py-3.5 text-slate-600">${escapeHtml(item.role)}</td>
+        <td class="px-4 py-3.5 text-center font-extrabold text-indigo-700">${item.hariKerja} Hari</td>
+        <td class="px-4 py-3.5 text-center font-bold text-amber-700">${item.totalShiftPagi}</td>
+        <td class="px-4 py-3.5 text-center font-bold text-indigo-700">${item.totalShiftSore}</td>
+        <td class="px-4 py-3.5 text-center font-black text-emerald-700">${item.totalHadir}</td>
+        <td class="px-4 py-3.5 text-center font-black text-rose-700">${item.totalTidakHadir}</td>
+        <td class="px-4 py-3.5 text-center font-black text-cyan-800">${item.persentase}</td>
         <td class="px-4 py-3.5 text-center">
-          <button onclick="lihatDetailPresensiPegawai('${escapeHtml(w.namaPekerja)}')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold border border-slate-300 transition-all">
+          <button onclick="lihatDetailPresensiPegawai('${escapeHtml(item.namaPekerja)}')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold border border-slate-300 transition-all">
             Detail
           </button>
         </td>
@@ -13329,7 +13530,7 @@ function renderRekapBulanan() {
 }
 
 function filterRekapBulanan(bulanVal) {
-  showToast('info', 'Menampilkan rekap kehadiran bulan: ' + bulanVal);
+  renderRekapBulanan();
 }
 
 function lihatDetailPresensiPegawai(nama) {
@@ -13579,7 +13780,19 @@ function fallbackLoadAbsensiLocal(queryDate) {
       { tanggal: "01-01-2026", hari: "Kamis", namaHariLibur: "Tahun Baru 2026", kategoriLibur: "Libur Nasional", statusOperasional: "Tutup", keterangan: "Libur Nasional" },
       { tanggal: "17-08-2026", hari: "Senin", namaHariLibur: "Hari Kemerdekaan RI", kategoriLibur: "Libur Nasional", statusOperasional: "Tutup", keterangan: "Libur Nasional" }
     ],
-    rekapBulanan: []
+    rekapBulanan: (window.AbsensiState && window.AbsensiState.rekapBulanan && window.AbsensiState.rekapBulanan.length > 0) 
+      ? window.AbsensiState.rekapBulanan 
+      : activeW.map(w => ({
+          periodeBulan: "Oktober 2026",
+          namaPekerja: w.namaPekerja,
+          role: w.role || "Staf",
+          hariKerja: 27,
+          totalShiftPagi: 0,
+          totalShiftSore: 0,
+          totalHadir: 0,
+          totalTidakHadir: 0,
+          persentase: "0%"
+        }))
   };
 
   applyAbsensiDataToState(mockRes);
@@ -15043,6 +15256,15 @@ renderAbsensiTable();
 var tbodySoreHtml = document.getElementById('tbodyAbsensiPegawai') ? document.getElementById('tbodyAbsensiPegawai').innerHTML : "";
 assert("ABSENSI-13: Kolom Shift Menampilkan 'Shift Sore' saat Shift Sore Terpilih", tbodySoreHtml.indexOf("Shift Sore") !== -1);
 pilihShiftAbsensi('Pagi'); // Kembalikan ke Shift Pagi
+
+// ABSENSI-14: Sinkronisasi Otomatis Rekap Bulanan dari Presensi Harian
+var rekapStaf = (window.AbsensiState.rekapBulanan || []).find(function(r) {
+  return (r.namaPekerja || '').toLowerCase() === "staf aktif terdaftar";
+});
+assert("ABSENSI-14: Rekap Bulanan Pegawai Mencatat Kehadiran setelah Simpan Presensi", rekapStaf !== undefined && rekapStaf.totalHadir >= 1);
+renderRekapBulanan();
+var tbodyRekapHtml = document.getElementById('tbodyRekapBulanan') ? document.getElementById('tbodyRekapBulanan').innerHTML : "";
+assert("ABSENSI-14: Tabel Rekap Bulanan Menampilkan Total Hadir Pegawai", tbodyRekapHtml.indexOf("Staf Aktif Terdaftar") !== -1 && tbodyRekapHtml.indexOf(">1<") !== -1);
 
 // --- TEST: Kategori Role (Owner, Dokter Gigi Spesialis, Dokter Gigi Umum, Perawat Gigi, Perawat Umum, Admin, Office) ---
 var selectRoleEl = document.getElementById('dbUserRole');

@@ -167,8 +167,8 @@ function handleApiRequest(action, params) {
         args = [params.payload || params];
       } else if (action === "getAbsensiModuleData") {
         args = [params.dateStr || params.tanggal || params[0] || ""];
-      } else if (action === "generatePayrollPeriode") {
-        args = [params.periodeBulan || params[0] || ""];
+      } else if (action === "generatePayrollPeriode" || action === "sinkronisasiRekapBulanan") {
+        args = [params.periodeBulan || params.periode || params[0] || ""];
       } else if (action === "hapusUserMaster" || action === "aktifkanUserMaster") {
         args = [params.username || params[0], params.isPermanent || params.currentUser || params[1]];
       } else if (action === "syncAllUsersToPayrollTarifShift" || action === "getPayrollModuleData" || action === "setupPayrollSpreadsheet" || action === "setupAbsensiSpreadsheet") {
@@ -5817,34 +5817,10 @@ function getAbsensiModuleData(dateStr) {
       });
     }
 
-    // 6. Ambil Rekap Bulanan
+    // 6. Ambil Rekap Bulanan (Otomatis diagregasi dari Presensi_Harian & disinkronkan ke Rekap_Bulanan)
     let targetPeriodeBulan = Utilities.formatDate(targetDate, "Asia/Jakarta", "MMMM yyyy");
     let infoHariKerjaBulanIni = hitungHariKerjaBulan_(targetPeriodeBulan, kalenderLibur);
-
-    let rekapBulanan = [];
-    let shRekap = ssA.getSheetByName("Rekap_Bulanan");
-    if (shRekap && shRekap.getLastRow() > 1) {
-      let vRekap = shRekap.getRange(2, 1, shRekap.getLastRow() - 1, shRekap.getLastColumn()).getValues();
-      vRekap.forEach(r => {
-        let pBulan = String(r[0] || targetPeriodeBulan);
-        let hk = Number(r[3]);
-        if (isNaN(hk) || hk <= 0) {
-          hk = hitungHariKerjaBulan_(pBulan, kalenderLibur).hariKerja;
-        }
-        rekapBulanan.push({
-          periodeBulan: pBulan,
-          namaPekerja: String(r[1] || ""),
-          role: String(r[2] || ""),
-          hariKerja: hk,
-          totalShiftPagi: Number(r[4]) || 0,
-          totalShiftSore: Number(r[5]) || 0,
-          totalHadir: Number(r[6]) || 0,
-          totalTidakHadir: Number(r[7]) || 0,
-          persentase: String(r[8] || "100%"),
-          terakhirUpdate: String(r[9] || "")
-        });
-      });
-    }
+    let rekapBulanan = sinkronisasiRekapBulanan_(ssA, targetPeriodeBulan, kalenderLibur, activeWorkers);
 
     return {
       success: true,
@@ -5941,6 +5917,236 @@ function hitungHariKerjaBulan_(periodeBulan, kalenderLibur) {
     };
   } catch (e) {
     return { totalDaysInMonth: 30, totalHariLibur: 4, hariKerja: 26 };
+  }
+}
+
+/**
+ * Helper: Mengagregasi data Presensi_Harian menjadi Rekap_Bulanan
+ * dan menyimpannya secara otomatis ke sheet Rekap_Bulanan di Spreadsheet 12 Presensi & Absensi Pegawai.
+ */
+function sinkronisasiRekapBulanan_(ssA, periodeBulan, kalenderLibur, activeWorkers) {
+  try {
+    if (!ssA) return [];
+    let shPres = ssA.getSheetByName("Presensi_Harian");
+    let shRekap = ssA.getSheetByName("Rekap_Bulanan") || ssA.insertSheet("Rekap_Bulanan");
+
+    // Pastikan header Rekap_Bulanan ada
+    let defHeaders = ["Periode_Bulan", "Nama_Pekerja", "Role", "Hari_Kerja", "Total_Shift_Pagi", "Total_Shift_Sore", "Total_Hadir", "Total_Tidak_Hadir", "Persentase_Kehadiran", "Terakhir_Diperbarui"];
+    if (shRekap.getLastRow() === 0) {
+      shRekap.appendRow(defHeaders);
+      shRekap.getRange(1, 1, 1, defHeaders.length).setFontWeight("bold").setBackground("#1e293b").setFontColor("#ffffff");
+      shRekap.setFrozenRows(1);
+    }
+
+    // Hitung Hari Kerja bulan ini
+    let infoHK = hitungHariKerjaBulan_(periodeBulan, kalenderLibur);
+    let hariKerja = infoHK.hariKerja || 27;
+
+    // Baca seluruh Presensi_Harian
+    let presValues = [];
+    if (shPres && shPres.getLastRow() > 1) {
+      presValues = shPres.getRange(2, 1, shPres.getLastRow() - 1, shPres.getLastColumn()).getValues();
+    }
+
+    // Tentukan bulan (0-11) dan tahun (YYYY) dari target periodeBulan (misal "Oktober 2026")
+    const bulanIndoMap = {
+      "januari": 0, "februari": 1, "maret": 2, "april": 3, "mei": 4, "juni": 5,
+      "juli": 6, "agustus": 7, "september": 8, "oktober": 9, "november": 10, "desember": 11
+    };
+    let now = new Date();
+    let targetMonth = now.getMonth();
+    let targetYear = now.getFullYear();
+
+    if (periodeBulan) {
+      let parts = String(periodeBulan).trim().toLowerCase().split(/\s+/);
+      if (parts.length >= 2) {
+        if (bulanIndoMap[parts[0]] !== undefined) targetMonth = bulanIndoMap[parts[0]];
+        let yParsed = parseInt(parts[1], 10);
+        if (!isNaN(yParsed)) targetYear = yParsed;
+      }
+    }
+
+    // Map agregasi per nama pekerja: { [namaKey]: { pagi: 0, sore: 0, hadir: 0, tidak: 0 } }
+    let aggMap = {};
+    presValues.forEach(r => {
+      let rawTgl = r[1];
+      let dObj = null;
+      if (rawTgl instanceof Date) {
+        dObj = rawTgl;
+      } else {
+        let strTgl = String(rawTgl || "").trim();
+        if (strTgl.indexOf('-') !== -1) {
+          let p = strTgl.split('-');
+          if (p[0].length === 4) {
+            dObj = new Date(parseInt(p[0], 10), parseInt(p[1], 10) - 1, parseInt(p[2], 10));
+          } else if (p[2] && p[2].length === 4) {
+            dObj = new Date(parseInt(p[2], 10), parseInt(p[1], 10) - 1, parseInt(p[0], 10));
+          }
+        }
+      }
+
+      if (!dObj || isNaN(dObj.getTime())) return;
+      if (dObj.getMonth() !== targetMonth || dObj.getFullYear() !== targetYear) return;
+
+      let nama = String(r[7] || "").trim();
+      if (!nama) return;
+      let namaKey = nama.toLowerCase();
+
+      if (!aggMap[namaKey]) {
+        aggMap[namaKey] = { pagi: 0, sore: 0, hadir: 0, tidak: 0 };
+      }
+
+      let shiftStr = String(r[3] || "").toLowerCase();
+      let statusStr = String(r[9] || "Hadir").toLowerCase();
+      let isHadir = (statusStr === "hadir" || statusStr.indexOf("hadir") !== -1);
+
+      if (isHadir) {
+        if (shiftStr.indexOf("pagi") !== -1 || shiftStr === "1" || shiftStr.indexOf("1") !== -1) {
+          aggMap[namaKey].pagi++;
+        } else if (shiftStr.indexOf("sore") !== -1 || shiftStr === "2" || shiftStr.indexOf("2") !== -1) {
+          aggMap[namaKey].sore++;
+        }
+        aggMap[namaKey].hadir++;
+      } else {
+        aggMap[namaKey].tidak++;
+      }
+    });
+
+    let waktuUpdate = Utilities.formatDate(new Date(), "Asia/Jakarta", "dd-MM-yyyy HH:mm:ss");
+    let resultRekap = [];
+    let rowsToSave = [];
+
+    // Ambil data pekerja aktif
+    let workers = [];
+    if (Array.isArray(activeWorkers) && activeWorkers.length > 0) {
+      workers = activeWorkers.slice();
+    } else {
+      try {
+        const defM = SPREADSHEET_DEFINITIONS["MASTER"];
+        const foundM = _findOrCreateSpreadsheetInFolder("MASTER", defM.title);
+        const shTarif = foundM.ss.getSheetByName("Pengaturan_Tarif_Shift");
+        if (shTarif && shTarif.getLastRow() > 1) {
+          let vTarif = shTarif.getRange(2, 1, shTarif.getLastRow() - 1, shTarif.getLastColumn()).getValues();
+          vTarif.forEach(r => {
+            let n = String(r[2] || "").trim();
+            let st = String(r[8] || "Aktif").trim().toLowerCase();
+            if (n && st !== "tidak aktif" && st !== "non aktif" && st !== "nonaktif" && st !== "inactive") {
+              workers.push({ namaPekerja: n, role: String(r[1] || "Staf") });
+            }
+          });
+        }
+      } catch (eM) {}
+    }
+
+    // Masukkan pekerja aktif
+    workers.forEach(w => {
+      let nClean = (w.namaPekerja || w.nama || "").trim();
+      if (!nClean) return;
+      let nKey = nClean.toLowerCase();
+      let st = aggMap[nKey] || { pagi: 0, sore: 0, hadir: 0, tidak: 0 };
+      let pct = st.hadir > 0 ? (Math.min(100, (st.hadir / Math.max(1, hariKerja)) * 100)).toFixed(1) + "%" : "0%";
+
+      let item = {
+        periodeBulan: periodeBulan,
+        namaPekerja: nClean,
+        role: w.role || "Staf",
+        hariKerja: hariKerja,
+        totalShiftPagi: st.pagi,
+        totalShiftSore: st.sore,
+        totalHadir: st.hadir,
+        totalTidakHadir: st.tidak,
+        persentase: pct,
+        terakhirUpdate: waktuUpdate
+      };
+      resultRekap.push(item);
+
+      rowsToSave.push([
+        item.periodeBulan,
+        item.namaPekerja,
+        item.role,
+        item.hariKerja,
+        item.totalShiftPagi,
+        item.totalShiftSore,
+        item.totalHadir,
+        item.totalTidakHadir,
+        item.persentase,
+        item.terakhirUpdate
+      ]);
+    });
+
+    // Masukkan juga pekerja yang ada di riwayat Presensi_Harian namun belum ada di workers
+    Object.keys(aggMap).forEach(nKey => {
+      let already = workers.some(w => (w.namaPekerja || w.nama || "").toLowerCase() === nKey);
+      if (!already) {
+        let st = aggMap[nKey];
+        let pct = st.hadir > 0 ? (Math.min(100, (st.hadir / Math.max(1, hariKerja)) * 100)).toFixed(1) + "%" : "0%";
+        let origRow = presValues.find(r => String(r[7] || "").toLowerCase() === nKey);
+        let origNama = origRow ? String(origRow[7]) : nKey;
+        let origRole = origRow ? String(origRow[8] || "Staf") : "Staf";
+        let item = {
+          periodeBulan: periodeBulan,
+          namaPekerja: origNama,
+          role: origRole,
+          hariKerja: hariKerja,
+          totalShiftPagi: st.pagi,
+          totalShiftSore: st.sore,
+          totalHadir: st.hadir,
+          totalTidakHadir: st.tidak,
+          persentase: pct,
+          terakhirUpdate: waktuUpdate
+        };
+        resultRekap.push(item);
+        rowsToSave.push([
+          item.periodeBulan,
+          item.namaPekerja,
+          item.role,
+          item.hariKerja,
+          item.totalShiftPagi,
+          item.totalShiftSore,
+          item.totalHadir,
+          item.totalTidakHadir,
+          item.persentase,
+          item.terakhirUpdate
+        ]);
+      }
+    });
+
+    // Tulis ke sheet Rekap_Bulanan jika ada spreadsheet
+    if (shRekap && typeof shRekap.getRange === 'function' && rowsToSave.length > 0) {
+      let existingRows = [];
+      if (shRekap.getLastRow() > 1) {
+        existingRows = shRekap.getRange(2, 1, shRekap.getLastRow() - 1, shRekap.getLastColumn()).getValues();
+      }
+      let otherMonthRows = existingRows.filter(r => String(r[0] || "").toLowerCase() !== String(periodeBulan).toLowerCase());
+      let finalRows = otherMonthRows.concat(rowsToSave);
+
+      if (shRekap.getLastRow() > 1) {
+        shRekap.getRange(2, 1, shRekap.getLastRow() - 1, shRekap.getLastColumn()).clearContent();
+      }
+      if (finalRows.length > 0) {
+        shRekap.getRange(2, 1, finalRows.length, finalRows[0].length).setValues(finalRows);
+      }
+    }
+
+    return resultRekap;
+  } catch (err) {
+    if (typeof Logger !== 'undefined') Logger.log("sinkronisasiRekapBulanan_ error: " + err.message);
+    return [];
+  }
+}
+
+/**
+ * Fungsi Eksternal/Publik Apps Script: Sinkronisasi Rekap_Bulanan.
+ */
+function sinkronisasiRekapBulanan(periodeBulan) {
+  try {
+    const absensiRef = getSpreadsheetAbsensi_();
+    const ssA = absensiRef.ss;
+    let targetPeriode = periodeBulan || Utilities.formatDate(new Date(), "Asia/Jakarta", "MMMM yyyy");
+    let result = sinkronisasiRekapBulanan_(ssA, targetPeriode);
+    return { success: true, count: result.length, data: result };
+  } catch(e) {
+    return { success: false, message: e.message };
   }
 }
 
@@ -6122,6 +6328,30 @@ function simpanAbsensiShift(payload) {
       });
     } catch (eSyncPay) {
       Logger.log("Sync ke Presensi_Shift_Harian error: " + eSyncPay.message);
+    }
+
+    // Sinkronisasi otomatis ke Rekap_Bulanan di Spreadsheet 12 Presensi & Absensi Pegawai
+    try {
+      let partsTgl = tanggal.split('-');
+      let dObjTgl = (partsTgl[0].length === 4)
+        ? new Date(parseInt(partsTgl[0], 10), parseInt(partsTgl[1], 10) - 1, parseInt(partsTgl[2], 10))
+        : new Date(parseInt(partsTgl[2], 10), parseInt(partsTgl[1], 10) - 1, parseInt(partsTgl[0], 10));
+      let periodeBulan = Utilities.formatDate(dObjTgl, "Asia/Jakarta", "MMMM yyyy");
+
+      let kalLibur = [];
+      let shLib = ss.getSheetByName("Kalender_Hari_Libur");
+      if (shLib && shLib.getLastRow() > 1) {
+        let vLib = shLib.getRange(2, 1, shLib.getLastRow() - 1, shLib.getLastColumn()).getValues();
+        vLib.forEach(r => {
+          kalLibur.push({
+            tanggal: (r[0] instanceof Date) ? Utilities.formatDate(r[0], "Asia/Jakarta", "dd-MM-yyyy") : String(r[0] || "").trim(),
+            statusOperasional: String(r[4] || "Tutup").trim()
+          });
+        });
+      }
+      sinkronisasiRekapBulanan_(ss, periodeBulan, kalLibur, records);
+    } catch(eRekap) {
+      Logger.log("Sync ke Rekap_Bulanan error: " + eRekap.message);
     }
 
     SpreadsheetApp.flush();

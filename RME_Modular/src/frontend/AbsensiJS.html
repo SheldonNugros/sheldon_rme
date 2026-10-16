@@ -1131,18 +1131,24 @@ function fallbackLoadAbsensiLocal(queryDate) {
     workers = window.PayrollState.tarifShift;
   } else if (window.KlinikData && window.KlinikData.staff) {
     workers = window.KlinikData.staff.map((s, i) => ({
-      idAturan: "TARIF-" + String(i + 1).padStart(3, '0'),
+      idAturan: s.idPekerja || s.id || ("SN-" + String(i + 1).padStart(2, '0')),
+      idPekerja: s.idPekerja || s.id || ("SN-" + String(i + 1).padStart(2, '0')),
       namaPekerja: s.nama,
       role: s.role,
-      status: "Aktif",
+      status: s.status || "Aktif",
       tarifShift1: 45000,
       tarifShift2: 45000
     }));
   } else {
     workers = [
-      { idAturan: "TARIF-001", namaPekerja: "drg. Rahma Yulinda D, Sp. BMM", role: "Dokter Gigi Spesialis", status: "Aktif" },
-      { idAturan: "TARIF-002", namaPekerja: "Bernadette Rostenkowski", role: "Perawat", status: "Aktif" },
-      { idAturan: "TARIF-003", namaPekerja: "Howard Wolowitz", role: "Admin", status: "Aktif" }
+      { idAturan: "SN-01", idPekerja: "SN-01", namaPekerja: "Vembrian Asung Nugroho", role: "Owner", status: "Aktif" },
+      { idAturan: "SN-02", idPekerja: "SN-02", namaPekerja: "drg. Rahma Yulinda D, Sp. BMM", role: "Dokter Gigi Spesialis", status: "Aktif" },
+      { idAturan: "SN-03", idPekerja: "SN-03", namaPekerja: "drg. Regyana Oktavaria", role: "Dokter Gigi Umum", status: "Aktif" },
+      { idAturan: "SN-04", idPekerja: "SN-04", namaPekerja: "drg. Tia Ardhana R", role: "Dokter Gigi Umum", status: "Aktif" },
+      { idAturan: "SN-06", idPekerja: "SN-06", namaPekerja: "Eva Nurmiza, AMKG", role: "Perawat Gigi", status: "Aktif" },
+      { idAturan: "SN-07", idPekerja: "SN-07", namaPekerja: "Fitriyati, AMKG", role: "Perawat Gigi", status: "Aktif" },
+      { idAturan: "SN-08", idPekerja: "SN-08", namaPekerja: "Riri Afriyanti", role: "Perawat Umum", status: "Aktif" },
+      { idAturan: "SN-09", idPekerja: "SN-09", namaPekerja: "Sri Purwanti", role: "Admin", status: "Aktif" }
     ];
   }
 
@@ -1176,10 +1182,7 @@ function fallbackLoadAbsensiLocal(queryDate) {
       { tanggal: "01-01-2026", hari: "Kamis", namaHariLibur: "Tahun Baru 2026", kategoriLibur: "Libur Nasional", statusOperasional: "Tutup", keterangan: "Libur Nasional" },
       { tanggal: "17-08-2026", hari: "Senin", namaHariLibur: "Hari Kemerdekaan RI", kategoriLibur: "Libur Nasional", statusOperasional: "Tutup", keterangan: "Libur Nasional" }
     ],
-    rekapBulanan: [
-      { namaPekerja: "Bernadette Rostenkowski", role: "Perawat", totalShiftPagi: 10, totalShiftSore: 8, totalHadir: 18, totalTidakHadir: 0, persentase: "100.0%" },
-      { namaPekerja: "Howard Wolowitz", role: "Admin", totalShiftPagi: 12, totalShiftSore: 6, totalHadir: 18, totalTidakHadir: 0, persentase: "100.0%" }
-    ]
+    rekapBulanan: []
   };
 
   applyAbsensiDataToState(mockRes);

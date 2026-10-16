@@ -15537,9 +15537,9 @@ assert("OWNER-UTIL-3: Panel User Kembali Aktif", !document.getElementById('subpa
 assert("OWNER-UTIL-3: Panel Owner Utility Kembali Tersembunyi", document.getElementById('subpanelMasterOwnerUtility').classList.contains('hidden'));
 
 // 6. Uji Urutan Navigasi Sidebar Pelayanan Pasien & Administrasi
-assert("SIDEBAR-ORDER-1: Urutan Tombol Pelayanan Pasien Sesuai Spesifikasi (Pasien, EMR, Kasir, Invoice, Absensi, Surat)", isPelayananOrderedInHtml);
+assert("SIDEBAR-ORDER-1: Urutan Tombol Pelayanan Pasien Sesuai Spesifikasi (Pasien, EMR, Kasir, Invoice, Surat)", isPelayananOrderedInHtml);
 assert("SIDEBAR-ORDER-2: Label Kelompok Administrasi Berubah Menjadi ADMINISTRASI", isAdminHeaderInHtml);
-assert("SIDEBAR-ORDER-3: Urutan Tombol Administrasi Sesuai Spesifikasi (Informasi, DB Master, Master User)", isAdminOrderedInHtml);
+assert("SIDEBAR-ORDER-3: Urutan Tombol Administrasi Sesuai Spesifikasi (Absensi, Informasi, DB Master, Master User)", isAdminOrderedInHtml);
 
 // SUMMARY REPORT
 print("=================================================");

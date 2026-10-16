@@ -34,17 +34,17 @@ p_pasien = klinis_html.find('id="nav-pasien"')
 p_emr = klinis_html.find('id="nav-rekam-medis"')
 p_kasir = klinis_html.find('id="nav-kasir"')
 p_inv = klinis_html.find('id="nav-riwayat-invoice"')
-p_abs = klinis_html.find('id="nav-absensi"')
 p_surat = klinis_html.find('id="nav-surat"')
-is_pelayanan_ordered = (0 <= p_pasien < p_emr < p_kasir < p_inv < p_abs < p_surat)
+is_pelayanan_ordered = (0 <= p_pasien < p_emr < p_kasir < p_inv < p_surat) and ('id="nav-absensi"' not in klinis_html)
 
 trans_m = re.search(r'id=["\']section-transaksi["\'][^>]*>(.*?)</nav>', html, re.DOTALL)
 trans_html = trans_m.group(1) if trans_m else ""
 is_admin_header = ("ADMINISTRASI" in trans_html)
+t_abs = trans_html.find('id="nav-absensi"')
 t_info = trans_html.find('id="nav-informasi"')
 t_db = trans_html.find('id="nav-database"')
 t_um = trans_html.find('id="nav-user-master"')
-is_admin_ordered = (0 <= t_info < t_db < t_um)
+is_admin_ordered = (0 <= t_abs < t_info < t_db < t_um)
 
 test_harness_file = os.path.join(BASE_DIR, 'tools', 'suite_harness.js')
 
@@ -1773,9 +1773,9 @@ assert("OWNER-UTIL-3: Panel User Kembali Aktif", !document.getElementById('subpa
 assert("OWNER-UTIL-3: Panel Owner Utility Kembali Tersembunyi", document.getElementById('subpanelMasterOwnerUtility').classList.contains('hidden'));
 
 // 6. Uji Urutan Navigasi Sidebar Pelayanan Pasien & Administrasi
-assert("SIDEBAR-ORDER-1: Urutan Tombol Pelayanan Pasien Sesuai Spesifikasi (Pasien, EMR, Kasir, Invoice, Absensi, Surat)", isPelayananOrderedInHtml);
+assert("SIDEBAR-ORDER-1: Urutan Tombol Pelayanan Pasien Sesuai Spesifikasi (Pasien, EMR, Kasir, Invoice, Surat)", isPelayananOrderedInHtml);
 assert("SIDEBAR-ORDER-2: Label Kelompok Administrasi Berubah Menjadi ADMINISTRASI", isAdminHeaderInHtml);
-assert("SIDEBAR-ORDER-3: Urutan Tombol Administrasi Sesuai Spesifikasi (Informasi, DB Master, Master User)", isAdminOrderedInHtml);
+assert("SIDEBAR-ORDER-3: Urutan Tombol Administrasi Sesuai Spesifikasi (Absensi, Informasi, DB Master, Master User)", isAdminOrderedInHtml);
 
 // SUMMARY REPORT
 print("=================================================");

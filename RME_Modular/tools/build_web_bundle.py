@@ -319,19 +319,27 @@ for idx_tr, r in enumerate(tarif_csv):
 presensi_csv = read_csv_rows('ABSENSI', 'Presensi_Harian.csv')
 presensi_list = []
 for r in presensi_csv:
-    if len(r) >= 10 and r[0].strip():
+    if len(r) == 9 and r[0].strip():
         presensi_list.append({
-            "idPresensi": r[0].strip(),
+            "tanggal": r[0].strip(),
+            "hari": r[1].strip(),
+            "shift": r[2].strip(),
+            "idPekerja": r[3].strip(),
+            "namaPekerja": r[4].strip(),
+            "role": r[5].strip(),
+            "statusAbsensi": r[6].strip(),
+            "verifikator": r[7].strip() if len(r) > 7 else "Admin",
+            "waktuInput": r[8].strip() if len(r) > 8 else ""
+        })
+    elif len(r) >= 10 and r[0].strip():
+        presensi_list.append({
             "tanggal": r[1].strip(),
             "hari": r[2].strip(),
             "shift": r[3].strip(),
-            "jamMulai": r[4].strip(),
-            "jamSelesai": r[5].strip(),
             "idPekerja": r[6].strip(),
             "namaPekerja": r[7].strip(),
             "role": r[8].strip(),
             "statusAbsensi": r[9].strip(),
-            "keterangan": r[10].strip() if len(r) > 10 else "",
             "verifikator": r[11].strip() if len(r) > 11 else "Admin",
             "waktuInput": r[12].strip() if len(r) > 12 else ""
         })
@@ -1187,23 +1195,17 @@ mock_gas_script = '''
           let st = r.statusAbsensi === "Hadir" ? "Hadir" : "Tidak";
           if (ex) {
             ex.statusAbsensi = st;
-            ex.keterangan = r.keterangan || "";
-            ex.jamMulai = payload.jamMulai || "10:00";
-            ex.jamSelesai = payload.jamSelesai || "15:00";
           } else {
             mockDb.presensiHarian.push({
-              idPresensi: "ATT-" + String(Date.now()).slice(-6) + "-" + String(count + 1).padStart(3, '0'),
               tanggal: payload.tanggal,
               hari: payload.hari,
               shift: payload.shift,
-              jamMulai: payload.jamMulai || "10:00",
-              jamSelesai: payload.jamSelesai || "15:00",
               idPekerja: r.idPekerja || "SN-01",
               namaPekerja: r.namaPekerja,
               role: r.role || "Staff",
               statusAbsensi: st,
-              keterangan: r.keterangan || "",
-              verifikator: payload.verifikator || "Admin"
+              verifikator: payload.verifikator || "Admin",
+              waktuInput: "17-10-2026 00:00:00"
             });
           }
           count++;

@@ -1,46 +1,46 @@
-ID_Presensi,Tanggal,Hari,Shift,Jam_Mulai,Jam_Selesai,ID_Pekerja,Nama_Pekerja,Role,Status_Absensi,Keterangan,Verifikator,Waktu_Input
-ATT-15102026-001,15-10-2026,Kamis,Sore,16:00,20:00,SN-01,Vembrian Asung Nugroho,Owner,Hadir,,Vembrian Asung,15-10-2026 23:45:51
-ATT-15102026-002,15-10-2026,Kamis,Sore,16:00,20:00,SN-02,"drg. Rahma Yulinda D, Sp. BMM",Dokter Gigi Spesialis,Tidak,,Vembrian Asung,15-10-2026 23:45:51
-ATT-15102026-003,15-10-2026,Kamis,Sore,16:00,20:00,SN-03,drg. Regyana Oktavaria,Dokter Gigi Umum,Tidak,,Vembrian Asung,15-10-2026 23:45:51
-ATT-15102026-004,15-10-2026,Kamis,Sore,16:00,20:00,SN-04,drg. Tia Ardhana R,Dokter Gigi Umum,Tidak,,Vembrian Asung,15-10-2026 23:45:51
-ATT-15102026-005,15-10-2026,Kamis,Sore,16:00,20:00,SN-05,drg. Latifah Mulyana,Dokter Gigi Umum,Tidak,,Vembrian Asung,15-10-2026 23:45:51
-ATT-15102026-006,15-10-2026,Kamis,Sore,16:00,20:00,SN-06,"Eva Nurmiza, AMKG",Perawat Gigi,Tidak,,Vembrian Asung,15-10-2026 23:45:51
-ATT-15102026-007,15-10-2026,Kamis,Sore,16:00,20:00,SN-07,"Fitriyati, AMKG",Perawat Gigi,Tidak,,Vembrian Asung,15-10-2026 23:45:51
-ATT-15102026-008,15-10-2026,Kamis,Sore,16:00,20:00,SN-08,Riri Afriyanti,Perawat Umum,Tidak,,Vembrian Asung,15-10-2026 23:45:51
-ATT-15102026-009,15-10-2026,Kamis,Sore,16:00,20:00,SN-09,Sri Purwanti,Admin,Tidak,,Vembrian Asung,15-10-2026 23:45:51
-ATT-15102026-010,15-10-2026,Kamis,Pagi,10:00,15:00,SN-01,Vembrian Asung Nugroho,Owner,Tidak,,Vembrian Asung,15-10-2026 23:46:25
-ATT-15102026-011,15-10-2026,Kamis,Pagi,10:00,15:00,SN-02,"drg. Rahma Yulinda D, Sp. BMM",Dokter Gigi Spesialis,Tidak,,Vembrian Asung,15-10-2026 23:46:25
-ATT-15102026-012,15-10-2026,Kamis,Pagi,10:00,15:00,SN-03,drg. Regyana Oktavaria,Dokter Gigi Umum,Tidak,,Vembrian Asung,15-10-2026 23:46:25
-ATT-15102026-013,15-10-2026,Kamis,Pagi,10:00,15:00,SN-04,drg. Tia Ardhana R,Dokter Gigi Umum,Tidak,,Vembrian Asung,15-10-2026 23:46:25
-ATT-15102026-014,15-10-2026,Kamis,Pagi,10:00,15:00,SN-05,drg. Latifah Mulyana,Dokter Gigi Umum,Tidak,,Vembrian Asung,15-10-2026 23:46:25
-ATT-15102026-015,15-10-2026,Kamis,Pagi,10:00,15:00,SN-06,"Eva Nurmiza, AMKG",Perawat Gigi,Tidak,,Vembrian Asung,15-10-2026 23:46:25
-ATT-15102026-016,15-10-2026,Kamis,Pagi,10:00,15:00,SN-07,"Fitriyati, AMKG",Perawat Gigi,Tidak,,Vembrian Asung,15-10-2026 23:46:25
-ATT-15102026-017,15-10-2026,Kamis,Pagi,10:00,15:00,SN-08,Riri Afriyanti,Perawat Umum,Tidak,,Vembrian Asung,15-10-2026 23:46:25
-ATT-15102026-018,15-10-2026,Kamis,Pagi,10:00,15:00,SN-09,Sri Purwanti,Admin,Tidak,,Vembrian Asung,15-10-2026 23:46:25
-ATT-16102026-019,16-10-2026,Jumat,Pagi,10:00,15:00,SN-01,Vembrian Asung Nugroho,Owner,Hadir,,Vembrian Asung,16-10-2026 00:25:13
-ATT-16102026-020,16-10-2026,Jumat,Pagi,10:00,15:00,SN-02,"drg. Rahma Yulinda D, Sp. BMM",Dokter Gigi Spesialis,Tidak,,Vembrian Asung,16-10-2026 00:25:13
-ATT-16102026-021,16-10-2026,Jumat,Pagi,10:00,15:00,SN-03,drg. Regyana Oktavaria,Dokter Gigi Umum,Hadir,,Vembrian Asung,16-10-2026 00:25:13
-ATT-16102026-022,16-10-2026,Jumat,Pagi,10:00,15:00,SN-04,drg. Tia Ardhana R,Dokter Gigi Umum,Hadir,,Vembrian Asung,16-10-2026 00:25:13
-ATT-16102026-023,16-10-2026,Jumat,Pagi,10:00,15:00,SN-05,drg. Latifah Mulyana,Dokter Gigi Umum,Hadir,,Vembrian Asung,16-10-2026 00:25:13
-ATT-16102026-024,16-10-2026,Jumat,Pagi,10:00,15:00,SN-06,"Eva Nurmiza, AMKG",Perawat Gigi,Tidak,,Vembrian Asung,16-10-2026 00:25:13
-ATT-16102026-025,16-10-2026,Jumat,Pagi,10:00,15:00,SN-07,"Fitriyati, AMKG",Perawat Gigi,Hadir,,Vembrian Asung,16-10-2026 00:25:13
-ATT-16102026-026,16-10-2026,Jumat,Pagi,10:00,15:00,SN-08,Riri Afriyanti,Perawat Umum,Tidak,,Vembrian Asung,16-10-2026 00:25:13
-ATT-16102026-027,16-10-2026,Jumat,Pagi,10:00,15:00,SN-09,Sri Purwanti,Admin,Tidak,,Vembrian Asung,16-10-2026 00:25:13
-ATT-16102026-028,16-10-2026,Jumat,Sore,16:00,20:00,SN-01,Vembrian Asung Nugroho,Owner,Tidak,,Vembrian Asung,16-10-2026 00:25:53
-ATT-16102026-029,16-10-2026,Jumat,Sore,16:00,20:00,SN-02,"drg. Rahma Yulinda D, Sp. BMM",Dokter Gigi Spesialis,Hadir,,Vembrian Asung,16-10-2026 00:25:53
-ATT-16102026-030,16-10-2026,Jumat,Sore,16:00,20:00,SN-03,drg. Regyana Oktavaria,Dokter Gigi Umum,Tidak,,Vembrian Asung,16-10-2026 00:25:53
-ATT-16102026-031,16-10-2026,Jumat,Sore,16:00,20:00,SN-04,drg. Tia Ardhana R,Dokter Gigi Umum,Tidak,,Vembrian Asung,16-10-2026 00:25:53
-ATT-16102026-032,16-10-2026,Jumat,Sore,16:00,20:00,SN-05,drg. Latifah Mulyana,Dokter Gigi Umum,Hadir,,Vembrian Asung,16-10-2026 00:25:53
-ATT-16102026-033,16-10-2026,Jumat,Sore,16:00,20:00,SN-06,"Eva Nurmiza, AMKG",Perawat Gigi,Hadir,,Vembrian Asung,16-10-2026 00:25:53
-ATT-16102026-034,16-10-2026,Jumat,Sore,16:00,20:00,SN-07,"Fitriyati, AMKG",Perawat Gigi,Hadir,,Vembrian Asung,16-10-2026 00:25:53
-ATT-16102026-035,16-10-2026,Jumat,Sore,16:00,20:00,SN-08,Riri Afriyanti,Perawat Umum,Hadir,,Vembrian Asung,16-10-2026 00:25:53
-ATT-16102026-036,16-10-2026,Jumat,Sore,16:00,20:00,SN-09,Sri Purwanti,Admin,Tidak,,Vembrian Asung,16-10-2026 00:25:53
-ATT-11102026-037,11-10-2026,Minggu,Sore,16:00,20:00,SN-01,Vembrian Asung Nugroho,Owner,Hadir,,Vembrian Asung,16-10-2026 00:26:31
-ATT-11102026-038,11-10-2026,Minggu,Sore,16:00,20:00,SN-02,"drg. Rahma Yulinda D, Sp. BMM",Dokter Gigi Spesialis,Tidak,,Vembrian Asung,16-10-2026 00:26:31
-ATT-11102026-039,11-10-2026,Minggu,Sore,16:00,20:00,SN-03,drg. Regyana Oktavaria,Dokter Gigi Umum,Tidak,,Vembrian Asung,16-10-2026 00:26:31
-ATT-11102026-040,11-10-2026,Minggu,Sore,16:00,20:00,SN-04,drg. Tia Ardhana R,Dokter Gigi Umum,Tidak,,Vembrian Asung,16-10-2026 00:26:31
-ATT-11102026-041,11-10-2026,Minggu,Sore,16:00,20:00,SN-05,drg. Latifah Mulyana,Dokter Gigi Umum,Tidak,,Vembrian Asung,16-10-2026 00:26:31
-ATT-11102026-042,11-10-2026,Minggu,Sore,16:00,20:00,SN-06,"Eva Nurmiza, AMKG",Perawat Gigi,Tidak,,Vembrian Asung,16-10-2026 00:26:31
-ATT-11102026-043,11-10-2026,Minggu,Sore,16:00,20:00,SN-07,"Fitriyati, AMKG",Perawat Gigi,Tidak,,Vembrian Asung,16-10-2026 00:26:31
-ATT-11102026-044,11-10-2026,Minggu,Sore,16:00,20:00,SN-08,Riri Afriyanti,Perawat Umum,Tidak,,Vembrian Asung,16-10-2026 00:26:31
-ATT-11102026-045,11-10-2026,Minggu,Sore,16:00,20:00,SN-09,Sri Purwanti,Admin,Tidak,,Vembrian Asung,16-10-2026 00:26:31
+Tanggal,Hari,Shift,ID_Pekerja,Nama_Pekerja,Role,Status_Absensi,Verifikator,Waktu_Input
+15-10-2026,Kamis,Sore,SN-01,Vembrian Asung Nugroho,Owner,Hadir,Vembrian Asung,15-10-2026 23:45:51
+15-10-2026,Kamis,Sore,SN-02,"drg. Rahma Yulinda D, Sp. BMM",Dokter Gigi Spesialis,Tidak,Vembrian Asung,15-10-2026 23:45:51
+15-10-2026,Kamis,Sore,SN-03,drg. Regyana Oktavaria,Dokter Gigi Umum,Tidak,Vembrian Asung,15-10-2026 23:45:51
+15-10-2026,Kamis,Sore,SN-04,drg. Tia Ardhana R,Dokter Gigi Umum,Tidak,Vembrian Asung,15-10-2026 23:45:51
+15-10-2026,Kamis,Sore,SN-05,drg. Latifah Mulyana,Dokter Gigi Umum,Tidak,Vembrian Asung,15-10-2026 23:45:51
+15-10-2026,Kamis,Sore,SN-06,"Eva Nurmiza, AMKG",Perawat Gigi,Tidak,Vembrian Asung,15-10-2026 23:45:51
+15-10-2026,Kamis,Sore,SN-07,"Fitriyati, AMKG",Perawat Gigi,Tidak,Vembrian Asung,15-10-2026 23:45:51
+15-10-2026,Kamis,Sore,SN-08,Riri Afriyanti,Perawat Umum,Tidak,Vembrian Asung,15-10-2026 23:45:51
+15-10-2026,Kamis,Sore,SN-09,Sri Purwanti,Admin,Tidak,Vembrian Asung,15-10-2026 23:45:51
+15-10-2026,Kamis,Pagi,SN-01,Vembrian Asung Nugroho,Owner,Tidak,Vembrian Asung,15-10-2026 23:46:25
+15-10-2026,Kamis,Pagi,SN-02,"drg. Rahma Yulinda D, Sp. BMM",Dokter Gigi Spesialis,Tidak,Vembrian Asung,15-10-2026 23:46:25
+15-10-2026,Kamis,Pagi,SN-03,drg. Regyana Oktavaria,Dokter Gigi Umum,Tidak,Vembrian Asung,15-10-2026 23:46:25
+15-10-2026,Kamis,Pagi,SN-04,drg. Tia Ardhana R,Dokter Gigi Umum,Tidak,Vembrian Asung,15-10-2026 23:46:25
+15-10-2026,Kamis,Pagi,SN-05,drg. Latifah Mulyana,Dokter Gigi Umum,Tidak,Vembrian Asung,15-10-2026 23:46:25
+15-10-2026,Kamis,Pagi,SN-06,"Eva Nurmiza, AMKG",Perawat Gigi,Tidak,Vembrian Asung,15-10-2026 23:46:25
+15-10-2026,Kamis,Pagi,SN-07,"Fitriyati, AMKG",Perawat Gigi,Tidak,Vembrian Asung,15-10-2026 23:46:25
+15-10-2026,Kamis,Pagi,SN-08,Riri Afriyanti,Perawat Umum,Tidak,Vembrian Asung,15-10-2026 23:46:25
+15-10-2026,Kamis,Pagi,SN-09,Sri Purwanti,Admin,Tidak,Vembrian Asung,15-10-2026 23:46:25
+16-10-2026,Jumat,Pagi,SN-01,Vembrian Asung Nugroho,Owner,Hadir,Vembrian Asung,16-10-2026 00:25:13
+16-10-2026,Jumat,Pagi,SN-02,"drg. Rahma Yulinda D, Sp. BMM",Dokter Gigi Spesialis,Tidak,Vembrian Asung,16-10-2026 00:25:13
+16-10-2026,Jumat,Pagi,SN-03,drg. Regyana Oktavaria,Dokter Gigi Umum,Hadir,Vembrian Asung,16-10-2026 00:25:13
+16-10-2026,Jumat,Pagi,SN-04,drg. Tia Ardhana R,Dokter Gigi Umum,Hadir,Vembrian Asung,16-10-2026 00:25:13
+16-10-2026,Jumat,Pagi,SN-05,drg. Latifah Mulyana,Dokter Gigi Umum,Hadir,Vembrian Asung,16-10-2026 00:25:13
+16-10-2026,Jumat,Pagi,SN-06,"Eva Nurmiza, AMKG",Perawat Gigi,Tidak,Vembrian Asung,16-10-2026 00:25:13
+16-10-2026,Jumat,Pagi,SN-07,"Fitriyati, AMKG",Perawat Gigi,Hadir,Vembrian Asung,16-10-2026 00:25:13
+16-10-2026,Jumat,Pagi,SN-08,Riri Afriyanti,Perawat Umum,Tidak,Vembrian Asung,16-10-2026 00:25:13
+16-10-2026,Jumat,Pagi,SN-09,Sri Purwanti,Admin,Tidak,Vembrian Asung,16-10-2026 00:25:13
+16-10-2026,Jumat,Sore,SN-01,Vembrian Asung Nugroho,Owner,Tidak,Vembrian Asung,16-10-2026 00:25:53
+16-10-2026,Jumat,Sore,SN-02,"drg. Rahma Yulinda D, Sp. BMM",Dokter Gigi Spesialis,Hadir,Vembrian Asung,16-10-2026 00:25:53
+16-10-2026,Jumat,Sore,SN-03,drg. Regyana Oktavaria,Dokter Gigi Umum,Tidak,Vembrian Asung,16-10-2026 00:25:53
+16-10-2026,Jumat,Sore,SN-04,drg. Tia Ardhana R,Dokter Gigi Umum,Tidak,Vembrian Asung,16-10-2026 00:25:53
+16-10-2026,Jumat,Sore,SN-05,drg. Latifah Mulyana,Dokter Gigi Umum,Hadir,Vembrian Asung,16-10-2026 00:25:53
+16-10-2026,Jumat,Sore,SN-06,"Eva Nurmiza, AMKG",Perawat Gigi,Hadir,Vembrian Asung,16-10-2026 00:25:53
+16-10-2026,Jumat,Sore,SN-07,"Fitriyati, AMKG",Perawat Gigi,Hadir,Vembrian Asung,16-10-2026 00:25:53
+16-10-2026,Jumat,Sore,SN-08,Riri Afriyanti,Perawat Umum,Hadir,Vembrian Asung,16-10-2026 00:25:53
+16-10-2026,Jumat,Sore,SN-09,Sri Purwanti,Admin,Tidak,Vembrian Asung,16-10-2026 00:25:53
+11-10-2026,Minggu,Sore,SN-01,Vembrian Asung Nugroho,Owner,Hadir,Vembrian Asung,16-10-2026 00:26:31
+11-10-2026,Minggu,Sore,SN-02,"drg. Rahma Yulinda D, Sp. BMM",Dokter Gigi Spesialis,Tidak,Vembrian Asung,16-10-2026 00:26:31
+11-10-2026,Minggu,Sore,SN-03,drg. Regyana Oktavaria,Dokter Gigi Umum,Tidak,Vembrian Asung,16-10-2026 00:26:31
+11-10-2026,Minggu,Sore,SN-04,drg. Tia Ardhana R,Dokter Gigi Umum,Tidak,Vembrian Asung,16-10-2026 00:26:31
+11-10-2026,Minggu,Sore,SN-05,drg. Latifah Mulyana,Dokter Gigi Umum,Tidak,Vembrian Asung,16-10-2026 00:26:31
+11-10-2026,Minggu,Sore,SN-06,"Eva Nurmiza, AMKG",Perawat Gigi,Tidak,Vembrian Asung,16-10-2026 00:26:31
+11-10-2026,Minggu,Sore,SN-07,"Fitriyati, AMKG",Perawat Gigi,Tidak,Vembrian Asung,16-10-2026 00:26:31
+11-10-2026,Minggu,Sore,SN-08,Riri Afriyanti,Perawat Umum,Tidak,Vembrian Asung,16-10-2026 00:26:31
+11-10-2026,Minggu,Sore,SN-09,Sri Purwanti,Admin,Tidak,Vembrian Asung,16-10-2026 00:26:31

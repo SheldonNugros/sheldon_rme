@@ -834,20 +834,15 @@ function simpanAbsensiShiftCurrent() {
         );
         if (existing) {
           existing.statusAbsensi = r.statusAbsensi;
-          existing.keterangan = r.keterangan;
         } else {
           window.AbsensiState.presensiHariIni.push({
-            idPresensi: 'ATT-' + Date.now(),
             tanggal: window.AbsensiState.formattedDate,
             hari: window.AbsensiState.currentDayName,
             shift: shiftName,
-            jamMulai: jadwal.jamMulai,
-            jamSelesai: jadwal.jamSelesai,
             idPekerja: r.idPekerja,
             namaPekerja: r.namaPekerja,
             role: r.role,
             statusAbsensi: r.statusAbsensi,
-            keterangan: r.keterangan,
             verifikator: 'Admin'
           });
         }

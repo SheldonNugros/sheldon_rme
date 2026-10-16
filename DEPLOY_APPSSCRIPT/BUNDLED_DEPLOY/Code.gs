@@ -4785,16 +4785,16 @@ const SPREADSHEET_DEFINITIONS = {
       "sheets": [
         {
           "name": "Presensi_Harian",
-          "headers": ["ID_Presensi", "Tanggal", "Hari", "Shift", "Jam_Mulai", "Jam_Selesai", "ID_Pekerja", "Nama_Pekerja", "Role", "Status_Absensi", "Keterangan", "Verifikator", "Waktu_Input"],
-          "formats": { "B": "dd-mm-yyyy", "E": "hh:mm", "F": "hh:mm", "M": "dd-mm-yyyy hh:mm:ss" },
+          "headers": ["Tanggal", "Hari", "Shift", "ID_Pekerja", "Nama_Pekerja", "Role", "Status_Absensi", "Verifikator", "Waktu_Input"],
+          "formats": { "A": "dd-mm-yyyy", "I": "dd-mm-yyyy hh:mm:ss" },
           "validations": {
-            "D": ["Pagi", "Sore"],
-            "J": ["Hadir", "Tidak"]
+            "C": ["Pagi", "Sore"],
+            "G": ["Hadir", "Tidak"]
           },
           "seedRows": [
-            ["ATT-20261015-001", "15-10-2026", "Kamis", "Pagi", "10:00", "15:00", "USR-STF-001", "Bernadette Rostenkowski", "Perawat", "Hadir", "Tepat waktu", "Admin", "15-10-2026 10:05:00"],
-            ["ATT-20261015-002", "15-10-2026", "Kamis", "Pagi", "10:00", "15:00", "USR-ADM-001", "Howard Wolowitz", "Admin", "Hadir", "Tepat waktu", "Admin", "15-10-2026 10:02:00"],
-            ["ATT-20261015-003", "15-10-2026", "Kamis", "Pagi", "10:00", "15:00", "DRG-001", "drg. Rahma Yulinda D, Sp. BMM", "Dokter Spesialis", "Hadir", "Tepat waktu", "Admin", "15-10-2026 10:10:00"]
+            ["15-10-2026", "Kamis", "Pagi", "SN-06", "Eva Nurmiza, AMKG", "Perawat Gigi", "Hadir", "Admin", "15-10-2026 10:05:00"],
+            ["15-10-2026", "Kamis", "Pagi", "SN-09", "Sri Purwanti", "Admin", "Hadir", "Admin", "15-10-2026 10:02:00"],
+            ["15-10-2026", "Kamis", "Pagi", "SN-02", "drg. Rahma Yulinda D, Sp. BMM", "Dokter Gigi Spesialis", "Hadir", "Admin", "15-10-2026 10:10:00"]
           ]
         },
         {
@@ -5791,29 +5791,28 @@ function getAbsensiModuleData(dateStr) {
     // 5. Ambil data Presensi yang sudah tersimpan untuk tanggal ini
     let presensiHariIni = [];
     let shPres = ssA.getSheetByName("Presensi_Harian");
-    if (shPres && shPres.getLastRow() > 1) {
-      let vPres = shPres.getRange(2, 1, shPres.getLastRow() - 1, shPres.getLastColumn()).getValues();
-      vPres.forEach(r => {
-        let tglPres = r[1];
-        let tglPresStr = (tglPres instanceof Date) ? Utilities.formatDate(tglPres, "Asia/Jakarta", "dd-MM-yyyy") : String(tglPres || "").trim();
-        if (tglPresStr === formattedDate) {
-          presensiHariIni.push({
-            idPresensi: String(r[0] || ""),
-            tanggal: tglPresStr,
-            hari: String(r[2] || ""),
-            shift: String(r[3] || ""),
-            jamMulai: String(r[4] || ""),
-            jamSelesai: String(r[5] || ""),
-            idPekerja: String(r[6] || ""),
-            namaPekerja: String(r[7] || ""),
-            role: String(r[8] || ""),
-            statusAbsensi: String(r[9] || "Hadir"),
-            keterangan: String(r[10] || ""),
-            verifikator: String(r[11] || ""),
-            waktuInput: String(r[12] || "")
-          });
-        }
-      });
+    if (shPres) {
+      migrasiFormatPresensiHarian_(shPres);
+      if (shPres.getLastRow() > 1) {
+        let vPres = shPres.getRange(2, 1, shPres.getLastRow() - 1, shPres.getLastColumn()).getValues();
+        vPres.forEach(r => {
+          let tglPres = r[0];
+          let tglPresStr = (tglPres instanceof Date) ? Utilities.formatDate(tglPres, "Asia/Jakarta", "dd-MM-yyyy") : String(tglPres || "").trim();
+          if (tglPresStr === formattedDate) {
+            presensiHariIni.push({
+              tanggal: tglPresStr,
+              hari: String(r[1] || ""),
+              shift: String(r[2] || ""),
+              idPekerja: String(r[3] || ""),
+              namaPekerja: String(r[4] || ""),
+              role: String(r[5] || ""),
+              statusAbsensi: String(r[6] || "Hadir"),
+              verifikator: String(r[7] || ""),
+              waktuInput: String(r[8] || "")
+            });
+          }
+        });
+      }
     }
 
     // 6. Ambil Rekap Bulanan (Otomatis diagregasi dari Presensi_Harian & disinkronkan ke Rekap_Bulanan)
@@ -5920,6 +5919,68 @@ function hitungHariKerjaBulan_(periodeBulan, kalenderLibur) {
 }
 
 /**
+ * Helper: Memastikan sheet Presensi_Harian menggunakan format 9 kolom ringkas:
+ * Tanggal, Hari, Shift, ID_Pekerja, Nama_Pekerja, Role, Status_Absensi, Verifikator, Waktu_Input
+ * (Menghilangkan ID_Presensi, Jam_Mulai, Jam_Selesai, Keterangan).
+ */
+function migrasiFormatPresensiHarian_(sh) {
+  try {
+    if (!sh) return;
+    const defHeaders = ["Tanggal", "Hari", "Shift", "ID_Pekerja", "Nama_Pekerja", "Role", "Status_Absensi", "Verifikator", "Waktu_Input"];
+    if (sh.getLastRow() === 0) {
+      sh.appendRow(defHeaders);
+      sh.getRange(1, 1, 1, defHeaders.length).setFontWeight("bold").setBackground("#1e293b").setFontColor("#ffffff");
+      sh.setFrozenRows(1);
+      return;
+    }
+    let curHeaders = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0];
+    let needsMigration = curHeaders.some(h => {
+      let hl = String(h || "").toLowerCase();
+      return hl === "id_presensi" || hl === "jam_mulai" || hl === "jam_selesai" || hl === "keterangan";
+    });
+
+    if (needsMigration) {
+      let idxTgl = curHeaders.indexOf("Tanggal");
+      let idxHari = curHeaders.indexOf("Hari");
+      let idxShift = curHeaders.indexOf("Shift");
+      let idxIdP = curHeaders.indexOf("ID_Pekerja");
+      let idxNama = curHeaders.indexOf("Nama_Pekerja");
+      let idxRole = curHeaders.indexOf("Role");
+      let idxStatus = curHeaders.indexOf("Status_Absensi");
+      let idxVerif = curHeaders.indexOf("Verifikator");
+      let idxWaktu = curHeaders.indexOf("Waktu_Input");
+
+      let oldRows = [];
+      if (sh.getLastRow() > 1) {
+        oldRows = sh.getRange(2, 1, sh.getLastRow() - 1, sh.getLastColumn()).getValues();
+      }
+
+      let newRows = oldRows.map(r => [
+        idxTgl !== -1 ? r[idxTgl] : "",
+        idxHari !== -1 ? r[idxHari] : "",
+        idxShift !== -1 ? r[idxShift] : "",
+        idxIdP !== -1 ? r[idxIdP] : "",
+        idxNama !== -1 ? r[idxNama] : "",
+        idxRole !== -1 ? r[idxRole] : "",
+        idxStatus !== -1 ? r[idxStatus] : "Hadir",
+        idxVerif !== -1 ? r[idxVerif] : "Admin",
+        idxWaktu !== -1 ? r[idxWaktu] : ""
+      ]);
+
+      sh.clear();
+      sh.appendRow(defHeaders);
+      sh.getRange(1, 1, 1, defHeaders.length).setFontWeight("bold").setBackground("#1e293b").setFontColor("#ffffff");
+      sh.setFrozenRows(1);
+      if (newRows.length > 0) {
+        sh.getRange(2, 1, newRows.length, defHeaders.length).setValues(newRows);
+      }
+    }
+  } catch (eMig) {
+    if (typeof Logger !== 'undefined') Logger.log("migrasiFormatPresensiHarian_ error: " + eMig.message);
+  }
+}
+
+/**
  * Helper: Mengagregasi data Presensi_Harian menjadi Rekap_Bulanan
  * dan menyimpannya secara otomatis ke sheet Rekap_Bulanan di Spreadsheet 12 Presensi & Absensi Pegawai.
  */
@@ -5966,9 +6027,24 @@ function sinkronisasiRekapBulanan_(ssA, periodeBulan, kalenderLibur, activeWorke
     }
 
     // Map agregasi per nama pekerja: { [namaKey]: { pagi: 0, sore: 0, hadir: 0, tidak: 0 } }
+    let colTgl = 0, colShift = 2, colNama = 4, colRole = 5, colStatus = 6;
+    if (shPres && shPres.getLastRow() >= 1) {
+      let hRow = shPres.getRange(1, 1, 1, shPres.getLastColumn()).getValues()[0];
+      let iT = hRow.indexOf("Tanggal");
+      let iS = hRow.indexOf("Shift");
+      let iN = hRow.indexOf("Nama_Pekerja");
+      let iR = hRow.indexOf("Role");
+      let iSt = hRow.indexOf("Status_Absensi");
+      if (iT !== -1) colTgl = iT;
+      if (iS !== -1) colShift = iS;
+      if (iN !== -1) colNama = iN;
+      if (iR !== -1) colRole = iR;
+      if (iSt !== -1) colStatus = iSt;
+    }
+
     let aggMap = {};
     presValues.forEach(r => {
-      let rawTgl = r[1];
+      let rawTgl = r[colTgl];
       let dObj = null;
       if (rawTgl instanceof Date) {
         dObj = rawTgl;
@@ -5987,7 +6063,7 @@ function sinkronisasiRekapBulanan_(ssA, periodeBulan, kalenderLibur, activeWorke
       if (!dObj || isNaN(dObj.getTime())) return;
       if (dObj.getMonth() !== targetMonth || dObj.getFullYear() !== targetYear) return;
 
-      let nama = String(r[7] || "").trim();
+      let nama = String(r[colNama] || "").trim();
       if (!nama) return;
       let namaKey = nama.toLowerCase();
 
@@ -5995,8 +6071,8 @@ function sinkronisasiRekapBulanan_(ssA, periodeBulan, kalenderLibur, activeWorke
         aggMap[namaKey] = { pagi: 0, sore: 0, hadir: 0, tidak: 0 };
       }
 
-      let shiftStr = String(r[3] || "").toLowerCase();
-      let statusStr = String(r[9] || "Hadir").toLowerCase();
+      let shiftStr = String(r[colShift] || "").toLowerCase();
+      let statusStr = String(r[colStatus] || "Hadir").toLowerCase();
       let isHadir = (statusStr === "hadir" || statusStr.indexOf("hadir") !== -1);
 
       if (isHadir) {
@@ -6079,9 +6155,9 @@ function sinkronisasiRekapBulanan_(ssA, periodeBulan, kalenderLibur, activeWorke
       if (!already) {
         let st = aggMap[nKey];
         let pct = st.hadir > 0 ? (Math.min(100, (st.hadir / Math.max(1, hariKerja)) * 100)).toFixed(1) + "%" : "0%";
-        let origRow = presValues.find(r => String(r[7] || "").toLowerCase() === nKey);
-        let origNama = origRow ? String(origRow[7]) : nKey;
-        let origRole = origRow ? String(origRow[8] || "Staf") : "Staf";
+        let origRow = presValues.find(r => String(r[colNama] || "").toLowerCase() === nKey);
+        let origNama = origRow ? String(origRow[colNama]) : nKey;
+        let origRole = origRow ? String(origRow[colRole] || "Staf") : "Staf";
         let item = {
           periodeBulan: periodeBulan,
           namaPekerja: origNama,
@@ -6174,6 +6250,9 @@ function simpanAbsensiShift(payload) {
       return { success: false, message: "Tidak ada baris data presensi yang dikirim." };
     }
 
+    // Pastikan sheet menggunakan format 9 kolom ringkas
+    migrasiFormatPresensiHarian_(sh);
+
     // Baca data yang ada untuk menghindari duplikasi
     let existingValues = [];
     if (sh.getLastRow() > 1) {
@@ -6192,15 +6271,14 @@ function simpanAbsensiShift(payload) {
       if (statusAbsensi !== "Hadir" && statusAbsensi !== "Tidak") {
         statusAbsensi = (statusAbsensi.toLowerCase().indexOf("hadir") !== -1) ? "Hadir" : "Tidak";
       }
-      let keterangan = String(rec.keterangan || "").trim();
 
       // Cek apakah sudah ada baris (Tanggal, Shift, Nama_Pekerja)
       let matchedRowIdx = -1;
       for (let i = 0; i < existingValues.length; i++) {
-        let rowTgl = existingValues[i][1];
+        let rowTgl = existingValues[i][0];
         let rowTglStr = (rowTgl instanceof Date) ? Utilities.formatDate(rowTgl, "Asia/Jakarta", "dd-MM-yyyy") : String(rowTgl || "").trim();
-        let rowShift = String(existingValues[i][3] || "").trim();
-        let rowNama = String(existingValues[i][7] || "").trim();
+        let rowShift = String(existingValues[i][2] || "").trim();
+        let rowNama = String(existingValues[i][4] || "").trim();
 
         if (rowTglStr === tanggal && rowShift.toLowerCase() === shift.toLowerCase() && rowNama.toLowerCase() === namaPekerja.toLowerCase()) {
           matchedRowIdx = i + 2;
@@ -6209,29 +6287,22 @@ function simpanAbsensiShift(payload) {
       }
 
       if (matchedRowIdx !== -1) {
-        // Update baris yang sudah ada
-        sh.getRange(matchedRowIdx, 5).setValue(jamMulai);
-        sh.getRange(matchedRowIdx, 6).setValue(jamSelesai);
-        sh.getRange(matchedRowIdx, 9).setValue(role);
-        sh.getRange(matchedRowIdx, 10).setValue(statusAbsensi);
-        sh.getRange(matchedRowIdx, 11).setValue(keterangan);
-        sh.getRange(matchedRowIdx, 12).setValue(verifikator);
-        sh.getRange(matchedRowIdx, 13).setValue(waktuInput);
+        // Update baris yang sudah ada (9 kolom)
+        sh.getRange(matchedRowIdx, 4).setValue(idPekerja);
+        sh.getRange(matchedRowIdx, 6).setValue(role);
+        sh.getRange(matchedRowIdx, 7).setValue(statusAbsensi);
+        sh.getRange(matchedRowIdx, 8).setValue(verifikator);
+        sh.getRange(matchedRowIdx, 9).setValue(waktuInput);
       } else {
-        // Baris baru
-        let newId = "ATT-" + tanggal.replace(/[^0-9]/g, '') + "-" + String(sh.getLastRow()).padStart(3, '0');
+        // Baris baru (9 kolom ringkas tanpa ID_Presensi, Jam_Mulai, Jam_Selesai, Keterangan)
         sh.appendRow([
-          newId,
           tanggal,
           hari,
           shift,
-          jamMulai,
-          jamSelesai,
           idPekerja,
           namaPekerja,
           role,
           statusAbsensi,
-          keterangan,
           verifikator,
           waktuInput
         ]);

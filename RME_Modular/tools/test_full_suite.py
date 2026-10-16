@@ -21,6 +21,10 @@ is_modal_perio_in_html = ("Reset Data Periodontal Charting ?" in html)
 role_select_m = re.search(r'<select[^>]*id=["\']dbUserRole["\'][^>]*>(.*?)</select>', html, re.DOTALL)
 role_options = re.findall(r'<option[^>]*value=["\']([^"\']+)["\']', role_select_m.group(1)) if role_select_m else []
 
+is_date_picker_large = bool(re.search(r'id=["\']absensiDatePicker["\'][^>]*text-base', html))
+is_paginasi_hari_ini_removed = ('onclick="setTanggalAbsensiHariIni()"' not in html)
+is_subtitle_absensi_removed = ('Pencatatan absensi pegawai klinik (2 Shift' not in html)
+
 test_harness_file = os.path.join(BASE_DIR, 'tools', 'suite_harness.js')
 
 dom_shim = r'''
@@ -1585,6 +1589,32 @@ assert("ABSENSI-9: Hari Kerja November 2026 Terhitung Akurat Dikurangi Libur Tam
 var badgeHkEl = document.getElementById('badgeHariKerjaRekap');
 assert("ABSENSI-9: Badge Hari Kerja Tersedia dan Tampil di UI Rekap", badgeHkEl !== null && badgeHkEl.innerText.indexOf('27') !== -1);
 
+// ABSENSI-10: Visibilitas Atur Hari Libur & Buka Google Sheets Khusus Role Owner
+terapkanRoleAkses("Admin");
+var btnLiburAdmin = document.getElementById('btnAturLiburAbsensi');
+var btnSheetAdmin = document.getElementById('btnBukaSheetAbsensi');
+assert("ABSENSI-10: Role Admin Menyembunyikan Tombol Atur Hari Libur Manual", btnLiburAdmin && btnLiburAdmin.classList.contains('hidden'));
+assert("ABSENSI-10: Role Admin Menyembunyikan Tombol Buka Google Sheets", btnSheetAdmin && btnSheetAdmin.classList.contains('hidden'));
+
+terapkanRoleAkses("Owner");
+var btnLiburOwner = document.getElementById('btnAturLiburAbsensi');
+var btnSheetOwner = document.getElementById('btnBukaSheetAbsensi');
+assert("ABSENSI-10: Role Owner Menampilkan Tombol Atur Hari Libur Manual", btnLiburOwner && !btnLiburOwner.classList.contains('hidden'));
+assert("ABSENSI-10: Role Owner Menampilkan Tombol Buka Google Sheets", btnSheetOwner && !btnSheetOwner.classList.contains('hidden'));
+
+// ABSENSI-11: Tombol Shift Pagi & Shift Sore Berada di Action Bar & Berukuran Besar
+var btnPagiEl = document.getElementById('btnShiftPagi');
+var btnSoreEl = document.getElementById('btnShiftSore');
+var btnSimpanEl = document.getElementById('btnSimpanAbsensi');
+assert("ABSENSI-11: Tombol Shift Pagi Tersedia & Berukuran Besar", btnPagiEl !== null && btnPagiEl.className.indexOf('px-5') !== -1);
+assert("ABSENSI-11: Tombol Shift Sore Tersedia & Berukuran Besar", btnSoreEl !== null && btnSoreEl.className.indexOf('px-5') !== -1);
+assert("ABSENSI-11: Tombol Simpan Presensi Shift Berukuran Besar", btnSimpanEl !== null && btnSimpanEl.className.indexOf('px-7') !== -1);
+
+// ABSENSI-12: Input Tanggal Berukuran Besar, Paginasi & Subtitle Dihilangkan
+assert("ABSENSI-12: Input Pemilih Tanggal Berukuran Besar di HTML", isDatePickerLargeInHtml === true);
+assert("ABSENSI-12: Tombol Paginasi Hari Ini Dihilangkan dari UI", isPaginasiHariIniRemoved === true);
+assert("ABSENSI-12: Subtitle Keterangan Absensi Dihilangkan dari UI", isSubtitleAbsensiRemoved === true);
+
 // --- TEST: Kategori Role (Owner, Dokter Gigi Spesialis, Dokter Gigi Umum, Perawat Gigi, Perawat Umum, Admin, Office) ---
 var selectRoleEl = document.getElementById('dbUserRole');
 assert("ROLE-1: Dropdown Kategori Role Tersedia", selectRoleEl !== null);
@@ -1632,7 +1662,7 @@ if (failedTotal > 0) {
 }
 '''
 
-full_test_script = f"var isButtonKonsultasiRemoved = {str(is_kon_removed).lower()};\nvar isModalResetPerioInHtml = {str(is_modal_perio_in_html).lower()};\nvar roleSelectOptionsFromHtml = {json.dumps(role_options)};\n" + dom_shim + "\n" + all_js + "\n" + test_runner_js
+full_test_script = f"var isButtonKonsultasiRemoved = {str(is_kon_removed).lower()};\nvar isModalResetPerioInHtml = {str(is_modal_perio_in_html).lower()};\nvar roleSelectOptionsFromHtml = {json.dumps(role_options)};\nvar isDatePickerLargeInHtml = {str(is_date_picker_large).lower()};\nvar isPaginasiHariIniRemoved = {str(is_paginasi_hari_ini_removed).lower()};\nvar isSubtitleAbsensiRemoved = {str(is_subtitle_absensi_removed).lower()};\n" + dom_shim + "\n" + all_js + "\n" + test_runner_js
 
 with open(test_harness_file, 'w', encoding='utf-8') as f:
     f.write(full_test_script)

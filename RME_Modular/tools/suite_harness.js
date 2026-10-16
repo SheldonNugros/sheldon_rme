@@ -1,6 +1,9 @@
 var isButtonKonsultasiRemoved = true;
 var isModalResetPerioInHtml = true;
 var roleSelectOptionsFromHtml = ["Owner", "Dokter Gigi Spesialis", "Dokter Gigi Umum", "Perawat Gigi", "Perawat Umum", "Admin", "Office"];
+var isDatePickerLargeInHtml = true;
+var isPaginasiHariIniRemoved = true;
+var isSubtitleAbsensiRemoved = true;
 
 // Enhanced DOM Mock for JavaScriptCore
 var window = this;
@@ -1891,6 +1894,7 @@ var console = {
       switchMenu('pasien');
     }
     if (typeof window.syncGasBadgeVisibility === 'function') window.syncGasBadgeVisibility();
+    if (typeof window.syncAbsensiRoleVisibility === 'function') window.syncAbsensiRoleVisibility();
   }
 
   document.addEventListener("DOMContentLoaded", () => {
@@ -12364,10 +12368,53 @@ window.AbsensiState = {
   spreadsheetUrl: ''
 };
 
+function syncAbsensiRoleVisibility() {
+  let role = String(window.activeUserRole || '').trim().toLowerCase();
+  let isOwner = (role === 'owner' || role === 'super user');
+
+  let btnLibur = document.getElementById('btnAturLiburAbsensi');
+  let btnSheet = document.getElementById('btnBukaSheetAbsensi');
+  let btnBannerLibur = document.getElementById('btnUbahJadwalLiburBanner');
+  let btnTab3Libur = document.getElementById('btnTambahLiburTab3');
+
+  if (btnLibur) {
+    if (isOwner) {
+      btnLibur.classList.remove('hidden');
+      btnLibur.classList.add('flex');
+    } else {
+      btnLibur.classList.add('hidden');
+      btnLibur.classList.remove('flex');
+    }
+  }
+  if (btnSheet) {
+    if (isOwner) {
+      btnSheet.classList.remove('hidden');
+      btnSheet.classList.add('flex');
+    } else {
+      btnSheet.classList.add('hidden');
+      btnSheet.classList.remove('flex');
+    }
+  }
+  if (btnBannerLibur) {
+    if (isOwner) btnBannerLibur.classList.remove('hidden'); else btnBannerLibur.classList.add('hidden');
+  }
+  if (btnTab3Libur) {
+    if (isOwner) {
+      btnTab3Libur.classList.remove('hidden');
+      btnTab3Libur.classList.add('flex');
+    } else {
+      btnTab3Libur.classList.add('hidden');
+      btnTab3Libur.classList.remove('flex');
+    }
+  }
+}
+window.syncAbsensiRoleVisibility = syncAbsensiRoleVisibility;
+
 /**
  * Inisialisasi Modul Absensi saat pertama kali dibuka dari menu.
  */
 function initAbsensiModule() {
+  syncAbsensiRoleVisibility();
   if (!window.AbsensiState.currentDate) {
     let now = new Date();
     let y = now.getFullYear();
@@ -12487,17 +12534,17 @@ function updateShiftSelectorUI() {
   let isPagi = (window.AbsensiState.currentShift === 'Pagi');
   if (btnPagi) {
     if (isPagi) {
-      btnPagi.className = "px-4 py-2 rounded-lg text-xs font-bold transition-all bg-amber-500 text-white border border-amber-600 shadow-sm flex items-center gap-2";
+      btnPagi.className = "px-5 py-2.5 rounded-xl text-sm font-extrabold transition-all bg-amber-500 text-white border border-amber-600 shadow-md flex items-center gap-2.5 hover:scale-[1.02]";
     } else {
-      btnPagi.className = "px-4 py-2 rounded-lg text-xs font-bold transition-all text-slate-600 hover:text-slate-900 flex items-center gap-2";
+      btnPagi.className = "px-5 py-2.5 rounded-xl text-sm font-extrabold transition-all text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 flex items-center gap-2.5";
     }
   }
 
   if (btnSore) {
     if (!isPagi) {
-      btnSore.className = "px-4 py-2 rounded-lg text-xs font-bold transition-all bg-indigo-600 text-white border border-indigo-700 shadow-sm flex items-center gap-2";
+      btnSore.className = "px-5 py-2.5 rounded-xl text-sm font-extrabold transition-all bg-indigo-600 text-white border border-indigo-700 shadow-md flex items-center gap-2.5 hover:scale-[1.02]";
     } else {
-      btnSore.className = "px-4 py-2 rounded-lg text-xs font-bold transition-all text-slate-600 hover:text-slate-900 flex items-center gap-2";
+      btnSore.className = "px-5 py-2.5 rounded-xl text-sm font-extrabold transition-all text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 flex items-center gap-2.5";
     }
   }
 }
@@ -12720,12 +12767,12 @@ function renderAbsensiTable() {
   if (btnSimpan) {
     if (isLocked) {
       btnSimpan.disabled = true;
-      btnSimpan.className = "px-5 py-2.5 bg-slate-200 text-slate-500 rounded-xl text-xs font-bold border border-slate-300 cursor-not-allowed flex items-center gap-2 shadow-none";
+      btnSimpan.className = "px-7 py-3 bg-slate-200 text-slate-500 rounded-xl text-sm font-bold border border-slate-300 cursor-not-allowed flex items-center gap-2.5 shadow-none";
       btnSimpan.innerHTML = '<span>🔒</span> Presensi Dikunci (Hari Libur)';
       btnSimpan.title = 'Presensi tidak dapat diisi pada hari Minggu / Libur Operasional';
     } else {
       btnSimpan.disabled = false;
-      btnSimpan.className = "px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-600/20 transition-all flex items-center gap-2 hover:scale-[1.02]";
+      btnSimpan.className = "px-7 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl text-sm font-black shadow-lg shadow-emerald-600/30 transition-all flex items-center gap-2.5 hover:scale-[1.03] active:scale-[0.98]";
       btnSimpan.innerHTML = '<span>💾</span> Simpan Presensi Shift';
       btnSimpan.removeAttribute('title');
     }
@@ -14942,6 +14989,32 @@ assert("ABSENSI-9: Hari Kerja November 2026 Terhitung Akurat Dikurangi Libur Tam
 // Verifikasi badge dan kolom tabel Rekap Bulanan
 var badgeHkEl = document.getElementById('badgeHariKerjaRekap');
 assert("ABSENSI-9: Badge Hari Kerja Tersedia dan Tampil di UI Rekap", badgeHkEl !== null && badgeHkEl.innerText.indexOf('27') !== -1);
+
+// ABSENSI-10: Visibilitas Atur Hari Libur & Buka Google Sheets Khusus Role Owner
+terapkanRoleAkses("Admin");
+var btnLiburAdmin = document.getElementById('btnAturLiburAbsensi');
+var btnSheetAdmin = document.getElementById('btnBukaSheetAbsensi');
+assert("ABSENSI-10: Role Admin Menyembunyikan Tombol Atur Hari Libur Manual", btnLiburAdmin && btnLiburAdmin.classList.contains('hidden'));
+assert("ABSENSI-10: Role Admin Menyembunyikan Tombol Buka Google Sheets", btnSheetAdmin && btnSheetAdmin.classList.contains('hidden'));
+
+terapkanRoleAkses("Owner");
+var btnLiburOwner = document.getElementById('btnAturLiburAbsensi');
+var btnSheetOwner = document.getElementById('btnBukaSheetAbsensi');
+assert("ABSENSI-10: Role Owner Menampilkan Tombol Atur Hari Libur Manual", btnLiburOwner && !btnLiburOwner.classList.contains('hidden'));
+assert("ABSENSI-10: Role Owner Menampilkan Tombol Buka Google Sheets", btnSheetOwner && !btnSheetOwner.classList.contains('hidden'));
+
+// ABSENSI-11: Tombol Shift Pagi & Shift Sore Berada di Action Bar & Berukuran Besar
+var btnPagiEl = document.getElementById('btnShiftPagi');
+var btnSoreEl = document.getElementById('btnShiftSore');
+var btnSimpanEl = document.getElementById('btnSimpanAbsensi');
+assert("ABSENSI-11: Tombol Shift Pagi Tersedia & Berukuran Besar", btnPagiEl !== null && btnPagiEl.className.indexOf('px-5') !== -1);
+assert("ABSENSI-11: Tombol Shift Sore Tersedia & Berukuran Besar", btnSoreEl !== null && btnSoreEl.className.indexOf('px-5') !== -1);
+assert("ABSENSI-11: Tombol Simpan Presensi Shift Berukuran Besar", btnSimpanEl !== null && btnSimpanEl.className.indexOf('px-7') !== -1);
+
+// ABSENSI-12: Input Tanggal Berukuran Besar, Paginasi & Subtitle Dihilangkan
+assert("ABSENSI-12: Input Pemilih Tanggal Berukuran Besar di HTML", isDatePickerLargeInHtml === true);
+assert("ABSENSI-12: Tombol Paginasi Hari Ini Dihilangkan dari UI", isPaginasiHariIniRemoved === true);
+assert("ABSENSI-12: Subtitle Keterangan Absensi Dihilangkan dari UI", isSubtitleAbsensiRemoved === true);
 
 // --- TEST: Kategori Role (Owner, Dokter Gigi Spesialis, Dokter Gigi Umum, Perawat Gigi, Perawat Umum, Admin, Office) ---
 var selectRoleEl = document.getElementById('dbUserRole');

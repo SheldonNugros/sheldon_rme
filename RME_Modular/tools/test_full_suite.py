@@ -26,6 +26,7 @@ is_paginasi_hari_ini_removed = ('onclick="setTanggalAbsensiHariIni()"' not in ht
 is_subtitle_absensi_removed = ('Pencatatan absensi pegawai klinik (2 Shift' not in html)
 is_tercatat_masuk_removed = ('Tercatat masuk tugas' not in html)
 is_izin_sakit_off_removed = ('Izin / Sakit / Off' not in html)
+is_btn_db_user_removed = ('id="btnDbUser"' not in html)
 
 test_harness_file = os.path.join(BASE_DIR, 'tools', 'suite_harness.js')
 
@@ -518,6 +519,7 @@ assert("Kasir Patient Selected", document.getElementById('ksrNama').value === "E
 switchMenu('database');
 runAllTimers();
 assert("Master Database Initialized Cleanly", typeof initDatabaseModule === 'function');
+assert("Redundant btnDbUser Removed from Database Master Submenu", isBtnDbUserRemoved);
 
 // 14a. Test Master Database Tabs Switching
 changeDBMenu('obat');
@@ -1727,7 +1729,7 @@ if (failedTotal > 0) {
 }
 '''
 
-full_test_script = f"var isButtonKonsultasiRemoved = {str(is_kon_removed).lower()};\nvar isModalResetPerioInHtml = {str(is_modal_perio_in_html).lower()};\nvar roleSelectOptionsFromHtml = {json.dumps(role_options)};\nvar isDatePickerLargeInHtml = {str(is_date_picker_large).lower()};\nvar isPaginasiHariIniRemoved = {str(is_paginasi_hari_ini_removed).lower()};\nvar isSubtitleAbsensiRemoved = {str(is_subtitle_absensi_removed).lower()};\nvar isTercatatMasukRemoved = {str(is_tercatat_masuk_removed).lower()};\nvar isIzinSakitOffRemoved = {str(is_izin_sakit_off_removed).lower()};\n" + dom_shim + "\n" + all_js + "\n" + test_runner_js
+full_test_script = f"var isButtonKonsultasiRemoved = {str(is_kon_removed).lower()};\nvar isModalResetPerioInHtml = {str(is_modal_perio_in_html).lower()};\nvar roleSelectOptionsFromHtml = {json.dumps(role_options)};\nvar isDatePickerLargeInHtml = {str(is_date_picker_large).lower()};\nvar isPaginasiHariIniRemoved = {str(is_paginasi_hari_ini_removed).lower()};\nvar isSubtitleAbsensiRemoved = {str(is_subtitle_absensi_removed).lower()};\nvar isTercatatMasukRemoved = {str(is_tercatat_masuk_removed).lower()};\nvar isIzinSakitOffRemoved = {str(is_izin_sakit_off_removed).lower()};\nvar isBtnDbUserRemoved = {str(is_btn_db_user_removed).lower()};\n" + dom_shim + "\n" + all_js + "\n" + test_runner_js
 
 with open(test_harness_file, 'w', encoding='utf-8') as f:
     f.write(full_test_script)

@@ -6,6 +6,7 @@ var isPaginasiHariIniRemoved = true;
 var isSubtitleAbsensiRemoved = true;
 var isTercatatMasukRemoved = true;
 var isIzinSakitOffRemoved = true;
+var isBtnDbUserRemoved = true;
 
 // Enhanced DOM Mock for JavaScriptCore
 var window = this;
@@ -1913,8 +1914,6 @@ var console = {
 
     let btnTambahPasien = document.getElementById('btnTambahPasienBaru');
     let btnFilterDuplikat = document.getElementById('btnFilterDuplikat');
-    let btnDbUser = document.getElementById('btnDbUser');
-    if (btnDbUser) btnDbUser.classList.add('hidden');
 
     // 1. SUPER USER / OWNER: Bisa membuka, edit, dan delete modul utama & manajemen user
     if (r === 'super user' || r === 'owner') {
@@ -1923,7 +1922,6 @@ var console = {
       });
       let navUM = document.getElementById('nav-user-master');
       if (navUM) navUM.classList.remove('hidden');
-      if (btnDbUser) btnDbUser.classList.remove('hidden');
 
       document.getElementById('section-transaksi').classList.remove('hidden');
       if (btnTambahPasien) btnTambahPasien.classList.remove('hidden');
@@ -14136,6 +14134,7 @@ assert("Kasir Patient Selected", document.getElementById('ksrNama').value === "E
 switchMenu('database');
 runAllTimers();
 assert("Master Database Initialized Cleanly", typeof initDatabaseModule === 'function');
+assert("Redundant btnDbUser Removed from Database Master Submenu", isBtnDbUserRemoved);
 
 // 14a. Test Master Database Tabs Switching
 changeDBMenu('obat');

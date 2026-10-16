@@ -398,8 +398,6 @@
 
     let btnTambahPasien = document.getElementById('btnTambahPasienBaru');
     let btnFilterDuplikat = document.getElementById('btnFilterDuplikat');
-    let btnDbUser = document.getElementById('btnDbUser');
-    if (btnDbUser) btnDbUser.classList.add('hidden');
 
     // 1. SUPER USER / OWNER: Bisa membuka, edit, dan delete modul utama & manajemen user
     if (r === 'super user' || r === 'owner') {
@@ -408,7 +406,6 @@
       });
       let navUM = document.getElementById('nav-user-master');
       if (navUM) navUM.classList.remove('hidden');
-      if (btnDbUser) btnDbUser.classList.remove('hidden');
 
       document.getElementById('section-transaksi').classList.remove('hidden');
       if (btnTambahPasien) btnTambahPasien.classList.remove('hidden');

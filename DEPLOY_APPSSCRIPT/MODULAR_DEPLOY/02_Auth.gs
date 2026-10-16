@@ -167,7 +167,8 @@ function registrasiAkunBaru(payload) {
       "Dokter Gigi Umum",
       "Perawat Gigi",
       "Perawat Umum",
-      "Admin"
+      "Admin",
+      "Office"
     ];
     let matchedRole = allowedRegisterRoles.find(r => r.toLowerCase() === role.toLowerCase());
     if (!matchedRole) {
@@ -180,26 +181,27 @@ function registrasiAkunBaru(payload) {
     let v = sheet.getDataRange().getValues();
 
     if (v.length === 0 || (v.length === 1 && !v[0][0])) {
-      const defaultHeaders = ["Nama_Pekerja", "Username", "Kategori_Role", "Password", "Status", "No_Registrasi", "No_HP", "Persen_JM_Dokter", "Email"];
+      const defaultHeaders = ["ID_Pekerja", "Nama_Pekerja", "Username", "Kategori_Role", "Password", "Status", "No_Registrasi", "No_HP", "Persen_JM_Dokter", "Email"];
       sheet.getRange(1, 1, 1, defaultHeaders.length).setValues([defaultHeaders]).setFontWeight("bold").setBackground("#e2e8f0");
       sheet.setFrozenRows(1);
       v = sheet.getDataRange().getValues();
     }
 
     let h = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
-    let idNama = getColIdx(h, ["namapekerja", "nama", "namalengkap"]); if (idNama === -1) idNama = 0;
-    let idUser = getColIdx(h, ["username", "user"]); if (idUser === -1) idUser = 1;
-    let idRole = getColIdx(h, ["kategorirole", "role", "kategori"]); if (idRole === -1) idRole = 2;
-    let idPass = getColIdx(h, ["password", "pass"]); if (idPass === -1) idPass = 3;
-    let idStatus = getColIdx(h, ["status"]); if (idStatus === -1) idStatus = 4;
-    let idSIP = getColIdx(h, ["noregistrasi", "sip", "noreg"]); if (idSIP === -1) idSIP = 5;
-    let idHP = getColIdx(h, ["nohp", "no_hp", "telepon", "wa"]); if (idHP === -1) idHP = 6;
-    let idJM = getColIdx(h, ["persen_jm_dokter", "persen_jm", "persenjm"]); if (idJM === -1) idJM = 7;
+    let idPekerjaCol = getColIdx(h, ["idpekerja", "id_pekerja", "idstaff"]);
+    let idNama = getColIdx(h, ["namapekerja", "nama", "namalengkap"]); if (idNama === -1) idNama = idPekerjaCol !== -1 ? 1 : 0;
+    let idUser = getColIdx(h, ["username", "user"]); if (idUser === -1) idUser = idNama + 1;
+    let idRole = getColIdx(h, ["kategorirole", "role", "kategori"]); if (idRole === -1) idRole = idUser + 1;
+    let idPass = getColIdx(h, ["password", "pass"]); if (idPass === -1) idPass = idRole + 1;
+    let idStatus = getColIdx(h, ["status"]); if (idStatus === -1) idStatus = idPass + 1;
+    let idSIP = getColIdx(h, ["noregistrasi", "sip", "noreg"]); if (idSIP === -1) idSIP = idStatus + 1;
+    let idHP = getColIdx(h, ["nohp", "no_hp", "telepon", "wa"]); if (idHP === -1) idHP = idSIP + 1;
+    let idJM = getColIdx(h, ["persen_jm_dokter", "persen_jm", "persenjm"]); if (idJM === -1) idJM = idHP + 1;
     let idEmail = getColIdx(h, ["email", "surel", "e-mail"]);
 
     // Tambahkan kolom Email secara otomatis jika belum ada di Sheet Data
     if (idEmail === -1) {
-      idEmail = Math.max(8, h.length);
+      idEmail = Math.max(9, h.length);
       sheet.getRange(1, idEmail + 1).setValue("Email").setFontWeight("bold").setBackground("#e2e8f0");
       h = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
     }
@@ -218,8 +220,13 @@ function registrasiAkunBaru(payload) {
     if (role === "Dokter Gigi Spesialis") pjmVal = 0.50;
     else if (role === "Dokter Gigi Umum") pjmVal = 0.40;
 
-    let totalCols = Math.max(9, h.length, idEmail + 1);
+    let newIdPekerja = (typeof generateNextIdPekerja === "function")
+      ? generateNextIdPekerja(role, sheet)
+      : ("SN-" + String(v.length).padStart(2, "0"));
+
+    let totalCols = Math.max(10, h.length, idEmail + 1);
     let newRow = new Array(totalCols).fill("");
+    if (idPekerjaCol !== -1) newRow[idPekerjaCol] = newIdPekerja;
     newRow[idNama] = nama;
     newRow[idUser] = cleanUser;
     newRow[idRole] = role;
@@ -237,12 +244,13 @@ function registrasiAkunBaru(payload) {
       sheet.getRange(lastRow, idJM + 1).setNumberFormat("0.0%");
     }
 
-    catatLog("Registrasi Akun", "Pendaftaran akun baru (Status: Non Aktif): " + cleanUser + " (" + role + ")", nama);
+    catatLog("Registrasi Akun", "Pendaftaran akun baru (Status: Non Aktif): " + cleanUser + " (" + role + ") [" + newIdPekerja + "]", nama);
 
     // Auto-sync ke RME Sheldon - 06 Master User & Role (Sheet: Pengaturan_Tarif_Shift)
     try {
       if (typeof syncUserToPayrollTarifShift === "function") {
         syncUserToPayrollTarifShift({
+          idPekerja: newIdPekerja,
           nama: nama,
           role: role,
           status: "Non Aktif"

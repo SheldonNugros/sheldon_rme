@@ -382,7 +382,7 @@ function getAIInsightsData(userRole, token) {
     let rekomendasi = `Tingkat kunjungan tertinggi terjadi pada hari ${maxDay} dengan waktu terpadat pada ${peakHour}. Disarankan penyesuaian roster dokter & asisten pada waktu tersebut.`;
     let targetPromo = `Optimalkan paket bundling untuk '${topTindakanNama}' dan siapkan stok cadangan untuk '${(topObat.length > 0 ? topObat[0].nama : "Obat Resep Utama")}'.`;
 
-    return {
+    const result = {
       // Metrik Umum
       totalPasien: totalPasien,
       pendapatan: pendapatanBulanIni,
@@ -390,12 +390,12 @@ function getAIInsightsData(userRole, token) {
       peakHour: peakHour,
       notifStok: notifStokText,
 
-      // Finansial & Operasional (Super User)
+      // Finansial & Operasional (Owner / Super User)
       forecastPendapatan: forecastPendapatan,
       topMarginServices: topMarginServices,
       hourHeatmap: hourHeatmap,
 
-      // Logistik Cerdas (Super User)
+      // Logistik Cerdas (Owner / Super User)
       burnRatePredictions: burnRatePredictions.slice(0, 5),
       slowMovingItems: slowMovingItems.slice(0, 4),
       expiredAlerts: expiredAlerts.slice(0, 4),
@@ -421,9 +421,9 @@ function getAIInsightsData(userRole, token) {
     };
 
     if (isDoctor) {
-      delete result.finansial;
-      delete result.prediksiOmset;
-      delete result.marginAnalysis;
+      delete result.pendapatan;
+      delete result.forecastPendapatan;
+      delete result.topMarginServices;
       delete result.topDokter;
     }
 

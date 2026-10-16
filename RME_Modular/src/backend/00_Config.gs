@@ -53,18 +53,18 @@ const ARCHIVE_CONFIG = {
  */
 const ROLE_RULES = {
   "SUPER_USER": {
-    roles: ["super user", "owner"],
-    allowedMenus: ["dashboard", "ai", "pasien", "rekam-medis", "surat", "database", "inventory", "informasi", "kasir", "riwayat-invoice", "payroll", "absensi"],
+    roles: ["owner", "super user"],
+    allowedMenus: ["dashboard", "ai", "pasien", "rekam-medis", "surat", "database", "user-master", "inventory", "informasi", "kasir", "riwayat-invoice", "payroll", "absensi"],
     defaultMenu: "dashboard"
   },
   "DOKTER_SPESIALIS": {
     roles: ["dokter gigi spesialis"],
-    allowedMenus: ["rekam-medis", "surat", "informasi", "pasien", "absensi"],
+    allowedMenus: ["rekam-medis", "surat", "informasi", "pasien", "ai", "absensi"],
     defaultMenu: "rekam-medis"
   },
   "DOKTER_UMUM": {
     roles: ["dokter gigi umum", "dokter"],
-    allowedMenus: ["rekam-medis", "surat", "informasi", "pasien", "absensi"],
+    allowedMenus: ["rekam-medis", "surat", "informasi", "pasien", "ai", "absensi"],
     defaultMenu: "rekam-medis"
   },
   "ADMIN": {
@@ -72,8 +72,8 @@ const ROLE_RULES = {
     allowedMenus: ["pasien", "surat", "informasi", "kasir", "riwayat-invoice", "payroll", "absensi"],
     defaultMenu: "pasien"
   },
-  "STAFF": {
-    roles: ["staff"],
+  "OFFICE": {
+    roles: ["office", "staff"],
     allowedMenus: ["pasien", "informasi", "absensi"],
     defaultMenu: "pasien"
   }

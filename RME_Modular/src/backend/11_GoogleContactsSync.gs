@@ -616,7 +616,7 @@ function hapusTriggerLanjutan() {
   const triggers = ScriptApp.getProjectTriggers();
   for (let t of triggers) {
     if (t.getHandlerFunction() === "sinkronisasiPasienKeGoogleContacts") {
-      // Hapus trigger bertipe waktu singkat jika ada
+      ScriptApp.deleteTrigger(t);
     }
   }
 }

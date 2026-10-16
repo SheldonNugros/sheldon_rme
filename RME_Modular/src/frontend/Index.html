@@ -385,13 +385,13 @@
       if (btnFilterDuplikat) btnFilterDuplikat.classList.add('hidden');
       switchMenu('pasien');
     }
-    // 4. STAFF: Database Pasien (view-only), Informasi, Absensi
-    else if (r.includes('staff')) {
+    // 4. STAFF / OFFICE: Database Pasien (view-only), Informasi, Absensi
+    else if (r.includes('staff') || r.includes('office')) {
       ['nav-pasien', 'nav-informasi', 'nav-absensi'].forEach(id => {
         let el = document.getElementById(id); if (el) el.classList.remove('hidden');
       });
       document.getElementById('section-transaksi').classList.remove('hidden');
-      // Staff view Database Pasien (sembunyikan tombol tambah pasien baru & filter data ganda)
+      // Staff / Office view Database Pasien (sembunyikan tombol tambah pasien baru & filter data ganda)
       if (btnTambahPasien) btnTambahPasien.classList.add('hidden');
       if (btnFilterDuplikat) btnFilterDuplikat.classList.add('hidden');
       switchMenu('pasien');

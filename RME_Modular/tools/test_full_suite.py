@@ -1608,6 +1608,16 @@ var fallbackUsers = getFallbackUserList();
 var adminUser = fallbackUsers.find(function(u) { return u.username === "admin"; });
 assert("ROLE-3: Akun Admin Sistem Menggunakan Role 'Owner'", adminUser && adminUser.role === "Owner");
 
+// Uji terapkanRoleAkses untuk Role 'Office'
+terapkanRoleAkses("Office");
+assert("ROLE-4: Role Office Menampilkan Menu Pasien, Informasi, dan Absensi", !document.getElementById('nav-pasien').classList.contains('hidden') && !document.getElementById('nav-informasi').classList.contains('hidden') && !document.getElementById('nav-absensi').classList.contains('hidden'));
+assert("ROLE-4: Role Office Menyembunyikan Tombol Tambah Pasien (View-Only)", document.getElementById('btnTambahPasienBaru').classList.contains('hidden'));
+assert("ROLE-4: Role Office Menyembunyikan Menu Kasir & Payroll", document.getElementById('nav-kasir').classList.contains('hidden') && document.getElementById('nav-payroll').classList.contains('hidden'));
+
+// Kembalikan ke Role 'Owner'
+terapkanRoleAkses("Owner");
+assert("ROLE-5: Role Owner Menampilkan Seluruh Menu Termasuk User Master", !document.getElementById('nav-user-master').classList.contains('hidden') && !document.getElementById('nav-dashboard').classList.contains('hidden'));
+
 // SUMMARY REPORT
 print("=================================================");
 var passedTotal = results.filter(r => r.passed).length;

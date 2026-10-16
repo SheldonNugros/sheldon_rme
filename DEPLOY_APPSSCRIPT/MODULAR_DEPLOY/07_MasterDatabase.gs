@@ -387,13 +387,14 @@ function onEdit(e) {
           if (sData) {
             var lRow = sData.getLastRow();
             if (lRow >= 2) {
-              var uVals = sData.getRange(2, 1, lRow - 1, Math.min(8, sData.getLastColumn())).getValues();
+              var uVals = sData.getRange(2, 1, lRow - 1, Math.min(10, sData.getLastColumn())).getValues();
               for (var u = 0; u < uVals.length; u++) {
                 if (String(uVals[u][1] || "").trim().toLowerCase() === enteredNama.toLowerCase()) {
                   found = {
+                    idPekerja: String(uVals[u][0] || "").trim(),
                     nama: String(uVals[u][1]).trim(),
-                    role: String(uVals[u][2] || "Staf").trim(),
-                    status: String(uVals[u][6] || "Aktif").trim()
+                    role: String(uVals[u][3] || "Staff").trim(),
+                    status: String(uVals[u][5] || "Aktif").trim()
                   };
                   break;
                 }
@@ -409,19 +410,23 @@ function onEdit(e) {
             return;
           }
 
-          // Auto-fill Kolom A (ID_Aturan), B (Role), I (Status), J (Timestamp)
+          // Auto-fill Kolom A (ID_Pekerja), B (Role), I (Status), J (Timestamp)
           var curId = String(sh.getRange(row, 1).getValue() || "").trim();
-          if (!curId) {
-            var maxId = 0;
-            var allIds = sh.getRange(2, 1, Math.max(1, sh.getLastRow() - 1), 1).getValues();
-            for (var k = 0; k < allIds.length; k++) {
-              var m = String(allIds[k][0] || "").match(/TARIF-(\d+)/i);
-              if (m) {
-                var num = parseInt(m[1], 10);
-                if (num > maxId) maxId = num;
+          if (!curId || curId.toUpperCase().startsWith("TARIF")) {
+            if (found.idPekerja && /^SN-\d+$/i.test(found.idPekerja)) {
+              sh.getRange(row, 1).setValue(found.idPekerja.toUpperCase());
+            } else {
+              var maxId = 0;
+              var allIds = sh.getRange(2, 1, Math.max(1, sh.getLastRow() - 1), 1).getValues();
+              for (var k = 0; k < allIds.length; k++) {
+                var m = String(allIds[k][0] || "").match(/SN-(\d+)/i);
+                if (m) {
+                  var num = parseInt(m[1], 10);
+                  if (num > maxId) maxId = num;
+                }
               }
+              sh.getRange(row, 1).setValue("SN-" + String(maxId + 1).padStart(2, '0'));
             }
-            sh.getRange(row, 1).setValue("TARIF-" + String(maxId + 1).padStart(3, '0'));
           }
           sh.getRange(row, 2).setValue(found.role);
           if (!sh.getRange(row, 9).getValue()) {
@@ -485,20 +490,21 @@ function bukaFormTarifShiftSidebar() {
  */
 function getUsersForTarifDropdown() {
   try {
-    var ssUser = getSpreadsheetMasterUser_();
+    var ssUser = SpreadsheetApp.openById(DB_CONFIG.MASTER.trim());
     if (!ssUser) return [];
     var sheetData = ssUser.getSheetByName("Data");
     if (!sheetData) return [];
     var lastRow = sheetData.getLastRow();
     if (lastRow < 2) return [];
-    var vals = sheetData.getRange(2, 1, lastRow - 1, Math.min(8, sheetData.getLastColumn())).getValues();
+    var vals = sheetData.getRange(2, 1, lastRow - 1, Math.min(10, sheetData.getLastColumn())).getValues();
     var res = [];
     for (var i = 0; i < vals.length; i++) {
+      var idPekerja = String(vals[i][0] || "").trim();
       var nama = String(vals[i][1] || "").trim();
-      var role = String(vals[i][2] || "Staf").trim();
-      var status = String(vals[i][6] || "Aktif").trim();
+      var role = String(vals[i][3] || "Staff").trim();
+      var status = String(vals[i][5] || "Aktif").trim();
       if (nama) {
-        res.push({ nama: nama, role: role, status: status });
+        res.push({ idPekerja: idPekerja, nama: nama, role: role, status: status });
       }
     }
     return res;
@@ -618,7 +624,7 @@ function getHtmlFormTarifShiftContent() {
 '          document.getElementById("diagShift1").value = 45000;' +
 '          document.getElementById("diagShift2").value = 45000;' +
 '          document.getElementById("diagGajiPokok").value = 0;' +
-'        } else if (rLow.includes("admin") || rLow.includes("kasir")) {' +
+'        } else if (rLow.includes("admin") || rLow.includes("kasir") || rLow.includes("office")) {' +
 '          tipeSel.value = "Gaji Bulanan Tetap";' +
 '          document.getElementById("diagShift1").value = 0;' +
 '          document.getElementById("diagShift2").value = 0;' +
@@ -670,10 +676,6 @@ function getHtmlFormTarifShiftContent() {
 '  </script>' +
 '</body>' +
 '</html>';
-}
-
-function getPrefixRole(role) {
-  return "SN-";
 }
 
 function generateNextIdPekerja(role, sheet) {

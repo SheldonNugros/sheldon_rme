@@ -201,7 +201,7 @@ function nextPagePasien() { let t = Math.ceil(filteredPasienList.length / itemsP
 // LOGIKA FORM PASIEN (TAMBAH / EDIT / SIMPAN)
 // ========================================================
 function bukaFormPasienBaru() {
-  if (window.activeUserRole && (window.activeUserRole.toLowerCase().includes('dokter') || window.activeUserRole.toLowerCase().includes('staff'))) {
+  if (window.activeUserRole && (window.activeUserRole.toLowerCase().includes('dokter') || window.activeUserRole.toLowerCase().includes('staff') || window.activeUserRole.toLowerCase().includes('office'))) {
     showToast('warning', 'Role Anda hanya memiliki akses View pada Database Pasien.');
     return;
   }

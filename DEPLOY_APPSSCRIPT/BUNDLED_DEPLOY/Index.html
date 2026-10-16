@@ -164,6 +164,7 @@
             <option value="Perawat Gigi">Perawat Gigi</option>
             <option value="Perawat Umum">Perawat Umum</option>
             <option value="Admin">Admin</option>
+            <option value="Office">Office</option>
           </select>
         </div>
         <div>
@@ -4995,13 +4996,13 @@
       if (btnFilterDuplikat) btnFilterDuplikat.classList.add('hidden');
       switchMenu('pasien');
     }
-    // 4. STAFF: Database Pasien (view-only), Informasi, Absensi
-    else if (r.includes('staff')) {
+    // 4. STAFF / OFFICE: Database Pasien (view-only), Informasi, Absensi
+    else if (r.includes('staff') || r.includes('office')) {
       ['nav-pasien', 'nav-informasi', 'nav-absensi'].forEach(id => {
         let el = document.getElementById(id); if (el) el.classList.remove('hidden');
       });
       document.getElementById('section-transaksi').classList.remove('hidden');
-      // Staff view Database Pasien (sembunyikan tombol tambah pasien baru & filter data ganda)
+      // Staff / Office view Database Pasien (sembunyikan tombol tambah pasien baru & filter data ganda)
       if (btnTambahPasien) btnTambahPasien.classList.add('hidden');
       if (btnFilterDuplikat) btnFilterDuplikat.classList.add('hidden');
       switchMenu('pasien');
@@ -5516,7 +5517,7 @@ function nextPagePasien() { let t = Math.ceil(filteredPasienList.length / itemsP
 // LOGIKA FORM PASIEN (TAMBAH / EDIT / SIMPAN)
 // ========================================================
 function bukaFormPasienBaru() {
-  if (window.activeUserRole && (window.activeUserRole.toLowerCase().includes('dokter') || window.activeUserRole.toLowerCase().includes('staff'))) {
+  if (window.activeUserRole && (window.activeUserRole.toLowerCase().includes('dokter') || window.activeUserRole.toLowerCase().includes('staff') || window.activeUserRole.toLowerCase().includes('office'))) {
     showToast('warning', 'Role Anda hanya memiliki akses View pada Database Pasien.');
     return;
   }
@@ -14800,8 +14801,9 @@ function renderInfoBmhp() {
 
     (window.PayrollState.honorStaff || []).forEach(s => {
       let st = mapShift[s.namaStaff];
-      let isAdmin = String(s.role || '').toLowerCase().includes('admin');
-      if (!isAdmin) {
+      let rLow = String(s.role || '').toLowerCase();
+      let isNonShift = rLow.includes('admin') || rLow.includes('office');
+      if (!isNonShift) {
         s.hadirShift1 = st ? st.s1 : 0;
         s.hadirShift2 = st ? st.s2 : 0;
         s.totalUangHarianShift = st ? st.uang : 0;
@@ -14821,33 +14823,6 @@ function renderInfoBmhp() {
     return true;
   }
 
-  function populatePresensiPekerjaDropdown() {
-    const sel = document.getElementById('presNamaPekerja');
-    if (!sel) return;
-    const currentVal = sel.value;
-    const activeWorkers = (window.PayrollState.tarifShift || []).filter(t => isPekerjaAktif(t.namaPekerja));
-
-    if (activeWorkers.length === 0) {
-      sel.innerHTML = '<option value="">(Tidak ada pekerja aktif)</option>';
-      const roleEl = document.getElementById('presRole');
-      if (roleEl) roleEl.value = '-';
-      return;
-    }
-
-    sel.innerHTML = activeWorkers.map((w, idx) => {
-      let idStr = w.idAturan || ('STF-' + String(idx + 1).padStart(3, '0'));
-      return `<option value="${w.namaPekerja}" data-role="${w.role}" data-id="${idStr}">${w.namaPekerja} (${w.role})</option>`;
-    }).join('');
-
-    let stillExists = activeWorkers.some(w => w.namaPekerja.toLowerCase() === currentVal.toLowerCase());
-    if (stillExists) {
-      sel.value = currentVal;
-    } else {
-      sel.selectedIndex = 0;
-    }
-    handlePresPekerjaChange();
-  }
-
   function populateStaffDatalist() {
     const dl = document.getElementById('listStaffMasterData');
     if (!dl) return;
@@ -14857,7 +14832,6 @@ function renderInfoBmhp() {
 
   function renderAllPayrollTables() {
     populateStaffDatalist();
-    populatePresensiPekerjaDropdown();
     recalculateShiftTotalsFromPresensi();
 
     // Saring hanya pekerja AKTIF agar pekerja Tidak Aktif tidak muncul di Payroll
@@ -14959,7 +14933,8 @@ function renderInfoBmhp() {
           let stColor = s.statusTransfer === 'Paid'
             ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
             : 'bg-amber-100 text-amber-800 border-amber-300';
-          let isNonShift = String(s.role || '').toLowerCase().includes('admin');
+          let rLow = String(s.role || '').toLowerCase();
+          let isNonShift = rLow.includes('admin') || rLow.includes('office');
           return `
             <tr class="hover:bg-cyan-50/40 transition-colors">
               <td class="py-3 px-4">
@@ -15003,41 +14978,7 @@ function renderInfoBmhp() {
       }
     }
 
-    // 4. Render Tabel Presensi Shift Harian
-    const tbPres = document.getElementById('tbodyPresensiHarian');
-    if (tbPres) {
-      if (listPres.length === 0) {
-        tbPres.innerHTML = '<tr><td colspan="8" class="py-8 text-center text-slate-400 font-bold">Belum ada data presensi shift harian.</td></tr>';
-      } else {
-        tbPres.innerHTML = listPres.map(p => {
-          let isHadir = String(p.statusKehadiran || '').toLowerCase() === 'hadir';
-          let badgeSt = isHadir
-            ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
-            : 'bg-rose-100 text-rose-800 border-rose-300';
-          let jMasuk = fmtTimePayroll(p.jamMasuk);
-          let jPulang = fmtTimePayroll(p.jamPulang);
-          let jamKerjaStr = (jMasuk || jPulang) ? (jMasuk + ' - ' + jPulang) : '-';
-          return `
-            <tr>
-              <td class="py-2.5 px-4 font-mono font-bold text-slate-600 text-[11px]">${p.idPresensi}</td>
-              <td class="py-2.5 px-3 font-bold text-slate-700">${p.tanggal}</td>
-              <td class="py-2.5 px-4 font-black text-slate-800">${p.namaPekerja}</td>
-              <td class="py-2.5 px-3 text-slate-600 font-semibold">${p.role}</td>
-              <td class="py-2.5 px-3 text-center">
-                <span class="px-2.5 py-0.5 rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-200 font-extrabold text-[11px]">${p.shift}</span>
-              </td>
-              <td class="py-2.5 px-3 text-center font-mono text-[11px] text-slate-600">${jamKerjaStr}</td>
-              <td class="py-2.5 px-3 text-center">
-                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black border ${badgeSt}">${p.statusKehadiran}</span>
-              </td>
-              <td class="py-2.5 px-4 text-right font-black text-emerald-700">${fmtRpPayroll(p.uangHarianDidapat)}</td>
-            </tr>
-          `;
-        }).join('');
-      }
-    }
-
-    // 5. Render Tabel Pengaturan Tarif Shift & Gaji Pokok
+    // 4. Render Tabel Pengaturan Tarif Shift & Gaji Pokok
     const tbTarif = document.getElementById('tbodyTarifShift');
     if (tbTarif) {
       const listTarif = window.PayrollState.tarifShift || [];
@@ -15070,7 +15011,7 @@ function renderInfoBmhp() {
       }).join('');
     }
 
-    // 6. Render Tabel Rincian Bagi Hasil JM Tindakan
+    // 5. Render Tabel Rincian Bagi Hasil JM Tindakan
     const tbJM = document.getElementById('tbodyRincianJM');
     if (tbJM) {
       const listJM = window.PayrollState.rekapJM || [];
@@ -15107,118 +15048,6 @@ function renderInfoBmhp() {
           `;
         }).join('');
       }
-    }
-  }
-
-  function handlePresPekerjaChange() {
-    const sel = document.getElementById('presNamaPekerja');
-    const roleEl = document.getElementById('presRole');
-    if (!sel || !roleEl) return;
-    const opt = (sel.options && sel.selectedIndex >= 0 && sel.options[sel.selectedIndex]) ? sel.options[sel.selectedIndex] : null;
-    let role = 'Dokter Gigi Umum';
-    if (opt && typeof opt.getAttribute === 'function') {
-      role = opt.getAttribute('data-role') || 'Dokter Gigi Umum';
-    } else if (sel.value) {
-      let t = (window.PayrollState.tarifShift || []).find(x => (x.namaPekerja || '').toLowerCase() === String(sel.value).toLowerCase());
-      if (t && t.role) role = t.role;
-    }
-    roleEl.value = role;
-    updatePreviewUangShift();
-  }
-
-  function updatePreviewUangShift() {
-    const sel = document.getElementById('presNamaPekerja');
-    const roleEl = document.getElementById('presRole');
-    const statusEl = document.getElementById('presStatus');
-    const previewEl = document.getElementById('presPreviewUang');
-    if (!previewEl) return;
-
-    const status = statusEl ? statusEl.value : 'Hadir';
-    if (status !== 'Hadir') {
-      previewEl.value = 'Rp 0 (Tidak Hadir)';
-      return;
-    }
-
-    const nama = sel ? sel.value : '';
-    const role = roleEl ? roleEl.value : '';
-    const shift = (document.getElementById('presShift') || {}).value || 'Shift 1';
-
-    let foundTarif = (window.PayrollState.tarifShift || []).find(t => String(t.namaPekerja || '').toLowerCase() === nama.toLowerCase());
-    let nominal = 0;
-    if (foundTarif) {
-      nominal = shift.includes('2') ? (Number(foundTarif.tarifShift2) || 0) : (Number(foundTarif.tarifShift1) || 0);
-    } else {
-      nominal = role.toLowerCase().includes('dokter') ? 55000 : (role.toLowerCase().includes('perawat') ? 45000 : 0);
-    }
-    previewEl.value = fmtRpPayroll(nominal);
-  }
-
-  function handleSimpanPresensiShift(e) {
-    if (e) e.preventDefault();
-    const rawDate = (document.getElementById('presTanggal') || {}).value || '';
-    let formattedDate = rawDate;
-    if (rawDate && rawDate.includes('-')) {
-      let p = rawDate.split('-');
-      if (p[0].length === 4) formattedDate = p[2] + '-' + p[1] + '-' + p[0];
-    }
-
-    const sel = document.getElementById('presNamaPekerja');
-    const opt = sel ? sel.options[sel.selectedIndex] : null;
-    const namaPekerja = sel ? sel.value : '';
-    const idPekerja = opt ? (opt.getAttribute('data-id') || 'STF-001') : 'STF-001';
-    const role = (document.getElementById('presRole') || {}).value || 'Dokter Gigi Umum';
-    const shift = (document.getElementById('presShift') || {}).value || 'Shift 1';
-    const jamMasuk = (document.getElementById('presJamMasuk') || {}).value || '09:00';
-    const jamPulang = (document.getElementById('presJamPulang') || {}).value || '15:00';
-    const statusKehadiran = (document.getElementById('presStatus') || {}).value || 'Hadir';
-
-    let nominal = 0;
-    if (statusKehadiran === 'Hadir') {
-      let foundT = (window.PayrollState.tarifShift || []).find(t => String(t.namaPekerja || '').toLowerCase() === namaPekerja.toLowerCase());
-      if (foundT) {
-        nominal = shift.includes('2') ? (Number(foundT.tarifShift2) || 0) : (Number(foundT.tarifShift1) || 0);
-      } else {
-        nominal = role.toLowerCase().includes('dokter') ? 55000 : 45000;
-      }
-    }
-
-    const payload = {
-      idPresensi: 'ATT-' + Date.now().toString().slice(-6),
-      tanggal: formattedDate,
-      idPekerja: idPekerja,
-      namaPekerja: namaPekerja,
-      role: role,
-      shift: shift,
-      jamMasuk: jamMasuk,
-      jamPulang: jamPulang,
-      statusKehadiran: statusKehadiran,
-      uangHarianDidapat: nominal,
-      verifikator: window.activeNamaAccount || 'Admin'
-    };
-
-    const btn = document.getElementById('btnSubmitPresensi');
-    const orig = btn ? btn.innerHTML : '';
-    if (btn) { btn.disabled = true; btn.innerHTML = '⏳ MENYIMPAN PRESENSI...'; }
-
-    // Update state langsung
-    window.PayrollState.presensiHarian.unshift(payload);
-    savePayrollCacheLocal();
-    renderAllPayrollTables();
-
-    if (typeof google !== 'undefined' && google.script && google.script.run) {
-      google.script.run
-        .withSuccessHandler(res => {
-          if (btn) { btn.disabled = false; btn.innerHTML = orig; }
-          if (typeof showToast === 'function') showToast('success', (res && res.message) ? res.message : 'Presensi shift berhasil disimpan!');
-        })
-        .withFailureHandler(() => {
-          if (btn) { btn.disabled = false; btn.innerHTML = orig; }
-          if (typeof showToast === 'function') showToast('success', 'Presensi shift tersimpan & dihitung otomatis!');
-        })
-        .simpanPresensiShift(payload);
-    } else {
-      if (btn) { btn.disabled = false; btn.innerHTML = orig; }
-      if (typeof showToast === 'function') showToast('success', 'Presensi shift tersimpan & dihitung otomatis!');
     }
   }
 
@@ -15599,10 +15428,7 @@ function renderInfoBmhp() {
   window.initPayrollModule = initPayrollModule;
   window.switchPayrollTab = switchPayrollTab;
   window.loadPayrollModuleData = loadPayrollModuleData;
-  window.handlePresPekerjaChange = handlePresPekerjaChange;
   window.handleTarifNamaPekerjaChange = handleTarifNamaPekerjaChange;
-  window.updatePreviewUangShift = updatePreviewUangShift;
-  window.handleSimpanPresensiShift = handleSimpanPresensiShift;
   window.pilihTarifShiftToEdit = pilihTarifShiftToEdit;
   window.resetFormTarifShiftBaru = resetFormTarifShiftBaru;
   window.handleSimpanTarifShift = handleSimpanTarifShift;

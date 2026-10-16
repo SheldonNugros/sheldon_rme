@@ -344,6 +344,46 @@ function parseHarga(val) {
   return parseInt(str.replace(/[^0-9-]/g, '')) || 0;
 }
 
+// =========================================================================
+// CACHE SERVICE HELPERS (RAM Cache for Blazing-Fast Spreadsheet Reads)
+// =========================================================================
+function getCacheJson(key) {
+  try {
+    if (typeof CacheService === 'undefined') return null;
+    const cache = CacheService.getScriptCache();
+    const val = cache.get(key);
+    if (!val) return null;
+    return JSON.parse(val);
+  } catch (e) {
+    return null;
+  }
+}
+
+function putCacheJson(key, data, ttlSeconds) {
+  try {
+    if (typeof CacheService === 'undefined') return;
+    const cache = CacheService.getScriptCache();
+    const str = JSON.stringify(data);
+    // Batas CacheService Google Apps Script per item adalah 100KB
+    if (str.length < 100000) {
+      cache.put(key, str, ttlSeconds || 600); // default 10 menit
+    }
+  } catch (e) {}
+}
+
+function removeCacheKey(key) {
+  try {
+    if (typeof CacheService === 'undefined') return;
+    const cache = CacheService.getScriptCache();
+    cache.remove(key);
+  } catch (e) {}
+}
+
+function invalidateMasterCache() {
+  removeCacheKey("INIT_MASTER_CACHE_V1");
+}
+
+
 
 // >>>>>>>>>>>>>>> MODULE: 02_Auth.gs <<<<<<<<<<<<<<<
 // =========================================================================
@@ -2132,12 +2172,18 @@ function simpanPembelianGudang(payload) {
 // =========================================================================
 
 function getInitMaster() {
-  return {
+  const cacheKey = "INIT_MASTER_CACHE_V1";
+  const cached = getCacheJson(cacheKey);
+  if (cached) return cached;
+
+  const result = {
     staff: getDaftarStaffLengkap(),
     tindakan: getDaftarTindakanLengkap(),
     obat: getDaftarObatLengkap(),
     bmhp: getDaftarBMHPLengkap()
   };
+  putCacheJson(cacheKey, result, 900); // Cache 15 menit di RAM
+  return result;
 }
 
 function getDaftarStaffLengkap() {
@@ -2364,6 +2410,7 @@ function simpanUserMaster(payload) {
         Logger.log("Info auto-sync to payroll: " + eSyncPay.message);
       }
 
+      invalidateMasterCache();
       return { success: true, message: "Akun user '" + cleanUser + "' berhasil diperbarui!" };
     } else {
       // MODE TAMBAH BARU
@@ -2405,6 +2452,7 @@ function simpanUserMaster(payload) {
         Logger.log("Info auto-sync to payroll: " + eSyncPay.message);
       }
 
+      invalidateMasterCache();
       return { success: true, message: "User baru '" + cleanUser + "' berhasil ditambahkan ke Database Master!" };
     }
   } catch (e) {
@@ -2445,6 +2493,7 @@ function aktifkanUserMaster(username, currentUser) {
           }
         } catch (eSyncPay) {}
 
+        invalidateMasterCache();
         return { success: true, message: "Akun '" + username + "' berhasil diaktifkan! Pengguna kini dapat login ke sistem." };
       }
     }
@@ -2486,6 +2535,7 @@ function hapusUserMaster(username, isPermanent) {
               });
             }
           } catch (eSyncPay) {}
+          invalidateMasterCache();
           return { success: true, message: "Akun '" + username + "' berhasil dihapus permanen." };
         } else {
           sheet.getRange(i + 1, idStatus + 1).setValue("Non Aktif");
@@ -2498,6 +2548,7 @@ function hapusUserMaster(username, isPermanent) {
               });
             }
           } catch (eSyncPay) {}
+          invalidateMasterCache();
           return { success: true, message: "Status akun '" + username + "' diubah menjadi Non Aktif." };
         }
       }
@@ -3405,7 +3456,7 @@ function simpanTindakanBaru(payload) {
 
     sheet.appendRow(newRow);
     catatLog("Tambah Tindakan", "Menambah tindakan baru: " + payload.nama + " (Kode: " + payload.kode + ", Lab: " + (payload.perluLab || 'Tidak') + ")", payload.currentUser);
-    
+    invalidateMasterCache();
     return { success: true, message: "Tindakan berhasil disimpan di Database Master!" };
   } catch (e) {
     return { success: false, message: "Gagal menyimpan: " + e.message };
@@ -3458,6 +3509,7 @@ function updateTindakan(payload) {
     sheet.getRange(targetRow, idLab + 1).setValue(payload.perluLab === 'Ya' ? 'Ya' : 'Tidak');
 
     catatLog("Update Tindakan", "Mengubah data tindakan: " + payload.nama + " (Kode: " + payload.kode + ")", payload.currentUser);
+    invalidateMasterCache();
     return { success: true, message: "Data tindakan berhasil diperbarui!" };
   } catch (e) {
     return { success: false, message: "Gagal memperbarui: " + e.message };
@@ -3499,6 +3551,7 @@ function hapusTindakan(payload) {
 
     sheet.deleteRow(targetRow);
     catatLog("Hapus Tindakan", "Menghapus tindakan: " + targetNama + " (Kode: " + payload.kode + ")", payload.currentUser);
+    invalidateMasterCache();
     return { success: true, message: "Tindakan " + targetNama + " berhasil dihapus dari Database!" };
   } catch (e) {
     return { success: false, message: "Gagal menghapus: " + e.message };
@@ -3591,7 +3644,7 @@ function simpanObatBaru(payload) {
 
     sheet.appendRow(newRow);
     catatLog("Master Obat", "Tambah item obat: " + payload.nama + " (ID: " + payload.kode + ")", payload.currentUser);
-    
+    invalidateMasterCache();
     return { success: true, message: "Obat berhasil disimpan di Database Master!" };
   } catch (e) {
     return { success: false, message: "Gagal menyimpan obat: " + e.message };
@@ -3641,7 +3694,7 @@ function simpanBmhpBaru(payload) {
 
     sheet.appendRow(newRow);
     catatLog("Master BMHP", "Tambah item BMHP: " + payload.nama + " (Kode: " + payload.kode + ")", payload.currentUser);
-    
+    invalidateMasterCache();
     return { success: true, message: "BMHP berhasil disimpan di Database Master!" };
   } catch (e) {
     return { success: false, message: "Gagal menyimpan BMHP: " + e.message };

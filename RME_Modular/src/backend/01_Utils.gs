@@ -253,3 +253,43 @@ function parseHarga(val) {
   let str = String(val).trim().replace(/,00$/, '');
   return parseInt(str.replace(/[^0-9-]/g, '')) || 0;
 }
+
+// =========================================================================
+// CACHE SERVICE HELPERS (RAM Cache for Blazing-Fast Spreadsheet Reads)
+// =========================================================================
+function getCacheJson(key) {
+  try {
+    if (typeof CacheService === 'undefined') return null;
+    const cache = CacheService.getScriptCache();
+    const val = cache.get(key);
+    if (!val) return null;
+    return JSON.parse(val);
+  } catch (e) {
+    return null;
+  }
+}
+
+function putCacheJson(key, data, ttlSeconds) {
+  try {
+    if (typeof CacheService === 'undefined') return;
+    const cache = CacheService.getScriptCache();
+    const str = JSON.stringify(data);
+    // Batas CacheService Google Apps Script per item adalah 100KB
+    if (str.length < 100000) {
+      cache.put(key, str, ttlSeconds || 600); // default 10 menit
+    }
+  } catch (e) {}
+}
+
+function removeCacheKey(key) {
+  try {
+    if (typeof CacheService === 'undefined') return;
+    const cache = CacheService.getScriptCache();
+    cache.remove(key);
+  } catch (e) {}
+}
+
+function invalidateMasterCache() {
+  removeCacheKey("INIT_MASTER_CACHE_V1");
+}
+

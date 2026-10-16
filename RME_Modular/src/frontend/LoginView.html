@@ -399,6 +399,8 @@
         document.getElementById('loginScreen').classList.add('hidden');
         document.getElementById('appContainer').classList.remove('hidden');
         showToast('success', 'Selamat Datang, ' + res.userData.namaAccount);
+        if (typeof updateDashboardNumbers === 'function') updateDashboardNumbers();
+        document.dispatchEvent(new Event('KlinikDataReady'));
         startDataSync();
       } else {
         showToast('error', res.message);

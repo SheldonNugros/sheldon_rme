@@ -342,6 +342,47 @@
     pasien: [], staff: [], tindakan: [], obat: [], bmhp: [], rekamMedis: [], pembayaran: [], statusLoad: { master: false, pasien: false, emr: false }
   };
 
+  // INSTANT STARTUP HYDRATION (Solusi A: Stale-While-Revalidate)
+  // Memuat data instan dari _mockDb (Vercel) atau localStorage cache dalam < 100ms
+  function hydrateInitialKlinikData() {
+    let loaded = false;
+    // 1. Prioritas: _mockDb bawaan runtime standalone (Vercel)
+    if (window._mockDb && typeof window._mockDb === 'object') {
+      if (Array.isArray(window._mockDb.pasien) && window._mockDb.pasien.length > 0) window.KlinikData.pasien = window._mockDb.pasien;
+      if (Array.isArray(window._mockDb.staff) && window._mockDb.staff.length > 0) window.KlinikData.staff = window._mockDb.staff;
+      if (Array.isArray(window._mockDb.tindakan) && window._mockDb.tindakan.length > 0) window.KlinikData.tindakan = window._mockDb.tindakan;
+      if (Array.isArray(window._mockDb.obat) && window._mockDb.obat.length > 0) window.KlinikData.obat = window._mockDb.obat;
+      if (Array.isArray(window._mockDb.bmhp) && window._mockDb.bmhp.length > 0) window.KlinikData.bmhp = window._mockDb.bmhp;
+      if (Array.isArray(window._mockDb.rekamMedis) && window._mockDb.rekamMedis.length > 0) window.KlinikData.rekamMedis = window._mockDb.rekamMedis;
+      if (Array.isArray(window._mockDb.pembayaran) && window._mockDb.pembayaran.length > 0) window.KlinikData.pembayaran = window._mockDb.pembayaran;
+      window.KlinikData.statusLoad = { master: true, pasien: true, emr: true };
+      loaded = true;
+    }
+    // 2. Cache lokal offline / kunjungan berulang
+    if (!loaded) {
+      try {
+        const cached = localStorage.getItem("sheldon_klinik_data_cache");
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (parsed && typeof parsed === 'object') {
+            if (Array.isArray(parsed.pasien) && parsed.pasien.length > 0) window.KlinikData.pasien = parsed.pasien;
+            if (Array.isArray(parsed.staff) && parsed.staff.length > 0) window.KlinikData.staff = parsed.staff;
+            if (Array.isArray(parsed.tindakan) && parsed.tindakan.length > 0) window.KlinikData.tindakan = parsed.tindakan;
+            if (Array.isArray(parsed.obat) && parsed.obat.length > 0) window.KlinikData.obat = parsed.obat;
+            if (Array.isArray(parsed.bmhp) && parsed.bmhp.length > 0) window.KlinikData.bmhp = parsed.bmhp;
+            if (Array.isArray(parsed.rekamMedis) && parsed.rekamMedis.length > 0) window.KlinikData.rekamMedis = parsed.rekamMedis;
+            if (Array.isArray(parsed.pembayaran) && parsed.pembayaran.length > 0) window.KlinikData.pembayaran = parsed.pembayaran;
+            window.KlinikData.statusLoad = { master: true, pasien: true, emr: true };
+            loaded = true;
+          }
+        }
+      } catch (e) {}
+    }
+    return loaded;
+  }
+  window.hydrateInitialKlinikData = hydrateInitialKlinikData;
+  hydrateInitialKlinikData();
+
   // ROLE MANAGEMENT ENGINE
   function terapkanRoleAkses(role) {
     window.activeUserRole = role;
@@ -443,6 +484,8 @@
         terapkanRoleAkses(userData.role);
         document.getElementById('loginScreen').classList.add('hidden');
         document.getElementById('appContainer').classList.remove('hidden');
+        if (typeof updateDashboardNumbers === 'function') updateDashboardNumbers();
+        document.dispatchEvent(new Event('KlinikDataReady'));
         startDataSync();
       } catch (error) { localStorage.removeItem("sheldon_user_session"); }
     }
@@ -582,49 +625,90 @@
     }, 300);
   }
 
-  function startDataSync() {
+  function startDataSync(forceOverlay = false) {
+    const hasExistingData = (window.KlinikData.pasien && window.KlinikData.pasien.length > 0) ||
+                            (window.KlinikData.staff && window.KlinikData.staff.length > 0);
+
     const loadUI = document.getElementById('globalLoadingStatus');
-    if (loadUI) {
-      loadUI.classList.remove('hidden');
-      loadUI.innerHTML = '🔄 Memuat Database...';
+
+    // SOLUSI A: Stale-While-Revalidate (Non-blocking background sync)
+    // Jika data sudah terhidrasi secara instan (< 100ms), lewati overlay sinkronisasi layar penuh
+    // agar pengguna dapat langsung bekerja dan mengeklik modul klinik tanpa jeda/loading!
+    if (hasExistingData && !forceOverlay) {
+      if (loadUI) {
+        loadUI.classList.remove('hidden');
+        loadUI.innerHTML = '<span class="inline-block animate-spin mr-1">🔄</span> Menyinkronkan di latar belakang...';
+      }
+      updateDashboardNumbers();
+      document.dispatchEvent(new Event('KlinikDataReady'));
+    } else {
+      if (loadUI) {
+        loadUI.classList.remove('hidden');
+        loadUI.innerHTML = '🔄 Memuat Database...';
+      }
+      showDbSyncOverlay('🔄 Menyinkronkan Master User, Tindakan & Obat...');
     }
 
     const syncStartTime = Date.now();
-    showDbSyncOverlay('🔄 Menyinkronkan Master User, Tindakan & Obat...');
-
     let completedTasks = 0; // total 4 tasks: master, pasien, rekamMedis, pembayaran
+
     const onTaskComplete = (taskName) => {
       completedTasks++;
-      if (completedTasks === 1) {
-        updateDbSyncOverlay(35, '🔄 Menyinkronkan Master Pasien & Rekam Medis...');
-        if (loadUI) loadUI.innerHTML = '🔄 Pasien & EMR...';
-      } else if (completedTasks === 2) {
-        updateDbSyncOverlay(65, '🔄 Menyinkronkan Rekam Medis & Odontogram...');
-        if (loadUI) loadUI.innerHTML = '🔄 Rekam Medis...';
-      } else if (completedTasks === 3) {
-        updateDbSyncOverlay(85, '🔄 Menyinkronkan Transaksi Kasir & Invoice...');
-        if (loadUI) loadUI.innerHTML = '🔄 Kasir & Invoice...';
-      } else if (completedTasks >= 4) {
-        updateDbSyncOverlay(100, '✅ Database Klinik Tersinkronisasi!', 'READY');
-        if (loadUI) loadUI.classList.add('hidden');
+      if (!hasExistingData || forceOverlay) {
+        if (completedTasks === 1) {
+          updateDbSyncOverlay(35, '🔄 Menyinkronkan Master Pasien & Rekam Medis...');
+          if (loadUI) loadUI.innerHTML = '🔄 Pasien & EMR...';
+        } else if (completedTasks === 2) {
+          updateDbSyncOverlay(65, '🔄 Menyinkronkan Rekam Medis & Odontogram...');
+          if (loadUI) loadUI.innerHTML = '🔄 Rekam Medis...';
+        } else if (completedTasks === 3) {
+          updateDbSyncOverlay(85, '🔄 Menyinkronkan Transaksi Kasir & Invoice...');
+          if (loadUI) loadUI.innerHTML = '🔄 Kasir & Invoice...';
+        } else if (completedTasks >= 4) {
+          updateDbSyncOverlay(100, '✅ Database Klinik Tersinkronisasi!', 'READY');
+          if (loadUI) loadUI.classList.add('hidden');
+          updateDashboardNumbers();
+          document.dispatchEvent(new Event('KlinikDataReady'));
+
+          const elapsed = Date.now() - syncStartTime;
+          const minDisplayMs = 500;
+          const remainMs = Math.max(150, minDisplayMs - elapsed);
+          setTimeout(() => {
+            hideDbSyncOverlay();
+            showToast('success', 'Database tersinkronisasi');
+          }, remainMs);
+        }
+      }
+
+      if (completedTasks >= 4) {
+        if (loadUI) {
+          loadUI.innerHTML = '✅ Sinkron';
+          setTimeout(() => { loadUI.classList.add('hidden'); }, 2000);
+        }
         updateDashboardNumbers();
         document.dispatchEvent(new Event('KlinikDataReady'));
 
-        const elapsed = Date.now() - syncStartTime;
-        const minDisplayMs = 650;
-        const remainMs = Math.max(250, minDisplayMs - elapsed);
-        setTimeout(() => {
-          hideDbSyncOverlay();
-          showToast('success', 'Database tersinkronisasi');
-        }, remainMs);
+        // Simpan cache lokal untuk instant startup hydration kunjungan berikutnya
+        try {
+          const toCache = {
+            staff: window.KlinikData.staff,
+            tindakan: window.KlinikData.tindakan,
+            obat: window.KlinikData.obat,
+            bmhp: window.KlinikData.bmhp,
+            pasien: (window.KlinikData.pasien || []).slice(0, 500),
+            rekamMedis: (window.KlinikData.rekamMedis || []).slice(0, 300),
+            pembayaran: (window.KlinikData.pembayaran || []).slice(0, 300)
+          };
+          localStorage.setItem("sheldon_klinik_data_cache", JSON.stringify(toCache));
+        } catch (eQuota) {}
       }
     };
 
     google.script.run.withSuccessHandler(res => {
-      window.KlinikData.staff = (res && res.staff) ? res.staff : [];
-      window.KlinikData.tindakan = (res && res.tindakan) ? res.tindakan : [];
-      window.KlinikData.obat = (res && res.obat) ? res.obat : [];
-      window.KlinikData.bmhp = (res && res.bmhp) ? res.bmhp : [];
+      if (res && res.staff) window.KlinikData.staff = res.staff;
+      if (res && res.tindakan) window.KlinikData.tindakan = res.tindakan;
+      if (res && res.obat) window.KlinikData.obat = res.obat;
+      if (res && res.bmhp) window.KlinikData.bmhp = res.bmhp;
       window.KlinikData.statusLoad.master = true;
       onTaskComplete('master');
     }).withFailureHandler(() => {
@@ -632,7 +716,9 @@
     }).getInitMaster();
 
     google.script.run.withSuccessHandler(res => {
-      window.KlinikData.pasien = res || [];
+      if (Array.isArray(res) && res.length > 0) {
+        window.KlinikData.pasien = res;
+      }
       window.KlinikData.statusLoad.pasien = true;
       onTaskComplete('pasien');
     }).withFailureHandler(() => {
@@ -647,7 +733,7 @@
       }
     }
     google.script.run.withSuccessHandler(res => {
-      window.KlinikData.rekamMedis = res || [];
+      if (Array.isArray(res)) window.KlinikData.rekamMedis = res;
       checkEmrKasirDone();
       onTaskComplete('emr');
     }).withFailureHandler(() => {
@@ -656,7 +742,7 @@
     }).getDaftarRekamMedis();
 
     google.script.run.withSuccessHandler(res => {
-      window.KlinikData.pembayaran = res || [];
+      if (Array.isArray(res)) window.KlinikData.pembayaran = res;
       checkEmrKasirDone();
       onTaskComplete('pembayaran');
     }).withFailureHandler(() => {

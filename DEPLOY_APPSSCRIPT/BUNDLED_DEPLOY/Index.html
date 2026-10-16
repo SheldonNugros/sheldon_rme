@@ -13219,8 +13219,8 @@ function handleRoleChange() {
   const isDokter = (role === 'Dokter Gigi Spesialis' || role === 'Dokter Gigi Umum');
   if (isDokter) {
     wrapJM.classList.remove('hidden');
-    if (jmInput && (jmInput.value === '0' || !jmInput.value)) {
-      jmInput.value = (role === 'Dokter Gigi Spesialis') ? '50' : '40';
+    if (jmInput && !jmInput.value) {
+      jmInput.value = '0';
     }
   } else {
     wrapJM.classList.add('hidden');
@@ -13664,8 +13664,8 @@ function editDbUser(username) {
 
   let isDokterRole = (roleSelect.value === 'Dokter Gigi Spesialis' || roleSelect.value === 'Dokter Gigi Umum');
   let pct = 0;
-  if (isDokterRole) {
-    pct = user.persenJM ? Number(user.persenJM) : (roleSelect.value === 'Dokter Gigi Spesialis' ? 50 : 40);
+  if (isDokterRole && user.persenJM) {
+    pct = Number(user.persenJM);
     if (pct <= 1 && pct > 0) pct = Math.round(pct * 100);
   }
   document.getElementById('dbUserPersenJM').value = pct;

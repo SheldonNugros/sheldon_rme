@@ -3202,8 +3202,7 @@ function getHtmlFormUserMasterContent() {
 '      const isDokter = (role === "Dokter Gigi Spesialis" || role === "Dokter Gigi Umum");' +
 '      if (isDokter) {' +
 '        wrap.classList.remove("hidden");' +
-'        if (role === "Dokter Gigi Spesialis") jmInput.value = "50";' +
-'        else if (role === "Dokter Gigi Umum") jmInput.value = "40";' +
+'        if (jmInput && !jmInput.value) jmInput.value = "0";' +
 '      } else {' +
 '        wrap.classList.add("hidden");' +
 '        if (jmInput) jmInput.value = "0";' +

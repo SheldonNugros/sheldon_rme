@@ -10116,8 +10116,8 @@ function handleRoleChange() {
   const isDokter = (role === 'Dokter Gigi Spesialis' || role === 'Dokter Gigi Umum');
   if (isDokter) {
     wrapJM.classList.remove('hidden');
-    if (jmInput && (jmInput.value === '0' || !jmInput.value)) {
-      jmInput.value = (role === 'Dokter Gigi Spesialis') ? '50' : '40';
+    if (jmInput && !jmInput.value) {
+      jmInput.value = '0';
     }
   } else {
     wrapJM.classList.add('hidden');
@@ -10561,8 +10561,8 @@ function editDbUser(username) {
 
   let isDokterRole = (roleSelect.value === 'Dokter Gigi Spesialis' || roleSelect.value === 'Dokter Gigi Umum');
   let pct = 0;
-  if (isDokterRole) {
-    pct = user.persenJM ? Number(user.persenJM) : (roleSelect.value === 'Dokter Gigi Spesialis' ? 50 : 40);
+  if (isDokterRole && user.persenJM) {
+    pct = Number(user.persenJM);
     if (pct <= 1 && pct > 0) pct = Math.round(pct * 100);
   }
   document.getElementById('dbUserPersenJM').value = pct;
@@ -15304,18 +15304,19 @@ var wrapJM = document.getElementById('wrapperDokterJM');
 var inputJM = document.getElementById('dbUserPersenJM');
 var roleSelect = document.getElementById('dbUserRole');
 
-// 1. Uji saat Dokter Gigi Spesialis dipilih -> wrapper tampil, default 50%
+// 1. Uji saat Dokter Gigi Spesialis dipilih -> wrapper tampil, default tetap 0
+inputJM.value = "0";
 roleSelect.value = "Dokter Gigi Spesialis";
 handleRoleChange();
 assert("ROLE-JM-1: Pengaturan JM Tampil saat Role Dokter Gigi Spesialis", !wrapJM.classList.contains('hidden'));
-assert("ROLE-JM-1: Default JM Dokter Gigi Spesialis adalah 50%", inputJM.value === "50");
+assert("ROLE-JM-1: Default JM Dokter Gigi Spesialis Tetap 0", inputJM.value === "0");
 
-// 2. Uji saat Dokter Gigi Umum dipilih -> wrapper tampil, default 40%
+// 2. Uji saat Dokter Gigi Umum dipilih -> wrapper tampil, default tetap 0
 inputJM.value = "0";
 roleSelect.value = "Dokter Gigi Umum";
 handleRoleChange();
 assert("ROLE-JM-2: Pengaturan JM Tampil saat Role Dokter Gigi Umum", !wrapJM.classList.contains('hidden'));
-assert("ROLE-JM-2: Default JM Dokter Gigi Umum adalah 40%", inputJM.value === "40");
+assert("ROLE-JM-2: Default JM Dokter Gigi Umum Tetap 0", inputJM.value === "0");
 
 // 3. Uji saat Role Selain Dokter dipilih (Owner, Perawat Gigi, Perawat Umum, Admin, Office) -> wrapper tersembunyi, default 0
 var nonDokterRoles = ["Perawat Gigi", "Perawat Umum", "Admin", "Office", "Owner"];

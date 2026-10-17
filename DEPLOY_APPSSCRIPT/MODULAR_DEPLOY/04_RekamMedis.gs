@@ -172,6 +172,29 @@ function simpanRekamMedis(payload) {
   const lock = LockService.getScriptLock();
   try {
     lock.waitLock(10000);
+
+    // Validasi backend: Jika obat diisi, Qty wajib ada dan valid (> 0)
+    if (payload && payload.obatStr) {
+      try {
+        let obtList = JSON.parse(payload.obatStr);
+        if (Array.isArray(obtList)) {
+          for (let oi = 0; oi < obtList.length; oi++) {
+            let oItem = obtList[oi];
+            if (oItem && (oItem.obat || oItem.nama)) {
+              let namaObat = String(oItem.obat || oItem.nama).trim();
+              let qVal = parseInt(oItem.qty, 10);
+              if (namaObat !== "" && (isNaN(qVal) || qVal <= 0)) {
+                return {
+                  success: false,
+                  message: "Gagal Simpan: Jumlah / Qty wajib diisi (> 0) untuk resep obat '" + namaObat + "'!"
+                };
+              }
+            }
+          }
+        }
+      } catch (eObat) {}
+    }
+
     const sheet = getSheetEksternal(DB_CONFIG.REKAM_MEDIS, "Data_Rekam_Medis");
     if (sheet.getLastRow() === 0) {
       sheet.appendRow([

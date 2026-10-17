@@ -24,28 +24,54 @@
 
       <!-- Quick Action Buttons -->
       <div class="flex flex-wrap items-center gap-2">
-        <button id="btnAturLiburAbsensi" onclick="bukaModalKelolaLibur()" class="px-3 py-1.5 bg-slate-800/90 hover:bg-slate-700 text-amber-300 border border-amber-500/30 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 hover:scale-[1.02]">
-          <span>⚙️</span> Atur Hari Libur Manual
-        </button>
-        <button onclick="refreshAbsensiData()" class="px-3 py-1.5 bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 hover:scale-[1.02]">
-          <span>🔄</span> Muat Ulang
-        </button>
-        <button id="btnBukaSheetAbsensi" onclick="bukaSpreadsheetAbsensi()" class="px-3 py-1.5 bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-200 border border-indigo-500/40 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 hover:scale-[1.02]">
-          <span>📊</span> Buka Google Sheets
+        <button type="button" onclick="refreshAbsensiData()" class="px-4 py-2 bg-slate-800/90 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 hover:border-slate-500 rounded-xl text-xs font-black transition-all shadow-sm flex items-center gap-2 hover:scale-[1.02] cursor-pointer">
+          <span class="text-sm">🔄</span> Refresh
         </button>
       </div>
     </div>
 
     <!-- TAB NAVIGASI MODUL -->
-    <div class="flex items-center gap-2 mt-4 border-b border-slate-800/80 pb-2 overflow-x-auto">
-      <button onclick="switchTabAbsensi('harian')" id="tabBtnAbsensiHarian" class="tab-btn-absensi px-4 py-2 rounded-xl text-xs font-bold transition-all bg-indigo-600 text-white shadow-md shadow-indigo-600/30 flex items-center gap-2">
-        <span>📋</span> Presensi Shift Harian
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2.5 mt-4 pt-3 border-t border-indigo-900/40">
+      <!-- Tab 1: Presensi Shift Harian -->
+      <button type="button" onclick="switchTabAbsensi('harian')" id="tabBtnAbsensiHarian" class="tab-btn-absensi group relative px-4 py-3 rounded-xl text-xs font-black bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 ring-2 ring-indigo-400/50 scale-[1.02] transition-all flex items-center gap-3 cursor-pointer">
+        <span class="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center text-base shadow-inner flex-shrink-0">📋</span>
+        <div class="text-left min-w-0 flex-1">
+          <div class="flex items-center justify-between gap-1">
+            <span class="font-black">1. Presensi Shift Harian</span>
+            <span class="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-emerald-400/20 text-emerald-200 border border-emerald-400/30 flex-shrink-0">Harian</span>
+          </div>
+          <div class="text-[10px] font-medium text-indigo-100 opacity-90 truncate">Pagi & Sore • Absen Pekerja</div>
+        </div>
       </button>
-      <button onclick="switchTabAbsensi('rekap')" id="tabBtnAbsensiRekap" class="tab-btn-absensi px-4 py-2 rounded-xl text-xs font-bold transition-all bg-slate-800/60 text-slate-300 hover:text-white hover:bg-slate-800 flex items-center gap-2">
-        <span>📊</span> Rekap Kehadiran Bulanan
+
+      <!-- Tab 2: Rekap Kehadiran Bulanan -->
+      <button type="button" onclick="switchTabAbsensi('rekap')" id="tabBtnAbsensiRekap" class="tab-btn-absensi group relative px-4 py-3 rounded-xl text-xs font-bold bg-white/10 hover:bg-white/15 text-slate-300 hover:text-white border border-white/10 transition-all flex items-center gap-3 cursor-pointer">
+        <span class="w-8 h-8 rounded-lg bg-white/10 group-hover:bg-white/20 flex items-center justify-center text-base shadow-inner flex-shrink-0">📊</span>
+        <div class="text-left min-w-0 flex-1">
+          <div class="font-bold">2. Rekap Kehadiran Bulanan</div>
+          <div class="text-[10px] font-normal text-slate-300 opacity-80 truncate">Total Hadir, Hari Kerja & Izin</div>
+        </div>
       </button>
-      <button onclick="switchTabAbsensi('libur')" id="tabBtnAbsensiLibur" class="tab-btn-absensi px-4 py-2 rounded-xl text-xs font-bold transition-all bg-slate-800/60 text-slate-300 hover:text-white hover:bg-slate-800 flex items-center gap-2">
-        <span>🗓️</span> Kalender Libur & Operasional
+
+      <!-- Tab 3: Kalender Libur & Operasional -->
+      <button type="button" onclick="switchTabAbsensi('libur')" id="tabBtnAbsensiLibur" class="tab-btn-absensi group relative px-4 py-3 rounded-xl text-xs font-bold bg-white/10 hover:bg-white/15 text-slate-300 hover:text-white border border-white/10 transition-all flex items-center gap-3 cursor-pointer">
+        <span class="w-8 h-8 rounded-lg bg-white/10 group-hover:bg-white/20 flex items-center justify-center text-base shadow-inner flex-shrink-0">🗓️</span>
+        <div class="text-left min-w-0 flex-1">
+          <div class="font-bold">3. Kalender Libur & Operasional</div>
+          <div class="text-[10px] font-normal text-slate-300 opacity-80 truncate">Jadwal Klinik & Hari Libur</div>
+        </div>
+      </button>
+
+      <!-- Tombol Buka Google Sheets (Dipindahkan tepat di sebelah Kalender Libur & Operasional) -->
+      <button type="button" id="btnBukaSheetAbsensi" onclick="bukaSpreadsheetAbsensi()" class="px-4 py-3 rounded-xl text-xs font-bold bg-emerald-600/30 hover:bg-emerald-600/50 text-emerald-200 hover:text-white border border-emerald-500/40 hover:border-emerald-400 transition-all shadow-md flex items-center gap-3 hover:scale-[1.02] cursor-pointer" title="Buka Spreadsheet Master Presensi_Shift_Harian & Kalender_Libur">
+        <span class="w-8 h-8 rounded-lg bg-emerald-500/30 flex items-center justify-center text-base shadow-inner flex-shrink-0">📊</span>
+        <div class="text-left min-w-0 flex-1">
+          <div class="flex items-center justify-between gap-1">
+            <span class="font-bold">Buka Google Sheets</span>
+            <span class="text-[9px] font-black uppercase px-1.5 py-0.5 rounded bg-emerald-400/20 text-emerald-300 border border-emerald-400/30 flex-shrink-0">Live</span>
+          </div>
+          <div class="text-[10px] font-normal text-emerald-200/80 truncate">Presensi & Kalender Libur</div>
+        </div>
       </button>
     </div>
   </div>

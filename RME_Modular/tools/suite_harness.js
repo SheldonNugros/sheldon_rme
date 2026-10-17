@@ -12,6 +12,8 @@ var isAdminHeaderInHtml = true;
 var isAdminOrderedInHtml = true;
 var isTabBtnPayInHtml = true;
 var isPanelPayInHtml = true;
+var isBtnAturLiburRemoved = true;
+var isBtnRefreshInHtml = true;
 
 // Enhanced DOM Mock for JavaScriptCore
 var window = this;
@@ -12732,6 +12734,9 @@ function initAbsensiModule() {
  * Beralih tab tampilan absensi (harian, rekap, libur).
  */
 function switchTabAbsensi(tabKey) {
+  const activeClass = "tab-btn-absensi group relative px-5 py-3 rounded-xl text-xs font-black bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30 ring-2 ring-indigo-400/50 scale-[1.02] transition-all flex items-center gap-3 cursor-pointer";
+  const inactiveClass = "tab-btn-absensi group relative px-5 py-3 rounded-xl text-xs font-bold bg-white/10 hover:bg-white/15 text-slate-300 hover:text-white border border-white/10 transition-all flex items-center gap-3 cursor-pointer";
+
   ['harian', 'rekap', 'libur'].forEach(k => {
     let content = document.getElementById('tabContentAbsensi' + k.charAt(0).toUpperCase() + k.slice(1));
     let btn = document.getElementById('tabBtnAbsensi' + k.charAt(0).toUpperCase() + k.slice(1));
@@ -12743,11 +12748,7 @@ function switchTabAbsensi(tabKey) {
       }
     }
     if (btn) {
-      if (k === tabKey) {
-        btn.className = "tab-btn-absensi px-4 py-2 rounded-xl text-xs font-bold transition-all bg-indigo-600 text-white shadow-md shadow-indigo-600/30 flex items-center gap-2";
-      } else {
-        btn.className = "tab-btn-absensi px-4 py-2 rounded-xl text-xs font-bold transition-all bg-slate-800/60 text-slate-300 hover:text-white hover:bg-slate-800 flex items-center gap-2";
-      }
+      btn.className = (k === tabKey) ? activeClass : inactiveClass;
     }
   });
 
@@ -15428,16 +15429,15 @@ var badgeHkEl = document.getElementById('badgeHariKerjaRekap');
 assert("ABSENSI-9: Badge Hari Kerja Tersedia dan Tampil di UI Rekap", badgeHkEl !== null && badgeHkEl.innerText.indexOf('27') !== -1);
 
 // ABSENSI-10: Visibilitas Atur Hari Libur & Buka Google Sheets Khusus Role Owner
+assert("ABSENSI-10: Tombol Atur Hari Libur Manual Dihilangkan dari Header (Double)", isBtnAturLiburRemoved);
+assert("ABSENSI-10: Tombol Refresh Tersedia Menggantikan Muat Ulang", isBtnRefreshInHtml);
+
 terapkanRoleAkses("Admin");
-var btnLiburAdmin = document.getElementById('btnAturLiburAbsensi');
 var btnSheetAdmin = document.getElementById('btnBukaSheetAbsensi');
-assert("ABSENSI-10: Role Admin Menyembunyikan Tombol Atur Hari Libur Manual", btnLiburAdmin && btnLiburAdmin.classList.contains('hidden'));
 assert("ABSENSI-10: Role Admin Menyembunyikan Tombol Buka Google Sheets", btnSheetAdmin && btnSheetAdmin.classList.contains('hidden'));
 
 terapkanRoleAkses("Owner");
-var btnLiburOwner = document.getElementById('btnAturLiburAbsensi');
 var btnSheetOwner = document.getElementById('btnBukaSheetAbsensi');
-assert("ABSENSI-10: Role Owner Menampilkan Tombol Atur Hari Libur Manual", btnLiburOwner && !btnLiburOwner.classList.contains('hidden'));
 assert("ABSENSI-10: Role Owner Menampilkan Tombol Buka Google Sheets", btnSheetOwner && !btnSheetOwner.classList.contains('hidden'));
 
 // ABSENSI-11: Tombol Shift Pagi & Shift Sore Berada di Action Bar & Berukuran Besar

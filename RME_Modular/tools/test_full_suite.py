@@ -47,6 +47,8 @@ t_um = trans_html.find('id="nav-user-master"')
 is_admin_ordered = (0 <= t_abs < t_info < t_db < t_um)
 is_tab_btn_pay_in_html = ('id="tabBtnPay-gaji-jm"' in html and '1. Gaji & Jasa Medis' in html)
 is_panel_pay_in_html = ('id="panelPay-gaji-jm"' in html)
+is_btn_atur_libur_removed = ('id="btnAturLiburAbsensi"' not in html)
+is_btn_refresh_in_html = ('Refresh' in html and 'refreshAbsensiData()' in html)
 
 test_harness_file = os.path.join(BASE_DIR, 'tools', 'suite_harness.js')
 
@@ -1616,16 +1618,15 @@ var badgeHkEl = document.getElementById('badgeHariKerjaRekap');
 assert("ABSENSI-9: Badge Hari Kerja Tersedia dan Tampil di UI Rekap", badgeHkEl !== null && badgeHkEl.innerText.indexOf('27') !== -1);
 
 // ABSENSI-10: Visibilitas Atur Hari Libur & Buka Google Sheets Khusus Role Owner
+assert("ABSENSI-10: Tombol Atur Hari Libur Manual Dihilangkan dari Header (Double)", isBtnAturLiburRemoved);
+assert("ABSENSI-10: Tombol Refresh Tersedia Menggantikan Muat Ulang", isBtnRefreshInHtml);
+
 terapkanRoleAkses("Admin");
-var btnLiburAdmin = document.getElementById('btnAturLiburAbsensi');
 var btnSheetAdmin = document.getElementById('btnBukaSheetAbsensi');
-assert("ABSENSI-10: Role Admin Menyembunyikan Tombol Atur Hari Libur Manual", btnLiburAdmin && btnLiburAdmin.classList.contains('hidden'));
 assert("ABSENSI-10: Role Admin Menyembunyikan Tombol Buka Google Sheets", btnSheetAdmin && btnSheetAdmin.classList.contains('hidden'));
 
 terapkanRoleAkses("Owner");
-var btnLiburOwner = document.getElementById('btnAturLiburAbsensi');
 var btnSheetOwner = document.getElementById('btnBukaSheetAbsensi');
-assert("ABSENSI-10: Role Owner Menampilkan Tombol Atur Hari Libur Manual", btnLiburOwner && !btnLiburOwner.classList.contains('hidden'));
 assert("ABSENSI-10: Role Owner Menampilkan Tombol Buka Google Sheets", btnSheetOwner && !btnSheetOwner.classList.contains('hidden'));
 
 // ABSENSI-11: Tombol Shift Pagi & Shift Sore Berada di Action Bar & Berukuran Besar
@@ -1826,7 +1827,7 @@ if (failedTotal > 0) {
 }
 '''
 
-full_test_script = f"var isButtonKonsultasiRemoved = {str(is_kon_removed).lower()};\nvar isModalResetPerioInHtml = {str(is_modal_perio_in_html).lower()};\nvar roleSelectOptionsFromHtml = {json.dumps(role_options)};\nvar isDatePickerLargeInHtml = {str(is_date_picker_large).lower()};\nvar isPaginasiHariIniRemoved = {str(is_paginasi_hari_ini_removed).lower()};\nvar isSubtitleAbsensiRemoved = {str(is_subtitle_absensi_removed).lower()};\nvar isTercatatMasukRemoved = {str(is_tercatat_masuk_removed).lower()};\nvar isIzinSakitOffRemoved = {str(is_izin_sakit_off_removed).lower()};\nvar isBtnDbUserRemoved = {str(is_btn_db_user_removed).lower()};\nvar isPelayananOrderedInHtml = {str(is_pelayanan_ordered).lower()};\nvar isAdminHeaderInHtml = {str(is_admin_header).lower()};\nvar isAdminOrderedInHtml = {str(is_admin_ordered).lower()};\nvar isTabBtnPayInHtml = {str(is_tab_btn_pay_in_html).lower()};\nvar isPanelPayInHtml = {str(is_panel_pay_in_html).lower()};\n" + dom_shim + "\n" + all_js + "\n" + test_runner_js
+full_test_script = f"var isButtonKonsultasiRemoved = {str(is_kon_removed).lower()};\nvar isModalResetPerioInHtml = {str(is_modal_perio_in_html).lower()};\nvar roleSelectOptionsFromHtml = {json.dumps(role_options)};\nvar isDatePickerLargeInHtml = {str(is_date_picker_large).lower()};\nvar isPaginasiHariIniRemoved = {str(is_paginasi_hari_ini_removed).lower()};\nvar isSubtitleAbsensiRemoved = {str(is_subtitle_absensi_removed).lower()};\nvar isTercatatMasukRemoved = {str(is_tercatat_masuk_removed).lower()};\nvar isIzinSakitOffRemoved = {str(is_izin_sakit_off_removed).lower()};\nvar isBtnDbUserRemoved = {str(is_btn_db_user_removed).lower()};\nvar isPelayananOrderedInHtml = {str(is_pelayanan_ordered).lower()};\nvar isAdminHeaderInHtml = {str(is_admin_header).lower()};\nvar isAdminOrderedInHtml = {str(is_admin_ordered).lower()};\nvar isTabBtnPayInHtml = {str(is_tab_btn_pay_in_html).lower()};\nvar isPanelPayInHtml = {str(is_panel_pay_in_html).lower()};\nvar isBtnAturLiburRemoved = {str(is_btn_atur_libur_removed).lower()};\nvar isBtnRefreshInHtml = {str(is_btn_refresh_in_html).lower()};\n" + dom_shim + "\n" + all_js + "\n" + test_runner_js
 
 with open(test_harness_file, 'w', encoding='utf-8') as f:
     f.write(full_test_script)

@@ -524,6 +524,9 @@ assert("Rekam Medis Search Dropdown Visible", !resRM.classList.contains('hidden'
 pilihPasienRM('PS-0321-0001');
 runAllTimers();
 assert("Active Pasien in EMR set", activePasienRM && activePasienRM.idPasien === "PS-0321-0001");
+assert("EMR Salin ke Form Baru Button in Detail Modal", document.getElementById('btnSalinDataKunjungan') !== null);
+assert("EMR Banner Carry-Forward Exists", document.getElementById('bannerCarryForwardRM') !== null);
+assert("EMR Function salinDataKunjunganKeForm is callable", typeof salinDataKunjunganKeForm === 'function');
 
 // 13. TEST KASIR PATIENT SEARCH
 switchMenu('kasir');

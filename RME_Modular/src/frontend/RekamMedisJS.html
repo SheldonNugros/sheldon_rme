@@ -213,20 +213,9 @@ function pilihPasienRM(idPasien) {
   resetPeriodontalToDefault();
   resetOhisToDefault();
   if (riwayatPasienAktif && riwayatPasienAktif.length > 0) {
-    let lastVisitWithOdo = riwayatPasienAktif.find(r => r.odontogramStr && r.odontogramStr !== "{}" && r.odontogramStr !== "[]");
-    if (lastVisitWithOdo) {
-      try {
-        let prevOdo = JSON.parse(lastVisitWithOdo.odontogramStr);
-        if (prevOdo && Object.keys(prevOdo).length > 0) {
-          let currEmpty = !currentOdontogram || Object.keys(currentOdontogram).length === 0;
-          if (currEmpty) {
-            currentOdontogram = JSON.parse(JSON.stringify(prevOdo));
-            renderOdontogramGrid();
-            alertMsg('success', 'Odontogram kunjungan terakhir (' + (lastVisitWithOdo.tanggalPeriksa || 'sebelumnya') + ') dimuat otomatis.');
-          }
-        }
-      } catch (err) {}
-    }
+    salinDataKunjunganKeForm(riwayatPasienAktif[0], true);
+  } else {
+    bersihkanFormRMHanyaInput();
   }
 }
 function loadRiwayatRM(idPasien) {
@@ -261,7 +250,10 @@ function renderRiwayatRMRoutes(container, riwayat) {
           <span class="text-[9px] bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full font-bold">${r.dokterPemeriksa || "-"}</span>
         </div>
         <div class="text-[10px] text-slate-700 mb-2 line-clamp-2"><b>Keluhan:</b> ${ana.cc || "-"}</div>
-        <button type="button" onclick="bukaDetailRM(${idx})" class="w-full py-1.5 bg-white border border-slate-300 text-indigo-600 hover:bg-indigo-50 rounded font-bold text-[10px] transition-colors shadow-sm">Lihat Detail Lengkap</button>
+        <div class="grid grid-cols-2 gap-1.5 mt-2">
+          <button type="button" onclick="bukaDetailRM(${idx})" class="py-1.5 bg-white border border-slate-300 text-indigo-600 hover:bg-indigo-50 rounded-lg font-bold text-[10px] transition-colors shadow-xs text-center cursor-pointer">Lihat Detail</button>
+          <button type="button" onclick="salinDataKunjunganKeForm(riwayatPasienAktif[${idx}], false)" class="py-1.5 bg-emerald-50 border border-emerald-300 text-emerald-700 hover:bg-emerald-100 rounded-lg font-bold text-[10px] transition-colors shadow-xs flex items-center justify-center gap-1 cursor-pointer" title="Salin data kunjungan ini ke formulir pemeriksaan baru"><span>📋</span> Salin Data</button>
+        </div>
       </div>`;
   }).join('');
   container.innerHTML = html;
@@ -317,7 +309,200 @@ function muatRiwayatArsipPasien() {
 // ==========================================
 // MODAL DETAIL & CETAK PDF
 // ==========================================
+function escapeHtmlAttr(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
 function closeDetailRM() { document.getElementById('modalDetailRM').classList.add('hidden'); }
+
+function salinDataKunjunganAktifDariDetail() {
+  if (!window.currentDetailRMRecord) {
+    alertMsg('error', 'Detail rekam medis tidak ditemukan.');
+    return;
+  }
+  salinDataKunjunganKeForm(window.currentDetailRMRecord, false);
+  closeDetailRM();
+  let target = document.getElementById('rmTglPeriksa') || document.getElementById('rmSearchPasien');
+  if (target) {
+    target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+}
+
+function salinDataKunjunganKeForm(r, isAuto = false) {
+  if (!r) return;
+
+  let ana = {}, fis = {}, odo = {}, tind = [], obat = [];
+  let odoJsonStr = r.odontogramStr || r.odontogram || "{}";
+  try { ana = JSON.parse(r.anamnesisStr || "{}"); } catch(e){}
+  try { fis = JSON.parse(r.fisikStr || "{}"); } catch(e){}
+  try { odo = typeof odoJsonStr === 'string' ? JSON.parse(odoJsonStr) : odoJsonStr; } catch(e){}
+  try { tind = JSON.parse(r.tindakanStr || "[]"); } catch(e){}
+  try { obat = JSON.parse(r.obatStr || "[]"); } catch(e){}
+
+  const setV = (id, val) => {
+    let el = document.getElementById(id);
+    if (el && val !== undefined && val !== null) el.value = val;
+  };
+
+  // 1. Anamnesis
+  setV('anaCC', ana.cc || '');
+  setV('anaPI', ana.pi || '');
+  setV('anaPDH', ana.pdh || '');
+  setV('anaPMH', ana.pmh || '');
+  setV('anaFH', ana.fh || '');
+  setV('anaKhusus', ana.khusus || '');
+
+  // Review of System
+  if (ana.ros) {
+    setV('anaEndo', ana.ros.endo || '');
+    setV('anaGastro', ana.ros.gastro || '');
+    setV('anaHemato', ana.ros.hemato || '');
+    setV('anaKardio', ana.ros.kardio || '');
+    setV('anaMuskulo', ana.ros.muskulo || '');
+    setV('anaNeuro', ana.ros.neuro || '');
+    setV('anaRespirasi', ana.ros.respirasi || '');
+    setV('anaUrogenital', ana.ros.uro || '');
+  }
+
+  // 2. Pemeriksaan Fisik & Vital Signs
+  setV('fisKesan', fis.kesan || '');
+  setV('fisKesadaran', fis.kesadaran || '');
+  setV('fisTensi', fis.tensi || '');
+  setV('fisNafas', fis.nafas || '');
+  setV('fisNadi', fis.nadi || '');
+  setV('fisSuhu', fis.suhu || '');
+  setV('fisBB', fis.bb || '');
+  setV('fisTB', fis.tb || '');
+  setV('fisAlergi', fis.alergi || '');
+  setV('fisEkstra', fis.ekstra || '');
+  setV('fisIntra', fis.intra || '');
+  setV('fisPenunjang', fis.penunjang || '');
+
+  // Catatan Edukasi
+  setV('rmCatatanEdukasi', r.catatanEdukasi || '');
+
+  // 3. Periodontal & OHIS
+  if (fis.periodontal) {
+    currentPeriodontalExam = JSON.parse(JSON.stringify(fis.periodontal));
+    renderPeriodontalVisual();
+  }
+  if (fis.ohis) {
+    currentOhisExam = JSON.parse(JSON.stringify(fis.ohis));
+    hitungOHIS();
+  }
+
+  // 4. Odontogram
+  if (odo && Object.keys(odo).length > 0) {
+    currentOdontogram = JSON.parse(JSON.stringify(odo));
+    renderOdontogramGrid();
+  } else if (riwayatPasienAktif && riwayatPasienAktif.length > 0) {
+    let lastWithOdo = riwayatPasienAktif.find(x => x.odontogramStr && x.odontogramStr !== "{}" && x.odontogramStr !== "[]");
+    if (lastWithOdo) {
+      try {
+        let prevOdo = JSON.parse(lastWithOdo.odontogramStr);
+        if (prevOdo && Object.keys(prevOdo).length > 0) {
+          currentOdontogram = JSON.parse(JSON.stringify(prevOdo));
+          renderOdontogramGrid();
+        }
+      } catch(e){}
+    }
+  }
+
+  // 5. Diagnosa ICD-10
+  let containerDiag = document.getElementById('containerDiagnosa');
+  if (containerDiag) {
+    containerDiag.innerHTML = '';
+    if (Array.isArray(ana.diagnosaICD) && ana.diagnosaICD.length > 0) {
+      ana.diagnosaICD.forEach(item => {
+        let text = typeof item === 'object' ? (item.desc || item.nama || '') : String(item);
+        let code = '';
+        let ket = '';
+        let parts = text.split(' - ');
+        if (parts.length > 1) {
+          code = parts[0].trim();
+          text = parts.slice(1).join(' - ').trim();
+        }
+        let m = text.match(/\((.*?)\)$/);
+        if (m) {
+          ket = m[1].trim();
+          text = text.replace(/\s*\((.*?)\)$/, '').trim();
+        }
+        tambahRowDiagnosa(text, code, ket);
+      });
+    } else {
+      tambahRowDiagnosa();
+    }
+  }
+
+  // 6. Tindakan ICD-9
+  let containerTind = document.getElementById('containerTindakan');
+  if (containerTind) {
+    containerTind.innerHTML = '';
+    if (Array.isArray(tind) && tind.length > 0) {
+      tind.forEach(item => {
+        let text = typeof item === 'object' ? (item.desc || item.nama || '') : String(item);
+        let code = '';
+        let ket = '';
+        let parts = text.split(' - ');
+        if (parts.length > 1) {
+          code = parts[0].trim();
+          text = parts.slice(1).join(' - ').trim();
+        }
+        let m = text.match(/\((.*?)\)$/);
+        if (m) {
+          ket = m[1].trim();
+          text = text.replace(/\s*\((.*?)\)$/, '').trim();
+        }
+        tambahRowTindakan(text, code, ket);
+      });
+    } else {
+      tambahRowTindakan();
+    }
+  }
+
+  // 7. Resep Obat
+  let containerOb = document.getElementById('containerObat');
+  if (containerOb) {
+    containerOb.innerHTML = '';
+    if (Array.isArray(obat) && obat.length > 0) {
+      obat.forEach(item => {
+        if (typeof item === 'object') {
+          tambahRowObat(item.obat || item.nama || '', item.qty || '', item.ket || '');
+        } else {
+          tambahRowObat(String(item), '', '');
+        }
+      });
+    }
+  }
+
+  // Tanggal periksa selalu default hari ini untuk kunjungan baru
+  let tglEl = document.getElementById('rmTglPeriksa');
+  if (tglEl) {
+    tglEl.value = getTodayIso();
+    tglEl.max = getTodayIso();
+  }
+
+  // Tampilkan banner notifikasi carry-forward
+  let bnr = document.getElementById('bannerCarryForwardRM');
+  let lblTgl = document.getElementById('lblTglCarryForward');
+  let tglKunjunganLama = formatTglIndoRM(r.tanggalPeriksa || 'sebelumnya');
+  if (bnr) {
+    if (lblTgl) lblTgl.innerText = tglKunjunganLama;
+    bnr.classList.remove('hidden');
+  }
+
+  if (isAuto) {
+    alertMsg('info', `📋 Data riwayat terakhir (${tglKunjunganLama}) dimuat otomatis ke formulir baru. Silakan edit atau tambahkan tindakan hari ini.`);
+  } else {
+    alertMsg('success', `📋 Seluruh data kunjungan (${tglKunjunganLama}) berhasil disalin ke formulir pemeriksaan baru!`);
+  }
+}
 function renderHistoryOdontogram(odoJsonStr) {
   let odoData = {};
   try { odoData = typeof odoJsonStr === 'string' ? JSON.parse(odoJsonStr) : odoJsonStr; } catch(e){}
@@ -383,6 +568,8 @@ function bukaDetailRM(idx) {
     alertMsg('error', 'Detail riwayat tidak dapat dimuat.');
     return;
   }
+  window.currentDetailRMIndex = idx;
+  window.currentDetailRMRecord = r;
   let ana = {}, fis = {}, odo = {}, tind = [], obat = [];
    let odoJsonStr = r.odontogramStr || r.odontogram || "{}";
   try { ana = JSON.parse(r.anamnesisStr || "{}"); } catch(e){}
@@ -1120,54 +1307,77 @@ function autoFillICD9Code(elDesc) {
 }
 
 
-function tambahRowDiagnosa() {
+function tambahRowDiagnosa(valDesc = '', valCode = '', valKet = '') {
   const c = document.getElementById('containerDiagnosa');
   let div = document.createElement('div');
   div.className = "p-2.5 bg-slate-50 rounded-xl border border-slate-200 space-y-2 row-diagnosa shadow-sm";
   div.innerHTML = `
     <div class="flex gap-2 items-center">
-      <input type="text" list="listICD10" oninput="autoTitleCase(this); autoFillICDCode(this);" placeholder="Ketik Kode atau Nama Penyakit (ICD-10)..." class="val-diagnosa flex-1 px-3 py-1.5 bg-white border border-slate-300 rounded-lg outline-none focus:ring-1 focus:ring-rose-500 text-xs font-semibold">
-      <input type="text" placeholder="Kode ICD-10" readonly class="val-icdcode w-28 px-2 py-1.5 bg-slate-200 text-slate-700 font-bold border border-slate-300 rounded-lg outline-none text-center text-xs">
+      <input type="text" list="listICD10" oninput="autoTitleCase(this); autoFillICDCode(this);" value="${escapeHtmlAttr(valDesc)}" placeholder="Ketik Kode atau Nama Penyakit (ICD-10)..." class="val-diagnosa flex-1 px-3 py-1.5 bg-white border border-slate-300 rounded-lg outline-none focus:ring-1 focus:ring-rose-500 text-xs font-semibold">
+      <input type="text" placeholder="Kode ICD-10" readonly value="${escapeHtmlAttr(valCode)}" class="val-icdcode w-28 px-2 py-1.5 bg-slate-200 text-slate-700 font-bold border border-slate-300 rounded-lg outline-none text-center text-xs">
       <button type="button" onclick="this.closest('.row-diagnosa').remove()" class="px-2.5 py-1.5 bg-rose-100 text-rose-600 rounded-lg font-black hover:bg-rose-200 transition-colors text-xs">X</button>
     </div>
     <div class="flex gap-2 items-center pl-8">
-      <input type="text" oninput="autoTitleCase(this)" placeholder="Catatan / Keterangan Diagnosa..." class="val-diagnosa-ket flex-1 px-3 py-1.5 bg-white border border-slate-300 rounded-lg outline-none focus:ring-1 focus:ring-rose-500 text-xs">
+      <input type="text" oninput="autoTitleCase(this)" value="${escapeHtmlAttr(valKet)}" placeholder="Catatan / Keterangan Diagnosa..." class="val-diagnosa-ket flex-1 px-3 py-1.5 bg-white border border-slate-300 rounded-lg outline-none focus:ring-1 focus:ring-rose-500 text-xs">
       <div class="w-28"></div>
       <div class="w-[26px]"></div>
     </div>
   `;
   c.appendChild(div);
+  if (valDesc && !valCode) {
+    let inp = div.querySelector('.val-diagnosa');
+    if (inp) autoFillICDCode(inp);
+  }
 }
 
 
-function tambahRowTindakan() {
+function tambahRowTindakan(valDesc = '', valCode = '', valKet = '') {
   const c = document.getElementById('containerTindakan');
   let div = document.createElement('div');
   div.className = "p-2.5 bg-slate-50 rounded-xl border border-slate-200 space-y-2 row-tindakan shadow-sm";
   div.innerHTML = `
     <div class="flex gap-2 items-center">
-      <input type="text" list="listTindakanRM" oninput="autoTitleCase(this); autoFillICD9Code(this);" placeholder="Ketik Kode atau Nama Tindakan (ICD-9)..." class="val-tindakan flex-1 px-3 py-1.5 bg-white border border-slate-300 rounded-lg outline-none focus:ring-1 focus:ring-indigo-500 text-xs font-semibold">
-      <input type="text" placeholder="Kode ICD-9" readonly class="val-icd9code w-28 px-2 py-1.5 bg-slate-200 text-slate-700 font-bold border border-slate-300 rounded-lg outline-none text-center text-xs">
+      <input type="text" list="listTindakanRM" oninput="autoTitleCase(this); autoFillICD9Code(this);" value="${escapeHtmlAttr(valDesc)}" placeholder="Ketik Kode atau Nama Tindakan (ICD-9)..." class="val-tindakan flex-1 px-3 py-1.5 bg-white border border-slate-300 rounded-lg outline-none focus:ring-1 focus:ring-indigo-500 text-xs font-semibold">
+      <input type="text" placeholder="Kode ICD-9" readonly value="${escapeHtmlAttr(valCode)}" class="val-icd9code w-28 px-2 py-1.5 bg-slate-200 text-slate-700 font-bold border border-slate-300 rounded-lg outline-none text-center text-xs">
       <button type="button" onclick="this.closest('.row-tindakan').remove()" class="px-2.5 py-1.5 bg-rose-100 text-rose-600 rounded-lg font-black hover:bg-rose-200 transition-colors text-xs">X</button>
     </div>
     <div class="flex gap-2 items-center pl-8">
-      <input type="text" oninput="autoTitleCase(this)" placeholder="Catatan / Keterangan Tindakan..." class="val-tindakan-ket flex-1 px-3 py-1.5 bg-white border border-slate-300 rounded-lg outline-none focus:ring-1 focus:ring-indigo-500 text-xs">
+      <input type="text" oninput="autoTitleCase(this)" value="${escapeHtmlAttr(valKet)}" placeholder="Catatan / Keterangan Tindakan..." class="val-tindakan-ket flex-1 px-3 py-1.5 bg-white border border-slate-300 rounded-lg outline-none focus:ring-1 focus:ring-indigo-500 text-xs">
       <div class="w-28"></div>
       <div class="w-[26px]"></div>
     </div>
   `;
   c.appendChild(div);
+  if (valDesc && !valCode) {
+    let inp = div.querySelector('.val-tindakan');
+    if (inp) autoFillICD9Code(inp);
+  }
 }
-function tambahRowObat() {
+function tambahRowObat(valNama = '', valQty = '', valKet = '') {
   const c = document.getElementById('containerObat');
   let div = document.createElement('div');
   div.className = "flex gap-2 items-center row-obat bg-slate-50 p-2 rounded border border-slate-200";
-  div.innerHTML = `<input type="text" list="listObatRM" oninput="autoTitleCase(this)" placeholder="Ketik / Cari Obat..." class="val-obat w-2/5 px-3 py-1.5 bg-white border border-slate-300 rounded outline-none focus:ring-1 focus:ring-teal-500"><input type="text" maxlength="2" oninput="this.value=this.value.replace(/[^0-9]/g,'')" placeholder="Qty" class="val-qty w-12 px-2 py-1.5 bg-white border border-slate-300 rounded text-center outline-none"><input type="text" oninput="autoTitleCase(this)" placeholder="Aturan Pakai..." class="val-ket flex-1 px-3 py-1.5 bg-white border border-slate-300 rounded outline-none"><button type="button" onclick="this.parentElement.remove()" class="px-2.5 py-1.5 bg-rose-100 text-rose-600 rounded font-black hover:bg-rose-200">X</button>`;
+  div.innerHTML = `<input type="text" list="listObatRM" oninput="autoTitleCase(this)" value="${escapeHtmlAttr(valNama)}" placeholder="Ketik / Cari Obat..." class="val-obat w-2/5 px-3 py-1.5 bg-white border border-slate-300 rounded outline-none focus:ring-1 focus:ring-teal-500"><input type="text" maxlength="2" oninput="this.value=this.value.replace(/[^0-9]/g,'')" value="${escapeHtmlAttr(valQty)}" placeholder="Qty" class="val-qty w-12 px-2 py-1.5 bg-white border border-slate-300 rounded text-center outline-none"><input type="text" oninput="autoTitleCase(this)" value="${escapeHtmlAttr(valKet)}" placeholder="Aturan Pakai..." class="val-ket flex-1 px-3 py-1.5 bg-white border border-slate-300 rounded outline-none"><button type="button" onclick="this.parentElement.remove()" class="px-2.5 py-1.5 bg-rose-100 text-rose-600 rounded font-black hover:bg-rose-200">X</button>`;
   c.appendChild(div);
 }
 // ==========================================
 // CLEAR & SIMPAN EMR
 // ==========================================
+function bersihkanFormRMHanyaInput() {
+  document.querySelectorAll('#anaCC, #anaPI, #anaPDH, #anaPMH, #anaFH, #anaEndo, #anaGastro, #anaHemato, #anaKardio, #anaMuskulo, #anaNeuro, #anaRespirasi, #anaUrogenital, #anaKhusus, #fisKesan, #fisKesadaran, #fisTensi, #fisNafas, #fisNadi, #fisSuhu, #fisBB, #fisTB, #fisAlergi, #fisEkstra, #fisIntra, #fisPenunjang, #rmCatatanEdukasi').forEach(el => el.value = '');
+  document.getElementById('containerDiagnosa').innerHTML = '';
+  document.getElementById('containerTindakan').innerHTML = '';
+  document.getElementById('containerObat').innerHTML = '';
+  tambahRowDiagnosa();
+  tambahRowTindakan();
+  let bnr = document.getElementById('bannerCarryForwardRM');
+  if (bnr) bnr.classList.add('hidden');
+  resetPeriodontalToDefault();
+  resetOhisToDefault();
+  let tglEl = document.getElementById('rmTglPeriksa');
+  if (tglEl) { tglEl.value = getTodayIso(); tglEl.max = getTodayIso(); }
+}
+
 function bersihkanFormRM() {
   activePasienRM = null; currentOdontogram = {};
   document.getElementById('rmSearchPasien').value = '';
@@ -1183,10 +1393,12 @@ function bersihkanFormRM() {
   document.getElementById('containerObat').innerHTML = '';
   tambahRowDiagnosa();
   tambahRowTindakan();
-   let tglEl = document.getElementById('rmTglPeriksa'); tglEl.value = getTodayIso(); tglEl.max = getTodayIso();
-   renderOdontogramGrid();
-   resetPeriodontalToDefault();
-   resetOhisToDefault();
+  let bnr = document.getElementById('bannerCarryForwardRM');
+  if (bnr) bnr.classList.add('hidden');
+  let tglEl = document.getElementById('rmTglPeriksa'); tglEl.value = getTodayIso(); tglEl.max = getTodayIso();
+  renderOdontogramGrid();
+  resetPeriodontalToDefault();
+  resetOhisToDefault();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 

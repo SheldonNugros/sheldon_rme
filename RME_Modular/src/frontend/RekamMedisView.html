@@ -533,9 +533,15 @@
           <input type="text" id="modalDiagnosis" placeholder="Misal: K04.0" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg outline-none focus:border-blue-500">
         </div>
       </div>
-      <div>
-        <label class="block font-semibold text-slate-700 mb-1">Catatan Tambahan:</label>
-        <input type="text" id="modalNotes" placeholder="Rencana perawatan dll..." class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg outline-none focus:border-blue-500">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Catatan Tambahan:</label>
+          <input type="text" id="modalNotes" placeholder="Rencana perawatan dll..." class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg outline-none focus:border-blue-500">
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Tanggal Diagnosa Gigi:</label>
+          <input type="date" id="modalToothTgl" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg outline-none focus:border-blue-500 font-bold text-slate-700">
+        </div>
       </div>
       <div class="flex flex-wrap gap-2 pt-2">
         <button type="button" onclick="setModalToothAllSurfaces('car')" class="px-3 py-1.5 bg-rose-50 text-rose-700 border border-rose-200 rounded-lg text-[10px] font-bold hover:bg-rose-100">Karies Semua</button>

@@ -18,6 +18,7 @@ var isEmrTitleRenamedInHtml = true;
 var isClearPasienBtnInHtml = true;
 var isTglLargeInHtml = true;
 var isTempatLahirInHtml = true;
+var isModalToothTglInHtml = true;
 
 // Enhanced DOM Mock for JavaScriptCore
 var window = this;
@@ -3271,7 +3272,8 @@ function openHistoryEMR(idPasien) {
                    let gen = dt.generalCondition !== 'nor' ? `Kondisi: ${dt.generalCondition}` : '';
                    let sur = Object.entries(dt.surfaces||{}).filter(x=>x[1]!=='nor').map(x=>x[0]+'='+x[1]).join(', ');
                    let srTx = sur ? `Permukaan: ${sur}` : '';
-                   return `<li class="break-inside-avoid"><b>Gigi ${gigi}:</b> <span class="text-slate-600">${gen}${srTx}</span> <span class="text-indigo-600 font-bold">${diag}</span> <span class="text-amber-600 italic">${nts}</span></li>`;
+                   let tglBadge = formatTglTindakanDDMMYY(dt.tanggal || r.tanggalPeriksa);
+                    return `<li class="break-inside-avoid"><b>Gigi ${gigi}:</b> <span class="text-slate-600">${gen}${srTx}</span> <span class="text-indigo-600 font-bold">${diag}</span> <span class="text-amber-600 italic">${nts}</span>${tglBadge ? ' ' + tglBadge : ''}</li>`;
                  }).join('')
                }
              </ul>
@@ -3343,7 +3345,13 @@ function openHistoryEMR(idPasien) {
            <div>
              <h4 class="font-black bg-slate-100 p-1.5 border-l-4 border-slate-800 mb-2 uppercase">Diagnosa (ICD-10)</h4>
              <ul class="list-disc pl-5 space-y-1 text-slate-800 font-bold mb-4">
-               ${ana.diagnosaICD.map(d => `<li>${d}</li>`).join('')}
+               ${ana.diagnosaICD.map(d => {
+                let p = parseTindakanItem(d, r.tanggalPeriksa);
+                let tglBadge = formatTglTindakanDDMMYY(p.tanggal);
+                let codePrefix = p.code ? `${p.code} - ` : '';
+                let ketText = p.ket ? ` (${p.ket})` : '';
+                return `<li class="py-0.5"><span class="font-semibold text-slate-800">${codePrefix}${p.desc}</span>${tglBadge ? ' ' + tglBadge : ''}${ketText}</li>`;
+              }).join('')}
              </ul>
            </div>
            ` : ''}
@@ -3363,7 +3371,12 @@ function openHistoryEMR(idPasien) {
              <h4 class="font-black bg-slate-100 p-1.5 border-l-4 border-slate-800 mb-2 uppercase">Resep Obat</h4>
              <table class="w-full text-left border border-slate-300 border-collapse">
                <tr class="bg-slate-50"><th class="border border-slate-300 px-2 py-1">Nama Obat</th><th class="border border-slate-300 px-2 py-1 w-16 text-center">Qty</th><th class="border border-slate-300 px-2 py-1">Aturan Pakai</th></tr>
-               ${obat.length === 0 ? '<tr><td colspan="3" class="border border-slate-300 px-2 py-1 text-center">-</td></tr>' : obat.map(o => `<tr><td class="border border-slate-300 px-2 py-1">${o.obat}</td><td class="border border-slate-300 px-2 py-1 text-center font-bold">${o.qty}</td><td class="border border-slate-300 px-2 py-1">${o.ket}</td></tr>`).join('')}
+               ${obat.length === 0 ? '<tr><td colspan="3" class="border border-slate-300 px-2 py-1 text-center">-</td></tr>' : obat.map(o => {
+                let p = parseTindakanItem(o.obat || o.nama || '', o.tanggal || o.tgl || r.tanggalPeriksa);
+                let tglBadge = formatTglTindakanDDMMYY(p.tanggal);
+                let displayObat = p.desc;
+                return `<tr><td class="border border-slate-300 px-2 py-1">${displayObat}${tglBadge ? ' ' + tglBadge : ''}</td><td class="border border-slate-300 px-2 py-1 text-center font-bold">${o.qty || '-'}</td><td class="border border-slate-300 px-2 py-1">${o.ket || p.ket || '-'}</td></tr>`;
+              }).join('')}
              </table>
            </div>
          
@@ -4020,11 +4033,17 @@ function printHistoryEMR(idPasien) {
              let gen = dt.generalCondition !== 'nor' ? `Kondisi: ${dt.generalCondition}` : '';
              let sur = Object.entries(dt.surfaces||{}).filter(x=>x[1]!=='nor').map(x=>x[0]+'='+x[1]).join(', ');
              let srTx = sur ? `Permukaan: ${sur}` : '';
-             return `<li class="break-inside-avoid"><b>Gigi ${gigi}:</b> <span class="text-slate-600">${gen}${srTx}</span> <span class="text-indigo-600 font-bold">${diag}</span> <span class="text-amber-600 italic">${nts}</span></li>`;
+             let tglBadge = formatTglTindakanDDMMYY(dt.tanggal || r.tanggalPeriksa);
+                    return `<li class="break-inside-avoid"><b>Gigi ${gigi}:</b> <span class="text-slate-600">${gen}${srTx}</span> <span class="text-indigo-600 font-bold">${diag}</span> <span class="text-amber-600 italic">${nts}</span>${tglBadge ? ' ' + tglBadge : ''}</li>`;
            }).join('');
           
          let obatList = obat.length === 0 ? '<tr><td colspan="3" class="border border-slate-300 px-2 py-1 text-center">-</td></tr>' :
-           obat.map(o => `<tr><td class="border border-slate-300 px-2 py-1">${o.obat}</td><td class="border border-slate-300 px-2 py-1 text-center font-bold">${o.qty}</td><td class="border border-slate-300 px-2 py-1">${o.ket}</td></tr>`).join('');
+            obat.map(o => {
+              let p = parseTindakanItem(o.obat || o.nama || '', o.tanggal || o.tgl || r.tanggalPeriksa);
+              let tglBadge = formatTglTindakanDDMMYY(p.tanggal);
+              let displayObat = p.desc;
+              return `<tr><td class="border border-slate-300 px-2 py-1">${displayObat}${tglBadge ? ' ' + tglBadge : ''}</td><td class="border border-slate-300 px-2 py-1 text-center font-bold">${o.qty || '-'}</td><td class="border border-slate-300 px-2 py-1">${o.ket || p.ket || '-'}</td></tr>`;
+            }).join('');
         
          let tglFormat = r.tanggalPeriksa || '-';
          if(tglFormat !== '-') {
@@ -4035,7 +4054,13 @@ function printHistoryEMR(idPasien) {
             }
          }
         
-         let diagGlobal = (ana.diagnosaICD && ana.diagnosaICD.length > 0) ? `<div><h4 class="font-black bg-slate-100 p-1.5 border-l-4 border-slate-800 mb-2 uppercase">Diagnosa (ICD-10)</h4><ul class="list-disc pl-5 space-y-1 text-slate-800 font-bold mb-4">${ana.diagnosaICD.map(d => `<li>${d}</li>`).join('')}</ul></div>` : '';
+         let diagGlobal = (ana.diagnosaICD && ana.diagnosaICD.length > 0) ? `<div><h4 class="font-black bg-slate-100 p-1.5 border-l-4 border-slate-800 mb-2 uppercase">Diagnosa (ICD-10)</h4><ul class="list-disc pl-5 space-y-1 text-slate-800 font-bold mb-4">${ana.diagnosaICD.map(d => {
+            let p = parseTindakanItem(d, r.tanggalPeriksa);
+            let tglBadge = formatTglTindakanDDMMYY(p.tanggal);
+            let codePrefix = p.code ? `${p.code} - ` : '';
+            let ketText = p.ket ? ` (${p.ket})` : '';
+            return `<li class="py-0.5"><span class="font-semibold text-slate-800">${codePrefix}${p.desc}</span>${tglBadge ? ' ' + tglBadge : ''}${ketText}</li>`;
+          }).join('')}</ul></div>` : '';
 
 
          return `
@@ -5082,7 +5107,13 @@ function salinDataKunjunganKeForm(r, isAuto = false) {
 
   // 4. Odontogram
   if (odo && Object.keys(odo).length > 0) {
-    currentOdontogram = JSON.parse(JSON.stringify(odo));
+    let copiedOdo = JSON.parse(JSON.stringify(odo));
+    Object.keys(copiedOdo).forEach(k => {
+      if (!copiedOdo[k].tanggal && r.tanggalPeriksa) {
+        copiedOdo[k].tanggal = r.tanggalPeriksa;
+      }
+    });
+    currentOdontogram = copiedOdo;
     renderOdontogramGrid();
   } else if (riwayatPasienAktif && riwayatPasienAktif.length > 0) {
     let lastWithOdo = riwayatPasienAktif.find(x => x.odontogramStr && x.odontogramStr !== "{}" && x.odontogramStr !== "[]");
@@ -5090,7 +5121,13 @@ function salinDataKunjunganKeForm(r, isAuto = false) {
       try {
         let prevOdo = JSON.parse(lastWithOdo.odontogramStr);
         if (prevOdo && Object.keys(prevOdo).length > 0) {
-          currentOdontogram = JSON.parse(JSON.stringify(prevOdo));
+          let copiedOdo = JSON.parse(JSON.stringify(prevOdo));
+          Object.keys(copiedOdo).forEach(k => {
+            if (!copiedOdo[k].tanggal && lastWithOdo.tanggalPeriksa) {
+              copiedOdo[k].tanggal = lastWithOdo.tanggalPeriksa;
+            }
+          });
+          currentOdontogram = copiedOdo;
           renderOdontogramGrid();
         }
       } catch(e){}
@@ -5103,20 +5140,8 @@ function salinDataKunjunganKeForm(r, isAuto = false) {
     containerDiag.innerHTML = '';
     if (Array.isArray(ana.diagnosaICD) && ana.diagnosaICD.length > 0) {
       ana.diagnosaICD.forEach(item => {
-        let text = typeof item === 'object' ? (item.desc || item.nama || '') : String(item);
-        let code = '';
-        let ket = '';
-        let parts = text.split(' - ');
-        if (parts.length > 1) {
-          code = parts[0].trim();
-          text = parts.slice(1).join(' - ').trim();
-        }
-        let m = text.match(/\((.*?)\)$/);
-        if (m) {
-          ket = m[1].trim();
-          text = text.replace(/\s*\((.*?)\)$/, '').trim();
-        }
-        tambahRowDiagnosa(text, code, ket);
+        let p = parseTindakanItem(item, r.tanggalPeriksa);
+        tambahRowDiagnosa(p.desc, p.code, p.ket, p.isoDate);
       });
     } else {
       tambahRowDiagnosa();
@@ -5144,9 +5169,12 @@ function salinDataKunjunganKeForm(r, isAuto = false) {
     if (Array.isArray(obat) && obat.length > 0) {
       obat.forEach(item => {
         if (typeof item === 'object') {
-          tambahRowObat(item.obat || item.nama || '', item.qty || '', item.ket || '');
+          let itemTgl = item.tanggal || item.tgl || '';
+          let p = parseTindakanItem(item.obat || item.nama || '', itemTgl || r.tanggalPeriksa);
+          tambahRowObat(p.desc, item.qty || '', item.ket || p.ket || '', p.isoDate);
         } else {
-          tambahRowObat(String(item), '', '');
+          let p = parseTindakanItem(String(item), r.tanggalPeriksa);
+          tambahRowObat(p.desc, '', p.ket || '', p.isoDate);
         }
       });
     }
@@ -5348,7 +5376,8 @@ function bukaDetailRM(idx) {
               let gen = dt.generalCondition !== 'nor' ? `Kondisi: ${dt.generalCondition}` : '';
               let sur = Object.entries(dt.surfaces||{}).filter(x=>x[1]!=='nor').map(x=>x[0]+'='+x[1]).join(', ');
               let srTx = sur ? `Permukaan: ${sur}` : '';
-              return `<li class="break-inside-avoid"><b>Gigi ${gigi}:</b> <span class="text-slate-600">${gen}${srTx}</span> <span class="text-indigo-600 font-bold">${diag}</span> <span class="text-amber-600 italic">${nts}</span></li>`;
+              let tglBadge = formatTglTindakanDDMMYY(dt.tanggal || r.tanggalPeriksa);
+              return `<li class="break-inside-avoid"><b>Gigi ${gigi}:</b> <span class="text-slate-600">${gen}${srTx}</span> <span class="text-indigo-600 font-bold">${diag}</span> <span class="text-amber-600 italic">${nts}</span>${tglBadge ? ' ' + tglBadge : ''}</li>`;
             }).join('')
           }
         </ul>
@@ -5424,7 +5453,13 @@ function bukaDetailRM(idx) {
       <div>
         <h4 class="font-black bg-slate-100 p-1.5 border-l-4 border-slate-800 mb-2 uppercase">Diagnosa (ICD-10)</h4>
         <ul class="list-disc pl-5 space-y-1 text-slate-800 font-bold mb-4">
-          ${ana.diagnosaICD.map(d => `<li>${d}</li>`).join('')}
+          ${ana.diagnosaICD.map(d => {
+            let p = parseTindakanItem(d, r.tanggalPeriksa);
+            let tglBadge = formatTglTindakanDDMMYY(p.tanggal);
+            let codePrefix = p.code ? `${p.code} - ` : '';
+            let ketText = p.ket ? ` (${p.ket})` : '';
+            return `<li class="py-0.5"><span class="font-semibold text-slate-800">${codePrefix}${p.desc}</span>${tglBadge ? ' ' + tglBadge : ''}${ketText}</li>`;
+          }).join('')}
         </ul>
       </div>` : ''}
       <div>
@@ -5441,7 +5476,12 @@ function bukaDetailRM(idx) {
         <h4 class="font-black bg-slate-100 p-1.5 border-l-4 border-slate-800 mb-2 uppercase">Resep Obat</h4>
         <table class="w-full text-left border border-slate-300 border-collapse">
           <tr class="bg-slate-50"><th class="border border-slate-300 px-2 py-1">Nama Obat</th><th class="border border-slate-300 px-2 py-1 w-16 text-center">Qty</th><th class="border border-slate-300 px-2 py-1">Aturan Pakai</th></tr>
-          ${obat.length === 0 ? '<tr><td colspan="3" class="border border-slate-300 px-2 py-1 text-center">-</td></tr>' : obat.map(o => `<tr><td class="border border-slate-300 px-2 py-1">${o.obat}</td><td class="border border-slate-300 px-2 py-1 text-center font-bold">${o.qty}</td><td class="border border-slate-300 px-2 py-1">${o.ket}</td></tr>`).join('')}
+          ${obat.length === 0 ? '<tr><td colspan="3" class="border border-slate-300 px-2 py-1 text-center">-</td></tr>' : obat.map(o => {
+            let p = parseTindakanItem(o.obat || o.nama || '', o.tanggal || o.tgl || r.tanggalPeriksa);
+            let tglBadge = formatTglTindakanDDMMYY(p.tanggal);
+            let displayObat = p.desc;
+            return `<tr><td class="border border-slate-300 px-2 py-1">${displayObat}${tglBadge ? ' ' + tglBadge : ''}</td><td class="border border-slate-300 px-2 py-1 text-center font-bold">${o.qty || '-'}</td><td class="border border-slate-300 px-2 py-1">${o.ket || p.ket || '-'}</td></tr>`;
+          }).join('')}
         </table>
       </div>
       <div>
@@ -5714,7 +5754,9 @@ let _surfaceClickTimer = null;
 function onSurfaceClick(tN, sK) {
   if (_surfaceClickTimer) clearTimeout(_surfaceClickTimer);
   _surfaceClickTimer = setTimeout(() => {
-    if (!currentOdontogram[tN]) currentOdontogram[tN] = { toothNumber: tN, generalCondition: 'nor', surfaces: { occlusal: 'nor', mesial: 'nor', distal: 'nor', buccal: 'nor', lingual: 'nor' } };
+    let toothDate = (document.getElementById('rmTglPeriksa') ? document.getElementById('rmTglPeriksa').value : '') || getTodayIso();
+    if (!currentOdontogram[tN]) currentOdontogram[tN] = { toothNumber: tN, generalCondition: 'nor', surfaces: { occlusal: 'nor', mesial: 'nor', distal: 'nor', buccal: 'nor', lingual: 'nor' }, tanggal: toothDate };
+    else if (!currentOdontogram[tN].tanggal) currentOdontogram[tN].tanggal = toothDate;
     if (['mis', 'rrx', 'crn', 'nvt', 'une', 'imx', 'pre'].includes(selectedCondition)) {
       currentOdontogram[tN].generalCondition = selectedCondition;
     } else {
@@ -5894,36 +5936,47 @@ function resetAllOdontogramToNormal() {
 function openToothModal(num) {
   modalSelectedToothNumber = num;
   const t = currentOdontogram[num] || { generalCondition: 'nor', surfaces: {} };
-   document.getElementById('modalToothNum').innerText = num;
+  document.getElementById('modalToothNum').innerText = num;
   document.getElementById('modalGeneralCond').value = t.generalCondition || 'nor';
   document.getElementById('modalMobility').value = String(t.mobility || 0);
   document.getElementById('modalDiagnosis').value = t.diagnosis || '';
   document.getElementById('modalNotes').value = t.notes || '';
+  let defaultTgl = toIsoDateTindakan(t.tanggal) || (document.getElementById('rmTglPeriksa') ? document.getElementById('rmTglPeriksa').value : '') || getTodayIso();
+  let tglEl = document.getElementById('modalToothTgl');
+  if (tglEl) tglEl.value = defaultTgl;
   document.getElementById('modalToothPreview').innerHTML = `<div class="scale-125 transform pointer-events-none">${renderSingleToothHtml(num)}</div>`;
-   document.getElementById('toothModal').classList.remove('hidden');
+  document.getElementById('toothModal').classList.remove('hidden');
 }
 function closeToothModal() {
   document.getElementById('toothModal').classList.add('hidden');
   modalSelectedToothNumber = null;
 }
- function setModalToothAllSurfaces(c) {
+function setModalToothAllSurfaces(c) {
   if (!modalSelectedToothNumber) return;
-  currentOdontogram[modalSelectedToothNumber] = { toothNumber: modalSelectedToothNumber, generalCondition: 'nor', surfaces: { occlusal: c, mesial: c, distal: c, buccal: c, lingual: c } };
+  let tglEl = document.getElementById('modalToothTgl');
+  let toothTgl = (tglEl && tglEl.value) ? tglEl.value : ((document.getElementById('rmTglPeriksa') ? document.getElementById('rmTglPeriksa').value : '') || getTodayIso());
+  currentOdontogram[modalSelectedToothNumber] = { toothNumber: modalSelectedToothNumber, generalCondition: 'nor', surfaces: { occlusal: c, mesial: c, distal: c, buccal: c, lingual: c }, tanggal: toothTgl };
   saveToothModalChanges();
 }
- function resetModalTooth() {
+function resetModalTooth() {
   if (!modalSelectedToothNumber) return;
   delete currentOdontogram[modalSelectedToothNumber];
   closeToothModal(); renderOdontogramGrid();
 }
- function saveToothModalChanges() {
+function saveToothModalChanges() {
   if (!modalSelectedToothNumber) return;
   if (!currentOdontogram[modalSelectedToothNumber]) currentOdontogram[modalSelectedToothNumber] = { toothNumber: modalSelectedToothNumber, surfaces: {} };
-   currentOdontogram[modalSelectedToothNumber].generalCondition = document.getElementById('modalGeneralCond').value;
+  currentOdontogram[modalSelectedToothNumber].generalCondition = document.getElementById('modalGeneralCond').value;
   currentOdontogram[modalSelectedToothNumber].mobility = Number(document.getElementById('modalMobility').value) || 0;
   currentOdontogram[modalSelectedToothNumber].diagnosis = document.getElementById('modalDiagnosis').value;
   currentOdontogram[modalSelectedToothNumber].notes = document.getElementById('modalNotes').value;
-   closeToothModal(); renderOdontogramGrid();
+  let tglEl = document.getElementById('modalToothTgl');
+  if (tglEl && tglEl.value) {
+    currentOdontogram[modalSelectedToothNumber].tanggal = tglEl.value;
+  } else if (!currentOdontogram[modalSelectedToothNumber].tanggal) {
+    currentOdontogram[modalSelectedToothNumber].tanggal = (document.getElementById('rmTglPeriksa') ? document.getElementById('rmTglPeriksa').value : '') || getTodayIso();
+  }
+  closeToothModal(); renderOdontogramGrid();
 }
 // ==========================================
 // DIAGNOSA ICD-10, TINDAKAN & OBAT DINAMIS
@@ -5984,20 +6037,23 @@ function autoFillICD9Code(elDesc) {
 }
 
 
-function tambahRowDiagnosa(valDesc = '', valCode = '', valKet = '') {
+function tambahRowDiagnosa(valDesc = '', valCode = '', valKet = '', valTgl = '') {
   const c = document.getElementById('containerDiagnosa');
+  let defaultTgl = valTgl || (document.getElementById('rmTglPeriksa') ? document.getElementById('rmTglPeriksa').value : '') || getTodayIso();
   let div = document.createElement('div');
   div.className = "p-2.5 bg-slate-50 rounded-xl border border-slate-200 space-y-2 row-diagnosa shadow-sm";
   div.innerHTML = `
-    <div class="flex gap-2 items-center">
-      <input type="text" list="listICD10" oninput="autoTitleCase(this); autoFillICDCode(this);" value="${escapeHtmlAttr(valDesc)}" placeholder="Ketik Kode atau Nama Penyakit (ICD-10)..." class="val-diagnosa flex-1 px-3 py-1.5 bg-white border border-slate-300 rounded-lg outline-none focus:ring-1 focus:ring-rose-500 text-xs font-semibold">
-      <input type="text" placeholder="Kode ICD-10" readonly value="${escapeHtmlAttr(valCode)}" class="val-icdcode w-28 px-2 py-1.5 bg-slate-200 text-slate-700 font-bold border border-slate-300 rounded-lg outline-none text-center text-xs">
-      <button type="button" onclick="this.closest('.row-diagnosa').remove()" class="px-2.5 py-1.5 bg-rose-100 text-rose-600 rounded-lg font-black hover:bg-rose-200 transition-colors text-xs">X</button>
+    <div class="flex gap-2 items-center flex-wrap sm:flex-nowrap">
+      <input type="text" list="listICD10" oninput="autoTitleCase(this); autoFillICDCode(this);" value="${escapeHtmlAttr(valDesc)}" placeholder="Ketik Kode atau Nama Penyakit (ICD-10)..." class="val-diagnosa flex-1 px-3 py-1.5 bg-white border border-slate-300 rounded-lg outline-none focus:ring-1 focus:ring-rose-500 text-xs font-semibold min-w-[200px]">
+      <input type="text" placeholder="Kode ICD-10" readonly value="${escapeHtmlAttr(valCode)}" class="val-icdcode w-24 px-2 py-1.5 bg-slate-200 text-slate-700 font-bold border border-slate-300 rounded-lg outline-none text-center text-xs">
+      <div class="flex items-center gap-1 bg-white border border-slate-300 rounded-lg px-2 py-1" title="Tanggal Diagnosa Ditambahkan">
+        <span class="text-slate-400 text-xs">📅</span>
+        <input type="date" value="${defaultTgl}" class="val-diagnosa-tgl bg-transparent text-slate-700 font-bold outline-none text-xs">
+      </div>
+      <button type="button" onclick="this.closest('.row-diagnosa').remove()" class="px-2.5 py-1.5 bg-rose-100 text-rose-600 rounded-lg font-black hover:bg-rose-200 transition-colors text-xs" title="Hapus Diagnosa">X</button>
     </div>
-    <div class="flex gap-2 items-center pl-8">
+    <div class="flex gap-2 items-center pl-2">
       <input type="text" oninput="autoTitleCase(this)" value="${escapeHtmlAttr(valKet)}" placeholder="Catatan / Keterangan Diagnosa..." class="val-diagnosa-ket flex-1 px-3 py-1.5 bg-white border border-slate-300 rounded-lg outline-none focus:ring-1 focus:ring-rose-500 text-xs">
-      <div class="w-28"></div>
-      <div class="w-[26px]"></div>
     </div>
   `;
   c.appendChild(div);
@@ -6048,12 +6104,22 @@ function updateObatQtyRequirement(inputObat) {
   }
 }
 
-function tambahRowObat(valNama = '', valQty = '', valKet = '') {
+function tambahRowObat(valNama = '', valQty = '', valKet = '', valTgl = '') {
   const c = document.getElementById('containerObat');
+  let defaultTgl = valTgl || (document.getElementById('rmTglPeriksa') ? document.getElementById('rmTglPeriksa').value : '') || getTodayIso();
   let div = document.createElement('div');
-  div.className = "flex gap-2 items-center row-obat bg-slate-50 p-2 rounded border border-slate-200";
+  div.className = "flex gap-2 items-center flex-wrap sm:flex-nowrap row-obat bg-slate-50 p-2 rounded-xl border border-slate-200 shadow-sm";
   let isReq = (valNama || '').toString().trim().length > 0;
-  div.innerHTML = `<input type="text" list="listObatRM" oninput="autoTitleCase(this); updateObatQtyRequirement(this);" value="${escapeHtmlAttr(valNama)}" placeholder="Ketik / Cari Obat..." class="val-obat w-2/5 px-3 py-1.5 bg-white border border-slate-300 rounded outline-none focus:ring-1 focus:ring-teal-500 text-xs font-semibold"><input type="text" maxlength="4" oninput="this.value=this.value.replace(/[^0-9]/g,''); this.classList.remove('border-rose-500','ring-2','ring-rose-400');" value="${escapeHtmlAttr(valQty)}" placeholder="${isReq ? 'Qty*' : 'Qty'}" class="val-qty w-14 px-2 py-1.5 bg-white border ${isReq ? 'border-indigo-400' : 'border-slate-300'} rounded text-center outline-none text-xs font-bold"><input type="text" oninput="autoTitleCase(this)" value="${escapeHtmlAttr(valKet)}" placeholder="Aturan Pakai..." class="val-ket flex-1 px-3 py-1.5 bg-white border border-slate-300 rounded outline-none text-xs"><button type="button" onclick="this.parentElement.remove()" class="px-2.5 py-1.5 bg-rose-100 text-rose-600 rounded font-black hover:bg-rose-200 text-xs">X</button>`;
+  div.innerHTML = `
+    <input type="text" list="listObatRM" oninput="autoTitleCase(this); updateObatQtyRequirement(this);" value="${escapeHtmlAttr(valNama)}" placeholder="Ketik / Cari Obat..." class="val-obat flex-1 min-w-[140px] px-3 py-1.5 bg-white border border-slate-300 rounded-lg outline-none focus:ring-1 focus:ring-teal-500 text-xs font-semibold">
+    <input type="text" maxlength="4" oninput="this.value=this.value.replace(/[^0-9]/g,''); this.classList.remove('border-rose-500','ring-2','ring-rose-400');" value="${escapeHtmlAttr(valQty)}" placeholder="${isReq ? 'Qty*' : 'Qty'}" class="val-qty w-14 px-2 py-1.5 bg-white border ${isReq ? 'border-indigo-400' : 'border-slate-300'} rounded-lg text-center outline-none text-xs font-bold">
+    <input type="text" oninput="autoTitleCase(this)" value="${escapeHtmlAttr(valKet)}" placeholder="Aturan Pakai..." class="val-ket flex-1 min-w-[130px] px-3 py-1.5 bg-white border border-slate-300 rounded-lg outline-none text-xs">
+    <div class="flex items-center gap-1 bg-white border border-slate-300 rounded-lg px-2 py-1" title="Tanggal Resep Ditambahkan">
+      <span class="text-slate-400 text-xs">📅</span>
+      <input type="date" value="${defaultTgl}" class="val-obat-tgl bg-transparent text-slate-700 font-bold outline-none text-xs">
+    </div>
+    <button type="button" onclick="this.closest('.row-obat').remove()" class="px-2.5 py-1.5 bg-rose-100 text-rose-600 rounded-lg font-black hover:bg-rose-200 text-xs" title="Hapus Obat">X</button>
+  `;
   c.appendChild(div);
 }
 // ==========================================
@@ -6110,9 +6176,11 @@ function simpanEMRFinal() {
     let obInput = row.querySelector('.val-obat');
     let qtyInput = row.querySelector('.val-qty');
     let ketInput = row.querySelector('.val-ket');
+    let tglInput = row.querySelector('.val-obat-tgl');
     let ob = obInput ? obInput.value.trim() : '';
     let q = qtyInput ? qtyInput.value.trim() : '';
     let k = ketInput ? ketInput.value.trim() : '';
+    let tglVal = tglInput ? tglInput.value.trim() : '';
     if (ob) {
       let numQty = parseInt(q, 10);
       if (!q || isNaN(numQty) || numQty <= 0) {
@@ -6120,7 +6188,9 @@ function simpanEMRFinal() {
           invalidQtyObat = { nama: ob, inputEl: qtyInput };
         }
       }
-      arrObat.push({ obat: ob, qty: q, ket: k });
+      let tglIso = tglVal || (document.getElementById('rmTglPeriksa') ? document.getElementById('rmTglPeriksa').value.trim() : '') || getTodayIso();
+      let tglBadge = formatTglTindakanDDMMYY(tglIso);
+      arrObat.push({ obat: ob, qty: q, ket: k, tanggal: tglIso, tglBadge: tglBadge });
     }
   });
 
@@ -6142,10 +6212,15 @@ function simpanEMRFinal() {
      let desc = row.querySelector('.val-diagnosa').value.trim();
      let code = row.querySelector('.val-icdcode').value.trim();
      let ket = row.querySelector('.val-diagnosa-ket') ? row.querySelector('.val-diagnosa-ket').value.trim() : '';
+     let tglVal = row.querySelector('.val-diagnosa-tgl') ? row.querySelector('.val-diagnosa-tgl').value.trim() : '';
      if(desc) {
         let fullDiag = desc;
         if (code && !desc.toLowerCase().includes(code.toLowerCase())) {
             fullDiag = `${code} - ${desc}`;
+        }
+        let tglFormatted = formatTglTindakanDDMMYY(tglVal || getV('rmTglPeriksa') || getTodayIso());
+        if (tglFormatted && !fullDiag.includes(tglFormatted)) {
+            fullDiag += ` ${tglFormatted}`;
         }
         if (ket) {
             fullDiag += ` (${ket})`;
@@ -6180,9 +6255,17 @@ function simpanEMRFinal() {
      }
   });
 
+  let finalOdonto = JSON.parse(JSON.stringify(currentOdontogram || {}));
+  let examDate = getV('rmTglPeriksa') || getTodayIso();
+  Object.keys(finalOdonto).forEach(tN => {
+    if (!finalOdonto[tN].tanggal) {
+      finalOdonto[tN].tanggal = examDate;
+    }
+  });
+
   let payload = {
     idPasien: activePasienRM.idPasien, noRm: activePasienRM.noRm, namaPasien: activePasienRM.namaPasien, tanggalPeriksa: getV('rmTglPeriksa'), dokterPemeriksa: getV('rmDokterLabel'),
-    anamnesisStr: JSON.stringify(anam), fisikStr: JSON.stringify(fisik), odontogram: JSON.stringify(currentOdontogram), tindakanStr: JSON.stringify(arrTindakan), obatStr: JSON.stringify(arrObat), catatanEdukasi: getV('rmCatatanEdukasi')
+    anamnesisStr: JSON.stringify(anam), fisikStr: JSON.stringify(fisik), odontogram: JSON.stringify(finalOdonto), tindakanStr: JSON.stringify(arrTindakan), obatStr: JSON.stringify(arrObat), catatanEdukasi: getV('rmCatatanEdukasi')
   };
  
   google.script.run.withSuccessHandler(res => {
@@ -14964,6 +15047,7 @@ let contDiag = document.getElementById('containerDiagnosa');
 assert("Diagnosa Row Appended", contDiag && contDiag.children.length > 0);
 let lastRowDiag = contDiag.children[contDiag.children.length - 1];
 assert("Diagnosa Note Field Present", !!lastRowDiag.querySelector('.val-diagnosa-ket'));
+assert("Diagnosa Date Field Present", !!lastRowDiag.querySelector('.val-diagnosa-tgl'));
 let mockInputDiag = { value: "karies dentis", setSelectionRange: function() {} };
 autoTitleCase(mockInputDiag);
 assert("Diagnosa Input Auto Title Case Formatted", mockInputDiag.value === "Karies Dentis");
@@ -14978,6 +15062,14 @@ assert("Format Tgl Tindakan DDMMYY", formatTglTindakanDDMMYY("2026-10-18") === "
 let mockInputTind = { value: "pencabutan gigi tetap", setSelectionRange: function() {} };
 autoTitleCase(mockInputTind);
 assert("Tindakan Input Auto Title Case Formatted", mockInputTind.value === "Pencabutan Gigi Tetap");
+
+tambahRowObat();
+let contObat = document.getElementById('containerObat');
+assert("Obat Row Appended", contObat && contObat.children.length > 0);
+let lastRowObat = contObat.children[contObat.children.length - 1];
+assert("Obat Date Field Present", !!lastRowObat.querySelector('.val-obat-tgl'));
+
+assert("Modal Tooth Tanggal Input Tersedia di HTML", isModalToothTglInHtml);
 
 // 15i. Test Detail Rekam Medis (EMR): Tombol Odontogram History & Posisi Diagnosis Gigi
 riwayatPasienAktif = [{
@@ -14997,6 +15089,9 @@ let printArea = document.getElementById('printAreaRM');
 assert("Detail RM Rendered", !!printArea);
 let printHtml = printArea.innerHTML;
 assert("Detail RM Tindakan Menampilkan Format Tanggal DDMMYY", printHtml.includes('[08/10/26]'));
+assert("Detail RM Diagnosa ICD-10 Menampilkan Format Tanggal DDMMYY", printHtml.includes('[08/10/26]') && printHtml.includes('K02.1 - Caries'));
+assert("Detail RM Resep Obat Menampilkan Format Tanggal DDMMYY", printHtml.includes('[08/10/26]') && printHtml.includes('Amoksisilin Generik 500mg'));
+assert("Detail RM Diagnosis Gigi Menampilkan Format Tanggal DDMMYY", printHtml.includes('[08/10/26]') && printHtml.includes('Gigi 16:'));
 assert("Tombol Buka Odontogram Interaktif Present", printHtml.includes('bukaModalOdontoHistory(0)'));
 assert("DMF-T Decayed Present", printHtml.includes('Decayed (D)'));
 assert("DMF-T Missing Present", printHtml.includes('Missing (M)'));
@@ -15013,6 +15108,11 @@ closeDetailRM();
 salinDataKunjunganKeForm(riwayatPasienAktif[0]);
 let firstCopiedRow = document.getElementById('containerTindakan').children[0];
 assert("Salin ke Form Membawa Tanggal Kunjungan Asli", firstCopiedRow.querySelector('.val-tindakan-tgl').value === '2026-10-08');
+let firstCopiedDiag = document.getElementById('containerDiagnosa').children[0];
+assert("Salin ke Form Membawa Tanggal Kunjungan Asli Diagnosa", firstCopiedDiag.querySelector('.val-diagnosa-tgl').value === '2026-10-08');
+let firstCopiedObat = document.getElementById('containerObat').children[0];
+assert("Salin ke Form Membawa Tanggal Kunjungan Asli Obat", firstCopiedObat.querySelector('.val-obat-tgl').value === '2026-10-08');
+assert("Salin ke Form Membawa Tanggal Kunjungan Asli Odontogram", currentOdontogram['16'] && currentOdontogram['16'].tanggal === '2026-10-08');
 
 // 15j. Test View History Pasien di Database Pasien: Aligned with Rekam Medis Layout
 let origPasienSuite = window.KlinikData.pasien || [];

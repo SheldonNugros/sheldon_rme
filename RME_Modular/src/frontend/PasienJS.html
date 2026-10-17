@@ -180,7 +180,7 @@ function renderTablePagePasien() {
           <td class="p-3 font-mono font-bold text-indigo-600 text-xs">${p.noRm || '-'}</td>
           <td class="p-3 font-bold text-slate-800 text-xs">${p.namaPasien || '-'}</td>
           <td class="p-3 text-slate-600 text-xs">${p.jenisKelamin || '-'}</td>
-          <td class="p-3 text-slate-600 text-xs">${formatTglAngkaDDMMYYYY(p.tanggalLahir)} / ${p.umur || '-'}</td>
+          <td class="p-3 text-slate-600 text-xs">${p.tempatLahir ? p.tempatLahir + ', ' : ''}${formatTglAngkaDDMMYYYY(p.tanggalLahir)} / ${p.umur || '-'}</td>
           <td class="p-3 text-slate-600 text-xs">${p.whatsapp || '-'}</td>
           <td class="p-3 text-rose-600 text-[11px] font-medium truncate max-w-[120px]" title="${p.riwayatPenyakit || '-'}">${p.riwayatPenyakit || '-'}</td>
           <td class="p-3 text-amber-600 text-[11px] font-medium truncate max-w-[120px]" title="${p.alergi || '-'}">${p.alergi || '-'}</td>
@@ -216,7 +216,7 @@ function resetFormPasien() {
   if (form) form.reset();
   
   let fieldsToClear = [
-    'pasId', 'pasRm', 'pasNama', 'pasTglLahir', 'pasUmur', 'pasNik',
+    'pasId', 'pasRm', 'pasNama', 'pasTempatLahir', 'pasTglLahir', 'pasUmur', 'pasNik',
     'pasWa', 'pasAlamat', 'pasRiwayat', 'pasAlergi', 'pasCatatan',
     'pasProvinsi', 'pasKabupaten', 'pasKecamatan', 'pasKelurahan'
   ];
@@ -383,6 +383,9 @@ function editPasien(idPasien) {
   document.getElementById('pasId').value = p.idPasien || '';
   document.getElementById('pasRm').value = p.noRm || '';
   document.getElementById('pasNama').value = p.namaPasien || '';
+  if (document.getElementById('pasTempatLahir')) {
+    document.getElementById('pasTempatLahir').value = p.tempatLahir || '';
+  }
   
   let tglL = p.tanggalLahir || '';
   if (tglL.includes('-')) {
@@ -455,6 +458,7 @@ function simpanDataPasien(e) {
       idPasien: idVal,
       noRm: rmVal,
       namaPasien: (document.getElementById('pasNama').value || "").trim(),
+      tempatLahir: (document.getElementById('pasTempatLahir') ? document.getElementById('pasTempatLahir').value : "").trim(),
       tanggalLahir: (document.getElementById('pasTglLahir').value || "").trim(),
       jenisKelamin: (document.getElementById('pasJk').value || "").trim(),
       umur: (document.getElementById('pasUmur').value || "").trim(),
@@ -502,6 +506,7 @@ function simpanDataPasien(e) {
             idPasien: targetId,
             noRm: targetRm,
             namaPasien: payload.namaPasien,
+            tempatLahir: payload.tempatLahir,
             tanggalLahir: payload.tanggalLahir,
             jenisKelamin: payload.jenisKelamin,
             umur: payload.umur,

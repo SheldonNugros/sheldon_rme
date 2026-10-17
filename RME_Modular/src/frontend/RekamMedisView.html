@@ -647,7 +647,7 @@
           <!-- Keluhan & Diagnosa Lampau -->
           <div class="bg-white/80 p-2.5 rounded-xl border border-indigo-100 flex flex-col justify-between">
             <div>
-              <span class="font-bold text-slate-500 text-[10px] block uppercase tracking-wider mb-1">Diagnosa & Keluhan Lalu</span>
+              <span class="font-bold text-slate-500 text-[10px] block uppercase tracking-wider mb-1">Diagnosa (ICD-10) & Keluhan Lalu</span>
               <div id="refCC" class="text-slate-700 mb-1 font-medium"><b>Keluhan:</b> -</div>
               <div id="refDiagnosa" class="text-slate-800 space-y-0.5"><b>Diagnosa:</b> -</div>
             </div>
@@ -659,15 +659,29 @@
           </div>
 
           <!-- Tindakan Lampau (ICD-9) -->
-          <div class="bg-white/80 p-2.5 rounded-xl border border-indigo-100">
-            <span class="font-bold text-slate-500 text-[10px] block uppercase tracking-wider mb-1">Tindakan Dilakukan Lalu (ICD-9)</span>
-            <div id="refTindakan" class="text-slate-800 space-y-0.5 font-medium">-</div>
+          <div class="bg-white/80 p-2.5 rounded-xl border border-indigo-100 flex flex-col justify-between">
+            <div>
+              <span class="font-bold text-slate-500 text-[10px] block uppercase tracking-wider mb-1">Tindakan Dilakukan Lalu (ICD-9)</span>
+              <div id="refTindakan" class="text-slate-800 space-y-0.5 font-medium">-</div>
+            </div>
+            <div class="mt-2 pt-1 border-t border-slate-100">
+              <button type="button" onclick="salinTindakanLaluKeHariIni()" class="text-indigo-600 hover:text-indigo-800 font-bold text-[10px] flex items-center gap-1 cursor-pointer">
+                <span>+</span> Lanjutkan Tindakan Lalu ke Hari Ini
+              </button>
+            </div>
           </div>
 
           <!-- Resep Obat Lampau -->
-          <div class="bg-white/80 p-2.5 rounded-xl border border-indigo-100">
-            <span class="font-bold text-slate-500 text-[10px] block uppercase tracking-wider mb-1">Terapi Obat Lalu</span>
-            <div id="refObat" class="text-slate-800 space-y-0.5 font-medium">-</div>
+          <div class="bg-white/80 p-2.5 rounded-xl border border-indigo-100 flex flex-col justify-between">
+            <div>
+              <span class="font-bold text-slate-500 text-[10px] block uppercase tracking-wider mb-1">Terapi Obat Lalu</span>
+              <div id="refObat" class="text-slate-800 space-y-0.5 font-medium">-</div>
+            </div>
+            <div class="mt-2 pt-1 border-t border-slate-100">
+              <button type="button" onclick="salinObatLaluKeHariIni()" class="text-indigo-600 hover:text-indigo-800 font-bold text-[10px] flex items-center gap-1 cursor-pointer">
+                <span>+</span> Lanjutkan Resep Obat Lalu ke Hari Ini
+              </button>
+            </div>
           </div>
         </div>
         

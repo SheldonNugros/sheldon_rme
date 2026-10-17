@@ -3656,7 +3656,7 @@
           <!-- Keluhan & Diagnosa Lampau -->
           <div class="bg-white/80 p-2.5 rounded-xl border border-indigo-100 flex flex-col justify-between">
             <div>
-              <span class="font-bold text-slate-500 text-[10px] block uppercase tracking-wider mb-1">Diagnosa & Keluhan Lalu</span>
+              <span class="font-bold text-slate-500 text-[10px] block uppercase tracking-wider mb-1">Diagnosa (ICD-10) & Keluhan Lalu</span>
               <div id="refCC" class="text-slate-700 mb-1 font-medium"><b>Keluhan:</b> -</div>
               <div id="refDiagnosa" class="text-slate-800 space-y-0.5"><b>Diagnosa:</b> -</div>
             </div>
@@ -3668,15 +3668,29 @@
           </div>
 
           <!-- Tindakan Lampau (ICD-9) -->
-          <div class="bg-white/80 p-2.5 rounded-xl border border-indigo-100">
-            <span class="font-bold text-slate-500 text-[10px] block uppercase tracking-wider mb-1">Tindakan Dilakukan Lalu (ICD-9)</span>
-            <div id="refTindakan" class="text-slate-800 space-y-0.5 font-medium">-</div>
+          <div class="bg-white/80 p-2.5 rounded-xl border border-indigo-100 flex flex-col justify-between">
+            <div>
+              <span class="font-bold text-slate-500 text-[10px] block uppercase tracking-wider mb-1">Tindakan Dilakukan Lalu (ICD-9)</span>
+              <div id="refTindakan" class="text-slate-800 space-y-0.5 font-medium">-</div>
+            </div>
+            <div class="mt-2 pt-1 border-t border-slate-100">
+              <button type="button" onclick="salinTindakanLaluKeHariIni()" class="text-indigo-600 hover:text-indigo-800 font-bold text-[10px] flex items-center gap-1 cursor-pointer">
+                <span>+</span> Lanjutkan Tindakan Lalu ke Hari Ini
+              </button>
+            </div>
           </div>
 
           <!-- Resep Obat Lampau -->
-          <div class="bg-white/80 p-2.5 rounded-xl border border-indigo-100">
-            <span class="font-bold text-slate-500 text-[10px] block uppercase tracking-wider mb-1">Terapi Obat Lalu</span>
-            <div id="refObat" class="text-slate-800 space-y-0.5 font-medium">-</div>
+          <div class="bg-white/80 p-2.5 rounded-xl border border-indigo-100 flex flex-col justify-between">
+            <div>
+              <span class="font-bold text-slate-500 text-[10px] block uppercase tracking-wider mb-1">Terapi Obat Lalu</span>
+              <div id="refObat" class="text-slate-800 space-y-0.5 font-medium">-</div>
+            </div>
+            <div class="mt-2 pt-1 border-t border-slate-100">
+              <button type="button" onclick="salinObatLaluKeHariIni()" class="text-indigo-600 hover:text-indigo-800 font-bold text-[10px] flex items-center gap-1 cursor-pointer">
+                <span>+</span> Lanjutkan Resep Obat Lalu ke Hari Ini
+              </button>
+            </div>
           </div>
         </div>
         
@@ -8547,6 +8561,78 @@ function salinDiagnosaLaluKeHariIni() {
   });
 
   alertMsg('success', `📋 ${countAdded} diagnosa lalu berhasil disalin ke formulir hari ini untuk evaluasi lanjutan.`);
+}
+
+function salinTindakanLaluKeHariIni() {
+  if (!window.lastReferenceRMRecord) {
+    alertMsg('info', 'Tidak ada referensi kunjungan sebelumnya.');
+    return;
+  }
+  let r = window.lastReferenceRMRecord;
+  let tind = [];
+  try { tind = JSON.parse(r.tindakanStr || "[]"); } catch(e){}
+  if (!Array.isArray(tind) || tind.length === 0) {
+    alertMsg('info', 'Kunjungan sebelumnya tidak memiliki riwayat tindakan.');
+    return;
+  }
+  let containerTind = document.getElementById('containerTindakan');
+  if (!containerTind) return;
+
+  let existingRows = containerTind.querySelectorAll('.row-tindakan');
+  if (existingRows.length === 1) {
+    let inpDesc = existingRows[0].querySelector('.val-tindakan');
+    let inpCode = existingRows[0].querySelector('.val-icd9code');
+    if ((!inpDesc || !inpDesc.value.trim()) && (!inpCode || !inpCode.value.trim())) {
+      containerTind.innerHTML = '';
+    }
+  }
+
+  let countAdded = 0;
+  tind.forEach(item => {
+    let p = parseTindakanItem(item, r.tanggalPeriksa);
+    let tglHariIni = (document.getElementById('rmTglPeriksa') ? document.getElementById('rmTglPeriksa').value : '') || getTodayIso();
+    tambahRowTindakan(p.desc, p.code, p.ket, tglHariIni);
+    countAdded++;
+  });
+
+  alertMsg('success', `📋 ${countAdded} tindakan lalu berhasil disalin ke formulir hari ini.`);
+}
+
+function salinObatLaluKeHariIni() {
+  if (!window.lastReferenceRMRecord) {
+    alertMsg('info', 'Tidak ada referensi kunjungan sebelumnya.');
+    return;
+  }
+  let r = window.lastReferenceRMRecord;
+  let obat = [];
+  try { obat = JSON.parse(r.obatStr || "[]"); } catch(e){}
+  if (!Array.isArray(obat) || obat.length === 0) {
+    alertMsg('info', 'Kunjungan sebelumnya tidak memiliki riwayat resep obat.');
+    return;
+  }
+  let containerOb = document.getElementById('containerObat');
+  if (!containerOb) return;
+
+  let existingRows = containerOb.querySelectorAll('.row-obat');
+  if (existingRows.length === 1) {
+    let inpNama = existingRows[0].querySelector('.val-obat');
+    if (!inpNama || !inpNama.value.trim()) {
+      containerOb.innerHTML = '';
+    }
+  }
+
+  let countAdded = 0;
+  obat.forEach(item => {
+    let itemTgl = typeof item === 'object' ? (item.tanggal || item.tgl || '') : '';
+    let p = parseTindakanItem(typeof item === 'object' ? (item.obat || item.nama || '') : String(item), itemTgl || r.tanggalPeriksa);
+    let qtyVal = typeof item === 'object' ? (item.qty || '') : '';
+    let ketVal = typeof item === 'object' ? (item.ket || p.ket || '') : (p.ket || '');
+    let tglHariIni = (document.getElementById('rmTglPeriksa') ? document.getElementById('rmTglPeriksa').value : '') || getTodayIso();
+    tambahRowObat(p.desc, qtyVal, ketVal, tglHariIni);
+    countAdded++;
+  });
+
+  alertMsg('success', `📋 ${countAdded} resep obat lalu berhasil disalin ke formulir hari ini.`);
 }
 
 function salinDataKunjunganKeForm(r, isAuto = false) {

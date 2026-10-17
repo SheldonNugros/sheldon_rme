@@ -5179,6 +5179,78 @@ function salinDiagnosaLaluKeHariIni() {
   alertMsg('success', `📋 ${countAdded} diagnosa lalu berhasil disalin ke formulir hari ini untuk evaluasi lanjutan.`);
 }
 
+function salinTindakanLaluKeHariIni() {
+  if (!window.lastReferenceRMRecord) {
+    alertMsg('info', 'Tidak ada referensi kunjungan sebelumnya.');
+    return;
+  }
+  let r = window.lastReferenceRMRecord;
+  let tind = [];
+  try { tind = JSON.parse(r.tindakanStr || "[]"); } catch(e){}
+  if (!Array.isArray(tind) || tind.length === 0) {
+    alertMsg('info', 'Kunjungan sebelumnya tidak memiliki riwayat tindakan.');
+    return;
+  }
+  let containerTind = document.getElementById('containerTindakan');
+  if (!containerTind) return;
+
+  let existingRows = containerTind.querySelectorAll('.row-tindakan');
+  if (existingRows.length === 1) {
+    let inpDesc = existingRows[0].querySelector('.val-tindakan');
+    let inpCode = existingRows[0].querySelector('.val-icd9code');
+    if ((!inpDesc || !inpDesc.value.trim()) && (!inpCode || !inpCode.value.trim())) {
+      containerTind.innerHTML = '';
+    }
+  }
+
+  let countAdded = 0;
+  tind.forEach(item => {
+    let p = parseTindakanItem(item, r.tanggalPeriksa);
+    let tglHariIni = (document.getElementById('rmTglPeriksa') ? document.getElementById('rmTglPeriksa').value : '') || getTodayIso();
+    tambahRowTindakan(p.desc, p.code, p.ket, tglHariIni);
+    countAdded++;
+  });
+
+  alertMsg('success', `📋 ${countAdded} tindakan lalu berhasil disalin ke formulir hari ini.`);
+}
+
+function salinObatLaluKeHariIni() {
+  if (!window.lastReferenceRMRecord) {
+    alertMsg('info', 'Tidak ada referensi kunjungan sebelumnya.');
+    return;
+  }
+  let r = window.lastReferenceRMRecord;
+  let obat = [];
+  try { obat = JSON.parse(r.obatStr || "[]"); } catch(e){}
+  if (!Array.isArray(obat) || obat.length === 0) {
+    alertMsg('info', 'Kunjungan sebelumnya tidak memiliki riwayat resep obat.');
+    return;
+  }
+  let containerOb = document.getElementById('containerObat');
+  if (!containerOb) return;
+
+  let existingRows = containerOb.querySelectorAll('.row-obat');
+  if (existingRows.length === 1) {
+    let inpNama = existingRows[0].querySelector('.val-obat');
+    if (!inpNama || !inpNama.value.trim()) {
+      containerOb.innerHTML = '';
+    }
+  }
+
+  let countAdded = 0;
+  obat.forEach(item => {
+    let itemTgl = typeof item === 'object' ? (item.tanggal || item.tgl || '') : '';
+    let p = parseTindakanItem(typeof item === 'object' ? (item.obat || item.nama || '') : String(item), itemTgl || r.tanggalPeriksa);
+    let qtyVal = typeof item === 'object' ? (item.qty || '') : '';
+    let ketVal = typeof item === 'object' ? (item.ket || p.ket || '') : (p.ket || '');
+    let tglHariIni = (document.getElementById('rmTglPeriksa') ? document.getElementById('rmTglPeriksa').value : '') || getTodayIso();
+    tambahRowObat(p.desc, qtyVal, ketVal, tglHariIni);
+    countAdded++;
+  });
+
+  alertMsg('success', `📋 ${countAdded} resep obat lalu berhasil disalin ke formulir hari ini.`);
+}
+
 function salinDataKunjunganKeForm(r, isAuto = false) {
   if (!r) return;
 
@@ -14988,6 +15060,8 @@ assert("EMR Function tampilkanReferensiKlinisRM is callable", typeof tampilkanRe
 assert("EMR Function bukaDetailKunjunganTerakhir is callable", typeof bukaDetailKunjunganTerakhir === 'function');
 assert("EMR Function tutupPanelReferensiRM is callable", typeof tutupPanelReferensiRM === 'function');
 assert("EMR Function salinDiagnosaLaluKeHariIni is callable", typeof salinDiagnosaLaluKeHariIni === 'function');
+assert("EMR Function salinTindakanLaluKeHariIni is callable", typeof salinTindakanLaluKeHariIni === 'function');
+assert("EMR Function salinObatLaluKeHariIni is callable", typeof salinObatLaluKeHariIni === 'function');
 assert("EMR Clear Pasien Button in HTML", isClearPasienBtnInHtml);
 assert("EMR Form Title Renamed to Form Electronic Medical Record (EMR)", isEmrTitleRenamedInHtml);
 assert("EMR Tanggal Pemeriksaan Enlarged", isTglLargeInHtml);
@@ -15242,6 +15316,11 @@ salinDiagnosaLaluKeHariIni();
 let firstCopiedDiag = document.getElementById('containerDiagnosa').children[0];
 assert("Permenkes 24/2022: Lanjutkan Diagnosa Menyalin Diagnosa Lalu", firstCopiedDiag && firstCopiedDiag.querySelector('.val-diagnosa').value.includes('Caries'));
 assert("Permenkes 24/2022: Lanjutkan Diagnosa Bertanggal Hari Ini", firstCopiedDiag && firstCopiedDiag.querySelector('.val-diagnosa-tgl').value === getTodayIso());
+
+salinTindakanLaluKeHariIni();
+let testCopiedTind = document.getElementById('containerTindakan').children[0];
+assert("Permenkes 24/2022: Lanjutkan Tindakan Menyalin Tindakan Lalu", testCopiedTind && testCopiedTind.querySelector('.val-tindakan').value.includes('Tumpatan'));
+assert("Permenkes 24/2022: Lanjutkan Tindakan Bertanggal Hari Ini", testCopiedTind && testCopiedTind.querySelector('.val-tindakan-tgl').value === getTodayIso());
 
 tutupPanelReferensiRM();
 assert("Permenkes 24/2022: Panel Referensi Bisa Ditutup", document.getElementById('panelReferensiKlinisRM').classList.contains('hidden'));

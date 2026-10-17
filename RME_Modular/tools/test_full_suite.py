@@ -538,6 +538,8 @@ assert("EMR Function tampilkanReferensiKlinisRM is callable", typeof tampilkanRe
 assert("EMR Function bukaDetailKunjunganTerakhir is callable", typeof bukaDetailKunjunganTerakhir === 'function');
 assert("EMR Function tutupPanelReferensiRM is callable", typeof tutupPanelReferensiRM === 'function');
 assert("EMR Function salinDiagnosaLaluKeHariIni is callable", typeof salinDiagnosaLaluKeHariIni === 'function');
+assert("EMR Function salinTindakanLaluKeHariIni is callable", typeof salinTindakanLaluKeHariIni === 'function');
+assert("EMR Function salinObatLaluKeHariIni is callable", typeof salinObatLaluKeHariIni === 'function');
 assert("EMR Clear Pasien Button in HTML", isClearPasienBtnInHtml);
 assert("EMR Form Title Renamed to Form Electronic Medical Record (EMR)", isEmrTitleRenamedInHtml);
 assert("EMR Tanggal Pemeriksaan Enlarged", isTglLargeInHtml);
@@ -792,6 +794,11 @@ salinDiagnosaLaluKeHariIni();
 let firstCopiedDiag = document.getElementById('containerDiagnosa').children[0];
 assert("Permenkes 24/2022: Lanjutkan Diagnosa Menyalin Diagnosa Lalu", firstCopiedDiag && firstCopiedDiag.querySelector('.val-diagnosa').value.includes('Caries'));
 assert("Permenkes 24/2022: Lanjutkan Diagnosa Bertanggal Hari Ini", firstCopiedDiag && firstCopiedDiag.querySelector('.val-diagnosa-tgl').value === getTodayIso());
+
+salinTindakanLaluKeHariIni();
+let testCopiedTind = document.getElementById('containerTindakan').children[0];
+assert("Permenkes 24/2022: Lanjutkan Tindakan Menyalin Tindakan Lalu", testCopiedTind && testCopiedTind.querySelector('.val-tindakan').value.includes('Tumpatan'));
+assert("Permenkes 24/2022: Lanjutkan Tindakan Bertanggal Hari Ini", testCopiedTind && testCopiedTind.querySelector('.val-tindakan-tgl').value === getTodayIso());
 
 tutupPanelReferensiRM();
 assert("Permenkes 24/2022: Panel Referensi Bisa Ditutup", document.getElementById('panelReferensiKlinisRM').classList.contains('hidden'));

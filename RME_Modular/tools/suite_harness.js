@@ -19,6 +19,7 @@ var isClearPasienBtnInHtml = true;
 var isTglLargeInHtml = true;
 var isTempatLahirInHtml = true;
 var isModalToothTglInHtml = true;
+var isPanelRefInHtml = true;
 
 // Enhanced DOM Mock for JavaScriptCore
 var window = this;
@@ -5042,6 +5043,144 @@ function salinDataKunjunganAktifDariDetail() {
   }
 }
 
+// ==========================================
+// REFERENSI KLINIS KUNJUNGAN TERAKHIR (PERMENKES NO. 24 TAHUN 2022)
+// ==========================================
+window.lastReferenceRMRecord = null;
+
+function tampilkanReferensiKlinisRM(r) {
+  let panel = document.getElementById('panelReferensiKlinisRM');
+  if (!panel || !r) return;
+  window.lastReferenceRMRecord = r;
+
+  let elTgl = document.getElementById('refTglKunjungan');
+  let elDokter = document.getElementById('refDokterKunjungan');
+  let elCC = document.getElementById('refCC');
+  let elDiag = document.getElementById('refDiagnosa');
+  let elTind = document.getElementById('refTindakan');
+  let elObat = document.getElementById('refObat');
+
+  if (elTgl) elTgl.innerText = formatTglIndoRM(r.tanggalPeriksa || '-');
+  if (elDokter) elDokter.innerText = r.dokterPemeriksa || 'Dokter';
+
+  let ana = {}, tind = [], obat = [];
+  try { ana = JSON.parse(r.anamnesisStr || "{}"); } catch(e){}
+  try { tind = JSON.parse(r.tindakanStr || "[]"); } catch(e){}
+  try { obat = JSON.parse(r.obatStr || "[]"); } catch(e){}
+
+  if (elCC) {
+    elCC.innerHTML = `<span class="text-slate-500 font-semibold">Keluhan:</span> <span class="text-slate-800 font-medium">${ana.cc || '-'}</span>`;
+  }
+
+  // Diagnosa ICD-10 Lampau
+  if (elDiag) {
+    let diagList = ana.diagnosaICD;
+    if (Array.isArray(diagList) && diagList.length > 0) {
+      elDiag.innerHTML = diagList.map(d => {
+        let p = parseTindakanItem(d, r.tanggalPeriksa);
+        let tglBadge = formatTglTindakanDDMMYY(p.tanggal);
+        let codePrefix = p.code ? `<span class="font-mono text-indigo-700 font-bold">${p.code}</span> - ` : '';
+        let ketText = p.ket ? ` <span class="text-slate-500">(${p.ket})</span>` : '';
+        let badgeHtml = tglBadge ? `<span class="inline-block px-1.5 py-0.2 bg-indigo-50 text-indigo-700 font-mono text-[9px] rounded border border-indigo-200 ml-1 font-semibold">${tglBadge}</span>` : '';
+        return `<div class="truncate leading-relaxed">• ${codePrefix}${p.desc}${badgeHtml}${ketText}</div>`;
+      }).join('');
+    } else {
+      elDiag.innerHTML = '<span class="text-slate-400 italic">Tidak ada diagnosa ICD-10 tercatat.</span>';
+    }
+  }
+
+  // Tindakan ICD-9 Lampau
+  if (elTind) {
+    if (Array.isArray(tind) && tind.length > 0) {
+      elTind.innerHTML = tind.map(t => {
+        let p = parseTindakanItem(t, r.tanggalPeriksa);
+        let tglBadge = formatTglTindakanDDMMYY(p.tanggal);
+        let codePrefix = p.code ? `<span class="font-mono text-indigo-700 font-bold">${p.code}</span> - ` : '';
+        let ketText = p.ket ? ` <span class="text-slate-500">(${p.ket})</span>` : '';
+        let badgeHtml = tglBadge ? `<span class="inline-block px-1.5 py-0.2 bg-indigo-50 text-indigo-700 font-mono text-[9px] rounded border border-indigo-200 ml-1 font-semibold">${tglBadge}</span>` : '';
+        return `<div class="truncate leading-relaxed">• ${codePrefix}${p.desc}${badgeHtml}${ketText}</div>`;
+      }).join('');
+    } else {
+      elTind.innerHTML = '<span class="text-slate-400 italic">Tidak ada tindakan lampau.</span>';
+    }
+  }
+
+  // Resep Obat Lampau
+  if (elObat) {
+    if (Array.isArray(obat) && obat.length > 0) {
+      elObat.innerHTML = obat.map(o => {
+        let p = parseTindakanItem(o.obat || o.nama || '', o.tanggal || o.tgl || r.tanggalPeriksa);
+        let tglBadge = formatTglTindakanDDMMYY(p.tanggal);
+        let qtyText = o.qty ? ` <span class="font-bold text-slate-700">(${o.qty})</span>` : '';
+        let ketText = (o.ket || p.ket) ? ` <span class="text-slate-500">- ${o.ket || p.ket}</span>` : '';
+        let badgeHtml = tglBadge ? `<span class="inline-block px-1.5 py-0.2 bg-indigo-50 text-indigo-700 font-mono text-[9px] rounded border border-indigo-200 ml-1 font-semibold">${tglBadge}</span>` : '';
+        return `<div class="truncate leading-relaxed">• <span class="font-medium text-slate-800">${p.desc}</span>${qtyText}${badgeHtml}${ketText}</div>`;
+      }).join('');
+    } else {
+      elObat.innerHTML = '<span class="text-slate-400 italic">Tidak ada resep obat lampau.</span>';
+    }
+  }
+
+  panel.classList.remove('hidden');
+}
+
+function bukaDetailKunjunganTerakhir() {
+  if (!window.lastReferenceRMRecord) {
+    alertMsg('info', 'Tidak ada data referensi kunjungan.');
+    return;
+  }
+  let targetRec = window.lastReferenceRMRecord;
+  let idx = (riwayatPasienAktif || []).findIndex(x => (x.idRmKlinis && x.idRmKlinis === targetRec.idRmKlinis) || (x.waktuSimpan && x.waktuSimpan === targetRec.waktuSimpan));
+  if (idx !== -1) {
+    bukaDetailRM(idx);
+  } else if (riwayatPasienAktif && riwayatPasienAktif.length > 0) {
+    bukaDetailRM(0);
+  }
+}
+
+function tutupPanelReferensiRM() {
+  let panel = document.getElementById('panelReferensiKlinisRM');
+  if (panel) panel.classList.add('hidden');
+}
+
+function salinDiagnosaLaluKeHariIni() {
+  if (!window.lastReferenceRMRecord) {
+    alertMsg('info', 'Tidak ada referensi kunjungan sebelumnya.');
+    return;
+  }
+  let r = window.lastReferenceRMRecord;
+  let ana = {};
+  try { ana = JSON.parse(r.anamnesisStr || "{}"); } catch(e){}
+  let diagList = ana.diagnosaICD;
+  if (!Array.isArray(diagList) || diagList.length === 0) {
+    alertMsg('info', 'Kunjungan sebelumnya tidak memiliki riwayat diagnosa ICD-10.');
+    return;
+  }
+  let containerDiag = document.getElementById('containerDiagnosa');
+  if (!containerDiag) return;
+
+  // Cek jika baris pertama masih kosong (belum diisi dokter)
+  let existingRows = containerDiag.querySelectorAll('.row-diagnosa');
+  if (existingRows.length === 1) {
+    let inpDesc = existingRows[0].querySelector('.val-diagnosa');
+    let inpCode = existingRows[0].querySelector('.val-icdcode');
+    if ((!inpDesc || !inpDesc.value.trim()) && (!inpCode || !inpCode.value.trim())) {
+      containerDiag.innerHTML = '';
+    }
+  }
+
+  let countAdded = 0;
+  diagList.forEach(item => {
+    let p = parseTindakanItem(item, r.tanggalPeriksa);
+    // Diagnosa lanjutan diberi tanggal pemeriksaan hari ini
+    let tglHariIni = (document.getElementById('rmTglPeriksa') ? document.getElementById('rmTglPeriksa').value : '') || getTodayIso();
+    tambahRowDiagnosa(p.desc, p.code, p.ket, tglHariIni);
+    countAdded++;
+  });
+
+  alertMsg('success', `📋 ${countAdded} diagnosa lalu berhasil disalin ke formulir hari ini untuk evaluasi lanjutan.`);
+}
+
 function salinDataKunjunganKeForm(r, isAuto = false) {
   if (!r) return;
 
@@ -5058,15 +5197,22 @@ function salinDataKunjunganKeForm(r, isAuto = false) {
     if (el && val !== undefined && val !== null) el.value = val;
   };
 
-  // 1. Anamnesis
-  setV('anaCC', ana.cc || '');
-  setV('anaPI', ana.pi || '');
+  // Tanggal periksa selalu default hari ini untuk kunjungan baru
+  let tglEl = document.getElementById('rmTglPeriksa');
+  if (tglEl) {
+    tglEl.value = getTodayIso();
+    tglEl.max = getTodayIso();
+  }
+
+  // 1. Anamnesis: Riwayat Medis Pasien yang Laten / Ongoing (Carry-Forward)
+  // Sesuai Permenkes No. 24/2022: Riwayat medis masa lalu pasien tetap terbawa sebagai referensi latar belakang pasien
   setV('anaPDH', ana.pdh || '');
   setV('anaPMH', ana.pmh || '');
   setV('anaFH', ana.fh || '');
   setV('anaKhusus', ana.khusus || '');
+  setV('fisAlergi', fis.alergi || '');
 
-  // Review of System
+  // Review of System (jika ada catatan lampau)
   if (ana.ros) {
     setV('anaEndo', ana.ros.endo || '');
     setV('anaGastro', ana.ros.gastro || '');
@@ -5078,34 +5224,31 @@ function salinDataKunjunganKeForm(r, isAuto = false) {
     setV('anaUrogenital', ana.ros.uro || '');
   }
 
-  // 2. Pemeriksaan Fisik & Vital Signs
-  setV('fisKesan', fis.kesan || '');
-  setV('fisKesadaran', fis.kesadaran || '');
-  setV('fisTensi', fis.tensi || '');
-  setV('fisNafas', fis.nafas || '');
-  setV('fisNadi', fis.nadi || '');
-  setV('fisSuhu', fis.suhu || '');
-  setV('fisBB', fis.bb || '');
-  setV('fisTB', fis.tb || '');
-  setV('fisAlergi', fis.alergi || '');
-  setV('fisEkstra', fis.ekstra || '');
-  setV('fisIntra', fis.intra || '');
-  setV('fisPenunjang', fis.penunjang || '');
+  // 2. Anamnesis Keluhan Encounter Hari Ini: Wajib Bersih / Kosong
+  setV('anaCC', '');
+  setV('anaPI', '');
 
-  // Catatan Edukasi
-  setV('rmCatatanEdukasi', r.catatanEdukasi || '');
+  // 3. Pemeriksaan Fisik & Vital Signs Hari Ini: Bersih untuk pengukuran baru hari ini
+  setV('fisKesan', '');
+  setV('fisKesadaran', '');
+  setV('fisTensi', '');
+  setV('fisNafas', '');
+  setV('fisNadi', '');
+  setV('fisSuhu', '');
+  setV('fisBB', '');
+  setV('fisTB', '');
+  setV('fisEkstra', '');
+  setV('fisIntra', '');
+  setV('fisPenunjang', '');
+  setV('rmCatatanEdukasi', '');
 
-  // 3. Periodontal & OHIS
-  if (fis.periodontal) {
-    currentPeriodontalExam = JSON.parse(JSON.stringify(fis.periodontal));
-    if (typeof renderPeriodontalVisual === 'function') renderPeriodontalVisual();
-  }
-  if (fis.ohis) {
-    currentOhisExam = JSON.parse(JSON.stringify(fis.ohis));
-    if (typeof hitungOHIS === 'function') hitungOHIS();
-  }
+  // Reset Periodontal & OHIS ke baseline untuk pemeriksaan baru
+  resetPeriodontalToDefault();
+  resetOhisToDefault();
 
-  // 4. Odontogram
+  // 4. Odontogram: Kumulatif (Permenkes No. 24/2022)
+  // Odontogram merekam status anatomi gigi pasien dari waktu ke waktu (akumulatif).
+  // Kondisi terakhir dimuat otomatis sehingga dokter tidak perlu menggambar ulang dari nol.
   if (odo && Object.keys(odo).length > 0) {
     let copiedOdo = JSON.parse(JSON.stringify(odo));
     Object.keys(copiedOdo).forEach(k => {
@@ -5134,72 +5277,39 @@ function salinDataKunjunganKeForm(r, isAuto = false) {
     }
   }
 
-  // 5. Diagnosa ICD-10
+  // 5. Diagnosa ICD-10 Hari Ini: 1 Baris Baru (Dokter dapat klik tombol di panel referensi jika ingin melanjutkan diagnosa lalu)
   let containerDiag = document.getElementById('containerDiagnosa');
   if (containerDiag) {
     containerDiag.innerHTML = '';
-    if (Array.isArray(ana.diagnosaICD) && ana.diagnosaICD.length > 0) {
-      ana.diagnosaICD.forEach(item => {
-        let p = parseTindakanItem(item, r.tanggalPeriksa);
-        tambahRowDiagnosa(p.desc, p.code, p.ket, p.isoDate);
-      });
-    } else {
-      tambahRowDiagnosa();
-    }
+    tambahRowDiagnosa();
   }
 
-  // 6. Tindakan ICD-9
+  // 6. Tindakan ICD-9 Hari Ini: Bersih 1 Baris Baru dengan Tanggal Hari Ini
+  // Sesuai Permenkes No. 24/2022: Mencegah duplikasi klaim/tagihan tindakan masa lalu ke encounter hari ini
   let containerTind = document.getElementById('containerTindakan');
   if (containerTind) {
     containerTind.innerHTML = '';
-    if (Array.isArray(tind) && tind.length > 0) {
-      tind.forEach(item => {
-        let p = parseTindakanItem(item, r.tanggalPeriksa);
-        tambahRowTindakan(p.desc, p.code, p.ket, p.isoDate);
-      });
-    } else {
-      tambahRowTindakan();
-    }
+    tambahRowTindakan();
   }
 
-  // 7. Resep Obat
+  // 7. Resep Obat Hari Ini: Bersih untuk peresepan encounter baru
   let containerOb = document.getElementById('containerObat');
   if (containerOb) {
     containerOb.innerHTML = '';
-    if (Array.isArray(obat) && obat.length > 0) {
-      obat.forEach(item => {
-        if (typeof item === 'object') {
-          let itemTgl = item.tanggal || item.tgl || '';
-          let p = parseTindakanItem(item.obat || item.nama || '', itemTgl || r.tanggalPeriksa);
-          tambahRowObat(p.desc, item.qty || '', item.ket || p.ket || '', p.isoDate);
-        } else {
-          let p = parseTindakanItem(String(item), r.tanggalPeriksa);
-          tambahRowObat(p.desc, '', p.ket || '', p.isoDate);
-        }
-      });
-    }
   }
 
-  // Tanggal periksa selalu default hari ini untuk kunjungan baru
-  let tglEl = document.getElementById('rmTglPeriksa');
-  if (tglEl) {
-    tglEl.value = getTodayIso();
-    tglEl.max = getTodayIso();
-  }
+  // 8. Tampilkan Panel Referensi Klinis Kunjungan Terakhir (Read-Only)
+  tampilkanReferensiKlinisRM(r);
 
-  // Tampilkan banner notifikasi carry-forward
+  // Sembunyikan banner carry forward lama jika ada
   let bnr = document.getElementById('bannerCarryForwardRM');
-  let lblTgl = document.getElementById('lblTglCarryForward');
-  let tglKunjunganLama = formatTglIndoRM(r.tanggalPeriksa || 'sebelumnya');
-  if (bnr) {
-    if (lblTgl) lblTgl.innerText = tglKunjunganLama;
-    bnr.classList.remove('hidden');
-  }
+  if (bnr) bnr.classList.add('hidden');
 
+  let tglKunjunganLama = formatTglIndoRM(r.tanggalPeriksa || 'sebelumnya');
   if (isAuto) {
-    alertMsg('info', `📋 Data riwayat terakhir (${tglKunjunganLama}) dimuat otomatis ke formulir baru. Silakan edit atau tambahkan tindakan hari ini.`);
+    alertMsg('info', `📋 Rekam Medis Siap: Odontogram kumulatif & riwayat pasien (${tglKunjunganLama}) termuat. Formulir tindakan & resep bersih untuk pelayanan hari ini.`);
   } else {
-    alertMsg('success', `📋 Seluruh data kunjungan (${tglKunjunganLama}) berhasil disalin ke formulir pemeriksaan baru!`);
+    alertMsg('success', `📋 Kunjungan (${tglKunjunganLama}) dimuat sebagai referensi klinis. Formulir siap untuk pelayanan hari ini.`);
   }
 }
 function renderHistoryOdontogram(odoJsonStr) {
@@ -6134,6 +6244,9 @@ function bersihkanFormRMHanyaInput() {
   tambahRowTindakan();
   let bnr = document.getElementById('bannerCarryForwardRM');
   if (bnr) bnr.classList.add('hidden');
+  let panelRef = document.getElementById('panelReferensiKlinisRM');
+  if (panelRef) panelRef.classList.add('hidden');
+  window.lastReferenceRMRecord = null;
   resetPeriodontalToDefault();
   resetOhisToDefault();
   let tglEl = document.getElementById('rmTglPeriksa');
@@ -6157,6 +6270,9 @@ function bersihkanFormRM() {
   tambahRowTindakan();
   let bnr = document.getElementById('bannerCarryForwardRM');
   if (bnr) bnr.classList.add('hidden');
+  let panelRef = document.getElementById('panelReferensiKlinisRM');
+  if (panelRef) panelRef.classList.add('hidden');
+  window.lastReferenceRMRecord = null;
   let tglEl = document.getElementById('rmTglPeriksa'); tglEl.value = getTodayIso(); tglEl.max = getTodayIso();
   renderOdontogramGrid();
   resetPeriodontalToDefault();
@@ -14868,7 +14984,12 @@ runAllTimers();
 assert("Active Pasien in EMR set", activePasienRM && activePasienRM.idPasien === "PS-0321-0001");
 assert("EMR Salin ke Form Baru Button in Detail Modal", document.getElementById('btnSalinDataKunjungan') !== null);
 assert("EMR Banner Carry-Forward Exists", document.getElementById('bannerCarryForwardRM') !== null);
+assert("EMR Panel Referensi Klinis in HTML", isPanelRefInHtml);
 assert("EMR Function salinDataKunjunganKeForm is callable", typeof salinDataKunjunganKeForm === 'function');
+assert("EMR Function tampilkanReferensiKlinisRM is callable", typeof tampilkanReferensiKlinisRM === 'function');
+assert("EMR Function bukaDetailKunjunganTerakhir is callable", typeof bukaDetailKunjunganTerakhir === 'function');
+assert("EMR Function tutupPanelReferensiRM is callable", typeof tutupPanelReferensiRM === 'function');
+assert("EMR Function salinDiagnosaLaluKeHariIni is callable", typeof salinDiagnosaLaluKeHariIni === 'function');
 assert("EMR Clear Pasien Button in HTML", isClearPasienBtnInHtml);
 assert("EMR Form Title Renamed to Form Electronic Medical Record (EMR)", isEmrTitleRenamedInHtml);
 assert("EMR Tanggal Pemeriksaan Enlarged", isTglLargeInHtml);
@@ -15106,13 +15227,26 @@ assert("Fungsi bukaModalOdontoHistory Tersedia", typeof bukaModalOdontoHistory =
 closeDetailRM();
 
 salinDataKunjunganKeForm(riwayatPasienAktif[0]);
+assert("Permenkes 24/2022: Panel Referensi Klinis Ditampilkan", !document.getElementById('panelReferensiKlinisRM').classList.contains('hidden'));
+assert("Permenkes 24/2022: Panel Referensi Memuat Tanggal Kunjungan Terakhir", document.getElementById('refTglKunjungan').innerText.includes('8') || document.getElementById('refTglKunjungan').innerText.includes('2026'));
+assert("Permenkes 24/2022: Panel Referensi Memuat CC/Keluhan Lalu", document.getElementById('refCC').innerText.includes('Nyeri'));
+assert("Permenkes 24/2022: Panel Referensi Memuat Tindakan Lalu", document.getElementById('refTindakan').innerText.includes('Tumpatan'));
+assert("Permenkes 24/2022: Panel Referensi Memuat Obat Lalu", document.getElementById('refObat').innerText.includes('Amoksisilin'));
+assert("Permenkes 24/2022: Odontogram Kumulatif Membawa Kondisi Terakhir", currentOdontogram['16'] && currentOdontogram['16'].generalCondition === 'car');
+assert("Permenkes 24/2022: Odontogram Gigi 16 Membawa Tanggal Asli", currentOdontogram['16'] && currentOdontogram['16'].tanggal === '2026-10-08');
+
 let firstCopiedRow = document.getElementById('containerTindakan').children[0];
-assert("Salin ke Form Membawa Tanggal Kunjungan Asli", firstCopiedRow.querySelector('.val-tindakan-tgl').value === '2026-10-08');
+assert("Permenkes 24/2022: Tindakan Hari Ini Bersih Kosong", firstCopiedRow && firstCopiedRow.querySelector('.val-tindakan').value === '');
+assert("Permenkes 24/2022: Tindakan Hari Ini Bertanggal Hari Ini", firstCopiedRow && firstCopiedRow.querySelector('.val-tindakan-tgl').value === getTodayIso());
+assert("Permenkes 24/2022: Anamnesis CC Kosong untuk Kunjungan Baru", document.getElementById('anaCC').value === '');
+
+salinDiagnosaLaluKeHariIni();
 let firstCopiedDiag = document.getElementById('containerDiagnosa').children[0];
-assert("Salin ke Form Membawa Tanggal Kunjungan Asli Diagnosa", firstCopiedDiag.querySelector('.val-diagnosa-tgl').value === '2026-10-08');
-let firstCopiedObat = document.getElementById('containerObat').children[0];
-assert("Salin ke Form Membawa Tanggal Kunjungan Asli Obat", firstCopiedObat.querySelector('.val-obat-tgl').value === '2026-10-08');
-assert("Salin ke Form Membawa Tanggal Kunjungan Asli Odontogram", currentOdontogram['16'] && currentOdontogram['16'].tanggal === '2026-10-08');
+assert("Permenkes 24/2022: Lanjutkan Diagnosa Menyalin Diagnosa Lalu", firstCopiedDiag && firstCopiedDiag.querySelector('.val-diagnosa').value.includes('Caries'));
+assert("Permenkes 24/2022: Lanjutkan Diagnosa Bertanggal Hari Ini", firstCopiedDiag && firstCopiedDiag.querySelector('.val-diagnosa-tgl').value === getTodayIso());
+
+tutupPanelReferensiRM();
+assert("Permenkes 24/2022: Panel Referensi Bisa Ditutup", document.getElementById('panelReferensiKlinisRM').classList.contains('hidden'));
 
 // 15j. Test View History Pasien di Database Pasien: Aligned with Rekam Medis Layout
 let origPasienSuite = window.KlinikData.pasien || [];

@@ -54,6 +54,7 @@ is_clear_pasien_btn_in_html = ('id="btnClearPasienRM"' in html)
 is_tgl_large_in_html = bool(re.search(r'id=["\']rmTglPeriksa["\'][^>]*text-base', html))
 is_tempat_lahir_in_html = ('id="pasTempatLahir"' in html)
 is_modal_tooth_tgl_in_html = ('id="modalToothTgl"' in html)
+is_panel_ref_in_html = ('id="panelReferensiKlinisRM"' in html)
 
 test_harness_file = os.path.join(BASE_DIR, 'tools', 'suite_harness.js')
 
@@ -531,7 +532,12 @@ runAllTimers();
 assert("Active Pasien in EMR set", activePasienRM && activePasienRM.idPasien === "PS-0321-0001");
 assert("EMR Salin ke Form Baru Button in Detail Modal", document.getElementById('btnSalinDataKunjungan') !== null);
 assert("EMR Banner Carry-Forward Exists", document.getElementById('bannerCarryForwardRM') !== null);
+assert("EMR Panel Referensi Klinis in HTML", isPanelRefInHtml);
 assert("EMR Function salinDataKunjunganKeForm is callable", typeof salinDataKunjunganKeForm === 'function');
+assert("EMR Function tampilkanReferensiKlinisRM is callable", typeof tampilkanReferensiKlinisRM === 'function');
+assert("EMR Function bukaDetailKunjunganTerakhir is callable", typeof bukaDetailKunjunganTerakhir === 'function');
+assert("EMR Function tutupPanelReferensiRM is callable", typeof tutupPanelReferensiRM === 'function');
+assert("EMR Function salinDiagnosaLaluKeHariIni is callable", typeof salinDiagnosaLaluKeHariIni === 'function');
 assert("EMR Clear Pasien Button in HTML", isClearPasienBtnInHtml);
 assert("EMR Form Title Renamed to Form Electronic Medical Record (EMR)", isEmrTitleRenamedInHtml);
 assert("EMR Tanggal Pemeriksaan Enlarged", isTglLargeInHtml);
@@ -769,13 +775,26 @@ assert("Fungsi bukaModalOdontoHistory Tersedia", typeof bukaModalOdontoHistory =
 closeDetailRM();
 
 salinDataKunjunganKeForm(riwayatPasienAktif[0]);
+assert("Permenkes 24/2022: Panel Referensi Klinis Ditampilkan", !document.getElementById('panelReferensiKlinisRM').classList.contains('hidden'));
+assert("Permenkes 24/2022: Panel Referensi Memuat Tanggal Kunjungan Terakhir", document.getElementById('refTglKunjungan').innerText.includes('8') || document.getElementById('refTglKunjungan').innerText.includes('2026'));
+assert("Permenkes 24/2022: Panel Referensi Memuat CC/Keluhan Lalu", document.getElementById('refCC').innerText.includes('Nyeri'));
+assert("Permenkes 24/2022: Panel Referensi Memuat Tindakan Lalu", document.getElementById('refTindakan').innerText.includes('Tumpatan'));
+assert("Permenkes 24/2022: Panel Referensi Memuat Obat Lalu", document.getElementById('refObat').innerText.includes('Amoksisilin'));
+assert("Permenkes 24/2022: Odontogram Kumulatif Membawa Kondisi Terakhir", currentOdontogram['16'] && currentOdontogram['16'].generalCondition === 'car');
+assert("Permenkes 24/2022: Odontogram Gigi 16 Membawa Tanggal Asli", currentOdontogram['16'] && currentOdontogram['16'].tanggal === '2026-10-08');
+
 let firstCopiedRow = document.getElementById('containerTindakan').children[0];
-assert("Salin ke Form Membawa Tanggal Kunjungan Asli", firstCopiedRow.querySelector('.val-tindakan-tgl').value === '2026-10-08');
+assert("Permenkes 24/2022: Tindakan Hari Ini Bersih Kosong", firstCopiedRow && firstCopiedRow.querySelector('.val-tindakan').value === '');
+assert("Permenkes 24/2022: Tindakan Hari Ini Bertanggal Hari Ini", firstCopiedRow && firstCopiedRow.querySelector('.val-tindakan-tgl').value === getTodayIso());
+assert("Permenkes 24/2022: Anamnesis CC Kosong untuk Kunjungan Baru", document.getElementById('anaCC').value === '');
+
+salinDiagnosaLaluKeHariIni();
 let firstCopiedDiag = document.getElementById('containerDiagnosa').children[0];
-assert("Salin ke Form Membawa Tanggal Kunjungan Asli Diagnosa", firstCopiedDiag.querySelector('.val-diagnosa-tgl').value === '2026-10-08');
-let firstCopiedObat = document.getElementById('containerObat').children[0];
-assert("Salin ke Form Membawa Tanggal Kunjungan Asli Obat", firstCopiedObat.querySelector('.val-obat-tgl').value === '2026-10-08');
-assert("Salin ke Form Membawa Tanggal Kunjungan Asli Odontogram", currentOdontogram['16'] && currentOdontogram['16'].tanggal === '2026-10-08');
+assert("Permenkes 24/2022: Lanjutkan Diagnosa Menyalin Diagnosa Lalu", firstCopiedDiag && firstCopiedDiag.querySelector('.val-diagnosa').value.includes('Caries'));
+assert("Permenkes 24/2022: Lanjutkan Diagnosa Bertanggal Hari Ini", firstCopiedDiag && firstCopiedDiag.querySelector('.val-diagnosa-tgl').value === getTodayIso());
+
+tutupPanelReferensiRM();
+assert("Permenkes 24/2022: Panel Referensi Bisa Ditutup", document.getElementById('panelReferensiKlinisRM').classList.contains('hidden'));
 
 // 15j. Test View History Pasien di Database Pasien: Aligned with Rekam Medis Layout
 let origPasienSuite = window.KlinikData.pasien || [];
@@ -1868,7 +1887,7 @@ if (failedTotal > 0) {
 }
 '''
 
-full_test_script = f"var isButtonKonsultasiRemoved = {str(is_kon_removed).lower()};\nvar isModalResetPerioInHtml = {str(is_modal_perio_in_html).lower()};\nvar roleSelectOptionsFromHtml = {json.dumps(role_options)};\nvar isDatePickerLargeInHtml = {str(is_date_picker_large).lower()};\nvar isPaginasiHariIniRemoved = {str(is_paginasi_hari_ini_removed).lower()};\nvar isSubtitleAbsensiRemoved = {str(is_subtitle_absensi_removed).lower()};\nvar isTercatatMasukRemoved = {str(is_tercatat_masuk_removed).lower()};\nvar isIzinSakitOffRemoved = {str(is_izin_sakit_off_removed).lower()};\nvar isBtnDbUserRemoved = {str(is_btn_db_user_removed).lower()};\nvar isPelayananOrderedInHtml = {str(is_pelayanan_ordered).lower()};\nvar isAdminHeaderInHtml = {str(is_admin_header).lower()};\nvar isAdminOrderedInHtml = {str(is_admin_ordered).lower()};\nvar isTabBtnPayInHtml = {str(is_tab_btn_pay_in_html).lower()};\nvar isPanelPayInHtml = {str(is_panel_pay_in_html).lower()};\nvar isBtnAturLiburRemoved = {str(is_btn_atur_libur_removed).lower()};\nvar isBtnRefreshInHtml = {str(is_btn_refresh_in_html).lower()};\nvar isEmrTitleRenamedInHtml = {str(is_emr_title_renamed).lower()};\nvar isClearPasienBtnInHtml = {str(is_clear_pasien_btn_in_html).lower()};\nvar isTglLargeInHtml = {str(is_tgl_large_in_html).lower()};\nvar isTempatLahirInHtml = {str(is_tempat_lahir_in_html).lower()};\nvar isModalToothTglInHtml = {str(is_modal_tooth_tgl_in_html).lower()};\n" + dom_shim + "\n" + all_js + "\n" + test_runner_js
+full_test_script = f"var isButtonKonsultasiRemoved = {str(is_kon_removed).lower()};\nvar isModalResetPerioInHtml = {str(is_modal_perio_in_html).lower()};\nvar roleSelectOptionsFromHtml = {json.dumps(role_options)};\nvar isDatePickerLargeInHtml = {str(is_date_picker_large).lower()};\nvar isPaginasiHariIniRemoved = {str(is_paginasi_hari_ini_removed).lower()};\nvar isSubtitleAbsensiRemoved = {str(is_subtitle_absensi_removed).lower()};\nvar isTercatatMasukRemoved = {str(is_tercatat_masuk_removed).lower()};\nvar isIzinSakitOffRemoved = {str(is_izin_sakit_off_removed).lower()};\nvar isBtnDbUserRemoved = {str(is_btn_db_user_removed).lower()};\nvar isPelayananOrderedInHtml = {str(is_pelayanan_ordered).lower()};\nvar isAdminHeaderInHtml = {str(is_admin_header).lower()};\nvar isAdminOrderedInHtml = {str(is_admin_ordered).lower()};\nvar isTabBtnPayInHtml = {str(is_tab_btn_pay_in_html).lower()};\nvar isPanelPayInHtml = {str(is_panel_pay_in_html).lower()};\nvar isBtnAturLiburRemoved = {str(is_btn_atur_libur_removed).lower()};\nvar isBtnRefreshInHtml = {str(is_btn_refresh_in_html).lower()};\nvar isEmrTitleRenamedInHtml = {str(is_emr_title_renamed).lower()};\nvar isClearPasienBtnInHtml = {str(is_clear_pasien_btn_in_html).lower()};\nvar isTglLargeInHtml = {str(is_tgl_large_in_html).lower()};\nvar isTempatLahirInHtml = {str(is_tempat_lahir_in_html).lower()};\nvar isModalToothTglInHtml = {str(is_modal_tooth_tgl_in_html).lower()};\nvar isPanelRefInHtml = {str(is_panel_ref_in_html).lower()};\n" + dom_shim + "\n" + all_js + "\n" + test_runner_js
 
 with open(test_harness_file, 'w', encoding='utf-8') as f:
     f.write(full_test_script)

@@ -49,6 +49,9 @@ is_tab_btn_pay_in_html = ('id="tabBtnPay-gaji-jm"' in html and '1. Gaji & Jasa M
 is_panel_pay_in_html = ('id="panelPay-gaji-jm"' in html)
 is_btn_atur_libur_removed = ('id="btnAturLiburAbsensi"' not in html)
 is_btn_refresh_in_html = ('Refresh' in html and 'refreshAbsensiData()' in html)
+is_emr_title_renamed = ("Form Electronic Medical Record (EMR)" in html)
+is_clear_pasien_btn_in_html = ('id="btnClearPasienRM"' in html)
+is_tgl_large_in_html = bool(re.search(r'id=["\']rmTglPeriksa["\'][^>]*text-base', html))
 
 test_harness_file = os.path.join(BASE_DIR, 'tools', 'suite_harness.js')
 
@@ -527,6 +530,14 @@ assert("Active Pasien in EMR set", activePasienRM && activePasienRM.idPasien ===
 assert("EMR Salin ke Form Baru Button in Detail Modal", document.getElementById('btnSalinDataKunjungan') !== null);
 assert("EMR Banner Carry-Forward Exists", document.getElementById('bannerCarryForwardRM') !== null);
 assert("EMR Function salinDataKunjunganKeForm is callable", typeof salinDataKunjunganKeForm === 'function');
+assert("EMR Clear Pasien Button in HTML", isClearPasienBtnInHtml);
+assert("EMR Form Title Renamed to Form Electronic Medical Record (EMR)", isEmrTitleRenamedInHtml);
+assert("EMR Tanggal Pemeriksaan Enlarged", isTglLargeInHtml);
+assert("EMR Function updateObatQtyRequirement exists", typeof updateObatQtyRequirement === 'function');
+bersihkanFormRM();
+assert("EMR Clear Pasien resets active patient to null", activePasienRM === null);
+pilihPasienRM('PS-0321-0001');
+runAllTimers();
 
 // 13. TEST KASIR PATIENT SEARCH
 switchMenu('kasir');
@@ -1830,7 +1841,7 @@ if (failedTotal > 0) {
 }
 '''
 
-full_test_script = f"var isButtonKonsultasiRemoved = {str(is_kon_removed).lower()};\nvar isModalResetPerioInHtml = {str(is_modal_perio_in_html).lower()};\nvar roleSelectOptionsFromHtml = {json.dumps(role_options)};\nvar isDatePickerLargeInHtml = {str(is_date_picker_large).lower()};\nvar isPaginasiHariIniRemoved = {str(is_paginasi_hari_ini_removed).lower()};\nvar isSubtitleAbsensiRemoved = {str(is_subtitle_absensi_removed).lower()};\nvar isTercatatMasukRemoved = {str(is_tercatat_masuk_removed).lower()};\nvar isIzinSakitOffRemoved = {str(is_izin_sakit_off_removed).lower()};\nvar isBtnDbUserRemoved = {str(is_btn_db_user_removed).lower()};\nvar isPelayananOrderedInHtml = {str(is_pelayanan_ordered).lower()};\nvar isAdminHeaderInHtml = {str(is_admin_header).lower()};\nvar isAdminOrderedInHtml = {str(is_admin_ordered).lower()};\nvar isTabBtnPayInHtml = {str(is_tab_btn_pay_in_html).lower()};\nvar isPanelPayInHtml = {str(is_panel_pay_in_html).lower()};\nvar isBtnAturLiburRemoved = {str(is_btn_atur_libur_removed).lower()};\nvar isBtnRefreshInHtml = {str(is_btn_refresh_in_html).lower()};\n" + dom_shim + "\n" + all_js + "\n" + test_runner_js
+full_test_script = f"var isButtonKonsultasiRemoved = {str(is_kon_removed).lower()};\nvar isModalResetPerioInHtml = {str(is_modal_perio_in_html).lower()};\nvar roleSelectOptionsFromHtml = {json.dumps(role_options)};\nvar isDatePickerLargeInHtml = {str(is_date_picker_large).lower()};\nvar isPaginasiHariIniRemoved = {str(is_paginasi_hari_ini_removed).lower()};\nvar isSubtitleAbsensiRemoved = {str(is_subtitle_absensi_removed).lower()};\nvar isTercatatMasukRemoved = {str(is_tercatat_masuk_removed).lower()};\nvar isIzinSakitOffRemoved = {str(is_izin_sakit_off_removed).lower()};\nvar isBtnDbUserRemoved = {str(is_btn_db_user_removed).lower()};\nvar isPelayananOrderedInHtml = {str(is_pelayanan_ordered).lower()};\nvar isAdminHeaderInHtml = {str(is_admin_header).lower()};\nvar isAdminOrderedInHtml = {str(is_admin_ordered).lower()};\nvar isTabBtnPayInHtml = {str(is_tab_btn_pay_in_html).lower()};\nvar isPanelPayInHtml = {str(is_panel_pay_in_html).lower()};\nvar isBtnAturLiburRemoved = {str(is_btn_atur_libur_removed).lower()};\nvar isBtnRefreshInHtml = {str(is_btn_refresh_in_html).lower()};\nvar isEmrTitleRenamedInHtml = {str(is_emr_title_renamed).lower()};\nvar isClearPasienBtnInHtml = {str(is_clear_pasien_btn_in_html).lower()};\nvar isTglLargeInHtml = {str(is_tgl_large_in_html).lower()};\n" + dom_shim + "\n" + all_js + "\n" + test_runner_js
 
 with open(test_harness_file, 'w', encoding='utf-8') as f:
     f.write(full_test_script)

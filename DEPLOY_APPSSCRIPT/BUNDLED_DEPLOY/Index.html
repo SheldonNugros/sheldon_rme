@@ -3560,7 +3560,7 @@
 <div class="flex items-center gap-3 mb-2 pb-3 border-b border-slate-200">
   <div class="w-10 h-10 bg-teal-50 text-teal-600 rounded-xl flex items-center justify-center font-bold text-xl shadow-sm border border-teal-100">🩺</div>
   <div>
-    <h2 class="text-lg font-black text-slate-900 tracking-tight">Formulir Rekam Medis (EMR)</h2>
+    <h2 class="text-lg font-black text-slate-900 tracking-tight">Form Electronic Medical Record (EMR)</h2>
     <p class="text-[11px] text-slate-500 font-medium">Odontogram Interaktif SVG - RME Standar</p>
   </div>
 </div>
@@ -3569,13 +3569,22 @@
   <!-- PANEL KIRI (Pencarian Pasien & Timeline Historis) -->
   <div class="lg:col-span-1 space-y-4">
     <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-      <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">Pilih Pasien</h3>
+      <div class="flex justify-between items-center mb-2">
+        <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-wider">Pilih Pasien</h3>
+        <button id="btnClearPasienRM" type="button" onclick="bersihkanFormRM()" class="text-[10px] font-bold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-2 py-0.5 rounded-lg flex items-center gap-1 transition-all shadow-xs cursor-pointer" title="Hapus pilihan pasien dan kosongkan formulir">
+          ✕ Clear Pasien
+        </button>
+      </div>
       <div class="relative">
-        <input type="text" id="rmSearchPasien" autocomplete="off" placeholder="🔍 Cari Nama / No RM..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500 transition-all">
+        <input type="text" id="rmSearchPasien" autocomplete="off" placeholder="🔍 Cari Nama / No RM..." class="w-full pl-3 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500 transition-all">
+        <button id="btnInputClearPasien" type="button" onclick="bersihkanFormRM()" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-rose-600 text-xs font-black px-1 py-0.5 rounded hover:bg-rose-50 transition-all cursor-pointer" title="Hapus pilihan pasien">✕</button>
         <div id="rmSearchResult" class="hidden absolute top-full left-0 right-0 bg-white border border-slate-200 rounded-lg shadow-xl z-40 max-h-48 overflow-y-auto mt-1"></div>
       </div>
-      <div class="mt-3 p-3 bg-indigo-50/50 border border-indigo-100 rounded-lg">
-        <p class="text-[10px] font-bold text-indigo-600 mb-1" id="rmSelectedRM">RM: -</p>
+      <div class="mt-3 p-3 bg-indigo-50/50 border border-indigo-100 rounded-lg relative">
+        <div class="flex justify-between items-start">
+          <p class="text-[10px] font-bold text-indigo-600 mb-1" id="rmSelectedRM">RM: -</p>
+          <button type="button" onclick="bersihkanFormRM()" class="text-[10px] font-bold text-slate-400 hover:text-rose-600 px-1 py-0.5 rounded hover:bg-white transition-all cursor-pointer" title="Clear Pasien">✕ Clear</button>
+        </div>
         <h4 class="text-xs font-black text-slate-800 mb-2" id="rmSelectedNama">Silakan cari pasien</h4>
         <div class="space-y-1">
           <p class="text-[10px] font-medium text-slate-600" id="rmSelectedJK">Jenis Kelamin: -</p>
@@ -3608,12 +3617,12 @@
     <div class="bg-white p-4 sm:p-5 rounded-xl shadow-sm border border-slate-200">
       <div class="flex flex-col md:flex-row gap-4">
         <div class="flex-1">
-          <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase">Tanggal Pemeriksaan *</label>
-          <input type="date" id="rmTglPeriksa" onchange="validasiTglMax(this)" required class="w-full max-w-[200px] px-3 py-1.5 bg-slate-50 border border-slate-200 rounded text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500">
+          <label class="block font-black text-indigo-700 mb-1.5 text-xs uppercase tracking-wide">Tanggal Pemeriksaan *</label>
+          <input type="date" id="rmTglPeriksa" onchange="validasiTglMax(this)" required class="w-full max-w-[260px] px-3.5 py-2.5 bg-slate-50 border-2 border-indigo-200 focus:border-indigo-600 rounded-xl text-base sm:text-lg font-black text-slate-900 shadow-xs outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all tracking-wider">
         </div>
         <div class="flex-1">
-          <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase">Dokter Pemeriksa</label>
-          <input type="text" id="rmDokterLabel" readonly class="w-full max-w-[250px] px-3 py-1.5 bg-slate-100 border border-slate-200 rounded text-xs font-bold text-slate-600 outline-none">
+          <label class="block font-bold text-slate-700 mb-1.5 text-xs uppercase tracking-wide">Dokter Pemeriksa</label>
+          <input type="text" id="rmDokterLabel" readonly class="w-full max-w-[280px] px-3.5 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-sm font-bold text-slate-700 outline-none">
         </div>
       </div>
 
@@ -8060,9 +8069,8 @@ function renderRiwayatRMRoutes(container, riwayat) {
           <span class="text-[9px] bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full font-bold">${r.dokterPemeriksa || "-"}</span>
         </div>
         <div class="text-[10px] text-slate-700 mb-2 line-clamp-2"><b>Keluhan:</b> ${ana.cc || "-"}</div>
-        <div class="grid grid-cols-2 gap-1.5 mt-2">
-          <button type="button" onclick="bukaDetailRM(${idx})" class="py-1.5 bg-white border border-slate-300 text-indigo-600 hover:bg-indigo-50 rounded-lg font-bold text-[10px] transition-colors shadow-xs text-center cursor-pointer">Lihat Detail</button>
-          <button type="button" onclick="salinDataKunjunganKeForm(riwayatPasienAktif[${idx}], false)" class="py-1.5 bg-emerald-50 border border-emerald-300 text-emerald-700 hover:bg-emerald-100 rounded-lg font-bold text-[10px] transition-colors shadow-xs flex items-center justify-center gap-1 cursor-pointer" title="Salin data kunjungan ini ke formulir pemeriksaan baru"><span>📋</span> Salin Data</button>
+        <div class="mt-2">
+          <button type="button" onclick="bukaDetailRM(${idx})" class="w-full py-1.5 bg-white border border-slate-300 text-indigo-600 hover:bg-indigo-50 rounded-lg font-bold text-[10px] transition-colors shadow-xs text-center cursor-pointer">Lihat Detail</button>
         </div>
       </div>`;
   }).join('');
@@ -9163,11 +9171,27 @@ function tambahRowTindakan(valDesc = '', valCode = '', valKet = '') {
     if (inp) autoFillICD9Code(inp);
   }
 }
+function updateObatQtyRequirement(inputObat) {
+  let row = inputObat.closest('.row-obat');
+  if (!row) return;
+  let qtyInput = row.querySelector('.val-qty');
+  if (!qtyInput) return;
+  let hasObat = inputObat.value.trim().length > 0;
+  if (hasObat) {
+    qtyInput.setAttribute('placeholder', 'Qty*');
+    qtyInput.classList.add('border-indigo-400');
+  } else {
+    qtyInput.setAttribute('placeholder', 'Qty');
+    qtyInput.classList.remove('border-indigo-400', 'border-rose-500', 'ring-2', 'ring-rose-400');
+  }
+}
+
 function tambahRowObat(valNama = '', valQty = '', valKet = '') {
   const c = document.getElementById('containerObat');
   let div = document.createElement('div');
   div.className = "flex gap-2 items-center row-obat bg-slate-50 p-2 rounded border border-slate-200";
-  div.innerHTML = `<input type="text" list="listObatRM" oninput="autoTitleCase(this)" value="${escapeHtmlAttr(valNama)}" placeholder="Ketik / Cari Obat..." class="val-obat w-2/5 px-3 py-1.5 bg-white border border-slate-300 rounded outline-none focus:ring-1 focus:ring-teal-500"><input type="text" maxlength="2" oninput="this.value=this.value.replace(/[^0-9]/g,'')" value="${escapeHtmlAttr(valQty)}" placeholder="Qty" class="val-qty w-12 px-2 py-1.5 bg-white border border-slate-300 rounded text-center outline-none"><input type="text" oninput="autoTitleCase(this)" value="${escapeHtmlAttr(valKet)}" placeholder="Aturan Pakai..." class="val-ket flex-1 px-3 py-1.5 bg-white border border-slate-300 rounded outline-none"><button type="button" onclick="this.parentElement.remove()" class="px-2.5 py-1.5 bg-rose-100 text-rose-600 rounded font-black hover:bg-rose-200">X</button>`;
+  let isReq = (valNama || '').toString().trim().length > 0;
+  div.innerHTML = `<input type="text" list="listObatRM" oninput="autoTitleCase(this); updateObatQtyRequirement(this);" value="${escapeHtmlAttr(valNama)}" placeholder="Ketik / Cari Obat..." class="val-obat w-2/5 px-3 py-1.5 bg-white border border-slate-300 rounded outline-none focus:ring-1 focus:ring-teal-500 text-xs font-semibold"><input type="text" maxlength="4" oninput="this.value=this.value.replace(/[^0-9]/g,''); this.classList.remove('border-rose-500','ring-2','ring-rose-400');" value="${escapeHtmlAttr(valQty)}" placeholder="${isReq ? 'Qty*' : 'Qty'}" class="val-qty w-14 px-2 py-1.5 bg-white border ${isReq ? 'border-indigo-400' : 'border-slate-300'} rounded text-center outline-none text-xs font-bold"><input type="text" oninput="autoTitleCase(this)" value="${escapeHtmlAttr(valKet)}" placeholder="Aturan Pakai..." class="val-ket flex-1 px-3 py-1.5 bg-white border border-slate-300 rounded outline-none text-xs"><button type="button" onclick="this.parentElement.remove()" class="px-2.5 py-1.5 bg-rose-100 text-rose-600 rounded font-black hover:bg-rose-200 text-xs">X</button>`;
   c.appendChild(div);
 }
 // ==========================================
@@ -9216,9 +9240,40 @@ function bersihkanFormRM() {
 // [PERBAIKAN] Mencegah duplikasi String Kode ICD-10 saat disimpan
 function simpanEMRFinal() {
   if (!activePasienRM) { alertMsg('error', 'Pilih pasien terlebih dahulu!'); return; }
-   let btn = document.getElementById('btnSimpanRM');
+
+  // [VALIDASI WAJIB] Resep Obat: Jika nama obat diisi, Qty wajib diisi (> 0)
+  let arrObat = [];
+  let invalidQtyObat = null;
+  document.querySelectorAll('.row-obat').forEach(row => {
+    let obInput = row.querySelector('.val-obat');
+    let qtyInput = row.querySelector('.val-qty');
+    let ketInput = row.querySelector('.val-ket');
+    let ob = obInput ? obInput.value.trim() : '';
+    let q = qtyInput ? qtyInput.value.trim() : '';
+    let k = ketInput ? ketInput.value.trim() : '';
+    if (ob) {
+      let numQty = parseInt(q, 10);
+      if (!q || isNaN(numQty) || numQty <= 0) {
+        if (!invalidQtyObat) {
+          invalidQtyObat = { nama: ob, inputEl: qtyInput };
+        }
+      }
+      arrObat.push({ obat: ob, qty: q, ket: k });
+    }
+  });
+
+  if (invalidQtyObat) {
+    alertMsg('error', `Resep Obat: Qty wajib diisi dengan angka valid (> 0) untuk obat "${invalidQtyObat.nama}"!`);
+    if (invalidQtyObat.inputEl) {
+      invalidQtyObat.inputEl.focus();
+      invalidQtyObat.inputEl.classList.add('border-rose-500', 'ring-2', 'ring-rose-400');
+    }
+    return;
+  }
+
+  let btn = document.getElementById('btnSimpanRM');
   btn.innerHTML = 'MENYIMPAN...'; btn.disabled = true;
-   const getV = (id) => document.getElementById(id) ? document.getElementById(id).value.trim() : '';
+  const getV = (id) => document.getElementById(id) ? document.getElementById(id).value.trim() : '';
  
   let arrDiagnosa = [];
   document.querySelectorAll('.row-diagnosa').forEach(row => {
@@ -9257,8 +9312,7 @@ function simpanEMRFinal() {
         arrTindakan.push(fullTind);
      }
   });
-  let arrObat = []; document.querySelectorAll('.row-obat').forEach(row => { let ob = row.querySelector('.val-obat').value, q = row.querySelector('.val-qty').value, k = row.querySelector('.val-ket').value; if(ob) arrObat.push({ obat: ob, qty: q, ket: k }); });
- 
+
   let payload = {
     idPasien: activePasienRM.idPasien, noRm: activePasienRM.noRm, namaPasien: activePasienRM.namaPasien, tanggalPeriksa: getV('rmTglPeriksa'), dokterPemeriksa: getV('rmDokterLabel'),
     anamnesisStr: JSON.stringify(anam), fisikStr: JSON.stringify(fisik), odontogram: JSON.stringify(currentOdontogram), tindakanStr: JSON.stringify(arrTindakan), obatStr: JSON.stringify(arrObat), catatanEdukasi: getV('rmCatatanEdukasi')

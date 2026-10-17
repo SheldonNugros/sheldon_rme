@@ -6082,13 +6082,6 @@
           <span>📅</span> Presensi & Absensi Pegawai
         </h2>
       </div>
-
-      <!-- Quick Action Buttons -->
-      <div class="flex flex-wrap items-center gap-2">
-        <button type="button" onclick="refreshAbsensiData()" class="px-4 py-2 bg-slate-800/90 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 hover:border-slate-500 rounded-xl text-xs font-black transition-all shadow-sm flex items-center gap-2 hover:scale-[1.02] cursor-pointer">
-          <span class="text-sm">🔄</span> Refresh
-        </button>
-      </div>
     </div>
 
     <!-- TAB NAVIGASI MODUL -->
@@ -6143,15 +6136,23 @@
   <div id="tabContentAbsensiHarian" class="space-y-4">
     <!-- PENGATUR TANGGAL (DIPERBESAR & BERSIH TANPA TOMBOL PAGINASI) -->
     <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
-      <div class="flex flex-wrap items-center gap-3">
-        <label class="text-sm md:text-base font-black text-slate-800 flex items-center gap-2">
-          <span class="text-lg">📅</span>
-          <span>Pilih Tanggal:</span>
-        </label>
-        <input type="date" id="absensiDatePicker" onchange="handleAbsensiDateChange(this.value)" class="bg-white border-2 border-indigo-300 hover:border-indigo-500 text-slate-900 text-base md:text-lg rounded-xl px-4 py-2 font-black focus:ring-4 focus:ring-indigo-500/20 focus:outline-none shadow-sm cursor-pointer transition-all">
-        <span id="labelHariTanggal" class="text-sm md:text-base font-extrabold px-3.5 py-2 rounded-xl bg-indigo-50 text-indigo-700 border border-indigo-200 shadow-sm flex items-center gap-2">
-          Memuat...
-        </span>
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="flex flex-wrap items-center gap-3">
+          <label class="text-sm md:text-base font-black text-slate-800 flex items-center gap-2">
+            <span class="text-lg">📅</span>
+            <span>Pilih Tanggal:</span>
+          </label>
+          <input type="date" id="absensiDatePicker" onchange="handleAbsensiDateChange(this.value)" class="bg-white border-2 border-indigo-300 hover:border-indigo-500 text-slate-900 text-base md:text-lg rounded-xl px-4 py-2 font-black focus:ring-4 focus:ring-indigo-500/20 focus:outline-none shadow-sm cursor-pointer transition-all">
+          <span id="labelHariTanggal" class="text-sm md:text-base font-extrabold px-3.5 py-2 rounded-xl bg-indigo-50 text-indigo-700 border border-indigo-200 shadow-sm flex items-center gap-2">
+            Memuat...
+          </span>
+        </div>
+
+        <!-- Tombol Refresh (Dipindahkan ke kanan baris tanggal & diperbesar) -->
+        <button type="button" id="btnRefreshAbsensi" onclick="refreshAbsensiData()" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-900 active:bg-slate-950 text-white hover:text-indigo-200 border-2 border-slate-700 hover:border-indigo-500 rounded-xl text-sm font-black transition-all shadow-md flex items-center justify-center gap-2.5 hover:scale-[1.03] cursor-pointer" title="Refresh Data Presensi">
+          <span class="text-base">🔄</span>
+          <span>Refresh</span>
+        </button>
       </div>
 
       <!-- NOTIFIKASI OPERASIONAL HARI LIBUR / MINGGU -->

@@ -8318,7 +8318,6 @@ function renderRiwayatRMRoutes(container, riwayat) {
     return;
   }
   let html = riwayat.map((r, idx) => {
-    let ana = {}; try { ana = JSON.parse(r.anamnesisStr || "{}"); } catch(e){}
     let arsipBadge = r.isArsip ? `<span class="text-[8px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-black border border-amber-300">📦 ARSIP ${r.tahunArsip || ""}</span>` : "";
     return `
       <div class="p-3 border ${r.isArsip ? "border-amber-200 bg-amber-50/50" : "border-slate-200 bg-slate-50"} rounded-xl mb-3 shadow-sm hover:shadow transition-shadow">
@@ -8327,9 +8326,8 @@ function renderRiwayatRMRoutes(container, riwayat) {
             <span class="font-bold text-indigo-700 text-[11px]">${formatTglIndoRM(r.tanggalPeriksa || "-")}</span>
             ${arsipBadge}
           </div>
-          <span class="text-[9px] bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full font-bold">${r.dokterPemeriksa || "-"}</span>
         </div>
-        <div class="text-[10px] text-slate-700 mb-2 line-clamp-2"><b>Keluhan:</b> ${ana.cc || "-"}</div>
+        <div class="text-[10px] text-slate-700 mb-2"><b>Dokter Pemeriksa:</b> <span class="font-bold text-slate-800">${r.dokterPemeriksa || "-"}</span></div>
         <div class="mt-2">
           <button type="button" onclick="bukaDetailRM(${idx})" class="w-full py-1.5 bg-white border border-slate-300 text-indigo-600 hover:bg-indigo-50 rounded-lg font-bold text-[10px] transition-colors shadow-xs text-center cursor-pointer">Lihat Detail</button>
         </div>

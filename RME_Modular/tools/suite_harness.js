@@ -3045,6 +3045,90 @@ function renderOdontogramData(str) {
   } catch(e) {}
   return `<div style="background-color: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0; font-family: monospace; font-size: 12px;">${str}</div>`;
 }
+function formatTglTindakanDDMMYY(tglStr) {
+  if (!tglStr || tglStr === '-') return '';
+  let str = String(tglStr).trim();
+  let mBrack = str.match(/^\[?(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})\]?$/);
+  if (mBrack) {
+    let d = ('0' + parseInt(mBrack[1], 10)).slice(-2);
+    let m = ('0' + parseInt(mBrack[2], 10)).slice(-2);
+    let y = mBrack[3].slice(-2);
+    return `[${d}/${m}/${y}]`;
+  }
+  let parts = str.split('-');
+  if (parts.length === 3 && parts[0].length === 4) {
+    let y = parts[0].slice(-2);
+    let m = ('0' + parseInt(parts[1], 10)).slice(-2);
+    let d = ('0' + parseInt(parts[2], 10)).slice(-2);
+    return `[${d}/${m}/${y}]`;
+  }
+  let dt = new Date(str);
+  if (!isNaN(dt.getTime())) {
+    let d = ('0' + dt.getDate()).slice(-2);
+    let m = ('0' + (dt.getMonth() + 1)).slice(-2);
+    let y = String(dt.getFullYear()).slice(-2);
+    return `[${d}/${m}/${y}]`;
+  }
+  return `[${str}]`;
+}
+function toIsoDateTindakan(str) {
+  if (!str) return '';
+  str = String(str).trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
+  let m = str.match(/^\[?(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})\]?$/);
+  if (m) {
+    let d = ('0' + parseInt(m[1], 10)).slice(-2);
+    let mo = ('0' + parseInt(m[2], 10)).slice(-2);
+    let y = m[3];
+    if (y.length === 2) {
+      y = '20' + y;
+    }
+    return `${y}-${mo}-${d}`;
+  }
+  return '';
+}
+function parseTindakanItem(item, fallbackDate = '') {
+  let raw = typeof item === 'object' ? (item.desc || item.nama || '') : String(item);
+  let code = typeof item === 'object' ? (item.kode || item.code || '') : '';
+  let ket = typeof item === 'object' ? (item.ket || item.keterangan || '') : '';
+  let tgl = typeof item === 'object' ? (item.tanggal || item.tgl || '') : '';
+  
+  let mDate = raw.match(/\[(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})\]/);
+  if (mDate) {
+    tgl = mDate[1];
+    raw = raw.replace(/\s*\[\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}\]/, '').trim();
+  }
+  
+  let mKet = raw.match(/\((.*?)\)$/);
+  if (mKet && !ket) {
+    ket = mKet[1].trim();
+    raw = raw.replace(/\s*\(.*?\)$/, '').trim();
+  }
+  
+  let parts = raw.split(' - ');
+  let desc = raw;
+  if (parts.length > 1 && !code) {
+    code = parts[0].trim();
+    desc = parts.slice(1).join(' - ').trim();
+  } else if (parts.length > 1 && code) {
+    desc = parts.slice(1).join(' - ').trim();
+  }
+  
+  if (!tgl && fallbackDate) {
+    tgl = fallbackDate;
+  }
+  
+  let iso = toIsoDateTindakan(tgl);
+  
+  return {
+    raw: typeof item === 'object' ? (item.desc || item.nama || '') : String(item),
+    code: code,
+    desc: desc,
+    ket: ket,
+    tanggal: tgl,
+    isoDate: iso
+  };
+}
 // ========================================================
 // FUNGSI MEMBUKA HISTORY LENGKAP (DIPERBAIKI)
 // ========================================================
@@ -3266,7 +3350,13 @@ function openHistoryEMR(idPasien) {
          
            <div>
              <h4 class="font-black bg-slate-100 p-1.5 border-l-4 border-slate-800 mb-2 uppercase">Tindakan (ICD-9)</h4>
-             <ul class="list-disc pl-5">${tind.length === 0 ? '<li>-</li>' : tind.map(t => `<li>${t}</li>`).join('')}</ul>
+             <ul class="list-disc pl-5">${tind.length === 0 ? '<li>-</li>' : tind.map(t => {
+               let p = parseTindakanItem(t, r.tanggalPeriksa);
+               let tglBadge = formatTglTindakanDDMMYY(p.tanggal);
+               let codePrefix = p.code ? `${p.code} - ` : '';
+               let ketText = p.ket ? ` (${p.ket})` : '';
+               return `<li class="py-0.5"><span class="font-semibold text-slate-800">${codePrefix}${p.desc}</span>${tglBadge ? ' ' + tglBadge : ''}${ketText}</li>`;
+             }).join('')}</ul>
            </div>
          
            <div>
@@ -4083,7 +4173,13 @@ function printHistoryEMR(idPasien) {
              
                <div>
                  <h4 class="font-black bg-slate-100 p-1.5 border-l-4 border-slate-800 mb-2 uppercase">Tindakan (ICD-9)</h4>
-                 <ul class="list-disc pl-5">${tind.length === 0 ? '<li>-</li>' : tind.map(t => `<li>${t}</li>`).join('')}</ul>
+                 <ul class="list-disc pl-5">${tind.length === 0 ? '<li>-</li>' : tind.map(t => {
+                   let p = parseTindakanItem(t, r.tanggalPeriksa);
+                   let tglBadge = formatTglTindakanDDMMYY(p.tanggal);
+                   let codePrefix = p.code ? `${p.code} - ` : '';
+                   let ketText = p.ket ? ` (${p.ket})` : '';
+                   return `<li class="py-0.5"><span class="font-semibold text-slate-800">${codePrefix}${p.desc}</span>${tglBadge ? ' ' + tglBadge : ''}${ketText}</li>`;
+                 }).join('')}</ul>
                </div>
              
                <div>
@@ -4575,6 +4671,90 @@ function formatTglIndoRM(tglStr) {
   }
   return tglStr;
 }
+function formatTglTindakanDDMMYY(tglStr) {
+  if (!tglStr || tglStr === '-') return '';
+  let str = String(tglStr).trim();
+  let mBrack = str.match(/^\[?(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})\]?$/);
+  if (mBrack) {
+    let d = ('0' + parseInt(mBrack[1], 10)).slice(-2);
+    let m = ('0' + parseInt(mBrack[2], 10)).slice(-2);
+    let y = mBrack[3].slice(-2);
+    return `[${d}/${m}/${y}]`;
+  }
+  let parts = str.split('-');
+  if (parts.length === 3 && parts[0].length === 4) {
+    let y = parts[0].slice(-2);
+    let m = ('0' + parseInt(parts[1], 10)).slice(-2);
+    let d = ('0' + parseInt(parts[2], 10)).slice(-2);
+    return `[${d}/${m}/${y}]`;
+  }
+  let dt = new Date(str);
+  if (!isNaN(dt.getTime())) {
+    let d = ('0' + dt.getDate()).slice(-2);
+    let m = ('0' + (dt.getMonth() + 1)).slice(-2);
+    let y = String(dt.getFullYear()).slice(-2);
+    return `[${d}/${m}/${y}]`;
+  }
+  return `[${str}]`;
+}
+function toIsoDateTindakan(str) {
+  if (!str) return '';
+  str = String(str).trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
+  let m = str.match(/^\[?(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})\]?$/);
+  if (m) {
+    let d = ('0' + parseInt(m[1], 10)).slice(-2);
+    let mo = ('0' + parseInt(m[2], 10)).slice(-2);
+    let y = m[3];
+    if (y.length === 2) {
+      y = '20' + y;
+    }
+    return `${y}-${mo}-${d}`;
+  }
+  return '';
+}
+function parseTindakanItem(item, fallbackDate = '') {
+  let raw = typeof item === 'object' ? (item.desc || item.nama || '') : String(item);
+  let code = typeof item === 'object' ? (item.kode || item.code || '') : '';
+  let ket = typeof item === 'object' ? (item.ket || item.keterangan || '') : '';
+  let tgl = typeof item === 'object' ? (item.tanggal || item.tgl || '') : '';
+  
+  let mDate = raw.match(/\[(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})\]/);
+  if (mDate) {
+    tgl = mDate[1];
+    raw = raw.replace(/\s*\[\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}\]/, '').trim();
+  }
+  
+  let mKet = raw.match(/\((.*?)\)$/);
+  if (mKet && !ket) {
+    ket = mKet[1].trim();
+    raw = raw.replace(/\s*\(.*?\)$/, '').trim();
+  }
+  
+  let parts = raw.split(' - ');
+  let desc = raw;
+  if (parts.length > 1 && !code) {
+    code = parts[0].trim();
+    desc = parts.slice(1).join(' - ').trim();
+  } else if (parts.length > 1 && code) {
+    desc = parts.slice(1).join(' - ').trim();
+  }
+  
+  if (!tgl && fallbackDate) {
+    tgl = fallbackDate;
+  }
+  
+  let iso = toIsoDateTindakan(tgl);
+  
+  return {
+    raw: typeof item === 'object' ? (item.desc || item.nama || '') : String(item),
+    code: code,
+    desc: desc,
+    ket: ket,
+    tanggal: tgl,
+    isoDate: iso
+  };
+}
 function hitungDetailUmurRM(tglLahirStr) {
   if (!tglLahirStr || tglLahirStr === '-') return '-';
   let parts = String(tglLahirStr).trim().split('-');
@@ -4893,11 +5073,11 @@ function salinDataKunjunganKeForm(r, isAuto = false) {
   // 3. Periodontal & OHIS
   if (fis.periodontal) {
     currentPeriodontalExam = JSON.parse(JSON.stringify(fis.periodontal));
-    renderPeriodontalVisual();
+    if (typeof renderPeriodontalVisual === 'function') renderPeriodontalVisual();
   }
   if (fis.ohis) {
     currentOhisExam = JSON.parse(JSON.stringify(fis.ohis));
-    hitungOHIS();
+    if (typeof hitungOHIS === 'function') hitungOHIS();
   }
 
   // 4. Odontogram
@@ -4949,20 +5129,8 @@ function salinDataKunjunganKeForm(r, isAuto = false) {
     containerTind.innerHTML = '';
     if (Array.isArray(tind) && tind.length > 0) {
       tind.forEach(item => {
-        let text = typeof item === 'object' ? (item.desc || item.nama || '') : String(item);
-        let code = '';
-        let ket = '';
-        let parts = text.split(' - ');
-        if (parts.length > 1) {
-          code = parts[0].trim();
-          text = parts.slice(1).join(' - ').trim();
-        }
-        let m = text.match(/\((.*?)\)$/);
-        if (m) {
-          ket = m[1].trim();
-          text = text.replace(/\s*\((.*?)\)$/, '').trim();
-        }
-        tambahRowTindakan(text, code, ket);
+        let p = parseTindakanItem(item, r.tanggalPeriksa);
+        tambahRowTindakan(p.desc, p.code, p.ket, p.isoDate);
       });
     } else {
       tambahRowTindakan();
@@ -5261,7 +5429,13 @@ function bukaDetailRM(idx) {
       </div>` : ''}
       <div>
         <h4 class="font-black bg-slate-100 p-1.5 border-l-4 border-slate-800 mb-2 uppercase">Tindakan (ICD-9)</h4>
-        <ul class="list-disc pl-5">${tind.length === 0 ? '<li>-</li>' : tind.map(t => `<li>${t}</li>`).join('')}</ul>
+        <ul class="list-disc pl-5">${tind.length === 0 ? '<li>-</li>' : tind.map(t => {
+          let p = parseTindakanItem(t, r.tanggalPeriksa);
+          let tglBadge = formatTglTindakanDDMMYY(p.tanggal);
+          let codePrefix = p.code ? `${p.code} - ` : '';
+          let ketText = p.ket ? ` (${p.ket})` : '';
+          return `<li class="py-0.5"><span class="font-semibold text-slate-800">${codePrefix}${p.desc}</span>${tglBadge ? ' ' + tglBadge : ''}${ketText}</li>`;
+        }).join('')}</ul>
       </div>
       <div>
         <h4 class="font-black bg-slate-100 p-1.5 border-l-4 border-slate-800 mb-2 uppercase">Resep Obat</h4>
@@ -5834,20 +6008,23 @@ function tambahRowDiagnosa(valDesc = '', valCode = '', valKet = '') {
 }
 
 
-function tambahRowTindakan(valDesc = '', valCode = '', valKet = '') {
+function tambahRowTindakan(valDesc = '', valCode = '', valKet = '', valTgl = '') {
   const c = document.getElementById('containerTindakan');
+  let defaultTgl = valTgl || (document.getElementById('rmTglPeriksa') ? document.getElementById('rmTglPeriksa').value : '') || getTodayIso();
   let div = document.createElement('div');
   div.className = "p-2.5 bg-slate-50 rounded-xl border border-slate-200 space-y-2 row-tindakan shadow-sm";
   div.innerHTML = `
-    <div class="flex gap-2 items-center">
-      <input type="text" list="listTindakanRM" oninput="autoTitleCase(this); autoFillICD9Code(this);" value="${escapeHtmlAttr(valDesc)}" placeholder="Ketik Kode atau Nama Tindakan (ICD-9)..." class="val-tindakan flex-1 px-3 py-1.5 bg-white border border-slate-300 rounded-lg outline-none focus:ring-1 focus:ring-indigo-500 text-xs font-semibold">
-      <input type="text" placeholder="Kode ICD-9" readonly value="${escapeHtmlAttr(valCode)}" class="val-icd9code w-28 px-2 py-1.5 bg-slate-200 text-slate-700 font-bold border border-slate-300 rounded-lg outline-none text-center text-xs">
-      <button type="button" onclick="this.closest('.row-tindakan').remove()" class="px-2.5 py-1.5 bg-rose-100 text-rose-600 rounded-lg font-black hover:bg-rose-200 transition-colors text-xs">X</button>
+    <div class="flex gap-2 items-center flex-wrap sm:flex-nowrap">
+      <input type="text" list="listTindakanRM" oninput="autoTitleCase(this); autoFillICD9Code(this);" value="${escapeHtmlAttr(valDesc)}" placeholder="Ketik Kode atau Nama Tindakan (ICD-9)..." class="val-tindakan flex-1 px-3 py-1.5 bg-white border border-slate-300 rounded-lg outline-none focus:ring-1 focus:ring-indigo-500 text-xs font-semibold min-w-[200px]">
+      <input type="text" placeholder="Kode ICD-9" readonly value="${escapeHtmlAttr(valCode)}" class="val-icd9code w-24 px-2 py-1.5 bg-slate-200 text-slate-700 font-bold border border-slate-300 rounded-lg outline-none text-center text-xs">
+      <div class="flex items-center gap-1 bg-white border border-slate-300 rounded-lg px-2 py-1" title="Tanggal Tindakan Ditambahkan">
+        <span class="text-slate-400 text-xs">📅</span>
+        <input type="date" value="${defaultTgl}" class="val-tindakan-tgl bg-transparent text-slate-700 font-bold outline-none text-xs">
+      </div>
+      <button type="button" onclick="this.closest('.row-tindakan').remove()" class="px-2.5 py-1.5 bg-rose-100 text-rose-600 rounded-lg font-black hover:bg-rose-200 transition-colors text-xs" title="Hapus Tindakan">X</button>
     </div>
-    <div class="flex gap-2 items-center pl-8">
+    <div class="flex gap-2 items-center pl-2">
       <input type="text" oninput="autoTitleCase(this)" value="${escapeHtmlAttr(valKet)}" placeholder="Catatan / Keterangan Tindakan..." class="val-tindakan-ket flex-1 px-3 py-1.5 bg-white border border-slate-300 rounded-lg outline-none focus:ring-1 focus:ring-indigo-500 text-xs">
-      <div class="w-28"></div>
-      <div class="w-[26px]"></div>
     </div>
   `;
   c.appendChild(div);
@@ -5986,10 +6163,15 @@ function simpanEMRFinal() {
      let desc = row.querySelector('.val-tindakan').value.trim();
      let code = row.querySelector('.val-icd9code') ? row.querySelector('.val-icd9code').value.trim() : '';
      let ket = row.querySelector('.val-tindakan-ket') ? row.querySelector('.val-tindakan-ket').value.trim() : '';
+     let tglVal = row.querySelector('.val-tindakan-tgl') ? row.querySelector('.val-tindakan-tgl').value.trim() : '';
      if(desc) {
         let fullTind = desc;
         if (code && !desc.toLowerCase().includes(code.toLowerCase())) {
             fullTind = `${code} - ${desc}`;
+        }
+        let tglFormatted = formatTglTindakanDDMMYY(tglVal || getV('rmTglPeriksa') || getTodayIso());
+        if (tglFormatted && !fullTind.includes(tglFormatted)) {
+            fullTind += ` ${tglFormatted}`;
         }
         if (ket) {
             fullTind += ` (${ket})`;
@@ -14791,6 +14973,8 @@ let contTind = document.getElementById('containerTindakan');
 assert("Tindakan Row Appended", contTind && contTind.children.length > 0);
 let lastRowTind = contTind.children[contTind.children.length - 1];
 assert("Tindakan Note Field Present", !!lastRowTind.querySelector('.val-tindakan-ket'));
+assert("Tindakan Date Field Present", !!lastRowTind.querySelector('.val-tindakan-tgl'));
+assert("Format Tgl Tindakan DDMMYY", formatTglTindakanDDMMYY("2026-10-18") === "[18/10/26]");
 let mockInputTind = { value: "pencabutan gigi tetap", setSelectionRange: function() {} };
 autoTitleCase(mockInputTind);
 assert("Tindakan Input Auto Title Case Formatted", mockInputTind.value === "Pencabutan Gigi Tetap");
@@ -14812,6 +14996,7 @@ bukaDetailRM(0);
 let printArea = document.getElementById('printAreaRM');
 assert("Detail RM Rendered", !!printArea);
 let printHtml = printArea.innerHTML;
+assert("Detail RM Tindakan Menampilkan Format Tanggal DDMMYY", printHtml.includes('[08/10/26]'));
 assert("Tombol Buka Odontogram Interaktif Present", printHtml.includes('bukaModalOdontoHistory(0)'));
 assert("DMF-T Decayed Present", printHtml.includes('Decayed (D)'));
 assert("DMF-T Missing Present", printHtml.includes('Missing (M)'));
@@ -14824,6 +15009,10 @@ assert("Diagnosis Gigi Berada di Bawah Odontogram", posDiagGigi > posOdonto);
 assert("Diagnosis Gigi Berada di Atas Periodontal", posDiagGigi < posPerio);
 assert("Fungsi bukaModalOdontoHistory Tersedia", typeof bukaModalOdontoHistory === 'function');
 closeDetailRM();
+
+salinDataKunjunganKeForm(riwayatPasienAktif[0]);
+let firstCopiedRow = document.getElementById('containerTindakan').children[0];
+assert("Salin ke Form Membawa Tanggal Kunjungan Asli", firstCopiedRow.querySelector('.val-tindakan-tgl').value === '2026-10-08');
 
 // 15j. Test View History Pasien di Database Pasien: Aligned with Rekam Medis Layout
 let origPasienSuite = window.KlinikData.pasien || [];

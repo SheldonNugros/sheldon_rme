@@ -718,6 +718,8 @@ let contTind = document.getElementById('containerTindakan');
 assert("Tindakan Row Appended", contTind && contTind.children.length > 0);
 let lastRowTind = contTind.children[contTind.children.length - 1];
 assert("Tindakan Note Field Present", !!lastRowTind.querySelector('.val-tindakan-ket'));
+assert("Tindakan Date Field Present", !!lastRowTind.querySelector('.val-tindakan-tgl'));
+assert("Format Tgl Tindakan DDMMYY", formatTglTindakanDDMMYY("2026-10-18") === "[18/10/26]");
 let mockInputTind = { value: "pencabutan gigi tetap", setSelectionRange: function() {} };
 autoTitleCase(mockInputTind);
 assert("Tindakan Input Auto Title Case Formatted", mockInputTind.value === "Pencabutan Gigi Tetap");
@@ -739,6 +741,7 @@ bukaDetailRM(0);
 let printArea = document.getElementById('printAreaRM');
 assert("Detail RM Rendered", !!printArea);
 let printHtml = printArea.innerHTML;
+assert("Detail RM Tindakan Menampilkan Format Tanggal DDMMYY", printHtml.includes('[08/10/26]'));
 assert("Tombol Buka Odontogram Interaktif Present", printHtml.includes('bukaModalOdontoHistory(0)'));
 assert("DMF-T Decayed Present", printHtml.includes('Decayed (D)'));
 assert("DMF-T Missing Present", printHtml.includes('Missing (M)'));
@@ -751,6 +754,10 @@ assert("Diagnosis Gigi Berada di Bawah Odontogram", posDiagGigi > posOdonto);
 assert("Diagnosis Gigi Berada di Atas Periodontal", posDiagGigi < posPerio);
 assert("Fungsi bukaModalOdontoHistory Tersedia", typeof bukaModalOdontoHistory === 'function');
 closeDetailRM();
+
+salinDataKunjunganKeForm(riwayatPasienAktif[0]);
+let firstCopiedRow = document.getElementById('containerTindakan').children[0];
+assert("Salin ke Form Membawa Tanggal Kunjungan Asli", firstCopiedRow.querySelector('.val-tindakan-tgl').value === '2026-10-08');
 
 // 15j. Test View History Pasien di Database Pasien: Aligned with Rekam Medis Layout
 let origPasienSuite = window.KlinikData.pasien || [];

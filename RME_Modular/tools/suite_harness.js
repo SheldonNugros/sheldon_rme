@@ -2590,21 +2590,32 @@ var console = {
         let invTotal = parseFloat(trx.totalInvoice || trx.grandTotalItem || 0);
         let metodeRaw = String(trx.metode || 'Cash');
         let metode = metodeRaw.toLowerCase();
+        let statusRaw = String(trx.status || trx.statusPembayaran || '').toLowerCase();
+        let ketRaw = String(trx.keterangan || '');
         totalUang += invTotal;
 
-        if (metode.includes('cash') || metode.includes('tunai')) {
+        if (statusRaw === 'split' || metode.includes('split') || (metode.includes('cash') && metode.includes('transfer'))) {
+          let splitMatch = ketRaw.match(/\[Split:\s*Cash\s*Rp\s*([\d\.,]+)\s*\|\s*Transfer\s*Rp\s*([\d\.,]+)\]/i);
+          if (splitMatch) {
+            let cashPart = parseFloat(splitMatch[1].replace(/[^0-9]/g, '')) || 0;
+            let tfPart = parseFloat(splitMatch[2].replace(/[^0-9]/g, '')) || 0;
+            totalCash += cashPart;
+            totalTransfer += tfPart;
+            countCash++;
+            countTransfer++;
+          } else {
+            let half = Math.floor(invTotal / 2);
+            totalCash += half;
+            totalTransfer += (invTotal - half);
+            countCash++;
+            countTransfer++;
+          }
+        } else if (metode.includes('cash') || metode.includes('tunai')) {
           totalCash += invTotal;
           countCash++;
         } else {
           totalTransfer += invTotal;
           countTransfer++;
-          if (metode.includes('qris') || metode.includes('gopay') || metode.includes('ovo') || metode.includes('dana') || metode.includes('wallet')) {
-            totalQris += invTotal;
-            countQris++;
-          } else if (metode.includes('debit') || metode.includes('kredit') || metode.includes('card') || metode.includes('edc') || metode.includes('kartu')) {
-            totalCard += invTotal;
-            countCard++;
-          }
         }
 
         // Tren Tanggal
@@ -2660,10 +2671,6 @@ var console = {
     setElText('dashCountCash', `${countCash} Trx (${pctCash}%)`);
     setElText('dashTotTransfer', 'Rp ' + formatUangDashboard(totalTransfer));
     setElText('dashCountTransfer', `${countTransfer} Trx (${pctTransfer}%)`);
-    setElText('dashTotQris', 'Rp ' + formatUangDashboard(totalQris));
-    setElText('dashCountQris', `${countQris} Trx`);
-    setElText('dashTotCard', 'Rp ' + formatUangDashboard(totalCard));
-    setElText('dashCountCard', `${countCard} Trx`);
 
     // Komposisi Sumber Pendapatan
     let pTindakan = sumKat > 0 ? Math.round((revTindakan / sumKat) * 100) : 0;

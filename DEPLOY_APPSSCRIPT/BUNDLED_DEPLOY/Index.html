@@ -907,31 +907,13 @@
                 <h4 class="text-xl font-black text-emerald-700" id="dashTotCash">Rp 0</h4>
               </div>
 
-              <!-- Total Non-Tunai / Transfer (Backward Compatible ID: dashTotTransfer) -->
+              <!-- Transfer Bank -->
               <div class="p-4 rounded-2xl bg-blue-50/60 border border-blue-200/80 flex flex-col justify-between">
                 <div class="flex items-center justify-between mb-2">
-                  <span class="text-xs font-black text-blue-800 flex items-center gap-1.5">🏦 Transfer & Non-Tunai</span>
+                  <span class="text-xs font-black text-blue-800 flex items-center gap-1.5">🏦 Transfer Bank</span>
                   <span id="dashCountTransfer" class="text-[10px] font-bold px-2 py-0.5 bg-blue-100 text-blue-800 rounded-md">0 Trx (0%)</span>
                 </div>
                 <h4 class="text-xl font-black text-blue-700" id="dashTotTransfer">Rp 0</h4>
-              </div>
-
-              <!-- QRIS / E-Wallet -->
-              <div class="p-4 rounded-2xl bg-purple-50/60 border border-purple-200/80 flex flex-col justify-between">
-                <div class="flex items-center justify-between mb-2">
-                  <span class="text-xs font-black text-purple-800 flex items-center gap-1.5">📱 QRIS / E-Wallet</span>
-                  <span id="dashCountQris" class="text-[10px] font-bold px-2 py-0.5 bg-purple-100 text-purple-800 rounded-md">0 Trx</span>
-                </div>
-                <h4 class="text-lg font-black text-purple-700" id="dashTotQris">Rp 0</h4>
-              </div>
-
-              <!-- Debit / Kredit / EDC -->
-              <div class="p-4 rounded-2xl bg-amber-50/60 border border-amber-200/80 flex flex-col justify-between">
-                <div class="flex items-center justify-between mb-2">
-                  <span class="text-xs font-black text-amber-800 flex items-center gap-1.5">💳 Debit / Kartu Kredit</span>
-                  <span id="dashCountCard" class="text-[10px] font-bold px-2 py-0.5 bg-amber-100 text-amber-800 rounded-md">0 Trx</span>
-                </div>
-                <h4 class="text-lg font-black text-amber-700" id="dashTotCard">Rp 0</h4>
               </div>
             </div>
           </div>
@@ -7627,21 +7609,32 @@
         let invTotal = parseFloat(trx.totalInvoice || trx.grandTotalItem || 0);
         let metodeRaw = String(trx.metode || 'Cash');
         let metode = metodeRaw.toLowerCase();
+        let statusRaw = String(trx.status || trx.statusPembayaran || '').toLowerCase();
+        let ketRaw = String(trx.keterangan || '');
         totalUang += invTotal;
 
-        if (metode.includes('cash') || metode.includes('tunai')) {
+        if (statusRaw === 'split' || metode.includes('split') || (metode.includes('cash') && metode.includes('transfer'))) {
+          let splitMatch = ketRaw.match(/\[Split:\s*Cash\s*Rp\s*([\d\.,]+)\s*\|\s*Transfer\s*Rp\s*([\d\.,]+)\]/i);
+          if (splitMatch) {
+            let cashPart = parseFloat(splitMatch[1].replace(/[^0-9]/g, '')) || 0;
+            let tfPart = parseFloat(splitMatch[2].replace(/[^0-9]/g, '')) || 0;
+            totalCash += cashPart;
+            totalTransfer += tfPart;
+            countCash++;
+            countTransfer++;
+          } else {
+            let half = Math.floor(invTotal / 2);
+            totalCash += half;
+            totalTransfer += (invTotal - half);
+            countCash++;
+            countTransfer++;
+          }
+        } else if (metode.includes('cash') || metode.includes('tunai')) {
           totalCash += invTotal;
           countCash++;
         } else {
           totalTransfer += invTotal;
           countTransfer++;
-          if (metode.includes('qris') || metode.includes('gopay') || metode.includes('ovo') || metode.includes('dana') || metode.includes('wallet')) {
-            totalQris += invTotal;
-            countQris++;
-          } else if (metode.includes('debit') || metode.includes('kredit') || metode.includes('card') || metode.includes('edc') || metode.includes('kartu')) {
-            totalCard += invTotal;
-            countCard++;
-          }
         }
 
         // Tren Tanggal
@@ -7697,10 +7690,6 @@
     setElText('dashCountCash', `${countCash} Trx (${pctCash}%)`);
     setElText('dashTotTransfer', 'Rp ' + formatUangDashboard(totalTransfer));
     setElText('dashCountTransfer', `${countTransfer} Trx (${pctTransfer}%)`);
-    setElText('dashTotQris', 'Rp ' + formatUangDashboard(totalQris));
-    setElText('dashCountQris', `${countQris} Trx`);
-    setElText('dashTotCard', 'Rp ' + formatUangDashboard(totalCard));
-    setElText('dashCountCard', `${countCard} Trx`);
 
     // Komposisi Sumber Pendapatan
     let pTindakan = sumKat > 0 ? Math.round((revTindakan / sumKat) * 100) : 0;

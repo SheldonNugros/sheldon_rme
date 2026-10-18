@@ -287,38 +287,42 @@
                   </div>
                   <h3 class="text-lg font-black mt-1 text-white" id="card3DToothTitle">Molar 1 Bawah Kiri</h3>
                 </div>
-                <span id="card3DConditionBadge" class="px-2.5 py-1 rounded-full text-xs font-black bg-rose-500/20 text-rose-400 border border-rose-500/30">
+                <button type="button" id="card3DConditionBadge" onclick="cycleToothGeneralCondition3D()" class="px-2.5 py-1 rounded-full text-xs font-black bg-rose-500/20 text-rose-400 border border-rose-500/30 hover:opacity-80 transition-all select-none cursor-pointer" title="Klik untuk ganti kondisi umum gigi (Normal, Karies, Tambalan, Non-Vital, Sisa Akar, Impaksi)">
                   Karies (Car)
-                </span>
+                </button>
               </div>
 
               <!-- 5 PERMUKAAN ANATOMI (OKLUSAL, MESIAL, DISTAL, BUKAL, LINGUAL) -->
               <div class="bg-slate-950/80 p-3 rounded-2xl border border-slate-800">
                 <div class="flex items-center justify-between mb-2">
                   <span class="text-xs font-bold text-slate-200 flex items-center gap-1.5"><span>📐</span> Pemetaan 5 Permukaan Anatomi:</span>
-                  <span class="text-[10px] text-slate-400 font-mono">Standard FDI</span>
+                  <span class="text-[10px] text-blue-400 font-bold bg-blue-950/80 px-2 py-0.5 rounded-lg border border-blue-800/80">Klik untuk ubah</span>
                 </div>
                 <div class="grid grid-cols-5 gap-1.5 text-center text-xs">
-                  <div id="surf3D_O" class="p-1.5 rounded-xl border border-slate-800 bg-slate-900 font-bold text-slate-400">
+                  <button type="button" id="surf3D_O" onclick="toggleToothSurface3D('occlusal')" class="p-1.5 rounded-xl border border-slate-800 bg-slate-900 font-bold text-slate-400 hover:border-blue-500/50 hover:bg-slate-800 cursor-pointer transition-all active:scale-95 shadow-xs" title="Klik untuk ubah Oklusal (NOR ➔ CAR ➔ CFR)">
                     <div class="text-[10px]">Oklusal</div>
-                    <div class="font-mono text-xs mt-0.5 text-white" id="surfCode3D_O">SOU</div>
-                  </div>
-                  <div id="surf3D_M" class="p-1.5 rounded-xl border border-slate-800 bg-slate-900 font-bold text-slate-400">
+                    <div class="font-mono text-xs mt-0.5 text-white" id="surfCode3D_O">NOR</div>
+                  </button>
+                  <button type="button" id="surf3D_M" onclick="toggleToothSurface3D('mesial')" class="p-1.5 rounded-xl border border-slate-800 bg-slate-900 font-bold text-slate-400 hover:border-blue-500/50 hover:bg-slate-800 cursor-pointer transition-all active:scale-95 shadow-xs" title="Klik untuk ubah Mesial (NOR ➔ CAR ➔ CFR)">
                     <div class="text-[10px]">Mesial</div>
-                    <div class="font-mono text-xs mt-0.5 text-white" id="surfCode3D_M">SOU</div>
-                  </div>
-                  <div id="surf3D_D" class="p-1.5 rounded-xl border border-slate-800 bg-slate-900 font-bold text-slate-400">
+                    <div class="font-mono text-xs mt-0.5 text-white" id="surfCode3D_M">NOR</div>
+                  </button>
+                  <button type="button" id="surf3D_D" onclick="toggleToothSurface3D('distal')" class="p-1.5 rounded-xl border border-slate-800 bg-slate-900 font-bold text-slate-400 hover:border-blue-500/50 hover:bg-slate-800 cursor-pointer transition-all active:scale-95 shadow-xs" title="Klik untuk ubah Distal (NOR ➔ CAR ➔ CFR)">
                     <div class="text-[10px]">Distal</div>
-                    <div class="font-mono text-xs mt-0.5 text-white" id="surfCode3D_D">SOU</div>
-                  </div>
-                  <div id="surf3D_B" class="p-1.5 rounded-xl border border-slate-800 bg-slate-900 font-bold text-slate-400">
+                    <div class="font-mono text-xs mt-0.5 text-white" id="surfCode3D_D">NOR</div>
+                  </button>
+                  <button type="button" id="surf3D_B" onclick="toggleToothSurface3D('buccal')" class="p-1.5 rounded-xl border border-slate-800 bg-slate-900 font-bold text-slate-400 hover:border-blue-500/50 hover:bg-slate-800 cursor-pointer transition-all active:scale-95 shadow-xs" title="Klik untuk ubah Bukal (NOR ➔ CAR ➔ CFR)">
                     <div class="text-[10px]">Bukal</div>
-                    <div class="font-mono text-xs mt-0.5 text-white" id="surfCode3D_B">SOU</div>
-                  </div>
-                  <div id="surf3D_L" class="p-1.5 rounded-xl border border-slate-800 bg-slate-900 font-bold text-slate-400">
+                    <div class="font-mono text-xs mt-0.5 text-white" id="surfCode3D_B">NOR</div>
+                  </button>
+                  <button type="button" id="surf3D_L" onclick="toggleToothSurface3D('lingual')" class="p-1.5 rounded-xl border border-slate-800 bg-slate-900 font-bold text-slate-400 hover:border-blue-500/50 hover:bg-slate-800 cursor-pointer transition-all active:scale-95 shadow-xs" title="Klik untuk ubah Lingual (NOR ➔ CAR ➔ CFR)">
                     <div class="text-[10px]">Lingual</div>
-                    <div class="font-mono text-xs mt-0.5 text-white" id="surfCode3D_L">SOU</div>
-                  </div>
+                    <div class="font-mono text-xs mt-0.5 text-white" id="surfCode3D_L">NOR</div>
+                  </button>
+                </div>
+                <div class="flex items-center justify-between text-[10px] text-slate-400 mt-2 px-0.5">
+                  <span>💡 Klik tombol:</span>
+                  <span class="font-semibold text-slate-300"><b>NOR</b> (Sehat) ➔ <span class="text-rose-400">CAR</span> (Karies) ➔ <span class="text-emerald-400">CFR</span> (Tambalan)</span>
                 </div>
               </div>
 

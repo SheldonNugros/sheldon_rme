@@ -2133,7 +2133,7 @@ function update3DClinicalPanel(id) {
 }
 
 function setToothDepth3D(depth) {
-  if (!selectedToothId3D) return;
+  if (!selectedToothId3D) selectedToothId3D = 36;
   if (!currentOdontogram[selectedToothId3D]) {
     currentOdontogram[selectedToothId3D] = {
       toothNumber: selectedToothId3D,
@@ -2149,6 +2149,103 @@ function setToothDepth3D(depth) {
   }
   update3DClinicalPanel(selectedToothId3D);
   render3DOdontogram();
+  renderOdontogramGrid();
+  updateDmftCalculations();
+}
+
+function toggleToothSurface3D(surfKey) {
+  if (!selectedToothId3D) selectedToothId3D = 36;
+  const tN = selectedToothId3D;
+  const toothDate = (document.getElementById('rmTglPeriksa') ? document.getElementById('rmTglPeriksa').value : '') || getTodayIso();
+
+  if (!currentOdontogram[tN]) {
+    currentOdontogram[tN] = {
+      toothNumber: tN,
+      generalCondition: 'nor',
+      surfaces: { occlusal: 'nor', mesial: 'nor', distal: 'nor', buccal: 'nor', lingual: 'nor' },
+      depth: 'dentin',
+      tanggal: toothDate
+    };
+  }
+  if (!currentOdontogram[tN].surfaces) {
+    currentOdontogram[tN].surfaces = { occlusal: 'nor', mesial: 'nor', distal: 'nor', buccal: 'nor', lingual: 'nor' };
+  }
+
+  // Cycle condition: nor -> car -> cfr -> nor
+  const currentCode = currentOdontogram[tN].surfaces[surfKey] || 'nor';
+  let nextCode = 'car';
+  if (currentCode === 'nor' || !currentCode) {
+    nextCode = 'car'; // Karies (Merah)
+  } else if (currentCode === 'car') {
+    nextCode = 'cfr'; // Tambalan Komposit (Hijau)
+  } else if (currentCode === 'cfr') {
+    nextCode = 'nor'; // Kembali Normal (SOU)
+  } else {
+    nextCode = 'nor';
+  }
+
+  currentOdontogram[tN].surfaces[surfKey] = nextCode;
+
+  // Sinkronkan generalCondition jika bukan kondisi struktural berat
+  const surfs = currentOdontogram[tN].surfaces;
+  const hasCar = Object.values(surfs).some(c => c === 'car');
+  const hasCfr = Object.values(surfs).some(c => c === 'cfr');
+
+  if (!['rrx', 'nvt', 'mis', 'imx', 'pre'].includes(currentOdontogram[tN].generalCondition)) {
+    if (hasCar) {
+      currentOdontogram[tN].generalCondition = 'car';
+    } else if (hasCfr) {
+      currentOdontogram[tN].generalCondition = 'cfr';
+    } else {
+      currentOdontogram[tN].generalCondition = 'nor';
+    }
+  }
+
+  update3DClinicalPanel(tN);
+  render3DOdontogram();
+  renderOdontogramGrid();
+  updateDmftCalculations();
+}
+
+function cycleToothGeneralCondition3D() {
+  if (!selectedToothId3D) selectedToothId3D = 36;
+  const tN = selectedToothId3D;
+  const toothDate = (document.getElementById('rmTglPeriksa') ? document.getElementById('rmTglPeriksa').value : '') || getTodayIso();
+
+  if (!currentOdontogram[tN]) {
+    currentOdontogram[tN] = {
+      toothNumber: tN,
+      generalCondition: 'nor',
+      surfaces: { occlusal: 'nor', mesial: 'nor', distal: 'nor', buccal: 'nor', lingual: 'nor' },
+      depth: 'dentin',
+      tanggal: toothDate
+    };
+  }
+
+  const cycleOrder = ['nor', 'car', 'cfr', 'nvt', 'rrx', 'imx', 'mis'];
+  const cur = currentOdontogram[tN].generalCondition || 'nor';
+  const nextIdx = (cycleOrder.indexOf(cur) + 1) % cycleOrder.length;
+  const nextCond = cycleOrder[nextIdx];
+
+  currentOdontogram[tN].generalCondition = nextCond;
+
+  // Jika kondisi menjadi car, pastikan minimal satu permukaan karies
+  if (nextCond === 'car') {
+    if (!currentOdontogram[tN].surfaces || Object.values(currentOdontogram[tN].surfaces).every(c => c === 'nor')) {
+      currentOdontogram[tN].surfaces = { occlusal: 'car', mesial: 'nor', distal: 'nor', buccal: 'nor', lingual: 'nor' };
+    }
+  } else if (nextCond === 'cfr') {
+    if (!currentOdontogram[tN].surfaces || Object.values(currentOdontogram[tN].surfaces).every(c => c === 'nor')) {
+      currentOdontogram[tN].surfaces = { occlusal: 'cfr', mesial: 'nor', distal: 'nor', buccal: 'nor', lingual: 'nor' };
+    }
+  } else if (nextCond === 'nor') {
+    currentOdontogram[tN].surfaces = { occlusal: 'nor', mesial: 'nor', distal: 'nor', buccal: 'nor', lingual: 'nor' };
+  }
+
+  update3DClinicalPanel(tN);
+  render3DOdontogram();
+  renderOdontogramGrid();
+  updateDmftCalculations();
 }
 
 function setCameraView3D(view) {

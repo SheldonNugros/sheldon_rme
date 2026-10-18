@@ -3326,38 +3326,51 @@
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 rounded-2xl overflow-hidden border border-slate-800 bg-[#070b14]">
           
           <!-- 3D VIEWPORT CANVAS (7 COLS) -->
-          <div class="lg:col-span-7 xl:col-span-8 relative bg-gradient-to-b from-[#090e1a] via-[#0d1424] to-[#090e1a] border-b lg:border-b-0 lg:border-r border-slate-800 flex flex-col items-center justify-center overflow-hidden min-h-[460px]">
+          <div class="lg:col-span-7 xl:col-span-8 relative bg-gradient-to-b from-[#090e1a] via-[#0d1424] to-[#090e1a] border-b lg:border-b-0 lg:border-r border-slate-800 flex flex-col items-center justify-center overflow-hidden min-h-[480px]">
             
             <!-- 3D Canvas -->
-            <canvas id="canvas3DOdontogram" class="w-full h-[440px] sm:h-[500px]"></canvas>
+            <canvas id="canvas3DOdontogram" class="w-full h-[460px] sm:h-[510px] block cursor-grab active:cursor-grabbing"></canvas>
 
-            <!-- FLOATING HUD: PRESET KASUS CEPAT -->
-            <div class="absolute top-3 left-3 flex flex-wrap gap-1.5 text-xs bg-slate-900/90 backdrop-blur-md p-1.5 rounded-2xl border border-slate-800 shadow-md">
-              <span class="text-slate-400 font-bold px-1.5 py-1 flex items-center">Sorot Gigi:</span>
-              <button type="button" onclick="selectTooth3D(36)" class="px-2 py-0.5 rounded-lg bg-rose-500/20 text-rose-300 border border-rose-500/30 hover:bg-rose-500/30 font-bold cursor-pointer">🔴 Gigi 36</button>
-              <button type="button" onclick="selectTooth3D(11)" class="px-2 py-0.5 rounded-lg bg-purple-500/20 text-purple-300 border border-purple-500/30 hover:bg-purple-500/30 font-bold cursor-pointer">🟣 Gigi 11</button>
-              <button type="button" onclick="selectTooth3D(48)" class="px-2 py-0.5 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/30 hover:bg-amber-500/30 font-bold cursor-pointer">🟠 Gigi 48</button>
-              <button type="button" onclick="selectTooth3D(26)" class="px-2 py-0.5 rounded-lg bg-blue-500/20 text-blue-300 border border-blue-500/30 hover:bg-blue-500/30 font-bold cursor-pointer">🔵 Gigi 26</button>
+            <!-- FLOATING HUD: TOP BAR (SOROT GIGI & LEGENDA WARNA) -->
+            <div class="absolute top-3 inset-x-3 flex flex-wrap items-center justify-between gap-2 pointer-events-none z-10">
+              <!-- Left: Preset Sorot Gigi Cepat -->
+              <div class="pointer-events-auto flex items-center gap-1.5 text-xs bg-slate-900/90 backdrop-blur-md p-1.5 rounded-2xl border border-slate-800 shadow-md">
+                <span class="text-slate-400 font-bold px-1.5 text-[11px] flex items-center gap-1"><span>🔍</span> Sorot:</span>
+                <button type="button" onclick="selectTooth3D(36)" class="px-2 py-0.5 rounded-lg bg-rose-500/20 text-rose-300 border border-rose-500/30 hover:bg-rose-500/30 font-bold cursor-pointer text-xs transition-colors">🔴 36</button>
+                <button type="button" onclick="selectTooth3D(11)" class="px-2 py-0.5 rounded-lg bg-purple-500/20 text-purple-300 border border-purple-500/30 hover:bg-purple-500/30 font-bold cursor-pointer text-xs transition-colors">🟣 11</button>
+                <button type="button" onclick="selectTooth3D(48)" class="px-2 py-0.5 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/30 hover:bg-amber-500/30 font-bold cursor-pointer text-xs transition-colors">🟠 48</button>
+                <button type="button" onclick="selectTooth3D(26)" class="px-2 py-0.5 rounded-lg bg-blue-500/20 text-blue-300 border border-blue-500/30 hover:bg-blue-500/30 font-bold cursor-pointer text-xs transition-colors">🔵 26</button>
+              </div>
+
+              <!-- Right: Legenda Status Warna 3D -->
+              <div class="pointer-events-auto flex flex-wrap items-center gap-2.5 text-[11px] bg-slate-900/90 backdrop-blur-md px-3 py-1.5 rounded-2xl border border-slate-800 shadow-md text-slate-300">
+                <span class="flex items-center gap-1 font-semibold"><span class="w-2.5 h-2.5 rounded-full bg-slate-100 border border-slate-400"></span> Normal</span>
+                <span class="flex items-center gap-1 font-bold text-rose-400"><span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span> Karies</span>
+                <span class="flex items-center gap-1 font-bold text-emerald-400"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Tambalan</span>
+                <span class="flex items-center gap-1 font-bold text-blue-400"><span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span> Crown</span>
+                <span class="flex items-center gap-1 font-bold text-purple-400"><span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span> Pulpa</span>
+              </div>
             </div>
 
-            <!-- FLOATING HUD: CAMERA CONTROLS -->
-            <div class="absolute bottom-3 left-3 flex items-center gap-1.5 bg-slate-900/90 backdrop-blur-md p-1.5 rounded-2xl border border-slate-800 shadow-md text-xs font-bold text-slate-300">
-              <button type="button" onclick="setCameraView3D('front')" class="px-2.5 py-1 rounded-xl hover:bg-slate-800 hover:text-white cursor-pointer">Tampak Depan</button>
-              <button type="button" onclick="setCameraView3D('occlusal')" class="px-2.5 py-1 rounded-xl hover:bg-slate-800 hover:text-white cursor-pointer">Tampak Kunyah</button>
-              <button type="button" onclick="setCameraView3D('side')" class="px-2.5 py-1 rounded-xl hover:bg-slate-800 hover:text-white cursor-pointer">Tampak Samping</button>
-              <div class="h-4 w-px bg-slate-700 my-auto mx-0.5"></div>
-              <button type="button" onclick="zoomStep3D(1.15)" class="p-1.5 hover:bg-slate-800 rounded-lg font-bold text-slate-200 cursor-pointer" title="Zoom In">🔍+</button>
-              <button type="button" onclick="zoomStep3D(0.85)" class="p-1.5 hover:bg-slate-800 rounded-lg font-bold text-slate-200 cursor-pointer" title="Zoom Out">🔍-</button>
-              <button type="button" onclick="resetCamera3D()" class="p-1.5 hover:bg-slate-800 rounded-lg text-xs text-slate-200 cursor-pointer" title="Reset Kamera">↺</button>
-            </div>
+            <!-- FLOATING HUD: BOTTOM BAR (KONTROL KAMERA 3D) -->
+            <div class="absolute bottom-3 inset-x-3 flex flex-wrap items-center justify-between gap-2 pointer-events-none z-10">
+              <!-- Left: Camera Presets & Zoom -->
+              <div class="pointer-events-auto flex items-center gap-1 bg-slate-900/90 backdrop-blur-md p-1.5 rounded-2xl border border-slate-800 shadow-md text-xs font-bold text-slate-300">
+                <button type="button" onclick="setCameraView3D('front')" class="px-2.5 py-1 rounded-xl hover:bg-slate-800 hover:text-white cursor-pointer transition-colors" title="Lihat dari arah depan">Tampak Depan</button>
+                <button type="button" onclick="setCameraView3D('occlusal')" class="px-2.5 py-1 rounded-xl hover:bg-slate-800 hover:text-white cursor-pointer transition-colors" title="Lihat permukaan kunyah (oklusal)">Tampak Kunyah</button>
+                <button type="button" onclick="setCameraView3D('side')" class="px-2.5 py-1 rounded-xl hover:bg-slate-800 hover:text-white cursor-pointer transition-colors" title="Lihat dari arah samping">Tampak Samping</button>
+                <div class="h-4 w-px bg-slate-700 my-auto mx-0.5"></div>
+                <button type="button" onclick="zoomStep3D(1.15)" class="px-2 py-1 hover:bg-slate-800 rounded-lg font-bold text-slate-200 cursor-pointer transition-colors" title="Perbesar (Zoom In)">🔍+</button>
+                <button type="button" onclick="zoomStep3D(0.85)" class="px-2 py-1 hover:bg-slate-800 rounded-lg font-bold text-slate-200 cursor-pointer transition-colors" title="Perkecil (Zoom Out)">🔍-</button>
+                <button type="button" onclick="resetCamera3D()" class="px-2 py-1 hover:bg-slate-800 rounded-lg text-slate-200 cursor-pointer transition-colors flex items-center gap-1 font-bold" title="Kembalikan posisi kamera semula">
+                  <span>↺</span> Reset
+                </button>
+              </div>
 
-            <!-- LEGENDA STATUS 3D -->
-            <div class="absolute bottom-3 right-3 hidden sm:flex items-center gap-2.5 text-xs bg-slate-900/90 backdrop-blur-md px-3 py-1.5 rounded-2xl border border-slate-800 shadow-xs text-slate-300">
-              <span class="flex items-center gap-1 font-semibold"><span class="w-2.5 h-2.5 rounded-full bg-slate-100 border border-slate-300"></span> Normal</span>
-              <span class="flex items-center gap-1 font-bold text-rose-400"><span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span> Karies</span>
-              <span class="flex items-center gap-1 font-bold text-emerald-400"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Tambalan</span>
-              <span class="flex items-center gap-1 font-bold text-blue-400"><span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span> Crown</span>
-              <span class="flex items-center gap-1 font-bold text-purple-400"><span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span> Saraf Pulpa</span>
+              <!-- Right: Hint Navigasi Mouse -->
+              <div class="pointer-events-auto hidden xl:flex items-center gap-1.5 text-[10px] text-slate-400 bg-slate-900/80 backdrop-blur-md px-2.5 py-1.5 rounded-xl border border-slate-800 shadow-xs">
+                <span>🖱️ Drag mouse untuk rotasi 3D &bull; Scroll untuk zoom</span>
+              </div>
             </div>
 
           </div>

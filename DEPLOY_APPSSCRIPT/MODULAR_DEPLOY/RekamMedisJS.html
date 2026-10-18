@@ -1378,13 +1378,250 @@ function updateDmftCalculations() {
   }
 }
 
-function bukaModalOdontogram() {
+// =========================================================================
+// INTEGRASI 3D DENTAL VISION & AUTO-MAPPING DIAGNOSIS ICD-10 & TINDAKAN
+// =========================================================================
+let currentOdontogramViewMode = '2d'; // '2d' | '3d'
+let selectedToothId3D = 36;
+let rotX_3D = 0.38;
+let rotY_3D = 0.08;
+let zoom_3D = 1.0;
+let jawOpening_3D = 0.25;
+let isXrayMode_3D = false;
+let currentArch_3D = 'all';
+let isDragging_3D = false;
+let startX_3D = 0, startY_3D = 0;
+let hitBoxes_3D = [];
+let is3DCanvasInitialized = false;
+
+function getFdiToothInfo(num) {
+  num = parseInt(num, 10);
+  const QUADRANT_NAMES = {
+    1: 'Kuadran 1 (Kanan Atas)',
+    2: 'Kuadran 2 (Kiri Atas)',
+    3: 'Kuadran 3 (Kiri Bawah)',
+    4: 'Kuadran 4 (Kanan Bawah)',
+    5: 'Kuadran 5 (Anak Kanan Atas)',
+    6: 'Kuadran 6 (Anak Kiri Atas)',
+    7: 'Kuadran 7 (Anak Kiri Bawah)',
+    8: 'Kuadran 8 (Anak Kanan Bawah)'
+  };
+  const TOOTH_BASE_NAMES = {
+    1: 'Insisivus Sentral (Seri 1)',
+    2: 'Insisivus Lateral (Seri 2)',
+    3: 'Kaninus (Taring)',
+    4: 'Premolar 1 (Geraham Kecil 1)',
+    5: 'Premolar 2 (Geraham Kecil 2)',
+    6: 'Molar 1 (Geraham Besar 1)',
+    7: 'Molar 2 (Geraham Besar 2)',
+    8: 'Molar 3 (Geraham Bungsu)'
+  };
+  const PEDO_NAMES = {
+    1: 'Insisivus Sentral Sulung',
+    2: 'Insisivus Lateral Sulung',
+    3: 'Kaninus Sulung',
+    4: 'Molar 1 Sulung',
+    5: 'Molar 2 Sulung'
+  };
+  const q = Math.floor(num / 10);
+  const pos = num % 10;
+  const quadStr = QUADRANT_NAMES[q] || `Kuadran ${q}`;
+  const isPedo = q >= 5 && q <= 8;
+  const baseName = isPedo ? (PEDO_NAMES[pos] || `Gigi ${pos}`) : (TOOTH_BASE_NAMES[pos] || `Gigi ${pos}`);
+  const arch = (q === 1 || q === 2 || q === 5 || q === 6) ? 'Atas' : 'Bawah';
+  const side = (q === 1 || q === 4 || q === 5 || q === 8) ? 'Kanan' : 'Kiri';
+  const fullName = `${baseName} ${arch} ${side}`;
+  const toothType = (pos >= 6) ? 'molar' : (pos >= 4 ? 'premolar' : (pos === 3 ? 'canine' : 'incisor'));
+  return { num, q, pos, quadStr, fullName, arch: arch.toLowerCase(), side: side.toLowerCase(), isPedo, type: toothType };
+}
+
+function getToothClinicalMapping(toothNum) {
+  const tInfo = getFdiToothInfo(toothNum);
+  const tState = currentOdontogram[toothNum] || { generalCondition: 'nor', surfaces: {} };
+  const surfs = tState.surfaces || {};
+  const genCond = tState.generalCondition || 'nor';
+  const depth = tState.depth || (genCond === 'nvt' ? 'pulp' : (hasKariesSurfaces(tState) ? 'dentin' : 'none'));
+
+  let icdCode = '-';
+  let icdDesc = 'Kondisi gigi sehat / normal';
+  let tindakanCode = '-';
+  let tindakanDesc = 'Kontrol berkala & pembersihan rutin';
+  let condLabel = 'Normal (SOU)';
+  let condCode = 'nor';
+
+  if (genCond === 'mis') {
+    icdCode = 'K08.1';
+    icdDesc = 'Loss of teeth due to accident, extraction or local periodontal disease';
+    tindakanCode = '23.4';
+    tindakanDesc = 'Rencana Pembuatan Gigi Tiruan (Prosthodontik)';
+    condLabel = 'Gigi Hilang / Dicabut (mis)';
+    condCode = 'mis';
+  } else if (genCond === 'rrx') {
+    icdCode = 'K08.3';
+    icdDesc = 'Retained dental root (Sisa Akar Gigi Tetap / Radix)';
+    tindakanCode = '23.09';
+    tindakanDesc = 'Pencabutan Sisa Akar Gigi (Ekstraksi Radix)';
+    condLabel = 'Sisa Akar (rrx)';
+    condCode = 'rrx';
+  } else if (genCond === 'nvt') {
+    icdCode = 'K04.1';
+    icdDesc = 'Necrosis of pulp (Nekrosis Pulpa / Gigi Non-Vital)';
+    tindakanCode = '23.7';
+    tindakanDesc = 'Perawatan Saluran Akar (PSA / Endodontik)';
+    condLabel = 'Gigi Non-Vital (nvt)';
+    condCode = 'nvt';
+  } else if (genCond === 'imx') {
+    icdCode = 'K01.1';
+    icdDesc = 'Impacted teeth (Gigi Miring / Impaksi)';
+    tindakanCode = '23.19';
+    tindakanDesc = 'Odontektomi / Bedah Gigi Impaksi';
+    condLabel = 'Impaksi Gigi (imx)';
+    condCode = 'imx';
+  } else if (genCond === 'pre') {
+    icdCode = 'K00.6';
+    icdDesc = 'Disturbances in tooth eruption (Persistensi Gigi Sulung)';
+    tindakanCode = '23.01';
+    tindakanDesc = 'Pencabutan Gigi Sulung Persistensi';
+    condLabel = 'Persistensi (pre)';
+    condCode = 'pre';
+  } else if (genCond === 'crn' || Object.values(surfs).includes('crn')) {
+    icdCode = 'Z96.5';
+    icdDesc = 'Presence of tooth and oral implants / crowns (Mahkota Tiruan)';
+    tindakanCode = '23.41';
+    tindakanDesc = 'Kontrol / Pemasangan Mahkota Tiruan (Crown)';
+    condLabel = 'Mahkota Tiruan / Crown (crn)';
+    condCode = 'crn';
+  } else if (Object.values(surfs).includes('car') || genCond === 'car') {
+    condCode = 'car';
+    condLabel = 'Karies Gigi (car)';
+    if (depth === 'enamel') {
+      icdCode = 'K02.0';
+      icdDesc = 'Caries limited to enamel (Karies Email)';
+      tindakanCode = '23.2';
+      tindakanDesc = 'Penambalan Komposit Mikro / Fissure Sealant';
+    } else if (depth === 'pulp') {
+      icdCode = 'K04.0';
+      icdDesc = 'Pulpitis (Karies Mengenai Pulpa / Saraf)';
+      tindakanCode = '23.7';
+      tindakanDesc = 'Perawatan Saluran Akar (PSA / Endodontik)';
+    } else {
+      icdCode = 'K02.1';
+      icdDesc = 'Caries of dentine (Karies Dentin)';
+      tindakanCode = '23.2';
+      tindakanDesc = 'Penambalan Komposit Light-Cure';
+    }
+  } else if (Object.values(surfs).some(c => ['cfr', 'amf', 'gif'].includes(c))) {
+    condCode = 'cfr';
+    condLabel = 'Tumpatan / Tambalan (cfr)';
+    icdCode = 'Z96.5';
+    icdDesc = 'Presence of tooth filling (Tumpatan Komposit / Restorasi)';
+    tindakanCode = '23.2';
+    tindakanDesc = 'Kontrol / Poles Tumpatan Restorasi';
+  } else if (Object.values(surfs).includes('tmp') || genCond === 'tmp') {
+    condCode = 'tmp';
+    condLabel = 'Tumpatan Sementara (tmp)';
+    icdCode = 'K02.1';
+    icdDesc = 'Caries of dentine (Tumpatan Sementara)';
+    tindakanCode = '23.2';
+    tindakanDesc = 'Bongkar Tumpatan Sementara & Tambal Tetap';
+  }
+
+  return {
+    toothNum,
+    tInfo,
+    tState,
+    depth,
+    icdCode,
+    icdDesc,
+    tindakanCode,
+    tindakanDesc,
+    condLabel,
+    condCode
+  };
+}
+
+function hasKariesSurfaces(tState) {
+  if (!tState) return false;
+  if (tState.generalCondition === 'car') return true;
+  return Object.values(tState.surfaces || {}).includes('car');
+}
+
+function terapkanDiagnosaTindakanGigiKeEMR(toothNum) {
+  const map = getToothClinicalMapping(toothNum);
+  if (map.icdCode === '-') {
+    alertMsg('info', `Gigi ${toothNum} dalam kondisi normal. Tidak ada diagnosa khusus.`);
+    return;
+  }
+  const ketGigi = `Gigi ${toothNum} (${map.tInfo.fullName})`;
+  tambahRowDiagnosa(map.icdDesc, map.icdCode, ketGigi);
+  tambahRowTindakan(map.tindakanDesc, map.tindakanCode, ketGigi);
+  alertMsg('success', `Diagnosa [${map.icdCode}] & Tindakan [${map.tindakanCode}] untuk Gigi ${toothNum} berhasil ditambahkan ke EMR!`);
+}
+
+function sinkronkanSemuaDiagnosaTindakanDariOdontogram() {
+  const teeth = Object.keys(currentOdontogram).map(Number);
+  if (teeth.length === 0) {
+    alertMsg('info', 'Belum ada data gigi yang diubah pada odontogram.');
+    return;
+  }
+  let added = 0;
+  teeth.forEach(tN => {
+    const map = getToothClinicalMapping(tN);
+    if (map.icdCode !== '-') {
+      const ketGigi = `Gigi ${tN}`;
+      tambahRowDiagnosa(map.icdDesc, map.icdCode, ketGigi);
+      tambahRowTindakan(map.tindakanDesc, map.tindakanCode, ketGigi);
+      added++;
+    }
+  });
+  if (added > 0) {
+    alertMsg('success', `Berhasil memasukkan ${added} temuan diagnosa (ICD-10) & tindakan (ICD-9) dari odontogram ke formulir EMR!`);
+  } else {
+    alertMsg('info', 'Seluruh gigi yang terdaftar dalam kondisi normal.');
+  }
+}
+
+function switchOdontogramView(mode) {
+  currentOdontogramViewMode = mode;
+  const c2D = document.getElementById('odoViewContainer2D');
+  const c3D = document.getElementById('odoViewContainer3D');
+  const btn2D = document.getElementById('tabBtnOdo2D');
+  const btn3D = document.getElementById('tabBtnOdo3D');
+
+  if (mode === '3d') {
+    if (c2D) c2D.classList.add('hidden');
+    if (c3D) c3D.classList.remove('hidden');
+    if (btn2D) {
+      btn2D.className = 'px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition-all flex items-center gap-1.5 cursor-pointer';
+    }
+    if (btn3D) {
+      btn3D.className = 'px-3.5 py-1.5 rounded-lg bg-blue-600 text-white shadow-sm transition-all flex items-center gap-1.5 cursor-pointer';
+    }
+    setTimeout(() => {
+      init3DOdontogram();
+      selectTooth3D(selectedToothId3D || 36);
+    }, 50);
+  } else {
+    if (c3D) c3D.classList.add('hidden');
+    if (c2D) c2D.classList.remove('hidden');
+    if (btn3D) {
+      btn3D.className = 'px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition-all flex items-center gap-1.5 cursor-pointer';
+    }
+    if (btn2D) {
+      btn2D.className = 'px-3.5 py-1.5 rounded-lg bg-blue-600 text-white shadow-sm transition-all flex items-center gap-1.5 cursor-pointer';
+    }
+    renderOdontogramGrid();
+  }
+}
+
+function bukaModalOdontogram(modeView = '2d') {
   const modal = document.getElementById("modalOdontogramInteractive");
   if (!modal) return;
   modal.classList.remove("hidden");
   renderPalette();
   setDentitionModeModal(dentitionMode || 'adult');
   renderOdontogramGrid();
+  switchOdontogramView(modeView || '2d');
 }
 
 function tutupModalOdontogram() {
@@ -1432,6 +1669,554 @@ function simpanOdontogramKeEMR() {
   tutupModalOdontogram();
   const count = Object.keys(currentOdontogram).length;
   alertMsg("success", `Data Odontogram (${count} gigi tercatat) berhasil diterapkan ke formulir rekam medis!`);
+}
+
+// =========================================================================
+// 3D DENTAL VISION ENGINE (WEBGL VOXEL-VECTOR MATH & ARCH ARTICULATION)
+// =========================================================================
+function calculateArchPositions3D() {
+  const positions = {};
+  const upperSeq = [18, 17, 16, 15, 14, 13, 12, 11, 21, 22, 23, 24, 25, 26, 27, 28];
+  const lowerSeq = [48, 47, 46, 45, 44, 43, 42, 41, 31, 32, 33, 34, 35, 36, 37, 38];
+
+  function mapArch(seq, baseHeight, archType) {
+    const n = seq.length;
+    for (let i = 0; i < n; i++) {
+      const id = seq[i];
+      const t = (i / (n - 1)) * Math.PI - (Math.PI / 2);
+      const radX = 145;
+      const radZ = 165;
+      const x = Math.sin(t) * radX;
+      const z = -Math.cos(t) * radZ + (Math.abs(Math.sin(t)) * 42) + 45;
+      positions[id] = { x, y: baseHeight, z, arch: archType, angle: t };
+    }
+  }
+
+  mapArch(upperSeq, -38, "upper");
+  mapArch(lowerSeq, 38, "lower");
+  return positions;
+}
+const TOOTH_POSITIONS_3D = calculateArchPositions3D();
+
+function init3DOdontogram() {
+  const canvas = document.getElementById("canvas3DOdontogram");
+  if (!canvas) return;
+
+  const rect = canvas.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = (rect.width || 600) * dpr;
+  canvas.height = (rect.height || 480) * dpr;
+  const ctx = canvas.getContext("2d");
+  ctx.scale(dpr, dpr);
+
+  if (!is3DCanvasInitialized) {
+    is3DCanvasInitialized = true;
+    canvas.addEventListener("mousedown", on3DMouseDown);
+    window.addEventListener("mousemove", on3DMouseMove);
+    window.addEventListener("mouseup", on3DMouseUp);
+    canvas.addEventListener("touchstart", on3DTouchStart, { passive: false });
+    window.addEventListener("touchmove", on3DTouchMove, { passive: false });
+    window.addEventListener("touchend", on3DTouchEnd);
+    canvas.addEventListener("wheel", on3DWheel, { passive: false });
+  }
+
+  render3DOdontogram();
+}
+
+function on3DMouseDown(e) {
+  isDragging_3D = true;
+  startX_3D = e.clientX;
+  startY_3D = e.clientY;
+}
+
+function on3DMouseMove(e) {
+  if (!isDragging_3D) return;
+  const dx = e.clientX - startX_3D;
+  const dy = e.clientY - startY_3D;
+  rotY_3D += dx * 0.009;
+  rotX_3D += dy * 0.009;
+  rotX_3D = Math.max(-1.1, Math.min(1.1, rotX_3D));
+  startX_3D = e.clientX;
+  startY_3D = e.clientY;
+  render3DOdontogram();
+}
+
+function on3DMouseUp(e) {
+  if (!isDragging_3D) return;
+  isDragging_3D = false;
+  const canvas = document.getElementById("canvas3DOdontogram");
+  if (!canvas) return;
+  const rect = canvas.getBoundingClientRect();
+  const clientX = e.clientX - rect.left;
+  const clientY = e.clientY - rect.top;
+
+  for (let i = hitBoxes_3D.length - 1; i >= 0; i--) {
+    const hb = hitBoxes_3D[i];
+    const dist = Math.hypot(clientX - hb.x, clientY - hb.y);
+    if (dist <= hb.r) {
+      selectTooth3D(hb.id);
+      break;
+    }
+  }
+}
+
+function on3DTouchStart(e) {
+  if (e.touches.length === 1) {
+    isDragging_3D = true;
+    startX_3D = e.touches[0].clientX;
+    startY_3D = e.touches[0].clientY;
+  }
+}
+
+function on3DTouchMove(e) {
+  if (!isDragging_3D || e.touches.length !== 1) return;
+  e.preventDefault();
+  const dx = e.touches[0].clientX - startX_3D;
+  const dy = e.touches[0].clientY - startY_3D;
+  rotY_3D += dx * 0.009;
+  rotX_3D += dy * 0.009;
+  rotX_3D = Math.max(-1.1, Math.min(1.1, rotX_3D));
+  startX_3D = e.touches[0].clientX;
+  startY_3D = e.touches[0].clientY;
+  render3DOdontogram();
+}
+
+function on3DTouchEnd(e) {
+  isDragging_3D = false;
+}
+
+function on3DWheel(e) {
+  e.preventDefault();
+  if (e.deltaY < 0) zoom_3D = Math.min(1.8, zoom_3D * 1.08);
+  else zoom_3D = Math.max(0.6, zoom_3D * 0.92);
+  render3DOdontogram();
+}
+
+function getArticulatedY3D(pos) {
+  if (pos.arch === "upper") return pos.y;
+  const tmjZ = 180;
+  const distFromHinge = (tmjZ - pos.z) / 180;
+  const deltaY = jawOpening_3D * 85 * Math.max(0.2, distFromHinge);
+  return pos.y + deltaY;
+}
+
+function render3DOdontogram() {
+  const canvas = document.getElementById("canvas3DOdontogram");
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+  const rect = canvas.getBoundingClientRect();
+  const width = rect.width;
+  const height = rect.height;
+  if (!width || !height) return;
+
+  ctx.clearRect(0, 0, width, height);
+  hitBoxes_3D = [];
+
+  const cx = width / 2;
+  const cy = height / 2;
+  const fov = 440 * zoom_3D;
+
+  drawGingiva3D(ctx, cx, cy, fov, "upper");
+  drawGingiva3D(ctx, cx, cy, fov, "lower");
+
+  const projected = [];
+  const teethList = [
+    18, 17, 16, 15, 14, 13, 12, 11, 21, 22, 23, 24, 25, 26, 27, 28,
+    48, 47, 46, 45, 44, 43, 42, 41, 31, 32, 33, 34, 35, 36, 37, 38
+  ];
+
+  teethList.forEach(id => {
+    const pos = TOOTH_POSITIONS_3D[id];
+    if (!pos) return;
+
+    if (currentArch_3D === "upper" && pos.arch !== "upper") return;
+    if (currentArch_3D === "lower" && pos.arch !== "lower") return;
+
+    const dynY = getArticulatedY3D(pos);
+
+    const cosY = Math.cos(rotY_3D), sinY = Math.sin(rotY_3D);
+    const x1 = pos.x * cosY + pos.z * sinY;
+    const z1 = -pos.x * sinY + pos.z * cosY;
+
+    const cosX = Math.cos(rotX_3D), sinX = Math.sin(rotX_3D);
+    const y2 = dynY * cosX - z1 * sinX;
+    const z2 = dynY * sinX + z1 * cosX;
+
+    const depth = z2 + 400;
+    if (depth <= 10) return;
+
+    const scale = fov / depth;
+    const px = cx + x1 * scale;
+    const py = cy + y2 * scale;
+
+    const map = getToothClinicalMapping(id);
+
+    projected.push({
+      id: id,
+      mapping: map,
+      pos: pos,
+      px: px,
+      py: py,
+      scale: scale,
+      zDepth: z2,
+      isSelected: id === selectedToothId3D
+    });
+  });
+
+  projected.sort((a, b) => b.zDepth - a.zDepth);
+
+  projected.forEach(item => {
+    drawTooth3DOdontogram(ctx, item);
+  });
+}
+
+function drawGingiva3D(ctx, cx, cy, fov, archType) {
+  if (currentArch_3D === "upper" && archType !== "upper") return;
+  if (currentArch_3D === "lower" && archType !== "lower") return;
+
+  const seq = archType === "upper"
+    ? [18, 17, 16, 15, 14, 13, 12, 11, 21, 22, 23, 24, 25, 26, 27, 28]
+    : [48, 47, 46, 45, 44, 43, 42, 41, 31, 32, 33, 34, 35, 36, 37, 38];
+
+  ctx.beginPath();
+  let first = true;
+
+  seq.forEach(id => {
+    const pos = TOOTH_POSITIONS_3D[id];
+    if (!pos) return;
+    const dynY = getArticulatedY3D(pos) + (archType === "upper" ? -14 : 14);
+
+    const cosY = Math.cos(rotY_3D), sinY = Math.sin(rotY_3D);
+    const x1 = pos.x * cosY + pos.z * sinY;
+    const z1 = -pos.x * sinY + pos.z * cosY;
+
+    const cosX = Math.cos(rotX_3D), sinX = Math.sin(rotX_3D);
+    const y2 = dynY * cosX - z1 * sinX;
+    const z2 = dynY * sinX + z1 * cosX;
+
+    const depth = z2 + 400;
+    if (depth <= 10) return;
+
+    const scale = fov / depth;
+    const px = cx + x1 * scale;
+    const py = cy + y2 * scale;
+
+    if (first) { ctx.moveTo(px, py); first = false; }
+    else { ctx.lineTo(px, py); }
+  });
+
+  ctx.lineWidth = isXrayMode_3D ? 12 * zoom_3D : 22 * zoom_3D;
+  ctx.strokeStyle = isXrayMode_3D ? "rgba(71, 85, 105, 0.2)" : "rgba(244, 114, 182, 0.35)";
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  ctx.stroke();
+}
+
+function drawTooth3DOdontogram(ctx, item) {
+  const { id, mapping, pos, px, py, scale, isSelected } = item;
+  const isMissing = mapping.condCode === "mis";
+  const toothType = mapping.tInfo.type;
+
+  let radius = 9 * scale;
+  if (toothType === "molar") radius = 15 * scale;
+  else if (toothType === "premolar") radius = 11.5 * scale;
+  else if (toothType === "canine") radius = 10 * scale;
+
+  hitBoxes_3D.push({ id: id, x: px, y: py, r: radius * 1.35 });
+
+  ctx.save();
+  ctx.translate(px, py);
+
+  if (isMissing) {
+    ctx.beginPath();
+    ctx.arc(0, 0, radius * 0.8, 0, Math.PI * 2);
+    ctx.setLineDash([3, 3]);
+    ctx.strokeStyle = "#94a3b8";
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    ctx.fillStyle = "#94a3b8";
+    ctx.font = `bold ${Math.max(10, Math.round(9 * scale))}px monospace`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("✕", 0, 0);
+    ctx.restore();
+    return;
+  }
+
+  if (isSelected) {
+    ctx.beginPath();
+    ctx.arc(0, 0, radius * 1.55, 0, Math.PI * 2);
+    ctx.fillStyle = "rgba(59, 130, 246, 0.25)";
+    ctx.fill();
+    ctx.strokeStyle = "#3b82f6";
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+  }
+
+  if (mapping.condCode === "car") {
+    ctx.beginPath();
+    ctx.arc(0, 0, radius * 1.38, 0, Math.PI * 2);
+    ctx.fillStyle = "rgba(239, 68, 68, 0.22)";
+    ctx.fill();
+  }
+
+  if (isXrayMode_3D) {
+    ctx.beginPath();
+    ctx.arc(0, 0, radius, 0, Math.PI * 2);
+    ctx.fillStyle = "rgba(226, 232, 240, 0.2)";
+    ctx.fill();
+    ctx.strokeStyle = "rgba(148, 163, 184, 0.6)";
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    const isPulpInfected = mapping.depth === "pulp" || mapping.condCode === "nvt";
+    ctx.beginPath();
+    ctx.ellipse(0, 0, radius * 0.45, radius * 0.7, 0, 0, Math.PI * 2);
+    ctx.fillStyle = isPulpInfected ? "#dc2626" : "#ec4899";
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(0, pos.arch === "upper" ? -radius * 1.4 : radius * 1.4);
+    ctx.strokeStyle = isPulpInfected ? "#ef4444" : "#f472b6";
+    ctx.lineWidth = 2.5 * scale;
+    ctx.stroke();
+
+    ctx.fillStyle = "#ffffff";
+    ctx.font = `bold ${Math.max(9, Math.round(7.5 * scale))}px monospace`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(id, 0, 0);
+
+    ctx.restore();
+    return;
+  }
+
+  const grad = ctx.createRadialGradient(-radius * 0.35, -radius * 0.35, radius * 0.15, 0, 0, radius);
+
+  if (mapping.condCode === "car") {
+    grad.addColorStop(0, "#fca5a5");
+    grad.addColorStop(0.5, "#ef4444");
+    grad.addColorStop(1, "#991b1b");
+  } else if (mapping.condCode === "cfr") {
+    grad.addColorStop(0, "#a7f3d0");
+    grad.addColorStop(0.6, "#10b981");
+    grad.addColorStop(1, "#065f46");
+  } else if (mapping.condCode === "crn") {
+    grad.addColorStop(0, "#93c5fd");
+    grad.addColorStop(0.6, "#3b82f6");
+    grad.addColorStop(1, "#1e3a8a");
+  } else if (mapping.condCode === "imx") {
+    grad.addColorStop(0, "#fed7aa");
+    grad.addColorStop(0.6, "#f97316");
+    grad.addColorStop(1, "#9a3412");
+  } else if (mapping.condCode === "nvt") {
+    grad.addColorStop(0, "#cbd5e1");
+    grad.addColorStop(0.6, "#475569");
+    grad.addColorStop(1, "#0f172a");
+  } else {
+    grad.addColorStop(0, "#ffffff");
+    grad.addColorStop(0.7, "#f1f5f9");
+    grad.addColorStop(1, "#cbd5e1");
+  }
+
+  ctx.beginPath();
+  if (toothType === "molar") {
+    ctx.roundRect(-radius, -radius, radius * 2, radius * 2, radius * 0.42);
+  } else if (toothType === "premolar") {
+    ctx.ellipse(0, 0, radius * 1.15, radius * 0.95, 0, 0, Math.PI * 2);
+  } else if (toothType === "canine") {
+    ctx.arc(0, 0, radius, 0, Math.PI * 2);
+  } else {
+    ctx.roundRect(-radius * 1.1, -radius * 0.65, radius * 2.2, radius * 1.3, radius * 0.3);
+  }
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  ctx.lineWidth = 1.2;
+  ctx.strokeStyle = isSelected ? "#2563eb" : (mapping.condCode === "car" ? "#b91c1c" : "#94a3b8");
+  ctx.stroke();
+
+  if (toothType === "molar") {
+    ctx.beginPath();
+    ctx.moveTo(-radius * 0.5, 0); ctx.lineTo(radius * 0.5, 0);
+    ctx.moveTo(0, -radius * 0.5); ctx.lineTo(0, radius * 0.5);
+    ctx.strokeStyle = mapping.condCode === "car" ? "#7f1d1d" : "rgba(100, 116, 139, 0.4)";
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+
+  ctx.fillStyle = (mapping.condCode === "car" || mapping.condCode === "crn" || mapping.condCode === "nvt") ? "#ffffff" : "#1e293b";
+  ctx.font = `bold ${Math.max(9, Math.round(7.5 * scale))}px monospace`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(id, 0, 0);
+
+  ctx.restore();
+}
+
+function selectTooth3D(id) {
+  selectedToothId3D = parseInt(id, 10);
+  update3DClinicalPanel(selectedToothId3D);
+  render3DOdontogram();
+}
+
+function update3DClinicalPanel(id) {
+  const map = getToothClinicalMapping(id);
+  const tState = map.tState;
+  const surfs = tState.surfaces || {};
+
+  const badgeFdi = document.getElementById("card3DFdiBadge");
+  const lblQuad = document.getElementById("card3DQuadrant");
+  const lblTitle = document.getElementById("card3DToothTitle");
+  const badgeCond = document.getElementById("card3DConditionBadge");
+  const icdCodeEl = document.getElementById("card3DIcdCode");
+  const icdDescEl = document.getElementById("card3DIcdDesc");
+  const tindCodeEl = document.getElementById("card3DTindakanCode");
+  const tindDescEl = document.getElementById("card3DTindakanDesc");
+
+  if (badgeFdi) badgeFdi.innerText = `FDI #${id}`;
+  if (lblQuad) lblQuad.innerText = map.tInfo.quadStr;
+  if (lblTitle) lblTitle.innerText = map.tInfo.fullName;
+  if (badgeCond) {
+    badgeCond.innerText = map.condLabel;
+    badgeCond.className = (map.condCode === 'car' || map.condCode === 'rrx' || map.condCode === 'nvt')
+      ? 'px-2.5 py-1 rounded-full text-xs font-black bg-rose-500/20 text-rose-400 border border-rose-500/30'
+      : (map.condCode === 'cfr' ? 'px-2.5 py-1 rounded-full text-xs font-black bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+      : 'px-2.5 py-1 rounded-full text-xs font-black bg-slate-800 text-slate-300 border border-slate-700');
+  }
+
+  const surfKeys = { O: 'occlusal', M: 'mesial', D: 'distal', B: 'buccal', L: 'lingual' };
+  ['O', 'M', 'D', 'B', 'L'].forEach(k => {
+    const sName = surfKeys[k];
+    const sCode = surfs[sName] || (map.condCode !== 'nor' && map.condCode !== 'cfr' ? map.condCode : 'nor');
+    const elBox = document.getElementById(`surf3D_${k}`);
+    const elCode = document.getElementById(`surfCode3D_${k}`);
+    if (elCode) elCode.innerText = sCode.toUpperCase();
+    if (elBox) {
+      if (sCode === 'car') {
+        elBox.className = "p-1.5 rounded-xl border border-rose-500/50 bg-rose-500/20 font-bold text-rose-400";
+      } else if (sCode === 'cfr') {
+        elBox.className = "p-1.5 rounded-xl border border-emerald-500/50 bg-emerald-500/20 font-bold text-emerald-400";
+      } else {
+        elBox.className = "p-1.5 rounded-xl border border-slate-800 bg-slate-900 font-bold text-slate-400";
+      }
+    }
+  });
+
+  const depthText = document.getElementById("depthLevelText3D");
+  const barE = document.getElementById("barEnamel3D");
+  const barD = document.getElementById("barDentin3D");
+  const barP = document.getElementById("barPulp3D");
+
+  if (map.depth === "enamel") {
+    if (depthText) depthText.innerText = "Email (K02.0 - Ringan)";
+    if (barE) barE.className = "h-full bg-amber-400 rounded-full w-1/3 transition-all cursor-pointer";
+    if (barD) barD.className = "h-full bg-slate-800 rounded-full w-1/3 transition-all cursor-pointer";
+    if (barP) barP.className = "h-full bg-slate-800 rounded-full w-1/3 transition-all cursor-pointer";
+  } else if (map.depth === "pulp" || map.condCode === "nvt") {
+    if (depthText) depthText.innerText = "Pulpa / Saraf (K04.0 / K04.1 - Dalam)";
+    if (barE) barE.className = "h-full bg-amber-400 rounded-full w-1/3 transition-all cursor-pointer";
+    if (barD) barD.className = "h-full bg-orange-500 rounded-full w-1/3 transition-all cursor-pointer";
+    if (barP) barP.className = "h-full bg-rose-500 rounded-full w-1/3 transition-all cursor-pointer animate-pulse";
+  } else {
+    if (depthText) depthText.innerText = "Lapisan Dentin (K02.1 - Sedang)";
+    if (barE) barE.className = "h-full bg-amber-400 rounded-full w-1/3 transition-all cursor-pointer";
+    if (barD) barD.className = "h-full bg-orange-500 rounded-full w-1/3 transition-all cursor-pointer";
+    if (barP) barP.className = "h-full bg-slate-800 rounded-full w-1/3 transition-all cursor-pointer";
+  }
+
+  if (icdCodeEl) icdCodeEl.innerText = map.icdCode;
+  if (icdDescEl) icdDescEl.innerText = map.icdDesc;
+  if (tindCodeEl) tindCodeEl.innerText = map.tindakanCode;
+  if (tindDescEl) tindDescEl.innerText = map.tindakanDesc;
+}
+
+function setToothDepth3D(depth) {
+  if (!selectedToothId3D) return;
+  if (!currentOdontogram[selectedToothId3D]) {
+    currentOdontogram[selectedToothId3D] = {
+      toothNumber: selectedToothId3D,
+      generalCondition: 'car',
+      surfaces: { occlusal: 'car', mesial: 'nor', distal: 'nor', buccal: 'nor', lingual: 'nor' },
+      depth: depth
+    };
+  } else {
+    currentOdontogram[selectedToothId3D].depth = depth;
+    if (depth === 'pulp') {
+      currentOdontogram[selectedToothId3D].generalCondition = 'car';
+    }
+  }
+  update3DClinicalPanel(selectedToothId3D);
+  render3DOdontogram();
+}
+
+function setCameraView3D(view) {
+  if (view === "front") {
+    rotX_3D = 0.05; rotY_3D = 0; zoom_3D = 1.0;
+  } else if (view === "occlusal") {
+    rotX_3D = 1.05; rotY_3D = 0; zoom_3D = 1.1;
+  } else if (view === "side") {
+    rotX_3D = 0.2; rotY_3D = 1.45; zoom_3D = 1.0;
+  }
+  render3DOdontogram();
+}
+
+function zoomStep3D(factor) {
+  zoom_3D = Math.max(0.6, Math.min(1.8, zoom_3D * factor));
+  render3DOdontogram();
+}
+
+function resetCamera3D() {
+  rotX_3D = 0.38; rotY_3D = 0.08; zoom_3D = 1.0;
+  jawOpening_3D = 0.25;
+  const slider = document.getElementById("jawSlider3D");
+  if (slider) slider.value = 0.25;
+  render3DOdontogram();
+}
+
+function setJawOpening3D(val) {
+  jawOpening_3D = parseFloat(val);
+  const slider = document.getElementById("jawSlider3D");
+  if (slider) slider.value = val;
+  render3DOdontogram();
+}
+
+function onJawSliderChange3D(val) {
+  jawOpening_3D = parseFloat(val);
+  render3DOdontogram();
+}
+
+function toggleXrayMode3D() {
+  isXrayMode_3D = !isXrayMode_3D;
+  const btn = document.getElementById("btnToggleXray3D");
+  const icon = document.getElementById("xrayIcon3D");
+  const lbl = document.getElementById("xrayLabel3D");
+  if (isXrayMode_3D) {
+    if (btn) btn.className = "px-3 py-1.5 rounded-xl border border-rose-500/50 bg-rose-950/60 text-rose-300 text-xs font-bold transition-all flex items-center gap-1.5 ring-1 ring-rose-500 cursor-pointer";
+    if (icon) icon.innerText = "⚡";
+    if (lbl) lbl.innerText = "Mode Rontgen Aktif";
+  } else {
+    if (btn) btn.className = "px-3 py-1.5 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer";
+    if (icon) icon.innerText = "💀";
+    if (lbl) lbl.innerText = "Mode Rontgen (Saraf)";
+  }
+  render3DOdontogram();
+}
+
+function setArch3D(arch) {
+  currentArch_3D = arch;
+  const btnAll = document.getElementById("tabArchAll3D");
+  const btnUp = document.getElementById("tabArchUpper3D");
+  const btnLow = document.getElementById("tabArchLower3D");
+  const activeClass = "px-2.5 py-1 rounded-lg bg-blue-600 text-white shadow-xs transition-all cursor-pointer";
+  const inactiveClass = "px-2.5 py-1 rounded-lg text-slate-400 hover:text-white transition-all cursor-pointer";
+
+  if (btnAll) btnAll.className = arch === "all" ? activeClass : inactiveClass;
+  if (btnUp) btnUp.className = arch === "upper" ? activeClass : inactiveClass;
+  if (btnLow) btnLow.className = arch === "lower" ? activeClass : inactiveClass;
+
+  render3DOdontogram();
 }
 
 function konfirmasiResetSemuaOdontogram() {

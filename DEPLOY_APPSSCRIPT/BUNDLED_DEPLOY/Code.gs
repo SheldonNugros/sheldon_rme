@@ -4899,14 +4899,13 @@ function _moveFileToDatabaseFolder(fileId, targetFolder) {
  * ke folder yang sama jika masih berada di Root. Hanya membuat baru jika benar-benar belum ada.
  */
 function _findOrCreateSpreadsheetInFolder(key, title) {
-  let folder = _getDatabaseParentFolder();
   let prop = PropertiesService.getScriptProperties();
   let propKey = "RME_SS_ID_" + key;
   let ss = null;
   let ssId = "";
   let isBaru = false;
 
-  // 1. Cek dari DB_CONFIG[key]
+  // 1. Cek dari DB_CONFIG[key] (Cepat & Langsung, tanpa scanning Drive folder)
   if (DB_CONFIG && DB_CONFIG[key] && String(DB_CONFIG[key]).trim() !== "") {
     let candidateId = String(DB_CONFIG[key]).trim();
     try {
@@ -4946,7 +4945,8 @@ function _findOrCreateSpreadsheetInFolder(key, title) {
     }
   }
 
-  // 3. Cari berdasarkan nama di dalam folder yang sama terlebih dahulu
+  // 3. Cari berdasarkan nama di dalam folder yang sama (Lazy: HANYA dipanggil jika belum ditemukan)
+  let folder = (!ss) ? _getDatabaseParentFolder() : null;
   if (!ss && folder) {
     try {
       let filesInFolder = folder.getFilesByName(title);
@@ -5679,6 +5679,17 @@ function _normalizeDateStr(val) {
  * Helper: Mengambil atau membuat Spreadsheet 12 Presensi & Absensi Pegawai.
  */
 function getSpreadsheetAbsensi_() {
+  if (typeof DB_CONFIG !== 'undefined' && DB_CONFIG && DB_CONFIG.ABSENSI) {
+    let candidateId = String(DB_CONFIG.ABSENSI).trim();
+    if (candidateId) {
+      try {
+        let ss = SpreadsheetApp.openById(candidateId);
+        if (ss) {
+          return { ss: ss, ssId: candidateId, url: ss.getUrl() };
+        }
+      } catch (e) {}
+    }
+  }
   const def = SPREADSHEET_DEFINITIONS["ABSENSI"];
   const found = _findOrCreateSpreadsheetInFolder("ABSENSI", def.title);
   return { ss: found.ss, ssId: found.ssId, url: found.ss.getUrl() };
@@ -5771,10 +5782,6 @@ function setupAbsensiSpreadsheet() {
  */
 function getAbsensiModuleData(dateStr) {
   try {
-    const absensiRef = getSpreadsheetAbsensi_();
-    const ssA = absensiRef.ss;
-    const ssId = absensiRef.ssId;
-
     // 1. Parsing Tanggal & Hari
     let now = new Date();
     let targetDate = now;
@@ -5795,6 +5802,22 @@ function getAbsensiModuleData(dateStr) {
     const namaHari = dayNames[dayIndex];
     const formattedDate = Utilities.formatDate(targetDate, "Asia/Jakarta", "dd-MM-yyyy");
     const isMinggu = (dayIndex === 0);
+
+    // Cek RAM Cache Apps Script (CacheService) untuk respon instan <300ms
+    try {
+      const cache = CacheService.getScriptCache();
+      const cached = cache.get("RME_ABSENSI_DATA_" + formattedDate);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed && parsed.success) {
+          return parsed;
+        }
+      }
+    } catch (eCacheRead) {}
+
+    const absensiRef = getSpreadsheetAbsensi_();
+    const ssA = absensiRef.ss;
+    const ssId = absensiRef.ssId;
 
     // 2. Tentukan Jadwal Shift berdasarkan hari
     let shiftSchedules = {
@@ -5848,18 +5871,31 @@ function getAbsensiModuleData(dateStr) {
 
     // 4. Ambil Daftar Pegawai dari Spreadsheet 06 Master User & Role sheet Pengaturan_Tarif_Shift
     // Syarat Wajib: Pekerja dengan status "Tidak Aktif" TIDAK AKAN MUNCUL di absen!
-    const defM = SPREADSHEET_DEFINITIONS["MASTER"];
-    const foundM = _findOrCreateSpreadsheetInFolder("MASTER", defM.title);
-    const ssM = foundM.ss;
+    let ssM = null;
+    let ssMId = "";
+    if (typeof DB_CONFIG !== 'undefined' && DB_CONFIG && DB_CONFIG.MASTER) {
+      try {
+        ssMId = String(DB_CONFIG.MASTER).trim();
+        ssM = SpreadsheetApp.openById(ssMId);
+      } catch (eM) {}
+    }
+    if (!ssM) {
+      const defM = SPREADSHEET_DEFINITIONS["MASTER"];
+      const foundM = _findOrCreateSpreadsheetInFolder("MASTER", defM.title);
+      ssM = foundM.ss;
+    }
     let shTarif = ssM.getSheetByName("Pengaturan_Tarif_Shift");
     let activeWorkers = [];
 
-    // Fallback sync jika belum tersinkron
-    try {
-      if (typeof syncAllUsersToPayrollTarifShift === 'function') {
-        syncAllUsersToPayrollTarifShift();
-      }
-    } catch(eSync) {}
+    // Fallback sync HANYA jika sheet tarif belum ada atau kosong sama sekali
+    if (!shTarif || shTarif.getLastRow() <= 1) {
+      try {
+        if (typeof syncAllUsersToPayrollTarifShift === 'function') {
+          syncAllUsersToPayrollTarifShift();
+          shTarif = ssM.getSheetByName("Pengaturan_Tarif_Shift");
+        }
+      } catch(eSync) {}
+    }
 
     if (shTarif && shTarif.getLastRow() > 1) {
       let vTarif = shTarif.getRange(2, 1, shTarif.getLastRow() - 1, shTarif.getLastColumn()).getValues();
@@ -5888,46 +5924,43 @@ function getAbsensiModuleData(dateStr) {
     // 5. Ambil data Presensi yang sudah tersimpan untuk tanggal ini
     let presensiHariIni = [];
     let shPres = ssA.getSheetByName("Presensi_Harian");
-    if (shPres) {
-      migrasiFormatPresensiHarian_(shPres);
-      if (shPres.getLastRow() > 1) {
-        let curH = shPres.getRange(1, 1, 1, shPres.getLastColumn()).getValues()[0];
-        let cTgl = (typeof getColIdx === 'function') ? getColIdx(curH, ['Tanggal', 'Tgl']) : 0; if (cTgl === -1) cTgl = 0;
-        let cHari = (typeof getColIdx === 'function') ? getColIdx(curH, ['Hari']) : 1; if (cHari === -1) cHari = 1;
-        let cShift = (typeof getColIdx === 'function') ? getColIdx(curH, ['Shift']) : 2; if (cShift === -1) cShift = 2;
-        let cIdP = (typeof getColIdx === 'function') ? getColIdx(curH, ['ID_Pekerja', 'ID Pekerja']) : 3; if (cIdP === -1) cIdP = 3;
-        let cNama = (typeof getColIdx === 'function') ? getColIdx(curH, ['Nama_Pekerja', 'Nama Pekerja', 'Nama']) : 4; if (cNama === -1) cNama = 4;
-        let cRole = (typeof getColIdx === 'function') ? getColIdx(curH, ['Role']) : 5; if (cRole === -1) cRole = 5;
-        let cStatus = (typeof getColIdx === 'function') ? getColIdx(curH, ['Status_Absensi', 'Status']) : 6; if (cStatus === -1) cStatus = 6;
-        let cVerif = (typeof getColIdx === 'function') ? getColIdx(curH, ['Verifikator']) : 7; if (cVerif === -1) cVerif = 7;
-        let cWaktu = (typeof getColIdx === 'function') ? getColIdx(curH, ['Waktu_Input', 'Waktu']) : 8; if (cWaktu === -1) cWaktu = 8;
+    if (shPres && shPres.getLastRow() > 1) {
+      let curH = shPres.getRange(1, 1, 1, shPres.getLastColumn()).getValues()[0];
+      let cTgl = (typeof getColIdx === 'function') ? getColIdx(curH, ['Tanggal', 'Tgl']) : 0; if (cTgl === -1) cTgl = 0;
+      let cHari = (typeof getColIdx === 'function') ? getColIdx(curH, ['Hari']) : 1; if (cHari === -1) cHari = 1;
+      let cShift = (typeof getColIdx === 'function') ? getColIdx(curH, ['Shift']) : 2; if (cShift === -1) cShift = 2;
+      let cIdP = (typeof getColIdx === 'function') ? getColIdx(curH, ['ID_Pekerja', 'ID Pekerja']) : 3; if (cIdP === -1) cIdP = 3;
+      let cNama = (typeof getColIdx === 'function') ? getColIdx(curH, ['Nama_Pekerja', 'Nama Pekerja', 'Nama']) : 4; if (cNama === -1) cNama = 4;
+      let cRole = (typeof getColIdx === 'function') ? getColIdx(curH, ['Role']) : 5; if (cRole === -1) cRole = 5;
+      let cStatus = (typeof getColIdx === 'function') ? getColIdx(curH, ['Status_Absensi', 'Status']) : 6; if (cStatus === -1) cStatus = 6;
+      let cVerif = (typeof getColIdx === 'function') ? getColIdx(curH, ['Verifikator']) : 7; if (cVerif === -1) cVerif = 7;
+      let cWaktu = (typeof getColIdx === 'function') ? getColIdx(curH, ['Waktu_Input', 'Waktu']) : 8; if (cWaktu === -1) cWaktu = 8;
 
-        let vPres = shPres.getRange(2, 1, shPres.getLastRow() - 1, shPres.getLastColumn()).getValues();
-        vPres.forEach(r => {
-          let tglPresStr = _normalizeDateStr(r[cTgl]);
-          if (tglPresStr === _normalizeDateStr(formattedDate)) {
-            presensiHariIni.push({
-              tanggal: tglPresStr,
-              hari: String(r[cHari] || ""),
-              shift: String(r[cShift] || ""),
-              idPekerja: String(r[cIdP] || ""),
-              namaPekerja: String(r[cNama] || ""),
-              role: String(r[cRole] || ""),
-              statusAbsensi: String(r[cStatus] || "Hadir"),
-              verifikator: String(r[cVerif] || ""),
-              waktuInput: String(r[cWaktu] || "")
-            });
-          }
-        });
-      }
+      let vPres = shPres.getRange(2, 1, shPres.getLastRow() - 1, shPres.getLastColumn()).getValues();
+      vPres.forEach(r => {
+        let tglPresStr = _normalizeDateStr(r[cTgl]);
+        if (tglPresStr === _normalizeDateStr(formattedDate)) {
+          presensiHariIni.push({
+            tanggal: tglPresStr,
+            hari: String(r[cHari] || ""),
+            shift: String(r[cShift] || ""),
+            idPekerja: String(r[cIdP] || ""),
+            namaPekerja: String(r[cNama] || ""),
+            role: String(r[cRole] || ""),
+            statusAbsensi: String(r[cStatus] || "Hadir"),
+            verifikator: String(r[cVerif] || ""),
+            waktuInput: String(r[cWaktu] || "")
+          });
+        }
+      });
     }
 
-    // 6. Ambil Rekap Bulanan (Otomatis diagregasi dari Presensi_Harian & disinkronkan ke Rekap_Bulanan)
+    // 6. Ambil Rekap Bulanan (Diagregasi di memori tanpa overhead tulis ke sheet saat pembacaan)
     let targetPeriodeBulan = Utilities.formatDate(targetDate, "Asia/Jakarta", "MMMM yyyy");
     let infoHariKerjaBulanIni = hitungHariKerjaBulan_(targetPeriodeBulan, kalenderLibur);
-    let rekapBulanan = sinkronisasiRekapBulanan_(ssA, targetPeriodeBulan, kalenderLibur, activeWorkers);
+    let rekapBulanan = sinkronisasiRekapBulanan_(ssA, targetPeriodeBulan, kalenderLibur, activeWorkers, true /* skipWrite = true */);
 
-    return {
+    let res = {
       success: true,
       spreadsheetId: ssId,
       spreadsheetUrl: ssA.getUrl(),
@@ -5943,6 +5976,17 @@ function getAbsensiModuleData(dateStr) {
       rekapBulanan: rekapBulanan,
       infoHariKerja: infoHariKerjaBulanIni
     };
+
+    // Simpan ke CacheService RAM (TTL 5 menit)
+    try {
+      const cache = CacheService.getScriptCache();
+      const strPayload = JSON.stringify(res);
+      if (strPayload.length < 100000) {
+        cache.put("RME_ABSENSI_DATA_" + formattedDate, strPayload, 300);
+      }
+    } catch (eCacheWrite) {}
+
+    return res;
   } catch (err) {
     return { success: false, message: "Gagal memuat modul Absensi: " + err.message };
   }
@@ -6091,15 +6135,18 @@ function migrasiFormatPresensiHarian_(sh) {
  * Helper: Mengagregasi data Presensi_Harian menjadi Rekap_Bulanan
  * dan menyimpannya secara otomatis ke sheet Rekap_Bulanan di Spreadsheet 12 Presensi & Absensi Pegawai.
  */
-function sinkronisasiRekapBulanan_(ssA, periodeBulan, kalenderLibur, activeWorkers) {
+function sinkronisasiRekapBulanan_(ssA, periodeBulan, kalenderLibur, activeWorkers, skipWrite) {
   try {
     if (!ssA) return [];
     let shPres = ssA.getSheetByName("Presensi_Harian");
-    let shRekap = ssA.getSheetByName("Rekap_Bulanan") || ssA.insertSheet("Rekap_Bulanan");
+    let shRekap = ssA.getSheetByName("Rekap_Bulanan");
+    if (!shRekap && !skipWrite) {
+      shRekap = ssA.insertSheet("Rekap_Bulanan");
+    }
 
-    // Pastikan header Rekap_Bulanan ada
+    // Pastikan header Rekap_Bulanan ada jika menulis ke sheet
     let defHeaders = ["Periode_Bulan", "Nama_Pekerja", "Role", "Hari_Kerja", "Total_Shift_Pagi", "Total_Shift_Sore", "Total_Hadir", "Total_Tidak_Hadir", "Persentase_Kehadiran", "Terakhir_Diperbarui"];
-    if (shRekap.getLastRow() === 0) {
+    if (!skipWrite && shRekap && shRekap.getLastRow() === 0) {
       shRekap.appendRow(defHeaders);
       shRekap.getRange(1, 1, 1, defHeaders.length).setFontWeight("bold").setBackground("#1e293b").setFontColor("#ffffff");
       shRekap.setFrozenRows(1);
@@ -6293,8 +6340,8 @@ function sinkronisasiRekapBulanan_(ssA, periodeBulan, kalenderLibur, activeWorke
       }
     });
 
-    // Tulis ke sheet Rekap_Bulanan jika ada spreadsheet
-    if (shRekap && typeof shRekap.getRange === 'function' && rowsToSave.length > 0) {
+    // Tulis ke sheet Rekap_Bulanan jika ada spreadsheet dan tidak dalam mode skipWrite
+    if (!skipWrite && shRekap && typeof shRekap.getRange === 'function' && rowsToSave.length > 0) {
       let existingRows = [];
       if (shRekap.getLastRow() > 1) {
         existingRows = shRekap.getRange(2, 1, shRekap.getLastRow() - 1, shRekap.getLastColumn()).getValues();
@@ -6553,6 +6600,16 @@ function simpanAbsensiShift(payload) {
     }
 
     SpreadsheetApp.flush();
+    try {
+      const cache = CacheService.getScriptCache();
+      cache.remove("RME_ABSENSI_DATA_" + tanggal);
+      let pTgl = String(tanggal).split('-');
+      if (pTgl.length === 3) {
+        let revTgl = pTgl[2] + '-' + pTgl[1] + '-' + pTgl[0];
+        cache.remove("RME_ABSENSI_DATA_" + revTgl);
+      }
+    } catch (eC) {}
+
     return {
       success: true,
       count: savedCount,
@@ -6623,6 +6680,16 @@ function simpanKalenderLibur(payload) {
     }
 
     SpreadsheetApp.flush();
+    try {
+      const cache = CacheService.getScriptCache();
+      cache.remove("RME_ABSENSI_DATA_" + tanggal);
+      let pTgl = String(tanggal).split('-');
+      if (pTgl.length === 3) {
+        let revTgl = pTgl[2] + '-' + pTgl[1] + '-' + pTgl[0];
+        cache.remove("RME_ABSENSI_DATA_" + revTgl);
+      }
+    } catch (eC) {}
+
     return {
       success: true,
       message: "Hari libur [" + namaHariLibur + "] tanggal " + tanggal + " berhasil disimpan!"

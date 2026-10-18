@@ -19938,38 +19938,62 @@ function getJadwalShiftCurrent() {
 }
 
 /**
- * Memuat data absensi dari Google Apps Script Backend (getAbsensiModuleData).
+ * Memuat data absensi dari Google Apps Script Backend (getAbsensiModuleData)
+ * dengan strategi Stale-While-Revalidate: Tampilkan cache lokal secara instan (0ms),
+ * lalu revalidasi sinkron data terbaru dari server di background.
  */
 function loadAbsensiData(dateStr) {
-  let tbody = document.getElementById('tbodyAbsensiPegawai');
-  if (tbody) {
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="7" class="px-4 py-12 text-center text-slate-400">
-          <div class="inline-block animate-spin text-xl mb-2">⏳</div>
-          <p>Memuat daftar pegawai aktif & presensi shift...</p>
-        </td>
-      </tr>
-    `;
-  }
-
   let formattedQueryDate = dateStr;
   if (dateStr && dateStr.indexOf('-') !== -1 && dateStr.split('-')[0].length === 4) {
     let p = dateStr.split('-');
     formattedQueryDate = p[2] + '-' + p[1] + '-' + p[0];
   }
 
+  // 1. Cek Local Storage (Stale-While-Revalidate): Render instan jika ada
+  let cacheKey = "sheldon_absensi_cache_" + formattedQueryDate;
+  let hasLocalCache = false;
+  try {
+    let rawCache = (typeof localStorage !== 'undefined') ? localStorage.getItem(cacheKey) : null;
+    if (rawCache) {
+      let cachedData = JSON.parse(rawCache);
+      if (cachedData && cachedData.success) {
+        hasLocalCache = true;
+        applyAbsensiDataToState(cachedData, true /* isFromCache */);
+      }
+    }
+  } catch (eLC) {}
+
+  // 2. Jika belum ada cache, tampilkan skeleton/spinner memuat
+  if (!hasLocalCache) {
+    let tbody = document.getElementById('tbodyAbsensiPegawai');
+    if (tbody) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="7" class="px-4 py-12 text-center text-slate-400">
+            <div class="inline-block animate-spin text-xl mb-2">⏳</div>
+            <p>Memuat daftar pegawai aktif & presensi shift...</p>
+          </td>
+        </tr>
+      `;
+    }
+  }
+
+  // 3. Ambil data server terkini di background
   if (typeof google !== 'undefined' && google.script && google.script.run) {
     google.script.run
       .withSuccessHandler(function(res) {
         if (!res || !res.success) {
-          showToast('error', res && res.message ? res.message : 'Gagal memuat data absensi.');
+          if (!hasLocalCache) {
+            showToast('error', res && res.message ? res.message : 'Gagal memuat data absensi.');
+          }
           return;
         }
-        applyAbsensiDataToState(res);
+        applyAbsensiDataToState(res, false);
       })
       .withFailureHandler(function(err) {
-        showToast('error', 'Koneksi backend gagal: ' + err.message);
+        if (!hasLocalCache) {
+          showToast('error', 'Koneksi backend gagal: ' + err.message);
+        }
       })
       .getAbsensiModuleData(formattedQueryDate);
   } else {
@@ -19987,7 +20011,7 @@ function loadAbsensiData(dateStr) {
       .then(r => r.json())
       .then(res => {
         if (res && res.success) {
-          applyAbsensiDataToState(res);
+          applyAbsensiDataToState(res, false);
         } else {
           fallbackLoadAbsensiLocal(formattedQueryDate);
         }
@@ -20004,13 +20028,24 @@ function loadAbsensiData(dateStr) {
 }
 
 function refreshAbsensiData() {
-  loadAbsensiData(window.AbsensiState.currentDate);
+  let targetDate = window.AbsensiState.currentDate;
+  let formattedQueryDate = targetDate;
+  if (targetDate && targetDate.indexOf('-') !== -1 && targetDate.split('-')[0].length === 4) {
+    let p = targetDate.split('-');
+    formattedQueryDate = p[2] + '-' + p[1] + '-' + p[0];
+  }
+  try {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.removeItem("sheldon_absensi_cache_" + formattedQueryDate);
+    }
+  } catch (e) {}
+  loadAbsensiData(targetDate);
 }
 
 /**
  * Menyimpan data respon backend ke state dan merender UI.
  */
-function applyAbsensiDataToState(res) {
+function applyAbsensiDataToState(res, isFromCache) {
   window.AbsensiState.formattedDate = res.date || '';
   window.AbsensiState.currentDayName = res.dayName || '';
   window.AbsensiState.isMinggu = Boolean(res.isMinggu);
@@ -20065,6 +20100,18 @@ function applyAbsensiDataToState(res) {
 
   // Render tabel presensi
   renderAbsensiTable();
+
+  // Simpan ke localStorage untuk instantaneous hydration (Stale-While-Revalidate)
+  if (!isFromCache && res && res.success) {
+    try {
+      if (typeof localStorage !== 'undefined') {
+        let fDate = window.AbsensiState.formattedDate || (res && res.date);
+        let cDate = window.AbsensiState.currentDate;
+        if (fDate) localStorage.setItem("sheldon_absensi_cache_" + fDate, JSON.stringify(res));
+        if (cDate && cDate !== fDate) localStorage.setItem("sheldon_absensi_cache_" + cDate, JSON.stringify(res));
+      }
+    } catch (eLC) {}
+  }
 }
 
 /**
@@ -20495,6 +20542,14 @@ function simpanAbsensiShiftCurrent() {
           return;
         }
         showToast('success', res.message || 'Presensi shift berhasil disimpan!');
+        try {
+          if (typeof localStorage !== 'undefined') {
+            let fDate = window.AbsensiState.formattedDate;
+            let cDate = window.AbsensiState.currentDate;
+            if (fDate) localStorage.removeItem("sheldon_absensi_cache_" + fDate);
+            if (cDate) localStorage.removeItem("sheldon_absensi_cache_" + cDate);
+          }
+        } catch (eInv) {}
         loadAbsensiData(window.AbsensiState.currentDate);
       })
       .withFailureHandler(function(err) {
@@ -20528,6 +20583,14 @@ function simpanAbsensiShiftCurrent() {
           return;
         }
         showToast('success', res.message || 'Presensi shift berhasil disimpan ke Google Sheets!');
+        try {
+          if (typeof localStorage !== 'undefined') {
+            let fDate = window.AbsensiState.formattedDate;
+            let cDate = window.AbsensiState.currentDate;
+            if (fDate) localStorage.removeItem("sheldon_absensi_cache_" + fDate);
+            if (cDate) localStorage.removeItem("sheldon_absensi_cache_" + cDate);
+          }
+        } catch (eInv) {}
         loadAbsensiData(window.AbsensiState.currentDate);
       })
       .catch(err => {

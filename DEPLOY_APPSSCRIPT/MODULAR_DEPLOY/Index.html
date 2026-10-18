@@ -718,60 +718,101 @@
       }
     };
 
-    google.script.run.withSuccessHandler(res => {
-      if (res && res.staff) window.KlinikData.staff = res.staff;
-      if (res && res.tindakan) window.KlinikData.tindakan = res.tindakan;
-      if (res && res.obat) window.KlinikData.obat = res.obat;
-      if (res && res.bmhp) window.KlinikData.bmhp = res.bmhp;
-      window.KlinikData.statusLoad.master = true;
-      onTaskComplete('master');
-    }).withFailureHandler(() => {
-      onTaskComplete('master');
-    }).getInitMaster();
+    function loadDataParallelFallback() {
+      google.script.run.withSuccessHandler(res => {
+        if (res && res.staff) window.KlinikData.staff = res.staff;
+        if (res && res.tindakan) window.KlinikData.tindakan = res.tindakan;
+        if (res && res.obat) window.KlinikData.obat = res.obat;
+        if (res && res.bmhp) window.KlinikData.bmhp = res.bmhp;
+        window.KlinikData.statusLoad.master = true;
+        onTaskComplete('master');
+      }).withFailureHandler(() => {
+        onTaskComplete('master');
+      }).getInitMaster();
 
-    window._isFetchingPasien = true;
-    google.script.run.withSuccessHandler(res => {
-      window._isFetchingPasien = false;
-      window.KlinikData.statusLoad.pasien = 'loaded';
-      window.KlinikData.pasien = Array.isArray(res) ? res : [];
-      window.KlinikData.errorMsgPasien = null;
-      try { document.dispatchEvent(new Event('KlinikPasienReady')); } catch (eEvt) {}
-      if (typeof updateStatistikPasienTampilan === 'function') updateStatistikPasienTampilan();
-      if (typeof searchPasienData === 'function') searchPasienData();
-      onTaskComplete('pasien');
-    }).withFailureHandler((err) => {
-      window._isFetchingPasien = false;
-      console.error("Gagal getInitPasien:", err);
-      window.KlinikData.statusLoad.pasien = 'error';
-      window.KlinikData.errorMsgPasien = err && err.message ? err.message : String(err);
-      if (typeof searchPasienData === 'function') searchPasienData();
-      onTaskComplete('pasien');
-    }).getInitPasien();
+      window._isFetchingPasien = true;
+      google.script.run.withSuccessHandler(res => {
+        window._isFetchingPasien = false;
+        window.KlinikData.statusLoad.pasien = 'loaded';
+        window.KlinikData.pasien = Array.isArray(res) ? res : [];
+        window.KlinikData.errorMsgPasien = null;
+        try { document.dispatchEvent(new Event('KlinikPasienReady')); } catch (eEvt) {}
+        if (typeof updateStatistikPasienTampilan === 'function') updateStatistikPasienTampilan();
+        if (typeof searchPasienData === 'function') searchPasienData();
+        onTaskComplete('pasien');
+      }).withFailureHandler((err) => {
+        window._isFetchingPasien = false;
+        console.error("Gagal getInitPasien:", err);
+        window.KlinikData.statusLoad.pasien = 'error';
+        window.KlinikData.errorMsgPasien = err && err.message ? err.message : String(err);
+        if (typeof searchPasienData === 'function') searchPasienData();
+        onTaskComplete('pasien');
+      }).getInitPasien();
 
-    let stepEmrKasir = 0;
-    function checkEmrKasirDone() {
-      stepEmrKasir++;
-      if (stepEmrKasir >= 2) {
-        window.KlinikData.statusLoad.emr = true;
+      let stepEmrKasir = 0;
+      function checkEmrKasirDone() {
+        stepEmrKasir++;
+        if (stepEmrKasir >= 2) {
+          window.KlinikData.statusLoad.emr = true;
+        }
       }
-    }
-    google.script.run.withSuccessHandler(res => {
-      if (Array.isArray(res)) window.KlinikData.rekamMedis = res;
-      checkEmrKasirDone();
-      onTaskComplete('emr');
-    }).withFailureHandler(() => {
-      checkEmrKasirDone();
-      onTaskComplete('emr');
-    }).getDaftarRekamMedis();
+      google.script.run.withSuccessHandler(res => {
+        if (Array.isArray(res)) window.KlinikData.rekamMedis = res;
+        checkEmrKasirDone();
+        onTaskComplete('emr');
+      }).withFailureHandler(() => {
+        checkEmrKasirDone();
+        onTaskComplete('emr');
+      }).getDaftarRekamMedis();
 
-    google.script.run.withSuccessHandler(res => {
-      if (Array.isArray(res)) window.KlinikData.pembayaran = res;
-      checkEmrKasirDone();
-      onTaskComplete('pembayaran');
-    }).withFailureHandler(() => {
-      checkEmrKasirDone();
-      onTaskComplete('pembayaran');
-    }).getDaftarPembayaran();
+      google.script.run.withSuccessHandler(res => {
+        if (Array.isArray(res)) window.KlinikData.pembayaran = res;
+        checkEmrKasirDone();
+        onTaskComplete('pembayaran');
+      }).withFailureHandler(() => {
+        checkEmrKasirDone();
+        onTaskComplete('pembayaran');
+      }).getDaftarPembayaran();
+    }
+
+    // Jalur Utama Cepat: Batch Init (1 Roundtrip untuk Master, Pasien, EMR, Kasir)
+    if (google && google.script && google.script.run && typeof google.script.run.getBatchInitKlinikData === 'function') {
+      window._isFetchingPasien = true;
+      google.script.run.withSuccessHandler(res => {
+        if (res && res.success) {
+          if (res.master) {
+            if (res.master.staff) window.KlinikData.staff = res.master.staff;
+            if (res.master.tindakan) window.KlinikData.tindakan = res.master.tindakan;
+            if (res.master.obat) window.KlinikData.obat = res.master.obat;
+            if (res.master.bmhp) window.KlinikData.bmhp = res.master.bmhp;
+            window.KlinikData.statusLoad.master = true;
+            onTaskComplete('master');
+          }
+          window._isFetchingPasien = false;
+          window.KlinikData.statusLoad.pasien = 'loaded';
+          window.KlinikData.pasien = Array.isArray(res.pasien) ? res.pasien : [];
+          window.KlinikData.errorMsgPasien = null;
+          try { document.dispatchEvent(new Event('KlinikPasienReady')); } catch (eEvt) {}
+          if (typeof updateStatistikPasienTampilan === 'function') updateStatistikPasienTampilan();
+          if (typeof searchPasienData === 'function') searchPasienData();
+          onTaskComplete('pasien');
+
+          if (Array.isArray(res.rekamMedis)) window.KlinikData.rekamMedis = res.rekamMedis;
+          window.KlinikData.statusLoad.emr = true;
+          onTaskComplete('emr');
+
+          if (Array.isArray(res.pembayaran)) window.KlinikData.pembayaran = res.pembayaran;
+          onTaskComplete('pembayaran');
+        } else {
+          loadDataParallelFallback();
+        }
+      }).withFailureHandler(err => {
+        console.warn("getBatchInitKlinikData gagal, beralih ke loader individual:", err);
+        loadDataParallelFallback();
+      }).getBatchInitKlinikData();
+    } else {
+      loadDataParallelFallback();
+    }
   }
 
   function updateDashboardNumbers() {

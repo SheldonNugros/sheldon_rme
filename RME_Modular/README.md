@@ -10,48 +10,48 @@ Sistem Rekam Medis Elektronik (RME) Klinik Sheldon berbasis **Google Apps Script
 RME_Modular/
 ├── README.md                      # Dokumentasi & Panduan Lengkap
 ├── csv_spreadsheets/              # File CSV Terpisah per Spreadsheet & Sheet
-│   ├── 01_PASIEN/
-│   │   ├── Data_Pasien.csv
-│   │   └── Statistik_Pasien.csv
-│   ├── 02_PEMBAYARAN/
+│   ├── PASIEN/
+│   │   └── Data_Pasien.csv
+│   ├── PEMBAYARAN/
 │   │   ├── Data_Pembayaran.csv
-│   │   ├── Rekap_Invoice.csv
-│   │   ├── Rekap_Harian.csv
-│   │   ├── Rekap_Metode_Dokter.csv
-│   │   └── Rekap_Item.csv
-│   ├── 03_REKAM_MEDIS/
-│   │   ├── Data_Rekam_Medis.csv
-│   │   └── Rekap_Kunjungan.csv
-│   ├── 04_SURAT/
+│   │   └── Rekap_Jasa_Medis.csv
+│   ├── REKAM_MEDIS/
+│   │   └── Data_Rekam_Medis.csv
+│   ├── SURAT/
 │   │   ├── Surat_Sakit.csv
 │   │   ├── Surat_Kontrol.csv
 │   │   ├── Resume_Medis.csv
 │   │   ├── Surat_Rujukan.csv
 │   │   ├── Surat_Lab.csv
-│   │   ├── Surat_Radiologi.csv
-│   │   └── Rekap_Surat.csv
-│   ├── 05_DATABASE/
+│   │   └── Surat_Radiologi.csv
+│   ├── DATABASE/
 │   │   ├── Kategori.csv
 │   │   ├── Tindakan.csv
-│   │   └── Rekap_Tindakan.csv
-│   ├── 06_MASTER/
+│   │   └── Tarif_Khusus_Dokter.csv
+│   ├── MASTER/
 │   │   ├── Data.csv
-│   │   ├── Matriks_Role.csv
-│   │   └── Rekap_Staff.csv
-│   ├── 07_LOG/
-│   │   ├── Log_Aktivitas.csv
-│   │   ├── pekerjaan.csv
-│   │   └── Rekap_Log.csv
-│   ├── 08_OBAT/
+│   │   └── Pengaturan_Tarif_Shift.csv
+│   ├── LOG/
+│   │   └── Log_Aktivitas.csv
+│   ├── OBAT/
 │   │   ├── Master_Obat.csv
-│   │   ├── Riwayat_Pembelian.csv
-│   │   └── Rekap_Stok.csv
-│   ├── 09_BMHP/
+│   │   └── Riwayat_Pembelian.csv
+│   ├── BMHP/
 │   │   ├── Master_BMHP.csv
-│   │   ├── Riwayat_Pembelian.csv
-│   │   └── Rekap_Stok.csv
-│   └── 10_ICD10/
-│       └── ICD_10.csv
+│   │   └── Riwayat_Pembelian.csv
+│   ├── ICD10/
+│   │   ├── ICD_10.csv
+│   │   └── ICD_9.csv
+│   ├── ABSENSI/
+│   │   ├── Presensi_Harian.csv
+│   │   ├── Kalender_Hari_Libur.csv
+│   │   └── Rekap_Bulanan.csv
+│   └── PAYROLL/
+│       ├── Penggajian_Dokter.csv
+│       ├── Honor_Perawat_Staff.csv
+│       ├── Tagihan_Vendor_Lab.csv
+│       ├── Slip_Gaji_Arsip.csv
+│       └── Presensi_Shift_Harian.csv
 ├── src/
 │   ├── backend/                   # Script Google Apps Script (.gs)
 │   │   ├── 00_Config.gs           # ID Spreadsheet & Role Rules Matrix

@@ -6196,60 +6196,101 @@
       }
     };
 
-    google.script.run.withSuccessHandler(res => {
-      if (res && res.staff) window.KlinikData.staff = res.staff;
-      if (res && res.tindakan) window.KlinikData.tindakan = res.tindakan;
-      if (res && res.obat) window.KlinikData.obat = res.obat;
-      if (res && res.bmhp) window.KlinikData.bmhp = res.bmhp;
-      window.KlinikData.statusLoad.master = true;
-      onTaskComplete('master');
-    }).withFailureHandler(() => {
-      onTaskComplete('master');
-    }).getInitMaster();
+    function loadDataParallelFallback() {
+      google.script.run.withSuccessHandler(res => {
+        if (res && res.staff) window.KlinikData.staff = res.staff;
+        if (res && res.tindakan) window.KlinikData.tindakan = res.tindakan;
+        if (res && res.obat) window.KlinikData.obat = res.obat;
+        if (res && res.bmhp) window.KlinikData.bmhp = res.bmhp;
+        window.KlinikData.statusLoad.master = true;
+        onTaskComplete('master');
+      }).withFailureHandler(() => {
+        onTaskComplete('master');
+      }).getInitMaster();
 
-    window._isFetchingPasien = true;
-    google.script.run.withSuccessHandler(res => {
-      window._isFetchingPasien = false;
-      window.KlinikData.statusLoad.pasien = 'loaded';
-      window.KlinikData.pasien = Array.isArray(res) ? res : [];
-      window.KlinikData.errorMsgPasien = null;
-      try { document.dispatchEvent(new Event('KlinikPasienReady')); } catch (eEvt) {}
-      if (typeof updateStatistikPasienTampilan === 'function') updateStatistikPasienTampilan();
-      if (typeof searchPasienData === 'function') searchPasienData();
-      onTaskComplete('pasien');
-    }).withFailureHandler((err) => {
-      window._isFetchingPasien = false;
-      console.error("Gagal getInitPasien:", err);
-      window.KlinikData.statusLoad.pasien = 'error';
-      window.KlinikData.errorMsgPasien = err && err.message ? err.message : String(err);
-      if (typeof searchPasienData === 'function') searchPasienData();
-      onTaskComplete('pasien');
-    }).getInitPasien();
+      window._isFetchingPasien = true;
+      google.script.run.withSuccessHandler(res => {
+        window._isFetchingPasien = false;
+        window.KlinikData.statusLoad.pasien = 'loaded';
+        window.KlinikData.pasien = Array.isArray(res) ? res : [];
+        window.KlinikData.errorMsgPasien = null;
+        try { document.dispatchEvent(new Event('KlinikPasienReady')); } catch (eEvt) {}
+        if (typeof updateStatistikPasienTampilan === 'function') updateStatistikPasienTampilan();
+        if (typeof searchPasienData === 'function') searchPasienData();
+        onTaskComplete('pasien');
+      }).withFailureHandler((err) => {
+        window._isFetchingPasien = false;
+        console.error("Gagal getInitPasien:", err);
+        window.KlinikData.statusLoad.pasien = 'error';
+        window.KlinikData.errorMsgPasien = err && err.message ? err.message : String(err);
+        if (typeof searchPasienData === 'function') searchPasienData();
+        onTaskComplete('pasien');
+      }).getInitPasien();
 
-    let stepEmrKasir = 0;
-    function checkEmrKasirDone() {
-      stepEmrKasir++;
-      if (stepEmrKasir >= 2) {
-        window.KlinikData.statusLoad.emr = true;
+      let stepEmrKasir = 0;
+      function checkEmrKasirDone() {
+        stepEmrKasir++;
+        if (stepEmrKasir >= 2) {
+          window.KlinikData.statusLoad.emr = true;
+        }
       }
-    }
-    google.script.run.withSuccessHandler(res => {
-      if (Array.isArray(res)) window.KlinikData.rekamMedis = res;
-      checkEmrKasirDone();
-      onTaskComplete('emr');
-    }).withFailureHandler(() => {
-      checkEmrKasirDone();
-      onTaskComplete('emr');
-    }).getDaftarRekamMedis();
+      google.script.run.withSuccessHandler(res => {
+        if (Array.isArray(res)) window.KlinikData.rekamMedis = res;
+        checkEmrKasirDone();
+        onTaskComplete('emr');
+      }).withFailureHandler(() => {
+        checkEmrKasirDone();
+        onTaskComplete('emr');
+      }).getDaftarRekamMedis();
 
-    google.script.run.withSuccessHandler(res => {
-      if (Array.isArray(res)) window.KlinikData.pembayaran = res;
-      checkEmrKasirDone();
-      onTaskComplete('pembayaran');
-    }).withFailureHandler(() => {
-      checkEmrKasirDone();
-      onTaskComplete('pembayaran');
-    }).getDaftarPembayaran();
+      google.script.run.withSuccessHandler(res => {
+        if (Array.isArray(res)) window.KlinikData.pembayaran = res;
+        checkEmrKasirDone();
+        onTaskComplete('pembayaran');
+      }).withFailureHandler(() => {
+        checkEmrKasirDone();
+        onTaskComplete('pembayaran');
+      }).getDaftarPembayaran();
+    }
+
+    // Jalur Utama Cepat: Batch Init (1 Roundtrip untuk Master, Pasien, EMR, Kasir)
+    if (google && google.script && google.script.run && typeof google.script.run.getBatchInitKlinikData === 'function') {
+      window._isFetchingPasien = true;
+      google.script.run.withSuccessHandler(res => {
+        if (res && res.success) {
+          if (res.master) {
+            if (res.master.staff) window.KlinikData.staff = res.master.staff;
+            if (res.master.tindakan) window.KlinikData.tindakan = res.master.tindakan;
+            if (res.master.obat) window.KlinikData.obat = res.master.obat;
+            if (res.master.bmhp) window.KlinikData.bmhp = res.master.bmhp;
+            window.KlinikData.statusLoad.master = true;
+            onTaskComplete('master');
+          }
+          window._isFetchingPasien = false;
+          window.KlinikData.statusLoad.pasien = 'loaded';
+          window.KlinikData.pasien = Array.isArray(res.pasien) ? res.pasien : [];
+          window.KlinikData.errorMsgPasien = null;
+          try { document.dispatchEvent(new Event('KlinikPasienReady')); } catch (eEvt) {}
+          if (typeof updateStatistikPasienTampilan === 'function') updateStatistikPasienTampilan();
+          if (typeof searchPasienData === 'function') searchPasienData();
+          onTaskComplete('pasien');
+
+          if (Array.isArray(res.rekamMedis)) window.KlinikData.rekamMedis = res.rekamMedis;
+          window.KlinikData.statusLoad.emr = true;
+          onTaskComplete('emr');
+
+          if (Array.isArray(res.pembayaran)) window.KlinikData.pembayaran = res.pembayaran;
+          onTaskComplete('pembayaran');
+        } else {
+          loadDataParallelFallback();
+        }
+      }).withFailureHandler(err => {
+        console.warn("getBatchInitKlinikData gagal, beralih ke loader individual:", err);
+        loadDataParallelFallback();
+      }).getBatchInitKlinikData();
+    } else {
+      loadDataParallelFallback();
+    }
   }
 
   function updateDashboardNumbers() {
@@ -7040,8 +7081,17 @@ function konfirmasiHapusPasien(idPasien, namaPasienFallback) {
   }
 }
 
-function loadListPekerjaan() {
-google.script.run.withSuccessHandler(res => {
+const DAFTAR_PEKERJAAN_STANDAR = [
+  "Belum/Tidak Bekerja", "Mengurus Rumah Tangga", "Pelajar/Mahasiswa", "Pensiunan",
+  "Pegawai Negeri Sipil (PNS)", "Tentara Nasional Indonesia (TNI)", "Kepolisian RI (POLRI)",
+  "Perdagangan", "Petani/Pekebun", "Peternak", "Nelayan/Perikanan", "Industri", "Konstruksi",
+  "Transportasi", "Karyawan Swasta", "Karyawan BUMN", "Karyawan BUMD", "Karyawan Honorer",
+  "Buruh Harian Lepas", "Pembantu Rumah Tangga", "Mekanik", "Seniman", "Wartawan",
+  "Dosen", "Guru", "Pilot", "Pengacara", "Notaris", "Arsitek", "Akuntan", "Konsultan",
+  "Dokter", "Bidan", "Perawat", "Apoteker", "Wiraswasta", "Lainnya"
+];
+
+function populatePekerjaanElements(res) {
   if (!res || res.length === 0) return;
   let inputs = document.querySelectorAll('input, select');
   let elPekerjaan = null;
@@ -7053,19 +7103,28 @@ google.script.run.withSuccessHandler(res => {
      }
   }
   if (elPekerjaan) {
+    let currVal = elPekerjaan.value;
     if (elPekerjaan.tagName.toLowerCase() === 'select') {
       let optionsHtml = '<option value="" disabled selected>-- Pilih Pekerjaan --</option>';
       res.forEach(p => { optionsHtml += `<option value="${p}">${p}</option>`; });
       elPekerjaan.innerHTML = optionsHtml;
-    }
-    else {
+      if (currVal) elPekerjaan.value = currVal;
+    } else {
        let dl = document.getElementById('listPekerjaanData');
        if(!dl) { dl = document.createElement('datalist'); dl.id = 'listPekerjaanData'; document.body.appendChild(dl); }
        let optionsHtml = ''; res.forEach(p => { optionsHtml += `<option value="${p}">`; });
        dl.innerHTML = optionsHtml; elPekerjaan.setAttribute('list', 'listPekerjaanData');
     }
   }
-}).getDaftarPekerjaan();
+}
+
+function loadListPekerjaan() {
+  populatePekerjaanElements(DAFTAR_PEKERJAAN_STANDAR);
+  if (typeof google !== 'undefined' && google.script && google.script.run && typeof google.script.run.getDaftarPekerjaan === 'function') {
+    google.script.run.withSuccessHandler(res => {
+      if (res && res.length > 0) populatePekerjaanElements(res);
+    }).getDaftarPekerjaan();
+  }
 }
 // ========================================================
 // ENGINE MIRRORING ODONTOGRAM & EMR (PERSIS REKAM MEDIS)

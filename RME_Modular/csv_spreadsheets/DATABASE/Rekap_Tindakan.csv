@@ -1,1 +1,0 @@
-"=IFERROR(QUERY(Tindakan!A1:D,""select C, count(A), avg(D), min(D), max(D) where A is not null group by C label count(A) 'Jumlah_Tindakan', avg(D) 'Rata_Tarif', min(D) 'Tarif_Min', max(D) 'Tarif_Max'"",1),""-"")"

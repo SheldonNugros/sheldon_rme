@@ -28,6 +28,10 @@ function getDaftarPekerjaan() {
 }
 
 function getDaftarPasien() {
+  const cacheKey = "INIT_PASIEN_CACHE_V1";
+  const cached = getCacheJson(cacheKey);
+  if (cached && Array.isArray(cached) && cached.length > 0) return cached;
+
   try {
     const v = readFast(DB_CONFIG.PASIEN, "Data_Pasien");
     if (v.length <= 1) return [];
@@ -86,8 +90,9 @@ function getDaftarPasien() {
         catatan: (idCatatan !== -1 && r[idCatatan]) ? String(r[idCatatan]).trim() : "",
         tglDaftar: (idTglDaftar !== -1 && r[idTglDaftar]) ? fDate(r[idTglDaftar]) : ""
       });
-    }
-    return result.reverse();
+    let finalResult = result.reverse();
+    putCacheJson(cacheKey, finalResult, 300);
+    return finalResult;
   } catch (e) {
     Logger.log("❌ Error getDaftarPasien: " + e.message);
     throw new Error("Gagal membaca Data_Pasien: " + e.message);
@@ -304,7 +309,7 @@ function simpanPasien(payload) {
     } else {
       sheet.getRange(rowIdx, 1, 1, newRow.length).setValues([newRow]);
       catatLog("Update Pasien", "Memperbarui data pasien: " + payload.namaPasien + " (RM: " + payload.noRm + ")", payload.currentUser);
-    }
+    removeCacheKey("INIT_PASIEN_CACHE_V1");
     return {
       success: true,
       message: isBaru ? "Data Pasien berhasil didaftarkan!" : "Data Pasien berhasil diperbarui!",
@@ -362,6 +367,7 @@ function hapusPasienPermanen(payload) {
 
     sheet.getRange(targetRow, idStatus + 1).setValue("Nonaktif");
     catatLog("Hapus Pasien", "Owner menonaktifkan pasien (Soft-Delete aman): " + targetNama + " (ID: " + payload.idPasien + ")", payload.currentUser);
+    removeCacheKey("INIT_PASIEN_CACHE_V1");
     return { success: true, message: "Data Pasien (" + targetNama + ") berhasil dinonaktifkan (Arsip Medis Aman)!" };
   } catch (e) {
     return { success: false, message: "Gagal menghapus pasien: " + e.message };

@@ -2,6 +2,29 @@
 // FUNGSI MASTER DATABASE: ICD-10, KATEGORI, TINDAKAN & STAFF
 // =========================================================================
 
+/**
+ * BATCH INIT DATA KLINIK:
+ * Menggabungkan Master Data, Pasien, Rekam Medis, dan Pembayaran dalam 1 kali RPC call
+ * Menghilangkan latensi 4 roundtrip terpisah dan mencegah antrean Apps Script container.
+ */
+function getBatchInitKlinikData() {
+  try {
+    return {
+      success: true,
+      master: getInitMaster(),
+      pasien: getInitPasien(),
+      rekamMedis: getDaftarRekamMedis(),
+      pembayaran: getDaftarPembayaran()
+    };
+  } catch (err) {
+    Logger.log("❌ Error getBatchInitKlinikData: " + err.message);
+    return {
+      success: false,
+      message: err.message
+    };
+  }
+}
+
 function getInitMaster() {
   const cacheKey = "INIT_MASTER_CACHE_V1";
   const cached = getCacheJson(cacheKey);

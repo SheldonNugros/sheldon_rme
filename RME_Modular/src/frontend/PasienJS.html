@@ -738,8 +738,17 @@ function konfirmasiHapusPasien(idPasien, namaPasienFallback) {
   }
 }
 
-function loadListPekerjaan() {
-google.script.run.withSuccessHandler(res => {
+const DAFTAR_PEKERJAAN_STANDAR = [
+  "Belum/Tidak Bekerja", "Mengurus Rumah Tangga", "Pelajar/Mahasiswa", "Pensiunan",
+  "Pegawai Negeri Sipil (PNS)", "Tentara Nasional Indonesia (TNI)", "Kepolisian RI (POLRI)",
+  "Perdagangan", "Petani/Pekebun", "Peternak", "Nelayan/Perikanan", "Industri", "Konstruksi",
+  "Transportasi", "Karyawan Swasta", "Karyawan BUMN", "Karyawan BUMD", "Karyawan Honorer",
+  "Buruh Harian Lepas", "Pembantu Rumah Tangga", "Mekanik", "Seniman", "Wartawan",
+  "Dosen", "Guru", "Pilot", "Pengacara", "Notaris", "Arsitek", "Akuntan", "Konsultan",
+  "Dokter", "Bidan", "Perawat", "Apoteker", "Wiraswasta", "Lainnya"
+];
+
+function populatePekerjaanElements(res) {
   if (!res || res.length === 0) return;
   let inputs = document.querySelectorAll('input, select');
   let elPekerjaan = null;
@@ -751,19 +760,28 @@ google.script.run.withSuccessHandler(res => {
      }
   }
   if (elPekerjaan) {
+    let currVal = elPekerjaan.value;
     if (elPekerjaan.tagName.toLowerCase() === 'select') {
       let optionsHtml = '<option value="" disabled selected>-- Pilih Pekerjaan --</option>';
       res.forEach(p => { optionsHtml += `<option value="${p}">${p}</option>`; });
       elPekerjaan.innerHTML = optionsHtml;
-    }
-    else {
+      if (currVal) elPekerjaan.value = currVal;
+    } else {
        let dl = document.getElementById('listPekerjaanData');
        if(!dl) { dl = document.createElement('datalist'); dl.id = 'listPekerjaanData'; document.body.appendChild(dl); }
        let optionsHtml = ''; res.forEach(p => { optionsHtml += `<option value="${p}">`; });
        dl.innerHTML = optionsHtml; elPekerjaan.setAttribute('list', 'listPekerjaanData');
     }
   }
-}).getDaftarPekerjaan();
+}
+
+function loadListPekerjaan() {
+  populatePekerjaanElements(DAFTAR_PEKERJAAN_STANDAR);
+  if (typeof google !== 'undefined' && google.script && google.script.run && typeof google.script.run.getDaftarPekerjaan === 'function') {
+    google.script.run.withSuccessHandler(res => {
+      if (res && res.length > 0) populatePekerjaanElements(res);
+    }).getDaftarPekerjaan();
+  }
 }
 // ========================================================
 // ENGINE MIRRORING ODONTOGRAM & EMR (PERSIS REKAM MEDIS)

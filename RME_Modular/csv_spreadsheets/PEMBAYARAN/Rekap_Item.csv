@@ -1,1 +1,0 @@
-"=IFERROR(QUERY(Data_Pembayaran!A1:T,""select G, H, sum(J), sum(M) where A is not null group by G, H order by sum(M) desc label sum(J) 'Total_Qty', sum(M) 'Total_Omzet'"",1),""-"")"

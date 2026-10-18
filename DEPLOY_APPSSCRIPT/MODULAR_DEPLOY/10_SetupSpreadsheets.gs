@@ -12,28 +12,14 @@ const SPREADSHEET_DEFINITIONS = {
       "sheets": [
         {
           "name": "Data_Pasien",
-          "headers": ["ID_Pasien", "Nama_Pasien", "No_RM", "Jenis_Kelamin", "Tempat_Lahir", "Tanggal_Lahir", "Umur", "Agama", "Golongan_Darah", "Pekerjaan", "NIK", "Alamat", "Provinsi", "Kabupaten", "Kecamatan", "Kelurahan", "WhatsApp", "Alergi", "Riwayat_Penyakit", "Catatan", "Tanggal_Daftar"],
+          "headers": ["ID_Pasien", "Nama_Pasien", "No_RM", "Jenis_Kelamin", "Tempat_Lahir", "Tanggal_Lahir", "Umur", "Agama", "Golongan_Darah", "Pekerjaan", "NIK", "Alamat", "Provinsi", "Kabupaten", "Kecamatan", "Kelurahan", "WhatsApp", "Alergi", "Riwayat_Penyakit", "Catatan", "Tanggal_Daftar", "Status_Aktif"],
           "formats": { "F": "dd-mm-yyyy", "K": "@", "Q": "@", "U": "dd-mm-yyyy" },
           "validations": {
             "D": ["Laki-Laki", "Perempuan"],
             "H": ["Islam", "Kristen", "Katolik", "Hindu", "Buddha", "Khonghucu"],
-            "I": ["A", "B", "AB", "O"]
+            "I": ["A", "B", "AB", "O"],
+            "V": ["Aktif", "Nonaktif"]
           }
-        },
-        {
-          "name": "Statistik_Pasien",
-          "grid": [
-            ["Metrik", "Nilai", "", "No_RM", "Nama_Pasien", "Umur_Saat_Ini"],
-            ["Total Pasien", "=COUNTA(Data_Pasien!A2:A)", "", "={\"\",\"\",\"\";ARRAYFORMULA(IF(Data_Pasien!A2:A=\"\",\"\",{Data_Pasien!C2:C,Data_Pasien!B2:B,IFERROR(DATEDIF(Data_Pasien!F2:F,TODAY(),\"Y\")&\" Tahun\",\"-\")}))}", "", ""],
-            ["Laki-Laki", "=COUNTIF(Data_Pasien!D2:D,\"Laki-Laki\")", "", "", "", ""],
-            ["Perempuan", "=COUNTIF(Data_Pasien!D2:D,\"Perempuan\")", "", "", "", ""],
-            ["Pasien Baru Bulan Ini", "=COUNTIFS(Data_Pasien!U2:U,\">=\"&(EOMONTH(TODAY(),-1)+1),Data_Pasien!U2:U,\"<=\"&EOMONTH(TODAY(),0))", "", "", "", ""],
-            ["Rata-rata Umur (Tahun)", "=IFERROR(ROUND(AVERAGE(FILTER(DATEDIF(Data_Pasien!F2:F,TODAY(),\"Y\"),ISNUMBER(Data_Pasien!F2:F))),1),\"-\")", "", "", "", ""],
-            ["Anak (< 12 th)", "=IFERROR(SUMPRODUCT(ISNUMBER(Data_Pasien!F2:F)*(IFERROR(DATEDIF(Data_Pasien!F2:F,TODAY(),\"Y\"),999)<12)),0)", "", "", "", ""],
-            ["Remaja (12-17 th)", "=IFERROR(SUMPRODUCT(ISNUMBER(Data_Pasien!F2:F)*(IFERROR(DATEDIF(Data_Pasien!F2:F,TODAY(),\"Y\"),-1)>=12)*(IFERROR(DATEDIF(Data_Pasien!F2:F,TODAY(),\"Y\"),999)<18)),0)", "", "", "", ""],
-            ["Dewasa (18-59 th)", "=IFERROR(SUMPRODUCT(ISNUMBER(Data_Pasien!F2:F)*(IFERROR(DATEDIF(Data_Pasien!F2:F,TODAY(),\"Y\"),-1)>=18)*(IFERROR(DATEDIF(Data_Pasien!F2:F,TODAY(),\"Y\"),999)<60)),0)", "", "", "", ""],
-            ["Lansia (>= 60 th)", "=IFERROR(SUMPRODUCT(ISNUMBER(Data_Pasien!F2:F)*(IFERROR(DATEDIF(Data_Pasien!F2:F,TODAY(),\"Y\"),-1)>=60)),0)", "", "", "", ""]
-          ]
         }
       ]
     },
@@ -52,18 +38,6 @@ const SPREADSHEET_DEFINITIONS = {
           }
         },
         {
-          "name": "Rekap_Invoice",
-          "grid": [
-            ["=QUERY(Data_Pembayaran!A1:T,\"select A, B, E, F, max(O), P, Q, S, sum(M), count(H) where A is not null group by A, B, E, F, P, Q, S order by B desc label max(O) 'Total_Invoice', sum(M) 'Total_Item', count(H) 'Jumlah_Item'\",1)", "", "", "", "", "", "", "", "", "", "={\"Audit\";ARRAYFORMULA(IF(A2:A=\"\",\"\",IF(E2:E=I2:I,\"OK\",\"SELISIH\")))}"]
-          ]
-        },
-        {
-          "name": "Rekap_Harian",
-          "grid": [
-            ["=IFERROR(QUERY(Rekap_Invoice!A1:J,\"select B, count(A), sum(E) where A is not null group by B order by B desc label count(A) 'Jumlah_Invoice', sum(E) 'Total_Pendapatan'\",1),\"Belum ada transaksi\")", "", "", "", "=IFERROR(QUERY(Rekap_Invoice!A1:J,\"select year(B), month(B)+1, count(A), sum(E) where B is not null group by year(B), month(B)+1 order by year(B) desc, month(B)+1 desc label year(B) 'Tahun', month(B)+1 'Bulan', count(A) 'Jumlah_Invoice', sum(E) 'Total_Pendapatan'\",1),\"Kolom Tanggal_Tindakan harus berformat tanggal\")"]
-          ]
-        },
-        {
           "name": "Rekap_Jasa_Medis",
           "headers": ["ID_Invoice", "Tanggal", "Dokter", "Perawat", "Kategori_Item", "Nama_Item", "Tarif_Kotor", "Biaya_Lab", "Dasar_Bagi_Hasil", "Persen_JM", "Tipe_Aturan", "JM_Dokter_Kotor", "Potongan_Perawat", "JM_Dokter_Bersih", "JM_Perawat", "Bagian_Klinik", "Status_JM", "Waktu_Hitung"],
           "formats": { "B": "dd-mm-yyyy", "G": "#,##0", "H": "#,##0", "I": "#,##0", "J": "0.0%", "L": "#,##0", "M": "#,##0", "N": "#,##0", "O": "#,##0", "P": "#,##0", "R": "dd-mm-yyyy hh:mm:ss" }
@@ -78,12 +52,6 @@ const SPREADSHEET_DEFINITIONS = {
           "name": "Data_Rekam_Medis",
           "headers": ["ID_RM_Klinis", "ID_Pasien", "No_RM", "Nama_Pasien", "Tanggal_Pemeriksaan", "Dokter_Pemeriksa", "Anamnesis_JSON", "Fisik_JSON", "Odontogram_JSON", "Tindakan_JSON", "Resep_Obat_JSON", "Catatan_Edukasi", "Waktu_Simpan"],
           "formats": { "E": "dd-mm-yyyy", "M": "dd-mm-yyyy hh:mm:ss" }
-        },
-        {
-          "name": "Rekap_Kunjungan",
-          "grid": [
-            ["=IFERROR(QUERY(Data_Rekam_Medis!A1:M,\"select F, count(A) where A is not null group by F order by count(A) desc label count(A) 'Jumlah_Pemeriksaan'\",1),\"-\")", "", "", "=IFERROR(QUERY(Data_Rekam_Medis!A1:M,\"select year(E), month(E)+1, count(A) where E is not null group by year(E), month(E)+1 order by year(E) desc, month(E)+1 desc label year(E) 'Tahun', month(E)+1 'Bulan', count(A) 'Jumlah_Kunjungan'\",1),\"-\")"]
-          ]
         }
       ]
     },
@@ -96,19 +64,7 @@ const SPREADSHEET_DEFINITIONS = {
         { "name": "Resume_Medis", "headers": ["ID_Pasien", "No_RM", "Nama_Pasien", "No_Surat", "Tgl_Cetak", "Tgl_Kunjungan", "Anamnesis", "Penunjang", "Diagnosis", "Tindakan", "Obat", "Hasil", "Keperluan", "Dokter", "Waktu_Sistem", "Pembuat"] },
         { "name": "Surat_Rujukan", "headers": ["ID_Pasien", "No_RM", "Nama_Pasien", "No_Surat", "Tgl_Cetak", "Tujuan", "Anamnesa", "Fisik", "Diagnosis", "Terapi", "Dokter", "Waktu_Sistem", "Pembuat"] },
         { "name": "Surat_Lab", "headers": ["ID_Pasien", "No_RM", "Nama_Pasien", "No_Surat", "Tgl_Cetak", "Tujuan", "Diagnosis", "Pemeriksaan", "Dokter", "Waktu_Sistem", "Pembuat"] },
-        { "name": "Surat_Radiologi", "headers": ["ID_Pasien", "No_RM", "Nama_Pasien", "No_Surat", "Tgl_Cetak", "Tujuan", "Diagnosis", "Pemeriksaan", "Dokter", "Waktu_Sistem", "Pembuat"] },
-        {
-          "name": "Rekap_Surat",
-          "grid": [
-            ["Jenis_Surat", "Kode", "Sheet", "Jumlah_Terbit", "No_Surat_Terakhir"],
-            ["Surat Keterangan Sakit", "SKS", "Surat_Sakit", "=COUNTA(Surat_Sakit!D2:D)", "=IFERROR(INDEX(Surat_Sakit!D2:D,COUNTA(Surat_Sakit!D2:D)),\"-\")"],
-            ["Surat Kontrol", "SKP", "Surat_Kontrol", "=COUNTA(Surat_Kontrol!D2:D)", "=IFERROR(INDEX(Surat_Kontrol!D2:D,COUNTA(Surat_Kontrol!D2:D)),\"-\")"],
-            ["Resume Medis", "RMP", "Resume_Medis", "=COUNTA(Resume_Medis!D2:D)", "=IFERROR(INDEX(Resume_Medis!D2:D,COUNTA(Resume_Medis!D2:D)),\"-\")"],
-            ["Surat Rujukan", "SRP", "Surat_Rujukan", "=COUNTA(Surat_Rujukan!D2:D)", "=IFERROR(INDEX(Surat_Rujukan!D2:D,COUNTA(Surat_Rujukan!D2:D)),\"-\")"],
-            ["Pengantar Laboratorium", "SPL", "Surat_Lab", "=COUNTA(Surat_Lab!D2:D)", "=IFERROR(INDEX(Surat_Lab!D2:D,COUNTA(Surat_Lab!D2:D)),\"-\")"],
-            ["Pengantar Radiologi", "SPR", "Surat_Radiologi", "=COUNTA(Surat_Radiologi!D2:D)", "=IFERROR(INDEX(Surat_Radiologi!D2:D,COUNTA(Surat_Radiologi!D2:D)),\"-\")"]
-          ]
-        }
+        { "name": "Surat_Radiologi", "headers": ["ID_Pasien", "No_RM", "Nama_Pasien", "No_Surat", "Tgl_Cetak", "Tujuan", "Diagnosis", "Pemeriksaan", "Dokter", "Waktu_Sistem", "Pembuat"] }
       ]
     },
 
@@ -202,12 +158,7 @@ const SPREADSHEET_DEFINITIONS = {
     "LOG": {
       "title": "RME Sheldon - 07 Log & Referensi",
       "sheets": [
-        { "name": "Log_Aktivitas", "headers": ["Waktu_Aktivitas", "Nama_Account", "Aksi", "Detail"] },
-        {
-          "name": "pekerjaan",
-          "headers": ["Nama_Pekerjaan"],
-          "seedRows": [["Belum/Tidak Bekerja"], ["Pelajar/Mahasiswa"], ["Ibu Rumah Tangga"], ["PNS"], ["TNI/Polri"], ["Karyawan Swasta"], ["Wiraswasta"], ["Buruh"], ["Guru/Dosen"], ["Lainnya"]]
-        }
+        { "name": "Log_Aktivitas", "headers": ["Waktu_Aktivitas", "Nama_Account", "Aksi", "Detail"] }
       ]
     },
 
@@ -233,19 +184,6 @@ const SPREADSHEET_DEFINITIONS = {
             ["01-10-2026", "INV-KF-002", "OBT-0002", "Asam Mefenamat 500 mg", 50000, "31-12-2027", 5, 500, "PT Kimia Farma", "Super User", "01-10-2026 09:00:00"],
             ["01-10-2026", "INV-KF-003", "OBT-0003", "Paracetamol 500 mg", 30000, "31-12-2027", 6, 600, "PT Kimia Farma", "Super User", "01-10-2026 09:00:00"]
           ]
-        },
-        {
-          "name": "Rekap_Obat",
-          "grid": [
-            ["Metrik", "Nilai", "", "=IFERROR(QUERY(Master_Obat!A1:N,\"select A, B, J, K, M where M = 'KRITIS' or M = 'HABIS' order by J asc\",1),\"Semua stok obat aman\")"],
-            ["Total Item Obat", "=COUNTA(Master_Obat!B2:B)", "", ""],
-            ["Total Fisik Stok Tersedia (Pcs)", "=SUM(Master_Obat!J2:J)", "", ""],
-            ["Total Obat Terjual (Pcs)", "=SUM(Master_Obat!L2:L)", "", ""],
-            ["Jumlah Stok Kritis", "=COUNTIFS(Master_Obat!J2:J,\"<=\"&Master_Obat!K2:K,Master_Obat!J2:J,\">0\")", "", ""],
-            ["Jumlah Stok Habis", "=COUNTIF(Master_Obat!J2:J,\"<=0\")", "", ""],
-            ["Total Nilai Persediaan (Rp)", "=SUMPRODUCT(Master_Obat!J2:J,Master_Obat!G2:G)", "", ""],
-            ["Total Pengeluaran Pembelian (Rp)", "=SUM(Riwayat_Pembelian!D2:D*Riwayat_Pembelian!F2:F)", "", ""]
-          ]
         }
       ]
     },
@@ -262,20 +200,7 @@ const SPREADSHEET_DEFINITIONS = {
             ["BMH-0002", "Masker Medis", "Pcs", 700, 2500, 500, 100, 0, "2028-06-30", "SUPPLIER ALKES"]
           ]
         },
-        { "name": "Riwayat_Pembelian", "headers": ["Tanggal", "Kode_Item", "Nama_Item", "Qty", "Harga_Beli", "Subtotal", "Supplier", "Expired_Date", "Petugas", "Waktu_Sistem"] },
-        {
-          "name": "Rekap_Stok",
-          "grid": [
-            ["Metrik", "Nilai", "", "=IFERROR(QUERY(Master_BMHP!A1:M,\"select A, B, F, G, I, L where L = 'KRITIS' or L = 'HABIS' or L = 'KADALUARSA' order by F asc\",1),\"Semua stok aman\")"],
-            ["Total Item", "=COUNTA(Master_BMHP!B2:B)", "", ""],
-            ["Stok Kritis", "=COUNTIF(Master_BMHP!L2:L,\"KRITIS\")", "", ""],
-            ["Stok Habis", "=COUNTIF(Master_BMHP!L2:L,\"HABIS\")", "", ""],
-            ["Kadaluarsa", "=COUNTIF(Master_BMHP!L2:L,\"KADALUARSA\")", "", ""],
-            ["Nilai Persediaan (HPP)", "=SUM(Master_BMHP!M2:M)", "", ""],
-            ["Total Terjual (Unit)", "=SUM(Master_BMHP!H2:H)", "", ""],
-            ["Pembelian Bulan Ini (Rp)", "=SUMIFS(Riwayat_Pembelian!F2:F,Riwayat_Pembelian!A2:A,\">=\"&(EOMONTH(TODAY(),-1)+1),Riwayat_Pembelian!A2:A,\"<=\"&EOMONTH(TODAY(),0))", "", ""]
-          ]
-        }
+        { "name": "Riwayat_Pembelian", "headers": ["Tanggal", "Kode_Item", "Nama_Item", "Qty", "Harga_Beli", "Subtotal", "Supplier", "Expired_Date", "Petugas", "Waktu_Sistem"] }
       ]
     },
 
@@ -675,7 +600,22 @@ function setupAllSpreadsheets() {
       }
     });
 
-    // Pembersihan sheet yang dipindahkan sesuai arsitektur database Sheldon:
+    // Pembersihan otomatis sheet-sheet formula/arsip usang yang tidak lagi diperlukan:
+    const obsoleteSheetNames = [
+      "Statistik_Pasien", "Rekap_Invoice", "Rekap_Harian", "Rekap_Kunjungan",
+      "Rekap_Surat", "Rekap_Obat", "Rekap_Stok", "pekerjaan", "Rekap_Tindakan",
+      "Matriks_Role", "Rekap_Staff", "Rekap_Log", "Rekap_Item", "Rekap_Metode_Dokter"
+    ];
+    obsoleteSheetNames.forEach(obsName => {
+      try {
+        let obsSheet = ss.getSheetByName(obsName);
+        if (obsSheet && ss.getSheets().length > 1) {
+          ss.deleteSheet(obsSheet);
+          Logger.log("🗑️ Berhasil menghapus sheet '" + obsName + "' dari " + def.title);
+        }
+      } catch (eDelObs) {}
+    });
+
     // 1. Hapus sheet Presensi_Shift_Harian dari 06 Master User & Role jika masih ada
     if (key === "MASTER") {
       try {
@@ -701,6 +641,46 @@ function setupAllSpreadsheets() {
   Logger.log("\n=== PASTE OBJEK DB_CONFIG INI KE `00_Config.gs` ===");
   Logger.log(JSON.stringify(newConfig, null, 2));
   return newConfig;
+}
+
+/**
+ * FUNGSI PEMBERSIIHAN:
+ * Menghapus sheet formula / arsip lama yang sudah tidak diperlukan lagi oleh aplikasi
+ * demi mempercepat komputasi dan performa Google Spreadsheet.
+ */
+function bersihkanSheetTidakDiperlukan() {
+  const obsoleteList = [
+    { key: "PASIEN", sheets: ["Statistik_Pasien"] },
+    { key: "PEMBAYARAN", sheets: ["Rekap_Invoice", "Rekap_Harian", "Rekap_Item", "Rekap_Metode_Dokter"] },
+    { key: "REKAM_MEDIS", sheets: ["Rekap_Kunjungan"] },
+    { key: "SURAT", sheets: ["Rekap_Surat"] },
+    { key: "OBAT", sheets: ["Rekap_Obat", "Rekap_Stok"] },
+    { key: "BMHP", sheets: ["Rekap_Stok"] },
+    { key: "LOG", sheets: ["pekerjaan", "Rekap_Log"] },
+    { key: "DATABASE", sheets: ["Rekap_Tindakan"] },
+    { key: "MASTER", sheets: ["Matriks_Role", "Rekap_Staff", "Presensi_Shift_Harian"] },
+    { key: "PAYROLL", sheets: ["Pengaturan_Tarif_Shift"] }
+  ];
+
+  let cleaned = [];
+  obsoleteList.forEach(item => {
+    try {
+      let ssId = (DB_CONFIG && DB_CONFIG[item.key]) ? String(DB_CONFIG[item.key]).trim() : "";
+      if (!ssId) return;
+      let ss = SpreadsheetApp.openById(ssId);
+      item.sheets.forEach(shName => {
+        let sh = ss.getSheetByName(shName);
+        if (sh && ss.getSheets().length > 1) {
+          ss.deleteSheet(sh);
+          cleaned.push(item.key + ": " + shName);
+          Logger.log("🗑️ Dihapus: " + item.key + " -> " + shName);
+        }
+      });
+    } catch (e) {
+      Logger.log("⚠️ Gagal membersihkan " + item.key + ": " + e.message);
+    }
+  });
+  return { success: true, message: "Pembersihan selesai. " + cleaned.length + " sheet usang berhasil dihapus.", cleaned: cleaned };
 }
 
 
@@ -981,6 +961,22 @@ function sinkronkanSemuaSheetOtomatis() {
             sheet.getRange(colLetter + "2:" + colLetter + "1000").setNumberFormat(shDef.formats[colLetter]);
           });
         }
+      });
+
+      // Pembersihan otomatis sheet formula/arsip usang yang tidak lagi diperlukan:
+      const obsoleteSheetNames = [
+        "Statistik_Pasien", "Rekap_Invoice", "Rekap_Harian", "Rekap_Kunjungan",
+        "Rekap_Surat", "Rekap_Obat", "Rekap_Stok", "pekerjaan", "Rekap_Tindakan",
+        "Matriks_Role", "Rekap_Staff", "Rekap_Log", "Rekap_Item", "Rekap_Metode_Dokter"
+      ];
+      obsoleteSheetNames.forEach(obsName => {
+        try {
+          let obsSheet = ss.getSheetByName(obsName);
+          if (obsSheet && ss.getSheets().length > 1) {
+            ss.deleteSheet(obsSheet);
+            laporan.push("🗑️ Dihapus sheet usang '" + obsName + "' dari " + def.title);
+          }
+        } catch (eDelObs) {}
       });
 
       // Penegakan arsitektur database:

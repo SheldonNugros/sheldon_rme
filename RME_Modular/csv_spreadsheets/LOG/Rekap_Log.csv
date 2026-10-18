@@ -1,1 +1,0 @@
-"=IFERROR(QUERY(Log_Aktivitas!A1:D,""select C, count(A) where A is not null group by C order by count(A) desc label count(A) 'Jumlah'"",1),""-"")",,,"=IFERROR(QUERY(Log_Aktivitas!A1:D,""select B, count(A) where A is not null group by B order by count(A) desc label count(A) 'Jumlah_Aktivitas'"",1),""-"")"

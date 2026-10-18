@@ -730,14 +730,18 @@
     }).getInitMaster();
 
     google.script.run.withSuccessHandler(res => {
-      if (Array.isArray(res) && res.length > 0) {
-        window.KlinikData.pasien = res;
-        if (typeof updateStatistikPasienTampilan === 'function') updateStatistikPasienTampilan();
-        if (typeof searchPasienData === 'function') searchPasienData();
-      }
-      window.KlinikData.statusLoad.pasien = true;
+      window.KlinikData.statusLoad.pasien = 'loaded';
+      window.KlinikData.pasien = Array.isArray(res) ? res : [];
+      window.KlinikData.errorMsgPasien = null;
+      try { document.dispatchEvent(new Event('KlinikPasienReady')); } catch (eEvt) {}
+      if (typeof updateStatistikPasienTampilan === 'function') updateStatistikPasienTampilan();
+      if (typeof searchPasienData === 'function') searchPasienData();
       onTaskComplete('pasien');
-    }).withFailureHandler(() => {
+    }).withFailureHandler((err) => {
+      console.error("Gagal getInitPasien:", err);
+      window.KlinikData.statusLoad.pasien = 'error';
+      window.KlinikData.errorMsgPasien = err && err.message ? err.message : String(err);
+      if (typeof searchPasienData === 'function') searchPasienData();
       onTaskComplete('pasien');
     }).getInitPasien();
 

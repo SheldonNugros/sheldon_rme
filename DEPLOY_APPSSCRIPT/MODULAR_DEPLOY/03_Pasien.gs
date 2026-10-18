@@ -89,7 +89,8 @@ function getDaftarPasien() {
     }
     return result.reverse();
   } catch (e) {
-    return [];
+    Logger.log("❌ Error getDaftarPasien: " + e.message);
+    throw new Error("Gagal membaca Data_Pasien: " + e.message);
   }
 }
 

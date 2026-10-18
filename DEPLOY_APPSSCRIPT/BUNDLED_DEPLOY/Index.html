@@ -2674,6 +2674,9 @@
 
           <!-- TOMBOL AKSI FILTER & CETAK -->
           <div class="flex items-center gap-2 shrink-0">
+            <button type="button" id="btnRefreshDataPasien" onclick="muatUlangDataPasien()" class="px-3.5 py-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 font-bold rounded-xl text-xs shadow-xs transition-all flex items-center justify-center gap-1.5 whitespace-nowrap active:scale-95 cursor-pointer" title="Muat ulang data pasien dari Google Sheets">
+              <span id="iconRefreshPasien">🔄</span> Muat Ulang
+            </button>
             <button type="button" id="btnFilterDuplikat" onclick="toggleFilterDataGanda()" class="hidden px-3.5 py-2.5 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 font-bold rounded-xl text-xs shadow-xs transition-all flex items-center justify-center gap-1.5 whitespace-nowrap">
               <span>⚠️</span> Filter Duplikat
             </button>
@@ -5968,14 +5971,18 @@
     }).getInitMaster();
 
     google.script.run.withSuccessHandler(res => {
-      if (Array.isArray(res) && res.length > 0) {
-        window.KlinikData.pasien = res;
-        if (typeof updateStatistikPasienTampilan === 'function') updateStatistikPasienTampilan();
-        if (typeof searchPasienData === 'function') searchPasienData();
-      }
-      window.KlinikData.statusLoad.pasien = true;
+      window.KlinikData.statusLoad.pasien = 'loaded';
+      window.KlinikData.pasien = Array.isArray(res) ? res : [];
+      window.KlinikData.errorMsgPasien = null;
+      try { document.dispatchEvent(new Event('KlinikPasienReady')); } catch (eEvt) {}
+      if (typeof updateStatistikPasienTampilan === 'function') updateStatistikPasienTampilan();
+      if (typeof searchPasienData === 'function') searchPasienData();
       onTaskComplete('pasien');
-    }).withFailureHandler(() => {
+    }).withFailureHandler((err) => {
+      console.error("Gagal getInitPasien:", err);
+      window.KlinikData.statusLoad.pasien = 'error';
+      window.KlinikData.errorMsgPasien = err && err.message ? err.message : String(err);
+      if (typeof searchPasienData === 'function') searchPasienData();
       onTaskComplete('pasien');
     }).getInitPasien();
 
@@ -6065,12 +6072,13 @@ let isFilterDuplikatAktif = false;
 document.addEventListener("KlinikDataReady", () => {
   initPasienModule();
 });
+document.addEventListener("KlinikPasienReady", () => {
+  initPasienModule();
+});
 document.addEventListener("DOMContentLoaded", () => {
-setTimeout(() => {
-   if(window.KlinikData && window.KlinikData.statusLoad && window.KlinikData.statusLoad.pasien) {
-       initPasienModule();
-   }
-}, 1000);
+  setTimeout(() => {
+    initPasienModule();
+  }, 500);
 });
 function initPasienModule() {
   let inputCari = document.getElementById('inputCariPasien');
@@ -6079,9 +6087,61 @@ function initPasienModule() {
       inputCari.addEventListener('input', resetPageAndSearchPasien);
   }
   updateStatistikPasienTampilan();
-  resetPageAndSearchPasien();
+
+  if (!window.KlinikData || !Array.isArray(window.KlinikData.pasien) || window.KlinikData.pasien.length === 0) {
+    if (window.KlinikData && window.KlinikData.statusLoad && window.KlinikData.statusLoad.pasien === 'error') {
+      renderTablePagePasien();
+    } else if (window.KlinikData && window.KlinikData.statusLoad && window.KlinikData.statusLoad.pasien === 'loading') {
+      renderTablePagePasien();
+    } else {
+      muatUlangDataPasien();
+    }
+  } else {
+    resetPageAndSearchPasien();
+  }
   loadListPekerjaan();
 }
+
+window.muatUlangDataPasien = function() {
+  let tbody = document.getElementById('tbodyPasien');
+  let icon = document.getElementById('iconRefreshPasien');
+  if (icon) icon.classList.add('animate-spin');
+
+  if (!window.KlinikData) window.KlinikData = {};
+  if (!window.KlinikData.statusLoad) window.KlinikData.statusLoad = {};
+  window.KlinikData.statusLoad.pasien = 'loading';
+
+  if (tbody) {
+    tbody.innerHTML = '<tr><td colspan="9" class="text-center py-12 text-slate-500 font-medium"><div class="flex flex-col items-center justify-center gap-2"><div class="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div><span class="text-xs font-bold text-slate-700">Sedang mengambil data pasien dari server...</span><span class="text-[11px] text-slate-400">Mohon tunggu beberapa saat</span></div></td></tr>';
+  }
+
+  if (typeof google !== 'undefined' && google.script && google.script.run) {
+    google.script.run
+      .withSuccessHandler(function(res) {
+        if (icon) icon.classList.remove('animate-spin');
+        window.KlinikData.pasien = Array.isArray(res) ? res : [];
+        window.KlinikData.statusLoad.pasien = 'loaded';
+        window.KlinikData.errorMsgPasien = null;
+        updateStatistikPasienTampilan();
+        resetPageAndSearchPasien();
+      })
+      .withFailureHandler(function(err) {
+        if (icon) icon.classList.remove('animate-spin');
+        console.error("Gagal memuat data pasien:", err);
+        window.KlinikData.statusLoad.pasien = 'error';
+        window.KlinikData.errorMsgPasien = err && err.message ? err.message : String(err);
+        renderTablePagePasien();
+      })
+      .getInitPasien();
+  } else {
+    setTimeout(function() {
+      if (icon) icon.classList.remove('animate-spin');
+      window.KlinikData.statusLoad.pasien = 'loaded';
+      updateStatistikPasienTampilan();
+      resetPageAndSearchPasien();
+    }, 300);
+  }
+};
 // ========================================================
 // LOGIKA STATISTIK (TOTAL, L, P)
 // ========================================================
@@ -6202,6 +6262,43 @@ function searchPasienData() {
 function renderTablePagePasien() {
   let tbody = document.getElementById('tbodyPasien');
   if (!tbody) return;
+
+  // Jika sedang loading
+  if (window.KlinikData && window.KlinikData.statusLoad && window.KlinikData.statusLoad.pasien === 'loading') {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="9" class="text-center py-12 text-slate-500 font-medium">
+          <div class="flex flex-col items-center justify-center gap-2">
+            <div class="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
+            <span class="text-xs font-bold text-slate-700">Sedang mengambil data pasien dari server...</span>
+            <span class="text-[11px] text-slate-400">Mohon tunggu beberapa saat</span>
+          </div>
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  // Jika terjadi error saat memuat data
+  if (window.KlinikData && window.KlinikData.statusLoad && window.KlinikData.statusLoad.pasien === 'error') {
+    let errMsg = window.KlinikData.errorMsgPasien || 'Koneksi ke spreadsheet terputus atau timeout.';
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="9" class="text-center py-10">
+          <div class="flex flex-col items-center justify-center gap-2 text-rose-600">
+            <span class="text-3xl">⚠️</span>
+            <span class="font-bold text-xs">Gagal memuat data pasien dari spreadsheet.</span>
+            <span class="text-[11px] text-slate-500 max-w-md">${errMsg}</span>
+            <button type="button" onclick="muatUlangDataPasien()" class="mt-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs shadow-sm transition-all flex items-center gap-1.5 cursor-pointer">
+              <span>🔄</span> Coba Lagi
+            </button>
+          </div>
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
   let totalPages = Math.ceil(filteredPasienList.length / itemsPerPagePasien) || 1;
   if (currentPagePasien > totalPages) currentPagePasien = totalPages;
   let btnPrev = document.getElementById('btnPrevPagePasien');
@@ -6233,77 +6330,82 @@ function renderTablePagePasien() {
   }
 
   tbody.innerHTML = pageData.map(p => {
-    // Badge Jenis Kelamin
-    let jkBadge = '<span class="text-slate-400 text-xs">-</span>';
-    let jk = String(p.jenisKelamin || '').toLowerCase();
-    if (jk.includes('laki') || jk === 'l') {
-      jkBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-50 text-blue-700 border border-blue-200/60 shadow-2xs">👨 Laki-laki</span>`;
-    } else if (jk.includes('perempuan') || jk === 'p') {
-      jkBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-pink-50 text-pink-700 border border-pink-200/60 shadow-2xs">👩 Perempuan</span>`;
-    } else if (p.jenisKelamin) {
-      jkBadge = `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 text-slate-700">${p.jenisKelamin}</span>`;
+    try {
+      // Badge Jenis Kelamin
+      let jkBadge = '<span class="text-slate-400 text-xs">-</span>';
+      let jk = String(p.jenisKelamin || '').toLowerCase();
+      if (jk.includes('laki') || jk === 'l') {
+        jkBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-50 text-blue-700 border border-blue-200/60 shadow-2xs">👨 Laki-laki</span>`;
+      } else if (jk.includes('perempuan') || jk === 'p') {
+        jkBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-pink-50 text-pink-700 border border-pink-200/60 shadow-2xs">👩 Perempuan</span>`;
+      } else if (p.jenisKelamin) {
+        jkBadge = `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 text-slate-700">${p.jenisKelamin}</span>`;
+      }
+
+      // TTL & Umur
+      let tglStr = formatTglAngkaDDMMYYYY(p.tanggalLahir);
+      let ttlText = p.tempatLahir ? `${p.tempatLahir}, ${tglStr}` : tglStr;
+      let umurBadge = p.umur ? `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200/60">${p.umur}</span>` : '';
+
+      // WhatsApp direct link ke WhatsApp Web & Chat Kontak
+      let rawWa = String(p.whatsapp || '').trim();
+      let waClean = rawWa.replace(/[^0-9]/g, '');
+      if (waClean.startsWith('0')) {
+        waClean = '62' + waClean.slice(1);
+      } else if (waClean && !waClean.startsWith('62')) {
+        waClean = '62' + waClean;
+      }
+      let waDisplay = (rawWa && rawWa !== '-') ? `
+        <a href="https://web.whatsapp.com/send?phone=${waClean}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-600 text-emerald-700 hover:text-white font-mono text-xs font-bold border border-emerald-300/80 hover:border-emerald-600 transition-all shadow-2xs hover:shadow-xs group cursor-pointer" title="Klik untuk langsung chat via WhatsApp Web">
+          <span class="text-sm group-hover:scale-125 transition-transform">💬</span>
+          <span>${rawWa}</span>
+        </a>` : '<span class="text-slate-400 text-xs">-</span>';
+
+      // Penyakit Sistemik
+      let rawRiwayat = String(p.riwayatPenyakit || '').trim();
+      let riwayatDisplay = (rawRiwayat && rawRiwayat !== '-') 
+        ? `<span class="inline-block max-w-[130px] truncate text-[11px] font-semibold text-rose-700 bg-rose-50 border border-rose-200/70 px-2 py-0.5 rounded-md" title="${rawRiwayat}">${rawRiwayat}</span>`
+        : '<span class="text-slate-400 text-xs">-</span>';
+
+      // Alergi (High Alert Badge)
+      let rawAlergi = String(p.alergi || '').trim();
+      let alergiDisplay = (rawAlergi && rawAlergi !== '-' && !rawAlergi.toLowerCase().includes('tidak ada'))
+        ? `<span class="inline-flex items-center gap-1 max-w-[130px] truncate text-[11px] font-bold text-amber-900 bg-amber-50 border border-amber-300 px-2 py-0.5 rounded-md shadow-2xs" title="${rawAlergi}">⚠️ ${rawAlergi}</span>`
+        : (rawAlergi ? `<span class="text-slate-400 text-xs truncate max-w-[120px] inline-block" title="${rawAlergi}">${rawAlergi}</span>` : '<span class="text-slate-400 text-xs">-</span>');
+
+      return `
+        <tr class="hover:bg-indigo-50/30 transition-colors border-b border-slate-100 group">
+            <td class="p-3.5 pl-4">
+                <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-mono font-bold bg-indigo-50 text-indigo-700 border border-indigo-200/70 shadow-2xs group-hover:bg-indigo-100 transition-colors">${p.noRm || '-'}</span>
+            </td>
+            <td class="p-3.5">
+                <div class="font-bold text-slate-800 text-xs tracking-tight">${p.namaPasien || '-'}</div>
+                ${p.nik ? `<div class="text-[10px] text-slate-400 font-mono tracking-tight mt-0.5">NIK: ${p.nik}</div>` : ''}
+            </td>
+            <td class="p-3.5">${jkBadge}</td>
+            <td class="p-3.5">
+                <div class="text-xs text-slate-700 font-medium">${ttlText}</div>
+                ${umurBadge ? `<div class="mt-1">${umurBadge}</div>` : ''}
+            </td>
+            <td class="p-3.5">${waDisplay}</td>
+            <td class="p-3.5">${riwayatDisplay}</td>
+            <td class="p-3.5">${alergiDisplay}</td>
+            <td class="p-3.5">
+                <span class="text-slate-600 text-xs truncate max-w-[140px] inline-block font-medium" title="${p.alamat || '-'}">${p.alamat || '-'}</span>
+            </td>
+            <td class="p-3.5 text-center">
+                <div class="flex items-center justify-center gap-1.5">
+                    ${(window.activeUserRole && (window.activeUserRole.toLowerCase().includes('super user') || window.activeUserRole.toLowerCase().includes('owner') || window.activeUserRole.toLowerCase().includes('admin'))) ? `<button onclick="editPasien('${p.idPasien}')" class="px-2.5 py-1.5 bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-700 rounded-lg text-[10px] font-bold transition-all shadow-2xs hover:shadow-xs" title="Edit Data Pasien">Edit</button>` : ''}
+                    ${(window.activeUserRole && (window.activeUserRole.toLowerCase().includes('super user') || window.activeUserRole.toLowerCase().includes('owner'))) ? `<button onclick="konfirmasiHapusPasien('${p.idPasien}', '${p.namaPasien}')" class="px-2.5 py-1.5 bg-rose-50 border border-rose-200 hover:bg-rose-500 hover:text-white text-rose-600 rounded-lg text-[10px] font-bold transition-all shadow-2xs hover:shadow-xs" title="Hapus Pasien (Owner)">🗑️ Hapus</button>` : ''}
+                    <button onclick="openHistoryEMR('${p.idPasien}')" class="px-2.5 py-1.5 bg-indigo-50 hover:bg-indigo-600 hover:text-white text-indigo-700 rounded-lg text-[10px] font-bold transition-all shadow-2xs hover:shadow-xs border border-indigo-200" title="Lihat Rekam Medis (History EMR)">🩺 History</button>
+                </div>
+            </td>
+        </tr>
+      `;
+    } catch (eRow) {
+      console.error("Gagal merender baris pasien:", eRow, p);
+      return `<tr class="border-b border-slate-100 text-slate-400 text-xs"><td colspan="9" class="p-3 text-center">Data baris pasien bermasalah (${p.noRm || p.namaPasien || '-'})</td></tr>`;
     }
-
-    // TTL & Umur
-    let tglStr = formatTglAngkaDDMMYYYY(p.tanggalLahir);
-    let ttlText = p.tempatLahir ? `${p.tempatLahir}, ${tglStr}` : tglStr;
-    let umurBadge = p.umur ? `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200/60">${p.umur}</span>` : '';
-
-    // WhatsApp direct link ke WhatsApp Web & Chat Kontak
-    let rawWa = String(p.whatsapp || '').trim();
-    let waClean = rawWa.replace(/[^0-9]/g, '');
-    if (waClean.startsWith('0')) {
-      waClean = '62' + waClean.slice(1);
-    } else if (waClean && !waClean.startsWith('62')) {
-      waClean = '62' + waClean;
-    }
-    let waDisplay = (rawWa && rawWa !== '-') ? `
-      <a href="https://web.whatsapp.com/send?phone=${waClean}" target="_blank" rel="noopener noreferrer" onclick="bukaChatWhatsAppPasien(event, '${waClean}', '${String(p.namaPasien || '').replace(/'/g, "\\'")}')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-600 text-emerald-700 hover:text-white font-mono text-xs font-bold border border-emerald-300/80 hover:border-emerald-600 transition-all shadow-2xs hover:shadow-xs group cursor-pointer" title="Klik untuk langsung chat via WhatsApp Web">
-        <span class="text-sm group-hover:scale-125 transition-transform">💬</span>
-        <span>${rawWa}</span>
-      </a>` : '<span class="text-slate-400 text-xs">-</span>';
-
-    // Penyakit Sistemik
-    let rawRiwayat = String(p.riwayatPenyakit || '').trim();
-    let riwayatDisplay = (rawRiwayat && rawRiwayat !== '-') 
-      ? `<span class="inline-block max-w-[130px] truncate text-[11px] font-semibold text-rose-700 bg-rose-50 border border-rose-200/70 px-2 py-0.5 rounded-md" title="${rawRiwayat}">${rawRiwayat}</span>`
-      : '<span class="text-slate-400 text-xs">-</span>';
-
-    // Alergi (High Alert Badge)
-    let rawAlergi = String(p.alergi || '').trim();
-    let alergiDisplay = (rawAlergi && rawAlergi !== '-' && !rawAlergi.toLowerCase().includes('tidak ada'))
-      ? `<span class="inline-flex items-center gap-1 max-w-[130px] truncate text-[11px] font-bold text-amber-900 bg-amber-50 border border-amber-300 px-2 py-0.5 rounded-md shadow-2xs" title="${rawAlergi}">⚠️ ${rawAlergi}</span>`
-      : (rawAlergi ? `<span class="text-slate-400 text-xs truncate max-w-[120px] inline-block" title="${rawAlergi}">${rawAlergi}</span>` : '<span class="text-slate-400 text-xs">-</span>');
-
-    return `
-      <tr class="hover:bg-indigo-50/30 transition-colors border-b border-slate-100 group">
-          <td class="p-3.5 pl-4">
-              <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-mono font-bold bg-indigo-50 text-indigo-700 border border-indigo-200/70 shadow-2xs group-hover:bg-indigo-100 transition-colors">${p.noRm || '-'}</span>
-          </td>
-          <td class="p-3.5">
-              <div class="font-bold text-slate-800 text-xs tracking-tight">${p.namaPasien || '-'}</div>
-              ${p.nik ? `<div class="text-[10px] text-slate-400 font-mono tracking-tight mt-0.5">NIK: ${p.nik}</div>` : ''}
-          </td>
-          <td class="p-3.5">${jkBadge}</td>
-          <td class="p-3.5">
-              <div class="text-xs text-slate-700 font-medium">${ttlText}</div>
-              ${umurBadge ? `<div class="mt-1">${umurBadge}</div>` : ''}
-          </td>
-          <td class="p-3.5">${waDisplay}</td>
-          <td class="p-3.5">${riwayatDisplay}</td>
-          <td class="p-3.5">${alergiDisplay}</td>
-          <td class="p-3.5">
-              <span class="text-slate-600 text-xs truncate max-w-[140px] inline-block font-medium" title="${p.alamat || '-'}">${p.alamat || '-'}</span>
-          </td>
-          <td class="p-3.5 text-center">
-              <div class="flex items-center justify-center gap-1.5">
-                  ${(window.activeUserRole && (window.activeUserRole.toLowerCase().includes('super user') || window.activeUserRole.toLowerCase().includes('owner') || window.activeUserRole.toLowerCase().includes('admin'))) ? `<button onclick="editPasien('${p.idPasien}')" class="px-2.5 py-1.5 bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-700 rounded-lg text-[10px] font-bold transition-all shadow-2xs hover:shadow-xs" title="Edit Data Pasien">Edit</button>` : ''}
-                  ${(window.activeUserRole && (window.activeUserRole.toLowerCase().includes('super user') || window.activeUserRole.toLowerCase().includes('owner'))) ? `<button onclick="konfirmasiHapusPasien('${p.idPasien}', '${p.namaPasien}')" class="px-2.5 py-1.5 bg-rose-50 border border-rose-200 hover:bg-rose-500 hover:text-white text-rose-600 rounded-lg text-[10px] font-bold transition-all shadow-2xs hover:shadow-xs" title="Hapus Pasien (Owner)">🗑️ Hapus</button>` : ''}
-                  <button onclick="openHistoryEMR('${p.idPasien}')" class="px-2.5 py-1.5 bg-indigo-50 hover:bg-indigo-600 hover:text-white text-indigo-700 rounded-lg text-[10px] font-bold transition-all shadow-2xs hover:shadow-xs border border-indigo-200" title="Lihat Rekam Medis (History EMR)">🩺 History</button>
-              </div>
-          </td>
-      </tr>
-    `;
   }).join('');
 }
 function prevPagePasien() { if (currentPagePasien > 1) { currentPagePasien--; renderTablePagePasien(); } }

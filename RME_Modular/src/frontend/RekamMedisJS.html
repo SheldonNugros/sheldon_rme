@@ -450,11 +450,9 @@ function tampilkanReferensiKlinisRM(r) {
     if (Array.isArray(diagList) && diagList.length > 0) {
       elDiag.innerHTML = diagList.map(d => {
         let p = parseTindakanItem(d, r.tanggalPeriksa);
-        let tglBadge = formatTglTindakanDDMMYY(p.tanggal);
         let codePrefix = p.code ? `<span class="font-mono text-indigo-700 font-bold">${p.code}</span> - ` : '';
         let ketText = p.ket ? ` <span class="text-slate-500">(${p.ket})</span>` : '';
-        let badgeHtml = tglBadge ? `<span class="inline-block px-1.5 py-0.2 bg-indigo-50 text-indigo-700 font-mono text-[9px] rounded border border-indigo-200 ml-1 font-semibold">${tglBadge}</span>` : '';
-        return `<div class="truncate leading-relaxed">• ${codePrefix}${p.desc}${badgeHtml}${ketText}</div>`;
+        return `<div class="truncate leading-relaxed">• ${codePrefix}${p.desc}${ketText}</div>`;
       }).join('');
     } else {
       elDiag.innerHTML = '<span class="text-slate-400 italic">Tidak ada diagnosa ICD-10 tercatat.</span>';
@@ -466,11 +464,9 @@ function tampilkanReferensiKlinisRM(r) {
     if (Array.isArray(tind) && tind.length > 0) {
       elTind.innerHTML = tind.map(t => {
         let p = parseTindakanItem(t, r.tanggalPeriksa);
-        let tglBadge = formatTglTindakanDDMMYY(p.tanggal);
         let codePrefix = p.code ? `<span class="font-mono text-indigo-700 font-bold">${p.code}</span> - ` : '';
         let ketText = p.ket ? ` <span class="text-slate-500">(${p.ket})</span>` : '';
-        let badgeHtml = tglBadge ? `<span class="inline-block px-1.5 py-0.2 bg-indigo-50 text-indigo-700 font-mono text-[9px] rounded border border-indigo-200 ml-1 font-semibold">${tglBadge}</span>` : '';
-        return `<div class="truncate leading-relaxed">• ${codePrefix}${p.desc}${badgeHtml}${ketText}</div>`;
+        return `<div class="truncate leading-relaxed">• ${codePrefix}${p.desc}${ketText}</div>`;
       }).join('');
     } else {
       elTind.innerHTML = '<span class="text-slate-400 italic">Tidak ada tindakan lampau.</span>';
@@ -482,11 +478,9 @@ function tampilkanReferensiKlinisRM(r) {
     if (Array.isArray(obat) && obat.length > 0) {
       elObat.innerHTML = obat.map(o => {
         let p = parseTindakanItem(o.obat || o.nama || '', o.tanggal || o.tgl || r.tanggalPeriksa);
-        let tglBadge = formatTglTindakanDDMMYY(p.tanggal);
         let qtyText = o.qty ? ` <span class="font-bold text-slate-700">(${o.qty})</span>` : '';
         let ketText = (o.ket || p.ket) ? ` <span class="text-slate-500">- ${o.ket || p.ket}</span>` : '';
-        let badgeHtml = tglBadge ? `<span class="inline-block px-1.5 py-0.2 bg-indigo-50 text-indigo-700 font-mono text-[9px] rounded border border-indigo-200 ml-1 font-semibold">${tglBadge}</span>` : '';
-        return `<div class="truncate leading-relaxed">• <span class="font-medium text-slate-800">${p.desc}</span>${qtyText}${badgeHtml}${ketText}</div>`;
+        return `<div class="truncate leading-relaxed">• <span class="font-medium text-slate-800">${p.desc}</span>${qtyText}${ketText}</div>`;
       }).join('');
     } else {
       elObat.innerHTML = '<span class="text-slate-400 italic">Tidak ada resep obat lampau.</span>';
@@ -544,9 +538,7 @@ function salinDiagnosaLaluKeHariIni() {
   let countAdded = 0;
   diagList.forEach(item => {
     let p = parseTindakanItem(item, r.tanggalPeriksa);
-    // Diagnosa lanjutan diberi tanggal pemeriksaan hari ini
-    let tglHariIni = (document.getElementById('rmTglPeriksa') ? document.getElementById('rmTglPeriksa').value : '') || getTodayIso();
-    tambahRowDiagnosa(p.desc, p.code, p.ket, tglHariIni);
+    tambahRowDiagnosa(p.desc, p.code, p.ket);
     countAdded++;
   });
 
@@ -580,8 +572,7 @@ function salinTindakanLaluKeHariIni() {
   let countAdded = 0;
   tind.forEach(item => {
     let p = parseTindakanItem(item, r.tanggalPeriksa);
-    let tglHariIni = (document.getElementById('rmTglPeriksa') ? document.getElementById('rmTglPeriksa').value : '') || getTodayIso();
-    tambahRowTindakan(p.desc, p.code, p.ket, tglHariIni);
+    tambahRowTindakan(p.desc, p.code, p.ket);
     countAdded++;
   });
 
@@ -617,8 +608,7 @@ function salinObatLaluKeHariIni() {
     let p = parseTindakanItem(typeof item === 'object' ? (item.obat || item.nama || '') : String(item), itemTgl || r.tanggalPeriksa);
     let qtyVal = typeof item === 'object' ? (item.qty || '') : '';
     let ketVal = typeof item === 'object' ? (item.ket || p.ket || '') : (p.ket || '');
-    let tglHariIni = (document.getElementById('rmTglPeriksa') ? document.getElementById('rmTglPeriksa').value : '') || getTodayIso();
-    tambahRowObat(p.desc, qtyVal, ketVal, tglHariIni);
+    tambahRowObat(p.desc, qtyVal, ketVal);
     countAdded++;
   });
 
@@ -1009,10 +999,9 @@ function bukaDetailRM(idx) {
         <ul class="list-disc pl-5 space-y-1 text-slate-800 font-bold mb-4">
           ${ana.diagnosaICD.map(d => {
             let p = parseTindakanItem(d, r.tanggalPeriksa);
-            let tglBadge = formatTglTindakanDDMMYY(p.tanggal);
             let codePrefix = p.code ? `${p.code} - ` : '';
             let ketText = p.ket ? ` (${p.ket})` : '';
-            return `<li class="py-0.5"><span class="font-semibold text-slate-800">${codePrefix}${p.desc}</span>${tglBadge ? ' ' + tglBadge : ''}${ketText}</li>`;
+            return `<li class="py-0.5"><span class="font-semibold text-slate-800">${codePrefix}${p.desc}</span>${ketText}</li>`;
           }).join('')}
         </ul>
       </div>` : ''}
@@ -1020,10 +1009,9 @@ function bukaDetailRM(idx) {
         <h4 class="font-black bg-slate-100 p-1.5 border-l-4 border-slate-800 mb-2 uppercase">Tindakan (ICD-9)</h4>
         <ul class="list-disc pl-5">${tind.length === 0 ? '<li>-</li>' : tind.map(t => {
           let p = parseTindakanItem(t, r.tanggalPeriksa);
-          let tglBadge = formatTglTindakanDDMMYY(p.tanggal);
           let codePrefix = p.code ? `${p.code} - ` : '';
           let ketText = p.ket ? ` (${p.ket})` : '';
-          return `<li class="py-0.5"><span class="font-semibold text-slate-800">${codePrefix}${p.desc}</span>${tglBadge ? ' ' + tglBadge : ''}${ketText}</li>`;
+          return `<li class="py-0.5"><span class="font-semibold text-slate-800">${codePrefix}${p.desc}</span>${ketText}</li>`;
         }).join('')}</ul>
       </div>
       <div>
@@ -1032,9 +1020,8 @@ function bukaDetailRM(idx) {
           <tr class="bg-slate-50"><th class="border border-slate-300 px-2 py-1">Nama Obat</th><th class="border border-slate-300 px-2 py-1 w-16 text-center">Qty</th><th class="border border-slate-300 px-2 py-1">Aturan Pakai</th></tr>
           ${obat.length === 0 ? '<tr><td colspan="3" class="border border-slate-300 px-2 py-1 text-center">-</td></tr>' : obat.map(o => {
             let p = parseTindakanItem(o.obat || o.nama || '', o.tanggal || o.tgl || r.tanggalPeriksa);
-            let tglBadge = formatTglTindakanDDMMYY(p.tanggal);
             let displayObat = p.desc;
-            return `<tr><td class="border border-slate-300 px-2 py-1">${displayObat}${tglBadge ? ' ' + tglBadge : ''}</td><td class="border border-slate-300 px-2 py-1 text-center font-bold">${o.qty || '-'}</td><td class="border border-slate-300 px-2 py-1">${o.ket || p.ket || '-'}</td></tr>`;
+            return `<tr><td class="border border-slate-300 px-2 py-1">${displayObat}</td><td class="border border-slate-300 px-2 py-1 text-center font-bold">${o.qty || '-'}</td><td class="border border-slate-300 px-2 py-1">${o.ket || p.ket || '-'}</td></tr>`;
           }).join('')}
         </table>
       </div>
@@ -1591,19 +1578,14 @@ function autoFillICD9Code(elDesc) {
 }
 
 
-function tambahRowDiagnosa(valDesc = '', valCode = '', valKet = '', valTgl = '') {
+function tambahRowDiagnosa(valDesc = '', valCode = '', valKet = '') {
   const c = document.getElementById('containerDiagnosa');
-  let defaultTgl = valTgl || (document.getElementById('rmTglPeriksa') ? document.getElementById('rmTglPeriksa').value : '') || getTodayIso();
   let div = document.createElement('div');
   div.className = "p-2.5 bg-slate-50 rounded-xl border border-slate-200 space-y-2 row-diagnosa shadow-sm";
   div.innerHTML = `
     <div class="flex gap-2 items-center flex-wrap sm:flex-nowrap">
       <input type="text" list="listICD10" oninput="autoTitleCase(this); autoFillICDCode(this);" value="${escapeHtmlAttr(valDesc)}" placeholder="Ketik Kode atau Nama Penyakit (ICD-10)..." class="val-diagnosa flex-1 px-3 py-1.5 bg-white border border-slate-300 rounded-lg outline-none focus:ring-1 focus:ring-rose-500 text-xs font-semibold min-w-[200px]">
       <input type="text" placeholder="Kode ICD-10" readonly value="${escapeHtmlAttr(valCode)}" class="val-icdcode w-24 px-2 py-1.5 bg-slate-200 text-slate-700 font-bold border border-slate-300 rounded-lg outline-none text-center text-xs">
-      <div class="flex items-center gap-1 bg-white border border-slate-300 rounded-lg px-2 py-1" title="Tanggal Diagnosa Ditambahkan">
-        <span class="text-slate-400 text-xs">📅</span>
-        <input type="date" value="${defaultTgl}" class="val-diagnosa-tgl bg-transparent text-slate-700 font-bold outline-none text-xs">
-      </div>
       <button type="button" onclick="this.closest('.row-diagnosa').remove()" class="px-2.5 py-1.5 bg-rose-100 text-rose-600 rounded-lg font-black hover:bg-rose-200 transition-colors text-xs" title="Hapus Diagnosa">X</button>
     </div>
     <div class="flex gap-2 items-center pl-2">
@@ -1618,19 +1600,14 @@ function tambahRowDiagnosa(valDesc = '', valCode = '', valKet = '', valTgl = '')
 }
 
 
-function tambahRowTindakan(valDesc = '', valCode = '', valKet = '', valTgl = '') {
+function tambahRowTindakan(valDesc = '', valCode = '', valKet = '') {
   const c = document.getElementById('containerTindakan');
-  let defaultTgl = valTgl || (document.getElementById('rmTglPeriksa') ? document.getElementById('rmTglPeriksa').value : '') || getTodayIso();
   let div = document.createElement('div');
   div.className = "p-2.5 bg-slate-50 rounded-xl border border-slate-200 space-y-2 row-tindakan shadow-sm";
   div.innerHTML = `
     <div class="flex gap-2 items-center flex-wrap sm:flex-nowrap">
       <input type="text" list="listTindakanRM" oninput="autoTitleCase(this); autoFillICD9Code(this);" value="${escapeHtmlAttr(valDesc)}" placeholder="Ketik Kode atau Nama Tindakan (ICD-9)..." class="val-tindakan flex-1 px-3 py-1.5 bg-white border border-slate-300 rounded-lg outline-none focus:ring-1 focus:ring-indigo-500 text-xs font-semibold min-w-[200px]">
       <input type="text" placeholder="Kode ICD-9" readonly value="${escapeHtmlAttr(valCode)}" class="val-icd9code w-24 px-2 py-1.5 bg-slate-200 text-slate-700 font-bold border border-slate-300 rounded-lg outline-none text-center text-xs">
-      <div class="flex items-center gap-1 bg-white border border-slate-300 rounded-lg px-2 py-1" title="Tanggal Tindakan Ditambahkan">
-        <span class="text-slate-400 text-xs">📅</span>
-        <input type="date" value="${defaultTgl}" class="val-tindakan-tgl bg-transparent text-slate-700 font-bold outline-none text-xs">
-      </div>
       <button type="button" onclick="this.closest('.row-tindakan').remove()" class="px-2.5 py-1.5 bg-rose-100 text-rose-600 rounded-lg font-black hover:bg-rose-200 transition-colors text-xs" title="Hapus Tindakan">X</button>
     </div>
     <div class="flex gap-2 items-center pl-2">
@@ -1658,9 +1635,8 @@ function updateObatQtyRequirement(inputObat) {
   }
 }
 
-function tambahRowObat(valNama = '', valQty = '', valKet = '', valTgl = '') {
+function tambahRowObat(valNama = '', valQty = '', valKet = '') {
   const c = document.getElementById('containerObat');
-  let defaultTgl = valTgl || (document.getElementById('rmTglPeriksa') ? document.getElementById('rmTglPeriksa').value : '') || getTodayIso();
   let div = document.createElement('div');
   div.className = "flex gap-2 items-center flex-wrap sm:flex-nowrap row-obat bg-slate-50 p-2 rounded-xl border border-slate-200 shadow-sm";
   let isReq = (valNama || '').toString().trim().length > 0;
@@ -1668,10 +1644,6 @@ function tambahRowObat(valNama = '', valQty = '', valKet = '', valTgl = '') {
     <input type="text" list="listObatRM" oninput="autoTitleCase(this); updateObatQtyRequirement(this);" value="${escapeHtmlAttr(valNama)}" placeholder="Ketik / Cari Obat..." class="val-obat flex-1 min-w-[140px] px-3 py-1.5 bg-white border border-slate-300 rounded-lg outline-none focus:ring-1 focus:ring-teal-500 text-xs font-semibold">
     <input type="text" maxlength="4" oninput="this.value=this.value.replace(/[^0-9]/g,''); this.classList.remove('border-rose-500','ring-2','ring-rose-400');" value="${escapeHtmlAttr(valQty)}" placeholder="${isReq ? 'Qty*' : 'Qty'}" class="val-qty w-14 px-2 py-1.5 bg-white border ${isReq ? 'border-indigo-400' : 'border-slate-300'} rounded-lg text-center outline-none text-xs font-bold">
     <input type="text" oninput="autoTitleCase(this)" value="${escapeHtmlAttr(valKet)}" placeholder="Aturan Pakai..." class="val-ket flex-1 min-w-[130px] px-3 py-1.5 bg-white border border-slate-300 rounded-lg outline-none text-xs">
-    <div class="flex items-center gap-1 bg-white border border-slate-300 rounded-lg px-2 py-1" title="Tanggal Resep Ditambahkan">
-      <span class="text-slate-400 text-xs">📅</span>
-      <input type="date" value="${defaultTgl}" class="val-obat-tgl bg-transparent text-slate-700 font-bold outline-none text-xs">
-    </div>
     <button type="button" onclick="this.closest('.row-obat').remove()" class="px-2.5 py-1.5 bg-rose-100 text-rose-600 rounded-lg font-black hover:bg-rose-200 text-xs" title="Hapus Obat">X</button>
   `;
   c.appendChild(div);
@@ -1736,11 +1708,9 @@ function simpanEMRFinal() {
     let obInput = row.querySelector('.val-obat');
     let qtyInput = row.querySelector('.val-qty');
     let ketInput = row.querySelector('.val-ket');
-    let tglInput = row.querySelector('.val-obat-tgl');
     let ob = obInput ? obInput.value.trim() : '';
     let q = qtyInput ? qtyInput.value.trim() : '';
     let k = ketInput ? ketInput.value.trim() : '';
-    let tglVal = tglInput ? tglInput.value.trim() : '';
     if (ob) {
       let numQty = parseInt(q, 10);
       if (!q || isNaN(numQty) || numQty <= 0) {
@@ -1748,9 +1718,7 @@ function simpanEMRFinal() {
           invalidQtyObat = { nama: ob, inputEl: qtyInput };
         }
       }
-      let tglIso = tglVal || (document.getElementById('rmTglPeriksa') ? document.getElementById('rmTglPeriksa').value.trim() : '') || getTodayIso();
-      let tglBadge = formatTglTindakanDDMMYY(tglIso);
-      arrObat.push({ obat: ob, qty: q, ket: k, tanggal: tglIso, tglBadge: tglBadge });
+      arrObat.push({ obat: ob, qty: q, ket: k });
     }
   });
 
@@ -1772,15 +1740,10 @@ function simpanEMRFinal() {
      let desc = row.querySelector('.val-diagnosa').value.trim();
      let code = row.querySelector('.val-icdcode').value.trim();
      let ket = row.querySelector('.val-diagnosa-ket') ? row.querySelector('.val-diagnosa-ket').value.trim() : '';
-     let tglVal = row.querySelector('.val-diagnosa-tgl') ? row.querySelector('.val-diagnosa-tgl').value.trim() : '';
      if(desc) {
         let fullDiag = desc;
         if (code && !desc.toLowerCase().includes(code.toLowerCase())) {
             fullDiag = `${code} - ${desc}`;
-        }
-        let tglFormatted = formatTglTindakanDDMMYY(tglVal || getV('rmTglPeriksa') || getTodayIso());
-        if (tglFormatted && !fullDiag.includes(tglFormatted)) {
-            fullDiag += ` ${tglFormatted}`;
         }
         if (ket) {
             fullDiag += ` (${ket})`;
@@ -1798,15 +1761,10 @@ function simpanEMRFinal() {
      let desc = row.querySelector('.val-tindakan').value.trim();
      let code = row.querySelector('.val-icd9code') ? row.querySelector('.val-icd9code').value.trim() : '';
      let ket = row.querySelector('.val-tindakan-ket') ? row.querySelector('.val-tindakan-ket').value.trim() : '';
-     let tglVal = row.querySelector('.val-tindakan-tgl') ? row.querySelector('.val-tindakan-tgl').value.trim() : '';
      if(desc) {
         let fullTind = desc;
         if (code && !desc.toLowerCase().includes(code.toLowerCase())) {
             fullTind = `${code} - ${desc}`;
-        }
-        let tglFormatted = formatTglTindakanDDMMYY(tglVal || getV('rmTglPeriksa') || getTodayIso());
-        if (tglFormatted && !fullTind.includes(tglFormatted)) {
-            fullTind += ` ${tglFormatted}`;
         }
         if (ket) {
             fullTind += ` (${ket})`;

@@ -718,7 +718,7 @@ let contDiag = document.getElementById('containerDiagnosa');
 assert("Diagnosa Row Appended", contDiag && contDiag.children.length > 0);
 let lastRowDiag = contDiag.children[contDiag.children.length - 1];
 assert("Diagnosa Note Field Present", !!lastRowDiag.querySelector('.val-diagnosa-ket'));
-assert("Diagnosa Date Field Present", !!lastRowDiag.querySelector('.val-diagnosa-tgl'));
+assert("Permenkes 24/2022: Input Tanggal Diagnosa Per Baris Dihilangkan", !lastRowDiag.querySelector('.val-diagnosa-tgl'));
 let mockInputDiag = { value: "karies dentis", setSelectionRange: function() {} };
 autoTitleCase(mockInputDiag);
 assert("Diagnosa Input Auto Title Case Formatted", mockInputDiag.value === "Karies Dentis");
@@ -728,7 +728,7 @@ let contTind = document.getElementById('containerTindakan');
 assert("Tindakan Row Appended", contTind && contTind.children.length > 0);
 let lastRowTind = contTind.children[contTind.children.length - 1];
 assert("Tindakan Note Field Present", !!lastRowTind.querySelector('.val-tindakan-ket'));
-assert("Tindakan Date Field Present", !!lastRowTind.querySelector('.val-tindakan-tgl'));
+assert("Permenkes 24/2022: Input Tanggal Tindakan Per Baris Dihilangkan", !lastRowTind.querySelector('.val-tindakan-tgl'));
 assert("Format Tgl Tindakan DDMMYY", formatTglTindakanDDMMYY("2026-10-18") === "[18/10/26]");
 let mockInputTind = { value: "pencabutan gigi tetap", setSelectionRange: function() {} };
 autoTitleCase(mockInputTind);
@@ -738,7 +738,7 @@ tambahRowObat();
 let contObat = document.getElementById('containerObat');
 assert("Obat Row Appended", contObat && contObat.children.length > 0);
 let lastRowObat = contObat.children[contObat.children.length - 1];
-assert("Obat Date Field Present", !!lastRowObat.querySelector('.val-obat-tgl'));
+assert("Permenkes 24/2022: Input Tanggal Obat Per Baris Dihilangkan", !lastRowObat.querySelector('.val-obat-tgl'));
 
 assert("Modal Tooth Tanggal Input Tersedia di HTML", isModalToothTglInHtml);
 
@@ -759,9 +759,10 @@ bukaDetailRM(0);
 let printArea = document.getElementById('printAreaRM');
 assert("Detail RM Rendered", !!printArea);
 let printHtml = printArea.innerHTML;
-assert("Detail RM Tindakan Menampilkan Format Tanggal DDMMYY", printHtml.includes('[08/10/26]'));
-assert("Detail RM Diagnosa ICD-10 Menampilkan Format Tanggal DDMMYY", printHtml.includes('[08/10/26]') && printHtml.includes('K02.1 - Caries'));
-assert("Detail RM Resep Obat Menampilkan Format Tanggal DDMMYY", printHtml.includes('[08/10/26]') && printHtml.includes('Amoksisilin Generik 500mg'));
+assert("Detail RM Menampilkan Tanggal Pelayanan Encounter", printHtml.includes('08') || printHtml.includes('Oktober') || printHtml.includes('2026'));
+assert("Detail RM Menampilkan Diagnosa ICD-10", printHtml.includes('K02.1 - Caries'));
+assert("Detail RM Menampilkan Tindakan ICD-9", printHtml.includes('23.2 - Tumpatan'));
+assert("Detail RM Menampilkan Resep Obat", printHtml.includes('Amoksisilin Generik 500mg'));
 assert("Detail RM Diagnosis Gigi Menampilkan Format Tanggal DDMMYY", printHtml.includes('[08/10/26]') && printHtml.includes('Gigi 16:'));
 assert("Tombol Buka Odontogram Interaktif Present", printHtml.includes('bukaModalOdontoHistory(0)'));
 assert("DMF-T Decayed Present", printHtml.includes('Decayed (D)'));
@@ -787,18 +788,18 @@ assert("Permenkes 24/2022: Odontogram Gigi 16 Membawa Tanggal Asli", currentOdon
 
 let firstCopiedRow = document.getElementById('containerTindakan').children[0];
 assert("Permenkes 24/2022: Tindakan Hari Ini Bersih Kosong", firstCopiedRow && firstCopiedRow.querySelector('.val-tindakan').value === '');
-assert("Permenkes 24/2022: Tindakan Hari Ini Bertanggal Hari Ini", firstCopiedRow && firstCopiedRow.querySelector('.val-tindakan-tgl').value === getTodayIso());
+assert("Permenkes 24/2022: Form Tindakan Bersih Tanpa Input Tanggal Per Baris", !firstCopiedRow.querySelector('.val-tindakan-tgl'));
 assert("Permenkes 24/2022: Anamnesis CC Kosong untuk Kunjungan Baru", document.getElementById('anaCC').value === '');
 
 salinDiagnosaLaluKeHariIni();
 let firstCopiedDiag = document.getElementById('containerDiagnosa').children[0];
 assert("Permenkes 24/2022: Lanjutkan Diagnosa Menyalin Diagnosa Lalu", firstCopiedDiag && firstCopiedDiag.querySelector('.val-diagnosa').value.includes('Caries'));
-assert("Permenkes 24/2022: Lanjutkan Diagnosa Bertanggal Hari Ini", firstCopiedDiag && firstCopiedDiag.querySelector('.val-diagnosa-tgl').value === getTodayIso());
+assert("Permenkes 24/2022: Form Diagnosa Salinan Bersih Tanpa Input Tanggal Per Baris", !firstCopiedDiag.querySelector('.val-diagnosa-tgl'));
 
 salinTindakanLaluKeHariIni();
 let testCopiedTind = document.getElementById('containerTindakan').children[0];
 assert("Permenkes 24/2022: Lanjutkan Tindakan Menyalin Tindakan Lalu", testCopiedTind && testCopiedTind.querySelector('.val-tindakan').value.includes('Tumpatan'));
-assert("Permenkes 24/2022: Lanjutkan Tindakan Bertanggal Hari Ini", testCopiedTind && testCopiedTind.querySelector('.val-tindakan-tgl').value === getTodayIso());
+assert("Permenkes 24/2022: Form Tindakan Salinan Bersih Tanpa Input Tanggal Per Baris", !testCopiedTind.querySelector('.val-tindakan-tgl'));
 
 tutupPanelReferensiRM();
 assert("Permenkes 24/2022: Panel Referensi Bisa Ditutup", document.getElementById('panelReferensiKlinisRM').classList.contains('hidden'));

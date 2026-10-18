@@ -1003,10 +1003,9 @@ function openHistoryEMR(idPasien) {
              <ul class="list-disc pl-5 space-y-1 text-slate-800 font-bold mb-4">
                ${ana.diagnosaICD.map(d => {
                 let p = parseTindakanItem(d, r.tanggalPeriksa);
-                let tglBadge = formatTglTindakanDDMMYY(p.tanggal);
                 let codePrefix = p.code ? `${p.code} - ` : '';
                 let ketText = p.ket ? ` (${p.ket})` : '';
-                return `<li class="py-0.5"><span class="font-semibold text-slate-800">${codePrefix}${p.desc}</span>${tglBadge ? ' ' + tglBadge : ''}${ketText}</li>`;
+                return `<li class="py-0.5"><span class="font-semibold text-slate-800">${codePrefix}${p.desc}</span>${ketText}</li>`;
               }).join('')}
              </ul>
            </div>
@@ -1016,10 +1015,9 @@ function openHistoryEMR(idPasien) {
              <h4 class="font-black bg-slate-100 p-1.5 border-l-4 border-slate-800 mb-2 uppercase">Tindakan (ICD-9)</h4>
              <ul class="list-disc pl-5">${tind.length === 0 ? '<li>-</li>' : tind.map(t => {
                let p = parseTindakanItem(t, r.tanggalPeriksa);
-               let tglBadge = formatTglTindakanDDMMYY(p.tanggal);
                let codePrefix = p.code ? `${p.code} - ` : '';
                let ketText = p.ket ? ` (${p.ket})` : '';
-               return `<li class="py-0.5"><span class="font-semibold text-slate-800">${codePrefix}${p.desc}</span>${tglBadge ? ' ' + tglBadge : ''}${ketText}</li>`;
+               return `<li class="py-0.5"><span class="font-semibold text-slate-800">${codePrefix}${p.desc}</span>${ketText}</li>`;
              }).join('')}</ul>
            </div>
          
@@ -1029,9 +1027,8 @@ function openHistoryEMR(idPasien) {
                <tr class="bg-slate-50"><th class="border border-slate-300 px-2 py-1">Nama Obat</th><th class="border border-slate-300 px-2 py-1 w-16 text-center">Qty</th><th class="border border-slate-300 px-2 py-1">Aturan Pakai</th></tr>
                ${obat.length === 0 ? '<tr><td colspan="3" class="border border-slate-300 px-2 py-1 text-center">-</td></tr>' : obat.map(o => {
                 let p = parseTindakanItem(o.obat || o.nama || '', o.tanggal || o.tgl || r.tanggalPeriksa);
-                let tglBadge = formatTglTindakanDDMMYY(p.tanggal);
                 let displayObat = p.desc;
-                return `<tr><td class="border border-slate-300 px-2 py-1">${displayObat}${tglBadge ? ' ' + tglBadge : ''}</td><td class="border border-slate-300 px-2 py-1 text-center font-bold">${o.qty || '-'}</td><td class="border border-slate-300 px-2 py-1">${o.ket || p.ket || '-'}</td></tr>`;
+                return `<tr><td class="border border-slate-300 px-2 py-1">${displayObat}</td><td class="border border-slate-300 px-2 py-1 text-center font-bold">${o.qty || '-'}</td><td class="border border-slate-300 px-2 py-1">${o.ket || p.ket || '-'}</td></tr>`;
               }).join('')}
              </table>
            </div>
@@ -1696,9 +1693,8 @@ function printHistoryEMR(idPasien) {
          let obatList = obat.length === 0 ? '<tr><td colspan="3" class="border border-slate-300 px-2 py-1 text-center">-</td></tr>' :
             obat.map(o => {
               let p = parseTindakanItem(o.obat || o.nama || '', o.tanggal || o.tgl || r.tanggalPeriksa);
-              let tglBadge = formatTglTindakanDDMMYY(p.tanggal);
               let displayObat = p.desc;
-              return `<tr><td class="border border-slate-300 px-2 py-1">${displayObat}${tglBadge ? ' ' + tglBadge : ''}</td><td class="border border-slate-300 px-2 py-1 text-center font-bold">${o.qty || '-'}</td><td class="border border-slate-300 px-2 py-1">${o.ket || p.ket || '-'}</td></tr>`;
+              return `<tr><td class="border border-slate-300 px-2 py-1">${displayObat}</td><td class="border border-slate-300 px-2 py-1 text-center font-bold">${o.qty || '-'}</td><td class="border border-slate-300 px-2 py-1">${o.ket || p.ket || '-'}</td></tr>`;
             }).join('');
         
          let tglFormat = r.tanggalPeriksa || '-';
@@ -1712,10 +1708,9 @@ function printHistoryEMR(idPasien) {
         
          let diagGlobal = (ana.diagnosaICD && ana.diagnosaICD.length > 0) ? `<div><h4 class="font-black bg-slate-100 p-1.5 border-l-4 border-slate-800 mb-2 uppercase">Diagnosa (ICD-10)</h4><ul class="list-disc pl-5 space-y-1 text-slate-800 font-bold mb-4">${ana.diagnosaICD.map(d => {
             let p = parseTindakanItem(d, r.tanggalPeriksa);
-            let tglBadge = formatTglTindakanDDMMYY(p.tanggal);
             let codePrefix = p.code ? `${p.code} - ` : '';
             let ketText = p.ket ? ` (${p.ket})` : '';
-            return `<li class="py-0.5"><span class="font-semibold text-slate-800">${codePrefix}${p.desc}</span>${tglBadge ? ' ' + tglBadge : ''}${ketText}</li>`;
+            return `<li class="py-0.5"><span class="font-semibold text-slate-800">${codePrefix}${p.desc}</span>${ketText}</li>`;
           }).join('')}</ul></div>` : '';
 
 
@@ -1856,10 +1851,9 @@ function printHistoryEMR(idPasien) {
                  <h4 class="font-black bg-slate-100 p-1.5 border-l-4 border-slate-800 mb-2 uppercase">Tindakan (ICD-9)</h4>
                  <ul class="list-disc pl-5">${tind.length === 0 ? '<li>-</li>' : tind.map(t => {
                    let p = parseTindakanItem(t, r.tanggalPeriksa);
-                   let tglBadge = formatTglTindakanDDMMYY(p.tanggal);
                    let codePrefix = p.code ? `${p.code} - ` : '';
                    let ketText = p.ket ? ` (${p.ket})` : '';
-                   return `<li class="py-0.5"><span class="font-semibold text-slate-800">${codePrefix}${p.desc}</span>${tglBadge ? ' ' + tglBadge : ''}${ketText}</li>`;
+                   return `<li class="py-0.5"><span class="font-semibold text-slate-800">${codePrefix}${p.desc}</span>${ketText}</li>`;
                  }).join('')}</ul>
                </div>
              

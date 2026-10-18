@@ -3776,46 +3776,288 @@
     </div>
 
 
-    <!-- Blok 2: ANAMNESIS -->
-    <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
-      <h3 class="text-sm font-black text-slate-800 mb-3 border-b border-slate-200 pb-2">Anamnesis</h3>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
-        <div><label class="text-[10px] font-bold text-slate-500">Chief Complain (CC)</label><input type="text" id="anaCC" oninput="autoTitleCase(this)" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded outline-none"></div>
-        <div><label class="text-[10px] font-bold text-slate-500">Present Illness (PI)</label><input type="text" id="anaPI" oninput="autoTitleCase(this)" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded outline-none"></div>
-        <div><label class="text-[10px] font-bold text-slate-500">Past Dental History (PDH)</label><input type="text" id="anaPDH" oninput="autoTitleCase(this)" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded outline-none"></div>
-        <div><label class="text-[10px] font-bold text-slate-500">Past Medical History (PMH)</label><input type="text" id="anaPMH" oninput="autoTitleCase(this)" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded outline-none"></div>
-        <div class="md:col-span-2"><label class="text-[10px] font-bold text-slate-500">Family History</label><input type="text" id="anaFH" oninput="autoTitleCase(this)" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded outline-none"></div>
+    <!-- Blok 2: ANAMNESIS & RIWAYAT PASIEN (MODERN CLINICAL SUITE) -->
+    <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-200/90 space-y-6">
+      <!-- Section Header -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-3.5 gap-2">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-lg shadow-xs">
+            💬
+          </div>
+          <div>
+            <h3 class="text-sm font-black text-slate-800 tracking-tight flex items-center gap-2">
+              Anamnesis & Riwayat Pasien
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200/60 font-mono">SUBJECTIVE DATA</span>
+            </h3>
+            <p class="text-[11px] text-slate-400">Pencatatan keluhan encounter hari ini dan latar belakang riwayat medis pasien (Permenkes No. 24/2022)</p>
+          </div>
+        </div>
       </div>
-      <p class="font-bold text-[10px] text-slate-700 bg-slate-100 p-1.5 rounded mb-2">Review Of System</p>
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
-        <div><label class="text-[9px] text-slate-500">Endokrine</label><input type="text" id="anaEndo" oninput="autoTitleCase(this)" class="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded outline-none"></div>
-        <div><label class="text-[9px] text-slate-500">Gastrointestinal</label><input type="text" id="anaGastro" oninput="autoTitleCase(this)" class="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded outline-none"></div>
-        <div><label class="text-[9px] text-slate-500">Hematopoetik</label><input type="text" id="anaHemato" oninput="autoTitleCase(this)" class="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded outline-none"></div>
-        <div><label class="text-[9px] text-slate-500">Kardiovaskuler</label><input type="text" id="anaKardio" oninput="autoTitleCase(this)" class="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded outline-none"></div>
-        <div><label class="text-[9px] text-slate-500">Muskuloskletetal</label><input type="text" id="anaMuskulo" oninput="autoTitleCase(this)" class="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded outline-none"></div>
-        <div><label class="text-[9px] text-slate-500">Neurologik</label><input type="text" id="anaNeuro" oninput="autoTitleCase(this)" class="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded outline-none"></div>
-        <div><label class="text-[9px] text-slate-500">Respirasi</label><input type="text" id="anaRespirasi" oninput="autoTitleCase(this)" class="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded outline-none"></div>
-        <div><label class="text-[9px] text-slate-500">Urogenital</label><input type="text" id="anaUrogenital" oninput="autoTitleCase(this)" class="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded outline-none"></div>
+
+      <!-- Sub-block 1: KELUHAN ENCOUNTER HARI INI (CC & PI) -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Chief Complaint (CC) -->
+        <div class="bg-gradient-to-br from-indigo-50/50 to-slate-50 p-4 rounded-xl border border-indigo-100/90 shadow-xs focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-100 transition-all">
+          <div class="flex items-center justify-between mb-2">
+            <label for="anaCC" class="text-xs font-black text-indigo-950 flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-indigo-600"></span>
+              Keluhan Utama <span class="text-[10px] font-bold text-indigo-600 font-mono">(Chief Complaint / CC)</span>
+            </label>
+            <span class="text-[9px] font-bold px-2 py-0.5 rounded bg-indigo-100/70 text-indigo-700 font-mono uppercase tracking-wider">Kunjungan Ini</span>
+          </div>
+          <textarea id="anaCC" rows="2" oninput="autoTitleCase(this)" placeholder="Contoh: Gigi geraham kanan bawah ngilu berdenyut sejak 3 hari lalu terutama saat minum air dingin..." class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-800 outline-none focus:border-indigo-500 resize-none shadow-xs placeholder:text-slate-400 placeholder:italic leading-relaxed"></textarea>
+        </div>
+
+        <!-- Present Illness (PI) -->
+        <div class="bg-gradient-to-br from-slate-50 to-indigo-50/30 p-4 rounded-xl border border-slate-200 shadow-xs focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-100 transition-all">
+          <div class="flex items-center justify-between mb-2">
+            <label for="anaPI" class="text-xs font-black text-slate-800 flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-slate-400"></span>
+              Perjalanan Penyakit <span class="text-[10px] font-bold text-slate-500 font-mono">(Present Illness / PI)</span>
+            </label>
+            <span class="text-[9px] font-semibold text-slate-400">Kronologi / Onset</span>
+          </div>
+          <textarea id="anaPI" rows="2" oninput="autoTitleCase(this)" placeholder="Contoh: Awalnya makanan sering terselip 2 minggu lalu, nyeri menjalar hingga ke pelipis kanan..." class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-800 outline-none focus:border-indigo-500 resize-none shadow-xs placeholder:text-slate-400 placeholder:italic leading-relaxed"></textarea>
+        </div>
       </div>
-      <div class="mt-2"><label class="text-[10px] font-bold text-slate-500">Catatan Khusus</label><input type="text" id="anaKhusus" oninput="autoTitleCase(this)" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded outline-none"></div>
+
+      <!-- Sub-block 2: RIWAYAT KESEHATAN LATEN (CARRY-FORWARD) -->
+      <div>
+        <div class="flex items-center gap-2 mb-2.5">
+          <span class="text-xs font-black uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+            <span>📋</span> Riwayat Medis Masa Lalu Pasien
+          </span>
+          <span class="text-[10px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200">Kumulatif / Terbawa Otomatis</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <!-- PDH -->
+          <div class="bg-slate-50/80 p-3 rounded-xl border border-slate-200 focus-within:border-indigo-400 transition-all">
+            <label for="anaPDH" class="text-[11px] font-bold text-slate-700 block mb-1 flex items-center gap-1">
+              <span>🦷</span> Riwayat Gigi & Mulut <span class="text-[9px] text-slate-400 font-mono">(PDH)</span>
+            </label>
+            <input type="text" id="anaPDH" oninput="autoTitleCase(this)" placeholder="Pernah scaling / cabut gigi..." class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-800 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-200">
+          </div>
+
+          <!-- PMH -->
+          <div class="bg-slate-50/80 p-3 rounded-xl border border-slate-200 focus-within:border-indigo-400 transition-all">
+            <label for="anaPMH" class="text-[11px] font-bold text-slate-700 block mb-1 flex items-center gap-1">
+              <span>🩺</span> Riwayat Medis Umum <span class="text-[9px] text-slate-400 font-mono">(PMH)</span>
+            </label>
+            <input type="text" id="anaPMH" oninput="autoTitleCase(this)" placeholder="Hipertensi, Maag, Asma..." class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-800 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-200">
+          </div>
+
+          <!-- FH -->
+          <div class="bg-slate-50/80 p-3 rounded-xl border border-slate-200 focus-within:border-indigo-400 transition-all">
+            <label for="anaFH" class="text-[11px] font-bold text-slate-700 block mb-1 flex items-center gap-1">
+              <span>🧬</span> Riwayat Penyakit Keluarga <span class="text-[9px] text-slate-400 font-mono">(FH)</span>
+            </label>
+            <input type="text" id="anaFH" oninput="autoTitleCase(this)" placeholder="Diabetes, Jantung, Kanker..." class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-800 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-200">
+          </div>
+        </div>
+      </div>
+
+      <!-- Sub-block 3: REVIEW OF SYSTEM (ROS MINI CLINICAL CARDS) -->
+      <div class="bg-slate-50/80 p-4 rounded-xl border border-slate-200/90">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-xs font-black uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+            <span>🔬</span> Review of System <span class="text-[10px] text-slate-400 font-normal lowercase">(penapisan fungsi organ tubuh)</span>
+          </span>
+          <span class="text-[10px] text-slate-400 font-mono">Ketik keluhan atau '-' jika normal</span>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+          <div class="bg-white p-2 rounded-lg border border-slate-200 shadow-2xs">
+            <label for="anaEndo" class="text-[10px] font-bold text-slate-600 block mb-0.5">Endokrin <span class="text-[9px] text-slate-400 font-normal">(DM/Tiroid)</span></label>
+            <input type="text" id="anaEndo" oninput="autoTitleCase(this)" placeholder="Normal / -" class="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded text-xs font-medium outline-none focus:bg-white focus:border-indigo-500">
+          </div>
+          <div class="bg-white p-2 rounded-lg border border-slate-200 shadow-2xs">
+            <label for="anaGastro" class="text-[10px] font-bold text-slate-600 block mb-0.5">Gastrointestinal <span class="text-[9px] text-slate-400 font-normal">(Lambung)</span></label>
+            <input type="text" id="anaGastro" oninput="autoTitleCase(this)" placeholder="Normal / -" class="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded text-xs font-medium outline-none focus:bg-white focus:border-indigo-500">
+          </div>
+          <div class="bg-white p-2 rounded-lg border border-slate-200 shadow-2xs">
+            <label for="anaHemato" class="text-[10px] font-bold text-slate-600 block mb-0.5">Hematologi <span class="text-[9px] text-slate-400 font-normal">(Koagulasi)</span></label>
+            <input type="text" id="anaHemato" oninput="autoTitleCase(this)" placeholder="Normal / -" class="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded text-xs font-medium outline-none focus:bg-white focus:border-indigo-500">
+          </div>
+          <div class="bg-white p-2 rounded-lg border border-slate-200 shadow-2xs">
+            <label for="anaKardio" class="text-[10px] font-bold text-slate-600 block mb-0.5">Kardiovaskular <span class="text-[9px] text-slate-400 font-normal">(Jantung)</span></label>
+            <input type="text" id="anaKardio" oninput="autoTitleCase(this)" placeholder="Normal / -" class="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded text-xs font-medium outline-none focus:bg-white focus:border-indigo-500">
+          </div>
+          <div class="bg-white p-2 rounded-lg border border-slate-200 shadow-2xs">
+            <label for="anaMuskulo" class="text-[10px] font-bold text-slate-600 block mb-0.5">Muskuloskeletal <span class="text-[9px] text-slate-400 font-normal">(Sendi/Otot)</span></label>
+            <input type="text" id="anaMuskulo" oninput="autoTitleCase(this)" placeholder="Normal / -" class="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded text-xs font-medium outline-none focus:bg-white focus:border-indigo-500">
+          </div>
+          <div class="bg-white p-2 rounded-lg border border-slate-200 shadow-2xs">
+            <label for="anaNeuro" class="text-[10px] font-bold text-slate-600 block mb-0.5">Neurologi <span class="text-[9px] text-slate-400 font-normal">(Saraf/Stroke)</span></label>
+            <input type="text" id="anaNeuro" oninput="autoTitleCase(this)" placeholder="Normal / -" class="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded text-xs font-medium outline-none focus:bg-white focus:border-indigo-500">
+          </div>
+          <div class="bg-white p-2 rounded-lg border border-slate-200 shadow-2xs">
+            <label for="anaRespirasi" class="text-[10px] font-bold text-slate-600 block mb-0.5">Respirasi <span class="text-[9px] text-slate-400 font-normal">(Asma/Paru)</span></label>
+            <input type="text" id="anaRespirasi" oninput="autoTitleCase(this)" placeholder="Normal / -" class="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded text-xs font-medium outline-none focus:bg-white focus:border-indigo-500">
+          </div>
+          <div class="bg-white p-2 rounded-lg border border-slate-200 shadow-2xs">
+            <label for="anaUrogenital" class="text-[10px] font-bold text-slate-600 block mb-0.5">Urogenital <span class="text-[9px] text-slate-400 font-normal">(Ginjal)</span></label>
+            <input type="text" id="anaUrogenital" oninput="autoTitleCase(this)" placeholder="Normal / -" class="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded text-xs font-medium outline-none focus:bg-white focus:border-indigo-500">
+          </div>
+        </div>
+      </div>
+
+      <!-- Sub-block 4: CATATAN KHUSUS / PERHATIAN KLINIS -->
+      <div class="bg-amber-50/60 p-3.5 rounded-xl border border-amber-200/90 flex items-center gap-3">
+        <div class="w-8 h-8 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center shrink-0 font-bold text-sm shadow-2xs">
+          ⚠️
+        </div>
+        <div class="flex-1">
+          <label for="anaKhusus" class="text-[11px] font-black text-amber-950 block mb-0.5">Catatan Perhatian Khusus Pasien</label>
+          <input type="text" id="anaKhusus" oninput="autoTitleCase(this)" placeholder="Contoh: Pasien sedang hamil trimester 2, konsumsi obat pengencer darah rutin (Aspirin), cemas tinggi..." class="w-full px-3 py-1.5 bg-white border border-amber-200 focus:border-amber-400 focus:ring-1 focus:ring-amber-300 rounded-lg text-xs font-medium text-slate-800 outline-none placeholder:text-amber-700/50">
+        </div>
+      </div>
     </div>
    
-    <!-- Blok 3: PEMERIKSAAN FISIK -->
-    <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
-      <h3 class="text-sm font-black text-slate-800 mb-3 border-b border-slate-200 pb-2">Pemeriksaan Fisik</h3>
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div class="col-span-2"><label class="text-[10px] font-bold text-slate-500">Kesan Umum</label><input type="text" id="fisKesan" oninput="autoTitleCase(this)" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded outline-none"></div>
-        <div class="col-span-2"><label class="text-[10px] font-bold text-slate-500">Kesadaran</label><input type="text" id="fisKesadaran" oninput="autoTitleCase(this)" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded outline-none"></div>
-        <div><label class="text-[10px] font-bold text-slate-500">Tensi (mmHg)</label><input type="text" id="fisTensi" maxlength="7" oninput="this.value=this.value.replace(/[^0-9\/]/g,'')" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded outline-none" placeholder="120/80"></div>
-        <div><label class="text-[10px] font-bold text-slate-500">Nafas (x/mnt)</label><input type="text" id="fisNafas" maxlength="3" oninput="this.value=this.value.replace(/[^0-9]/g,'')" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded outline-none"></div>
-        <div><label class="text-[10px] font-bold text-slate-500">Nadi (x/mnt)</label><input type="text" id="fisNadi" maxlength="3" oninput="this.value=this.value.replace(/[^0-9]/g,'')" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded outline-none"></div>
-        <div><label class="text-[10px] font-bold text-slate-500">Suhu (°C)</label><input type="text" id="fisSuhu" maxlength="4" oninput="this.value=this.value.replace(/[^0-9.]/g,'')" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded outline-none" placeholder="36.5"></div>
-        <div><label class="text-[10px] font-bold text-slate-500">Berat Badan (kg)</label><input type="text" id="fisBB" maxlength="5" oninput="this.value=this.value.replace(/[^0-9.]/g,'')" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded outline-none"></div>
-        <div><label class="text-[10px] font-bold text-slate-500">Tinggi Badan (cm)</label><input type="text" id="fisTB" maxlength="5" oninput="this.value=this.value.replace(/[^0-9.]/g,'')" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded outline-none"></div>
-        <div class="col-span-2"><label class="text-[10px] font-bold text-slate-500">Alergi</label><input type="text" id="fisAlergi" oninput="autoTitleCase(this)" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded outline-none"></div>
-        <div class="col-span-2"><label class="text-[10px] font-bold text-slate-500">Ekstra Oral</label><input type="text" id="fisEkstra" oninput="autoTitleCase(this)" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded outline-none"></div>
-        <div class="col-span-2"><label class="text-[10px] font-bold text-slate-500">Intra Oral</label><input type="text" id="fisIntra" oninput="autoTitleCase(this)" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded outline-none"></div>
-        <div class="col-span-4"><label class="text-[10px] font-bold text-slate-500">Penunjang Diagnostik / Laboratorium</label><input type="text" id="fisPenunjang" oninput="autoTitleCase(this)" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded outline-none"></div>
+    <!-- Blok 3: PEMERIKSAAN FISIK & TANDA VITAL (MODERN CLINICAL SUITE) -->
+    <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-200/90 space-y-6">
+      <!-- Section Header -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-3.5 gap-2">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-teal-50 border border-teal-100 flex items-center justify-center text-teal-600 font-bold text-lg shadow-xs">
+            🩺
+          </div>
+          <div>
+            <h3 class="text-sm font-black text-slate-800 tracking-tight flex items-center gap-2">
+              Pemeriksaan Fisik & Tanda Vital
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-teal-50 text-teal-700 border border-teal-200/60 font-mono">OBJECTIVE DATA</span>
+            </h3>
+            <p class="text-[11px] text-slate-400">Tanda-tanda vital, status kesadaran, peringatan alergi, dan inspeksi ekstra/intra oral</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sub-block 1: KESAN UMUM & KESADARAN -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 focus-within:border-teal-500 transition-all">
+          <label for="fisKesan" class="text-[11px] font-bold text-slate-700 block mb-1">Kesan Umum</label>
+          <input type="text" id="fisKesan" oninput="autoTitleCase(this)" placeholder="Contoh: Baik / Tampak Sakit Sedang..." class="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-800 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-200">
+        </div>
+        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 focus-within:border-teal-500 transition-all">
+          <label for="fisKesadaran" class="text-[11px] font-bold text-slate-700 block mb-1">Tingkat Kesadaran</label>
+          <input type="text" id="fisKesadaran" oninput="autoTitleCase(this)" placeholder="Contoh: Compos Mentis (Sadar Penuh)..." class="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-800 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-200">
+        </div>
+      </div>
+
+      <!-- Sub-block 2: TANDA VITAL (VITAL SIGNS DASHBOARD CARDS) -->
+      <div>
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs font-black uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+            <span>⚡</span> Tanda-Tanda Vital (Vital Signs)
+          </span>
+          <span class="text-[10px] text-slate-400 font-mono">Parameter klinis objektif</span>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2.5">
+          <!-- Tensi -->
+          <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-center hover:border-teal-400 transition-all">
+            <label for="fisTensi" class="text-[10px] font-bold text-slate-500 block uppercase">Tekanan Darah</label>
+            <div class="relative mt-1">
+              <input type="text" id="fisTensi" maxlength="7" oninput="this.value=this.value.replace(/[^0-9\/]/g,'')" placeholder="120/80" class="w-full px-2 py-1 text-center bg-white border border-slate-200 rounded-lg text-xs font-black text-slate-800 outline-none focus:border-teal-500 font-mono">
+              <span class="text-[9px] font-bold text-slate-400 block mt-0.5">mmHg</span>
+            </div>
+          </div>
+
+          <!-- Nadi -->
+          <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-center hover:border-teal-400 transition-all">
+            <label for="fisNadi" class="text-[10px] font-bold text-slate-500 block uppercase">Detak Nadi</label>
+            <div class="relative mt-1">
+              <input type="text" id="fisNadi" maxlength="3" oninput="this.value=this.value.replace(/[^0-9]/g,'')" placeholder="80" class="w-full px-2 py-1 text-center bg-white border border-slate-200 rounded-lg text-xs font-black text-slate-800 outline-none focus:border-teal-500 font-mono">
+              <span class="text-[9px] font-bold text-slate-400 block mt-0.5">x/menit</span>
+            </div>
+          </div>
+
+          <!-- Nafas -->
+          <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-center hover:border-teal-400 transition-all">
+            <label for="fisNafas" class="text-[10px] font-bold text-slate-500 block uppercase">Pernafasan</label>
+            <div class="relative mt-1">
+              <input type="text" id="fisNafas" maxlength="3" oninput="this.value=this.value.replace(/[^0-9]/g,'')" placeholder="20" class="w-full px-2 py-1 text-center bg-white border border-slate-200 rounded-lg text-xs font-black text-slate-800 outline-none focus:border-teal-500 font-mono">
+              <span class="text-[9px] font-bold text-slate-400 block mt-0.5">x/menit</span>
+            </div>
+          </div>
+
+          <!-- Suhu -->
+          <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-center hover:border-teal-400 transition-all">
+            <label for="fisSuhu" class="text-[10px] font-bold text-slate-500 block uppercase">Suhu Tubuh</label>
+            <div class="relative mt-1">
+              <input type="text" id="fisSuhu" maxlength="4" oninput="this.value=this.value.replace(/[^0-9.]/g,'')" placeholder="36.5" class="w-full px-2 py-1 text-center bg-white border border-slate-200 rounded-lg text-xs font-black text-slate-800 outline-none focus:border-teal-500 font-mono">
+              <span class="text-[9px] font-bold text-slate-400 block mt-0.5">°C</span>
+            </div>
+          </div>
+
+          <!-- Berat Badan -->
+          <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-center hover:border-teal-400 transition-all">
+            <label for="fisBB" class="text-[10px] font-bold text-slate-500 block uppercase">Berat Badan</label>
+            <div class="relative mt-1">
+              <input type="text" id="fisBB" maxlength="5" oninput="this.value=this.value.replace(/[^0-9.]/g,'')" placeholder="65" class="w-full px-2 py-1 text-center bg-white border border-slate-200 rounded-lg text-xs font-black text-slate-800 outline-none focus:border-teal-500 font-mono">
+              <span class="text-[9px] font-bold text-slate-400 block mt-0.5">kg</span>
+            </div>
+          </div>
+
+          <!-- Tinggi Badan -->
+          <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-center hover:border-teal-400 transition-all">
+            <label for="fisTB" class="text-[10px] font-bold text-slate-500 block uppercase">Tinggi Badan</label>
+            <div class="relative mt-1">
+              <input type="text" id="fisTB" maxlength="5" oninput="this.value=this.value.replace(/[^0-9.]/g,'')" placeholder="170" class="w-full px-2 py-1 text-center bg-white border border-slate-200 rounded-lg text-xs font-black text-slate-800 outline-none focus:border-teal-500 font-mono">
+              <span class="text-[9px] font-bold text-slate-400 block mt-0.5">cm</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sub-block 3: HIGH ALERT ALERGI PASIEN (RED CARD ALERT) -->
+      <div class="bg-rose-50/80 p-4 rounded-xl border border-rose-200 flex flex-col sm:flex-row sm:items-center gap-3.5 shadow-2xs">
+        <div class="flex items-center gap-2.5 shrink-0">
+          <span class="w-9 h-9 rounded-xl bg-rose-500 text-white flex items-center justify-center font-bold text-base shadow-xs">
+            ⚠️
+          </span>
+          <div>
+            <label for="fisAlergi" class="text-xs font-black text-rose-950 block leading-tight">Riwayat Alergi Pasien</label>
+            <span class="text-[10px] text-rose-600 font-semibold">Obat / Anestesi / Lateks / Bahan Medis</span>
+          </div>
+        </div>
+        <div class="flex-1">
+          <input type="text" id="fisAlergi" oninput="autoTitleCase(this)" placeholder="Ketik jenis obat/bahan (contoh: Amoxicillin, Lidocaine). Bila tidak ada ketik 'Tidak Ada / -'..." class="w-full px-3.5 py-2 bg-white border border-rose-300 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 rounded-lg text-xs font-bold text-rose-900 outline-none placeholder:text-rose-400 placeholder:font-normal">
+        </div>
+      </div>
+
+      <!-- Sub-block 4: EKSTRA ORAL & INTRA ORAL -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Ekstra Oral -->
+        <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 focus-within:border-teal-500 transition-all">
+          <div class="flex items-center justify-between mb-1.5">
+            <label for="fisEkstra" class="text-xs font-black text-slate-800 flex items-center gap-1.5">
+              <span>👤</span> Pemeriksaan Ekstra Oral
+            </label>
+            <span class="text-[9px] text-slate-400 font-medium">Wajah, TMJ, KGB</span>
+          </div>
+          <input type="text" id="fisEkstra" oninput="autoTitleCase(this)" placeholder="Contoh: Wajah simetris, TMJ normal tidak ada clicking, KGB tidak teraba..." class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-800 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-200">
+        </div>
+
+        <!-- Intra Oral -->
+        <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 focus-within:border-teal-500 transition-all">
+          <div class="flex items-center justify-between mb-1.5">
+            <label for="fisIntra" class="text-xs font-black text-slate-800 flex items-center gap-1.5">
+              <span>👄</span> Pemeriksaan Intra Oral
+            </label>
+            <span class="text-[9px] text-slate-400 font-medium">Bibir, Mukosa, Lidah, Palatum</span>
+          </div>
+          <input type="text" id="fisIntra" oninput="autoTitleCase(this)" placeholder="Contoh: Mukosa bukal & labial normal, lidah normal, palatum normal..." class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-800 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-200">
+        </div>
+      </div>
+
+      <!-- Sub-block 5: PENUNJANG DIAGNOSTIK / LAB -->
+      <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 focus-within:border-teal-500 transition-all">
+        <div class="flex items-center justify-between mb-1.5">
+          <label for="fisPenunjang" class="text-xs font-black text-slate-800 flex items-center gap-1.5">
+            <span>🔬</span> Penunjang Diagnostik & Laboratorium
+          </label>
+          <span class="text-[9px] text-slate-400 font-medium">Foto Rontgen / Darah / Biopsi</span>
+        </div>
+        <input type="text" id="fisPenunjang" oninput="autoTitleCase(this)" placeholder="Contoh: Foto Rontgen Panoramik: Tampak impaksi gigi 38 posisi vertikal kelas 1A, radiolusensi pada 46..." class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-800 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-200">
       </div>
     </div>
 

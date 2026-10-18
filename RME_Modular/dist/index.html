@@ -1946,58 +1946,396 @@
     <div class="flex-1 overflow-y-auto p-6 bg-slate-50/50 relative scroll-smooth" id="mainContentScroll">
       
       <!-- DASHBOARD FINANSIAL MODULE -->
-      <div id="view-dashboard" class="module-view hidden">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4">
-            <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center text-2xl font-bold">👥</div>
-            <div><p class="text-[10px] font-bold text-slate-500 uppercase">Total Pasien</p><h3 class="text-2xl font-black text-slate-800" id="dashTotPasien">0</h3></div>
+      <div id="view-dashboard" class="module-view hidden space-y-6">
+        
+        <!-- 1. HEADER BANNER & EXPORT ACTIONS -->
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-6 bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-950 rounded-3xl shadow-lg border border-slate-700/60 text-white">
+          <div class="flex items-center gap-4">
+            <div class="w-14 h-14 bg-white/10 backdrop-blur-md text-emerald-400 rounded-2xl flex items-center justify-center font-bold text-3xl shadow-inner border border-white/20 shrink-0">
+              📊
+            </div>
+            <div>
+              <div class="flex flex-wrap items-center gap-2.5">
+                <h2 class="text-xl md:text-2xl font-black text-white tracking-tight">Dashboard Finansial & Eksekutif</h2>
+                <span class="px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 rounded-full flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Real-Time Analytics
+                </span>
+              </div>
+              <p class="text-xs text-slate-300 font-medium mt-1" id="dashActivePeriodLabel">Memantau omzet kotor, estimasi jasa medis dokter, laba bersih klinik, dan tren transaksi</p>
+            </div>
           </div>
-          <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4">
-            <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-2xl font-bold">💳</div>
-            <div><p class="text-[10px] font-bold text-slate-500 uppercase">Transaksi Aktif</p><h3 class="text-2xl font-black text-slate-800" id="dashTotTrx">0</h3></div>
-          </div>
-          <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4">
-            <div class="w-12 h-12 bg-sky-50 text-sky-600 rounded-xl flex items-center justify-center text-2xl font-bold">🩺</div>
-            <div><p class="text-[10px] font-bold text-slate-500 uppercase">Total EMR</p><h3 class="text-2xl font-black text-slate-800" id="dashTotEmr">0</h3></div>
-          </div>
-          <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4">
-            <div class="w-12 h-12 bg-rose-50 text-rose-600 rounded-xl flex items-center justify-center text-2xl font-bold">📦</div>
-            <div><p class="text-[10px] font-bold text-slate-500 uppercase">Master Data</p><h3 class="text-2xl font-black text-slate-800" id="dashTotItem">0</h3></div>
+          <div class="flex flex-wrap items-center gap-2.5">
+            <button type="button" onclick="exportDashboardFinansialCSV()" class="px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white font-bold rounded-xl border border-white/20 text-xs transition-all flex items-center gap-2 cursor-pointer active:scale-95">
+              <span>📥</span> Export Excel (CSV)
+            </button>
+            <button type="button" onclick="cetakLaporanFinansial()" class="px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-black rounded-xl shadow-md text-xs transition-all flex items-center gap-2 cursor-pointer active:scale-95">
+              <span>🖨️</span> Cetak Laporan
+            </button>
           </div>
         </div>
 
-        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 mb-6 flex flex-wrap items-end gap-4">
-          <div>
-            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Dari Tanggal</label>
-            <input type="date" id="dashFilterAwal" class="px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold w-44 text-slate-700 outline-none focus:border-indigo-500">
+        <!-- 2. FILTER CEPAT (QUICK PRESETS) & RENTANG TANGGAL -->
+        <div class="bg-white p-5 md:p-6 rounded-3xl shadow-sm border border-slate-200/90 space-y-4">
+          <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+            <div>
+              <span class="text-[11px] font-black uppercase tracking-wider text-slate-400 block mb-2">⚡ Filter Cepat Periode</span>
+              <div class="flex flex-wrap items-center gap-2" id="dashPresetButtons">
+                <button type="button" onclick="setDashPreset('all')" data-preset="all" class="dash-preset-btn px-3.5 py-2 rounded-xl text-xs font-extrabold border transition-all cursor-pointer bg-indigo-600 text-white border-indigo-600 shadow-sm">Semua Waktu</button>
+                <button type="button" onclick="setDashPreset('today')" data-preset="today" class="dash-preset-btn px-3.5 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer bg-slate-50 text-slate-700 border-slate-200 hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-200">Hari Ini</button>
+                <button type="button" onclick="setDashPreset('7d')" data-preset="7d" class="dash-preset-btn px-3.5 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer bg-slate-50 text-slate-700 border-slate-200 hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-200">7 Hari Terakhir</button>
+                <button type="button" onclick="setDashPreset('this_month')" data-preset="this_month" class="dash-preset-btn px-3.5 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer bg-slate-50 text-slate-700 border-slate-200 hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-200">Bulan Ini</button>
+                <button type="button" onclick="setDashPreset('last_month')" data-preset="last_month" class="dash-preset-btn px-3.5 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer bg-slate-50 text-slate-700 border-slate-200 hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-200">Bulan Lalu</button>
+                <button type="button" onclick="setDashPreset('this_year')" data-preset="this_year" class="dash-preset-btn px-3.5 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer bg-slate-50 text-slate-700 border-slate-200 hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-200">Tahun Ini</button>
+              </div>
+            </div>
+
+            <div class="flex flex-wrap items-end gap-3">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Dari Tanggal</label>
+                <input type="date" id="dashFilterAwal" class="px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs md:text-sm font-bold text-slate-800 outline-none focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Sampai Tanggal</label>
+                <input type="date" id="dashFilterAkhir" class="px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs md:text-sm font-bold text-slate-800 outline-none focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all">
+              </div>
+              <button type="button" onclick="updateDashboardNumbers('custom')" class="px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 text-white font-black text-xs md:text-sm rounded-xl transition-all shadow-md shadow-indigo-500/20 cursor-pointer active:scale-95">
+                🔍 Terapkan Filter
+              </button>
+            </div>
           </div>
-          <div>
-            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Sampai Tanggal</label>
-            <input type="date" id="dashFilterAkhir" class="px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold w-44 text-slate-700 outline-none focus:border-indigo-500">
+
+          <div class="flex flex-wrap items-center justify-between gap-2 text-xs">
+            <div class="flex items-center gap-2 text-slate-600 font-semibold">
+              <span>📅 Rentang Aktif:</span>
+              <span id="dashRangeBadge" class="px-2.5 py-0.5 bg-slate-100 text-slate-800 font-black rounded-lg border border-slate-200">Seluruh Riwayat Transaksi</span>
+            </div>
+            <div id="dashGrowthBadge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-emerald-50 text-emerald-700 border border-emerald-200">
+              <span>📊</span> Menunggu kalkulasi...
+            </div>
           </div>
-          <button onclick="updateDashboardNumbers()" class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-all shadow-md shadow-indigo-500/20">
-            Terapkan Filter
-          </button>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div class="bg-gradient-to-br from-slate-800 to-slate-900 p-6 rounded-2xl shadow-lg border border-slate-700 relative overflow-hidden">
-            <div class="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center text-xl mb-4">💰</div>
-            <p class="text-slate-400 font-bold uppercase tracking-wider mb-1 text-[10px]">Total Transaksi (Semua Metode)</p>
-            <h3 class="text-3xl font-black text-white" id="dashTotUang">Rp 0</h3>
-            <p class="text-indigo-300 mt-2 text-[11px] font-bold bg-white/10 inline-block px-3 py-1 rounded-full" id="dashTotCount">0 Invoice Transaksi</p>
+        <!-- 3. KPI OPERASIONAL KLINIK (4 KARTU) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="bg-white p-5 rounded-2xl shadow-xs border border-slate-200/90 flex items-center gap-4 hover:border-indigo-300 transition-all">
+            <div class="w-13 h-13 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center text-2xl font-bold border border-indigo-100 shrink-0">👥</div>
+            <div class="min-w-0">
+              <p class="text-xs font-bold text-slate-500">Total Database Pasien</p>
+              <h3 class="text-2xl font-black text-slate-900 tracking-tight" id="dashTotPasien">0</h3>
+              <p class="text-[11px] font-semibold text-indigo-600 truncate mt-0.5" id="dashSubPasien">Pasien terdaftar aktif</p>
+            </div>
           </div>
-          <div class="bg-gradient-to-br from-emerald-500 to-emerald-600 p-6 rounded-2xl shadow-lg border border-emerald-500 relative overflow-hidden">
-            <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-xl mb-4">💵</div>
-            <p class="text-emerald-100 font-bold uppercase tracking-wider mb-1 text-[10px]">Pembayaran Cash / Tunai</p>
-            <h3 class="text-3xl font-black text-white" id="dashTotCash">Rp 0</h3>
+          <div class="bg-white p-5 rounded-2xl shadow-xs border border-slate-200/90 flex items-center gap-4 hover:border-emerald-300 transition-all">
+            <div class="w-13 h-13 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center text-2xl font-bold border border-emerald-100 shrink-0">🧾</div>
+            <div class="min-w-0">
+              <p class="text-xs font-bold text-slate-500">Item Transaksi Kasir</p>
+              <h3 class="text-2xl font-black text-slate-900 tracking-tight" id="dashTotTrx">0</h3>
+              <p class="text-[11px] font-semibold text-emerald-600 truncate mt-0.5" id="dashSubTrx">0 Invoice Lunas</p>
+            </div>
           </div>
-          <div class="bg-gradient-to-br from-blue-500 to-blue-600 p-6 rounded-2xl shadow-lg border border-blue-500 relative overflow-hidden">
-            <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-xl mb-4">💳</div>
-            <p class="text-blue-100 font-bold uppercase tracking-wider mb-1 text-[10px]">Pembayaran Transfer / Non-Tunai</p>
-            <h3 class="text-3xl font-black text-white" id="dashTotTransfer">Rp 0</h3>
+          <div class="bg-white p-5 rounded-2xl shadow-xs border border-slate-200/90 flex items-center gap-4 hover:border-sky-300 transition-all">
+            <div class="w-13 h-13 bg-sky-50 text-sky-600 rounded-2xl flex items-center justify-center text-2xl font-bold border border-sky-100 shrink-0">🩺</div>
+            <div class="min-w-0">
+              <p class="text-xs font-bold text-slate-500">Total Kunjungan EMR</p>
+              <h3 class="text-2xl font-black text-slate-900 tracking-tight" id="dashTotEmr">0</h3>
+              <p class="text-[11px] font-semibold text-sky-600 truncate mt-0.5" id="dashSubEmr">Rekam medis tersimpan</p>
+            </div>
+          </div>
+          <div class="bg-white p-5 rounded-2xl shadow-xs border border-slate-200/90 flex items-center gap-4 hover:border-rose-300 transition-all">
+            <div class="w-13 h-13 bg-rose-50 text-rose-600 rounded-2xl flex items-center justify-center text-2xl font-bold border border-rose-100 shrink-0">📦</div>
+            <div class="min-w-0">
+              <p class="text-xs font-bold text-slate-500">Katalog Layanan & Obat</p>
+              <h3 class="text-2xl font-black text-slate-900 tracking-tight" id="dashTotItem">0</h3>
+              <p class="text-[11px] font-semibold text-rose-600 truncate mt-0.5" id="dashSubItem">Tindakan & item farmasi</p>
+            </div>
           </div>
         </div>
+
+        <!-- 4. ANALISIS PROFITABILITAS & PENDAPATAN UTAMA (4 KARTU BESAR) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+          <!-- Card 1: Omzet Kotor -->
+          <div class="bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 p-6 rounded-3xl shadow-lg border border-slate-700 relative overflow-hidden text-white flex flex-col justify-between">
+            <div class="absolute -right-4 -top-4 text-7xl opacity-10 pointer-events-none">💰</div>
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <span class="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center text-xl border border-white/10">💰</span>
+                <span class="px-2.5 py-1 rounded-full text-[10px] font-black bg-indigo-500/30 text-indigo-200 border border-indigo-400/30" id="dashTotCount">0 Invoice Transaksi</span>
+              </div>
+              <p class="text-slate-300 font-bold uppercase tracking-wider text-[11px]">Omzet Kotor (Gross Revenue)</p>
+              <h3 class="text-2xl xl:text-3xl font-black text-white mt-1 tracking-tight" id="dashTotUang">Rp 0</h3>
+            </div>
+            <div class="mt-4 pt-3 border-t border-white/10 flex items-center justify-between text-[11px] text-slate-300 font-medium">
+              <span>Total pemasukan kasir</span>
+              <span class="font-bold text-emerald-300">100% Gross</span>
+            </div>
+          </div>
+
+          <!-- Card 2: Estimasi Jasa Medis Dokter -->
+          <div class="bg-gradient-to-br from-amber-500 to-orange-600 p-6 rounded-3xl shadow-lg border border-amber-500 relative overflow-hidden text-white flex flex-col justify-between">
+            <div class="absolute -right-4 -top-4 text-7xl opacity-10 pointer-events-none">👨‍⚕️</div>
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <span class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center text-xl">👨‍⚕️</span>
+                <span class="px-2.5 py-1 rounded-full text-[10px] font-black bg-black/20 text-white" id="dashPctJM">Alokasi JM: 0%</span>
+              </div>
+              <p class="text-amber-100 font-bold uppercase tracking-wider text-[11px]">Estimasi Jasa Medis (JM) Dokter</p>
+              <h3 class="text-2xl xl:text-3xl font-black text-white mt-1 tracking-tight" id="dashTotEstJM">Rp 0</h3>
+            </div>
+            <div class="mt-4 pt-3 border-t border-white/20 flex items-center justify-between text-[11px] text-amber-50 font-medium">
+              <span>Bagi hasil tindakan medis</span>
+              <span id="dashCountDokterAktif" class="font-bold">0 Dokter</span>
+            </div>
+          </div>
+
+          <!-- Card 3: Pendapatan Bersih Klinik (Net Share) -->
+          <div class="bg-gradient-to-br from-teal-600 to-emerald-700 p-6 rounded-3xl shadow-lg border border-teal-500 relative overflow-hidden text-white flex flex-col justify-between">
+            <div class="absolute -right-4 -top-4 text-7xl opacity-10 pointer-events-none">🏦</div>
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <span class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center text-xl">🏦</span>
+                <span class="px-2.5 py-1 rounded-full text-[10px] font-black bg-white/20 text-white" id="dashPctMargin">Margin: 0%</span>
+              </div>
+              <p class="text-teal-100 font-bold uppercase tracking-wider text-[11px]">Pendapatan Bersih Klinik (Net)</p>
+              <h3 class="text-2xl xl:text-3xl font-black text-white mt-1 tracking-tight" id="dashTotNetKlinik">Rp 0</h3>
+            </div>
+            <div class="mt-4 pt-3 border-t border-white/20 flex items-center justify-between text-[11px] text-teal-50 font-medium">
+              <span>Omzet dikurangi JM Dokter</span>
+              <span class="font-bold">Kas Klinik</span>
+            </div>
+          </div>
+
+          <!-- Card 4: Rata-rata Nilai Transaksi (Basket Size) -->
+          <div class="bg-gradient-to-br from-violet-600 to-purple-700 p-6 rounded-3xl shadow-lg border border-violet-500 relative overflow-hidden text-white flex flex-col justify-between">
+            <div class="absolute -right-4 -top-4 text-7xl opacity-10 pointer-events-none">📈</div>
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <span class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center text-xl">📈</span>
+                <span class="px-2.5 py-1 rounded-full text-[10px] font-black bg-white/20 text-white">Avg / Pasien</span>
+              </div>
+              <p class="text-violet-100 font-bold uppercase tracking-wider text-[11px]">Rata-rata Transaksi / Kunjungan</p>
+              <h3 class="text-2xl xl:text-3xl font-black text-white mt-1 tracking-tight" id="dashAvgTrx">Rp 0</h3>
+            </div>
+            <div class="mt-4 pt-3 border-t border-white/20 flex items-center justify-between text-[11px] text-violet-100 font-medium">
+              <span>Total Potongan Diskon:</span>
+              <span id="dashTotDiskonInfo" class="font-bold">Rp 0</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. RINCIAN METODE PEMBAYARAN & KOMPOSISI SUMBER PENDAPATAN -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          
+          <!-- Kiri: Rincian Metode Pembayaran (7 Kolom) -->
+          <div class="lg:col-span-7 bg-white p-6 rounded-3xl shadow-sm border border-slate-200/90 space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div class="flex items-center gap-2.5">
+                <span class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg border border-emerald-100">💳</span>
+                <div>
+                  <h4 class="font-black text-slate-800 text-sm md:text-base">Rincian Metode Pembayaran</h4>
+                  <p class="text-[11px] text-slate-500">Distribusi kas masuk berdasarkan kanal pembayaran pasien</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <!-- Cash / Tunai -->
+              <div class="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-200/80 flex flex-col justify-between">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-xs font-black text-emerald-800 flex items-center gap-1.5">💵 Cash / Tunai</span>
+                  <span id="dashCountCash" class="text-[10px] font-bold px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-md">0 Trx (0%)</span>
+                </div>
+                <h4 class="text-xl font-black text-emerald-700" id="dashTotCash">Rp 0</h4>
+              </div>
+
+              <!-- Total Non-Tunai / Transfer (Backward Compatible ID: dashTotTransfer) -->
+              <div class="p-4 rounded-2xl bg-blue-50/60 border border-blue-200/80 flex flex-col justify-between">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-xs font-black text-blue-800 flex items-center gap-1.5">🏦 Transfer & Non-Tunai</span>
+                  <span id="dashCountTransfer" class="text-[10px] font-bold px-2 py-0.5 bg-blue-100 text-blue-800 rounded-md">0 Trx (0%)</span>
+                </div>
+                <h4 class="text-xl font-black text-blue-700" id="dashTotTransfer">Rp 0</h4>
+              </div>
+
+              <!-- QRIS / E-Wallet -->
+              <div class="p-4 rounded-2xl bg-purple-50/60 border border-purple-200/80 flex flex-col justify-between">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-xs font-black text-purple-800 flex items-center gap-1.5">📱 QRIS / E-Wallet</span>
+                  <span id="dashCountQris" class="text-[10px] font-bold px-2 py-0.5 bg-purple-100 text-purple-800 rounded-md">0 Trx</span>
+                </div>
+                <h4 class="text-lg font-black text-purple-700" id="dashTotQris">Rp 0</h4>
+              </div>
+
+              <!-- Debit / Kredit / EDC -->
+              <div class="p-4 rounded-2xl bg-amber-50/60 border border-amber-200/80 flex flex-col justify-between">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-xs font-black text-amber-800 flex items-center gap-1.5">💳 Debit / Kartu Kredit</span>
+                  <span id="dashCountCard" class="text-[10px] font-bold px-2 py-0.5 bg-amber-100 text-amber-800 rounded-md">0 Trx</span>
+                </div>
+                <h4 class="text-lg font-black text-amber-700" id="dashTotCard">Rp 0</h4>
+              </div>
+            </div>
+          </div>
+
+          <!-- Kanan: Komposisi Sumber Pendapatan (5 Kolom) -->
+          <div class="lg:col-span-5 bg-white p-6 rounded-3xl shadow-sm border border-slate-200/90 flex flex-col justify-between space-y-4">
+            <div class="flex items-center gap-2.5 pb-3 border-b border-slate-100">
+              <span class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg border border-indigo-100">🧩</span>
+              <div>
+                <h4 class="font-black text-slate-800 text-sm md:text-base">Komposisi Sumber Pendapatan</h4>
+                <p class="text-[11px] text-slate-500">Kontribusi tindakan medis vs penjualan obat/farmasi</p>
+              </div>
+            </div>
+
+            <div class="space-y-4 my-auto">
+              <!-- Tindakan Medis -->
+              <div>
+                <div class="flex justify-between items-center text-xs mb-1.5">
+                  <span class="font-bold text-slate-700 flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-indigo-600"></span> Jasa Tindakan Medis</span>
+                  <div class="text-right">
+                    <span class="font-black text-slate-900" id="dashRevTindakan">Rp 0</span>
+                    <span class="text-[11px] font-bold text-indigo-600 ml-1" id="dashPctTindakan">(0%)</span>
+                  </div>
+                </div>
+                <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
+                  <div id="dashBarTindakan" class="h-full bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-full transition-all duration-500" style="width: 0%"></div>
+                </div>
+              </div>
+
+              <!-- Obat & Farmasi -->
+              <div>
+                <div class="flex justify-between items-center text-xs mb-1.5">
+                  <span class="font-bold text-slate-700 flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-teal-500"></span> Penjualan Obat & Farmasi</span>
+                  <div class="text-right">
+                    <span class="font-black text-slate-900" id="dashRevObat">Rp 0</span>
+                    <span class="text-[11px] font-bold text-teal-600 ml-1" id="dashPctObat">(0%)</span>
+                  </div>
+                </div>
+                <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
+                  <div id="dashBarObat" class="h-full bg-gradient-to-r from-teal-400 to-teal-600 rounded-full transition-all duration-500" style="width: 0%"></div>
+                </div>
+              </div>
+
+              <!-- BMHP & Lainnya -->
+              <div>
+                <div class="flex justify-between items-center text-xs mb-1.5">
+                  <span class="font-bold text-slate-700 flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span> BMHP / Penunjang Lainnya</span>
+                  <div class="text-right">
+                    <span class="font-black text-slate-900" id="dashRevLainnya">Rp 0</span>
+                    <span class="text-[11px] font-bold text-rose-600 ml-1" id="dashPctLainnya">(0%)</span>
+                  </div>
+                </div>
+                <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
+                  <div id="dashBarLainnya" class="h-full bg-gradient-to-r from-rose-400 to-rose-600 rounded-full transition-all duration-500" style="width: 0%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 6. GRAFIK VISUAL TREN PENDAPATAN -->
+        <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200/90 space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+            <div class="flex items-center gap-2.5">
+              <span class="w-9 h-9 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center text-lg border border-sky-100">📊</span>
+              <div>
+                <h4 class="font-black text-slate-800 text-sm md:text-base">Grafik Tren Pendapatan Klinik</h4>
+                <p class="text-[11px] text-slate-500">Visualisasi pergerakan omzet berdasarkan tanggal/periode transaksi</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <span id="dashPeakInfo" class="px-3 py-1 bg-amber-50 text-amber-800 border border-amber-200 rounded-xl text-xs font-bold">🏆 Puncak Omzet: -</span>
+            </div>
+          </div>
+
+          <div id="dashTrendChartContainer" class="pt-4 pb-2 min-h-[210px] flex items-end gap-2.5 overflow-x-auto custom-scrollbar px-2">
+            <!-- Bar chart rendered dynamically by updateDashboardNumbers() -->
+          </div>
+        </div>
+
+        <!-- 7. TOP 5 LAYANAN TERLARIS & PERFORMA DOKTER -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          
+          <!-- Kiri: Top 5 Tindakan & Obat Penyumbang Omzet -->
+          <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200/90 space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div class="flex items-center gap-2.5">
+                <span class="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg border border-amber-100">🏆</span>
+                <div>
+                  <h4 class="font-black text-slate-800 text-sm md:text-base">Top 5 Tindakan & Layanan Terlaris</h4>
+                  <p class="text-[11px] text-slate-500">Penyumbang omzet terbesar pada periode terpilih</p>
+                </div>
+              </div>
+            </div>
+            <div id="dashTopItemsBody" class="space-y-3">
+              <!-- Populated via JS -->
+            </div>
+          </div>
+
+          <!-- Kanan: Performa & Kontribusi per Dokter -->
+          <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200/90 space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div class="flex items-center gap-2.5">
+                <span class="w-9 h-9 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center text-lg border border-teal-100">🩺</span>
+                <div>
+                  <h4 class="font-black text-slate-800 text-sm md:text-base">Performa & Kontribusi per Dokter</h4>
+                  <p class="text-[11px] text-slate-500">Jumlah pasien ditangani, omzet kotor, dan estimasi JM</p>
+                </div>
+              </div>
+            </div>
+            <div class="overflow-x-auto rounded-2xl border border-slate-200">
+              <table class="w-full text-left whitespace-nowrap text-xs">
+                <thead class="bg-slate-100/80 text-[11px] uppercase font-black text-slate-600 border-b border-slate-200">
+                  <tr>
+                    <th class="p-3">Nama Dokter</th>
+                    <th class="p-3 text-center">Pasien</th>
+                    <th class="p-3 text-right">Total Omzet</th>
+                    <th class="p-3 text-right">Est. Jasa Medis</th>
+                  </tr>
+                </thead>
+                <tbody id="dashDoctorPerfBody" class="divide-y divide-slate-100 font-medium text-slate-700">
+                  <tr><td colspan="4" class="p-6 text-center text-slate-400 font-bold">Belum ada data transaksi dokter.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- 8. TABEL TRANSAKSI KASIR TERBARU -->
+        <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200/90 space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+            <div class="flex items-center gap-2.5">
+              <span class="w-9 h-9 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-lg border border-rose-100">🧾</span>
+              <div>
+                <h4 class="font-black text-slate-800 text-sm md:text-base">Daftar Transaksi Kasir Terbaru</h4>
+                <p class="text-[11px] text-slate-500">10 invoice pembayaran terakhir pada periode terpilih</p>
+              </div>
+            </div>
+            <button type="button" onclick="switchMenu('riwayat-invoice')" class="px-4 py-2 bg-slate-100 hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 font-bold rounded-xl text-xs border border-slate-200 transition-colors cursor-pointer self-start sm:self-auto">
+              Lihat Semua Invoice ➡️
+            </button>
+          </div>
+
+          <div class="overflow-x-auto rounded-2xl border border-slate-200">
+            <table class="w-full text-left whitespace-nowrap text-xs">
+              <thead class="bg-slate-100/80 text-[11px] uppercase font-black text-slate-600 border-b border-slate-200">
+                <tr>
+                  <th class="p-3.5">No. Invoice</th>
+                  <th class="p-3.5">Tanggal</th>
+                  <th class="p-3.5">Nama Pasien</th>
+                  <th class="p-3.5">Dokter</th>
+                  <th class="p-3.5">Rincian Item</th>
+                  <th class="p-3.5 text-center">Metode</th>
+                  <th class="p-3.5 text-right">Total Tagihan</th>
+                </tr>
+              </thead>
+              <tbody id="dashRecentTrxBody" class="divide-y divide-slate-100 font-medium text-slate-700">
+                <tr><td colspan="7" class="p-8 text-center text-slate-400 font-bold">Belum ada riwayat transaksi.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
       </div>
 
       <!-- INJECT MODUL VIEW HTML -->
@@ -8242,50 +8580,511 @@
     }
   }
 
-  function updateDashboardNumbers() {
-    document.getElementById('dashTotPasien').innerText = window.KlinikData.pasien.length;
-    document.getElementById('dashTotTrx').innerText = window.KlinikData.pembayaran.length;
-    document.getElementById('dashTotEmr').innerText = window.KlinikData.rekamMedis.length;
-    document.getElementById('dashTotItem').innerText = window.KlinikData.obat.length + window.KlinikData.tindakan.length;
-    
-    let rawTglAwal = document.getElementById('dashFilterAwal').value;
-    let rawTglAkhir = document.getElementById('dashFilterAkhir').value;
-    let tglAwal = rawTglAwal ? new Date(rawTglAwal).setHours(0,0,0,0) : null;
-    let tglAkhir = rawTglAkhir ? new Date(rawTglAkhir).setHours(23,59,59,999) : null;
-    
-    let totalUang = 0, totalCash = 0, totalTransfer = 0, invoiceCount = 0;
+  window._dashCurrentFilteredInvoices = [];
+  window._dashCurrentSummary = {};
+
+  function parseDashDate(rawStr) {
+    if (!rawStr) return null;
+    let clean = String(rawStr).trim().split(' ')[0];
+    let parts = clean.split(/[-/]/);
+    if (parts.length !== 3) return null;
+    let y, m, d;
+    if (parts[0].length === 4) {
+      y = parseInt(parts[0], 10);
+      m = parseInt(parts[1], 10);
+      d = parseInt(parts[2], 10);
+    } else if (parts[2].length === 4) {
+      d = parseInt(parts[0], 10);
+      m = parseInt(parts[1], 10);
+      y = parseInt(parts[2], 10);
+    } else {
+      return null;
+    }
+    if (isNaN(y) || isNaN(m) || isNaN(d)) return null;
+    let dt = new Date(y, m - 1, d);
+    let mm = String(m).padStart(2, '0');
+    let dd = String(d).padStart(2, '0');
+    return {
+      time: dt.getTime(),
+      yyyyMmDd: `${y}-${mm}-${dd}`,
+      ddMmYyyy: `${dd}-${mm}-${y}`,
+      yearMonth: `${y}-${mm}`
+    };
+  }
+
+  function toInputDateStr(dt) {
+    let y = dt.getFullYear();
+    let m = String(dt.getMonth() + 1).padStart(2, '0');
+    let d = String(dt.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+
+  function setDashPreset(preset) {
+    const now = new Date();
+    const elAwal = document.getElementById('dashFilterAwal');
+    const elAkhir = document.getElementById('dashFilterAkhir');
+    if (!elAwal || !elAkhir) return;
+
+    if (preset === 'all') {
+      elAwal.value = '';
+      elAkhir.value = '';
+    } else if (preset === 'today') {
+      let s = toInputDateStr(now);
+      elAwal.value = s;
+      elAkhir.value = s;
+    } else if (preset === '7d') {
+      let past = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6);
+      elAwal.value = toInputDateStr(past);
+      elAkhir.value = toInputDateStr(now);
+    } else if (preset === 'this_month') {
+      let first = new Date(now.getFullYear(), now.getMonth(), 1);
+      let last = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+      elAwal.value = toInputDateStr(first);
+      elAkhir.value = toInputDateStr(last);
+    } else if (preset === 'last_month') {
+      let first = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      let last = new Date(now.getFullYear(), now.getMonth(), 0);
+      elAwal.value = toInputDateStr(first);
+      elAkhir.value = toInputDateStr(last);
+    } else if (preset === 'this_year') {
+      let first = new Date(now.getFullYear(), 0, 1);
+      let last = new Date(now.getFullYear(), 11, 31);
+      elAwal.value = toInputDateStr(first);
+      elAkhir.value = toInputDateStr(last);
+    }
+
+    document.querySelectorAll('.dash-preset-btn').forEach(btn => {
+      if (btn.getAttribute('data-preset') === preset) {
+        btn.className = 'dash-preset-btn px-3.5 py-2 rounded-xl text-xs font-extrabold border transition-all cursor-pointer bg-indigo-600 text-white border-indigo-600 shadow-sm';
+      } else {
+        btn.className = 'dash-preset-btn px-3.5 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer bg-slate-50 text-slate-700 border-slate-200 hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-200';
+      }
+    });
+
+    updateDashboardNumbers(preset);
+  }
+
+  function getDokterRateJM(namaDokter, namaItem) {
+    let listTindakan = window.KlinikData.tindakan || [];
+    let masterT = listTindakan.find(x => (x.nama || '').toLowerCase() === (namaItem || '').toLowerCase());
+    if (masterT && masterT.persenJMDefault !== null && masterT.persenJMDefault !== undefined && Number(masterT.persenJMDefault) > 0) {
+      let p = Number(masterT.persenJMDefault);
+      return p > 1 ? p / 100 : p;
+    }
+    let listStaff = window.KlinikData.staff || [];
+    let dok = listStaff.find(d => (d.nama || '').toLowerCase() === (namaDokter || '').toLowerCase());
+    if (dok && dok.persenJM !== undefined && dok.persenJM !== null && Number(dok.persenJM) > 0) {
+      let p = Number(dok.persenJM);
+      return p > 1 ? p / 100 : p;
+    }
+    return 0.40; // Default 40%
+  }
+
+  function updateDashboardNumbers(presetSource) {
+    const pasienList = window.KlinikData.pasien || [];
+    const pembayaranList = window.KlinikData.pembayaran || [];
+    const emrList = window.KlinikData.rekamMedis || [];
+    const obatList = window.KlinikData.obat || [];
+    const tindakanList = window.KlinikData.tindakan || [];
+    const bmhpList = window.KlinikData.bmhp || [];
+
+    const setElText = (id, txt) => {
+      const el = document.getElementById(id);
+      if (el) el.innerText = txt;
+    };
+
+    setElText('dashTotPasien', pasienList.length);
+    setElText('dashTotTrx', pembayaranList.length);
+    setElText('dashTotEmr', emrList.length);
+    setElText('dashTotItem', obatList.length + tindakanList.length + bmhpList.length);
+    setElText('dashSubItem', `${tindakanList.length} Tindakan • ${obatList.length} Obat`);
+
+    if (presetSource === 'custom') {
+      document.querySelectorAll('.dash-preset-btn').forEach(btn => {
+        btn.className = 'dash-preset-btn px-3.5 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer bg-slate-50 text-slate-700 border-slate-200 hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-200';
+      });
+    }
+
+    const elAwal = document.getElementById('dashFilterAwal');
+    const elAkhir = document.getElementById('dashFilterAkhir');
+    let rawTglAwal = elAwal ? elAwal.value : '';
+    let rawTglAkhir = elAkhir ? elAkhir.value : '';
+    let tglAwal = rawTglAwal ? new Date(rawTglAwal + 'T00:00:00').getTime() : null;
+    let tglAkhir = rawTglAkhir ? new Date(rawTglAkhir + 'T23:59:59.999').getTime() : null;
+
+    // Update label rentang aktif
+    if (rawTglAwal && rawTglAkhir) {
+      let p1 = parseDashDate(rawTglAwal);
+      let p2 = parseDashDate(rawTglAkhir);
+      setElText('dashRangeBadge', `${p1 ? p1.ddMmYyyy : rawTglAwal} s/d ${p2 ? p2.ddMmYyyy : rawTglAkhir}`);
+    } else if (rawTglAwal) {
+      let p1 = parseDashDate(rawTglAwal);
+      setElText('dashRangeBadge', `Mulai ${p1 ? p1.ddMmYyyy : rawTglAwal}`);
+    } else if (rawTglAkhir) {
+      let p2 = parseDashDate(rawTglAkhir);
+      setElText('dashRangeBadge', `Sampai ${p2 ? p2.ddMmYyyy : rawTglAkhir}`);
+    } else {
+      setElText('dashRangeBadge', 'Seluruh Riwayat Transaksi');
+    }
+
+    // Hitung periode pembanding sebelumnya (jika ada filter rentang)
+    let prevAwal = null, prevAkhir = null;
+    if (tglAwal && tglAkhir && tglAkhir >= tglAwal) {
+      let span = (tglAkhir - tglAwal) + 1;
+      prevAkhir = tglAwal - 1;
+      prevAwal = prevAkhir - span + 1;
+    }
+
+    let totalUang = 0, totalCash = 0, totalTransfer = 0, totalQris = 0, totalCard = 0;
+    let countCash = 0, countTransfer = 0, countQris = 0, countCard = 0, invoiceCount = 0;
+    let totalEstJM = 0, totalDiskonNominal = 0;
+    let revTindakan = 0, revObat = 0, revLainnya = 0;
+    let prevPeriodUang = 0;
+
     let countedInv = {};
-    
-    window.KlinikData.pembayaran.forEach(trx => {
-      let trxDateRaw = trx.tanggal ? trx.tanggal.split(' ')[0] : null;
-      if (!trxDateRaw) return;
-      let tParts = trxDateRaw.split('-');
-      if (tParts.length !== 3) return;
-      let trxTime = new Date(tParts[0], parseInt(tParts[1])-1, tParts[2]).getTime();
-      let isPass = true;
-      if (tglAwal && trxTime < tglAwal) isPass = false;
-      if (tglAkhir && trxTime > tglAkhir) isPass = false;
-      if (isPass) {
-        let invId = trx.idInvoice || Math.random();
-        if (!countedInv[invId]) {
-          countedInv[invId] = true;
-          invoiceCount++;
-          let total = parseFloat(trx.totalInvoice || trx.grandTotalItem || 0);
-          let metode = (trx.metode || "").toLowerCase();
-          totalUang += total;
-          if (metode.includes('cash') || metode.includes('tunai')) {
-            totalCash += total;
-          } else {
-            totalTransfer += total;
+    let prevCountedInv = {};
+    let invoiceMap = {};
+    let itemMap = {};
+    let doctorMap = {};
+    let dateTrendMap = {};
+
+    pembayaranList.forEach(trx => {
+      let parsedDate = parseDashDate(trx.tanggal);
+      if (!parsedDate) return;
+      let trxTime = parsedDate.time;
+
+      // Cek apakah masuk periode pembanding sebelumnya
+      if (prevAwal !== null && prevAkhir !== null && trxTime >= prevAwal && trxTime <= prevAkhir) {
+        let pInvId = trx.idInvoice || Math.random();
+        if (!prevCountedInv[pInvId]) {
+          prevCountedInv[pInvId] = true;
+          prevPeriodUang += parseFloat(trx.totalInvoice || trx.grandTotalItem || 0);
+        }
+      }
+
+      // Cek apakah masuk rentang filter aktif
+      if (tglAwal && trxTime < tglAwal) return;
+      if (tglAkhir && trxTime > tglAkhir) return;
+
+      let invId = trx.idInvoice || ('INV-' + Math.random());
+      let harga = parseFloat(trx.harga || 0);
+      let qty = parseFloat(trx.qty || 1);
+      let discPct = parseFloat(trx.diskon || 0);
+      let grossLine = harga * qty;
+      let lineTotal = parseFloat(trx.grandTotalItem || 0);
+      if (!lineTotal && grossLine > 0) {
+        lineTotal = discPct <= 100 ? Math.round(grossLine * (1 - discPct / 100)) : Math.max(0, grossLine - discPct);
+      }
+      let discNominal = Math.max(0, grossLine - lineTotal);
+      totalDiskonNominal += discNominal;
+
+      // Kategori pendapatan
+      let katLower = String(trx.kategori || '').toLowerCase();
+      let itemName = String(trx.item || 'Layanan Medis').trim();
+      let dokterName = String(trx.dokter || 'Dokter Klinik').trim();
+
+      let lineJM = 0;
+      if (katLower.includes('obat') || katLower.includes('farmasi') || katLower.includes('resep')) {
+        revObat += lineTotal;
+      } else if (katLower.includes('bmhp') || katLower.includes('bahan') || katLower.includes('alkes')) {
+        revLainnya += lineTotal;
+      } else {
+        revTindakan += lineTotal;
+        let rateJM = getDokterRateJM(dokterName, itemName);
+        lineJM = Math.round(lineTotal * rateJM);
+        totalEstJM += lineJM;
+      }
+
+      // Akumulasi Top Items
+      if (itemName) {
+        if (!itemMap[itemName]) {
+          itemMap[itemName] = { nama: itemName, kategori: trx.kategori || 'Tindakan', qty: 0, omzet: 0 };
+        }
+        itemMap[itemName].qty += qty;
+        itemMap[itemName].omzet += lineTotal;
+      }
+
+      // Akumulasi Performa Dokter
+      if (dokterName && dokterName !== '-') {
+        if (!doctorMap[dokterName]) {
+          doctorMap[dokterName] = { nama: dokterName, invSet: {}, omzet: 0, estJM: 0 };
+        }
+        doctorMap[dokterName].invSet[invId] = true;
+        doctorMap[dokterName].omzet += lineTotal;
+        doctorMap[dokterName].estJM += lineJM;
+      }
+
+      // Akumulasi Invoice Unik
+      if (!countedInv[invId]) {
+        countedInv[invId] = true;
+        invoiceCount++;
+        let invTotal = parseFloat(trx.totalInvoice || trx.grandTotalItem || 0);
+        let metodeRaw = String(trx.metode || 'Cash');
+        let metode = metodeRaw.toLowerCase();
+        totalUang += invTotal;
+
+        if (metode.includes('cash') || metode.includes('tunai')) {
+          totalCash += invTotal;
+          countCash++;
+        } else {
+          totalTransfer += invTotal;
+          countTransfer++;
+          if (metode.includes('qris') || metode.includes('gopay') || metode.includes('ovo') || metode.includes('dana') || metode.includes('wallet')) {
+            totalQris += invTotal;
+            countQris++;
+          } else if (metode.includes('debit') || metode.includes('kredit') || metode.includes('card') || metode.includes('edc') || metode.includes('kartu')) {
+            totalCard += invTotal;
+            countCard++;
           }
+        }
+
+        // Tren Tanggal
+        let dateKey = parsedDate.yyyyMmDd;
+        dateTrendMap[dateKey] = (dateTrendMap[dateKey] || 0) + invTotal;
+
+        invoiceMap[invId] = {
+          idInvoice: invId,
+          tanggal: parsedDate.ddMmYyyy,
+          sortTime: parsedDate.time,
+          namaPasien: trx.namaPasien || '-',
+          noRm: trx.noRm || '-',
+          dokter: dokterName,
+          metode: metodeRaw,
+          totalInvoice: invTotal,
+          items: [itemName]
+        };
+      } else if (invoiceMap[invId] && itemName) {
+        if (invoiceMap[invId].items.indexOf(itemName) === -1) {
+          invoiceMap[invId].items.push(itemName);
         }
       }
     });
-    
-    document.getElementById('dashTotUang').innerText = 'Rp ' + formatUangDashboard(totalUang);
-    document.getElementById('dashTotCount').innerText = invoiceCount + ' Invoice Transaksi';
-    document.getElementById('dashTotCash').innerText = 'Rp ' + formatUangDashboard(totalCash);
-    document.getElementById('dashTotTransfer').innerText = 'Rp ' + formatUangDashboard(totalTransfer);
+
+    // Normalisasi jika hanya ada totalInvoice tanpa rincian kategori
+    let sumKat = revTindakan + revObat + revLainnya;
+    if (sumKat === 0 && totalUang > 0) {
+      revTindakan = totalUang;
+      sumKat = totalUang;
+    }
+
+    let netKlinik = Math.max(0, totalUang - totalEstJM);
+    let avgBasket = invoiceCount > 0 ? Math.round(totalUang / invoiceCount) : 0;
+    let pctJM = totalUang > 0 ? Math.round((totalEstJM / totalUang) * 100) : 0;
+    let pctMargin = totalUang > 0 ? Math.round((netKlinik / totalUang) * 100) : 0;
+
+    // Update DOM Utama (termasuk ID lama untuk kompatibilitas)
+    setElText('dashSubTrx', `${invoiceCount} Invoice Terverifikasi`);
+    setElText('dashTotUang', 'Rp ' + formatUangDashboard(totalUang));
+    setElText('dashTotCount', invoiceCount + ' Invoice Transaksi');
+    setElText('dashTotEstJM', 'Rp ' + formatUangDashboard(totalEstJM));
+    setElText('dashPctJM', `Alokasi JM: ${pctJM}%`);
+    setElText('dashCountDokterAktif', `${Object.keys(doctorMap).length} Dokter Aktif`);
+    setElText('dashTotNetKlinik', 'Rp ' + formatUangDashboard(netKlinik));
+    setElText('dashPctMargin', `Margin: ${pctMargin}%`);
+    setElText('dashAvgTrx', 'Rp ' + formatUangDashboard(avgBasket));
+    setElText('dashTotDiskonInfo', 'Rp ' + formatUangDashboard(totalDiskonNominal));
+
+    // Metode Pembayaran
+    let pctCash = totalUang > 0 ? Math.round((totalCash / totalUang) * 100) : 0;
+    let pctTransfer = totalUang > 0 ? Math.round((totalTransfer / totalUang) * 100) : 0;
+    setElText('dashTotCash', 'Rp ' + formatUangDashboard(totalCash));
+    setElText('dashCountCash', `${countCash} Trx (${pctCash}%)`);
+    setElText('dashTotTransfer', 'Rp ' + formatUangDashboard(totalTransfer));
+    setElText('dashCountTransfer', `${countTransfer} Trx (${pctTransfer}%)`);
+    setElText('dashTotQris', 'Rp ' + formatUangDashboard(totalQris));
+    setElText('dashCountQris', `${countQris} Trx`);
+    setElText('dashTotCard', 'Rp ' + formatUangDashboard(totalCard));
+    setElText('dashCountCard', `${countCard} Trx`);
+
+    // Komposisi Sumber Pendapatan
+    let pTindakan = sumKat > 0 ? Math.round((revTindakan / sumKat) * 100) : 0;
+    let pObat = sumKat > 0 ? Math.round((revObat / sumKat) * 100) : 0;
+    let pLainnya = sumKat > 0 ? Math.max(0, 100 - pTindakan - pObat) : 0;
+    setElText('dashRevTindakan', 'Rp ' + formatUangDashboard(revTindakan));
+    setElText('dashPctTindakan', `(${pTindakan}%)`);
+    setElText('dashRevObat', 'Rp ' + formatUangDashboard(revObat));
+    setElText('dashPctObat', `(${pObat}%)`);
+    setElText('dashRevLainnya', 'Rp ' + formatUangDashboard(revLainnya));
+    setElText('dashPctLainnya', `(${pLainnya}%)`);
+
+    const barT = document.getElementById('dashBarTindakan'); if (barT) barT.style.width = pTindakan + '%';
+    const barO = document.getElementById('dashBarObat'); if (barO) barO.style.width = pObat + '%';
+    const barL = document.getElementById('dashBarLainnya'); if (barL) barL.style.width = pLainnya + '%';
+
+    // Indikator Pertumbuhan (Growth Badge)
+    const growthEl = document.getElementById('dashGrowthBadge');
+    if (growthEl) {
+      if (prevAwal !== null && prevPeriodUang > 0) {
+        let diffPct = (((totalUang - prevPeriodUang) / prevPeriodUang) * 100).toFixed(1);
+        if (diffPct >= 0) {
+          growthEl.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-emerald-50 text-emerald-700 border border-emerald-200';
+          growthEl.innerHTML = `<span>▲ +${diffPct}%</span> <span class="font-medium text-emerald-600">vs periode sebelumnya</span>`;
+        } else {
+          growthEl.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-rose-50 text-rose-700 border border-rose-200';
+          growthEl.innerHTML = `<span>▼ ${diffPct}%</span> <span class="font-medium text-rose-600">vs periode sebelumnya</span>`;
+        }
+      } else {
+        growthEl.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-indigo-50 text-indigo-700 border border-indigo-200';
+        growthEl.innerHTML = `<span>✅ ${invoiceCount} Invoice</span> <span class="font-medium text-indigo-600">terkalkulasi otomatis</span>`;
+      }
+    }
+
+    // Render Grafik Tren Pendapatan
+    const chartBox = document.getElementById('dashTrendChartContainer');
+    if (chartBox) {
+      let trendKeys = Object.keys(dateTrendMap).sort();
+      if (trendKeys.length === 0) {
+        chartBox.innerHTML = `<div class="w-full py-12 text-center text-slate-400 font-bold text-xs">Belum ada data transaksi pada periode ini untuk ditampilkan pada grafik.</div>`;
+        setElText('dashPeakInfo', '🏆 Puncak Omzet: -');
+      } else {
+        // Ambil maks 14 titik terakhir agar grafik proporsional dan mudah dibaca
+        let displayKeys = trendKeys.slice(-14);
+        let maxVal = 0;
+        let peakDate = '';
+        displayKeys.forEach(k => {
+          if (dateTrendMap[k] > maxVal) {
+            maxVal = dateTrendMap[k];
+            peakDate = k;
+          }
+        });
+        let pPeak = parseDashDate(peakDate);
+        setElText('dashPeakInfo', `🏆 Puncak: ${pPeak ? pPeak.ddMmYyyy : peakDate} (Rp ${formatUangDashboard(maxVal)})`);
+
+        chartBox.innerHTML = displayKeys.map(k => {
+          let val = dateTrendMap[k];
+          let heightPct = maxVal > 0 ? Math.max(12, Math.round((val / maxVal) * 140)) : 12;
+          let isPeak = (val === maxVal && maxVal > 0);
+          let barColor = isPeak
+            ? 'bg-gradient-to-t from-emerald-600 to-teal-400 shadow-md shadow-emerald-500/20'
+            : 'bg-gradient-to-t from-indigo-600 to-indigo-400 hover:from-indigo-500 hover:to-sky-400';
+          let shortLabel = k.split('-').slice(1).reverse().join('/');
+          let shortVal = val >= 1000000 ? (val / 1000000).toFixed(1) + 'Jt' : (val >= 1000 ? Math.round(val / 1000) + 'Rb' : val);
+          return `
+            <div class="flex-1 min-w-[48px] flex flex-col items-center group">
+              <span class="text-[10px] font-black ${isPeak ? 'text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200' : 'text-slate-600'} mb-1.5 transition-transform group-hover:scale-110">${shortVal}</span>
+              <div class="w-full max-w-[42px] rounded-t-xl transition-all duration-300 ${barColor}" style="height: ${heightPct}px;" title="${k}: Rp ${formatUangDashboard(val)}"></div>
+              <span class="text-[10px] font-bold text-slate-500 mt-2">${shortLabel}</span>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    // Render Top 5 Layanan & Obat Terlaris
+    const topItemsEl = document.getElementById('dashTopItemsBody');
+    if (topItemsEl) {
+      let sortedItems = Object.values(itemMap).sort((a, b) => b.omzet - a.omzet).slice(0, 5);
+      if (sortedItems.length === 0) {
+        topItemsEl.innerHTML = `<div class="py-8 text-center text-slate-400 font-bold text-xs">Belum ada data layanan pada periode ini.</div>`;
+      } else {
+        let maxItemOmzet = sortedItems[0].omzet || 1;
+        topItemsEl.innerHTML = sortedItems.map((itm, idx) => {
+          let wPct = Math.max(8, Math.round((itm.omzet / maxItemOmzet) * 100));
+          let rankBadge = idx === 0 ? '🥇' : (idx === 1 ? '🥈' : (idx === 2 ? '🥉' : `#${idx + 1}`));
+          return `
+            <div class="p-3 rounded-2xl bg-slate-50/90 border border-slate-200/70 space-y-1.5">
+              <div class="flex items-center justify-between gap-2 text-xs">
+                <div class="flex items-center gap-2 min-w-0">
+                  <span class="font-black text-sm shrink-0">${rankBadge}</span>
+                  <span class="font-bold text-slate-800 truncate">${itm.nama}</span>
+                  <span class="px-2 py-0.5 text-[10px] font-bold bg-indigo-50 text-indigo-700 rounded-md border border-indigo-100 shrink-0">${itm.qty}x</span>
+                </div>
+                <span class="font-black text-slate-900 shrink-0">Rp ${formatUangDashboard(itm.omzet)}</span>
+              </div>
+              <div class="w-full h-2 bg-slate-200/70 rounded-full overflow-hidden">
+                <div class="h-full bg-gradient-to-r from-amber-500 to-orange-500 rounded-full" style="width: ${wPct}%"></div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    // Render Tabel Performa Dokter
+    const docBodyEl = document.getElementById('dashDoctorPerfBody');
+    if (docBodyEl) {
+      let sortedDocs = Object.values(doctorMap).sort((a, b) => b.omzet - a.omzet);
+      if (sortedDocs.length === 0) {
+        docBodyEl.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-slate-400 font-bold">Belum ada data transaksi dokter pada periode ini.</td></tr>`;
+      } else {
+        docBodyEl.innerHTML = sortedDocs.map(d => {
+          let pCount = Object.keys(d.invSet).length;
+          return `
+            <tr class="hover:bg-slate-50 transition-colors">
+              <td class="p-3 font-bold text-slate-800">${d.nama}</td>
+              <td class="p-3 text-center"><span class="px-2.5 py-0.5 bg-teal-50 text-teal-700 font-black rounded-lg border border-teal-200">${pCount} Pasien</span></td>
+              <td class="p-3 text-right font-black text-slate-900">Rp ${formatUangDashboard(d.omzet)}</td>
+              <td class="p-3 text-right font-bold text-amber-700">Rp ${formatUangDashboard(d.estJM)}</td>
+            </tr>
+          `;
+        }).join('');
+      }
+    }
+
+    // Render 10 Transaksi Terbaru
+    const recentBodyEl = document.getElementById('dashRecentTrxBody');
+    let sortedInvoices = Object.values(invoiceMap).sort((a, b) => {
+      if (b.sortTime !== a.sortTime) return b.sortTime - a.sortTime;
+      return String(b.idInvoice).localeCompare(String(a.idInvoice));
+    });
+    window._dashCurrentFilteredInvoices = sortedInvoices;
+    window._dashCurrentSummary = {
+      totalUang, totalEstJM, netKlinik, avgBasket, invoiceCount, totalCash, totalTransfer, totalQris, totalCard
+    };
+
+    if (recentBodyEl) {
+      let top10 = sortedInvoices.slice(0, 10);
+      if (top10.length === 0) {
+        recentBodyEl.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-400 font-bold">Belum ada riwayat transaksi pada periode ini.</td></tr>`;
+      } else {
+        recentBodyEl.innerHTML = top10.map(inv => {
+          let mLower = String(inv.metode || '').toLowerCase();
+          let badgeClass = (mLower.includes('cash') || mLower.includes('tunai'))
+            ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+            : (mLower.includes('qris') ? 'bg-purple-50 text-purple-700 border-purple-200' : 'bg-blue-50 text-blue-700 border-blue-200');
+          let ringkasanItem = inv.items.slice(0, 2).join(', ') + (inv.items.length > 2 ? ` (+${inv.items.length - 2} lainnya)` : '');
+          return `
+            <tr class="hover:bg-slate-50 transition-colors">
+              <td class="p-3.5 font-mono font-bold text-indigo-700">${inv.idInvoice}</td>
+              <td class="p-3.5 text-slate-600 font-semibold">${inv.tanggal}</td>
+              <td class="p-3.5 font-bold text-slate-900">${inv.namaPasien} <span class="text-[10px] text-slate-400 font-mono">(${inv.noRm})</span></td>
+              <td class="p-3.5 text-slate-700 font-semibold">${inv.dokter}</td>
+              <td class="p-3.5 text-slate-600 max-w-xs truncate" title="${inv.items.join(', ')}">${ringkasanItem}</td>
+              <td class="p-3.5 text-center"><span class="px-2.5 py-1 rounded-lg border text-[10px] font-black uppercase ${badgeClass}">${inv.metode}</span></td>
+              <td class="p-3.5 text-right font-black text-slate-900">Rp ${formatUangDashboard(inv.totalInvoice)}</td>
+            </tr>
+          `;
+        }).join('');
+      }
+    }
+  }
+
+  function exportDashboardFinansialCSV() {
+    const list = window._dashCurrentFilteredInvoices || [];
+    if (list.length === 0) {
+      if (typeof showToast === 'function') showToast('Tidak ada data transaksi pada periode ini untuk di-export.', 'error');
+      return;
+    }
+    let csvLines = ['No Invoice,Tanggal,No RM,Nama Pasien,Dokter Pemeriksa,Rincian Layanan,Metode Pembayaran,Total Tagihan (Rp)'];
+    list.forEach(inv => {
+      let cleanPasien = String(inv.namaPasien || '').replace(/"/g, '""');
+      let cleanDokter = String(inv.dokter || '').replace(/"/g, '""');
+      let cleanItems = String((inv.items || []).join(' | ')).replace(/"/g, '""');
+      csvLines.push(`"${inv.idInvoice}","${inv.tanggal}","${inv.noRm}","${cleanPasien}","${cleanDokter}","${cleanItems}","${inv.metode}",${inv.totalInvoice}`);
+    });
+    let blob = new Blob([csvLines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    let url = URL.createObjectURL(blob);
+    let a = document.createElement('a');
+    a.href = url;
+    a.download = `Laporan_Finansial_Sheldon_${new Date().toISOString().slice(0,10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    if (typeof showToast === 'function') showToast('Laporan CSV berhasil diunduh!', 'success');
+  }
+
+  function cetakLaporanFinansial() {
+    window.print();
   }
 </script>
 

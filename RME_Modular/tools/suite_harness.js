@@ -2346,50 +2346,511 @@ var console = {
     }
   }
 
-  function updateDashboardNumbers() {
-    document.getElementById('dashTotPasien').innerText = window.KlinikData.pasien.length;
-    document.getElementById('dashTotTrx').innerText = window.KlinikData.pembayaran.length;
-    document.getElementById('dashTotEmr').innerText = window.KlinikData.rekamMedis.length;
-    document.getElementById('dashTotItem').innerText = window.KlinikData.obat.length + window.KlinikData.tindakan.length;
-    
-    let rawTglAwal = document.getElementById('dashFilterAwal').value;
-    let rawTglAkhir = document.getElementById('dashFilterAkhir').value;
-    let tglAwal = rawTglAwal ? new Date(rawTglAwal).setHours(0,0,0,0) : null;
-    let tglAkhir = rawTglAkhir ? new Date(rawTglAkhir).setHours(23,59,59,999) : null;
-    
-    let totalUang = 0, totalCash = 0, totalTransfer = 0, invoiceCount = 0;
+  window._dashCurrentFilteredInvoices = [];
+  window._dashCurrentSummary = {};
+
+  function parseDashDate(rawStr) {
+    if (!rawStr) return null;
+    let clean = String(rawStr).trim().split(' ')[0];
+    let parts = clean.split(/[-/]/);
+    if (parts.length !== 3) return null;
+    let y, m, d;
+    if (parts[0].length === 4) {
+      y = parseInt(parts[0], 10);
+      m = parseInt(parts[1], 10);
+      d = parseInt(parts[2], 10);
+    } else if (parts[2].length === 4) {
+      d = parseInt(parts[0], 10);
+      m = parseInt(parts[1], 10);
+      y = parseInt(parts[2], 10);
+    } else {
+      return null;
+    }
+    if (isNaN(y) || isNaN(m) || isNaN(d)) return null;
+    let dt = new Date(y, m - 1, d);
+    let mm = String(m).padStart(2, '0');
+    let dd = String(d).padStart(2, '0');
+    return {
+      time: dt.getTime(),
+      yyyyMmDd: `${y}-${mm}-${dd}`,
+      ddMmYyyy: `${dd}-${mm}-${y}`,
+      yearMonth: `${y}-${mm}`
+    };
+  }
+
+  function toInputDateStr(dt) {
+    let y = dt.getFullYear();
+    let m = String(dt.getMonth() + 1).padStart(2, '0');
+    let d = String(dt.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+
+  function setDashPreset(preset) {
+    const now = new Date();
+    const elAwal = document.getElementById('dashFilterAwal');
+    const elAkhir = document.getElementById('dashFilterAkhir');
+    if (!elAwal || !elAkhir) return;
+
+    if (preset === 'all') {
+      elAwal.value = '';
+      elAkhir.value = '';
+    } else if (preset === 'today') {
+      let s = toInputDateStr(now);
+      elAwal.value = s;
+      elAkhir.value = s;
+    } else if (preset === '7d') {
+      let past = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6);
+      elAwal.value = toInputDateStr(past);
+      elAkhir.value = toInputDateStr(now);
+    } else if (preset === 'this_month') {
+      let first = new Date(now.getFullYear(), now.getMonth(), 1);
+      let last = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+      elAwal.value = toInputDateStr(first);
+      elAkhir.value = toInputDateStr(last);
+    } else if (preset === 'last_month') {
+      let first = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      let last = new Date(now.getFullYear(), now.getMonth(), 0);
+      elAwal.value = toInputDateStr(first);
+      elAkhir.value = toInputDateStr(last);
+    } else if (preset === 'this_year') {
+      let first = new Date(now.getFullYear(), 0, 1);
+      let last = new Date(now.getFullYear(), 11, 31);
+      elAwal.value = toInputDateStr(first);
+      elAkhir.value = toInputDateStr(last);
+    }
+
+    document.querySelectorAll('.dash-preset-btn').forEach(btn => {
+      if (btn.getAttribute('data-preset') === preset) {
+        btn.className = 'dash-preset-btn px-3.5 py-2 rounded-xl text-xs font-extrabold border transition-all cursor-pointer bg-indigo-600 text-white border-indigo-600 shadow-sm';
+      } else {
+        btn.className = 'dash-preset-btn px-3.5 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer bg-slate-50 text-slate-700 border-slate-200 hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-200';
+      }
+    });
+
+    updateDashboardNumbers(preset);
+  }
+
+  function getDokterRateJM(namaDokter, namaItem) {
+    let listTindakan = window.KlinikData.tindakan || [];
+    let masterT = listTindakan.find(x => (x.nama || '').toLowerCase() === (namaItem || '').toLowerCase());
+    if (masterT && masterT.persenJMDefault !== null && masterT.persenJMDefault !== undefined && Number(masterT.persenJMDefault) > 0) {
+      let p = Number(masterT.persenJMDefault);
+      return p > 1 ? p / 100 : p;
+    }
+    let listStaff = window.KlinikData.staff || [];
+    let dok = listStaff.find(d => (d.nama || '').toLowerCase() === (namaDokter || '').toLowerCase());
+    if (dok && dok.persenJM !== undefined && dok.persenJM !== null && Number(dok.persenJM) > 0) {
+      let p = Number(dok.persenJM);
+      return p > 1 ? p / 100 : p;
+    }
+    return 0.40; // Default 40%
+  }
+
+  function updateDashboardNumbers(presetSource) {
+    const pasienList = window.KlinikData.pasien || [];
+    const pembayaranList = window.KlinikData.pembayaran || [];
+    const emrList = window.KlinikData.rekamMedis || [];
+    const obatList = window.KlinikData.obat || [];
+    const tindakanList = window.KlinikData.tindakan || [];
+    const bmhpList = window.KlinikData.bmhp || [];
+
+    const setElText = (id, txt) => {
+      const el = document.getElementById(id);
+      if (el) el.innerText = txt;
+    };
+
+    setElText('dashTotPasien', pasienList.length);
+    setElText('dashTotTrx', pembayaranList.length);
+    setElText('dashTotEmr', emrList.length);
+    setElText('dashTotItem', obatList.length + tindakanList.length + bmhpList.length);
+    setElText('dashSubItem', `${tindakanList.length} Tindakan • ${obatList.length} Obat`);
+
+    if (presetSource === 'custom') {
+      document.querySelectorAll('.dash-preset-btn').forEach(btn => {
+        btn.className = 'dash-preset-btn px-3.5 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer bg-slate-50 text-slate-700 border-slate-200 hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-200';
+      });
+    }
+
+    const elAwal = document.getElementById('dashFilterAwal');
+    const elAkhir = document.getElementById('dashFilterAkhir');
+    let rawTglAwal = elAwal ? elAwal.value : '';
+    let rawTglAkhir = elAkhir ? elAkhir.value : '';
+    let tglAwal = rawTglAwal ? new Date(rawTglAwal + 'T00:00:00').getTime() : null;
+    let tglAkhir = rawTglAkhir ? new Date(rawTglAkhir + 'T23:59:59.999').getTime() : null;
+
+    // Update label rentang aktif
+    if (rawTglAwal && rawTglAkhir) {
+      let p1 = parseDashDate(rawTglAwal);
+      let p2 = parseDashDate(rawTglAkhir);
+      setElText('dashRangeBadge', `${p1 ? p1.ddMmYyyy : rawTglAwal} s/d ${p2 ? p2.ddMmYyyy : rawTglAkhir}`);
+    } else if (rawTglAwal) {
+      let p1 = parseDashDate(rawTglAwal);
+      setElText('dashRangeBadge', `Mulai ${p1 ? p1.ddMmYyyy : rawTglAwal}`);
+    } else if (rawTglAkhir) {
+      let p2 = parseDashDate(rawTglAkhir);
+      setElText('dashRangeBadge', `Sampai ${p2 ? p2.ddMmYyyy : rawTglAkhir}`);
+    } else {
+      setElText('dashRangeBadge', 'Seluruh Riwayat Transaksi');
+    }
+
+    // Hitung periode pembanding sebelumnya (jika ada filter rentang)
+    let prevAwal = null, prevAkhir = null;
+    if (tglAwal && tglAkhir && tglAkhir >= tglAwal) {
+      let span = (tglAkhir - tglAwal) + 1;
+      prevAkhir = tglAwal - 1;
+      prevAwal = prevAkhir - span + 1;
+    }
+
+    let totalUang = 0, totalCash = 0, totalTransfer = 0, totalQris = 0, totalCard = 0;
+    let countCash = 0, countTransfer = 0, countQris = 0, countCard = 0, invoiceCount = 0;
+    let totalEstJM = 0, totalDiskonNominal = 0;
+    let revTindakan = 0, revObat = 0, revLainnya = 0;
+    let prevPeriodUang = 0;
+
     let countedInv = {};
-    
-    window.KlinikData.pembayaran.forEach(trx => {
-      let trxDateRaw = trx.tanggal ? trx.tanggal.split(' ')[0] : null;
-      if (!trxDateRaw) return;
-      let tParts = trxDateRaw.split('-');
-      if (tParts.length !== 3) return;
-      let trxTime = new Date(tParts[0], parseInt(tParts[1])-1, tParts[2]).getTime();
-      let isPass = true;
-      if (tglAwal && trxTime < tglAwal) isPass = false;
-      if (tglAkhir && trxTime > tglAkhir) isPass = false;
-      if (isPass) {
-        let invId = trx.idInvoice || Math.random();
-        if (!countedInv[invId]) {
-          countedInv[invId] = true;
-          invoiceCount++;
-          let total = parseFloat(trx.totalInvoice || trx.grandTotalItem || 0);
-          let metode = (trx.metode || "").toLowerCase();
-          totalUang += total;
-          if (metode.includes('cash') || metode.includes('tunai')) {
-            totalCash += total;
-          } else {
-            totalTransfer += total;
+    let prevCountedInv = {};
+    let invoiceMap = {};
+    let itemMap = {};
+    let doctorMap = {};
+    let dateTrendMap = {};
+
+    pembayaranList.forEach(trx => {
+      let parsedDate = parseDashDate(trx.tanggal);
+      if (!parsedDate) return;
+      let trxTime = parsedDate.time;
+
+      // Cek apakah masuk periode pembanding sebelumnya
+      if (prevAwal !== null && prevAkhir !== null && trxTime >= prevAwal && trxTime <= prevAkhir) {
+        let pInvId = trx.idInvoice || Math.random();
+        if (!prevCountedInv[pInvId]) {
+          prevCountedInv[pInvId] = true;
+          prevPeriodUang += parseFloat(trx.totalInvoice || trx.grandTotalItem || 0);
+        }
+      }
+
+      // Cek apakah masuk rentang filter aktif
+      if (tglAwal && trxTime < tglAwal) return;
+      if (tglAkhir && trxTime > tglAkhir) return;
+
+      let invId = trx.idInvoice || ('INV-' + Math.random());
+      let harga = parseFloat(trx.harga || 0);
+      let qty = parseFloat(trx.qty || 1);
+      let discPct = parseFloat(trx.diskon || 0);
+      let grossLine = harga * qty;
+      let lineTotal = parseFloat(trx.grandTotalItem || 0);
+      if (!lineTotal && grossLine > 0) {
+        lineTotal = discPct <= 100 ? Math.round(grossLine * (1 - discPct / 100)) : Math.max(0, grossLine - discPct);
+      }
+      let discNominal = Math.max(0, grossLine - lineTotal);
+      totalDiskonNominal += discNominal;
+
+      // Kategori pendapatan
+      let katLower = String(trx.kategori || '').toLowerCase();
+      let itemName = String(trx.item || 'Layanan Medis').trim();
+      let dokterName = String(trx.dokter || 'Dokter Klinik').trim();
+
+      let lineJM = 0;
+      if (katLower.includes('obat') || katLower.includes('farmasi') || katLower.includes('resep')) {
+        revObat += lineTotal;
+      } else if (katLower.includes('bmhp') || katLower.includes('bahan') || katLower.includes('alkes')) {
+        revLainnya += lineTotal;
+      } else {
+        revTindakan += lineTotal;
+        let rateJM = getDokterRateJM(dokterName, itemName);
+        lineJM = Math.round(lineTotal * rateJM);
+        totalEstJM += lineJM;
+      }
+
+      // Akumulasi Top Items
+      if (itemName) {
+        if (!itemMap[itemName]) {
+          itemMap[itemName] = { nama: itemName, kategori: trx.kategori || 'Tindakan', qty: 0, omzet: 0 };
+        }
+        itemMap[itemName].qty += qty;
+        itemMap[itemName].omzet += lineTotal;
+      }
+
+      // Akumulasi Performa Dokter
+      if (dokterName && dokterName !== '-') {
+        if (!doctorMap[dokterName]) {
+          doctorMap[dokterName] = { nama: dokterName, invSet: {}, omzet: 0, estJM: 0 };
+        }
+        doctorMap[dokterName].invSet[invId] = true;
+        doctorMap[dokterName].omzet += lineTotal;
+        doctorMap[dokterName].estJM += lineJM;
+      }
+
+      // Akumulasi Invoice Unik
+      if (!countedInv[invId]) {
+        countedInv[invId] = true;
+        invoiceCount++;
+        let invTotal = parseFloat(trx.totalInvoice || trx.grandTotalItem || 0);
+        let metodeRaw = String(trx.metode || 'Cash');
+        let metode = metodeRaw.toLowerCase();
+        totalUang += invTotal;
+
+        if (metode.includes('cash') || metode.includes('tunai')) {
+          totalCash += invTotal;
+          countCash++;
+        } else {
+          totalTransfer += invTotal;
+          countTransfer++;
+          if (metode.includes('qris') || metode.includes('gopay') || metode.includes('ovo') || metode.includes('dana') || metode.includes('wallet')) {
+            totalQris += invTotal;
+            countQris++;
+          } else if (metode.includes('debit') || metode.includes('kredit') || metode.includes('card') || metode.includes('edc') || metode.includes('kartu')) {
+            totalCard += invTotal;
+            countCard++;
           }
+        }
+
+        // Tren Tanggal
+        let dateKey = parsedDate.yyyyMmDd;
+        dateTrendMap[dateKey] = (dateTrendMap[dateKey] || 0) + invTotal;
+
+        invoiceMap[invId] = {
+          idInvoice: invId,
+          tanggal: parsedDate.ddMmYyyy,
+          sortTime: parsedDate.time,
+          namaPasien: trx.namaPasien || '-',
+          noRm: trx.noRm || '-',
+          dokter: dokterName,
+          metode: metodeRaw,
+          totalInvoice: invTotal,
+          items: [itemName]
+        };
+      } else if (invoiceMap[invId] && itemName) {
+        if (invoiceMap[invId].items.indexOf(itemName) === -1) {
+          invoiceMap[invId].items.push(itemName);
         }
       }
     });
-    
-    document.getElementById('dashTotUang').innerText = 'Rp ' + formatUangDashboard(totalUang);
-    document.getElementById('dashTotCount').innerText = invoiceCount + ' Invoice Transaksi';
-    document.getElementById('dashTotCash').innerText = 'Rp ' + formatUangDashboard(totalCash);
-    document.getElementById('dashTotTransfer').innerText = 'Rp ' + formatUangDashboard(totalTransfer);
+
+    // Normalisasi jika hanya ada totalInvoice tanpa rincian kategori
+    let sumKat = revTindakan + revObat + revLainnya;
+    if (sumKat === 0 && totalUang > 0) {
+      revTindakan = totalUang;
+      sumKat = totalUang;
+    }
+
+    let netKlinik = Math.max(0, totalUang - totalEstJM);
+    let avgBasket = invoiceCount > 0 ? Math.round(totalUang / invoiceCount) : 0;
+    let pctJM = totalUang > 0 ? Math.round((totalEstJM / totalUang) * 100) : 0;
+    let pctMargin = totalUang > 0 ? Math.round((netKlinik / totalUang) * 100) : 0;
+
+    // Update DOM Utama (termasuk ID lama untuk kompatibilitas)
+    setElText('dashSubTrx', `${invoiceCount} Invoice Terverifikasi`);
+    setElText('dashTotUang', 'Rp ' + formatUangDashboard(totalUang));
+    setElText('dashTotCount', invoiceCount + ' Invoice Transaksi');
+    setElText('dashTotEstJM', 'Rp ' + formatUangDashboard(totalEstJM));
+    setElText('dashPctJM', `Alokasi JM: ${pctJM}%`);
+    setElText('dashCountDokterAktif', `${Object.keys(doctorMap).length} Dokter Aktif`);
+    setElText('dashTotNetKlinik', 'Rp ' + formatUangDashboard(netKlinik));
+    setElText('dashPctMargin', `Margin: ${pctMargin}%`);
+    setElText('dashAvgTrx', 'Rp ' + formatUangDashboard(avgBasket));
+    setElText('dashTotDiskonInfo', 'Rp ' + formatUangDashboard(totalDiskonNominal));
+
+    // Metode Pembayaran
+    let pctCash = totalUang > 0 ? Math.round((totalCash / totalUang) * 100) : 0;
+    let pctTransfer = totalUang > 0 ? Math.round((totalTransfer / totalUang) * 100) : 0;
+    setElText('dashTotCash', 'Rp ' + formatUangDashboard(totalCash));
+    setElText('dashCountCash', `${countCash} Trx (${pctCash}%)`);
+    setElText('dashTotTransfer', 'Rp ' + formatUangDashboard(totalTransfer));
+    setElText('dashCountTransfer', `${countTransfer} Trx (${pctTransfer}%)`);
+    setElText('dashTotQris', 'Rp ' + formatUangDashboard(totalQris));
+    setElText('dashCountQris', `${countQris} Trx`);
+    setElText('dashTotCard', 'Rp ' + formatUangDashboard(totalCard));
+    setElText('dashCountCard', `${countCard} Trx`);
+
+    // Komposisi Sumber Pendapatan
+    let pTindakan = sumKat > 0 ? Math.round((revTindakan / sumKat) * 100) : 0;
+    let pObat = sumKat > 0 ? Math.round((revObat / sumKat) * 100) : 0;
+    let pLainnya = sumKat > 0 ? Math.max(0, 100 - pTindakan - pObat) : 0;
+    setElText('dashRevTindakan', 'Rp ' + formatUangDashboard(revTindakan));
+    setElText('dashPctTindakan', `(${pTindakan}%)`);
+    setElText('dashRevObat', 'Rp ' + formatUangDashboard(revObat));
+    setElText('dashPctObat', `(${pObat}%)`);
+    setElText('dashRevLainnya', 'Rp ' + formatUangDashboard(revLainnya));
+    setElText('dashPctLainnya', `(${pLainnya}%)`);
+
+    const barT = document.getElementById('dashBarTindakan'); if (barT) barT.style.width = pTindakan + '%';
+    const barO = document.getElementById('dashBarObat'); if (barO) barO.style.width = pObat + '%';
+    const barL = document.getElementById('dashBarLainnya'); if (barL) barL.style.width = pLainnya + '%';
+
+    // Indikator Pertumbuhan (Growth Badge)
+    const growthEl = document.getElementById('dashGrowthBadge');
+    if (growthEl) {
+      if (prevAwal !== null && prevPeriodUang > 0) {
+        let diffPct = (((totalUang - prevPeriodUang) / prevPeriodUang) * 100).toFixed(1);
+        if (diffPct >= 0) {
+          growthEl.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-emerald-50 text-emerald-700 border border-emerald-200';
+          growthEl.innerHTML = `<span>▲ +${diffPct}%</span> <span class="font-medium text-emerald-600">vs periode sebelumnya</span>`;
+        } else {
+          growthEl.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-rose-50 text-rose-700 border border-rose-200';
+          growthEl.innerHTML = `<span>▼ ${diffPct}%</span> <span class="font-medium text-rose-600">vs periode sebelumnya</span>`;
+        }
+      } else {
+        growthEl.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-indigo-50 text-indigo-700 border border-indigo-200';
+        growthEl.innerHTML = `<span>✅ ${invoiceCount} Invoice</span> <span class="font-medium text-indigo-600">terkalkulasi otomatis</span>`;
+      }
+    }
+
+    // Render Grafik Tren Pendapatan
+    const chartBox = document.getElementById('dashTrendChartContainer');
+    if (chartBox) {
+      let trendKeys = Object.keys(dateTrendMap).sort();
+      if (trendKeys.length === 0) {
+        chartBox.innerHTML = `<div class="w-full py-12 text-center text-slate-400 font-bold text-xs">Belum ada data transaksi pada periode ini untuk ditampilkan pada grafik.</div>`;
+        setElText('dashPeakInfo', '🏆 Puncak Omzet: -');
+      } else {
+        // Ambil maks 14 titik terakhir agar grafik proporsional dan mudah dibaca
+        let displayKeys = trendKeys.slice(-14);
+        let maxVal = 0;
+        let peakDate = '';
+        displayKeys.forEach(k => {
+          if (dateTrendMap[k] > maxVal) {
+            maxVal = dateTrendMap[k];
+            peakDate = k;
+          }
+        });
+        let pPeak = parseDashDate(peakDate);
+        setElText('dashPeakInfo', `🏆 Puncak: ${pPeak ? pPeak.ddMmYyyy : peakDate} (Rp ${formatUangDashboard(maxVal)})`);
+
+        chartBox.innerHTML = displayKeys.map(k => {
+          let val = dateTrendMap[k];
+          let heightPct = maxVal > 0 ? Math.max(12, Math.round((val / maxVal) * 140)) : 12;
+          let isPeak = (val === maxVal && maxVal > 0);
+          let barColor = isPeak
+            ? 'bg-gradient-to-t from-emerald-600 to-teal-400 shadow-md shadow-emerald-500/20'
+            : 'bg-gradient-to-t from-indigo-600 to-indigo-400 hover:from-indigo-500 hover:to-sky-400';
+          let shortLabel = k.split('-').slice(1).reverse().join('/');
+          let shortVal = val >= 1000000 ? (val / 1000000).toFixed(1) + 'Jt' : (val >= 1000 ? Math.round(val / 1000) + 'Rb' : val);
+          return `
+            <div class="flex-1 min-w-[48px] flex flex-col items-center group">
+              <span class="text-[10px] font-black ${isPeak ? 'text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200' : 'text-slate-600'} mb-1.5 transition-transform group-hover:scale-110">${shortVal}</span>
+              <div class="w-full max-w-[42px] rounded-t-xl transition-all duration-300 ${barColor}" style="height: ${heightPct}px;" title="${k}: Rp ${formatUangDashboard(val)}"></div>
+              <span class="text-[10px] font-bold text-slate-500 mt-2">${shortLabel}</span>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    // Render Top 5 Layanan & Obat Terlaris
+    const topItemsEl = document.getElementById('dashTopItemsBody');
+    if (topItemsEl) {
+      let sortedItems = Object.values(itemMap).sort((a, b) => b.omzet - a.omzet).slice(0, 5);
+      if (sortedItems.length === 0) {
+        topItemsEl.innerHTML = `<div class="py-8 text-center text-slate-400 font-bold text-xs">Belum ada data layanan pada periode ini.</div>`;
+      } else {
+        let maxItemOmzet = sortedItems[0].omzet || 1;
+        topItemsEl.innerHTML = sortedItems.map((itm, idx) => {
+          let wPct = Math.max(8, Math.round((itm.omzet / maxItemOmzet) * 100));
+          let rankBadge = idx === 0 ? '🥇' : (idx === 1 ? '🥈' : (idx === 2 ? '🥉' : `#${idx + 1}`));
+          return `
+            <div class="p-3 rounded-2xl bg-slate-50/90 border border-slate-200/70 space-y-1.5">
+              <div class="flex items-center justify-between gap-2 text-xs">
+                <div class="flex items-center gap-2 min-w-0">
+                  <span class="font-black text-sm shrink-0">${rankBadge}</span>
+                  <span class="font-bold text-slate-800 truncate">${itm.nama}</span>
+                  <span class="px-2 py-0.5 text-[10px] font-bold bg-indigo-50 text-indigo-700 rounded-md border border-indigo-100 shrink-0">${itm.qty}x</span>
+                </div>
+                <span class="font-black text-slate-900 shrink-0">Rp ${formatUangDashboard(itm.omzet)}</span>
+              </div>
+              <div class="w-full h-2 bg-slate-200/70 rounded-full overflow-hidden">
+                <div class="h-full bg-gradient-to-r from-amber-500 to-orange-500 rounded-full" style="width: ${wPct}%"></div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    // Render Tabel Performa Dokter
+    const docBodyEl = document.getElementById('dashDoctorPerfBody');
+    if (docBodyEl) {
+      let sortedDocs = Object.values(doctorMap).sort((a, b) => b.omzet - a.omzet);
+      if (sortedDocs.length === 0) {
+        docBodyEl.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-slate-400 font-bold">Belum ada data transaksi dokter pada periode ini.</td></tr>`;
+      } else {
+        docBodyEl.innerHTML = sortedDocs.map(d => {
+          let pCount = Object.keys(d.invSet).length;
+          return `
+            <tr class="hover:bg-slate-50 transition-colors">
+              <td class="p-3 font-bold text-slate-800">${d.nama}</td>
+              <td class="p-3 text-center"><span class="px-2.5 py-0.5 bg-teal-50 text-teal-700 font-black rounded-lg border border-teal-200">${pCount} Pasien</span></td>
+              <td class="p-3 text-right font-black text-slate-900">Rp ${formatUangDashboard(d.omzet)}</td>
+              <td class="p-3 text-right font-bold text-amber-700">Rp ${formatUangDashboard(d.estJM)}</td>
+            </tr>
+          `;
+        }).join('');
+      }
+    }
+
+    // Render 10 Transaksi Terbaru
+    const recentBodyEl = document.getElementById('dashRecentTrxBody');
+    let sortedInvoices = Object.values(invoiceMap).sort((a, b) => {
+      if (b.sortTime !== a.sortTime) return b.sortTime - a.sortTime;
+      return String(b.idInvoice).localeCompare(String(a.idInvoice));
+    });
+    window._dashCurrentFilteredInvoices = sortedInvoices;
+    window._dashCurrentSummary = {
+      totalUang, totalEstJM, netKlinik, avgBasket, invoiceCount, totalCash, totalTransfer, totalQris, totalCard
+    };
+
+    if (recentBodyEl) {
+      let top10 = sortedInvoices.slice(0, 10);
+      if (top10.length === 0) {
+        recentBodyEl.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-400 font-bold">Belum ada riwayat transaksi pada periode ini.</td></tr>`;
+      } else {
+        recentBodyEl.innerHTML = top10.map(inv => {
+          let mLower = String(inv.metode || '').toLowerCase();
+          let badgeClass = (mLower.includes('cash') || mLower.includes('tunai'))
+            ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+            : (mLower.includes('qris') ? 'bg-purple-50 text-purple-700 border-purple-200' : 'bg-blue-50 text-blue-700 border-blue-200');
+          let ringkasanItem = inv.items.slice(0, 2).join(', ') + (inv.items.length > 2 ? ` (+${inv.items.length - 2} lainnya)` : '');
+          return `
+            <tr class="hover:bg-slate-50 transition-colors">
+              <td class="p-3.5 font-mono font-bold text-indigo-700">${inv.idInvoice}</td>
+              <td class="p-3.5 text-slate-600 font-semibold">${inv.tanggal}</td>
+              <td class="p-3.5 font-bold text-slate-900">${inv.namaPasien} <span class="text-[10px] text-slate-400 font-mono">(${inv.noRm})</span></td>
+              <td class="p-3.5 text-slate-700 font-semibold">${inv.dokter}</td>
+              <td class="p-3.5 text-slate-600 max-w-xs truncate" title="${inv.items.join(', ')}">${ringkasanItem}</td>
+              <td class="p-3.5 text-center"><span class="px-2.5 py-1 rounded-lg border text-[10px] font-black uppercase ${badgeClass}">${inv.metode}</span></td>
+              <td class="p-3.5 text-right font-black text-slate-900">Rp ${formatUangDashboard(inv.totalInvoice)}</td>
+            </tr>
+          `;
+        }).join('');
+      }
+    }
+  }
+
+  function exportDashboardFinansialCSV() {
+    const list = window._dashCurrentFilteredInvoices || [];
+    if (list.length === 0) {
+      if (typeof showToast === 'function') showToast('Tidak ada data transaksi pada periode ini untuk di-export.', 'error');
+      return;
+    }
+    let csvLines = ['No Invoice,Tanggal,No RM,Nama Pasien,Dokter Pemeriksa,Rincian Layanan,Metode Pembayaran,Total Tagihan (Rp)'];
+    list.forEach(inv => {
+      let cleanPasien = String(inv.namaPasien || '').replace(/"/g, '""');
+      let cleanDokter = String(inv.dokter || '').replace(/"/g, '""');
+      let cleanItems = String((inv.items || []).join(' | ')).replace(/"/g, '""');
+      csvLines.push(`"${inv.idInvoice}","${inv.tanggal}","${inv.noRm}","${cleanPasien}","${cleanDokter}","${cleanItems}","${inv.metode}",${inv.totalInvoice}`);
+    });
+    let blob = new Blob([csvLines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    let url = URL.createObjectURL(blob);
+    let a = document.createElement('a');
+    a.href = url;
+    a.download = `Laporan_Finansial_Sheldon_${new Date().toISOString().slice(0,10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    if (typeof showToast === 'function') showToast('Laporan CSV berhasil diunduh!', 'success');
+  }
+
+  function cetakLaporanFinansial() {
+    window.print();
   }
 
 

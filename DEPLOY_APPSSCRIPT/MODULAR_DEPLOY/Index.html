@@ -904,7 +904,7 @@
       const pUser = document.getElementById('panelDbUser');
       if (pUser) pUser.classList.remove('hidden');
       if (typeof handleRoleChange === 'function') handleRoleChange();
-      if (typeof loadDaftarUserMaster === 'function') loadDaftarUserMaster(true);
+      if (typeof loadDaftarUserMaster === 'function') loadDaftarUserMaster(false);
       if (typeof switchMasterUserSubTab === 'function') switchMasterUserSubTab('user');
     }
     if (menuId === 'payroll') {

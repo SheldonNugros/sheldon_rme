@@ -7053,7 +7053,7 @@
       const pUser = document.getElementById('panelDbUser');
       if (pUser) pUser.classList.remove('hidden');
       if (typeof handleRoleChange === 'function') handleRoleChange();
-      if (typeof loadDaftarUserMaster === 'function') loadDaftarUserMaster(true);
+      if (typeof loadDaftarUserMaster === 'function') loadDaftarUserMaster(false);
       if (typeof switchMasterUserSubTab === 'function') switchMasterUserSubTab('user');
     }
     if (menuId === 'payroll') {
@@ -17598,9 +17598,33 @@ function loadDaftarUserMaster(forceReload) {
   const tbody = document.getElementById('tbodyDbUser');
   const btnTop = document.getElementById('btnReloadUserMaster');
   const btnTbl = document.getElementById('btnRefreshTabelUser');
-  const origTop = btnTop ? btnTop.innerHTML : '<span>🔄</span> Muat Ulang Data';
-  const origTbl = btnTbl ? btnTbl.innerHTML : '<span>🔄</span> Refresh';
+  const origTop = btnTop ? (btnTop.getAttribute('data-orig') || btnTop.innerHTML) : '<span>🔄</span> Muat Ulang Data';
+  const origTbl = btnTbl ? (btnTbl.getAttribute('data-orig') || btnTbl.innerHTML) : '<span>🔄</span> Refresh';
+  if (btnTop && !btnTop.getAttribute('data-orig')) btnTop.setAttribute('data-orig', origTop);
+  if (btnTbl && !btnTbl.getAttribute('data-orig')) btnTbl.setAttribute('data-orig', origTbl);
 
+  // 1. SWR Cache First: Jika list in-memory masih kosong, isi dari localStorage / window.KlinikData
+  if (!Array.isArray(listMasterUser) || listMasterUser.length === 0) {
+    const cachedUsers = getFallbackUserList();
+    if (Array.isArray(cachedUsers) && cachedUsers.length > 0) {
+      listMasterUser = cachedUsers;
+    }
+  }
+
+  const hasExistingData = Array.isArray(listMasterUser) && listMasterUser.length > 0;
+
+  // 2. Jika bukan forceReload dan data sudah ada di memori/cache, langsung render instan (< 10ms)
+  if (!forceReload && hasExistingData) {
+    renderTabelUser();
+
+    // Throttle background sync jika baru saja disinkronkan kurang dari 60 detik atau sedang fetch
+    const now = Date.now();
+    if (window._userMasterFetching || (window._lastUserMasterFetchTime && (now - window._lastUserMasterFetchTime < 60000))) {
+      return;
+    }
+  }
+
+  // 3. Tangani UI jika forceReload manual
   if (forceReload) {
     if (btnTop) { btnTop.disabled = true; btnTop.innerHTML = '<span class="inline-block animate-spin">⏳</span> Memuat...'; }
     if (btnTbl) { btnTbl.disabled = true; btnTbl.innerHTML = '<span class="inline-block animate-spin">⏳</span> Memuat...'; }
@@ -17608,23 +17632,30 @@ function loadDaftarUserMaster(forceReload) {
       localStorage.removeItem('sheldon_master_users_cache');
     } catch (eClean) {}
     if (typeof showToast === 'function') showToast('info', '🔄 Menyinkronkan data pengguna langsung dari Spreadsheet...');
-  }
-
-  if (tbody && (forceReload || !Array.isArray(listMasterUser) || listMasterUser.length === 0)) {
+    if (tbody) {
+      tbody.innerHTML = '<tr><td colspan="11" class="text-center py-6 text-slate-400 font-bold"><span class="inline-block animate-spin mr-2">⏳</span>Memuat akun pengguna dari spreadsheet...</td></tr>';
+    }
+  } else if (!hasExistingData && tbody) {
     tbody.innerHTML = '<tr><td colspan="11" class="text-center py-6 text-slate-400 font-bold"><span class="inline-block animate-spin mr-2">⏳</span>Memuat akun pengguna dari spreadsheet...</td></tr>';
   }
 
+  window._userMasterFetching = true;
+
   const finishLoad = (usersArr) => {
+    window._userMasterFetching = false;
+    window._lastUserMasterFetchTime = Date.now();
+
     if (btnTop) { btnTop.disabled = false; btnTop.innerHTML = origTop; }
     if (btnTbl) { btnTbl.disabled = false; btnTbl.innerHTML = origTbl; }
     
     // Spreadsheet adalah sumber data utama (Single Source of Truth)
     // Jika server mengembalikan array (termasuk array kosong jika seluruh baris dihapus), gunakan data server!
-    let loaded = Array.isArray(usersArr) ? usersArr : getFallbackUserList();
+    let loaded = Array.isArray(usersArr) && usersArr.length > 0 ? usersArr : (hasExistingData ? listMasterUser : getFallbackUserList());
 
     listMasterUser = loaded;
     saveFallbackUserList(listMasterUser);
     renderTabelUser();
+
     if (forceReload) {
       if (typeof showToast === 'function') {
         showToast('success', '✅ Berhasil memuat ' + listMasterUser.length + ' akun pengguna dari Spreadsheet!');
@@ -17645,17 +17676,17 @@ function loadDaftarUserMaster(forceReload) {
         if (Array.isArray(res)) {
           finishLoad(res);
         } else {
-          finishLoad(getFallbackUserList());
+          finishLoad(hasExistingData ? listMasterUser : getFallbackUserList());
         }
       })
       .withFailureHandler(err => {
-        finishLoad(getFallbackUserList());
+        finishLoad(hasExistingData ? listMasterUser : getFallbackUserList());
       })
       .getDaftarUserMaster();
   } else {
     setTimeout(() => {
-      finishLoad(getFallbackUserList());
-    }, 300);
+      finishLoad(hasExistingData ? listMasterUser : getFallbackUserList());
+    }, 200);
   }
 }
 

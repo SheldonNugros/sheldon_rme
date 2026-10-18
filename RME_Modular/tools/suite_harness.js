@@ -2480,7 +2480,9 @@ function searchPasienData() {
       filteredPasienList = list.filter(p =>
           (p.namaPasien || "").toLowerCase().includes(q) ||
           (p.noRm || "").toLowerCase().includes(q) ||
-          (p.whatsapp || "").toLowerCase().includes(q)
+          (p.whatsapp || "").toLowerCase().includes(q) ||
+          (p.nik || "").toLowerCase().includes(q) ||
+          (p.alamat || "").toLowerCase().includes(q)
       );
   } else {
       filteredPasienList = list;
@@ -2520,25 +2522,71 @@ function renderTablePagePasien() {
     return s;
   }
 
-  tbody.innerHTML = pageData.map(p => `
-      <tr class="hover:bg-slate-50 transition-colors border-b border-slate-100">
-          <td class="p-3 font-mono font-bold text-indigo-600 text-xs">${p.noRm || '-'}</td>
-          <td class="p-3 font-bold text-slate-800 text-xs">${p.namaPasien || '-'}</td>
-          <td class="p-3 text-slate-600 text-xs">${p.jenisKelamin || '-'}</td>
-          <td class="p-3 text-slate-600 text-xs">${p.tempatLahir ? p.tempatLahir + ', ' : ''}${formatTglAngkaDDMMYYYY(p.tanggalLahir)} / ${p.umur || '-'}</td>
-          <td class="p-3 text-slate-600 text-xs">${p.whatsapp || '-'}</td>
-          <td class="p-3 text-rose-600 text-[11px] font-medium truncate max-w-[120px]" title="${p.riwayatPenyakit || '-'}">${p.riwayatPenyakit || '-'}</td>
-          <td class="p-3 text-amber-600 text-[11px] font-medium truncate max-w-[120px]" title="${p.alergi || '-'}">${p.alergi || '-'}</td>
-          <td class="p-3 text-slate-600 text-xs truncate max-w-[150px]" title="${p.alamat || '-'}">${p.alamat || '-'}</td>
-          <td class="p-3 text-center">
-              <div class="flex justify-center gap-1.5">
-                  ${(window.activeUserRole && (window.activeUserRole.toLowerCase().includes('super user') || window.activeUserRole.toLowerCase().includes('owner') || window.activeUserRole.toLowerCase().includes('admin'))) ? `<button onclick="editPasien('${p.idPasien}')" class="px-3 py-1.5 bg-white border border-slate-200 hover:bg-slate-100 text-slate-600 rounded-lg text-[10px] font-bold transition-all shadow-sm">Edit</button>` : ''}
-                  ${(window.activeUserRole && (window.activeUserRole.toLowerCase().includes('super user') || window.activeUserRole.toLowerCase().includes('owner'))) ? `<button onclick="konfirmasiHapusPasien('${p.idPasien}', '${p.namaPasien}')" class="px-2.5 py-1.5 bg-rose-50 border border-rose-200 hover:bg-rose-500 hover:text-white text-rose-600 rounded-lg text-[10px] font-bold transition-all shadow-sm" title="Hapus Pasien (Owner)">🗑️ Hapus</button>` : ''}
-                  <button onclick="openHistoryEMR('${p.idPasien}')" class="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg text-[10px] font-bold transition-all shadow-sm border border-indigo-200" title="Lihat Riwayat Rekam Medis">🩺 History</button>
+  tbody.innerHTML = pageData.map(p => {
+    // Badge Jenis Kelamin
+    let jkBadge = '<span class="text-slate-400 text-xs">-</span>';
+    let jk = (p.jenisKelamin || '').toLowerCase();
+    if (jk.includes('laki') || jk === 'l') {
+      jkBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-50 text-blue-700 border border-blue-200/60 shadow-2xs">👨 Laki-laki</span>`;
+    } else if (jk.includes('perempuan') || jk === 'p') {
+      jkBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-pink-50 text-pink-700 border border-pink-200/60 shadow-2xs">👩 Perempuan</span>`;
+    } else if (p.jenisKelamin) {
+      jkBadge = `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 text-slate-700">${p.jenisKelamin}</span>`;
+    }
+
+    // TTL & Umur
+    let tglStr = formatTglAngkaDDMMYYYY(p.tanggalLahir);
+    let ttlText = p.tempatLahir ? `${p.tempatLahir}, ${tglStr}` : tglStr;
+    let umurBadge = p.umur ? `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200/60">${p.umur}</span>` : '';
+
+    // WhatsApp link direct chat
+    let waClean = (p.whatsapp || '').replace(/[^0-9]/g, '');
+    if (waClean.startsWith('0')) waClean = '62' + waClean.slice(1);
+    let waDisplay = p.whatsapp ? `
+      <a href="https://wa.me/${waClean}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-mono text-[11px] font-bold border border-emerald-200/70 transition-colors shadow-2xs group" title="Buka WhatsApp Chat">
+        <span class="group-hover:scale-110 transition-transform">💬</span> ${p.whatsapp}
+      </a>` : '<span class="text-slate-400 text-xs">-</span>';
+
+    // Penyakit Sistemik
+    let riwayatDisplay = p.riwayatPenyakit && p.riwayatPenyakit.trim() && p.riwayatPenyakit.trim() !== '-' 
+      ? `<span class="inline-block max-w-[130px] truncate text-[11px] font-semibold text-rose-700 bg-rose-50 border border-rose-200/70 px-2 py-0.5 rounded-md" title="${p.riwayatPenyakit}">${p.riwayatPenyakit}</span>`
+      : '<span class="text-slate-400 text-xs">-</span>';
+
+    // Alergi (High Alert Badge)
+    let alergiDisplay = p.alergi && p.alergi.trim() && p.alergi.trim() !== '-' && !p.alergi.toLowerCase().includes('tidak ada')
+      ? `<span class="inline-flex items-center gap-1 max-w-[130px] truncate text-[11px] font-bold text-amber-900 bg-amber-50 border border-amber-300 px-2 py-0.5 rounded-md shadow-2xs" title="${p.alergi}">⚠️ ${p.alergi}</span>`
+      : (p.alergi ? `<span class="text-slate-400 text-xs truncate max-w-[120px] inline-block" title="${p.alergi}">${p.alergi}</span>` : '<span class="text-slate-400 text-xs">-</span>');
+
+    return `
+      <tr class="hover:bg-indigo-50/30 transition-colors border-b border-slate-100 group">
+          <td class="p-3.5 pl-4">
+              <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-mono font-bold bg-indigo-50 text-indigo-700 border border-indigo-200/70 shadow-2xs group-hover:bg-indigo-100 transition-colors">${p.noRm || '-'}</span>
+          </td>
+          <td class="p-3.5">
+              <div class="font-bold text-slate-800 text-xs tracking-tight">${p.namaPasien || '-'}</div>
+              ${p.nik ? `<div class="text-[10px] text-slate-400 font-mono tracking-tight mt-0.5">NIK: ${p.nik}</div>` : ''}
+          </td>
+          <td class="p-3.5">${jkBadge}</td>
+          <td class="p-3.5">
+              <div class="text-xs text-slate-700 font-medium">${ttlText}</div>
+              ${umurBadge ? `<div class="mt-1">${umurBadge}</div>` : ''}
+          </td>
+          <td class="p-3.5">${waDisplay}</td>
+          <td class="p-3.5">${riwayatDisplay}</td>
+          <td class="p-3.5">${alergiDisplay}</td>
+          <td class="p-3.5">
+              <span class="text-slate-600 text-xs truncate max-w-[140px] inline-block font-medium" title="${p.alamat || '-'}">${p.alamat || '-'}</span>
+          </td>
+          <td class="p-3.5 text-center">
+              <div class="flex items-center justify-center gap-1.5">
+                  ${(window.activeUserRole && (window.activeUserRole.toLowerCase().includes('super user') || window.activeUserRole.toLowerCase().includes('owner') || window.activeUserRole.toLowerCase().includes('admin'))) ? `<button onclick="editPasien('${p.idPasien}')" class="px-2.5 py-1.5 bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-700 rounded-lg text-[10px] font-bold transition-all shadow-2xs hover:shadow-xs" title="Edit Data Pasien">Edit</button>` : ''}
+                  ${(window.activeUserRole && (window.activeUserRole.toLowerCase().includes('super user') || window.activeUserRole.toLowerCase().includes('owner'))) ? `<button onclick="konfirmasiHapusPasien('${p.idPasien}', '${p.namaPasien}')" class="px-2.5 py-1.5 bg-rose-50 border border-rose-200 hover:bg-rose-500 hover:text-white text-rose-600 rounded-lg text-[10px] font-bold transition-all shadow-2xs hover:shadow-xs" title="Hapus Pasien (Owner)">🗑️ Hapus</button>` : ''}
+                  <button onclick="openHistoryEMR('${p.idPasien}')" class="px-2.5 py-1.5 bg-indigo-50 hover:bg-indigo-600 hover:text-white text-indigo-700 rounded-lg text-[10px] font-bold transition-all shadow-2xs hover:shadow-xs border border-indigo-200" title="Lihat Rekam Medis (History EMR)">🩺 History</button>
               </div>
           </td>
       </tr>
-  `).join('');
+    `;
+  }).join('');
 }
 function prevPagePasien() { if (currentPagePasien > 1) { currentPagePasien--; renderTablePagePasien(); } }
 function nextPagePasien() { let t = Math.ceil(filteredPasienList.length / itemsPerPagePasien); if (currentPagePasien < t) { currentPagePasien++; renderTablePagePasien(); } }

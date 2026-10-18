@@ -2685,7 +2685,7 @@ function renderTablePagePasien() {
             <td class="p-3.5 text-center">
                 <div class="flex items-center justify-center gap-1.5">
                     ${(window.activeUserRole && (window.activeUserRole.toLowerCase().includes('super user') || window.activeUserRole.toLowerCase().includes('owner') || window.activeUserRole.toLowerCase().includes('admin'))) ? `<button onclick="editPasien('${p.idPasien}')" class="px-2.5 py-1.5 bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-700 rounded-lg text-[10px] font-bold transition-all shadow-2xs hover:shadow-xs" title="Edit Data Pasien">Edit</button>` : ''}
-                    ${(window.activeUserRole && (window.activeUserRole.toLowerCase().includes('super user') || window.activeUserRole.toLowerCase().includes('owner'))) ? `<button onclick="konfirmasiHapusPasien('${p.idPasien}', '${p.namaPasien}')" class="px-2.5 py-1.5 bg-rose-50 border border-rose-200 hover:bg-rose-500 hover:text-white text-rose-600 rounded-lg text-[10px] font-bold transition-all shadow-2xs hover:shadow-xs" title="Hapus Pasien (Owner)">🗑️ Hapus</button>` : ''}
+                    ${(window.activeUserRole && (window.activeUserRole.toLowerCase().includes('super user') || window.activeUserRole.toLowerCase().includes('owner'))) ? `<button onclick="konfirmasiHapusPasien('${p.idPasien}')" class="px-2.5 py-1.5 bg-rose-50 border border-rose-200 hover:bg-rose-500 hover:text-white text-rose-600 rounded-lg text-[10px] font-bold transition-all shadow-2xs hover:shadow-xs" title="Hapus Pasien (Owner)">🗑️ Hapus</button>` : ''}
                     <button onclick="openHistoryEMR('${p.idPasien}')" class="px-2.5 py-1.5 bg-indigo-50 hover:bg-indigo-600 hover:text-white text-indigo-700 rounded-lg text-[10px] font-bold transition-all shadow-2xs hover:shadow-xs border border-indigo-200" title="Lihat Rekam Medis (History EMR)">🩺 History</button>
                 </div>
             </td>
@@ -3089,8 +3089,10 @@ function simpanDataPasien(e) {
     .simpanPasien(payload);
 }
 
-function konfirmasiHapusPasien(idPasien, namaPasien) {
-  if (confirm(`PERINGATAN SUPER USER:\nApakah Anda yakin ingin MENGHAPUS PERMANEN data pasien: "${namaPasien}" (${idPasien})?\nTindakan ini tidak dapat dibatalkan.`)) {
+function konfirmasiHapusPasien(idPasien, namaPasienFallback) {
+  let pasienObj = (window.KlinikData && Array.isArray(window.KlinikData.pasien)) ? window.KlinikData.pasien.find(p => p.idPasien === idPasien) : null;
+  let namaPasien = pasienObj ? (pasienObj.namaPasien || idPasien) : (namaPasienFallback || idPasien);
+  if (confirm(`PERINGATAN OWNER / ADMIN:\nApakah Anda yakin ingin MENGHAPUS data pasien: "${namaPasien}" (${idPasien})?\nTindakan ini tidak dapat dibatalkan.`)) {
     google.script.run.withSuccessHandler(res => {
       if (res.success) {
         showToast('success', res.message);
@@ -4797,6 +4799,13 @@ function bukaPrintWindowMpi(cleanName, originalTitle) {
     pf.onafterprint = function() { document.title = originalTitle; };
     setTimeout(() => { document.title = originalTitle; }, 15000);
   }, 600);
+}
+
+// Inisialisasi otomatis jika dokumen sudah siap
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+  setTimeout(() => {
+    if (typeof initPasienModule === 'function') initPasienModule();
+  }, 100);
 }
 
 

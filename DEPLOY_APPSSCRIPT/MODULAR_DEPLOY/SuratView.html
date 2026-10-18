@@ -11,37 +11,72 @@
 <div class="space-y-6 text-xs relative text-slate-800">
   
   <!-- HEADER HALAMAN SURAT (Hanya tampil di layar) -->
-  <div class="flex items-center gap-3 mb-2 pb-3 border-b border-slate-200 print:hidden">
-    <div class="w-10 h-10 bg-rose-50 text-rose-600 rounded-xl flex items-center justify-center font-bold text-xl shadow-sm border border-rose-100">📝</div>
-    <div>
-      <h2 class="text-lg font-black text-slate-900 tracking-tight">Surat & Formulir Medis</h2>
-      <p class="text-[11px] text-slate-500 font-medium">Pembuatan dokumen surat keterangan, rujukan, dan pengantar lab</p>
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-950 rounded-2xl shadow-md border border-slate-700/50 print:hidden text-white mb-2">
+    <div class="flex items-center gap-4">
+      <div class="w-12 h-12 bg-white/10 backdrop-blur-md text-amber-300 rounded-2xl flex items-center justify-center font-bold text-2xl shadow-inner border border-white/20 shrink-0">
+        📝
+      </div>
+      <div>
+        <div class="flex items-center gap-2.5">
+          <h2 class="text-xl font-black text-white tracking-tight">Surat & Formulir Medis</h2>
+          <span class="px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider bg-rose-500/20 text-rose-300 border border-rose-400/30 rounded-full">Resmi & Sah</span>
+        </div>
+        <p class="text-xs text-slate-300 font-medium mt-0.5">Pembuatan dokumen surat keterangan sakit, kontrol pasien, resume medis, rujukan, lab & radiologi</p>
+      </div>
     </div>
   </div>
 
-
   <!-- KUMPULAN TOMBOL SURAT -->
   <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-6 print:hidden">
-    <button onclick="changeSuratMenu('sakit')" id="navSakit" class="p-3 bg-white border border-slate-200 rounded-xl hover:border-teal-400 hover:shadow-md transition-all flex flex-col items-center gap-2 group">
-      <span class="text-2xl group-hover:scale-110 transition-transform">🤒</span><span class="font-bold text-[10px] text-center text-slate-700">Keterangan Sakit</span>
+    <!-- 1. Keterangan Sakit -->
+    <button onclick="changeSuratMenu('sakit')" id="navSakit" class="p-3.5 bg-white border border-slate-200 rounded-2xl hover:border-teal-400 hover:shadow-md hover:-translate-y-0.5 transition-all flex flex-col items-center gap-2 group shadow-xs cursor-pointer">
+      <div class="w-11 h-11 rounded-xl bg-teal-50 border border-teal-100 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">🤒</div>
+      <div class="text-center">
+        <span class="block font-black text-xs text-slate-800 tracking-tight">Surat Sakit</span>
+        <span class="text-[10px] font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-md border border-teal-100 mt-0.5 inline-block">SKS</span>
+      </div>
     </button>
-    <button onclick="changeSuratMenu('kontrol')" id="navKontrol" class="p-3 bg-white border border-slate-200 rounded-xl hover:border-blue-400 hover:shadow-md transition-all flex flex-col items-center gap-2 group">
-      <span class="text-2xl group-hover:scale-110 transition-transform">📅</span><span class="font-bold text-[10px] text-center text-slate-700">Kontrol Pasien</span>
+    <!-- 2. Kontrol Pasien -->
+    <button onclick="changeSuratMenu('kontrol')" id="navKontrol" class="p-3.5 bg-white border border-slate-200 rounded-2xl hover:border-blue-400 hover:shadow-md hover:-translate-y-0.5 transition-all flex flex-col items-center gap-2 group shadow-xs cursor-pointer">
+      <div class="w-11 h-11 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">📅</div>
+      <div class="text-center">
+        <span class="block font-black text-xs text-slate-800 tracking-tight">Surat Kontrol</span>
+        <span class="text-[10px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-100 mt-0.5 inline-block">SKP</span>
+      </div>
     </button>
-    <button onclick="changeSuratMenu('resume')" id="navResume" class="p-3 bg-white border border-slate-200 rounded-xl hover:border-purple-400 hover:shadow-md transition-all flex flex-col items-center gap-2 group">
-      <span class="text-2xl group-hover:scale-110 transition-transform">📋</span><span class="font-bold text-[10px] text-center text-slate-700">Resume Medis</span>
+    <!-- 3. Resume Medis -->
+    <button onclick="changeSuratMenu('resume')" id="navResume" class="p-3.5 bg-white border border-slate-200 rounded-2xl hover:border-purple-400 hover:shadow-md hover:-translate-y-0.5 transition-all flex flex-col items-center gap-2 group shadow-xs cursor-pointer">
+      <div class="w-11 h-11 rounded-xl bg-purple-50 border border-purple-100 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">📋</div>
+      <div class="text-center">
+        <span class="block font-black text-xs text-slate-800 tracking-tight">Resume Medis</span>
+        <span class="text-[10px] font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded-md border border-purple-100 mt-0.5 inline-block">RSM</span>
+      </div>
     </button>
-    <button onclick="changeSuratMenu('rujukan')" id="navRujukan" class="p-3 bg-white border border-slate-200 rounded-xl hover:border-rose-400 hover:shadow-md transition-all flex flex-col items-center gap-2 group">
-      <span class="text-2xl group-hover:scale-110 transition-transform">🚑</span><span class="font-bold text-[10px] text-center text-slate-700">Surat Rujukan</span>
+    <!-- 4. Rujukan -->
+    <button onclick="changeSuratMenu('rujukan')" id="navRujukan" class="p-3.5 bg-white border border-slate-200 rounded-2xl hover:border-rose-400 hover:shadow-md hover:-translate-y-0.5 transition-all flex flex-col items-center gap-2 group shadow-xs cursor-pointer">
+      <div class="w-11 h-11 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">🚑</div>
+      <div class="text-center">
+        <span class="block font-black text-xs text-slate-800 tracking-tight">Surat Rujukan</span>
+        <span class="text-[10px] font-bold text-rose-700 bg-rose-50 px-2 py-0.5 rounded-md border border-rose-100 mt-0.5 inline-block">SPM</span>
+      </div>
     </button>
-    <button onclick="changeSuratMenu('lab')" id="navLab" class="p-3 bg-white border border-slate-200 rounded-xl hover:border-cyan-400 hover:shadow-md transition-all flex flex-col items-center gap-2 group">
-      <span class="text-2xl group-hover:scale-110 transition-transform">🔬</span><span class="font-bold text-[10px] text-center text-slate-700">Pengantar Lab</span>
+    <!-- 5. Lab -->
+    <button onclick="changeSuratMenu('lab')" id="navLab" class="p-3.5 bg-white border border-slate-200 rounded-2xl hover:border-cyan-400 hover:shadow-md hover:-translate-y-0.5 transition-all flex flex-col items-center gap-2 group shadow-xs cursor-pointer">
+      <div class="w-11 h-11 rounded-xl bg-cyan-50 border border-cyan-100 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">🔬</div>
+      <div class="text-center">
+        <span class="block font-black text-xs text-slate-800 tracking-tight">Pengantar Lab</span>
+        <span class="text-[10px] font-bold text-cyan-700 bg-cyan-50 px-2 py-0.5 rounded-md border border-cyan-100 mt-0.5 inline-block">LAB</span>
+      </div>
     </button>
-    <button onclick="changeSuratMenu('radiologi')" id="navRadiologi" class="p-3 bg-white border border-slate-200 rounded-xl hover:border-indigo-400 hover:shadow-md transition-all flex flex-col items-center gap-2 group">
-      <span class="text-2xl group-hover:scale-110 transition-transform">🩻</span><span class="font-bold text-[10px] text-center text-slate-700">Pengantar Radiologi</span>
+    <!-- 6. Radiologi -->
+    <button onclick="changeSuratMenu('radiologi')" id="navRadiologi" class="p-3.5 bg-white border border-slate-200 rounded-2xl hover:border-indigo-400 hover:shadow-md hover:-translate-y-0.5 transition-all flex flex-col items-center gap-2 group shadow-xs cursor-pointer">
+      <div class="w-11 h-11 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">🩻</div>
+      <div class="text-center">
+        <span class="block font-black text-xs text-slate-800 tracking-tight">Radiologi</span>
+        <span class="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-100 mt-0.5 inline-block">RAD</span>
+      </div>
     </button>
   </div>
-
 
   <!-- ======================================================= -->
   <!-- PANEL BERANDA SURAT (STATISTIK & VERIFIKASI DOKUMEN)    -->
@@ -49,53 +84,54 @@
   <div id="panelSuratBeranda" class="space-y-6 print:hidden">
     
     <!-- STATISTIK MINI DASHBOARD -->
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-      <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col items-center text-center">
-        <span class="text-xl mb-1">🤒</span>
-        <span class="text-[10px] font-bold text-slate-500 uppercase">Surat Sakit</span>
-        <span class="text-2xl font-black text-teal-600" id="statSKS">0</span>
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3.5">
+      <div class="bg-white p-4 rounded-2xl border border-slate-200/90 shadow-xs flex flex-col items-center text-center relative overflow-hidden group hover:border-teal-400 transition-all">
+        <div class="w-10 h-10 rounded-xl bg-teal-50 border border-teal-100 flex items-center justify-center text-xl mb-2 text-teal-600">🤒</div>
+        <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Surat Sakit</span>
+        <span class="text-3xl font-black text-teal-600 tracking-tight mt-1" id="statSKS">0</span>
       </div>
-      <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col items-center text-center">
-        <span class="text-xl mb-1">📅</span>
-        <span class="text-[10px] font-bold text-slate-500 uppercase">Kontrol</span>
-        <span class="text-2xl font-black text-blue-600" id="statSKP">0</span>
+      <div class="bg-white p-4 rounded-2xl border border-slate-200/90 shadow-xs flex flex-col items-center text-center relative overflow-hidden group hover:border-blue-400 transition-all">
+        <div class="w-10 h-10 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-xl mb-2 text-blue-600">📅</div>
+        <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Kontrol</span>
+        <span class="text-3xl font-black text-blue-600 tracking-tight mt-1" id="statSKP">0</span>
       </div>
-      <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col items-center text-center">
-        <span class="text-xl mb-1">📋</span>
-        <span class="text-[10px] font-bold text-slate-500 uppercase">Resume</span>
-        <span class="text-2xl font-black text-purple-600" id="statRSM">0</span>
+      <div class="bg-white p-4 rounded-2xl border border-slate-200/90 shadow-xs flex flex-col items-center text-center relative overflow-hidden group hover:border-purple-400 transition-all">
+        <div class="w-10 h-10 rounded-xl bg-purple-50 border border-purple-100 flex items-center justify-center text-xl mb-2 text-purple-600">📋</div>
+        <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Resume</span>
+        <span class="text-3xl font-black text-purple-600 tracking-tight mt-1" id="statRSM">0</span>
       </div>
-      <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col items-center text-center">
-        <span class="text-xl mb-1">🚑</span>
-        <span class="text-[10px] font-bold text-slate-500 uppercase">Rujukan</span>
-        <span class="text-2xl font-black text-rose-600" id="statSRP">0</span>
+      <div class="bg-white p-4 rounded-2xl border border-slate-200/90 shadow-xs flex flex-col items-center text-center relative overflow-hidden group hover:border-rose-400 transition-all">
+        <div class="w-10 h-10 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center text-xl mb-2 text-rose-600">🚑</div>
+        <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Rujukan</span>
+        <span class="text-3xl font-black text-rose-600 tracking-tight mt-1" id="statSRP">0</span>
       </div>
-      <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col items-center text-center">
-        <span class="text-xl mb-1">🔬</span>
-        <span class="text-[10px] font-bold text-slate-500 uppercase">Lab</span>
-        <span class="text-2xl font-black text-cyan-600" id="statLAB">0</span>
+      <div class="bg-white p-4 rounded-2xl border border-slate-200/90 shadow-xs flex flex-col items-center text-center relative overflow-hidden group hover:border-cyan-400 transition-all">
+        <div class="w-10 h-10 rounded-xl bg-cyan-50 border border-cyan-100 flex items-center justify-center text-xl mb-2 text-cyan-600">🔬</div>
+        <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Lab</span>
+        <span class="text-3xl font-black text-cyan-600 tracking-tight mt-1" id="statLAB">0</span>
       </div>
-      <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col items-center text-center">
-        <span class="text-xl mb-1">🩻</span>
-        <span class="text-[10px] font-bold text-slate-500 uppercase">Radiologi</span>
-        <span class="text-2xl font-black text-indigo-600" id="statRAD">0</span>
+      <div class="bg-white p-4 rounded-2xl border border-slate-200/90 shadow-xs flex flex-col items-center text-center relative overflow-hidden group hover:border-indigo-400 transition-all">
+        <div class="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-xl mb-2 text-indigo-600">🩻</div>
+        <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Radiologi</span>
+        <span class="text-3xl font-black text-indigo-600 tracking-tight mt-1" id="statRAD">0</span>
       </div>
     </div>
 
-
     <!-- MODUL QUICK SEARCH / VERIFIKASI DOKUMEN -->
-    <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 text-center relative overflow-hidden">
+    <div class="bg-white p-8 md:p-10 rounded-3xl shadow-sm border border-slate-200 text-center relative overflow-hidden">
       <!-- Background Ornament -->
-      <div class="absolute top-0 right-0 p-8 opacity-5 pointer-events-none text-9xl">🛡️</div>
+      <div class="absolute -top-6 -right-6 p-8 opacity-5 pointer-events-none text-9xl">🛡️</div>
       
-      <h3 class="text-lg font-black text-slate-800 mb-2">Verifikasi & Pencarian Dokumen</h3>
-      <p class="text-xs text-slate-500 mb-6 max-w-lg mx-auto">Ketik <span class="font-bold">Nomor Surat</span> atau <span class="font-bold">Nama Pasien</span> untuk melacak riwayat dan memverifikasi keaslian dokumen.</p>
+      <div class="inline-flex items-center gap-2 px-3 py-1 bg-indigo-50 border border-indigo-100 rounded-full text-indigo-700 font-bold text-xs mb-3">
+        <span>🛡️</span> Pelacakan Validasi Medis
+      </div>
+      <h3 class="text-xl md:text-2xl font-black text-slate-800 mb-2 tracking-tight">Verifikasi & Pencarian Dokumen Surat</h3>
+      <p class="text-xs md:text-sm text-slate-500 mb-6 max-w-lg mx-auto">Ketik <span class="font-bold text-slate-700">Nomor Surat</span> atau <span class="font-bold text-slate-700">Nama Pasien</span> untuk melacak riwayat dan memverifikasi keaslian dokumen secara instan.</p>
       
       <div class="max-w-2xl mx-auto relative">
-        <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-xl">🔍</span>
-        <input type="text" id="inputVerifikasiSurat" oninput="prosesVerifikasiSurat()" autocomplete="off" placeholder="Ketik No. Surat (Cth: SKP/SHELDON/...) atau Nama Pasien..." class="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-300 rounded-xl text-sm font-bold text-slate-700 outline-none focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 transition-all shadow-inner">
+        <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-xl text-slate-400">🔍</span>
+        <input type="text" id="inputVerifikasiSurat" oninput="prosesVerifikasiSurat()" autocomplete="off" placeholder="Ketik No. Surat (Cth: SKP/SHELDON/...) atau Nama Pasien..." class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-sm font-bold text-slate-800 outline-none focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 transition-all shadow-inner">
       </div>
-
 
       <!-- Container Hasil Pencarian -->
       <div id="hasilVerifikasiContainer" class="max-w-2xl mx-auto mt-6 text-left space-y-3 hidden">
@@ -103,76 +139,157 @@
       </div>
     </div>
 
-
   </div>
-
 
   <!-- ======================================================= -->
   <!-- 1. PANEL SURAT KETERANGAN SAKIT (SKS)                   -->
   <!-- ======================================================= -->
   <div id="panelSuratSakit" class="hidden space-y-6">
-    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 print:hidden">
-      <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
-        <div class="flex items-center gap-3">
-          <div class="w-8 h-8 bg-teal-50 text-teal-600 rounded-lg flex items-center justify-center font-bold text-base">📄</div>
-          <div><h3 class="text-sm font-black text-slate-900">Form Surat Keterangan Sakit</h3><p class="text-[10px] text-slate-500 font-medium">Pembuatan surat istirahat medis pasien</p></div>
-        </div>
-        <button onclick="tutupFormSurat()" class="text-xs font-bold text-slate-500 hover:text-rose-600">X Tutup Form</button>
-      </div>
-      <form id="formSKS" onsubmit="handleCetakSKS(event)" class="space-y-3">
-        <input type="hidden" id="sksIdPasien"><input type="hidden" id="sksNoRm">
-        <div class="relative">
-          <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Cari Pasien *</label>
-          <input type="text" id="sksSearchPasien" oninput="searchPasienSKS()" placeholder="Ketik Nama atau No. RM..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-teal-500">
-          <div id="sksSearchResult" class="hidden absolute top-full left-0 right-0 bg-white border rounded-xl shadow-xl z-30 max-h-48 overflow-y-auto mt-1"></div>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-          <div class="lg:col-span-2"><label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Nama Pasien</label><input type="text" id="sksNama" readonly class="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl font-bold text-slate-800 text-xs outline-none"></div>
-          <div><label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Umur</label><input type="text" id="sksUmur" readonly class="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl font-bold text-slate-800 text-xs outline-none"></div>
-          <div><label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Jenis Kelamin</label><input type="text" id="sksJK" readonly class="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl font-bold text-slate-800 text-xs outline-none"></div>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div><label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Pekerjaan</label><input type="text" id="sksPekerjaan" readonly class="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl font-bold text-slate-800 text-xs outline-none"></div>
-          <div><label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Alamat Lengkap</label><input type="text" id="sksAlamat" readonly class="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl font-bold text-slate-800 text-xs outline-none"></div>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
-          <div><label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Lama Istirahat (Max 5 Hari) *</label><input type="number" id="sksLamaHari" required min="1" max="5" value="" placeholder="Maks. 5 Hari" oninput="validasiLamaSKS(this); hitungTglSelesaiSKS()" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-800 text-xs outline-none focus:ring-2 focus:ring-teal-500"></div>
-          <div><label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Mulai Tanggal *</label><input type="date" id="sksTglMulai" required onchange="hitungTglSelesaiSKS()" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-800 text-xs outline-none focus:ring-2 focus:ring-teal-500 cursor-pointer"></div>
-          <div><label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Sampai Tanggal</label><input type="date" id="sksTglSelesai" readonly class="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl font-bold text-slate-800 text-xs outline-none"></div>
+    <div class="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-200 print:hidden">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-slate-100">
+        <div class="flex items-center gap-3.5">
+          <div class="w-12 h-12 bg-teal-50 text-teal-600 rounded-2xl flex items-center justify-center font-bold text-2xl border border-teal-100 shadow-xs">📄</div>
           <div>
-            <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Dokter Pemeriksa *</label>
-            <select id="sksDokter" required class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl font-bold text-slate-800 text-xs outline-none focus:ring-2 focus:ring-teal-500 cursor-pointer">
-              <option value="" disabled selected>-- Pilih Dokter --</option>
-            </select>
+            <div class="flex items-center gap-2">
+              <h3 class="text-lg font-black text-slate-900 tracking-tight">Form Surat Keterangan Sakit</h3>
+              <span class="px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider bg-teal-50 text-teal-700 border border-teal-200 rounded-full">SKS</span>
+            </div>
+            <p class="text-xs text-slate-500 font-medium">Pembuatan surat istirahat medis pasien (Maksimal 5 hari)</p>
           </div>
         </div>
-        <div class="flex justify-end gap-2 pt-2">
-          <button type="button" onclick="resetFormSKS()" class="px-5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-all">Reset</button>
-          <button type="submit" id="btnCetakSKS" class="px-6 py-2 bg-teal-600 hover:bg-teal-700 text-white font-black rounded-xl shadow-md transition-all">SIMPAN & CETAK SKS</button>
+        <button type="button" onclick="tutupFormSurat()" class="self-start sm:self-auto px-4 py-2 bg-slate-100 hover:bg-rose-50 text-slate-600 hover:text-rose-600 font-bold rounded-xl text-xs transition-colors flex items-center gap-1.5 cursor-pointer border border-slate-200">
+          <span>✕</span> Tutup Form
+        </button>
+      </div>
+
+      <form id="formSKS" onsubmit="handleCetakSKS(event)" class="space-y-5">
+        <input type="hidden" id="sksIdPasien"><input type="hidden" id="sksNoRm">
+        
+        <!-- SECTION 1: DATA PASIEN -->
+        <div class="bg-slate-50/80 p-4 md:p-5 rounded-2xl border border-slate-200/80 space-y-4">
+          <div class="flex items-center gap-2 pb-2 border-b border-slate-200/60">
+            <span class="w-6 h-6 rounded-lg bg-teal-100 text-teal-700 font-black text-xs flex items-center justify-center">1</span>
+            <h4 class="font-bold text-slate-800 text-xs uppercase tracking-wider">Identitas Pasien</h4>
+          </div>
+
+          <div class="relative">
+            <label class="block font-bold text-slate-700 mb-1.5 text-xs">Cari Pasien Terdaftar <span class="text-rose-500 font-black">*</span></label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">🔍</span>
+              <input type="text" id="sksSearchPasien" oninput="searchPasienSKS()" placeholder="Ketik Nama Pasien atau Nomor Rekam Medis (RM)..." class="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs md:text-sm font-semibold text-slate-800 placeholder:text-slate-400 placeholder:font-normal outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all shadow-xs">
+            </div>
+            <div id="sksSearchResult" class="hidden absolute top-full left-0 right-0 bg-white border border-slate-200 rounded-2xl shadow-xl z-30 max-h-56 overflow-y-auto mt-1 divide-y divide-slate-100"></div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3.5">
+            <div class="lg:col-span-2">
+              <label class="block font-bold text-slate-700 mb-1.5 text-xs">Nama Lengkap Pasien</label>
+              <input type="text" id="sksNama" readonly placeholder="Terisi otomatis..." class="w-full px-4 py-2.5 bg-slate-100/90 border border-slate-200 rounded-xl font-bold text-slate-800 text-xs md:text-sm outline-none cursor-not-allowed">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1.5 text-xs">Umur</label>
+              <input type="text" id="sksUmur" readonly placeholder="-" class="w-full px-4 py-2.5 bg-slate-100/90 border border-slate-200 rounded-xl font-bold text-slate-800 text-xs md:text-sm outline-none cursor-not-allowed">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1.5 text-xs">Jenis Kelamin</label>
+              <input type="text" id="sksJK" readonly placeholder="-" class="w-full px-4 py-2.5 bg-slate-100/90 border border-slate-200 rounded-xl font-bold text-slate-800 text-xs md:text-sm outline-none cursor-not-allowed">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+            <div>
+              <label class="block font-bold text-slate-700 mb-1.5 text-xs">Pekerjaan</label>
+              <input type="text" id="sksPekerjaan" readonly placeholder="-" class="w-full px-4 py-2.5 bg-slate-100/90 border border-slate-200 rounded-xl font-bold text-slate-800 text-xs md:text-sm outline-none cursor-not-allowed">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1.5 text-xs">Alamat Lengkap</label>
+              <input type="text" id="sksAlamat" readonly placeholder="-" class="w-full px-4 py-2.5 bg-slate-100/90 border border-slate-200 rounded-xl font-bold text-slate-800 text-xs md:text-sm outline-none cursor-not-allowed">
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 2: PERIODE ISTIRAHAT & DOKTER -->
+        <div class="bg-slate-50/80 p-4 md:p-5 rounded-2xl border border-slate-200/80 space-y-4">
+          <div class="flex items-center gap-2 pb-2 border-b border-slate-200/60">
+            <span class="w-6 h-6 rounded-lg bg-teal-100 text-teal-700 font-black text-xs flex items-center justify-center">2</span>
+            <h4 class="font-bold text-slate-800 text-xs uppercase tracking-wider">Detail Surat Keterangan Sakit</h4>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3.5">
+            <div>
+              <label class="block font-bold text-slate-700 mb-1.5 text-xs">Lama Istirahat (Max 5 Hari) <span class="text-rose-500 font-black">*</span></label>
+              <input type="number" id="sksLamaHari" required min="1" max="5" value="" placeholder="Maks. 5 Hari" oninput="validasiLamaSKS(this); hitungTglSelesaiSKS()" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl font-bold text-slate-800 text-xs md:text-sm outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all shadow-xs">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1.5 text-xs">Mulai Tanggal <span class="text-rose-500 font-black">*</span></label>
+              <input type="date" id="sksTglMulai" required onchange="hitungTglSelesaiSKS()" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl font-bold text-slate-800 text-xs md:text-sm outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all cursor-pointer shadow-xs">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1.5 text-xs">Sampai Tanggal</label>
+              <input type="date" id="sksTglSelesai" readonly class="w-full px-4 py-2.5 bg-slate-100/90 border border-slate-200 rounded-xl font-bold text-slate-800 text-xs md:text-sm outline-none cursor-not-allowed">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1.5 text-xs">Dokter Pemeriksa <span class="text-rose-500 font-black">*</span></label>
+              <select id="sksDokter" required class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl font-bold text-slate-800 text-xs md:text-sm outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all cursor-pointer shadow-xs">
+                <option value="" disabled selected>-- Pilih Dokter --</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- ACTION BUTTONS -->
+        <div class="flex flex-col sm:flex-row justify-end items-stretch sm:items-center gap-3 pt-3">
+          <button type="button" onclick="resetFormSKS()" class="px-6 py-3 bg-slate-100 hover:bg-rose-50 hover:text-rose-700 text-slate-700 font-bold rounded-xl border border-slate-300 text-xs md:text-sm transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer shadow-xs">
+            <span>🔄</span> Reset Form
+          </button>
+          <button type="submit" id="btnCetakSKS" class="px-8 py-3.5 bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-500 hover:to-teal-600 text-white font-black rounded-xl text-xs md:text-sm shadow-md hover:shadow-lg shadow-teal-500/20 transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer">
+            <span>🖨️</span> SIMPAN & CETAK SKS
+          </button>
         </div>
       </form>
+
+      <!-- RIWAYAT SKS -->
       <div class="mt-10 border-t border-slate-200 pt-6">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-4">
-          <div><h4 class="font-bold text-slate-800 text-sm">Riwayat Surat Keterangan Sakit</h4><span id="sksTotalBadge" class="text-teal-600 font-bold text-[10px]">Total: 0 Surat</span></div>
-          <div class="w-full md:w-64"><input type="text" id="sksSearchTable" oninput="searchSksTable()" placeholder="Cari Nama Pasien SKS..." class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-teal-500"></div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h4 class="font-black text-slate-800 text-sm md:text-base">Riwayat Surat Keterangan Sakit</h4>
+              <span id="sksTotalBadge" class="bg-teal-50 text-teal-700 border border-teal-200 px-2.5 py-0.5 rounded-full font-black text-[11px]">Total: 0 Surat</span>
+            </div>
+            <p class="text-[11px] text-slate-500 mt-0.5">Daftar surat keterangan sakit yang telah diterbitkan</p>
+          </div>
+          <div class="w-full md:w-72 relative">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">🔍</span>
+            <input type="text" id="sksSearchTable" oninput="searchSksTable()" placeholder="Cari Nama Pasien SKS..." class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:bg-white focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 transition-all">
+          </div>
         </div>
-        <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-sm">
+
+        <div class="overflow-x-auto rounded-2xl border border-slate-200 shadow-xs">
           <table class="w-full text-left whitespace-nowrap">
-            <thead class="bg-slate-50 text-[10px] uppercase font-bold text-slate-500 border-b border-slate-200">
-              <tr><th class="p-3">No. Surat</th><th class="p-3">Tanggal Cetak</th><th class="p-3">Nama Pasien</th><th class="p-3 text-center">Lama (Hari)</th><th class="p-3 text-center">Aksi</th></tr>
+            <thead class="bg-slate-100/80 text-[11px] uppercase font-black text-slate-600 border-b border-slate-200">
+              <tr>
+                <th class="p-3.5">No. Surat</th>
+                <th class="p-3.5">Tanggal Cetak</th>
+                <th class="p-3.5">Nama Pasien</th>
+                <th class="p-3.5 text-center">Lama (Hari)</th>
+                <th class="p-3.5 text-center">Aksi</th>
+              </tr>
             </thead>
-            <tbody id="sksTableBody" class="divide-y divide-slate-100 text-xs">
-              <tr><td colspan="5" class="text-center text-slate-400 py-6 font-bold">Belum ada riwayat SKS tersimpan.</td></tr>
+            <tbody id="sksTableBody" class="divide-y divide-slate-100 text-xs font-medium text-slate-700">
+              <tr><td colspan="5" class="text-center text-slate-400 py-8 font-bold">Belum ada riwayat SKS tersimpan.</td></tr>
             </tbody>
           </table>
         </div>
-        <div class="flex justify-between items-center mt-4">
-          <button id="btnPrevSKS" onclick="prevPageSKS()" disabled class="px-5 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-teal-600 disabled:opacity-40 transition-all shadow-sm">⬅️ Back</button>
-          <span id="sksPageInfo" class="text-[10px] text-slate-500 font-bold">Halaman 1 dari 1</span>
-          <button id="btnNextSKS" onclick="nextPageSKS()" disabled class="px-5 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-teal-600 disabled:opacity-40 transition-all shadow-sm">Next ➡️</button>
+
+        <div class="flex justify-between items-center mt-4 pt-2">
+          <button id="btnPrevSKS" onclick="prevPageSKS()" disabled class="px-5 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-700 hover:bg-teal-50 hover:border-teal-300 hover:text-teal-700 disabled:opacity-40 disabled:hover:bg-white disabled:hover:border-slate-300 disabled:hover:text-slate-700 transition-all shadow-xs cursor-pointer">⬅️ Sebelumnya</button>
+          <span id="sksPageInfo" class="text-xs text-slate-500 font-bold bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200">Halaman 1 dari 1</span>
+          <button id="btnNextSKS" onclick="nextPageSKS()" disabled class="px-5 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-700 hover:bg-teal-50 hover:border-teal-300 hover:text-teal-700 disabled:opacity-40 disabled:hover:bg-white disabled:hover:border-slate-300 disabled:hover:text-slate-700 transition-all shadow-xs cursor-pointer">Selanjutnya ➡️</button>
         </div>
       </div>
     </div>
+
+    <!-- PRINT TEMPLATE SKS (MANDATORY EXACT PRESERVATION) -->
     <div id="printAreaSKS" class="hidden print:block bg-white mx-auto text-slate-900 text-[14px] leading-relaxed print-area-wrapper relative" style="width: 210mm; min-height: 297mm; padding: 40px; box-sizing: border-box; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
       <div class="mb-4"><img src="https://lh3.googleusercontent.com/d/1GjKfmHhcGWgmPcQmuw00gLUBbP3_fead" alt="Kop Surat Klinik Gigi Sheldon" class="w-full h-auto object-contain" style="display: block;"></div>
       <div class="text-center my-6">
@@ -202,71 +319,147 @@
     </div>
   </div>
 
-
   <!-- ======================================================= -->
   <!-- 2. PANEL SURAT KONTROL PASIEN (SKP)                     -->
   <!-- ======================================================= -->
   <div id="panelSuratKontrol" class="hidden space-y-6">
-    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 print:hidden">
-      <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
-        <div class="flex items-center gap-3">
-          <div class="w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center font-bold text-base">🗓️</div>
-          <div><h3 class="text-sm font-black text-slate-900">Form Surat Kontrol Pasien</h3><p class="text-[10px] text-slate-500 font-medium">Jadwal konsultasi ulang dan perawatan lanjutan</p></div>
-        </div>
-        <button onclick="tutupFormSurat()" class="text-xs font-bold text-slate-500 hover:text-rose-600">X Tutup Form</button>
-      </div>
-      <form id="formSKP" onsubmit="handleCetakSKP(event)" class="space-y-3">
-        <input type="hidden" id="skpIdPasien">
-        <div class="relative">
-          <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Cari Pasien *</label>
-          <input type="text" id="skpSearchPasien" oninput="searchPasienSKP()" placeholder="Ketik Nama Pasien atau No. RM..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-blue-500">
-          <div id="skpSearchResult" class="hidden absolute top-full left-0 right-0 bg-white border rounded-xl shadow-xl z-30 max-h-48 overflow-y-auto mt-1"></div>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <div class="md:col-span-2"><label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Nama Pasien</label><input type="text" id="skpNama" readonly class="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl font-bold text-slate-800 text-xs outline-none"></div>
-          <div><label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Nomor RM</label><input type="text" id="skpNoRm" readonly class="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl font-bold text-slate-800 text-xs outline-none"></div>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div><label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Diagnosis *</label><input type="text" id="skpDiagnosis" required oninput="autoTitleCase(this)" placeholder="Diagnosis pasien..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-blue-500"></div>
-          <div><label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Tindakan Yang Telah Diberikan *</label><input type="text" id="skpTindakan" required oninput="autoTitleCase(this)" placeholder="Tindakan..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-blue-500"></div>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <div><label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Tanggal Kontrol Kembali (Opsional)</label><input type="date" id="skpTglKontrol" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-800 text-xs outline-none focus:ring-2 focus:ring-blue-500"></div>
+    <div class="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-200 print:hidden">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-slate-100">
+        <div class="flex items-center gap-3.5">
+          <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center font-bold text-2xl border border-blue-100 shadow-xs">🗓️</div>
           <div>
-            <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Dokter Tujuan *</label>
-            <select id="skpDokterTujuan" required class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl font-bold text-slate-800 text-xs outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer">
-              <option value="" disabled selected>-- Pilih Dokter --</option>
-            </select>
+            <div class="flex items-center gap-2">
+              <h3 class="text-lg font-black text-slate-900 tracking-tight">Form Surat Kontrol Pasien</h3>
+              <span class="px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider bg-blue-50 text-blue-700 border border-blue-200 rounded-full">SKP</span>
+            </div>
+            <p class="text-xs text-slate-500 font-medium">Jadwal konsultasi ulang dan perawatan lanjutan pasien</p>
           </div>
-          <div><label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Alasan / Rencana Kontrol (Opsional)</label><input type="text" id="skpAlasan" oninput="autoTitleCase(this)" placeholder="Misal: Buka Jahitan..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-blue-500"></div>
         </div>
-        <div class="flex justify-end gap-2 pt-2">
-          <button type="button" onclick="resetFormSKP()" class="px-5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-all">Reset</button>
-          <button type="submit" id="btnCetakSKP" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-xl shadow-md transition-all">SIMPAN & CETAK SKP</button>
+        <button type="button" onclick="tutupFormSurat()" class="self-start sm:self-auto px-4 py-2 bg-slate-100 hover:bg-rose-50 text-slate-600 hover:text-rose-600 font-bold rounded-xl text-xs transition-colors flex items-center gap-1.5 cursor-pointer border border-slate-200">
+          <span>✕</span> Tutup Form
+        </button>
+      </div>
+
+      <form id="formSKP" onsubmit="handleCetakSKP(event)" class="space-y-5">
+        <input type="hidden" id="skpIdPasien">
+        
+        <!-- SECTION 1: DATA PASIEN -->
+        <div class="bg-slate-50/80 p-4 md:p-5 rounded-2xl border border-slate-200/80 space-y-4">
+          <div class="flex items-center gap-2 pb-2 border-b border-slate-200/60">
+            <span class="w-6 h-6 rounded-lg bg-blue-100 text-blue-700 font-black text-xs flex items-center justify-center">1</span>
+            <h4 class="font-bold text-slate-800 text-xs uppercase tracking-wider">Identitas Pasien</h4>
+          </div>
+
+          <div class="relative">
+            <label class="block font-bold text-slate-700 mb-1.5 text-xs">Cari Pasien Terdaftar <span class="text-rose-500 font-black">*</span></label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">🔍</span>
+              <input type="text" id="skpSearchPasien" oninput="searchPasienSKP()" placeholder="Ketik Nama Pasien atau Nomor RM..." class="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs md:text-sm font-semibold text-slate-800 placeholder:text-slate-400 placeholder:font-normal outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all shadow-xs">
+            </div>
+            <div id="skpSearchResult" class="hidden absolute top-full left-0 right-0 bg-white border border-slate-200 rounded-2xl shadow-xl z-30 max-h-56 overflow-y-auto mt-1 divide-y divide-slate-100"></div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+            <div class="md:col-span-2">
+              <label class="block font-bold text-slate-700 mb-1.5 text-xs">Nama Lengkap Pasien</label>
+              <input type="text" id="skpNama" readonly placeholder="Terisi otomatis..." class="w-full px-4 py-2.5 bg-slate-100/90 border border-slate-200 rounded-xl font-bold text-slate-800 text-xs md:text-sm outline-none cursor-not-allowed">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1.5 text-xs">Nomor Rekam Medis (RM)</label>
+              <input type="text" id="skpNoRm" readonly placeholder="-" class="w-full px-4 py-2.5 bg-slate-100/90 border border-slate-200 rounded-xl font-bold text-slate-800 text-xs md:text-sm outline-none cursor-not-allowed">
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 2: DETAIL KLINIS & JADWAL KONTROL -->
+        <div class="bg-slate-50/80 p-4 md:p-5 rounded-2xl border border-slate-200/80 space-y-4">
+          <div class="flex items-center gap-2 pb-2 border-b border-slate-200/60">
+            <span class="w-6 h-6 rounded-lg bg-blue-100 text-blue-700 font-black text-xs flex items-center justify-center">2</span>
+            <h4 class="font-bold text-slate-800 text-xs uppercase tracking-wider">Detail Klinis & Rencana Kontrol</h4>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+            <div>
+              <label class="block font-bold text-slate-700 mb-1.5 text-xs">Diagnosis Medis <span class="text-rose-500 font-black">*</span></label>
+              <input type="text" id="skpDiagnosis" required oninput="autoTitleCase(this)" placeholder="Diagnosis pasien..." class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl font-semibold text-slate-800 text-xs md:text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all shadow-xs">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1.5 text-xs">Tindakan Yang Telah Diberikan <span class="text-rose-500 font-black">*</span></label>
+              <input type="text" id="skpTindakan" required oninput="autoTitleCase(this)" placeholder="Tindakan yang telah dilakukan..." class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl font-semibold text-slate-800 text-xs md:text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all shadow-xs">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+            <div>
+              <label class="block font-bold text-slate-700 mb-1.5 text-xs">Tanggal Kontrol Kembali <span class="text-slate-400 font-normal">(Opsional)</span></label>
+              <input type="date" id="skpTglKontrol" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl font-bold text-slate-800 text-xs md:text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all cursor-pointer shadow-xs">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1.5 text-xs">Dokter Tujuan <span class="text-rose-500 font-black">*</span></label>
+              <select id="skpDokterTujuan" required class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl font-bold text-slate-800 text-xs md:text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all cursor-pointer shadow-xs">
+                <option value="" disabled selected>-- Pilih Dokter --</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1.5 text-xs">Alasan / Rencana Kontrol <span class="text-slate-400 font-normal">(Opsional)</span></label>
+              <input type="text" id="skpAlasan" oninput="autoTitleCase(this)" placeholder="Misal: Buka Jahitan, Evaluasi Obat..." class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl font-semibold text-slate-800 text-xs md:text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all shadow-xs">
+            </div>
+          </div>
+        </div>
+
+        <!-- ACTION BUTTONS -->
+        <div class="flex flex-col sm:flex-row justify-end items-stretch sm:items-center gap-3 pt-3">
+          <button type="button" onclick="resetFormSKP()" class="px-6 py-3 bg-slate-100 hover:bg-rose-50 hover:text-rose-700 text-slate-700 font-bold rounded-xl border border-slate-300 text-xs md:text-sm transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer shadow-xs">
+            <span>🔄</span> Reset Form
+          </button>
+          <button type="submit" id="btnCetakSKP" class="px-8 py-3.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white font-black rounded-xl text-xs md:text-sm shadow-md hover:shadow-lg shadow-blue-500/20 transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer">
+            <span>🖨️</span> SIMPAN & CETAK SKP
+          </button>
         </div>
       </form>
+
+      <!-- RIWAYAT SKP -->
       <div class="mt-10 border-t border-slate-200 pt-6">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-4">
-          <div><h4 class="font-bold text-slate-800 text-sm">Riwayat Surat Kontrol</h4><span id="skpTotalBadge" class="text-blue-600 font-bold text-[10px]">Total: 0 Surat</span></div>
-          <div class="w-full md:w-64"><input type="text" id="skpSearchTable" oninput="searchSkpTable()" placeholder="Cari Nama Pasien SKP..." class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-blue-500"></div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h4 class="font-black text-slate-800 text-sm md:text-base">Riwayat Surat Kontrol</h4>
+              <span id="skpTotalBadge" class="bg-blue-50 text-blue-700 border border-blue-200 px-2.5 py-0.5 rounded-full font-black text-[11px]">Total: 0 Surat</span>
+            </div>
+            <p class="text-[11px] text-slate-500 mt-0.5">Daftar surat kontrol pasien yang telah diterbitkan</p>
+          </div>
+          <div class="w-full md:w-72 relative">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">🔍</span>
+            <input type="text" id="skpSearchTable" oninput="searchSkpTable()" placeholder="Cari Nama Pasien SKP..." class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all">
+          </div>
         </div>
-        <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-sm">
+
+        <div class="overflow-x-auto rounded-2xl border border-slate-200 shadow-xs">
           <table class="w-full text-left whitespace-nowrap">
-            <thead class="bg-slate-50 text-[10px] uppercase font-bold text-slate-500 border-b border-slate-200">
-              <tr><th class="p-3">No. Surat</th><th class="p-3">Tanggal Cetak</th><th class="p-3">Nama Pasien</th><th class="p-3">Dokter Tujuan</th><th class="p-3 text-center">Aksi</th></tr>
+            <thead class="bg-slate-100/80 text-[11px] uppercase font-black text-slate-600 border-b border-slate-200">
+              <tr>
+                <th class="p-3.5">No. Surat</th>
+                <th class="p-3.5">Tanggal Cetak</th>
+                <th class="p-3.5">Nama Pasien</th>
+                <th class="p-3.5">Dokter Tujuan</th>
+                <th class="p-3.5 text-center">Aksi</th>
+              </tr>
             </thead>
-            <tbody id="skpTableBody" class="divide-y divide-slate-100 text-xs">
-              <tr><td colspan="5" class="text-center text-slate-400 py-6 font-bold">Belum ada riwayat SKP tersimpan.</td></tr>
+            <tbody id="skpTableBody" class="divide-y divide-slate-100 text-xs font-medium text-slate-700">
+              <tr><td colspan="5" class="text-center text-slate-400 py-8 font-bold">Belum ada riwayat SKP tersimpan.</td></tr>
             </tbody>
           </table>
         </div>
-        <div class="flex justify-between items-center mt-4">
-          <button id="btnPrevSKP" onclick="prevPageSKP()" disabled class="px-5 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-blue-600 disabled:opacity-40 transition-all shadow-sm">⬅ Back</button>
-          <span id="skpPageInfo" class="text-[10px] text-slate-500 font-bold">Halaman 1 dari 1</span>
-          <button id="btnNextSKP" onclick="nextPageSKP()" disabled class="px-5 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-blue-600 disabled:opacity-40 transition-all shadow-sm">Next ➡️</button>
+
+        <div class="flex justify-between items-center mt-4 pt-2">
+          <button id="btnPrevSKP" onclick="prevPageSKP()" disabled class="px-5 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-700 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700 disabled:opacity-40 disabled:hover:bg-white disabled:hover:border-slate-300 disabled:hover:text-slate-700 transition-all shadow-xs cursor-pointer">⬅️ Sebelumnya</button>
+          <span id="skpPageInfo" class="text-xs text-slate-500 font-bold bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200">Halaman 1 dari 1</span>
+          <button id="btnNextSKP" onclick="nextPageSKP()" disabled class="px-5 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-700 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700 disabled:opacity-40 disabled:hover:bg-white disabled:hover:border-slate-300 disabled:hover:text-slate-700 transition-all shadow-xs cursor-pointer">Selanjutnya ➡️</button>
         </div>
       </div>
     </div>
+
+    <!-- PRINT TEMPLATE SKP (MANDATORY EXACT PRESERVATION) -->
     <div id="printAreaSKP" class="hidden print:block bg-white mx-auto text-slate-900 text-[14px] leading-relaxed print-area-wrapper relative" style="width: 210mm; min-height: 297mm; padding: 40px; box-sizing: border-box; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
       <div class="mb-4"><img src="https://lh3.googleusercontent.com/d/1GjKfmHhcGWgmPcQmuw00gLUBbP3_fead" alt="Kop Surat Klinik Gigi Sheldon" class="w-full h-auto object-contain" style="display: block;"></div>
       <div class="text-center my-6">
@@ -302,90 +495,180 @@
     </div>
   </div>
 
-
   <!-- ======================================================= -->
   <!-- 3. PANEL RESUME MEDIS (RSM)                             -->
   <!-- ======================================================= -->
   <div id="panelResumeMedis" class="hidden space-y-6">
-    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 print:hidden">
-      <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
-        <div class="flex items-center gap-3">
-          <div class="w-8 h-8 bg-purple-50 text-purple-600 rounded-lg flex items-center justify-center font-bold text-base">📋</div>
-          <div><h3 class="text-sm font-black text-slate-900">Form Resume Medis Pasien</h3><p class="text-[10px] text-slate-500 font-medium">Ringkasan lengkap klinis pasien (Semua kolom wajib diisi)</p></div>
+    <div class="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-200 print:hidden">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-slate-100">
+        <div class="flex items-center gap-3.5">
+          <div class="w-12 h-12 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center font-bold text-2xl border border-purple-100 shadow-xs">📋</div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="text-lg font-black text-slate-900 tracking-tight">Form Resume Medis Pasien</h3>
+              <span class="px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider bg-purple-50 text-purple-700 border border-purple-200 rounded-full">RSM</span>
+            </div>
+            <p class="text-xs text-slate-500 font-medium">Ringkasan lengkap klinis pasien untuk keperluan rujukan atau klaim asuransi</p>
+          </div>
         </div>
-        <button onclick="tutupFormSurat()" class="text-xs font-bold text-slate-500 hover:text-rose-600">X Tutup Form</button>
+        <button type="button" onclick="tutupFormSurat()" class="self-start sm:self-auto px-4 py-2 bg-slate-100 hover:bg-rose-50 text-slate-600 hover:text-rose-600 font-bold rounded-xl text-xs transition-colors flex items-center gap-1.5 cursor-pointer border border-slate-200">
+          <span>✕</span> Tutup Form
+        </button>
       </div>
-      <form id="formRSM" onsubmit="handleCetakRSM(event)" class="space-y-3">
+
+      <form id="formRSM" onsubmit="handleCetakRSM(event)" class="space-y-5">
         <input type="hidden" id="rsmIdPasien"><input type="hidden" id="rsmNoRm">
-        <div class="relative">
-          <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Cari Pasien *</label>
-          <input type="text" id="rsmSearchPasien" required oninput="searchPasienRSM()" placeholder="Ketik Nama atau No. RM..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-purple-500">
-          <div id="rsmSearchResult" class="hidden absolute top-full left-0 right-0 bg-white border rounded-xl shadow-xl z-30 max-h-48 overflow-y-auto mt-1"></div>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <div><label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Nama Pasien</label><input type="text" id="rsmNama" readonly class="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl font-bold text-slate-800 text-xs outline-none"></div>
-          <div><label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Umur</label><input type="text" id="rsmUmur" readonly class="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl font-bold text-slate-800 text-xs outline-none"></div>
-          <div><label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Tanggal Kunjungan *</label><input type="date" id="rsmTglKunjungan" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-800 text-xs outline-none focus:ring-2 focus:ring-purple-500 cursor-pointer"></div>
-        </div>
-        <div>
-          <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Alamat Lengkap *</label>
-          <input type="text" id="rsmAlamat" required oninput="autoTitleCase(this)" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-purple-500">
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div><label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Ringkasan Riwayat Penyakit / Anamnesis *</label><textarea id="rsmRingkasanKlinis" required oninput="autoTitleCase(this)" rows="2" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-purple-500"></textarea></div>
-          <div><label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Pemeriksaan Penunjang (Rontgen / Lab) *</label><textarea id="rsmPemeriksaanPenunjang" required oninput="autoTitleCase(this)" rows="2" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-purple-500"></textarea></div>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div><label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Diagnosis Utama / Kerja *</label><input type="text" id="rsmDiagnosisKerja" required oninput="autoTitleCase(this)" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-purple-500"></div>
-          <div><label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Tindakan / Terapi Medis *</label><input type="text" id="rsmTindakanMedis" required oninput="autoTitleCase(this)" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-purple-500"></div>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div><label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Medikamentosa (Obat-obatan) *</label><input type="text" id="rsmMedikamentosa" required oninput="autoTitleCase(this)" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-purple-500"></div>
-          <div><label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Hasil Perawatan & Anjuran *</label><input type="text" id="rsmHasilPerawatan" required oninput="autoTitleCase(this)" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-purple-500"></div>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div>
-            <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Keperluan Resume *</label>
-            <input type="text" id="rsmKeperluan" list="listKeperluanOptions" required oninput="autoTitleCase(this)" placeholder="Pilih atau ketik manual..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-purple-500">
-            <datalist id="listKeperluanOptions">
-              <option value="Klaim Asuransi"></option>
-              <option value="Keterangan Medis"></option>
-            </datalist>
+        
+        <!-- SECTION 1: DATA PASIEN -->
+        <div class="bg-slate-50/80 p-4 md:p-5 rounded-2xl border border-slate-200/80 space-y-4">
+          <div class="flex items-center gap-2 pb-2 border-b border-slate-200/60">
+            <span class="w-6 h-6 rounded-lg bg-purple-100 text-purple-700 font-black text-xs flex items-center justify-center">1</span>
+            <h4 class="font-bold text-slate-800 text-xs uppercase tracking-wider">Identitas Pasien & Kunjungan</h4>
           </div>
+
+          <div class="relative">
+            <label class="block font-bold text-slate-700 mb-1.5 text-xs">Cari Pasien Terdaftar <span class="text-rose-500 font-black">*</span></label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">🔍</span>
+              <input type="text" id="rsmSearchPasien" required oninput="searchPasienRSM()" placeholder="Ketik Nama Pasien atau Nomor RM..." class="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs md:text-sm font-semibold text-slate-800 placeholder:text-slate-400 placeholder:font-normal outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all shadow-xs">
+            </div>
+            <div id="rsmSearchResult" class="hidden absolute top-full left-0 right-0 bg-white border border-slate-200 rounded-2xl shadow-xl z-30 max-h-56 overflow-y-auto mt-1 divide-y divide-slate-100"></div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+            <div>
+              <label class="block font-bold text-slate-700 mb-1.5 text-xs">Nama Lengkap Pasien</label>
+              <input type="text" id="rsmNama" readonly placeholder="Terisi otomatis..." class="w-full px-4 py-2.5 bg-slate-100/90 border border-slate-200 rounded-xl font-bold text-slate-800 text-xs md:text-sm outline-none cursor-not-allowed">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1.5 text-xs">Umur</label>
+              <input type="text" id="rsmUmur" readonly placeholder="-" class="w-full px-4 py-2.5 bg-slate-100/90 border border-slate-200 rounded-xl font-bold text-slate-800 text-xs md:text-sm outline-none cursor-not-allowed">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1.5 text-xs">Tanggal Kunjungan <span class="text-rose-500 font-black">*</span></label>
+              <input type="date" id="rsmTglKunjungan" required class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl font-bold text-slate-800 text-xs md:text-sm outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all cursor-pointer shadow-xs">
+            </div>
+          </div>
+
           <div>
-            <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Dokter Penanggung Jawab *</label>
-            <select id="rsmDokter" required class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl font-bold text-slate-800 text-xs outline-none focus:ring-2 focus:ring-purple-500 cursor-pointer">
-              <option value="" disabled selected>-- Pilih Dokter --</option>
-            </select>
+            <label class="block font-bold text-slate-700 mb-1.5 text-xs">Alamat Lengkap <span class="text-rose-500 font-black">*</span></label>
+            <input type="text" id="rsmAlamat" required oninput="autoTitleCase(this)" placeholder="Alamat tempat tinggal pasien..." class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl font-semibold text-slate-800 text-xs md:text-sm outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all shadow-xs">
           </div>
         </div>
-        <div class="flex justify-end gap-2 pt-2">
-          <button type="button" onclick="resetFormRSM()" class="px-5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-all">Reset</button>
-          <button type="submit" id="btnCetakRSM" class="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white font-black rounded-xl shadow-md transition-all">SIMPAN & CETAK RESUME</button>
+
+        <!-- SECTION 2: RINGKASAN KLINIS & PEMERIKSAAN -->
+        <div class="bg-slate-50/80 p-4 md:p-5 rounded-2xl border border-slate-200/80 space-y-4">
+          <div class="flex items-center gap-2 pb-2 border-b border-slate-200/60">
+            <span class="w-6 h-6 rounded-lg bg-purple-100 text-purple-700 font-black text-xs flex items-center justify-center">2</span>
+            <h4 class="font-bold text-slate-800 text-xs uppercase tracking-wider">Ringkasan Riwayat & Pemeriksaan</h4>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+            <div>
+              <label class="block font-bold text-slate-700 mb-1.5 text-xs">Ringkasan Riwayat Penyakit / Anamnesis <span class="text-rose-500 font-black">*</span></label>
+              <textarea id="rsmRingkasanKlinis" required oninput="autoTitleCase(this)" rows="3" placeholder="Keluhan utama dan riwayat penyakit..." class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl font-semibold text-slate-800 text-xs md:text-sm outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all shadow-xs"></textarea>
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1.5 text-xs">Pemeriksaan Penunjang (Rontgen / Lab) <span class="text-rose-500 font-black">*</span></label>
+              <textarea id="rsmPemeriksaanPenunjang" required oninput="autoTitleCase(this)" rows="3" placeholder="Hasil rontgen, laboratorium, tes penunjang..." class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl font-semibold text-slate-800 text-xs md:text-sm outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all shadow-xs"></textarea>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+            <div>
+              <label class="block font-bold text-slate-700 mb-1.5 text-xs">Diagnosis Utama / Kerja <span class="text-rose-500 font-black">*</span></label>
+              <input type="text" id="rsmDiagnosisKerja" required oninput="autoTitleCase(this)" placeholder="Diagnosis utama..." class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl font-bold text-slate-800 text-xs md:text-sm outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all shadow-xs">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1.5 text-xs">Tindakan / Terapi Medis <span class="text-rose-500 font-black">*</span></label>
+              <input type="text" id="rsmTindakanMedis" required oninput="autoTitleCase(this)" placeholder="Tindakan medis yang dilakukan..." class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl font-bold text-slate-800 text-xs md:text-sm outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all shadow-xs">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+            <div>
+              <label class="block font-bold text-slate-700 mb-1.5 text-xs">Medikamentosa (Obat-obatan) <span class="text-rose-500 font-black">*</span></label>
+              <input type="text" id="rsmMedikamentosa" required oninput="autoTitleCase(this)" placeholder="Resep obat, dosis, instruksi minum..." class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl font-semibold text-slate-800 text-xs md:text-sm outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all shadow-xs">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1.5 text-xs">Hasil Perawatan & Anjuran <span class="text-rose-500 font-black">*</span></label>
+              <input type="text" id="rsmHasilPerawatan" required oninput="autoTitleCase(this)" placeholder="Status kesembuhan, pantangan, anjuran kontrol..." class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl font-semibold text-slate-800 text-xs md:text-sm outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all shadow-xs">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+            <div>
+              <label class="block font-bold text-slate-700 mb-1.5 text-xs">Keperluan Resume <span class="text-rose-500 font-black">*</span></label>
+              <input type="text" id="rsmKeperluan" list="listKeperluanOptions" required oninput="autoTitleCase(this)" placeholder="Pilih opsi atau ketik manual..." class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl font-semibold text-slate-800 text-xs md:text-sm outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all shadow-xs">
+              <datalist id="listKeperluanOptions">
+                <option value="Klaim Asuransi"></option>
+                <option value="Keterangan Medis"></option>
+                <option value="Rujukan Rumah Sakit"></option>
+              </datalist>
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1.5 text-xs">Dokter Penanggung Jawab <span class="text-rose-500 font-black">*</span></label>
+              <select id="rsmDokter" required class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl font-bold text-slate-800 text-xs md:text-sm outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all cursor-pointer shadow-xs">
+                <option value="" disabled selected>-- Pilih Dokter --</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- ACTION BUTTONS -->
+        <div class="flex flex-col sm:flex-row justify-end items-stretch sm:items-center gap-3 pt-3">
+          <button type="button" onclick="resetFormRSM()" class="px-6 py-3 bg-slate-100 hover:bg-rose-50 hover:text-rose-700 text-slate-700 font-bold rounded-xl border border-slate-300 text-xs md:text-sm transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer shadow-xs">
+            <span>🔄</span> Reset Form
+          </button>
+          <button type="submit" id="btnCetakRSM" class="px-8 py-3.5 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white font-black rounded-xl text-xs md:text-sm shadow-md hover:shadow-lg shadow-purple-500/20 transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer">
+            <span>🖨️</span> SIMPAN & CETAK RESUME
+          </button>
         </div>
       </form>
+
+      <!-- RIWAYAT RSM -->
       <div class="mt-10 border-t border-slate-200 pt-6">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-4">
-          <div><h4 class="font-bold text-slate-800 text-sm">Riwayat Resume Medis</h4><span id="rsmTotalBadge" class="text-purple-600 font-bold text-[10px]">Total: 0 Surat</span></div>
-          <div class="w-full md:w-64"><input type="text" id="rsmSearchTable" oninput="searchRsmTable()" placeholder="Cari Nama Pasien RSM..." class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-purple-500"></div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h4 class="font-black text-slate-800 text-sm md:text-base">Riwayat Resume Medis</h4>
+              <span id="rsmTotalBadge" class="bg-purple-50 text-purple-700 border border-purple-200 px-2.5 py-0.5 rounded-full font-black text-[11px]">Total: 0 Surat</span>
+            </div>
+            <p class="text-[11px] text-slate-500 mt-0.5">Daftar resume medis pasien yang telah diterbitkan</p>
+          </div>
+          <div class="w-full md:w-72 relative">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">🔍</span>
+            <input type="text" id="rsmSearchTable" oninput="searchRsmTable()" placeholder="Cari Nama Pasien RSM..." class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all">
+          </div>
         </div>
-        <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-sm">
+
+        <div class="overflow-x-auto rounded-2xl border border-slate-200 shadow-xs">
           <table class="w-full text-left whitespace-nowrap">
-            <thead class="bg-slate-50 text-[10px] uppercase font-bold text-slate-500 border-b border-slate-200">
-              <tr><th class="p-3">No. Surat</th><th class="p-3">Tgl Kunjungan</th><th class="p-3">Nama Pasien</th><th class="p-3">Dokter PJ</th><th class="p-3 text-center">Keperluan</th><th class="p-3 text-center">Aksi</th></tr>
+            <thead class="bg-slate-100/80 text-[11px] uppercase font-black text-slate-600 border-b border-slate-200">
+              <tr>
+                <th class="p-3.5">No. Surat</th>
+                <th class="p-3.5">Tgl Kunjungan</th>
+                <th class="p-3.5">Nama Pasien</th>
+                <th class="p-3.5">Dokter PJ</th>
+                <th class="p-3.5 text-center">Keperluan</th>
+                <th class="p-3.5 text-center">Aksi</th>
+              </tr>
             </thead>
-            <tbody id="rsmTableBody" class="divide-y divide-slate-100 text-xs">
-              <tr><td colspan="6" class="text-center text-slate-400 py-6 font-bold">Belum ada riwayat RSM tersimpan.</td></tr>
+            <tbody id="rsmTableBody" class="divide-y divide-slate-100 text-xs font-medium text-slate-700">
+              <tr><td colspan="6" class="text-center text-slate-400 py-8 font-bold">Belum ada riwayat RSM tersimpan.</td></tr>
             </tbody>
           </table>
         </div>
-        <div class="flex justify-between items-center mt-4">
-          <button id="btnPrevRSM" onclick="prevPageRSM()" disabled class="px-5 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-purple-600 disabled:opacity-40 transition-all shadow-sm">⬅️ Back</button>
-          <span id="rsmPageInfo" class="text-[10px] text-slate-500 font-bold">Halaman 1 dari 1</span>
-          <button id="btnNextRSM" onclick="nextPageRSM()" disabled class="px-5 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-purple-600 disabled:opacity-40 transition-all shadow-sm">Next ➡</button>
+
+        <div class="flex justify-between items-center mt-4 pt-2">
+          <button id="btnPrevRSM" onclick="prevPageRSM()" disabled class="px-5 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-700 hover:bg-purple-50 hover:border-purple-300 hover:text-purple-700 disabled:opacity-40 disabled:hover:bg-white disabled:hover:border-slate-300 disabled:hover:text-slate-700 transition-all shadow-xs cursor-pointer">⬅️ Sebelumnya</button>
+          <span id="rsmPageInfo" class="text-xs text-slate-500 font-bold bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200">Halaman 1 dari 1</span>
+          <button id="btnNextRSM" onclick="nextPageRSM()" disabled class="px-5 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-700 hover:bg-purple-50 hover:border-purple-300 hover:text-purple-700 disabled:opacity-40 disabled:hover:bg-white disabled:hover:border-slate-300 disabled:hover:text-slate-700 transition-all shadow-xs cursor-pointer">Selanjutnya ➡️</button>
         </div>
       </div>
     </div>
+
+    <!-- PRINT TEMPLATE RSM (MANDATORY EXACT PRESERVATION) -->
     <div id="printAreaRSM" class="hidden print:block bg-white mx-auto text-slate-900 text-[14px] leading-relaxed print-area-wrapper relative" style="width: 210mm; min-height: 297mm; padding: 40px; box-sizing: border-box; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
       <div class="mb-4"><img src="https://lh3.googleusercontent.com/d/1GjKfmHhcGWgmPcQmuw00gLUBbP3_fead" alt="Kop Surat Klinik Gigi Sheldon" class="w-full h-auto object-contain" style="display: block;"></div>
       <div class="text-center my-6">
@@ -417,80 +700,168 @@
     </div>
   </div>
 
-
   <!-- ======================================================= -->
-  <!-- 4. PANEL SURAT PENGANTAR MEDIS / RUJUKAN (SRP)          -->
+  <!-- 4. PANEL SURAT PENGANTAR MEDIS / RUJUKAN (SPM)          -->
   <!-- ======================================================= -->
   <div id="panelSuratRujukan" class="hidden space-y-6">
-    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 print:hidden">
-      <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
-        <div class="flex items-center gap-3">
-          <div class="w-8 h-8 bg-rose-50 text-rose-600 rounded-lg flex items-center justify-center font-bold text-base">🚑</div>
-          <div><h3 class="text-sm font-black text-slate-900">Form Surat Rujukan</h3><p class="text-[10px] text-slate-500 font-medium">Pembuatan dokumen rujukan pasien antar faskes/sejawat</p></div>
+    <div class="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-200 print:hidden">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-slate-100">
+        <div class="flex items-center gap-3.5">
+          <div class="w-12 h-12 bg-rose-50 text-rose-600 rounded-2xl flex items-center justify-center font-bold text-2xl border border-rose-100 shadow-xs">🚑</div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="text-lg font-black text-slate-900 tracking-tight">Form Surat Rujukan</h3>
+              <span class="px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider bg-rose-50 text-rose-700 border border-rose-200 rounded-full">SPM</span>
+            </div>
+            <p class="text-xs text-slate-500 font-medium">Pembuatan dokumen rujukan pasien antar faskes / dokter spesialis</p>
+          </div>
         </div>
-        <button onclick="tutupFormSurat()" class="text-xs font-bold text-slate-500 hover:text-rose-600">X Tutup Form</button>
+        <button type="button" onclick="tutupFormSurat()" class="self-start sm:self-auto px-4 py-2 bg-slate-100 hover:bg-rose-50 text-slate-600 hover:text-rose-600 font-bold rounded-xl text-xs transition-colors flex items-center gap-1.5 cursor-pointer border border-slate-200">
+          <span>✕</span> Tutup Form
+        </button>
       </div>
-      <form id="formSPM" onsubmit="handleCetakSPM(event)" class="space-y-3">
+
+      <form id="formSPM" onsubmit="handleCetakSPM(event)" class="space-y-5">
         <input type="hidden" id="spmIdPasien"><input type="hidden" id="spmNoRm">
-        <div class="relative">
-          <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Cari Pasien *</label>
-          <input type="text" id="spmSearchPasien" required oninput="searchPasienSPM()" placeholder="Ketik Nama atau No. RM..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-rose-500">
-          <div id="spmSearchResult" class="hidden absolute top-full left-0 right-0 bg-white border rounded-xl shadow-xl z-30 max-h-48 overflow-y-auto mt-1"></div>
+        
+        <!-- SECTION 1: DATA PASIEN -->
+        <div class="bg-slate-50/80 p-4 md:p-5 rounded-2xl border border-slate-200/80 space-y-4">
+          <div class="flex items-center gap-2 pb-2 border-b border-slate-200/60">
+            <span class="w-6 h-6 rounded-lg bg-rose-100 text-rose-700 font-black text-xs flex items-center justify-center">1</span>
+            <h4 class="font-bold text-slate-800 text-xs uppercase tracking-wider">Identitas Pasien</h4>
+          </div>
+
+          <div class="relative">
+            <label class="block font-bold text-slate-700 mb-1.5 text-xs">Cari Pasien Terdaftar <span class="text-rose-500 font-black">*</span></label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">🔍</span>
+              <input type="text" id="spmSearchPasien" required oninput="searchPasienSPM()" placeholder="Ketik Nama Pasien atau Nomor RM..." class="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs md:text-sm font-semibold text-slate-800 placeholder:text-slate-400 placeholder:font-normal outline-none focus:border-rose-500 focus:ring-4 focus:ring-rose-500/10 transition-all shadow-xs">
+            </div>
+            <div id="spmSearchResult" class="hidden absolute top-full left-0 right-0 bg-white border border-slate-200 rounded-2xl shadow-xl z-30 max-h-56 overflow-y-auto mt-1 divide-y divide-slate-100"></div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3.5">
+            <div class="lg:col-span-2">
+              <label class="block font-bold text-slate-700 mb-1.5 text-xs">Nama Lengkap Pasien <span class="text-rose-500 font-black">*</span></label>
+              <input type="text" id="spmNama" readonly required placeholder="Terisi otomatis..." class="w-full px-4 py-2.5 bg-slate-100/90 border border-slate-200 rounded-xl font-bold text-slate-800 text-xs md:text-sm outline-none cursor-not-allowed">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1.5 text-xs">Tgl Lahir / Umur</label>
+              <input type="text" id="spmUmur" readonly placeholder="-" class="w-full px-4 py-2.5 bg-slate-100/90 border border-slate-200 rounded-xl font-bold text-slate-800 text-xs md:text-sm outline-none cursor-not-allowed">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1.5 text-xs">Jenis Kelamin</label>
+              <input type="text" id="spmJK" readonly placeholder="-" class="w-full px-4 py-2.5 bg-slate-100/90 border border-slate-200 rounded-xl font-bold text-slate-800 text-xs md:text-sm outline-none cursor-not-allowed">
+            </div>
+          </div>
+
+          <div>
+            <label class="block font-bold text-slate-700 mb-1.5 text-xs">Alamat Lengkap</label>
+            <input type="text" id="spmAlamat" readonly placeholder="-" class="w-full px-4 py-2.5 bg-slate-100/90 border border-slate-200 rounded-xl font-bold text-slate-800 text-xs md:text-sm outline-none cursor-not-allowed">
+          </div>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-          <div class="lg:col-span-2"><label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Nama Pasien *</label><input type="text" id="spmNama" readonly required class="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl font-bold text-slate-800 text-xs outline-none"></div>
-          <div><label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Tgl Lahir / Umur</label><input type="text" id="spmUmur" readonly class="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl font-bold text-slate-800 text-xs outline-none"></div>
-          <div><label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Jenis Kelamin</label><input type="text" id="spmJK" readonly class="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl font-bold text-slate-800 text-xs outline-none"></div>
-        </div>
-        <div>
-          <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Alamat Lengkap</label>
-          <input type="text" id="spmAlamat" readonly class="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl font-bold text-slate-800 text-xs outline-none">
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-3 border-t border-slate-100">
-          <div><label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Kepada Yth (Tujuan Rujukan) *</label><input type="text" id="spmTujuan" required oninput="autoTitleCase(this)" placeholder="Teman Sejawat Dokter / RS Tujuan..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-rose-500"></div>
-          <div><label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Tanggal Cetak Surat *</label><input type="date" id="spmTglCetak" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-800 text-xs outline-none focus:ring-2 focus:ring-rose-500 cursor-pointer"></div>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div><label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Anamnesa (Keluhan) *</label><textarea id="spmAnamnesa" required oninput="autoTitleCase(this)" rows="2" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-rose-500"></textarea></div>
-          <div><label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Pemeriksaan Fisik *</label><textarea id="spmFisik" required oninput="autoTitleCase(this)" rows="2" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-rose-500"></textarea></div>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div><label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Diagnosis Sementara *</label><input type="text" id="spmDiagnosis" required oninput="autoTitleCase(this)" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-rose-500"></div>
-          <div><label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Terapi / Obat Terakhir *</label><input type="text" id="spmTerapi" required oninput="autoTitleCase(this)" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-rose-500"></div>
-        </div>
-        <div class="mt-3">
-            <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Hormat Kami (Dokter Pengirim) *</label>
-            <select id="spmDokter" required class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl font-bold text-slate-800 text-xs outline-none focus:ring-2 focus:ring-rose-500 cursor-pointer">
+
+        <!-- SECTION 2: TUJUAN RUJUKAN & DATA KLINIS -->
+        <div class="bg-slate-50/80 p-4 md:p-5 rounded-2xl border border-slate-200/80 space-y-4">
+          <div class="flex items-center gap-2 pb-2 border-b border-slate-200/60">
+            <span class="w-6 h-6 rounded-lg bg-rose-100 text-rose-700 font-black text-xs flex items-center justify-center">2</span>
+            <h4 class="font-bold text-slate-800 text-xs uppercase tracking-wider">Detail Tujuan Rujukan & Klinis</h4>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+            <div>
+              <label class="block font-bold text-slate-700 mb-1.5 text-xs">Kepada Yth (Tujuan Rujukan) <span class="text-rose-500 font-black">*</span></label>
+              <input type="text" id="spmTujuan" required oninput="autoTitleCase(this)" placeholder="Teman Sejawat Dokter / RS Tujuan..." class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl font-semibold text-slate-800 text-xs md:text-sm outline-none focus:border-rose-500 focus:ring-4 focus:ring-rose-500/10 transition-all shadow-xs">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1.5 text-xs">Tanggal Cetak Surat <span class="text-rose-500 font-black">*</span></label>
+              <input type="date" id="spmTglCetak" required class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl font-bold text-slate-800 text-xs md:text-sm outline-none focus:border-rose-500 focus:ring-4 focus:ring-rose-500/10 transition-all cursor-pointer shadow-xs">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+            <div>
+              <label class="block font-bold text-slate-700 mb-1.5 text-xs">Anamnesa (Keluhan Pasien) <span class="text-rose-500 font-black">*</span></label>
+              <textarea id="spmAnamnesa" required oninput="autoTitleCase(this)" rows="3" placeholder="Keluhan utama dan riwayat klinis pasien..." class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl font-semibold text-slate-800 text-xs md:text-sm outline-none focus:border-rose-500 focus:ring-4 focus:ring-rose-500/10 transition-all shadow-xs"></textarea>
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1.5 text-xs">Pemeriksaan Fisik <span class="text-rose-500 font-black">*</span></label>
+              <textarea id="spmFisik" required oninput="autoTitleCase(this)" rows="3" placeholder="Hasil pemeriksaan fisik atau status lokalis..." class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl font-semibold text-slate-800 text-xs md:text-sm outline-none focus:border-rose-500 focus:ring-4 focus:ring-rose-500/10 transition-all shadow-xs"></textarea>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+            <div>
+              <label class="block font-bold text-slate-700 mb-1.5 text-xs">Diagnosis Sementara <span class="text-rose-500 font-black">*</span></label>
+              <input type="text" id="spmDiagnosis" required oninput="autoTitleCase(this)" placeholder="Diagnosis sementara..." class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl font-bold text-slate-800 text-xs md:text-sm outline-none focus:border-rose-500 focus:ring-4 focus:ring-rose-500/10 transition-all shadow-xs">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1.5 text-xs">Terapi / Obat Terakhir <span class="text-rose-500 font-black">*</span></label>
+              <input type="text" id="spmTerapi" required oninput="autoTitleCase(this)" placeholder="Tindakan atau obat yang telah diberikan..." class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl font-semibold text-slate-800 text-xs md:text-sm outline-none focus:border-rose-500 focus:ring-4 focus:ring-rose-500/10 transition-all shadow-xs">
+            </div>
+          </div>
+
+          <div>
+            <label class="block font-bold text-slate-700 mb-1.5 text-xs">Hormat Kami (Dokter Pengirim) <span class="text-rose-500 font-black">*</span></label>
+            <select id="spmDokter" required class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl font-bold text-slate-800 text-xs md:text-sm outline-none focus:border-rose-500 focus:ring-4 focus:ring-rose-500/10 transition-all cursor-pointer shadow-xs">
               <option value="" disabled selected>-- Pilih Dokter --</option>
             </select>
+          </div>
         </div>
-        <div class="flex justify-end gap-2 pt-2">
-          <button type="button" onclick="resetFormSPM()" class="px-5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-all">Reset</button>
-          <button type="submit" id="btnCetakSPM" class="px-6 py-2 bg-rose-600 hover:bg-rose-700 text-white font-black rounded-xl shadow-md transition-all">SIMPAN & CETAK RUJUKAN</button>
+
+        <!-- ACTION BUTTONS -->
+        <div class="flex flex-col sm:flex-row justify-end items-stretch sm:items-center gap-3 pt-3">
+          <button type="button" onclick="resetFormSPM()" class="px-6 py-3 bg-slate-100 hover:bg-rose-50 hover:text-rose-700 text-slate-700 font-bold rounded-xl border border-slate-300 text-xs md:text-sm transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer shadow-xs">
+            <span>🔄</span> Reset Form
+          </button>
+          <button type="submit" id="btnCetakSPM" class="px-8 py-3.5 bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-500 hover:to-rose-600 text-white font-black rounded-xl text-xs md:text-sm shadow-md hover:shadow-lg shadow-rose-500/20 transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer">
+            <span>🖨️</span> SIMPAN & CETAK RUJUKAN
+          </button>
         </div>
       </form>
+
+      <!-- RIWAYAT SPM -->
       <div class="mt-10 border-t border-slate-200 pt-6">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-4">
-          <div><h4 class="font-bold text-slate-800 text-sm">Riwayat Surat Rujukan</h4><span id="spmTotalBadge" class="text-rose-600 font-bold text-[10px]">Total: 0 Surat</span></div>
-          <div class="w-full md:w-64"><input type="text" id="spmSearchTable" oninput="searchSpmTable()" placeholder="Cari Nama Pasien SRP..." class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-rose-500"></div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h4 class="font-black text-slate-800 text-sm md:text-base">Riwayat Surat Rujukan</h4>
+              <span id="spmTotalBadge" class="bg-rose-50 text-rose-700 border border-rose-200 px-2.5 py-0.5 rounded-full font-black text-[11px]">Total: 0 Surat</span>
+            </div>
+            <p class="text-[11px] text-slate-500 mt-0.5">Daftar surat rujukan pasien yang telah diterbitkan</p>
+          </div>
+          <div class="w-full md:w-72 relative">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">🔍</span>
+            <input type="text" id="spmSearchTable" oninput="searchSpmTable()" placeholder="Cari Nama Pasien SRP..." class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:bg-white focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 transition-all">
+          </div>
         </div>
-        <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-sm">
+
+        <div class="overflow-x-auto rounded-2xl border border-slate-200 shadow-xs">
           <table class="w-full text-left whitespace-nowrap">
-            <thead class="bg-slate-50 text-[10px] uppercase font-bold text-slate-500 border-b border-slate-200">
-              <tr><th class="p-3">No. Surat</th><th class="p-3">Tanggal Cetak</th><th class="p-3">Nama Pasien</th><th class="p-3">Tujuan (Kepada Yth)</th><th class="p-3 text-center">Aksi</th></tr>
+            <thead class="bg-slate-100/80 text-[11px] uppercase font-black text-slate-600 border-b border-slate-200">
+              <tr>
+                <th class="p-3.5">No. Surat</th>
+                <th class="p-3.5">Tanggal Cetak</th>
+                <th class="p-3.5">Nama Pasien</th>
+                <th class="p-3.5">Tujuan (Kepada Yth)</th>
+                <th class="p-3.5 text-center">Aksi</th>
+              </tr>
             </thead>
-            <tbody id="spmTableBody" class="divide-y divide-slate-100 text-xs">
-              <tr><td colspan="5" class="text-center text-slate-400 py-6 font-bold">Belum ada riwayat Rujukan tersimpan.</td></tr>
+            <tbody id="spmTableBody" class="divide-y divide-slate-100 text-xs font-medium text-slate-700">
+              <tr><td colspan="5" class="text-center text-slate-400 py-8 font-bold">Belum ada riwayat Rujukan tersimpan.</td></tr>
             </tbody>
           </table>
         </div>
-        <div class="flex justify-between items-center mt-4">
-          <button id="btnPrevSPM" onclick="prevPageSPM()" disabled class="px-5 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-rose-600 disabled:opacity-40 transition-all shadow-sm">⬅️ Back</button>
-          <span id="spmPageInfo" class="text-[10px] text-slate-500 font-bold">Halaman 1 dari 1</span>
-          <button id="btnNextSPM" onclick="nextPageSPM()" disabled class="px-5 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-rose-600 disabled:opacity-40 transition-all shadow-sm">Next ➡️</button>
+
+        <div class="flex justify-between items-center mt-4 pt-2">
+          <button id="btnPrevSPM" onclick="prevPageSPM()" disabled class="px-5 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-700 hover:bg-rose-50 hover:border-rose-300 hover:text-rose-700 disabled:opacity-40 disabled:hover:bg-white disabled:hover:border-slate-300 disabled:hover:text-slate-700 transition-all shadow-xs cursor-pointer">⬅️ Sebelumnya</button>
+          <span id="spmPageInfo" class="text-xs text-slate-500 font-bold bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200">Halaman 1 dari 1</span>
+          <button id="btnNextSPM" onclick="nextPageSPM()" disabled class="px-5 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-700 hover:bg-rose-50 hover:border-rose-300 hover:text-rose-700 disabled:opacity-40 disabled:hover:bg-white disabled:hover:border-slate-300 disabled:hover:text-slate-700 transition-all shadow-xs cursor-pointer">Selanjutnya ➡️</button>
         </div>
       </div>
     </div>
+
+    <!-- PRINT TEMPLATE SPM (MANDATORY EXACT PRESERVATION) -->
     <div id="printAreaSPM" class="hidden print:block bg-white mx-auto text-slate-900 text-[14px] leading-relaxed print-area-wrapper relative" style="width: 210mm; min-height: 297mm; padding: 40px; box-sizing: border-box; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
       <div class="mb-4"><img src="https://lh3.googleusercontent.com/d/1GjKfmHhcGWgmPcQmuw00gLUBbP3_fead" alt="Kop Surat Klinik Gigi Sheldon" class="w-full h-auto object-contain" style="display: block;"></div>
       <div class="text-center mt-6 mb-2">
@@ -532,79 +903,157 @@
     </div>
   </div>
 
-
   <!-- ======================================================= -->
   <!-- 5. PANEL SURAT PENGANTAR LAB (LAB)                      -->
   <!-- ======================================================= -->
   <div id="panelSuratLab" class="hidden space-y-6">
-    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 print:hidden">
-      <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
-        <div class="flex items-center gap-3">
-          <div class="w-8 h-8 bg-cyan-50 text-cyan-600 rounded-lg flex items-center justify-center font-bold text-base">🔬</div>
-          <div><h3 class="text-sm font-black text-slate-900">Form Pengantar Laboratorium</h3><p class="text-[10px] text-slate-500 font-medium">Pembuatan dokumen pengantar pemeriksaan lab</p></div>
-        </div>
-        <button onclick="tutupFormSurat()" class="text-xs font-bold text-slate-500 hover:text-rose-600">X Tutup Form</button>
-      </div>
-      <form id="formLAB" onsubmit="handleCetakLAB(event)" class="space-y-3">
-        <input type="hidden" id="labIdPasien"><input type="hidden" id="labNoRm">
-        <div class="relative">
-          <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Cari Pasien *</label>
-          <input type="text" id="labSearchPasien" required oninput="searchPasienLAB()" placeholder="Ketik Nama atau No. RM..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-cyan-500">
-          <div id="labSearchResult" class="hidden absolute top-full left-0 right-0 bg-white border rounded-xl shadow-xl z-30 max-h-48 overflow-y-auto mt-1"></div>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-          <div class="lg:col-span-2"><label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Nama Pasien *</label><input type="text" id="labNama" readonly required class="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl font-bold text-slate-800 text-xs outline-none"></div>
-          <div><label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Tgl Lahir / Umur</label><input type="text" id="labUmur" readonly class="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl font-bold text-slate-800 text-xs outline-none"></div>
-          <div><label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Jenis Kelamin</label><input type="text" id="labJK" readonly class="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl font-bold text-slate-800 text-xs outline-none"></div>
-        </div>
-        <div>
-          <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Alamat Lengkap</label>
-          <input type="text" id="labAlamat" readonly class="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl font-bold text-slate-800 text-xs outline-none">
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-3 border-t border-slate-100">
-          <div><label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Kepada Yth (Tujuan Lab) *</label><input type="text" id="labTujuan" required oninput="autoTitleCase(this)" value="Petugas Laboratorium" placeholder="Nama Lab / RS Tujuan..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-cyan-500"></div>
-          <div><label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Tanggal Cetak Surat *</label><input type="date" id="labTglCetak" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-800 text-xs outline-none focus:ring-2 focus:ring-cyan-500 cursor-pointer"></div>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div><label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Diagnosis Klinis *</label><input type="text" id="labDiagnosis" required oninput="autoTitleCase(this)" placeholder="Cth: Suspek Febris Dengue..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-cyan-500"></div>
+    <div class="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-200 print:hidden">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-slate-100">
+        <div class="flex items-center gap-3.5">
+          <div class="w-12 h-12 bg-cyan-50 text-cyan-600 rounded-2xl flex items-center justify-center font-bold text-2xl border border-cyan-100 shadow-xs">🔬</div>
           <div>
-            <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Dokter Pemeriksa *</label>
-            <select id="labDokter" required class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl font-bold text-slate-800 text-xs outline-none focus:ring-2 focus:ring-cyan-500 cursor-pointer">
-              <option value="" disabled selected>-- Pilih Dokter --</option>
-            </select>
+            <div class="flex items-center gap-2">
+              <h3 class="text-lg font-black text-slate-900 tracking-tight">Form Pengantar Laboratorium</h3>
+              <span class="px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider bg-cyan-50 text-cyan-700 border border-cyan-200 rounded-full">LAB</span>
+            </div>
+            <p class="text-xs text-slate-500 font-medium">Pembuatan dokumen permintaan pemeriksaan spesimen laboratorium</p>
           </div>
         </div>
-        <div>
-          <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Jenis Pemeriksaan Yang Diminta *</label>
-          <textarea id="labPemeriksaan" required rows="4" placeholder="Ketik jenis pemeriksaan... (Bisa ditekan Enter agar rapi saat dicetak)" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-cyan-500"></textarea>
+        <button type="button" onclick="tutupFormSurat()" class="self-start sm:self-auto px-4 py-2 bg-slate-100 hover:bg-rose-50 text-slate-600 hover:text-rose-600 font-bold rounded-xl text-xs transition-colors flex items-center gap-1.5 cursor-pointer border border-slate-200">
+          <span>✕</span> Tutup Form
+        </button>
+      </div>
+
+      <form id="formLAB" onsubmit="handleCetakLAB(event)" class="space-y-5">
+        <input type="hidden" id="labIdPasien"><input type="hidden" id="labNoRm">
+        
+        <!-- SECTION 1: DATA PASIEN -->
+        <div class="bg-slate-50/80 p-4 md:p-5 rounded-2xl border border-slate-200/80 space-y-4">
+          <div class="flex items-center gap-2 pb-2 border-b border-slate-200/60">
+            <span class="w-6 h-6 rounded-lg bg-cyan-100 text-cyan-700 font-black text-xs flex items-center justify-center">1</span>
+            <h4 class="font-bold text-slate-800 text-xs uppercase tracking-wider">Identitas Pasien</h4>
+          </div>
+
+          <div class="relative">
+            <label class="block font-bold text-slate-700 mb-1.5 text-xs">Cari Pasien Terdaftar <span class="text-rose-500 font-black">*</span></label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">🔍</span>
+              <input type="text" id="labSearchPasien" required oninput="searchPasienLAB()" placeholder="Ketik Nama Pasien atau Nomor RM..." class="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs md:text-sm font-semibold text-slate-800 placeholder:text-slate-400 placeholder:font-normal outline-none focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/10 transition-all shadow-xs">
+            </div>
+            <div id="labSearchResult" class="hidden absolute top-full left-0 right-0 bg-white border border-slate-200 rounded-2xl shadow-xl z-30 max-h-56 overflow-y-auto mt-1 divide-y divide-slate-100"></div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3.5">
+            <div class="lg:col-span-2">
+              <label class="block font-bold text-slate-700 mb-1.5 text-xs">Nama Lengkap Pasien <span class="text-rose-500 font-black">*</span></label>
+              <input type="text" id="labNama" readonly required placeholder="Terisi otomatis..." class="w-full px-4 py-2.5 bg-slate-100/90 border border-slate-200 rounded-xl font-bold text-slate-800 text-xs md:text-sm outline-none cursor-not-allowed">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1.5 text-xs">Tgl Lahir / Umur</label>
+              <input type="text" id="labUmur" readonly placeholder="-" class="w-full px-4 py-2.5 bg-slate-100/90 border border-slate-200 rounded-xl font-bold text-slate-800 text-xs md:text-sm outline-none cursor-not-allowed">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1.5 text-xs">Jenis Kelamin</label>
+              <input type="text" id="labJK" readonly placeholder="-" class="w-full px-4 py-2.5 bg-slate-100/90 border border-slate-200 rounded-xl font-bold text-slate-800 text-xs md:text-sm outline-none cursor-not-allowed">
+            </div>
+          </div>
+
+          <div>
+            <label class="block font-bold text-slate-700 mb-1.5 text-xs">Alamat Lengkap</label>
+            <input type="text" id="labAlamat" readonly placeholder="-" class="w-full px-4 py-2.5 bg-slate-100/90 border border-slate-200 rounded-xl font-bold text-slate-800 text-xs md:text-sm outline-none cursor-not-allowed">
+          </div>
         </div>
-        <div class="flex justify-end gap-2 pt-2">
-          <button type="button" onclick="resetFormLAB()" class="px-5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-all">Reset</button>
-          <button type="submit" id="btnCetakLAB" class="px-6 py-2 bg-cyan-600 hover:bg-cyan-700 text-white font-black rounded-xl shadow-md transition-all">SIMPAN & CETAK LAB</button>
+
+        <!-- SECTION 2: DETAIL PERMINTAAN LAB -->
+        <div class="bg-slate-50/80 p-4 md:p-5 rounded-2xl border border-slate-200/80 space-y-4">
+          <div class="flex items-center gap-2 pb-2 border-b border-slate-200/60">
+            <span class="w-6 h-6 rounded-lg bg-cyan-100 text-cyan-700 font-black text-xs flex items-center justify-center">2</span>
+            <h4 class="font-bold text-slate-800 text-xs uppercase tracking-wider">Detail Permintaan Laboratorium</h4>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+            <div>
+              <label class="block font-bold text-slate-700 mb-1.5 text-xs">Kepada Yth (Tujuan Lab) <span class="text-rose-500 font-black">*</span></label>
+              <input type="text" id="labTujuan" required oninput="autoTitleCase(this)" value="Petugas Laboratorium" placeholder="Nama Lab / RS Tujuan..." class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl font-semibold text-slate-800 text-xs md:text-sm outline-none focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/10 transition-all shadow-xs">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1.5 text-xs">Tanggal Cetak Surat <span class="text-rose-500 font-black">*</span></label>
+              <input type="date" id="labTglCetak" required class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl font-bold text-slate-800 text-xs md:text-sm outline-none focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/10 transition-all cursor-pointer shadow-xs">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+            <div>
+              <label class="block font-bold text-slate-700 mb-1.5 text-xs">Diagnosis Klinis <span class="text-rose-500 font-black">*</span></label>
+              <input type="text" id="labDiagnosis" required oninput="autoTitleCase(this)" placeholder="Cth: Suspek Febris Dengue, Anemia..." class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl font-bold text-slate-800 text-xs md:text-sm outline-none focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/10 transition-all shadow-xs">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1.5 text-xs">Dokter Pemeriksa <span class="text-rose-500 font-black">*</span></label>
+              <select id="labDokter" required class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl font-bold text-slate-800 text-xs md:text-sm outline-none focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/10 transition-all cursor-pointer shadow-xs">
+                <option value="" disabled selected>-- Pilih Dokter --</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block font-bold text-slate-700 mb-1.5 text-xs">Jenis Pemeriksaan Yang Diminta <span class="text-rose-500 font-black">*</span></label>
+            <textarea id="labPemeriksaan" required rows="4" placeholder="Ketik rincian pemeriksaan lab... (Tekan Enter untuk baris baru agar rapi saat dicetak)" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl font-semibold text-slate-800 text-xs md:text-sm outline-none focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/10 transition-all shadow-xs"></textarea>
+          </div>
+        </div>
+
+        <!-- ACTION BUTTONS -->
+        <div class="flex flex-col sm:flex-row justify-end items-stretch sm:items-center gap-3 pt-3">
+          <button type="button" onclick="resetFormLAB()" class="px-6 py-3 bg-slate-100 hover:bg-rose-50 hover:text-rose-700 text-slate-700 font-bold rounded-xl border border-slate-300 text-xs md:text-sm transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer shadow-xs">
+            <span>🔄</span> Reset Form
+          </button>
+          <button type="submit" id="btnCetakLAB" class="px-8 py-3.5 bg-gradient-to-r from-cyan-600 to-cyan-700 hover:from-cyan-500 hover:to-cyan-600 text-white font-black rounded-xl text-xs md:text-sm shadow-md hover:shadow-lg shadow-cyan-500/20 transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer">
+            <span>🖨️</span> SIMPAN & CETAK LAB
+          </button>
         </div>
       </form>
+
+      <!-- RIWAYAT LAB -->
       <div class="mt-10 border-t border-slate-200 pt-6">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-4">
-          <div><h4 class="font-bold text-slate-800 text-sm">Riwayat Pengantar Lab</h4><span id="labTotalBadge" class="text-cyan-600 font-bold text-[10px]">Total: 0 Surat</span></div>
-          <div class="w-full md:w-64"><input type="text" id="labSearchTable" oninput="searchLabTable()" placeholder="Cari Nama Pasien Lab..." class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-cyan-500"></div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h4 class="font-black text-slate-800 text-sm md:text-base">Riwayat Pengantar Laboratorium</h4>
+              <span id="labTotalBadge" class="bg-cyan-50 text-cyan-700 border border-cyan-200 px-2.5 py-0.5 rounded-full font-black text-[11px]">Total: 0 Surat</span>
+            </div>
+            <p class="text-[11px] text-slate-500 mt-0.5">Daftar surat pengantar laboratorium yang telah diterbitkan</p>
+          </div>
+          <div class="w-full md:w-72 relative">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">🔍</span>
+            <input type="text" id="labSearchTable" oninput="searchLabTable()" placeholder="Cari Nama Pasien Lab..." class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:bg-white focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 transition-all">
+          </div>
         </div>
-        <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-sm">
+
+        <div class="overflow-x-auto rounded-2xl border border-slate-200 shadow-xs">
           <table class="w-full text-left whitespace-nowrap">
-            <thead class="bg-slate-50 text-[10px] uppercase font-bold text-slate-500 border-b border-slate-200">
-              <tr><th class="p-3">No. Surat</th><th class="p-3">Tanggal Cetak</th><th class="p-3">Nama Pasien</th><th class="p-3">Diagnosis Klinis</th><th class="p-3 text-center">Aksi</th></tr>
+            <thead class="bg-slate-100/80 text-[11px] uppercase font-black text-slate-600 border-b border-slate-200">
+              <tr>
+                <th class="p-3.5">No. Surat</th>
+                <th class="p-3.5">Tanggal Cetak</th>
+                <th class="p-3.5">Nama Pasien</th>
+                <th class="p-3.5">Diagnosis Klinis</th>
+                <th class="p-3.5 text-center">Aksi</th>
+              </tr>
             </thead>
-            <tbody id="labTableBody" class="divide-y divide-slate-100 text-xs">
-              <tr><td colspan="5" class="text-center text-slate-400 py-6 font-bold">Belum ada riwayat Pengantar Lab tersimpan.</td></tr>
+            <tbody id="labTableBody" class="divide-y divide-slate-100 text-xs font-medium text-slate-700">
+              <tr><td colspan="5" class="text-center text-slate-400 py-8 font-bold">Belum ada riwayat Pengantar Lab tersimpan.</td></tr>
             </tbody>
           </table>
         </div>
-        <div class="flex justify-between items-center mt-4">
-          <button id="btnPrevLAB" onclick="prevPageLAB()" disabled class="px-5 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-cyan-600 disabled:opacity-40 transition-all shadow-sm">⬅️ Back</button>
-          <span id="labPageInfo" class="text-[10px] text-slate-500 font-bold">Halaman 1 dari 1</span>
-          <button id="btnNextLAB" onclick="nextPageLAB()" disabled class="px-5 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-cyan-600 disabled:opacity-40 transition-all shadow-sm">Next ➡️</button>
+
+        <div class="flex justify-between items-center mt-4 pt-2">
+          <button id="btnPrevLAB" onclick="prevPageLAB()" disabled class="px-5 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-700 hover:bg-cyan-50 hover:border-cyan-300 hover:text-cyan-700 disabled:opacity-40 disabled:hover:bg-white disabled:hover:border-slate-300 disabled:hover:text-slate-700 transition-all shadow-xs cursor-pointer">⬅️ Sebelumnya</button>
+          <span id="labPageInfo" class="text-xs text-slate-500 font-bold bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200">Halaman 1 dari 1</span>
+          <button id="btnNextLAB" onclick="nextPageLAB()" disabled class="px-5 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-700 hover:bg-cyan-50 hover:border-cyan-300 hover:text-cyan-700 disabled:opacity-40 disabled:hover:bg-white disabled:hover:border-slate-300 disabled:hover:text-slate-700 transition-all shadow-xs cursor-pointer">Selanjutnya ➡️</button>
         </div>
       </div>
     </div>
+
+    <!-- PRINT TEMPLATE LAB (MANDATORY EXACT PRESERVATION) -->
     <div id="printAreaLAB" class="hidden print:block bg-white mx-auto text-slate-900 text-[14px] leading-relaxed print-area-wrapper relative" style="width: 210mm; min-height: 297mm; padding: 40px; box-sizing: border-box; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
       <div class="mb-4"><img src="https://lh3.googleusercontent.com/d/1GjKfmHhcGWgmPcQmuw00gLUBbP3_fead" alt="Kop Surat Klinik Gigi Sheldon" class="w-full h-auto object-contain" style="display: block;"></div>
       <div class="text-center mt-6 mb-2">
@@ -640,79 +1089,157 @@
     </div>
   </div>
 
-
   <!-- ======================================================= -->
   <!-- 6. PANEL SURAT PENGANTAR RADIOLOGI (RAD)                -->
   <!-- ======================================================= -->
   <div id="panelSuratRadiologi" class="hidden space-y-6">
-    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 print:hidden">
-      <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
-        <div class="flex items-center gap-3">
-          <div class="w-8 h-8 bg-indigo-50 text-indigo-600 rounded-lg flex items-center justify-center font-bold text-base">🩻</div>
-          <div><h3 class="text-sm font-black text-slate-900">Form Pengantar Radiologi</h3><p class="text-[10px] text-slate-500 font-medium">Pembuatan dokumen permintaan pemeriksaan rontgen/radiologi</p></div>
-        </div>
-        <button onclick="tutupFormSurat()" class="text-xs font-bold text-slate-500 hover:text-rose-600">X Tutup Form</button>
-      </div>
-      <form id="formRAD" onsubmit="handleCetakRAD(event)" class="space-y-3">
-        <input type="hidden" id="radIdPasien"><input type="hidden" id="radNoRm">
-        <div class="relative">
-          <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Cari Pasien *</label>
-          <input type="text" id="radSearchPasien" required oninput="searchPasienRAD()" placeholder="Ketik Nama atau No. RM..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-indigo-500">
-          <div id="radSearchResult" class="hidden absolute top-full left-0 right-0 bg-white border rounded-xl shadow-xl z-30 max-h-48 overflow-y-auto mt-1"></div>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-          <div class="lg:col-span-2"><label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Nama Pasien *</label><input type="text" id="radNama" readonly required class="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl font-bold text-slate-800 text-xs outline-none"></div>
-          <div><label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Tgl Lahir / Umur</label><input type="text" id="radUmur" readonly class="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl font-bold text-slate-800 text-xs outline-none"></div>
-          <div><label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Jenis Kelamin</label><input type="text" id="radJK" readonly class="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl font-bold text-slate-800 text-xs outline-none"></div>
-        </div>
-        <div>
-          <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Alamat Lengkap</label>
-          <input type="text" id="radAlamat" readonly class="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl font-bold text-slate-800 text-xs outline-none">
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-3 border-t border-slate-100">
-          <div><label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Kepada Yth (Tujuan Radiologi) *</label><input type="text" id="radTujuan" required oninput="autoTitleCase(this)" value="Dokter Spesialis Radiologi / Petugas Radiografi" placeholder="Nama RS Tujuan / Unit Radiologi..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500"></div>
-          <div><label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Tanggal Cetak Surat *</label><input type="date" id="radTglCetak" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-800 text-xs outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"></div>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div><label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Diagnosis Klinis / Indikasi *</label><input type="text" id="radDiagnosis" required oninput="autoTitleCase(this)" placeholder="Cth: Suspek Fraktur Clavicula..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500"></div>
+    <div class="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-200 print:hidden">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-slate-100">
+        <div class="flex items-center gap-3.5">
+          <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center font-bold text-2xl border border-indigo-100 shadow-xs">🩻</div>
           <div>
-            <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Dokter Pemeriksa *</label>
-            <select id="radDokter" required class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl font-bold text-slate-800 text-xs outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
-              <option value="" disabled selected>-- Pilih Dokter --</option>
-            </select>
+            <div class="flex items-center gap-2">
+              <h3 class="text-lg font-black text-slate-900 tracking-tight">Form Pengantar Radiologi</h3>
+              <span class="px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-full">RAD</span>
+            </div>
+            <p class="text-xs text-slate-500 font-medium">Pembuatan dokumen permintaan pemeriksaan rontgen atau radiologi</p>
           </div>
         </div>
-        <div>
-          <label class="block font-bold text-slate-700 mb-1 text-[10px] uppercase tracking-wider">Jenis Pemeriksaan Radiologi Yang Diminta *</label>
-          <textarea id="radPemeriksaan" required rows="4" placeholder="Ketik jenis radiologi... (Bisa ditekan Enter agar rapi saat dicetak)" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+        <button type="button" onclick="tutupFormSurat()" class="self-start sm:self-auto px-4 py-2 bg-slate-100 hover:bg-rose-50 text-slate-600 hover:text-rose-600 font-bold rounded-xl text-xs transition-colors flex items-center gap-1.5 cursor-pointer border border-slate-200">
+          <span>✕</span> Tutup Form
+        </button>
+      </div>
+
+      <form id="formRAD" onsubmit="handleCetakRAD(event)" class="space-y-5">
+        <input type="hidden" id="radIdPasien"><input type="hidden" id="radNoRm">
+        
+        <!-- SECTION 1: DATA PASIEN -->
+        <div class="bg-slate-50/80 p-4 md:p-5 rounded-2xl border border-slate-200/80 space-y-4">
+          <div class="flex items-center gap-2 pb-2 border-b border-slate-200/60">
+            <span class="w-6 h-6 rounded-lg bg-indigo-100 text-indigo-700 font-black text-xs flex items-center justify-center">1</span>
+            <h4 class="font-bold text-slate-800 text-xs uppercase tracking-wider">Identitas Pasien</h4>
+          </div>
+
+          <div class="relative">
+            <label class="block font-bold text-slate-700 mb-1.5 text-xs">Cari Pasien Terdaftar <span class="text-rose-500 font-black">*</span></label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">🔍</span>
+              <input type="text" id="radSearchPasien" required oninput="searchPasienRAD()" placeholder="Ketik Nama Pasien atau Nomor RM..." class="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs md:text-sm font-semibold text-slate-800 placeholder:text-slate-400 placeholder:font-normal outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all shadow-xs">
+            </div>
+            <div id="radSearchResult" class="hidden absolute top-full left-0 right-0 bg-white border border-slate-200 rounded-2xl shadow-xl z-30 max-h-56 overflow-y-auto mt-1 divide-y divide-slate-100"></div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3.5">
+            <div class="lg:col-span-2">
+              <label class="block font-bold text-slate-700 mb-1.5 text-xs">Nama Lengkap Pasien <span class="text-rose-500 font-black">*</span></label>
+              <input type="text" id="radNama" readonly required placeholder="Terisi otomatis..." class="w-full px-4 py-2.5 bg-slate-100/90 border border-slate-200 rounded-xl font-bold text-slate-800 text-xs md:text-sm outline-none cursor-not-allowed">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1.5 text-xs">Tgl Lahir / Umur</label>
+              <input type="text" id="radUmur" readonly placeholder="-" class="w-full px-4 py-2.5 bg-slate-100/90 border border-slate-200 rounded-xl font-bold text-slate-800 text-xs md:text-sm outline-none cursor-not-allowed">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1.5 text-xs">Jenis Kelamin</label>
+              <input type="text" id="radJK" readonly placeholder="-" class="w-full px-4 py-2.5 bg-slate-100/90 border border-slate-200 rounded-xl font-bold text-slate-800 text-xs md:text-sm outline-none cursor-not-allowed">
+            </div>
+          </div>
+
+          <div>
+            <label class="block font-bold text-slate-700 mb-1.5 text-xs">Alamat Lengkap</label>
+            <input type="text" id="radAlamat" readonly placeholder="-" class="w-full px-4 py-2.5 bg-slate-100/90 border border-slate-200 rounded-xl font-bold text-slate-800 text-xs md:text-sm outline-none cursor-not-allowed">
+          </div>
         </div>
-        <div class="flex justify-end gap-2 pt-2">
-          <button type="button" onclick="resetFormRAD()" class="px-5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-all">Reset</button>
-          <button type="submit" id="btnCetakRAD" class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-black rounded-xl shadow-md transition-all">SIMPAN & CETAK RADIOLOGI</button>
+
+        <!-- SECTION 2: DETAIL PERMINTAAN RADIOLOGI -->
+        <div class="bg-slate-50/80 p-4 md:p-5 rounded-2xl border border-slate-200/80 space-y-4">
+          <div class="flex items-center gap-2 pb-2 border-b border-slate-200/60">
+            <span class="w-6 h-6 rounded-lg bg-indigo-100 text-indigo-700 font-black text-xs flex items-center justify-center">2</span>
+            <h4 class="font-bold text-slate-800 text-xs uppercase tracking-wider">Detail Permintaan Radiologi</h4>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+            <div>
+              <label class="block font-bold text-slate-700 mb-1.5 text-xs">Kepada Yth (Tujuan Radiologi) <span class="text-rose-500 font-black">*</span></label>
+              <input type="text" id="radTujuan" required oninput="autoTitleCase(this)" value="Dokter Spesialis Radiologi / Petugas Radiografi" placeholder="Nama RS Tujuan / Unit Radiologi..." class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl font-semibold text-slate-800 text-xs md:text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all shadow-xs">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1.5 text-xs">Tanggal Cetak Surat <span class="text-rose-500 font-black">*</span></label>
+              <input type="date" id="radTglCetak" required class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl font-bold text-slate-800 text-xs md:text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all cursor-pointer shadow-xs">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+            <div>
+              <label class="block font-bold text-slate-700 mb-1.5 text-xs">Diagnosis Klinis / Indikasi <span class="text-rose-500 font-black">*</span></label>
+              <input type="text" id="radDiagnosis" required oninput="autoTitleCase(this)" placeholder="Cth: Suspek Fraktur Mandibula, Impaksi M3..." class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl font-bold text-slate-800 text-xs md:text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all shadow-xs">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1.5 text-xs">Dokter Pemeriksa <span class="text-rose-500 font-black">*</span></label>
+              <select id="radDokter" required class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl font-bold text-slate-800 text-xs md:text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all cursor-pointer shadow-xs">
+                <option value="" disabled selected>-- Pilih Dokter --</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block font-bold text-slate-700 mb-1.5 text-xs">Jenis Pemeriksaan Radiologi Yang Diminta <span class="text-rose-500 font-black">*</span></label>
+            <textarea id="radPemeriksaan" required rows="4" placeholder="Ketik jenis rontgen yang diminta... Cth: Panoramic Foto, Periapikal Gigi 48 (Bisa ditekan Enter agar rapi saat dicetak)" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl font-semibold text-slate-800 text-xs md:text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all shadow-xs"></textarea>
+          </div>
+        </div>
+
+        <!-- ACTION BUTTONS -->
+        <div class="flex flex-col sm:flex-row justify-end items-stretch sm:items-center gap-3 pt-3">
+          <button type="button" onclick="resetFormRAD()" class="px-6 py-3 bg-slate-100 hover:bg-rose-50 hover:text-rose-700 text-slate-700 font-bold rounded-xl border border-slate-300 text-xs md:text-sm transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer shadow-xs">
+            <span>🔄</span> Reset Form
+          </button>
+          <button type="submit" id="btnCetakRAD" class="px-8 py-3.5 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 text-white font-black rounded-xl text-xs md:text-sm shadow-md hover:shadow-lg shadow-indigo-500/20 transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer">
+            <span>🖨️</span> SIMPAN & CETAK RADIOLOGI
+          </button>
         </div>
       </form>
+
+      <!-- RIWAYAT RAD -->
       <div class="mt-10 border-t border-slate-200 pt-6">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-4">
-          <div><h4 class="font-bold text-slate-800 text-sm">Riwayat Pengantar Radiologi</h4><span id="radTotalBadge" class="text-indigo-600 font-bold text-[10px]">Total: 0 Surat</span></div>
-          <div class="w-full md:w-64"><input type="text" id="radSearchTable" oninput="searchRadTable()" placeholder="Cari Nama Pasien Radiologi..." class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-indigo-500"></div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h4 class="font-black text-slate-800 text-sm md:text-base">Riwayat Pengantar Radiologi</h4>
+              <span id="radTotalBadge" class="bg-indigo-50 text-indigo-700 border border-indigo-200 px-2.5 py-0.5 rounded-full font-black text-[11px]">Total: 0 Surat</span>
+            </div>
+            <p class="text-[11px] text-slate-500 mt-0.5">Daftar surat permintaan radiologi yang telah diterbitkan</p>
+          </div>
+          <div class="w-full md:w-72 relative">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">🔍</span>
+            <input type="text" id="radSearchTable" oninput="searchRadTable()" placeholder="Cari Nama Pasien Radiologi..." class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all">
+          </div>
         </div>
-        <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-sm">
+
+        <div class="overflow-x-auto rounded-2xl border border-slate-200 shadow-xs">
           <table class="w-full text-left whitespace-nowrap">
-            <thead class="bg-slate-50 text-[10px] uppercase font-bold text-slate-500 border-b border-slate-200">
-              <tr><th class="p-3">No. Surat</th><th class="p-3">Tanggal Cetak</th><th class="p-3">Nama Pasien</th><th class="p-3">Diagnosis Klinis</th><th class="p-3 text-center">Aksi</th></tr>
+            <thead class="bg-slate-100/80 text-[11px] uppercase font-black text-slate-600 border-b border-slate-200">
+              <tr>
+                <th class="p-3.5">No. Surat</th>
+                <th class="p-3.5">Tanggal Cetak</th>
+                <th class="p-3.5">Nama Pasien</th>
+                <th class="p-3.5">Diagnosis Klinis</th>
+                <th class="p-3.5 text-center">Aksi</th>
+              </tr>
             </thead>
-            <tbody id="radTableBody" class="divide-y divide-slate-100 text-xs">
-              <tr><td colspan="5" class="text-center text-slate-400 py-6 font-bold">Belum ada riwayat Pengantar Radiologi tersimpan.</td></tr>
+            <tbody id="radTableBody" class="divide-y divide-slate-100 text-xs font-medium text-slate-700">
+              <tr><td colspan="5" class="text-center text-slate-400 py-8 font-bold">Belum ada riwayat Pengantar Radiologi tersimpan.</td></tr>
             </tbody>
           </table>
         </div>
-        <div class="flex justify-between items-center mt-4">
-          <button id="btnPrevRAD" onclick="prevPageRAD()" disabled class="px-5 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-indigo-600 disabled:opacity-40 transition-all shadow-sm">⬅️ Back</button>
-          <span id="radPageInfo" class="text-[10px] text-slate-500 font-bold">Halaman 1 dari 1</span>
-          <button id="btnNextRAD" onclick="nextPageRAD()" disabled class="px-5 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-indigo-600 disabled:opacity-40 transition-all shadow-sm">Next ➡️</button>
+
+        <div class="flex justify-between items-center mt-4 pt-2">
+          <button id="btnPrevRAD" onclick="prevPageRAD()" disabled class="px-5 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-700 hover:bg-indigo-50 hover:border-indigo-300 hover:text-indigo-700 disabled:opacity-40 disabled:hover:bg-white disabled:hover:border-slate-300 disabled:hover:text-slate-700 transition-all shadow-xs cursor-pointer">⬅️ Sebelumnya</button>
+          <span id="radPageInfo" class="text-xs text-slate-500 font-bold bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200">Halaman 1 dari 1</span>
+          <button id="btnNextRAD" onclick="nextPageRAD()" disabled class="px-5 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-700 hover:bg-indigo-50 hover:border-indigo-300 hover:text-indigo-700 disabled:opacity-40 disabled:hover:bg-white disabled:hover:border-slate-300 disabled:hover:text-slate-700 transition-all shadow-xs cursor-pointer">Selanjutnya ➡️</button>
         </div>
       </div>
     </div>
+
+    <!-- PRINT TEMPLATE RAD (MANDATORY EXACT PRESERVATION) -->
     <div id="printAreaRAD" class="hidden print:block bg-white mx-auto text-slate-900 text-[14px] leading-relaxed print-area-wrapper relative" style="width: 210mm; min-height: 297mm; padding: 40px; box-sizing: border-box; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
       <div class="mb-4"><img src="https://lh3.googleusercontent.com/d/1GjKfmHhcGWgmPcQmuw00gLUBbP3_fead" alt="Kop Surat Klinik Gigi Sheldon" class="w-full h-auto object-contain" style="display: block;"></div>
       <div class="text-center mt-6 mb-2">
@@ -751,21 +1278,26 @@
   <!-- ========================================== -->
   <!-- MODAL PREVIEW SURAT MEDIS                 -->
   <!-- ========================================== -->
-  <div id="modalPreviewSurat" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-all print:hidden">
-    <div class="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
-      <div class="flex justify-between items-center px-6 py-4 border-b border-slate-200 bg-slate-50">
-        <div>
-          <h3 class="text-sm font-black text-slate-800" id="modalPreviewSuratTitle">Pratinjau Surat Medis</h3>
-          <p class="text-[10px] text-slate-500 font-medium" id="modalPreviewSuratSubtitle">Periksa kelengkapan dokumen surat sebelum dicetak</p>
+  <div id="modalPreviewSurat" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm transition-all print:hidden">
+    <div class="bg-white rounded-3xl w-full max-w-4xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden border border-slate-200">
+      <div class="flex justify-between items-center px-6 py-4 border-b border-slate-200 bg-slate-50/80">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center font-bold text-xl border border-teal-100">🖨️</div>
+          <div>
+            <h3 class="text-base font-black text-slate-800" id="modalPreviewSuratTitle">Pratinjau Surat Medis</h3>
+            <p class="text-xs text-slate-500 font-medium" id="modalPreviewSuratSubtitle">Periksa kelengkapan dan format dokumen sebelum dicetak</p>
+          </div>
         </div>
-        <div class="flex gap-2">
-          <button type="button" id="btnModalCetakSurat" class="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-lg text-xs shadow-sm transition-colors flex items-center gap-1.5">🖨️ Cetak / Save PDF</button>
-          <button type="button" onclick="tutupModalPreviewSurat()" class="w-9 h-9 flex items-center justify-center text-slate-400 hover:text-rose-500 font-bold bg-white rounded-lg border border-slate-200 hover:bg-rose-50 text-xl transition-colors">&times;</button>
+        <div class="flex items-center gap-2">
+          <button type="button" id="btnModalCetakSurat" class="px-5 py-2.5 bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-500 hover:to-teal-600 text-white font-black rounded-xl text-xs shadow-md transition-all flex items-center gap-2 cursor-pointer active:scale-95">
+            <span>🖨️</span> Cetak / Save PDF
+          </button>
+          <button type="button" onclick="tutupModalPreviewSurat()" class="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-rose-600 font-bold bg-white rounded-xl border border-slate-200 hover:bg-rose-50 text-2xl transition-colors cursor-pointer">&times;</button>
         </div>
       </div>
       <!-- WADAH VIEW SURAT -->
-      <div class="p-6 overflow-y-auto flex-1 bg-slate-200/50 flex justify-center">
-        <div id="modalPreviewSuratContainer" class="bg-white shadow-md relative overflow-hidden" style="width: 210mm; max-width: 210mm; padding: 0;"></div>
+      <div class="p-6 overflow-y-auto flex-1 bg-slate-200/60 flex justify-center">
+        <div id="modalPreviewSuratContainer" class="bg-white shadow-xl relative overflow-hidden rounded-lg" style="width: 210mm; max-width: 210mm; padding: 0;"></div>
       </div>
     </div>
   </div>

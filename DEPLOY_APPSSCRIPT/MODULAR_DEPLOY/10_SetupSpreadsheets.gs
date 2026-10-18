@@ -140,7 +140,7 @@ const SPREADSHEET_DEFINITIONS = {
           "formats": { "A": "@", "E": "#,##0", "F": "#,##0", "G": "#,##0" },
           "validations": {
             "B": ["Owner", "Dokter Gigi Spesialis", "Dokter Gigi Umum", "Perawat Gigi", "Perawat Umum", "Admin", "Office"],
-            "D": ["Uang Harian Shift", "Gaji Bulanan Tetap", "Kombinasi Shift & Tindakan"],
+            "D": ["Tindakan", "Uang Harian Shift", "Gaji Bulanan Tetap", "Kombinasi Shift & Tindakan"],
             "I": ["Aktif", "Tidak Aktif"]
           },
           "seedRows": [

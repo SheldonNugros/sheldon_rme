@@ -1881,6 +1881,50 @@ assert("PAYROLL-UNIFIED-6: Beralih ke Tab Tarif Menampilkan panelPay-tarif", !do
 switchPayrollTab('gaji-jm');
 assert("PAYROLL-UNIFIED-7: Beralih Kembali ke Gaji & JM Menampilkan panelPay-gaji-jm", !document.getElementById('panelPay-gaji-jm').classList.contains('hidden'));
 
+// Uji Tipe Kompensasi & Kunci Form Input
+var elTipeKomp = document.getElementById('tarifTipe');
+var s1Input = document.getElementById('tarifShift1');
+var s2Input = document.getElementById('tarifShift2');
+var gpInput = document.getElementById('tarifGajiPokok');
+
+assert("KOMPENSASI-1: Select tarifTipe Tersedia di DOM", elTipeKomp !== null);
+assert("KOMPENSASI-1: Fungsi handleTarifTipeChange Tersedia", typeof handleTarifTipeChange === "function");
+
+// 1. Default Kosong
+resetFormTarifShiftBaru();
+assert("KOMPENSASI-2: Default Tipe Kompensasi adalah Kosong", elTipeKomp.value === "");
+assert("KOMPENSASI-2: Saat Kosong, Tarif Shift 1 Terkunci (disabled)", s1Input.disabled === true);
+assert("KOMPENSASI-2: Saat Kosong, Tarif Shift 2 Terkunci (disabled)", s2Input.disabled === true);
+assert("KOMPENSASI-2: Saat Kosong, Gaji Pokok Terkunci (disabled)", gpInput.disabled === true);
+
+// 2. Tindakan: Tarif shift 1 dan 2, gaji pokok tidak bisa di isi
+elTipeKomp.value = "Tindakan";
+handleTarifTipeChange();
+assert("KOMPENSASI-3: Saat Tindakan, Tarif Shift 1 Terkunci (disabled)", s1Input.disabled === true && Number(s1Input.value) === 0);
+assert("KOMPENSASI-3: Saat Tindakan, Tarif Shift 2 Terkunci (disabled)", s2Input.disabled === true && Number(s2Input.value) === 0);
+assert("KOMPENSASI-3: Saat Tindakan, Gaji Pokok Terkunci (disabled)", gpInput.disabled === true && Number(gpInput.value) === 0);
+
+// 3. Uang Harian Shift: Gaji pokok Bulanan tidak bisa di isi
+elTipeKomp.value = "Uang Harian Shift";
+handleTarifTipeChange();
+assert("KOMPENSASI-4: Saat Uang Harian Shift, Tarif Shift 1 Terbuka (enabled)", s1Input.disabled === false);
+assert("KOMPENSASI-4: Saat Uang Harian Shift, Tarif Shift 2 Terbuka (enabled)", s2Input.disabled === false);
+assert("KOMPENSASI-4: Saat Uang Harian Shift, Gaji Pokok Terkunci (disabled)", gpInput.disabled === true && Number(gpInput.value) === 0);
+
+// 4. Gaji Bulanan Tetap: Tarif shift tidak bisa di isi
+elTipeKomp.value = "Gaji Bulanan Tetap";
+handleTarifTipeChange();
+assert("KOMPENSASI-5: Saat Gaji Bulanan Tetap, Tarif Shift 1 Terkunci (disabled)", s1Input.disabled === true && Number(s1Input.value) === 0);
+assert("KOMPENSASI-5: Saat Gaji Bulanan Tetap, Tarif Shift 2 Terkunci (disabled)", s2Input.disabled === true && Number(s2Input.value) === 0);
+assert("KOMPENSASI-5: Saat Gaji Bulanan Tetap, Gaji Pokok Terbuka (enabled)", gpInput.disabled === false);
+
+// 5. Kombinasi Shift & Tindakan: Gaji pokok tidak bisa di isi
+elTipeKomp.value = "Kombinasi Shift & Tindakan";
+handleTarifTipeChange();
+assert("KOMPENSASI-6: Saat Kombinasi Shift & Tindakan, Tarif Shift 1 Terbuka (enabled)", s1Input.disabled === false);
+assert("KOMPENSASI-6: Saat Kombinasi Shift & Tindakan, Tarif Shift 2 Terbuka (enabled)", s2Input.disabled === false);
+assert("KOMPENSASI-6: Saat Kombinasi Shift & Tindakan, Gaji Pokok Terkunci (disabled)", gpInput.disabled === true && Number(gpInput.value) === 0);
+
 // SUMMARY REPORT
 print("=================================================");
 var passedTotal = results.filter(r => r.passed).length;

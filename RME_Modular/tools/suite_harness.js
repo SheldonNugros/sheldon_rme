@@ -14158,6 +14158,7 @@ function renderInfoBmhp() {
       }
     } catch (e) {}
     loadPayrollModuleData(false);
+    if (typeof handleTarifTipeChange === 'function') handleTarifTipeChange();
   }
 
   function switchPayrollTab(tabKey) {
@@ -14606,24 +14607,24 @@ function renderInfoBmhp() {
         hint.textContent = '✓ Terverifikasi di Sheet Data (' + found.role + ')';
         hint.className = 'text-[10px] text-emerald-600 font-bold mt-1';
       }
+      const exTarif = (window.PayrollState.tarifShift || []).find(x => String(x.namaPekerja || '').toLowerCase() === val.toLowerCase());
       const tipeEl = document.getElementById('tarifTipe');
       if (tipeEl) {
-        let rLow = (found.role || '').toLowerCase();
-        if (rLow.includes('dokter')) {
-          tipeEl.value = 'Kombinasi Shift & Tindakan';
-          let s1El = document.getElementById('tarifShift1'); if (s1El) s1El.value = 55000;
-          let s2El = document.getElementById('tarifShift2'); if (s2El) s2El.value = 55000;
-          let gpEl = document.getElementById('tarifGajiPokok'); if (gpEl) gpEl.value = 0;
-        } else if (rLow.includes('perawat')) {
-          tipeEl.value = 'Uang Harian Shift';
-          let s1El = document.getElementById('tarifShift1'); if (s1El) s1El.value = 45000;
-          let s2El = document.getElementById('tarifShift2'); if (s2El) s2El.value = 45000;
-          let gpEl = document.getElementById('tarifGajiPokok'); if (gpEl) gpEl.value = 0;
-        } else if (rLow.includes('admin') || rLow.includes('kasir') || rLow.includes('office')) {
-          tipeEl.value = 'Gaji Bulanan Tetap';
-          let s1El = document.getElementById('tarifShift1'); if (s1El) s1El.value = 0;
-          let s2El = document.getElementById('tarifShift2'); if (s2El) s2El.value = 0;
-          let gpEl = document.getElementById('tarifGajiPokok'); if (gpEl) gpEl.value = 1200000;
+        if (exTarif && exTarif.tipeKompensasi) {
+          tipeEl.value = exTarif.tipeKompensasi;
+          handleTarifTipeChange();
+          if (exTarif.tipeKompensasi === 'Uang Harian Shift' || exTarif.tipeKompensasi === 'Kombinasi Shift & Tindakan') {
+            let s1El = document.getElementById('tarifShift1'); if (s1El) s1El.value = Number(exTarif.tarifShift1) || 0;
+            let s2El = document.getElementById('tarifShift2'); if (s2El) s2El.value = Number(exTarif.tarifShift2) || 0;
+          }
+          if (exTarif.tipeKompensasi === 'Gaji Bulanan Tetap') {
+            let gpEl = document.getElementById('tarifGajiPokok'); if (gpEl) gpEl.value = Number(exTarif.gajiPokokBulanan) || 0;
+          }
+        } else {
+          if (!tipeEl.value) {
+            tipeEl.value = '';
+            handleTarifTipeChange();
+          }
         }
       }
     } else {
@@ -14635,19 +14636,65 @@ function renderInfoBmhp() {
     }
   }
 
+  function handleTarifTipeChange() {
+    const tipeEl = document.getElementById('tarifTipe');
+    const tipe = (tipeEl ? tipeEl.value : '').trim();
+    const s1 = document.getElementById('tarifShift1');
+    const s2 = document.getElementById('tarifShift2');
+    const gp = document.getElementById('tarifGajiPokok');
+
+    if (!s1 || !s2 || !gp) return;
+
+    const setInputState = (inputEl, isEnabled, defaultVal = 0) => {
+      inputEl.disabled = !isEnabled;
+      if (!isEnabled) {
+        inputEl.value = defaultVal;
+        inputEl.classList.remove('bg-slate-50', 'text-slate-800', 'border-slate-300');
+        inputEl.classList.add('bg-slate-100', 'text-slate-400', 'border-slate-200', 'cursor-not-allowed');
+      } else {
+        inputEl.classList.remove('bg-slate-100', 'text-slate-400', 'border-slate-200', 'cursor-not-allowed');
+        inputEl.classList.add('bg-slate-50', 'text-slate-800', 'border-slate-300');
+        if (inputEl.value === '' || inputEl.value === '0') {
+          if (defaultVal > 0) inputEl.value = defaultVal;
+        }
+      }
+    };
+
+    if (tipe === 'Tindakan') {
+      // jika ini di pilih maka Tarif shift 1 dan 2, gaji pokok tidak bisa di isi.
+      setInputState(s1, false, 0);
+      setInputState(s2, false, 0);
+      setInputState(gp, false, 0);
+    } else if (tipe === 'Uang Harian Shift') {
+      // Jika di pilih Uang Harian Shift, Gaji pokok Bulanan tidka Bisa di isi.
+      setInputState(s1, true, 45000);
+      setInputState(s2, true, 45000);
+      setInputState(gp, false, 0);
+    } else if (tipe === 'Gaji Bulanan Tetap') {
+      // Jika Gaji Bulanan Tetap. Tarif shift tidak bisa di isi.
+      setInputState(s1, false, 0);
+      setInputState(s2, false, 0);
+      setInputState(gp, true, 1200000);
+    } else if (tipe === 'Kombinasi Shift & Tindakan') {
+      // Jika Kombinasi Shift & Tindakan, Gaji pokok tidak bisa di isi.
+      setInputState(s1, true, 55000);
+      setInputState(s2, true, 55000);
+      setInputState(gp, false, 0);
+    } else {
+      // default kosong: semua tidak bisa diisi sampai memilih tipe kompensasi
+      setInputState(s1, false, 0);
+      setInputState(s2, false, 0);
+      setInputState(gp, false, 0);
+    }
+  }
+
   function resetFormTarifShiftBaru() {
     const elNama = document.getElementById('tarifNamaPekerja');
     if (elNama) { elNama.value = ''; elNama.focus(); }
     const elRole = document.getElementById('tarifRole');
     if (elRole) elRole.value = '';
     const elTipe = document.getElementById('tarifTipe');
-    if (elTipe) elTipe.value = 'Kombinasi Shift & Tindakan';
-    const elS1 = document.getElementById('tarifShift1');
-    if (elS1) elS1.value = 55000;
-    const elS2 = document.getElementById('tarifShift2');
-    if (elS2) elS2.value = 55000;
-    const elGp = document.getElementById('tarifGajiPokok');
-    if (elGp) elGp.value = 0;
+    if (elTipe) elTipe.value = '';
     const elKet = document.getElementById('tarifKeterangan');
     if (elKet) elKet.value = '';
     const elStat = document.getElementById('tarifStatus');
@@ -14657,6 +14704,7 @@ function renderInfoBmhp() {
       hint.textContent = 'Pilih atau ketik nama pekerja terdaftar di Sheet Data';
       hint.className = 'text-[10px] text-slate-500 mt-1';
     }
+    handleTarifTipeChange();
     const card = document.getElementById('cardFormTarifShift');
     if (card && typeof card.scrollIntoView === 'function') {
       card.scrollIntoView({ behavior: 'smooth' });
@@ -14668,10 +14716,23 @@ function renderInfoBmhp() {
     if (!item) return;
     document.getElementById('tarifNamaPekerja').value = item.namaPekerja || '';
     document.getElementById('tarifRole').value = item.role || 'Dokter Gigi Umum';
-    document.getElementById('tarifTipe').value = item.tipeKompensasi || 'Kombinasi Shift & Tindakan';
-    document.getElementById('tarifShift1').value = Number(item.tarifShift1) || 0;
-    document.getElementById('tarifShift2').value = Number(item.tarifShift2) || 0;
-    document.getElementById('tarifGajiPokok').value = Number(item.gajiPokokBulanan) || 0;
+    const tipeEl = document.getElementById('tarifTipe');
+    if (tipeEl) {
+      tipeEl.value = item.tipeKompensasi || '';
+    }
+    handleTarifTipeChange();
+    if (item.tipeKompensasi === 'Uang Harian Shift' || item.tipeKompensasi === 'Kombinasi Shift & Tindakan') {
+      document.getElementById('tarifShift1').value = Number(item.tarifShift1) || 0;
+      document.getElementById('tarifShift2').value = Number(item.tarifShift2) || 0;
+    } else {
+      document.getElementById('tarifShift1').value = 0;
+      document.getElementById('tarifShift2').value = 0;
+    }
+    if (item.tipeKompensasi === 'Gaji Bulanan Tetap') {
+      document.getElementById('tarifGajiPokok').value = Number(item.gajiPokokBulanan) || 0;
+    } else {
+      document.getElementById('tarifGajiPokok').value = 0;
+    }
     document.getElementById('tarifKeterangan').value = item.keterangan || '';
     const statEl = document.getElementById('tarifStatus');
     if (statEl) {
@@ -14684,6 +14745,10 @@ function renderInfoBmhp() {
       hint.textContent = '✓ Mengedit aturan: ' + item.namaPekerja + ' (' + (item.idAturan || '-') + ')';
       hint.className = 'text-[10px] text-indigo-600 font-bold mt-1';
     }
+    const card = document.getElementById('cardFormTarifShift');
+    if (card && typeof card.scrollIntoView === 'function') {
+      card.scrollIntoView({ behavior: 'smooth' });
+    }
   }
 
   function handleSimpanTarifShift(e) {
@@ -14691,6 +14756,14 @@ function renderInfoBmhp() {
     const namaPekerja = ((document.getElementById('tarifNamaPekerja') || {}).value || '').trim();
     if (!namaPekerja) {
       if (typeof showToast === 'function') showToast('error', 'Nama pekerja wajib diisi!');
+      return;
+    }
+
+    const tipeKompensasi = ((document.getElementById('tarifTipe') || {}).value || '').trim();
+    if (!tipeKompensasi) {
+      if (typeof showToast === 'function') showToast('error', 'Silakan pilih Tipe Kompensasi terlebih dahulu!');
+      const elTipe = document.getElementById('tarifTipe');
+      if (elTipe) elTipe.focus();
       return;
     }
 
@@ -14729,15 +14802,26 @@ function renderInfoBmhp() {
       idAturan = pfx + String(maxN + 1).padStart(2, '0');
     }
 
+    // Terapkan batas nilai sesuai Tipe Kompensasi terpilih
+    let s1Val = (tipeKompensasi === 'Uang Harian Shift' || tipeKompensasi === 'Kombinasi Shift & Tindakan')
+      ? (Number((document.getElementById('tarifShift1') || {}).value) || 0)
+      : 0;
+    let s2Val = (tipeKompensasi === 'Uang Harian Shift' || tipeKompensasi === 'Kombinasi Shift & Tindakan')
+      ? (Number((document.getElementById('tarifShift2') || {}).value) || 0)
+      : 0;
+    let gpVal = (tipeKompensasi === 'Gaji Bulanan Tetap')
+      ? (Number((document.getElementById('tarifGajiPokok') || {}).value) || 0)
+      : 0;
+
     const payload = {
       idAturan: idAturan,
       idPekerja: idAturan,
       namaPekerja: foundStaff ? foundStaff.nama : namaPekerja,
       role: autoRole,
-      tipeKompensasi: (document.getElementById('tarifTipe') || {}).value,
-      tarifShift1: Number((document.getElementById('tarifShift1') || {}).value) || 0,
-      tarifShift2: Number((document.getElementById('tarifShift2') || {}).value) || 0,
-      gajiPokokBulanan: Number((document.getElementById('tarifGajiPokok') || {}).value) || 0,
+      tipeKompensasi: tipeKompensasi,
+      tarifShift1: s1Val,
+      tarifShift2: s2Val,
+      gajiPokokBulanan: gpVal,
       keterangan: ((document.getElementById('tarifKeterangan') || {}).value || '').trim(),
       status: (document.getElementById('tarifStatus') || {}).value || 'Aktif'
     };
@@ -14962,6 +15046,7 @@ function renderInfoBmhp() {
   window.switchPayrollTab = switchPayrollTab;
   window.filterGajiJmView = filterGajiJmView;
   window.loadPayrollModuleData = loadPayrollModuleData;
+  window.handleTarifTipeChange = handleTarifTipeChange;
   window.handleTarifNamaPekerjaChange = handleTarifNamaPekerjaChange;
   window.pilihTarifShiftToEdit = pilihTarifShiftToEdit;
   window.resetFormTarifShiftBaru = resetFormTarifShiftBaru;
@@ -18078,6 +18163,50 @@ assert("PAYROLL-UNIFIED-6: Beralih ke Tab Tarif Menampilkan panelPay-tarif", !do
 
 switchPayrollTab('gaji-jm');
 assert("PAYROLL-UNIFIED-7: Beralih Kembali ke Gaji & JM Menampilkan panelPay-gaji-jm", !document.getElementById('panelPay-gaji-jm').classList.contains('hidden'));
+
+// Uji Tipe Kompensasi & Kunci Form Input
+var elTipeKomp = document.getElementById('tarifTipe');
+var s1Input = document.getElementById('tarifShift1');
+var s2Input = document.getElementById('tarifShift2');
+var gpInput = document.getElementById('tarifGajiPokok');
+
+assert("KOMPENSASI-1: Select tarifTipe Tersedia di DOM", elTipeKomp !== null);
+assert("KOMPENSASI-1: Fungsi handleTarifTipeChange Tersedia", typeof handleTarifTipeChange === "function");
+
+// 1. Default Kosong
+resetFormTarifShiftBaru();
+assert("KOMPENSASI-2: Default Tipe Kompensasi adalah Kosong", elTipeKomp.value === "");
+assert("KOMPENSASI-2: Saat Kosong, Tarif Shift 1 Terkunci (disabled)", s1Input.disabled === true);
+assert("KOMPENSASI-2: Saat Kosong, Tarif Shift 2 Terkunci (disabled)", s2Input.disabled === true);
+assert("KOMPENSASI-2: Saat Kosong, Gaji Pokok Terkunci (disabled)", gpInput.disabled === true);
+
+// 2. Tindakan: Tarif shift 1 dan 2, gaji pokok tidak bisa di isi
+elTipeKomp.value = "Tindakan";
+handleTarifTipeChange();
+assert("KOMPENSASI-3: Saat Tindakan, Tarif Shift 1 Terkunci (disabled)", s1Input.disabled === true && Number(s1Input.value) === 0);
+assert("KOMPENSASI-3: Saat Tindakan, Tarif Shift 2 Terkunci (disabled)", s2Input.disabled === true && Number(s2Input.value) === 0);
+assert("KOMPENSASI-3: Saat Tindakan, Gaji Pokok Terkunci (disabled)", gpInput.disabled === true && Number(gpInput.value) === 0);
+
+// 3. Uang Harian Shift: Gaji pokok Bulanan tidak bisa di isi
+elTipeKomp.value = "Uang Harian Shift";
+handleTarifTipeChange();
+assert("KOMPENSASI-4: Saat Uang Harian Shift, Tarif Shift 1 Terbuka (enabled)", s1Input.disabled === false);
+assert("KOMPENSASI-4: Saat Uang Harian Shift, Tarif Shift 2 Terbuka (enabled)", s2Input.disabled === false);
+assert("KOMPENSASI-4: Saat Uang Harian Shift, Gaji Pokok Terkunci (disabled)", gpInput.disabled === true && Number(gpInput.value) === 0);
+
+// 4. Gaji Bulanan Tetap: Tarif shift tidak bisa di isi
+elTipeKomp.value = "Gaji Bulanan Tetap";
+handleTarifTipeChange();
+assert("KOMPENSASI-5: Saat Gaji Bulanan Tetap, Tarif Shift 1 Terkunci (disabled)", s1Input.disabled === true && Number(s1Input.value) === 0);
+assert("KOMPENSASI-5: Saat Gaji Bulanan Tetap, Tarif Shift 2 Terkunci (disabled)", s2Input.disabled === true && Number(s2Input.value) === 0);
+assert("KOMPENSASI-5: Saat Gaji Bulanan Tetap, Gaji Pokok Terbuka (enabled)", gpInput.disabled === false);
+
+// 5. Kombinasi Shift & Tindakan: Gaji pokok tidak bisa di isi
+elTipeKomp.value = "Kombinasi Shift & Tindakan";
+handleTarifTipeChange();
+assert("KOMPENSASI-6: Saat Kombinasi Shift & Tindakan, Tarif Shift 1 Terbuka (enabled)", s1Input.disabled === false);
+assert("KOMPENSASI-6: Saat Kombinasi Shift & Tindakan, Tarif Shift 2 Terbuka (enabled)", s2Input.disabled === false);
+assert("KOMPENSASI-6: Saat Kombinasi Shift & Tindakan, Gaji Pokok Terkunci (disabled)", gpInput.disabled === true && Number(gpInput.value) === 0);
 
 // SUMMARY REPORT
 print("=================================================");

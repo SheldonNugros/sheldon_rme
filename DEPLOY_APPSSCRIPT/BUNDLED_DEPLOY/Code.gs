@@ -2845,26 +2845,28 @@ function getHtmlFormTarifShiftContent() {
 '        </div>' +
 '        <div>' +
 '          <label class="block font-black text-slate-700 mb-1 uppercase text-[10px]">Tipe Kompensasi *</label>' +
-'          <select id="diagTipe" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-bold text-slate-800 text-xs">' +
-'            <option value="Kombinasi Shift & Tindakan">Kombinasi Shift & Tindakan</option>' +
+'          <select id="diagTipe" onchange="handleDiagTipeChange()" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-bold text-slate-800 text-xs">' +
+'            <option value="" selected>-- Pilih Tipe Kompensasi --</option>' +
+'            <option value="Tindakan">Tindakan</option>' +
 '            <option value="Uang Harian Shift">Uang Harian Shift</option>' +
 '            <option value="Gaji Bulanan Tetap">Gaji Bulanan Tetap</option>' +
+'            <option value="Kombinasi Shift & Tindakan">Kombinasi Shift & Tindakan</option>' +
 '          </select>' +
 '        </div>' +
 '      </div>' +
 '      <div class="grid grid-cols-2 gap-3">' +
 '        <div>' +
 '          <label class="block font-black text-slate-700 mb-1 uppercase text-[10px]">Tarif Shift 1 (Rp)</label>' +
-'          <input type="number" id="diagShift1" value="55000" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-bold text-slate-800 text-xs">' +
+'          <input type="number" id="diagShift1" value="0" disabled class="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl font-bold text-slate-400 text-xs cursor-not-allowed">' +
 '        </div>' +
 '        <div>' +
 '          <label class="block font-black text-slate-700 mb-1 uppercase text-[10px]">Tarif Shift 2 (Rp)</label>' +
-'          <input type="number" id="diagShift2" value="55000" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-bold text-slate-800 text-xs">' +
+'          <input type="number" id="diagShift2" value="0" disabled class="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl font-bold text-slate-400 text-xs cursor-not-allowed">' +
 '        </div>' +
 '      </div>' +
 '      <div>' +
 '        <label class="block font-black text-slate-700 mb-1 uppercase text-[10px]">Gaji Pokok Bulanan Tetap (Khusus Admin Non-Shift)</label>' +
-'        <input type="number" id="diagGajiPokok" value="0" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-bold text-slate-800 text-xs">' +
+'        <input type="number" id="diagGajiPokok" value="0" disabled class="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl font-bold text-slate-400 text-xs cursor-not-allowed">' +
 '      </div>' +
 '      <div>' +
 '        <label class="block font-black text-slate-700 mb-1 uppercase text-[10px]">Keterangan (Opsional)</label>' +
@@ -2886,6 +2888,7 @@ function getHtmlFormTarifShiftContent() {
 '  <script>' +
 '    var listStaff = [];' +
 '    window.onload = function() {' +
+'      handleDiagTipeChange();' +
 '      google.script.run' +
 '        .withSuccessHandler(function(data) {' +
 '          listStaff = data || [];' +
@@ -2899,30 +2902,29 @@ function getHtmlFormTarifShiftContent() {
 '        })' +
 '        .getUsersForTarifDropdown();' +
 '    };' +
+'    function handleDiagTipeChange() {' +
+'      var tipe = (document.getElementById("diagTipe") || {}).value || "";' +
+'      var s1 = document.getElementById("diagShift1");' +
+'      var s2 = document.getElementById("diagShift2");' +
+'      var gp = document.getElementById("diagGajiPokok");' +
+'      if (!s1 || !s2 || !gp) return;' +
+'      function setSt(el, en, defV) {' +
+'        el.disabled = !en;' +
+'        if (!en) { el.value = defV || 0; el.className = "w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl font-bold text-slate-400 text-xs cursor-not-allowed"; }' +
+'        else { el.className = "w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-bold text-slate-800 text-xs"; if (defV > 0 && (!el.value || el.value === "0")) el.value = defV; }' +
+'      }' +
+'      if (tipe === "Tindakan") { setSt(s1, false, 0); setSt(s2, false, 0); setSt(gp, false, 0); }' +
+'      else if (tipe === "Uang Harian Shift") { setSt(s1, true, 45000); setSt(s2, true, 45000); setSt(gp, false, 0); }' +
+'      else if (tipe === "Gaji Bulanan Tetap") { setSt(s1, false, 0); setSt(s2, false, 0); setSt(gp, true, 1200000); }' +
+'      else if (tipe === "Kombinasi Shift & Tindakan") { setSt(s1, true, 55000); setSt(s2, true, 55000); setSt(gp, false, 0); }' +
+'      else { setSt(s1, false, 0); setSt(s2, false, 0); setSt(gp, false, 0); }' +
+'    }' +
 '    function handleDiagNamaChange() {' +
 '      var nama = document.getElementById("diagNama").value;' +
 '      var found = listStaff.find(function(s) { return s.nama === nama; });' +
 '      var roleInput = document.getElementById("diagRole");' +
-'      var tipeSel = document.getElementById("diagTipe");' +
 '      if (found) {' +
 '        roleInput.value = found.role || "Staf";' +
-'        var rLow = (found.role || "").toLowerCase();' +
-'        if (rLow.includes("dokter")) {' +
-'          tipeSel.value = "Kombinasi Shift & Tindakan";' +
-'          document.getElementById("diagShift1").value = 55000;' +
-'          document.getElementById("diagShift2").value = 55000;' +
-'          document.getElementById("diagGajiPokok").value = 0;' +
-'        } else if (rLow.includes("perawat")) {' +
-'          tipeSel.value = "Uang Harian Shift";' +
-'          document.getElementById("diagShift1").value = 45000;' +
-'          document.getElementById("diagShift2").value = 45000;' +
-'          document.getElementById("diagGajiPokok").value = 0;' +
-'        } else if (rLow.includes("admin") || rLow.includes("kasir") || rLow.includes("office")) {' +
-'          tipeSel.value = "Gaji Bulanan Tetap";' +
-'          document.getElementById("diagShift1").value = 0;' +
-'          document.getElementById("diagShift2").value = 0;' +
-'          document.getElementById("diagGajiPokok").value = 1200000;' +
-'        }' +
 '      } else {' +
 '        roleInput.value = "";' +
 '      }' +
@@ -4620,7 +4622,7 @@ const SPREADSHEET_DEFINITIONS = {
           "formats": { "A": "@", "E": "#,##0", "F": "#,##0", "G": "#,##0" },
           "validations": {
             "B": ["Owner", "Dokter Gigi Spesialis", "Dokter Gigi Umum", "Perawat Gigi", "Perawat Umum", "Admin", "Office"],
-            "D": ["Uang Harian Shift", "Gaji Bulanan Tetap", "Kombinasi Shift & Tindakan"],
+            "D": ["Tindakan", "Uang Harian Shift", "Gaji Bulanan Tetap", "Kombinasi Shift & Tindakan"],
             "I": ["Aktif", "Tidak Aktif"]
           },
           "seedRows": [

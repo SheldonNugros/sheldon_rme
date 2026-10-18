@@ -205,7 +205,42 @@ function getSheetEksternal(idSpreadsheet, namaSheet) {
     const ss = SpreadsheetApp.openById(idSpreadsheet.trim());
     let sheet = ss.getSheetByName(namaSheet) || 
                 ss.getSheetByName(namaSheet.replace(/\s+/g, '_')) || 
-                ss.getSheetByName("Data_" + namaSheet);
+                ss.getSheetByName(namaSheet.replace(/_/g, ' ')) || 
+                ss.getSheetByName("Data_" + namaSheet) ||
+                ss.getSheetByName(namaSheet.replace(/^Data_/, '')) ||
+                ss.getSheetByName(namaSheet.replace(/^Data_/, '').replace(/_/g, ' '));
+
+    if (!sheet) {
+      const cleanTarget = namaSheet.toLowerCase().replace(/[\s_.]/g, '');
+      const allSheets = ss.getSheets();
+      for (let s of allSheets) {
+        let sClean = s.getName().toLowerCase().replace(/[\s_.]/g, '');
+        if (sClean === cleanTarget || sClean === cleanTarget.replace(/^data/, '') || sClean === ('data' + cleanTarget)) {
+          sheet = s;
+          break;
+        }
+      }
+      if (!sheet && allSheets.length === 1) {
+        sheet = allSheets[0];
+      }
+    }
+
+    // Auto-Recover: Jika sheet yang ditemukan kosong (<= 1 baris), cari sheet lain yang memiliki data
+    if (sheet && sheet.getLastRow() <= 1) {
+      const allSheets = ss.getSheets();
+      for (let s of allSheets) {
+        if (s.getLastRow() > 1) {
+          let sClean = s.getName().toLowerCase().replace(/[\s_.]/g, '');
+          let cleanTarget = namaSheet.toLowerCase().replace(/[\s_.]/g, '');
+          if (sClean.includes('pasien') || sClean === cleanTarget || sClean === cleanTarget.replace(/^data/, '')) {
+            Logger.log("[Auto-Recover] Mengalihkan ke sheet berisi data: " + s.getName() + " (" + s.getLastRow() + " baris)");
+            sheet = s;
+            break;
+          }
+        }
+      }
+    }
+
     if (!sheet) {
       // FITUR OTOMATIS: Buat sheet jika belum ada di spreadsheet!
       sheet = ss.insertSheet(namaSheet);

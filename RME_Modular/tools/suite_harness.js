@@ -2260,7 +2260,9 @@ var console = {
       onTaskComplete('master');
     }).getInitMaster();
 
+    window._isFetchingPasien = true;
     google.script.run.withSuccessHandler(res => {
+      window._isFetchingPasien = false;
       window.KlinikData.statusLoad.pasien = 'loaded';
       window.KlinikData.pasien = Array.isArray(res) ? res : [];
       window.KlinikData.errorMsgPasien = null;
@@ -2269,6 +2271,7 @@ var console = {
       if (typeof searchPasienData === 'function') searchPasienData();
       onTaskComplete('pasien');
     }).withFailureHandler((err) => {
+      window._isFetchingPasien = false;
       console.error("Gagal getInitPasien:", err);
       window.KlinikData.statusLoad.pasien = 'error';
       window.KlinikData.errorMsgPasien = err && err.message ? err.message : String(err);
@@ -2377,21 +2380,25 @@ function initPasienModule() {
   }
   updateStatistikPasienTampilan();
 
-  if (!window.KlinikData || !Array.isArray(window.KlinikData.pasien) || window.KlinikData.pasien.length === 0) {
+  if (window.KlinikData && Array.isArray(window.KlinikData.pasien) && window.KlinikData.pasien.length > 0) {
+    resetPageAndSearchPasien();
+  } else {
     if (window.KlinikData && window.KlinikData.statusLoad && window.KlinikData.statusLoad.pasien === 'error') {
-      renderTablePagePasien();
-    } else if (window.KlinikData && window.KlinikData.statusLoad && window.KlinikData.statusLoad.pasien === 'loading') {
       renderTablePagePasien();
     } else {
       muatUlangDataPasien();
     }
-  } else {
-    resetPageAndSearchPasien();
   }
   loadListPekerjaan();
 }
 
 window.muatUlangDataPasien = function() {
+  if (window._isFetchingPasien) {
+    console.log("Pengambilan data pasien sedang berlangsung...");
+    return;
+  }
+  window._isFetchingPasien = true;
+
   let tbody = document.getElementById('tbodyPasien');
   let icon = document.getElementById('iconRefreshPasien');
   if (icon) icon.classList.add('animate-spin');
@@ -2400,13 +2407,15 @@ window.muatUlangDataPasien = function() {
   if (!window.KlinikData.statusLoad) window.KlinikData.statusLoad = {};
   window.KlinikData.statusLoad.pasien = 'loading';
 
-  if (tbody) {
+  let hasData = Array.isArray(window.KlinikData.pasien) && window.KlinikData.pasien.length > 0;
+  if (!hasData && tbody) {
     tbody.innerHTML = '<tr><td colspan="9" class="text-center py-12 text-slate-500 font-medium"><div class="flex flex-col items-center justify-center gap-2"><div class="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div><span class="text-xs font-bold text-slate-700">Sedang mengambil data pasien dari server...</span><span class="text-[11px] text-slate-400">Mohon tunggu beberapa saat</span></div></td></tr>';
   }
 
   if (typeof google !== 'undefined' && google.script && google.script.run) {
     google.script.run
       .withSuccessHandler(function(res) {
+        window._isFetchingPasien = false;
         if (icon) icon.classList.remove('animate-spin');
         window.KlinikData.pasien = Array.isArray(res) ? res : [];
         window.KlinikData.statusLoad.pasien = 'loaded';
@@ -2415,6 +2424,7 @@ window.muatUlangDataPasien = function() {
         resetPageAndSearchPasien();
       })
       .withFailureHandler(function(err) {
+        window._isFetchingPasien = false;
         if (icon) icon.classList.remove('animate-spin');
         console.error("Gagal memuat data pasien:", err);
         window.KlinikData.statusLoad.pasien = 'error';
@@ -2424,6 +2434,7 @@ window.muatUlangDataPasien = function() {
       .getInitPasien();
   } else {
     setTimeout(function() {
+      window._isFetchingPasien = false;
       if (icon) icon.classList.remove('animate-spin');
       window.KlinikData.statusLoad.pasien = 'loaded';
       updateStatistikPasienTampilan();
@@ -2552,8 +2563,10 @@ function renderTablePagePasien() {
   let tbody = document.getElementById('tbodyPasien');
   if (!tbody) return;
 
-  // Jika sedang loading
-  if (window.KlinikData && window.KlinikData.statusLoad && window.KlinikData.statusLoad.pasien === 'loading') {
+  let hasData = window.KlinikData && Array.isArray(window.KlinikData.pasien) && window.KlinikData.pasien.length > 0;
+
+  // Jika sedang loading DAN belum ada data di memori
+  if (!hasData && window.KlinikData && window.KlinikData.statusLoad && window.KlinikData.statusLoad.pasien === 'loading') {
     tbody.innerHTML = `
       <tr>
         <td colspan="9" class="text-center py-12 text-slate-500 font-medium">
@@ -2568,8 +2581,8 @@ function renderTablePagePasien() {
     return;
   }
 
-  // Jika terjadi error saat memuat data
-  if (window.KlinikData && window.KlinikData.statusLoad && window.KlinikData.statusLoad.pasien === 'error') {
+  // Jika terjadi error saat memuat data DAN belum ada data di memori
+  if (!hasData && window.KlinikData && window.KlinikData.statusLoad && window.KlinikData.statusLoad.pasien === 'error') {
     let errMsg = window.KlinikData.errorMsgPasien || 'Koneksi ke spreadsheet terputus atau timeout.';
     tbody.innerHTML = `
       <tr>

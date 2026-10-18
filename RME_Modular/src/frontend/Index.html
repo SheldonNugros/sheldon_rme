@@ -729,7 +729,9 @@
       onTaskComplete('master');
     }).getInitMaster();
 
+    window._isFetchingPasien = true;
     google.script.run.withSuccessHandler(res => {
+      window._isFetchingPasien = false;
       window.KlinikData.statusLoad.pasien = 'loaded';
       window.KlinikData.pasien = Array.isArray(res) ? res : [];
       window.KlinikData.errorMsgPasien = null;
@@ -738,6 +740,7 @@
       if (typeof searchPasienData === 'function') searchPasienData();
       onTaskComplete('pasien');
     }).withFailureHandler((err) => {
+      window._isFetchingPasien = false;
       console.error("Gagal getInitPasien:", err);
       window.KlinikData.statusLoad.pasien = 'error';
       window.KlinikData.errorMsgPasien = err && err.message ? err.message : String(err);

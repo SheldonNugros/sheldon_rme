@@ -31,12 +31,12 @@ function initPasienModule() {
 // LOGIKA STATISTIK (TOTAL, L, P)
 // ========================================================
 function updateStatistikPasienTampilan() {
-  let list = window.KlinikData.pasien || [];
+  let list = (window.KlinikData && Array.isArray(window.KlinikData.pasien)) ? window.KlinikData.pasien : [];
   let total = list.length;
   let laki = 0;
   let perempuan = 0;
   list.forEach(p => {
-      let jk = (p.jenisKelamin || "").toLowerCase();
+      let jk = String(p.jenisKelamin || "").toLowerCase();
       if (jk.startsWith('l')) laki++;
       else if (jk.startsWith('p')) perempuan++;
   });
@@ -79,13 +79,13 @@ function getKelompokDuplikatMap(list) {
   let mapNik = new Map();
 
   list.forEach(p => {
-    let nama = (p.namaPasien || "").toLowerCase().trim().replace(/\s+/g, ' ');
-    let tgl = (p.tanggalLahir || "").trim();
+    let nama = String(p.namaPasien || "").toLowerCase().trim().replace(/\s+/g, ' ');
+    let tgl = String(p.tanggalLahir || "").trim();
     let parts = tgl.split(/[-/]/);
     let stdTgl = parts.length === 3 ? (parts[0].length === 4 ? `${parts[2]}-${parts[1]}-${parts[0]}` : tgl) : tgl;
     let keyDob = nama && stdTgl ? `${nama}|${stdTgl}` : "";
 
-    let nik = (p.nik || "").trim();
+    let nik = String(p.nik || "").trim();
 
     if (keyDob) {
       if (!mapNamaLahir.has(keyDob)) mapNamaLahir.set(keyDob, []);
@@ -118,26 +118,26 @@ function resetPageAndSearchPasien() {
 function searchPasienData() {
   let inputEl = document.getElementById('inputCariPasien');
   let q = inputEl ? inputEl.value.toLowerCase().trim() : "";
-  let list = window.KlinikData.pasien || [];
+  let list = (window.KlinikData && Array.isArray(window.KlinikData.pasien)) ? window.KlinikData.pasien : [];
 
   if (isFilterDuplikatAktif) {
     let dupSet = getKelompokDuplikatMap(list);
     list = list.filter(p => dupSet.has(p.idPasien));
     // Sort agar data yang kembar berdampingan
     list.sort((a, b) => {
-      let nA = (a.namaPasien || "").toLowerCase();
-      let nB = (b.namaPasien || "").toLowerCase();
+      let nA = String(a.namaPasien || "").toLowerCase();
+      let nB = String(b.namaPasien || "").toLowerCase();
       return nA.localeCompare(nB);
     });
   }
 
   if (q) {
       filteredPasienList = list.filter(p =>
-          (p.namaPasien || "").toLowerCase().includes(q) ||
-          (p.noRm || "").toLowerCase().includes(q) ||
-          (p.whatsapp || "").toLowerCase().includes(q) ||
-          (p.nik || "").toLowerCase().includes(q) ||
-          (p.alamat || "").toLowerCase().includes(q)
+          String(p.namaPasien || "").toLowerCase().includes(q) ||
+          String(p.noRm || "").toLowerCase().includes(q) ||
+          String(p.whatsapp || "").toLowerCase().includes(q) ||
+          String(p.nik || "").toLowerCase().includes(q) ||
+          String(p.alamat || "").toLowerCase().includes(q)
       );
   } else {
       filteredPasienList = list;
@@ -180,7 +180,7 @@ function renderTablePagePasien() {
   tbody.innerHTML = pageData.map(p => {
     // Badge Jenis Kelamin
     let jkBadge = '<span class="text-slate-400 text-xs">-</span>';
-    let jk = (p.jenisKelamin || '').toLowerCase();
+    let jk = String(p.jenisKelamin || '').toLowerCase();
     if (jk.includes('laki') || jk === 'l') {
       jkBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-50 text-blue-700 border border-blue-200/60 shadow-2xs">👨 Laki-laki</span>`;
     } else if (jk.includes('perempuan') || jk === 'p') {
@@ -195,27 +195,30 @@ function renderTablePagePasien() {
     let umurBadge = p.umur ? `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200/60">${p.umur}</span>` : '';
 
     // WhatsApp direct link ke WhatsApp Web & Chat Kontak
-    let waClean = (p.whatsapp || '').replace(/[^0-9]/g, '');
+    let rawWa = String(p.whatsapp || '').trim();
+    let waClean = rawWa.replace(/[^0-9]/g, '');
     if (waClean.startsWith('0')) {
       waClean = '62' + waClean.slice(1);
     } else if (waClean && !waClean.startsWith('62')) {
       waClean = '62' + waClean;
     }
-    let waDisplay = (p.whatsapp && p.whatsapp.trim() && p.whatsapp.trim() !== '-') ? `
-      <a href="https://web.whatsapp.com/send?phone=${waClean}" target="_blank" rel="noopener noreferrer" onclick="bukaChatWhatsAppPasien(event, '${waClean}', '${(p.namaPasien || '').replace(/'/g, "\\'")}')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-600 text-emerald-700 hover:text-white font-mono text-xs font-bold border border-emerald-300/80 hover:border-emerald-600 transition-all shadow-2xs hover:shadow-xs group cursor-pointer" title="Klik untuk langsung chat via WhatsApp Web">
+    let waDisplay = (rawWa && rawWa !== '-') ? `
+      <a href="https://web.whatsapp.com/send?phone=${waClean}" target="_blank" rel="noopener noreferrer" onclick="bukaChatWhatsAppPasien(event, '${waClean}', '${String(p.namaPasien || '').replace(/'/g, "\\'")}')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-600 text-emerald-700 hover:text-white font-mono text-xs font-bold border border-emerald-300/80 hover:border-emerald-600 transition-all shadow-2xs hover:shadow-xs group cursor-pointer" title="Klik untuk langsung chat via WhatsApp Web">
         <span class="text-sm group-hover:scale-125 transition-transform">💬</span>
-        <span>${p.whatsapp}</span>
+        <span>${rawWa}</span>
       </a>` : '<span class="text-slate-400 text-xs">-</span>';
 
     // Penyakit Sistemik
-    let riwayatDisplay = p.riwayatPenyakit && p.riwayatPenyakit.trim() && p.riwayatPenyakit.trim() !== '-' 
-      ? `<span class="inline-block max-w-[130px] truncate text-[11px] font-semibold text-rose-700 bg-rose-50 border border-rose-200/70 px-2 py-0.5 rounded-md" title="${p.riwayatPenyakit}">${p.riwayatPenyakit}</span>`
+    let rawRiwayat = String(p.riwayatPenyakit || '').trim();
+    let riwayatDisplay = (rawRiwayat && rawRiwayat !== '-') 
+      ? `<span class="inline-block max-w-[130px] truncate text-[11px] font-semibold text-rose-700 bg-rose-50 border border-rose-200/70 px-2 py-0.5 rounded-md" title="${rawRiwayat}">${rawRiwayat}</span>`
       : '<span class="text-slate-400 text-xs">-</span>';
 
     // Alergi (High Alert Badge)
-    let alergiDisplay = p.alergi && p.alergi.trim() && p.alergi.trim() !== '-' && !p.alergi.toLowerCase().includes('tidak ada')
-      ? `<span class="inline-flex items-center gap-1 max-w-[130px] truncate text-[11px] font-bold text-amber-900 bg-amber-50 border border-amber-300 px-2 py-0.5 rounded-md shadow-2xs" title="${p.alergi}">⚠️ ${p.alergi}</span>`
-      : (p.alergi ? `<span class="text-slate-400 text-xs truncate max-w-[120px] inline-block" title="${p.alergi}">${p.alergi}</span>` : '<span class="text-slate-400 text-xs">-</span>');
+    let rawAlergi = String(p.alergi || '').trim();
+    let alergiDisplay = (rawAlergi && rawAlergi !== '-' && !rawAlergi.toLowerCase().includes('tidak ada'))
+      ? `<span class="inline-flex items-center gap-1 max-w-[130px] truncate text-[11px] font-bold text-amber-900 bg-amber-50 border border-amber-300 px-2 py-0.5 rounded-md shadow-2xs" title="${rawAlergi}">⚠️ ${rawAlergi}</span>`
+      : (rawAlergi ? `<span class="text-slate-400 text-xs truncate max-w-[120px] inline-block" title="${rawAlergi}">${rawAlergi}</span>` : '<span class="text-slate-400 text-xs">-</span>');
 
     return `
       <tr class="hover:bg-indigo-50/30 transition-colors border-b border-slate-100 group">
@@ -377,7 +380,7 @@ function cekDuplikasiFrontend() {
 
   // 1. Cek NIK Unik
   if (inputNik && inputNik.length >= 10) {
-    found = list.find(p => (p.nik || "").trim() === inputNik);
+    found = list.find(p => String(p.nik || "").trim() === inputNik);
     if (found) reason = `NIK <b>${inputNik}</b> sudah terdaftar`;
   }
 
@@ -388,9 +391,9 @@ function cekDuplikasiFrontend() {
     let stdInputTgl = partsIn.length === 3 ? (partsIn[0].length === 4 ? `${partsIn[2]}-${partsIn[1]}-${partsIn[0]}` : inputTgl) : inputTgl;
 
     found = list.find(p => {
-      let pNama = (p.namaPasien || "").toLowerCase().trim().replace(/\s+/g, ' ');
+      let pNama = String(p.namaPasien || "").toLowerCase().trim().replace(/\s+/g, ' ');
       if (pNama !== inputNama) return false;
-      let pTgl = (p.tanggalLahir || "").trim();
+      let pTgl = String(p.tanggalLahir || "").trim();
       let partsP = pTgl.split(/[-/]/);
       let stdPTgl = partsP.length === 3 ? (partsP[0].length === 4 ? `${partsP[2]}-${partsP[1]}-${partsP[0]}` : pTgl) : pTgl;
       return stdPTgl === stdInputTgl;
@@ -574,10 +577,10 @@ function simpanDataPasien(e) {
           
           let existingIdx = -1;
           if (payload.idPasien) {
-            existingIdx = window.KlinikData.pasien.findIndex(p => (p.idPasien || '').trim().toLowerCase() === payload.idPasien.trim().toLowerCase());
+            existingIdx = window.KlinikData.pasien.findIndex(p => String(p.idPasien || '').trim().toLowerCase() === String(payload.idPasien).trim().toLowerCase());
           }
           if (existingIdx === -1 && payload.noRm) {
-            existingIdx = window.KlinikData.pasien.findIndex(p => (p.noRm || '').trim().toLowerCase() === payload.noRm.trim().toLowerCase());
+            existingIdx = window.KlinikData.pasien.findIndex(p => String(p.noRm || '').trim().toLowerCase() === String(payload.noRm).trim().toLowerCase());
           }
 
           let updatedRecord = {

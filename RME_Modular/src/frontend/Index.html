@@ -732,6 +732,8 @@
     google.script.run.withSuccessHandler(res => {
       if (Array.isArray(res) && res.length > 0) {
         window.KlinikData.pasien = res;
+        if (typeof updateStatistikPasienTampilan === 'function') updateStatistikPasienTampilan();
+        if (typeof searchPasienData === 'function') searchPasienData();
       }
       window.KlinikData.statusLoad.pasien = true;
       onTaskComplete('pasien');

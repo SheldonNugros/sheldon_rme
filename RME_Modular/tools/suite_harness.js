@@ -7367,6 +7367,8 @@ function bersihkanFormRM() {
   renderOdontogramGrid();
   resetPeriodontalToDefault();
   resetOhisToDefault();
+  toggleSectionAnamnesis(false);
+  toggleSectionFisik(false);
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -8372,6 +8374,60 @@ function bukaModalOhisHistory(idx) {
     bukaModalOhis();
   } else {
     alertMsg("info", "Kunjungan ini tidak memiliki catatan data OHI-S.");
+  }
+}
+
+function toggleSectionAnamnesis(forceState) {
+  const content = document.getElementById("contentSectionAnamnesis");
+  const btn = document.getElementById("btnToggleAnamnesis");
+  const label = document.getElementById("labelToggleAnamnesis");
+  const icon = document.getElementById("iconToggleAnamnesis");
+  if (!content) return;
+
+  const isCurrentlyHidden = content.classList.contains("hidden");
+  const shouldOpen = (forceState !== undefined) ? forceState : isCurrentlyHidden;
+
+  if (shouldOpen) {
+    content.classList.remove("hidden");
+    if (btn) {
+      btn.className = "w-full sm:w-auto px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs transition-all border border-indigo-600 flex items-center justify-center gap-2 shadow-sm active:scale-95 cursor-pointer";
+    }
+    if (label) label.innerText = "Tutup Form Anamnesis";
+    if (icon) icon.innerText = "▲";
+  } else {
+    content.classList.add("hidden");
+    if (btn) {
+      btn.className = "w-full sm:w-auto px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold rounded-xl text-xs transition-all border border-indigo-200/80 flex items-center justify-center gap-2 shadow-2xs active:scale-95 cursor-pointer";
+    }
+    if (label) label.innerText = "Buka Form Anamnesis";
+    if (icon) icon.innerText = "▼";
+  }
+}
+
+function toggleSectionFisik(forceState) {
+  const content = document.getElementById("contentSectionFisik");
+  const btn = document.getElementById("btnToggleFisik");
+  const label = document.getElementById("labelToggleFisik");
+  const icon = document.getElementById("iconToggleFisik");
+  if (!content) return;
+
+  const isCurrentlyHidden = content.classList.contains("hidden");
+  const shouldOpen = (forceState !== undefined) ? forceState : isCurrentlyHidden;
+
+  if (shouldOpen) {
+    content.classList.remove("hidden");
+    if (btn) {
+      btn.className = "w-full sm:w-auto px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl text-xs transition-all border border-teal-600 flex items-center justify-center gap-2 shadow-sm active:scale-95 cursor-pointer";
+    }
+    if (label) label.innerText = "Tutup Form Fisik & Vital";
+    if (icon) icon.innerText = "▲";
+  } else {
+    content.classList.add("hidden");
+    if (btn) {
+      btn.className = "w-full sm:w-auto px-4 py-2 bg-teal-50 hover:bg-teal-100 text-teal-700 font-bold rounded-xl text-xs transition-all border border-teal-200/80 flex items-center justify-center gap-2 shadow-2xs active:scale-95 cursor-pointer";
+    }
+    if (label) label.innerText = "Buka Form Fisik & Vital";
+    if (icon) icon.innerText = "▼";
   }
 }
 

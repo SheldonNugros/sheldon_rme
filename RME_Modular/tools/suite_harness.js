@@ -2035,7 +2035,7 @@ var console = {
     window.activeMenuId = menuId;
     document.querySelectorAll('.module-view').forEach(el => el.classList.add('hidden'));
     document.querySelectorAll('.nav-btn').forEach(el => {
-      el.classList.remove('bg-gradient-to-r', 'from-cyan-600', 'to-indigo-600', 'text-white', 'shadow-md', 'shadow-cyan-500/20', 'ring-1', 'ring-cyan-400/30', 'bg-indigo-600');
+      el.classList.remove('bg-gradient-to-r', 'from-cyan-600', 'via-blue-600', 'to-indigo-600', 'to-indigo-600', 'text-white', 'shadow-lg', 'shadow-cyan-500/25', 'ring-1', 'ring-cyan-400/40', 'bg-indigo-600');
       el.classList.add('text-slate-300', 'hover:bg-slate-800/90', 'hover:text-white');
     });
     const targetView = document.getElementById('view-' + menuId);
@@ -2044,7 +2044,7 @@ var console = {
     if (targetView) targetView.classList.remove('hidden');
     if (targetNav) {
       targetNav.classList.remove('text-slate-300', 'hover:bg-slate-800/90');
-      targetNav.classList.add('bg-gradient-to-r', 'from-cyan-600', 'to-indigo-600', 'text-white', 'shadow-md', 'shadow-cyan-500/20', 'ring-1', 'ring-cyan-400/30');
+      targetNav.classList.add('bg-gradient-to-r', 'from-cyan-600', 'via-blue-600', 'to-indigo-600', 'text-white', 'shadow-lg', 'shadow-cyan-500/25', 'ring-1', 'ring-cyan-400/40');
       document.getElementById('topbarTitle').innerText = targetNav.innerText.replace(/[^a-zA-Z0-9\s&]/gi, '').trim();
     }
 

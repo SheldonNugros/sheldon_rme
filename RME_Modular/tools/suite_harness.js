@@ -20,6 +20,9 @@ var isTglLargeInHtml = true;
 var isTempatLahirInHtml = true;
 var isModalToothTglInHtml = true;
 var isPanelRefInHtml = true;
+var isMetodeCashTfOnly = true;
+var isStatusSplitInHtml = true;
+var isBoxSplitInHtml = true;
 
 // Enhanced DOM Mock for JavaScriptCore
 var window = this;
@@ -9163,17 +9166,109 @@ function toggleSectionFisik(forceState) {
    let stat = document.getElementById('ksrStatus').value;
    let boxDp = document.getElementById('boxNominalDp');
    let subDp = document.getElementById('subLabelDpInfo');
+   let boxSplit = document.getElementById('boxSplitPayment');
    let lblJudul = document.getElementById('lblJudulTotalBayar');
+   let metEl = document.getElementById('ksrMetode');
+   let optSplit = document.getElementById('optMetodeSplit');
 
    if (stat === 'Uang Muka') {
      if (boxDp) boxDp.classList.remove('hidden');
+     if (boxSplit) boxSplit.classList.add('hidden');
      if (subDp) subDp.classList.remove('hidden');
      if (lblJudul) lblJudul.innerText = 'TOTAL PAKET / TINDAKAN';
+     if (optSplit) optSplit.classList.add('hidden');
+     if (metEl && metEl.value === 'Cash & Transfer') metEl.value = '';
      hitungSisaTagihanDp();
-   } else {
+   } else if (stat === 'Split') {
      if (boxDp) boxDp.classList.add('hidden');
+     if (boxSplit) boxSplit.classList.remove('hidden');
      if (subDp) subDp.classList.add('hidden');
      if (lblJudul) lblJudul.innerText = 'TOTAL BIAYA TINDAKAN';
+     if (optSplit) optSplit.classList.remove('hidden');
+     if (metEl) metEl.value = 'Cash & Transfer';
+     initSplitPaymentValues();
+   } else {
+     if (boxDp) boxDp.classList.add('hidden');
+     if (boxSplit) boxSplit.classList.add('hidden');
+     if (subDp) subDp.classList.add('hidden');
+     if (lblJudul) lblJudul.innerText = 'TOTAL BIAYA TINDAKAN';
+     if (optSplit) optSplit.classList.add('hidden');
+     if (metEl && metEl.value === 'Cash & Transfer') metEl.value = '';
+   }
+ }
+
+ function initSplitPaymentValues() {
+   let total = parseUangKSR(document.getElementById('valTotalBayarRaw').value);
+   let lblTarget = document.getElementById('lblTotalSplitTarget');
+   if (lblTarget) {
+     lblTarget.innerText = 'Target: Rp ' + formatRpKSR(total);
+   }
+   let cashEl = document.getElementById('ksrSplitCash');
+   let transferEl = document.getElementById('ksrSplitTransfer');
+   if (cashEl && transferEl) {
+     let curCash = parseUangKSR(cashEl.value);
+     let curTf = parseUangKSR(transferEl.value);
+     if (curCash + curTf !== total || (curCash === 0 && curTf === 0)) {
+       let half = Math.floor(total / 2);
+       cashEl.value = half > 0 ? formatRpKSR(half) : (total > 0 ? formatRpKSR(total) : '0');
+       let remaining = Math.max(0, total - parseUangKSR(cashEl.value));
+       transferEl.value = remaining > 0 ? formatRpKSR(remaining) : '0';
+     }
+   }
+   updateSplitSummaryCheck();
+ }
+
+ function handleSplitInput(source) {
+   let total = parseUangKSR(document.getElementById('valTotalBayarRaw').value);
+   let cashEl = document.getElementById('ksrSplitCash');
+   let transferEl = document.getElementById('ksrSplitTransfer');
+   if (!cashEl || !transferEl) return;
+
+   if (source === 'cash') {
+     autoFormatUang(cashEl);
+     let cashVal = parseUangKSR(cashEl.value);
+     if (cashVal > total) {
+       cashVal = total;
+       cashEl.value = formatRpKSR(cashVal);
+     }
+     let transferVal = Math.max(0, total - cashVal);
+     transferEl.value = transferVal > 0 ? formatRpKSR(transferVal) : '0';
+   } else if (source === 'transfer') {
+     autoFormatUang(transferEl);
+     let transferVal = parseUangKSR(transferEl.value);
+     if (transferVal > total) {
+       transferVal = total;
+       transferEl.value = formatRpKSR(transferVal);
+     }
+     let cashVal = Math.max(0, total - transferVal);
+     cashEl.value = cashVal > 0 ? formatRpKSR(cashVal) : '0';
+   }
+
+   updateSplitSummaryCheck();
+ }
+
+ function updateSplitSummaryCheck() {
+   let total = parseUangKSR(document.getElementById('valTotalBayarRaw').value);
+   let cashVal = parseUangKSR((document.getElementById('ksrSplitCash') || {}).value);
+   let transferVal = parseUangKSR((document.getElementById('ksrSplitTransfer') || {}).value);
+   let lblCheck = document.getElementById('lblSplitTotalCheck');
+   let lblTarget = document.getElementById('lblTotalSplitTarget');
+   if (lblTarget) {
+     lblTarget.innerText = 'Target: Rp ' + formatRpKSR(total);
+   }
+   if (!lblCheck) return;
+
+   let sum = cashVal + transferVal;
+   if (sum === total && total > 0) {
+     lblCheck.className = 'font-black text-emerald-700';
+     lblCheck.innerText = 'Rp ' + formatRpKSR(sum) + ' (Sesuai 100% ✓)';
+   } else if (total === 0) {
+     lblCheck.className = 'font-bold text-slate-500';
+     lblCheck.innerText = 'Rp 0 (Tindakan belum diinput)';
+   } else {
+     let diff = total - sum;
+     lblCheck.className = 'font-black text-rose-600';
+     lblCheck.innerText = 'Rp ' + formatRpKSR(sum) + ' (Selisih: Rp ' + formatRpKSR(diff) + ')';
    }
  }
 
@@ -9193,6 +9288,10 @@ function toggleSectionFisik(forceState) {
    if (lblDp) lblDp.innerText = 'Rp ' + formatRpKSR(nominalDp);
    if (lblSisa) lblSisa.innerText = 'Rp ' + formatRpKSR(sisa);
  }
+
+ window.handleSplitInput = handleSplitInput;
+ window.initSplitPaymentValues = initSplitPaymentValues;
+ window.updateSplitSummaryCheck = updateSplitSummaryCheck;
 
 
  function groupRiwayatInvoices() {
@@ -9478,6 +9577,10 @@ function toggleSectionFisik(forceState) {
    let sum = 0; document.querySelectorAll('.val-grand').forEach(el => { sum += parseUangKSR(el.value); });
    document.getElementById('lblTotalBayarKSR').innerText = 'Rp ' + formatRpKSR(sum);
    document.getElementById('valTotalBayarRaw').value = sum;
+   let statEl = document.getElementById('ksrStatus');
+   if (statEl && statEl.value === 'Split' && typeof handleSplitInput === 'function') {
+     handleSplitInput('cash');
+   }
  }
 
 
@@ -9508,6 +9611,8 @@ function toggleSectionFisik(forceState) {
  function resetFormBilling() {
    document.getElementById('ksrNama').value = ''; document.getElementById('ksrRM').value = ''; document.getElementById('ksrID').value = ''; document.getElementById('ksrDokter').value = ''; document.getElementById('ksrMetode').value = ''; document.getElementById('ksrStatus').value = ''; document.getElementById('ksrKet').value = '';
    let ksrDp = document.getElementById('ksrNominalDp'); if (ksrDp) ksrDp.value = '';
+   let ksrSplitCash = document.getElementById('ksrSplitCash'); if (ksrSplitCash) ksrSplitCash.value = '';
+   let ksrSplitTransfer = document.getElementById('ksrSplitTransfer'); if (ksrSplitTransfer) ksrSplitTransfer.value = '';
    onStatusBayarChange();
    document.getElementById('ksrTbodyTindakan').innerHTML = ''; document.getElementById('ksrTbodyObat').innerHTML = ''; document.getElementById('ksrTbodyBMHP').innerHTML = '';
    document.getElementById('ksrSearchPasien').value = '';
@@ -9544,6 +9649,21 @@ function toggleSectionFisik(forceState) {
      let sisaTagihan = totalBiayaTindakan - dpVal;
      let infoDp = '[DP: Rp ' + formatRpKSR(dpVal) + ' | Total Paket: Rp ' + formatRpKSR(totalBiayaTindakan) + ' | Sisa Piutang: Rp ' + formatRpKSR(sisaTagihan) + ']';
      ketTambahan = ketTambahan ? (ketTambahan + ' ' + infoDp) : infoDp;
+   } else if (stat === 'Split') {
+     let cashVal = parseUangKSR(document.getElementById('ksrSplitCash').value);
+     let transferVal = parseUangKSR(document.getElementById('ksrSplitTransfer').value);
+     if (totalBiayaTindakan <= 0) {
+       showToast('error', 'Total tindakan belum ada / masih 0 untuk pembayaran Split!');
+       return;
+     }
+     if ((cashVal + transferVal) !== totalBiayaTindakan) {
+       showToast('error', 'Jumlah Cash (Rp ' + formatRpKSR(cashVal) + ') + Transfer (Rp ' + formatRpKSR(transferVal) + ') harus sama dengan Total Tindakan (Rp ' + formatRpKSR(totalBiayaTindakan) + ')!');
+       return;
+     }
+     met = 'Cash & Transfer';
+     nominalBayarAkhir = totalBiayaTindakan;
+     let infoSplit = '[Split: Cash Rp ' + formatRpKSR(cashVal) + ' | Transfer Rp ' + formatRpKSR(transferVal) + ']';
+     ketTambahan = ketTambahan ? (ketTambahan + ' ' + infoSplit) : infoSplit;
    }
 
    let btn = document.getElementById('btnSimpanBilling'); btn.innerHTML = 'MEMPROSES...'; btn.disabled = true;
@@ -17433,8 +17553,47 @@ simpanBillingFinal();
 runAllTimers();
 
 assert("K-10: Pelunasan Berhasil Diterbitkan", getLastToast().includes("Berhasil!"));
-pilihPasienKSR('PS-0321-0001');
 assert("K-10: Evaluasi Tagihan Berjalan Pasien Menunjukkan Status Lunas", document.getElementById('alertCicilanBody').innerHTML.includes("PELUNASAN") || alertCicilan.classList.contains('hidden'));
+
+// Skenario K-SPLIT: Pembagian Pembayaran Split (Cash & Transfer Bank)
+assert("K-SPLIT-1: Opsi Metode Bayar Hanya Cash dan Transfer Bank", isMetodeCashTfOnly);
+assert("K-SPLIT-2: Status Pembayaran Memiliki Opsi Split", isStatusSplitInHtml);
+assert("K-SPLIT-3: Box Split Payment Tersedia di HTML", isBoxSplitInHtml);
+
+switchMenu('kasir');
+resetFormBilling();
+pilihPasienKSR('PS-0321-0001');
+document.getElementById('ksrTgl').value = '2026-10-08';
+document.getElementById('ksrDokter').value = 'drg. Rahma Yulinda D, Sp. BMM';
+
+addKasirTindakan();
+var tbSplit = document.getElementById('ksrTbodyTindakan');
+var rowSplit = tbSplit.children[tbSplit.children.length - 1];
+rowSplit.querySelector('.val-nama').value = 'Pembersihan Karang Gigi';
+rowSplit.querySelector('.val-harga').value = '500.000';
+rowSplit.querySelector('.val-qty').value = '1';
+rowSplit.querySelector('.val-disc').value = '0';
+rowSplit.querySelector('.val-grand').value = '500.000';
+hitungGrandTotalSemua();
+
+document.getElementById('ksrStatus').value = 'Split';
+onStatusBayarChange();
+assert("K-SPLIT-4: Box Split Ditampilkan Saat Status Split", !document.getElementById('boxSplitPayment').classList.contains('hidden'));
+assert("K-SPLIT-4: Metode Otomatis Menjadi Cash & Transfer", document.getElementById('ksrMetode').value === 'Cash & Transfer');
+
+// Test auto calculation
+document.getElementById('ksrSplitCash').value = '200.000';
+handleSplitInput('cash');
+assert("K-SPLIT-5: Mengisi Cash 200rb Otomatis Mengisi Transfer 300rb", parseUangKSR(document.getElementById('ksrSplitTransfer').value) === 300000);
+
+document.getElementById('ksrSplitTransfer').value = '450.000';
+handleSplitInput('transfer');
+assert("K-SPLIT-6: Mengisi Transfer 450rb Otomatis Mengisi Cash 50rb", parseUangKSR(document.getElementById('ksrSplitCash').value) === 50000);
+
+// Simpan final invoice split
+simpanBillingFinal();
+runAllTimers();
+assert("K-SPLIT-7: Invoice Pembayaran Split Berhasil Disimpan", getLastToast().includes("Berhasil!"));
 
 // Skenario K-11: Riwayat Invoice Search & Filter Kalender
 switchMenu('riwayat-invoice');

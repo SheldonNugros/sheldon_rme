@@ -33,8 +33,8 @@ const SPREADSHEET_DEFINITIONS = {
           "formats": { "B": "dd-mm-yyyy", "I": "#,##0", "K": "#,##0", "M": "#,##0", "O": "#,##0", "T": "dd-mm-yyyy hh:mm:ss" },
           "validations": {
             "G": ["Tindakan", "Obat", "BMHP"],
-            "P": ["Tunai", "Transfer Bank", "QRIS", "Kartu Debit/Kredit", "Asuransi"],
-            "Q": ["Lunas", "Uang Muka", "Pelunasan"]
+            "P": ["Cash", "Tunai", "Transfer Bank", "Cash & Transfer", "QRIS", "Kartu Debit/Kredit", "Asuransi"],
+            "Q": ["Lunas", "Uang Muka", "Pelunasan", "Split"]
           }
         },
         {

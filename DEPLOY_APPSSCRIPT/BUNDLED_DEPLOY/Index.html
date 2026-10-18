@@ -6319,10 +6319,9 @@
             <label class="block font-bold text-slate-700 mb-1.5 text-xs">Metode Bayar <span class="text-rose-500 font-black">*</span></label>
             <select id="ksrMetode" class="w-full px-4 py-3 bg-white border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 rounded-xl text-xs font-bold text-slate-800 outline-none cursor-pointer shadow-2xs">
               <option value="" disabled selected>-- Pilih Metode --</option>
-              <option value="Cash">💵 Cash / Tunai</option>
-              <option value="Transfer">🏦 Transfer Bank</option>
-              <option value="QRIS">📱 QRIS / E-Wallet</option>
-              <option value="Debit / Kartu Kredit">💳 Kartu Debit / Kredit</option>
+              <option value="Cash">💵 Cash</option>
+              <option value="Transfer Bank">🏦 Transfer Bank</option>
+              <option value="Cash & Transfer" id="optMetodeSplit" class="hidden">🔀 Cash & Transfer (Split)</option>
             </select>
           </div>
           <div>
@@ -6330,10 +6329,55 @@
             <select id="ksrStatus" onchange="onStatusBayarChange()" class="w-full px-4 py-3 bg-white border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 rounded-xl text-xs font-bold text-slate-800 outline-none cursor-pointer shadow-2xs">
               <option value="" disabled selected>-- Pilih Status --</option>
               <option value="Lunas">✅ Lunas</option>
+              <option value="Split">🔀 Split</option>
               <option value="Uang Muka">⏳ Uang Muka (DP / Cicilan)</option>
               <option value="Pelunasan">🔄 Pelunasan</option>
             </select>
           </div>
+        </div>
+
+        <!-- KOLOM INPUT NOMINAL SPLIT PAYMENT (CASH & TRANSFER) -->
+        <div id="boxSplitPayment" class="hidden p-4 bg-gradient-to-br from-indigo-50/90 via-sky-50/80 to-blue-50/90 border-2 border-indigo-300 rounded-2xl space-y-3 shadow-sm">
+          <div class="flex justify-between items-center pb-2 border-b border-indigo-100">
+            <label class="font-black text-indigo-950 text-xs uppercase tracking-wide flex items-center gap-2">
+              <span class="text-base">🔀</span> Pembagian Pembayaran Split (Cash & Transfer) <span class="text-rose-600">*</span>
+            </label>
+            <span class="text-xs font-black text-indigo-700 bg-white px-2.5 py-1 rounded-lg border border-indigo-200 shadow-xs" id="lblTotalSplitTarget">
+              Target: Rp 0
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            <!-- Porsi Cash -->
+            <div class="bg-white p-3 rounded-xl border border-indigo-200/80 shadow-xs space-y-1">
+              <label class="block text-[11px] font-black text-slate-700 flex items-center gap-1.5">
+                <span>💵</span> Nominal Cash (Rp) <span class="text-rose-500">*</span>
+              </label>
+              <div class="relative">
+                <span class="absolute inset-y-0 left-0 pl-3 flex items-center font-bold text-slate-500 text-xs">Rp</span>
+                <input type="text" id="ksrSplitCash" oninput="handleSplitInput('cash')" placeholder="0" class="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-300 focus:border-indigo-500 focus:bg-white rounded-lg text-xs font-black text-slate-900 outline-none transition-all">
+              </div>
+              <p class="text-[10px] text-slate-500">Nominal uang tunai yang diterima</p>
+            </div>
+
+            <!-- Porsi Transfer Bank -->
+            <div class="bg-white p-3 rounded-xl border border-indigo-200/80 shadow-xs space-y-1">
+              <label class="block text-[11px] font-black text-slate-700 flex items-center gap-1.5">
+                <span>🏦</span> Nominal Transfer Bank (Rp) <span class="text-rose-500">*</span>
+              </label>
+              <div class="relative">
+                <span class="absolute inset-y-0 left-0 pl-3 flex items-center font-bold text-slate-500 text-xs">Rp</span>
+                <input type="text" id="ksrSplitTransfer" oninput="handleSplitInput('transfer')" placeholder="0" class="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-300 focus:border-indigo-500 focus:bg-white rounded-lg text-xs font-black text-slate-900 outline-none transition-all">
+              </div>
+              <p class="text-[10px] text-slate-500">Nominal via transfer rekening bank</p>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between pt-2 border-t border-indigo-100 text-xs">
+            <span class="text-[11px] font-bold text-slate-600">Total Terbagi (Cash + Transfer):</span>
+            <span id="lblSplitTotalCheck" class="font-black text-emerald-700">Rp 0 (Sesuai 100% ✓)</span>
+          </div>
+          <p class="text-[10px] text-indigo-800 font-medium">ℹ️ Cukup ketik salah satu nominal (Cash atau Transfer), nominal lainnya otomatis disesuaikan dengan total biaya tindakan.</p>
         </div>
 
         <!-- KOLOM INPUT NOMINAL BAYAR KHUSUS UANG MUKA / DP -->
@@ -14158,17 +14202,109 @@ function toggleSectionFisik(forceState) {
    let stat = document.getElementById('ksrStatus').value;
    let boxDp = document.getElementById('boxNominalDp');
    let subDp = document.getElementById('subLabelDpInfo');
+   let boxSplit = document.getElementById('boxSplitPayment');
    let lblJudul = document.getElementById('lblJudulTotalBayar');
+   let metEl = document.getElementById('ksrMetode');
+   let optSplit = document.getElementById('optMetodeSplit');
 
    if (stat === 'Uang Muka') {
      if (boxDp) boxDp.classList.remove('hidden');
+     if (boxSplit) boxSplit.classList.add('hidden');
      if (subDp) subDp.classList.remove('hidden');
      if (lblJudul) lblJudul.innerText = 'TOTAL PAKET / TINDAKAN';
+     if (optSplit) optSplit.classList.add('hidden');
+     if (metEl && metEl.value === 'Cash & Transfer') metEl.value = '';
      hitungSisaTagihanDp();
-   } else {
+   } else if (stat === 'Split') {
      if (boxDp) boxDp.classList.add('hidden');
+     if (boxSplit) boxSplit.classList.remove('hidden');
      if (subDp) subDp.classList.add('hidden');
      if (lblJudul) lblJudul.innerText = 'TOTAL BIAYA TINDAKAN';
+     if (optSplit) optSplit.classList.remove('hidden');
+     if (metEl) metEl.value = 'Cash & Transfer';
+     initSplitPaymentValues();
+   } else {
+     if (boxDp) boxDp.classList.add('hidden');
+     if (boxSplit) boxSplit.classList.add('hidden');
+     if (subDp) subDp.classList.add('hidden');
+     if (lblJudul) lblJudul.innerText = 'TOTAL BIAYA TINDAKAN';
+     if (optSplit) optSplit.classList.add('hidden');
+     if (metEl && metEl.value === 'Cash & Transfer') metEl.value = '';
+   }
+ }
+
+ function initSplitPaymentValues() {
+   let total = parseUangKSR(document.getElementById('valTotalBayarRaw').value);
+   let lblTarget = document.getElementById('lblTotalSplitTarget');
+   if (lblTarget) {
+     lblTarget.innerText = 'Target: Rp ' + formatRpKSR(total);
+   }
+   let cashEl = document.getElementById('ksrSplitCash');
+   let transferEl = document.getElementById('ksrSplitTransfer');
+   if (cashEl && transferEl) {
+     let curCash = parseUangKSR(cashEl.value);
+     let curTf = parseUangKSR(transferEl.value);
+     if (curCash + curTf !== total || (curCash === 0 && curTf === 0)) {
+       let half = Math.floor(total / 2);
+       cashEl.value = half > 0 ? formatRpKSR(half) : (total > 0 ? formatRpKSR(total) : '0');
+       let remaining = Math.max(0, total - parseUangKSR(cashEl.value));
+       transferEl.value = remaining > 0 ? formatRpKSR(remaining) : '0';
+     }
+   }
+   updateSplitSummaryCheck();
+ }
+
+ function handleSplitInput(source) {
+   let total = parseUangKSR(document.getElementById('valTotalBayarRaw').value);
+   let cashEl = document.getElementById('ksrSplitCash');
+   let transferEl = document.getElementById('ksrSplitTransfer');
+   if (!cashEl || !transferEl) return;
+
+   if (source === 'cash') {
+     autoFormatUang(cashEl);
+     let cashVal = parseUangKSR(cashEl.value);
+     if (cashVal > total) {
+       cashVal = total;
+       cashEl.value = formatRpKSR(cashVal);
+     }
+     let transferVal = Math.max(0, total - cashVal);
+     transferEl.value = transferVal > 0 ? formatRpKSR(transferVal) : '0';
+   } else if (source === 'transfer') {
+     autoFormatUang(transferEl);
+     let transferVal = parseUangKSR(transferEl.value);
+     if (transferVal > total) {
+       transferVal = total;
+       transferEl.value = formatRpKSR(transferVal);
+     }
+     let cashVal = Math.max(0, total - transferVal);
+     cashEl.value = cashVal > 0 ? formatRpKSR(cashVal) : '0';
+   }
+
+   updateSplitSummaryCheck();
+ }
+
+ function updateSplitSummaryCheck() {
+   let total = parseUangKSR(document.getElementById('valTotalBayarRaw').value);
+   let cashVal = parseUangKSR((document.getElementById('ksrSplitCash') || {}).value);
+   let transferVal = parseUangKSR((document.getElementById('ksrSplitTransfer') || {}).value);
+   let lblCheck = document.getElementById('lblSplitTotalCheck');
+   let lblTarget = document.getElementById('lblTotalSplitTarget');
+   if (lblTarget) {
+     lblTarget.innerText = 'Target: Rp ' + formatRpKSR(total);
+   }
+   if (!lblCheck) return;
+
+   let sum = cashVal + transferVal;
+   if (sum === total && total > 0) {
+     lblCheck.className = 'font-black text-emerald-700';
+     lblCheck.innerText = 'Rp ' + formatRpKSR(sum) + ' (Sesuai 100% ✓)';
+   } else if (total === 0) {
+     lblCheck.className = 'font-bold text-slate-500';
+     lblCheck.innerText = 'Rp 0 (Tindakan belum diinput)';
+   } else {
+     let diff = total - sum;
+     lblCheck.className = 'font-black text-rose-600';
+     lblCheck.innerText = 'Rp ' + formatRpKSR(sum) + ' (Selisih: Rp ' + formatRpKSR(diff) + ')';
    }
  }
 
@@ -14188,6 +14324,10 @@ function toggleSectionFisik(forceState) {
    if (lblDp) lblDp.innerText = 'Rp ' + formatRpKSR(nominalDp);
    if (lblSisa) lblSisa.innerText = 'Rp ' + formatRpKSR(sisa);
  }
+
+ window.handleSplitInput = handleSplitInput;
+ window.initSplitPaymentValues = initSplitPaymentValues;
+ window.updateSplitSummaryCheck = updateSplitSummaryCheck;
 
 
  function groupRiwayatInvoices() {
@@ -14473,6 +14613,10 @@ function toggleSectionFisik(forceState) {
    let sum = 0; document.querySelectorAll('.val-grand').forEach(el => { sum += parseUangKSR(el.value); });
    document.getElementById('lblTotalBayarKSR').innerText = 'Rp ' + formatRpKSR(sum);
    document.getElementById('valTotalBayarRaw').value = sum;
+   let statEl = document.getElementById('ksrStatus');
+   if (statEl && statEl.value === 'Split' && typeof handleSplitInput === 'function') {
+     handleSplitInput('cash');
+   }
  }
 
 
@@ -14503,6 +14647,8 @@ function toggleSectionFisik(forceState) {
  function resetFormBilling() {
    document.getElementById('ksrNama').value = ''; document.getElementById('ksrRM').value = ''; document.getElementById('ksrID').value = ''; document.getElementById('ksrDokter').value = ''; document.getElementById('ksrMetode').value = ''; document.getElementById('ksrStatus').value = ''; document.getElementById('ksrKet').value = '';
    let ksrDp = document.getElementById('ksrNominalDp'); if (ksrDp) ksrDp.value = '';
+   let ksrSplitCash = document.getElementById('ksrSplitCash'); if (ksrSplitCash) ksrSplitCash.value = '';
+   let ksrSplitTransfer = document.getElementById('ksrSplitTransfer'); if (ksrSplitTransfer) ksrSplitTransfer.value = '';
    onStatusBayarChange();
    document.getElementById('ksrTbodyTindakan').innerHTML = ''; document.getElementById('ksrTbodyObat').innerHTML = ''; document.getElementById('ksrTbodyBMHP').innerHTML = '';
    document.getElementById('ksrSearchPasien').value = '';
@@ -14539,6 +14685,21 @@ function toggleSectionFisik(forceState) {
      let sisaTagihan = totalBiayaTindakan - dpVal;
      let infoDp = '[DP: Rp ' + formatRpKSR(dpVal) + ' | Total Paket: Rp ' + formatRpKSR(totalBiayaTindakan) + ' | Sisa Piutang: Rp ' + formatRpKSR(sisaTagihan) + ']';
      ketTambahan = ketTambahan ? (ketTambahan + ' ' + infoDp) : infoDp;
+   } else if (stat === 'Split') {
+     let cashVal = parseUangKSR(document.getElementById('ksrSplitCash').value);
+     let transferVal = parseUangKSR(document.getElementById('ksrSplitTransfer').value);
+     if (totalBiayaTindakan <= 0) {
+       showToast('error', 'Total tindakan belum ada / masih 0 untuk pembayaran Split!');
+       return;
+     }
+     if ((cashVal + transferVal) !== totalBiayaTindakan) {
+       showToast('error', 'Jumlah Cash (Rp ' + formatRpKSR(cashVal) + ') + Transfer (Rp ' + formatRpKSR(transferVal) + ') harus sama dengan Total Tindakan (Rp ' + formatRpKSR(totalBiayaTindakan) + ')!');
+       return;
+     }
+     met = 'Cash & Transfer';
+     nominalBayarAkhir = totalBiayaTindakan;
+     let infoSplit = '[Split: Cash Rp ' + formatRpKSR(cashVal) + ' | Transfer Rp ' + formatRpKSR(transferVal) + ']';
+     ketTambahan = ketTambahan ? (ketTambahan + ' ' + infoSplit) : infoSplit;
    }
 
    let btn = document.getElementById('btnSimpanBilling'); btn.innerHTML = 'MEMPROSES...'; btn.disabled = true;

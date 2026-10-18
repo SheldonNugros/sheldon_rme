@@ -56,6 +56,15 @@ is_tempat_lahir_in_html = ('id="pasTempatLahir"' in html)
 is_modal_tooth_tgl_in_html = ('id="modalToothTgl"' in html)
 is_panel_ref_in_html = ('id="panelReferensiKlinisRM"' in html)
 
+ksr_metode_m = re.search(r'<select[^>]*id=["\']ksrMetode["\'][^>]*>(.*?)</select>', html, re.DOTALL)
+ksr_metode_options = re.findall(r'<option[^>]*value=["\']([^"\']*)["\']', ksr_metode_m.group(1)) if ksr_metode_m else []
+is_metode_cash_tf_only = set([opt for opt in ksr_metode_options if opt and opt != 'Cash & Transfer']) == {'Cash', 'Transfer Bank'}
+
+ksr_status_m = re.search(r'<select[^>]*id=["\']ksrStatus["\'][^>]*>(.*?)</select>', html, re.DOTALL)
+ksr_status_options = re.findall(r'<option[^>]*value=["\']([^"\']*)["\']', ksr_status_m.group(1)) if ksr_status_m else []
+is_status_split_in_html = ('Split' in ksr_status_options)
+is_box_split_in_html = ('id="boxSplitPayment"' in html and 'id="ksrSplitCash"' in html and 'id="ksrSplitTransfer"' in html)
+
 test_harness_file = os.path.join(BASE_DIR, 'tools', 'suite_harness.js')
 
 dom_shim = r'''
@@ -1150,8 +1159,47 @@ simpanBillingFinal();
 runAllTimers();
 
 assert("K-10: Pelunasan Berhasil Diterbitkan", getLastToast().includes("Berhasil!"));
-pilihPasienKSR('PS-0321-0001');
 assert("K-10: Evaluasi Tagihan Berjalan Pasien Menunjukkan Status Lunas", document.getElementById('alertCicilanBody').innerHTML.includes("PELUNASAN") || alertCicilan.classList.contains('hidden'));
+
+// Skenario K-SPLIT: Pembagian Pembayaran Split (Cash & Transfer Bank)
+assert("K-SPLIT-1: Opsi Metode Bayar Hanya Cash dan Transfer Bank", isMetodeCashTfOnly);
+assert("K-SPLIT-2: Status Pembayaran Memiliki Opsi Split", isStatusSplitInHtml);
+assert("K-SPLIT-3: Box Split Payment Tersedia di HTML", isBoxSplitInHtml);
+
+switchMenu('kasir');
+resetFormBilling();
+pilihPasienKSR('PS-0321-0001');
+document.getElementById('ksrTgl').value = '2026-10-08';
+document.getElementById('ksrDokter').value = 'drg. Rahma Yulinda D, Sp. BMM';
+
+addKasirTindakan();
+var tbSplit = document.getElementById('ksrTbodyTindakan');
+var rowSplit = tbSplit.children[tbSplit.children.length - 1];
+rowSplit.querySelector('.val-nama').value = 'Pembersihan Karang Gigi';
+rowSplit.querySelector('.val-harga').value = '500.000';
+rowSplit.querySelector('.val-qty').value = '1';
+rowSplit.querySelector('.val-disc').value = '0';
+rowSplit.querySelector('.val-grand').value = '500.000';
+hitungGrandTotalSemua();
+
+document.getElementById('ksrStatus').value = 'Split';
+onStatusBayarChange();
+assert("K-SPLIT-4: Box Split Ditampilkan Saat Status Split", !document.getElementById('boxSplitPayment').classList.contains('hidden'));
+assert("K-SPLIT-4: Metode Otomatis Menjadi Cash & Transfer", document.getElementById('ksrMetode').value === 'Cash & Transfer');
+
+// Test auto calculation
+document.getElementById('ksrSplitCash').value = '200.000';
+handleSplitInput('cash');
+assert("K-SPLIT-5: Mengisi Cash 200rb Otomatis Mengisi Transfer 300rb", parseUangKSR(document.getElementById('ksrSplitTransfer').value) === 300000);
+
+document.getElementById('ksrSplitTransfer').value = '450.000';
+handleSplitInput('transfer');
+assert("K-SPLIT-6: Mengisi Transfer 450rb Otomatis Mengisi Cash 50rb", parseUangKSR(document.getElementById('ksrSplitCash').value) === 50000);
+
+// Simpan final invoice split
+simpanBillingFinal();
+runAllTimers();
+assert("K-SPLIT-7: Invoice Pembayaran Split Berhasil Disimpan", getLastToast().includes("Berhasil!"));
 
 // Skenario K-11: Riwayat Invoice Search & Filter Kalender
 switchMenu('riwayat-invoice');
@@ -1939,7 +1987,7 @@ if (failedTotal > 0) {
 }
 '''
 
-full_test_script = f"var isButtonKonsultasiRemoved = {str(is_kon_removed).lower()};\nvar isModalResetPerioInHtml = {str(is_modal_perio_in_html).lower()};\nvar roleSelectOptionsFromHtml = {json.dumps(role_options)};\nvar isDatePickerLargeInHtml = {str(is_date_picker_large).lower()};\nvar isPaginasiHariIniRemoved = {str(is_paginasi_hari_ini_removed).lower()};\nvar isSubtitleAbsensiRemoved = {str(is_subtitle_absensi_removed).lower()};\nvar isTercatatMasukRemoved = {str(is_tercatat_masuk_removed).lower()};\nvar isIzinSakitOffRemoved = {str(is_izin_sakit_off_removed).lower()};\nvar isBtnDbUserRemoved = {str(is_btn_db_user_removed).lower()};\nvar isPelayananOrderedInHtml = {str(is_pelayanan_ordered).lower()};\nvar isAdminHeaderInHtml = {str(is_admin_header).lower()};\nvar isAdminOrderedInHtml = {str(is_admin_ordered).lower()};\nvar isTabBtnPayInHtml = {str(is_tab_btn_pay_in_html).lower()};\nvar isPanelPayInHtml = {str(is_panel_pay_in_html).lower()};\nvar isBtnAturLiburRemoved = {str(is_btn_atur_libur_removed).lower()};\nvar isBtnRefreshInHtml = {str(is_btn_refresh_in_html).lower()};\nvar isEmrTitleRenamedInHtml = {str(is_emr_title_renamed).lower()};\nvar isClearPasienBtnInHtml = {str(is_clear_pasien_btn_in_html).lower()};\nvar isTglLargeInHtml = {str(is_tgl_large_in_html).lower()};\nvar isTempatLahirInHtml = {str(is_tempat_lahir_in_html).lower()};\nvar isModalToothTglInHtml = {str(is_modal_tooth_tgl_in_html).lower()};\nvar isPanelRefInHtml = {str(is_panel_ref_in_html).lower()};\n" + dom_shim + "\n" + all_js + "\n" + test_runner_js
+full_test_script = f"var isButtonKonsultasiRemoved = {str(is_kon_removed).lower()};\nvar isModalResetPerioInHtml = {str(is_modal_perio_in_html).lower()};\nvar roleSelectOptionsFromHtml = {json.dumps(role_options)};\nvar isDatePickerLargeInHtml = {str(is_date_picker_large).lower()};\nvar isPaginasiHariIniRemoved = {str(is_paginasi_hari_ini_removed).lower()};\nvar isSubtitleAbsensiRemoved = {str(is_subtitle_absensi_removed).lower()};\nvar isTercatatMasukRemoved = {str(is_tercatat_masuk_removed).lower()};\nvar isIzinSakitOffRemoved = {str(is_izin_sakit_off_removed).lower()};\nvar isBtnDbUserRemoved = {str(is_btn_db_user_removed).lower()};\nvar isPelayananOrderedInHtml = {str(is_pelayanan_ordered).lower()};\nvar isAdminHeaderInHtml = {str(is_admin_header).lower()};\nvar isAdminOrderedInHtml = {str(is_admin_ordered).lower()};\nvar isTabBtnPayInHtml = {str(is_tab_btn_pay_in_html).lower()};\nvar isPanelPayInHtml = {str(is_panel_pay_in_html).lower()};\nvar isBtnAturLiburRemoved = {str(is_btn_atur_libur_removed).lower()};\nvar isBtnRefreshInHtml = {str(is_btn_refresh_in_html).lower()};\nvar isEmrTitleRenamedInHtml = {str(is_emr_title_renamed).lower()};\nvar isClearPasienBtnInHtml = {str(is_clear_pasien_btn_in_html).lower()};\nvar isTglLargeInHtml = {str(is_tgl_large_in_html).lower()};\nvar isTempatLahirInHtml = {str(is_tempat_lahir_in_html).lower()};\nvar isModalToothTglInHtml = {str(is_modal_tooth_tgl_in_html).lower()};\nvar isPanelRefInHtml = {str(is_panel_ref_in_html).lower()};\nvar isMetodeCashTfOnly = {str(is_metode_cash_tf_only).lower()};\nvar isStatusSplitInHtml = {str(is_status_split_in_html).lower()};\nvar isBoxSplitInHtml = {str(is_box_split_in_html).lower()};\n" + dom_shim + "\n" + all_js + "\n" + test_runner_js
 
 with open(test_harness_file, 'w', encoding='utf-8') as f:
     f.write(full_test_script)

@@ -90,6 +90,7 @@ function getDaftarPasien() {
         catatan: (idCatatan !== -1 && r[idCatatan]) ? String(r[idCatatan]).trim() : "",
         tglDaftar: (idTglDaftar !== -1 && r[idTglDaftar]) ? fDate(r[idTglDaftar]) : ""
       });
+    }
     let finalResult = result.reverse();
     putCacheJson(cacheKey, finalResult, 300);
     return finalResult;
@@ -309,6 +310,7 @@ function simpanPasien(payload) {
     } else {
       sheet.getRange(rowIdx, 1, 1, newRow.length).setValues([newRow]);
       catatLog("Update Pasien", "Memperbarui data pasien: " + payload.namaPasien + " (RM: " + payload.noRm + ")", payload.currentUser);
+    }
     removeCacheKey("INIT_PASIEN_CACHE_V1");
     return {
       success: true,

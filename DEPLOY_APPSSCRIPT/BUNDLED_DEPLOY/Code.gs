@@ -5068,7 +5068,7 @@ function setupAllSpreadsheets() {
       if (shDef.validations) {
         Object.keys(shDef.validations).forEach(colLetter => {
           let listValues = shDef.validations[colLetter];
-          let rule = SpreadsheetApp.newDataValidation().requireValueInList(listValues, true).build();
+          let rule = SpreadsheetApp.newDataValidation().requireValueInList(listValues, true).setAllowInvalid(true).build();
           sheet.getRange(colLetter + "2:" + colLetter + "1000").setDataValidation(rule);
         });
       }
@@ -7517,10 +7517,34 @@ function simpanTarifShift(payload) {
 
     const rowValues = [idAturan, role, foundInSheetData.nama, tipe, s1, s2, gp, ket, status];
 
-    if (foundRow > 1) {
-      sh.getRange(foundRow, 1, 1, rowValues.length).setValues([rowValues]);
-    } else {
-      sh.appendRow(rowValues);
+    // Sinkronkan validasi kolom D (Tipe_Kompensasi) agar mencakup 'Tindakan' dan setAllowInvalid(true)
+    try {
+      const allowedTipe = ["Tindakan", "Uang Harian Shift", "Gaji Bulanan Tetap", "Kombinasi Shift & Tindakan"];
+      const ruleTipe = SpreadsheetApp.newDataValidation()
+        .requireValueInList(allowedTipe, true)
+        .setAllowInvalid(true)
+        .build();
+      sh.getRange("D2:D500").setDataValidation(ruleTipe);
+    } catch (eVal) {
+      try {
+        if (foundRow > 1) sh.getRange(foundRow, 4).clearDataValidations();
+      } catch (eClr) {}
+    }
+
+    try {
+      if (foundRow > 1) {
+        sh.getRange(foundRow, 1, 1, rowValues.length).setValues([rowValues]);
+      } else {
+        sh.appendRow(rowValues);
+      }
+    } catch (eSet) {
+      // Fallback jika validasi sel lama masih menolak: hapus validasi baris tersebut dan ulangi simpan
+      if (foundRow > 1) {
+        sh.getRange(foundRow, 1, 1, rowValues.length).clearDataValidations();
+        sh.getRange(foundRow, 1, 1, rowValues.length).setValues([rowValues]);
+      } else {
+        sh.appendRow(rowValues);
+      }
     }
 
     SpreadsheetApp.flush();
@@ -7942,13 +7966,19 @@ function syncAllUsersToPayrollTarifShift() {
       shTarif.getRange(2, 9, finalRows.length, 1).setHorizontalAlignment("center");
     }
 
-    // Validasi Data Dropdown Status: Aktif / Tidak Aktif
+    // Validasi Data Dropdown Status: Aktif / Tidak Aktif dan Tipe Kompensasi
     try {
       const ruleStatus = SpreadsheetApp.newDataValidation()
         .requireValueInList(["Aktif", "Tidak Aktif"], true)
-        .setAllowInvalid(false)
+        .setAllowInvalid(true)
         .build();
       shTarif.getRange(2, 9, Math.max(50, finalRows.length + 20), 1).setDataValidation(ruleStatus);
+
+      const ruleTipe = SpreadsheetApp.newDataValidation()
+        .requireValueInList(["Tindakan", "Uang Harian Shift", "Gaji Bulanan Tetap", "Kombinasi Shift & Tindakan"], true)
+        .setAllowInvalid(true)
+        .build();
+      shTarif.getRange(2, 4, Math.max(50, finalRows.length + 20), 1).setDataValidation(ruleTipe);
     } catch(eVal) {}
 
     SpreadsheetApp.flush();

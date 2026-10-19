@@ -368,6 +368,14 @@
             : 'bg-amber-100 text-amber-800 border-amber-300';
           let rLow = String(s.role || '').toLowerCase();
           let isNonShift = rLow.includes('admin') || rLow.includes('office');
+          let rBadgeStaff = 'bg-slate-100 text-slate-700 border-slate-300';
+          if (rLow === 'owner' || rLow === 'super user') rBadgeStaff = 'bg-purple-100 text-purple-800 border-purple-300';
+          else if (rLow.includes('spesialis')) rBadgeStaff = 'bg-indigo-100 text-indigo-800 border-indigo-300';
+          else if (rLow.includes('dokter')) rBadgeStaff = 'bg-sky-100 text-sky-800 border-sky-300';
+          else if (rLow.includes('perawat gigi')) rBadgeStaff = 'bg-teal-100 text-teal-800 border-teal-300';
+          else if (rLow.includes('perawat')) rBadgeStaff = 'bg-emerald-100 text-emerald-800 border-emerald-300';
+          else if (rLow.includes('office')) rBadgeStaff = 'bg-rose-100 text-rose-800 border-rose-300';
+          else if (rLow.includes('admin') || rLow.includes('kasir')) rBadgeStaff = 'bg-amber-100 text-amber-900 border-amber-300';
           return `
             <tr class="hover:bg-cyan-50/40 transition-colors">
               <td class="py-3 px-4">
@@ -379,7 +387,7 @@
                 <div class="text-[10px] text-slate-500">${s.catatan || ''}</div>
               </td>
               <td class="py-3 px-3">
-                <span class="px-2.5 py-1 rounded-lg bg-slate-100 font-extrabold text-[11px] text-slate-700">${s.role}</span>
+                <span class="px-2.5 py-1 rounded-lg border font-extrabold text-[11px] shadow-2xs ${rBadgeStaff}">${s.role}</span>
               </td>
               <td class="py-3 px-4 text-right font-black text-slate-800">${fmtRpPayroll(s.gajiPokokBulanan)}</td>
               <td class="py-3 px-3 text-center">
@@ -421,11 +429,20 @@
         let badgeStatus = isAktif
           ? '<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-extrabold text-[10px] border border-emerald-300">Aktif</span>'
           : '<span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 font-bold text-[10px] border border-rose-300">Tidak Aktif</span>';
+        let rLowTarif = (t.role || '').toLowerCase();
+        let rBadgeTarif = 'bg-slate-100 text-slate-700 border-slate-300';
+        if (rLowTarif === 'owner' || rLowTarif === 'super user') rBadgeTarif = 'bg-purple-100 text-purple-800 border-purple-300';
+        else if (rLowTarif.includes('spesialis')) rBadgeTarif = 'bg-indigo-100 text-indigo-800 border-indigo-300';
+        else if (rLowTarif.includes('dokter')) rBadgeTarif = 'bg-sky-100 text-sky-800 border-sky-300';
+        else if (rLowTarif.includes('perawat gigi')) rBadgeTarif = 'bg-teal-100 text-teal-800 border-teal-300';
+        else if (rLowTarif.includes('perawat')) rBadgeTarif = 'bg-emerald-100 text-emerald-800 border-emerald-300';
+        else if (rLowTarif.includes('office')) rBadgeTarif = 'bg-rose-100 text-rose-800 border-rose-300';
+        else if (rLowTarif.includes('admin') || rLowTarif.includes('kasir')) rBadgeTarif = 'bg-amber-100 text-amber-900 border-amber-300';
         return `
         <tr>
           <td class="py-3 px-4 font-mono font-bold text-slate-500 text-[11px]">${t.idAturan}</td>
           <td class="py-3 px-4 font-black text-slate-800">${t.namaPekerja}</td>
-          <td class="py-3 px-3 font-bold text-slate-600">${t.role}</td>
+          <td class="py-3 px-3"><span class="px-2.5 py-0.5 rounded-md border font-extrabold text-[10px] shadow-2xs ${rBadgeTarif}">${t.role}</span></td>
           <td class="py-3 px-3">
             <span class="px-2.5 py-0.5 rounded-lg bg-slate-100 border border-slate-200 font-bold text-[10px] text-slate-700">${t.tipeKompensasi}</span>
           </td>

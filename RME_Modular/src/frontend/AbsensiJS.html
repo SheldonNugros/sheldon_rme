@@ -596,17 +596,23 @@ function renderAbsensiTable() {
     let curAtt = window.AbsensiState.attendanceMap[namaKey];
     let isHadir = (curAtt.status === 'Hadir');
 
-    // Role badge color (high contrast light theme)
-    let rBadge = "bg-slate-100 text-slate-700 border-slate-200";
+    // Role badge color (distinct, high-contrast role colors)
+    let rBadge = "bg-slate-50 text-slate-700 border-slate-300";
     let roleLower = (w.role || "").toLowerCase();
-    if (roleLower.includes("dokter")) {
-      rBadge = "bg-indigo-50 text-indigo-700 border-indigo-200";
+    if (roleLower === "owner" || roleLower === "super user") {
+      rBadge = "bg-purple-50 text-purple-700 border-purple-300";
+    } else if (roleLower.includes("spesialis")) {
+      rBadge = "bg-indigo-50 text-indigo-700 border-indigo-300";
+    } else if (roleLower.includes("dokter")) {
+      rBadge = "bg-sky-50 text-sky-700 border-sky-300";
+    } else if (roleLower.includes("perawat gigi")) {
+      rBadge = "bg-teal-50 text-teal-700 border-teal-300";
     } else if (roleLower.includes("perawat")) {
-      rBadge = "bg-emerald-50 text-emerald-700 border-emerald-200";
-    } else if (roleLower.includes("admin") || roleLower.includes("kasir") || roleLower.includes("office")) {
-      rBadge = "bg-amber-50 text-amber-800 border-amber-200";
-    } else if (roleLower.includes("owner")) {
-      rBadge = "bg-purple-50 text-purple-700 border-purple-200";
+      rBadge = "bg-emerald-50 text-emerald-700 border-emerald-300";
+    } else if (roleLower.includes("office")) {
+      rBadge = "bg-rose-50 text-rose-700 border-rose-300";
+    } else if (roleLower.includes("admin") || roleLower.includes("kasir")) {
+      rBadge = "bg-amber-50 text-amber-800 border-amber-300";
     }
 
     htmlRows += `
@@ -1140,11 +1146,21 @@ function renderRekapBulanan() {
 
   let html = '';
   displayList.forEach((item, idx) => {
+    let rBadgeRekap = "bg-slate-50 text-slate-700 border-slate-300";
+    let rLowRekap = (item.role || "").toLowerCase();
+    if (rLowRekap === "owner" || rLowRekap === "super user") rBadgeRekap = "bg-purple-50 text-purple-700 border-purple-300";
+    else if (rLowRekap.includes("spesialis")) rBadgeRekap = "bg-indigo-50 text-indigo-700 border-indigo-300";
+    else if (rLowRekap.includes("dokter")) rBadgeRekap = "bg-sky-50 text-sky-700 border-sky-300";
+    else if (rLowRekap.includes("perawat gigi")) rBadgeRekap = "bg-teal-50 text-teal-700 border-teal-300";
+    else if (rLowRekap.includes("perawat")) rBadgeRekap = "bg-emerald-50 text-emerald-700 border-emerald-300";
+    else if (rLowRekap.includes("office")) rBadgeRekap = "bg-rose-50 text-rose-700 border-rose-300";
+    else if (rLowRekap.includes("admin") || rLowRekap.includes("kasir")) rBadgeRekap = "bg-amber-50 text-amber-800 border-amber-300";
+
     html += `
       <tr class="transition-colors hover:bg-slate-50">
         <td class="px-4 py-3.5 text-center text-slate-600 font-bold">${idx + 1}</td>
         <td class="px-4 py-3.5 font-bold text-slate-900">${escapeHtml(item.namaPekerja)}</td>
-        <td class="px-4 py-3.5 text-slate-600">${escapeHtml(item.role)}</td>
+        <td class="px-4 py-3.5"><span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold border ${rBadgeRekap}">${escapeHtml(item.role)}</span></td>
         <td class="px-4 py-3.5 text-center font-extrabold text-indigo-700">${item.hariKerja} Hari</td>
         <td class="px-4 py-3.5 text-center font-bold text-amber-700">${item.totalShiftPagi}</td>
         <td class="px-4 py-3.5 text-center font-bold text-indigo-700">${item.totalShiftSore}</td>

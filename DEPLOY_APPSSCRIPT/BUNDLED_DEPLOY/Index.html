@@ -17875,13 +17875,23 @@ function renderTabelUser() {
   }
 
   tbody.innerHTML = filtered.map(u => {
-    let roleBadge = 'bg-slate-100 text-slate-700';
     let rLow = (u.role || '').toLowerCase();
-    if (rLow === 'owner' || rLow === 'super user') roleBadge = 'bg-purple-100 text-purple-700 font-black';
-    else if (rLow.includes('dokter')) roleBadge = 'bg-blue-100 text-blue-700 font-bold';
-    else if (rLow.includes('perawat')) roleBadge = 'bg-teal-100 text-teal-700 font-bold';
-    else if (rLow.includes('office')) roleBadge = 'bg-indigo-100 text-indigo-700 font-bold';
-    else if (rLow.includes('admin') || rLow.includes('kasir')) roleBadge = 'bg-amber-100 text-amber-700 font-bold';
+    let roleBadge = 'bg-slate-100 text-slate-700 border border-slate-300 font-bold';
+    if (rLow === 'owner' || rLow === 'super user') {
+      roleBadge = 'bg-purple-100 text-purple-800 border border-purple-300 font-black';
+    } else if (rLow.includes('spesialis')) {
+      roleBadge = 'bg-indigo-100 text-indigo-800 border border-indigo-300 font-extrabold';
+    } else if (rLow.includes('dokter')) {
+      roleBadge = 'bg-sky-100 text-sky-800 border border-sky-300 font-extrabold';
+    } else if (rLow.includes('perawat gigi')) {
+      roleBadge = 'bg-teal-100 text-teal-800 border border-teal-300 font-extrabold';
+    } else if (rLow.includes('perawat')) {
+      roleBadge = 'bg-emerald-100 text-emerald-800 border border-emerald-300 font-extrabold';
+    } else if (rLow.includes('office')) {
+      roleBadge = 'bg-rose-100 text-rose-800 border border-rose-300 font-extrabold';
+    } else if (rLow.includes('admin') || rLow.includes('kasir')) {
+      roleBadge = 'bg-amber-100 text-amber-900 border border-amber-300 font-extrabold';
+    }
 
     let stRaw = (u.status || 'Aktif').trim();
     let isAktif = (stRaw.toLowerCase() === 'aktif' || stRaw.toLowerCase() === 'active');
@@ -17914,7 +17924,7 @@ function renderTabelUser() {
         <td class="p-3 font-mono text-xs font-bold text-indigo-700">${u.idPekerja || '-'}</td>
         <td class="p-3 font-bold text-slate-800">${u.nama || '-'}</td>
         <td class="p-3 font-mono text-slate-700 text-xs font-semibold">${u.username || '-'}</td>
-        <td class="p-3"><span class="px-2.5 py-1 rounded-lg text-xs ${roleBadge}">${u.role || '-'}</span></td>
+        <td class="p-3"><span class="px-2.5 py-1 rounded-lg text-xs shadow-2xs ${roleBadge}">${u.role || '-'}</span></td>
         <td class="p-3 text-center">${passBadge}</td>
         <td class="p-3 text-center">${statusBadge}</td>
         <td class="p-3 text-slate-600 text-xs">${u.noReg || '-'}</td>
@@ -19623,6 +19633,14 @@ function renderInfoBmhp() {
             : 'bg-amber-100 text-amber-800 border-amber-300';
           let rLow = String(s.role || '').toLowerCase();
           let isNonShift = rLow.includes('admin') || rLow.includes('office');
+          let rBadgeStaff = 'bg-slate-100 text-slate-700 border-slate-300';
+          if (rLow === 'owner' || rLow === 'super user') rBadgeStaff = 'bg-purple-100 text-purple-800 border-purple-300';
+          else if (rLow.includes('spesialis')) rBadgeStaff = 'bg-indigo-100 text-indigo-800 border-indigo-300';
+          else if (rLow.includes('dokter')) rBadgeStaff = 'bg-sky-100 text-sky-800 border-sky-300';
+          else if (rLow.includes('perawat gigi')) rBadgeStaff = 'bg-teal-100 text-teal-800 border-teal-300';
+          else if (rLow.includes('perawat')) rBadgeStaff = 'bg-emerald-100 text-emerald-800 border-emerald-300';
+          else if (rLow.includes('office')) rBadgeStaff = 'bg-rose-100 text-rose-800 border-rose-300';
+          else if (rLow.includes('admin') || rLow.includes('kasir')) rBadgeStaff = 'bg-amber-100 text-amber-900 border-amber-300';
           return `
             <tr class="hover:bg-cyan-50/40 transition-colors">
               <td class="py-3 px-4">
@@ -19634,7 +19652,7 @@ function renderInfoBmhp() {
                 <div class="text-[10px] text-slate-500">${s.catatan || ''}</div>
               </td>
               <td class="py-3 px-3">
-                <span class="px-2.5 py-1 rounded-lg bg-slate-100 font-extrabold text-[11px] text-slate-700">${s.role}</span>
+                <span class="px-2.5 py-1 rounded-lg border font-extrabold text-[11px] shadow-2xs ${rBadgeStaff}">${s.role}</span>
               </td>
               <td class="py-3 px-4 text-right font-black text-slate-800">${fmtRpPayroll(s.gajiPokokBulanan)}</td>
               <td class="py-3 px-3 text-center">
@@ -19676,11 +19694,20 @@ function renderInfoBmhp() {
         let badgeStatus = isAktif
           ? '<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-extrabold text-[10px] border border-emerald-300">Aktif</span>'
           : '<span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 font-bold text-[10px] border border-rose-300">Tidak Aktif</span>';
+        let rLowTarif = (t.role || '').toLowerCase();
+        let rBadgeTarif = 'bg-slate-100 text-slate-700 border-slate-300';
+        if (rLowTarif === 'owner' || rLowTarif === 'super user') rBadgeTarif = 'bg-purple-100 text-purple-800 border-purple-300';
+        else if (rLowTarif.includes('spesialis')) rBadgeTarif = 'bg-indigo-100 text-indigo-800 border-indigo-300';
+        else if (rLowTarif.includes('dokter')) rBadgeTarif = 'bg-sky-100 text-sky-800 border-sky-300';
+        else if (rLowTarif.includes('perawat gigi')) rBadgeTarif = 'bg-teal-100 text-teal-800 border-teal-300';
+        else if (rLowTarif.includes('perawat')) rBadgeTarif = 'bg-emerald-100 text-emerald-800 border-emerald-300';
+        else if (rLowTarif.includes('office')) rBadgeTarif = 'bg-rose-100 text-rose-800 border-rose-300';
+        else if (rLowTarif.includes('admin') || rLowTarif.includes('kasir')) rBadgeTarif = 'bg-amber-100 text-amber-900 border-amber-300';
         return `
         <tr>
           <td class="py-3 px-4 font-mono font-bold text-slate-500 text-[11px]">${t.idAturan}</td>
           <td class="py-3 px-4 font-black text-slate-800">${t.namaPekerja}</td>
-          <td class="py-3 px-3 font-bold text-slate-600">${t.role}</td>
+          <td class="py-3 px-3"><span class="px-2.5 py-0.5 rounded-md border font-extrabold text-[10px] shadow-2xs ${rBadgeTarif}">${t.role}</span></td>
           <td class="py-3 px-3">
             <span class="px-2.5 py-0.5 rounded-lg bg-slate-100 border border-slate-200 font-bold text-[10px] text-slate-700">${t.tipeKompensasi}</span>
           </td>
@@ -20810,17 +20837,23 @@ function renderAbsensiTable() {
     let curAtt = window.AbsensiState.attendanceMap[namaKey];
     let isHadir = (curAtt.status === 'Hadir');
 
-    // Role badge color (high contrast light theme)
-    let rBadge = "bg-slate-100 text-slate-700 border-slate-200";
+    // Role badge color (distinct, high-contrast role colors)
+    let rBadge = "bg-slate-50 text-slate-700 border-slate-300";
     let roleLower = (w.role || "").toLowerCase();
-    if (roleLower.includes("dokter")) {
-      rBadge = "bg-indigo-50 text-indigo-700 border-indigo-200";
+    if (roleLower === "owner" || roleLower === "super user") {
+      rBadge = "bg-purple-50 text-purple-700 border-purple-300";
+    } else if (roleLower.includes("spesialis")) {
+      rBadge = "bg-indigo-50 text-indigo-700 border-indigo-300";
+    } else if (roleLower.includes("dokter")) {
+      rBadge = "bg-sky-50 text-sky-700 border-sky-300";
+    } else if (roleLower.includes("perawat gigi")) {
+      rBadge = "bg-teal-50 text-teal-700 border-teal-300";
     } else if (roleLower.includes("perawat")) {
-      rBadge = "bg-emerald-50 text-emerald-700 border-emerald-200";
-    } else if (roleLower.includes("admin") || roleLower.includes("kasir") || roleLower.includes("office")) {
-      rBadge = "bg-amber-50 text-amber-800 border-amber-200";
-    } else if (roleLower.includes("owner")) {
-      rBadge = "bg-purple-50 text-purple-700 border-purple-200";
+      rBadge = "bg-emerald-50 text-emerald-700 border-emerald-300";
+    } else if (roleLower.includes("office")) {
+      rBadge = "bg-rose-50 text-rose-700 border-rose-300";
+    } else if (roleLower.includes("admin") || roleLower.includes("kasir")) {
+      rBadge = "bg-amber-50 text-amber-800 border-amber-300";
     }
 
     htmlRows += `
@@ -21354,11 +21387,21 @@ function renderRekapBulanan() {
 
   let html = '';
   displayList.forEach((item, idx) => {
+    let rBadgeRekap = "bg-slate-50 text-slate-700 border-slate-300";
+    let rLowRekap = (item.role || "").toLowerCase();
+    if (rLowRekap === "owner" || rLowRekap === "super user") rBadgeRekap = "bg-purple-50 text-purple-700 border-purple-300";
+    else if (rLowRekap.includes("spesialis")) rBadgeRekap = "bg-indigo-50 text-indigo-700 border-indigo-300";
+    else if (rLowRekap.includes("dokter")) rBadgeRekap = "bg-sky-50 text-sky-700 border-sky-300";
+    else if (rLowRekap.includes("perawat gigi")) rBadgeRekap = "bg-teal-50 text-teal-700 border-teal-300";
+    else if (rLowRekap.includes("perawat")) rBadgeRekap = "bg-emerald-50 text-emerald-700 border-emerald-300";
+    else if (rLowRekap.includes("office")) rBadgeRekap = "bg-rose-50 text-rose-700 border-rose-300";
+    else if (rLowRekap.includes("admin") || rLowRekap.includes("kasir")) rBadgeRekap = "bg-amber-50 text-amber-800 border-amber-300";
+
     html += `
       <tr class="transition-colors hover:bg-slate-50">
         <td class="px-4 py-3.5 text-center text-slate-600 font-bold">${idx + 1}</td>
         <td class="px-4 py-3.5 font-bold text-slate-900">${escapeHtml(item.namaPekerja)}</td>
-        <td class="px-4 py-3.5 text-slate-600">${escapeHtml(item.role)}</td>
+        <td class="px-4 py-3.5"><span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold border ${rBadgeRekap}">${escapeHtml(item.role)}</span></td>
         <td class="px-4 py-3.5 text-center font-extrabold text-indigo-700">${item.hariKerja} Hari</td>
         <td class="px-4 py-3.5 text-center font-bold text-amber-700">${item.totalShiftPagi}</td>
         <td class="px-4 py-3.5 text-center font-bold text-indigo-700">${item.totalShiftSore}</td>

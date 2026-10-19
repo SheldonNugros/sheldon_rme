@@ -1949,6 +1949,60 @@ switchMasterUserSubTab('user');
 assert("TKD-7: Panel User Kembali Aktif", !document.getElementById('subpanelMasterUser').classList.contains('hidden'));
 assert("TKD-7: Panel TKD Kembali Tersembunyi", document.getElementById('subpanelMasterTarifKhusus').classList.contains('hidden'));
 
+// 5c. Uji Penyaringan Tindakan Medis Sesuai Role Dokter Penanggung Jawab di Kasir
+const mockSampleTindakan = [
+  { kode: "UMM-0001", nama: "Konsultasi Dokter Gigi", kategori: "Umum", tarif: 50000 },
+  { kode: "DGU-0001", nama: "Penambalan Komposit Light-Cure", kategori: "Dokter Gigi Umum", tarif: 250000 },
+  { kode: "DGU-0002", nama: "Scaling Rahang Atas & Bawah", kategori: "Dokter Gigi Umum", tarif: 300000 },
+  { kode: "DGS-0001", nama: "Perawatan Saluran Akar (PSA) Molar", kategori: "Dokter Gigi Spesialis", tarif: 1500000 },
+  { kode: "DGS-0002", nama: "Odontektomi Gigi Impaksi M3", kategori: "Dokter Gigi Spesialis", tarif: 2500000 }
+];
+
+// Test Dokter Gigi Umum: Hanya tindakan Kategori "Dokter Gigi Umum" + "Umum"
+const tindakanDGU = filterTindakanByRoleDokter(mockSampleTindakan, "Dokter Gigi Umum");
+assert("KASIR-FILTER-1: Dokter Gigi Umum Memuat Tindakan Kategori Dokter Gigi Umum", tindakanDGU.some(t => t.kode === "DGU-0001"));
+assert("KASIR-FILTER-1: Dokter Gigi Umum Memuat Tindakan Kategori Umum", tindakanDGU.some(t => t.kode === "UMM-0001"));
+assert("KASIR-FILTER-1: Dokter Gigi Umum TIDAK Memuat Tindakan Dokter Gigi Spesialis", !tindakanDGU.some(t => t.kode === "DGS-0001"));
+assert("KASIR-FILTER-1: Dokter Gigi Umum TIDAK Memuat Odontektomi", !tindakanDGU.some(t => t.kode === "DGS-0002"));
+
+// Test Dokter Gigi Spesialis: Hanya tindakan Kategori "Dokter Gigi Spesialis" + "Umum"
+const tindakanDGS = filterTindakanByRoleDokter(mockSampleTindakan, "Dokter Gigi Spesialis");
+assert("KASIR-FILTER-2: Dokter Gigi Spesialis Memuat Tindakan Kategori Dokter Gigi Spesialis", tindakanDGS.some(t => t.kode === "DGS-0001"));
+assert("KASIR-FILTER-2: Dokter Gigi Spesialis Memuat Odontektomi", tindakanDGS.some(t => t.kode === "DGS-0002"));
+assert("KASIR-FILTER-2: Dokter Gigi Spesialis Memuat Tindakan Kategori Umum", tindakanDGS.some(t => t.kode === "UMM-0001"));
+assert("KASIR-FILTER-2: Dokter Gigi Spesialis TIDAK Memuat Tindakan Dokter Gigi Umum", !tindakanDGS.some(t => t.kode === "DGU-0001"));
+assert("KASIR-FILTER-2: Dokter Gigi Spesialis TIDAK Memuat Penambalan DGU", !tindakanDGS.some(t => t.kode === "DGU-0002"));
+
+// Test Kategori Umum: Selalu muncul untuk SEMUA dokter
+assert("KASIR-FILTER-3: Kategori Umum (UMM) Muncul untuk Dokter Gigi Umum", tindakanDGU.some(t => t.kategori.toLowerCase() === "umum"));
+assert("KASIR-FILTER-3: Kategori Umum (UMM) Muncul untuk Dokter Gigi Spesialis", tindakanDGS.some(t => t.kategori.toLowerCase() === "umum"));
+
+// Test Update Datalist Kasir saat Dokter Dipilih di UI
+const ksrDokEl = document.getElementById('ksrDokter');
+if (ksrDokEl) {
+  window.KlinikData.tindakan = mockSampleTindakan;
+  window.KlinikData.staff = [
+    { nama: "drg. Regyana Oktavaria", role: "Dokter Gigi Umum" },
+    { nama: "drg. Rahma Yulinda D, Sp. BMM", role: "Dokter Gigi Spesialis" }
+  ];
+  
+  // Pilih Dokter Gigi Umum
+  ksrDokEl.value = "drg. Regyana Oktavaria";
+  updateDatalistTindakan();
+  const dlKasirContentDGU = document.getElementById('dlTindakanKasir')?.innerHTML || '';
+  assert("KASIR-UI-1: Datalist Kasir Berisi Tindakan DGU saat Dokter Gigi Umum Dipilih", dlKasirContentDGU.includes("Penambalan Komposit Light-Cure"));
+  assert("KASIR-UI-1: Datalist Kasir Berisi Tindakan Umum saat Dokter Gigi Umum Dipilih", dlKasirContentDGU.includes("Konsultasi Dokter Gigi"));
+  assert("KASIR-UI-1: Datalist Kasir TIDAK Berisi Tindakan Spesialis saat Dokter Gigi Umum Dipilih", !dlKasirContentDGU.includes("Odontektomi Gigi Impaksi M3"));
+
+  // Ganti ke Dokter Gigi Spesialis
+  ksrDokEl.value = "drg. Rahma Yulinda D, Sp. BMM";
+  updateDatalistTindakan();
+  const dlKasirContentDGS = document.getElementById('dlTindakanKasir')?.innerHTML || '';
+  assert("KASIR-UI-2: Datalist Kasir Berisi Tindakan Spesialis saat Dokter Spesialis Dipilih", dlKasirContentDGS.includes("Odontektomi Gigi Impaksi M3"));
+  assert("KASIR-UI-2: Datalist Kasir Berisi Tindakan Umum saat Dokter Spesialis Dipilih", dlKasirContentDGS.includes("Konsultasi Dokter Gigi"));
+  assert("KASIR-UI-2: Datalist Kasir TIDAK Berisi Tindakan DGU saat Dokter Spesialis Dipilih", !dlKasirContentDGS.includes("Penambalan Komposit Light-Cure"));
+}
+
 // 6. Uji Urutan Navigasi Sidebar Pelayanan Pasien & Administrasi
 assert("SIDEBAR-ORDER-1: Urutan Tombol Pelayanan Pasien Sesuai Spesifikasi (Pasien, EMR, Kasir, Invoice, Surat)", isPelayananOrderedInHtml);
 assert("SIDEBAR-ORDER-2: Label Kelompok Administrasi Berubah Menjadi ADMINISTRASI", isAdminHeaderInHtml);

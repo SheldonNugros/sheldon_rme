@@ -9045,8 +9045,13 @@ function toggleSectionFisik(forceState) {
    let selDokter = document.getElementById('ksrDokter');
    if(selDokter) {
      selDokter.innerHTML = '<option value="">-- Pilih Dokter --</option>';
-     let dokters = window.KlinikData.staff.filter(s => s.role.toLowerCase().includes('dokter gigi'));
-     dokters.forEach(d => { selDokter.innerHTML += `<option value="${d.nama}">${d.nama}</option>`; });
+     let dokters = (window.KlinikData && Array.isArray(window.KlinikData.staff))
+       ? window.KlinikData.staff.filter(s => {
+           let r = String(s.role || '').toLowerCase();
+           return r.includes('dokter gigi umum') || r.includes('dokter gigi spesialis') || r.includes('dokter gigi');
+         })
+       : [];
+     dokters.forEach(d => { selDokter.innerHTML += `<option value="${d.nama}" data-role="${d.role}">${d.nama} (${d.role})</option>`; });
    }
 
 
@@ -9497,41 +9502,132 @@ function toggleSectionFisik(forceState) {
  // ==========================================
  // LOGIKA KASIR (INPUT & HITUNG)
  // ==========================================
+  // Filter Tindakan Berdasarkan Role Dokter Penanggung Jawab:
+  // - Dokter Gigi Umum -> Tindakan Kategori "Dokter Gigi Umum" + Kategori "Umum"
+  // - Dokter Gigi Spesialis -> Tindakan Kategori "Dokter Gigi Spesialis" + Kategori "Umum"
+  // - Kategori "Umum" (Kode UMM) -> Muncul kepada SEMUA dokter
+  function filterTindakanByRoleDokter(allTindakan, roleDokter) {
+    if (!roleDokter) return (allTindakan || []);
+    let role = String(roleDokter).toLowerCase().trim();
+    let isSpesialis = role.includes('spesialis');
+    let isUmum = role.includes('umum') || role.includes('dokter');
+
+    return (allTindakan || []).filter(function(t) {
+      let kat = String(t.kategori || '').toLowerCase().trim();
+      let kod = String(t.kode || '').toUpperCase().trim();
+
+      // 1. Kategori Murni 'Umum' (Kode UMM): Muncul kepada SEMUA dokter
+      let isKategoriUmum = (kat === 'umum') || kod.startsWith('UMM');
+      if (isKategoriUmum) return true;
+
+      // 2. Jika Dokter Gigi Spesialis: Hanya Kategori Dokter Gigi Spesialis (Kode DGS)
+      if (isSpesialis) {
+        return kat.includes('spesialis') || kod.startsWith('DGS');
+      }
+
+      // 3. Jika Dokter Gigi Umum: Hanya Kategori Dokter Gigi Umum (Kode DGU), dan BUKAN spesialis
+      if (isUmum) {
+        let isDGU = kat === 'dokter gigi umum' || kat.includes('gigi umum') || kod.startsWith('DGU');
+        let isDGS = kat.includes('spesialis') || kod.startsWith('DGS');
+        return isDGU && !isDGS;
+      }
+
+      return kat.includes(role);
+    });
+  }
+
+  function validasiBarisTindakanKasir(dokName, roleDokter, filtered) {
+    if (!dokName) return;
+    let rows = document.querySelectorAll('#ksrTbodyTindakan tr.row-tindakan');
+    if (!rows || rows.length === 0) return;
+
+    let validNames = new Set((filtered || []).map(t => t.nama));
+    let invalidItems = [];
+
+    rows.forEach(row => {
+      let inputNama = row.querySelector('.val-nama');
+      if (inputNama && inputNama.value.trim()) {
+        let val = inputNama.value.trim();
+        if (!validNames.has(val)) {
+          invalidItems.push(val);
+          inputNama.classList.add('border-rose-500', 'bg-rose-50/70', 'ring-2', 'ring-rose-200');
+          inputNama.title = `Tindakan "${val}" tidak sesuai dengan role ${roleDokter || 'dokter'}!`;
+        } else {
+          inputNama.classList.remove('border-rose-500', 'bg-rose-50/70', 'ring-2', 'ring-rose-200');
+          inputNama.title = "";
+        }
+      }
+    });
+
+    if (invalidItems.length > 0 && typeof showToast === 'function') {
+      let roleLabel = roleDokter ? ` (${roleDokter})` : '';
+      showToast('warning', `Perhatian: Tindakan "${invalidItems[0]}" tidak termasuk dalam kategori tindakan ${dokName}${roleLabel}.`);
+    }
+  }
+
   function updateDatalistTindakan() {
     let dokEl = document.getElementById('ksrDokter');
     if(!dokEl) return;
     let dokName = dokEl.value, targetRole = "";
-    if (dokName) { let d = window.KlinikData.staff.find(x => x.nama === dokName); if(d) targetRole = d.role.toLowerCase(); }
+    if (dokName && window.KlinikData && Array.isArray(window.KlinikData.staff)) {
+      let d = window.KlinikData.staff.find(x => x.nama === dokName);
+      if (d && d.role) targetRole = d.role;
+    }
+    if (!targetRole && dokEl.selectedIndex >= 0 && dokEl.options[dokEl.selectedIndex]) {
+      targetRole = dokEl.options[dokEl.selectedIndex].getAttribute('data-role') || "";
+    }
    
     let allTindakan = window.KlinikData.tindakan || [];
-    let isUmum = function(t) {
-      let kat = (t.kategori || '').toLowerCase();
-      let kod = (t.kode || '').toUpperCase();
-      return kat.includes('umum') || kod.startsWith('UMM');
-    };
+    let filtered = filterTindakanByRoleDokter(allTindakan, targetRole);
 
-    let filtered = allTindakan;
-    if (targetRole.includes('spesialis')) {
-      filtered = allTindakan.filter(function(t) { return t.kategori.toLowerCase().includes('spesialis') || isUmum(t); });
-    } else if (targetRole.includes('umum') || targetRole === 'dokter') {
-      filtered = allTindakan.filter(function(t) { return isUmum(t); });
-    } else if (targetRole) {
-      filtered = allTindakan.filter(function(t) { return t.kategori.toLowerCase().includes(targetRole) || isUmum(t); });
-    }
-    let dlTindakan = document.getElementById('dlTindakanKasir');
-    if(dlTindakan) dlTindakan.innerHTML = filtered.map(function(t) { return `<option value="${t.nama}">`; }).join('');
+    let htmlOptions = filtered.map(function(t) { return `<option value="${t.nama}">`; }).join('');
+
+    let dlKasir = document.getElementById('dlTindakanKasir');
+    if (dlKasir) dlKasir.innerHTML = htmlOptions;
+
+    let dlList = document.getElementById('listTindakanKasir');
+    if (dlList) dlList.innerHTML = htmlOptions;
+
+    document.querySelectorAll('#ksrTbodyTindakan .val-nama').forEach(input => {
+      input.setAttribute('list', 'dlTindakanKasir');
+    });
+
+    validasiBarisTindakanKasir(dokName, targetRole, filtered);
   }
 
 
  function onInputDatalistChange(el, type) {
    let val = el.value, obj = null;
-   if (type === 'tindakan') obj = window.KlinikData.tindakan.find(x => x.nama === val);
+   if (type === 'tindakan') {
+     obj = (window.KlinikData.tindakan || []).find(x => x.nama === val);
+     let dokEl = document.getElementById('ksrDokter');
+     let dokName = dokEl ? dokEl.value : "";
+     if (obj && dokName) {
+       let targetRole = "";
+       let d = (window.KlinikData.staff || []).find(x => x.nama === dokName);
+       if (d && d.role) targetRole = d.role;
+       if (!targetRole && dokEl.selectedIndex >= 0 && dokEl.options[dokEl.selectedIndex]) {
+         targetRole = dokEl.options[dokEl.selectedIndex].getAttribute('data-role') || "";
+       }
+       let allowed = filterTindakanByRoleDokter([obj], targetRole);
+       if (allowed.length === 0) {
+         if (typeof showToast === 'function') {
+           showToast('warning', `Tindakan "${obj.nama}" (Kategori: ${obj.kategori}) tidak sesuai kompetensi role untuk ${dokName} (${targetRole}).`);
+         }
+         el.classList.add('border-rose-500', 'bg-rose-50/70', 'ring-2', 'ring-rose-200');
+       } else {
+         el.classList.remove('border-rose-500', 'bg-rose-50/70', 'ring-2', 'ring-rose-200');
+       }
+     } else {
+       el.classList.remove('border-rose-500', 'bg-rose-50/70', 'ring-2', 'ring-rose-200');
+     }
+   }
    else if (type === 'obat') obj = window.KlinikData.obat.find(x => x.nama === val);
    else if (type === 'bmhp') obj = window.KlinikData.bmhp.find(x => x.nama === val);
 
    let row = el.closest('tr');
    if (obj) {
-     row.querySelector('.val-harga').value = formatRpKSR(obj.harga || obj.hargaJual || 0);
+     row.querySelector('.val-harga').value = formatRpKSR(obj.harga || obj.hargaJual || obj.tarif || 0);
      el.setAttribute('data-kode', obj.kode || obj.idObat || '');
      el.setAttribute('data-stok', obj.stok !== undefined ? obj.stok : 9999);
      if (type === 'obat' || type === 'bmhp') {
@@ -10052,13 +10148,18 @@ function initKasirDropdowns() {
   if (window.KlinikData && window.KlinikData.staff) {
     // A. Injeksi Dokter
     if (kasirDokter) {
-        let dokters = window.KlinikData.staff.filter(s => s.role.toLowerCase().includes('dokter'));
+        let dokters = (window.KlinikData && Array.isArray(window.KlinikData.staff))
+          ? window.KlinikData.staff.filter(s => {
+              let r = String(s.role || '').toLowerCase();
+              return r.includes('dokter gigi umum') || r.includes('dokter gigi spesialis') || r.includes('dokter gigi');
+            })
+          : [];
         let html = '<option value="" disabled selected>-- Pilih Dokter --</option>';
-        dokters.forEach(d => { html += `<option value="${d.nama}" data-role="${d.role}">${d.nama}</option>`; });
+        dokters.forEach(d => { html += `<option value="${d.nama}" data-role="${d.role}">${d.nama} (${d.role})</option>`; });
         kasirDokter.innerHTML = html;
        
         // Event listener untuk memicu penyaringan "Tindakan" saat dokter dipilih
-        kasirDokter.addEventListener('change', filterTindakanKasir);
+        kasirDokter.addEventListener('change', updateDatalistTindakan);
     }
    
     // B. Injeksi Perawat (Khusus Role Perawat Gigi)
@@ -10076,48 +10177,41 @@ function initKasirDropdowns() {
 }
 
 
-// Logika Pemotongan Pilihan Tindakan Sesuai Role (Kategori Umum / UMM selalu muncul untuk semua role dokter)
+// Logika Pemotongan Pilihan Tindakan Sesuai Role (Delegasikan ke updateDatalistTindakan)
 function filterTindakanKasir(e) {
-  let opt = e.target.options[e.target.selectedIndex];
-  let roleDokter = (opt.getAttribute('data-role') || "").toLowerCase();
- 
-  let allTindakan = window.KlinikData.tindakan || [];
-  let isUmum = function(t) {
-    let kat = (t.kategori || '').toLowerCase();
-    let kod = (t.kode || '').toUpperCase();
-    return kat.includes('umum') || kod.startsWith('UMM');
-  };
-  let filtered = [];
- 
-  if (roleDokter.includes('spesialis')) {
-      // Spesialis: Bisa memilih Spesialis & Umum (UMM)
-      filtered = allTindakan.filter(function(t) { return t.kategori.toLowerCase().includes('spesialis') || isUmum(t); });
-  } else if (roleDokter.includes('umum') || roleDokter === 'dokter') {
-      // Dokter Umum: Bisa memilih kategori Umum (UMM)
-      filtered = allTindakan.filter(function(t) { return isUmum(t); });
-  } else if (roleDokter) {
-      filtered = allTindakan.filter(function(t) { return t.kategori.toLowerCase().includes(roleDokter) || isUmum(t); });
-  } else {
-      filtered = allTindakan;
-  }
- 
-  // Perbarui hanya daftar tindakan
-  renderDatalistKasir(filtered);
+  updateDatalistTindakan();
 }
 
 
 // Membaca Data Mentah menjadi Pilihan Dropdown / Datalist (Otomatis Menempel ke Input)
 function renderDatalistKasir(tindakanTersaring = null) {
-  // A. Tindakan (Terfilter)
-  let listTindakan = tindakanTersaring || window.KlinikData.tindakan || [];
+  // A. Tindakan (Terfilter berdasarkan role dokter yang terpilih)
+  let dokEl = document.getElementById('ksrDokter');
+  let dokName = dokEl ? dokEl.value : "";
+  let targetRole = "";
+  if (dokName && window.KlinikData && Array.isArray(window.KlinikData.staff)) {
+    let d = window.KlinikData.staff.find(x => x.nama === dokName);
+    if (d && d.role) targetRole = d.role;
+  }
+  if (!targetRole && dokEl && dokEl.selectedIndex >= 0 && dokEl.options[dokEl.selectedIndex]) {
+    targetRole = dokEl.options[dokEl.selectedIndex].getAttribute('data-role') || "";
+  }
+
+  let listTindakan = tindakanTersaring || (typeof filterTindakanByRoleDokter === 'function' ? filterTindakanByRoleDokter(window.KlinikData.tindakan || [], targetRole) : (window.KlinikData.tindakan || []));
+  let htmlOpts = listTindakan.map(t => `<option value="${t.nama}">`).join('');
+
   let dlTindakan = document.getElementById('listTindakanKasir');
   if (!dlTindakan) {
       dlTindakan = document.createElement('datalist');
       dlTindakan.id = 'listTindakanKasir';
       document.body.appendChild(dlTindakan);
   }
-  dlTindakan.innerHTML = listTindakan.map(t => `<option value="${t.nama}">`).join('');
-  document.querySelectorAll('input[id*="tindakan"], input[name*="tindakan"]').forEach(el => el.setAttribute('list', 'listTindakanKasir'));
+  dlTindakan.innerHTML = htmlOpts;
+
+  let dlKasir = document.getElementById('dlTindakanKasir');
+  if (dlKasir) dlKasir.innerHTML = htmlOpts;
+
+  document.querySelectorAll('input[id*="tindakan"], input[name*="tindakan"], #ksrTbodyTindakan .val-nama').forEach(el => el.setAttribute('list', 'dlTindakanKasir'));
 
 
   // B. Obat (Dari Master_Obat)
@@ -13485,11 +13579,52 @@ function populateDropdownDokterTKD(selectedNama) {
 }
 window.populateDropdownDokterTKD = populateDropdownDokterTKD;
 
-function populateDropdownTindakanTKD(selectedNama) {
+function filterTindakanByRoleTKD(allTindakan, roleDokter) {
+  if (!roleDokter) return (allTindakan || []);
+  let role = String(roleDokter).toLowerCase().trim();
+  let isSpesialis = role.includes('spesialis');
+  let isUmum = role.includes('umum') || role.includes('dokter');
+
+  return (allTindakan || []).filter(function(t) {
+    let kat = String(t.kategori || '').toLowerCase().trim();
+    let kod = String(t.kode || '').toUpperCase().trim();
+
+    // 1. Kategori Murni 'Umum' (Kode UMM): Muncul kepada SEMUA dokter
+    let isKategoriUmum = (kat === 'umum') || kod.startsWith('UMM');
+    if (isKategoriUmum) return true;
+
+    // 2. Jika Dokter Gigi Spesialis: Hanya Kategori Dokter Gigi Spesialis (Kode DGS)
+    if (isSpesialis) {
+      return kat.includes('spesialis') || kod.startsWith('DGS');
+    }
+
+    // 3. Jika Dokter Gigi Umum: Hanya Kategori Dokter Gigi Umum (Kode DGU), dan BUKAN spesialis
+    if (isUmum) {
+      let isDGU = kat === 'dokter gigi umum' || kat.includes('gigi umum') || kod.startsWith('DGU');
+      let isDGS = kat.includes('spesialis') || kod.startsWith('DGS');
+      return isDGU && !isDGS;
+    }
+
+    return kat.includes(role);
+  });
+}
+window.filterTindakanByRoleTKD = filterTindakanByRoleTKD;
+
+function populateDropdownTindakanTKD(selectedNama, filterRole = null) {
   const select = document.getElementById('tkdTindakan');
   if (!select) return;
 
-  const tindakanList = getDaftarMasterTindakanTKD();
+  let targetRole = filterRole;
+  if (!targetRole) {
+    const selDok = document.getElementById('tkdDokter');
+    if (selDok && selDok.selectedIndex >= 0 && selDok.options[selDok.selectedIndex]) {
+      targetRole = selDok.options[selDok.selectedIndex].getAttribute('data-role') || '';
+    }
+  }
+
+  const allTindakan = getDaftarMasterTindakanTKD();
+  const tindakanList = filterTindakanByRoleTKD(allTindakan, targetRole);
+
   let html = '<option value="">-- Pilih Tindakan Medis --</option>';
   tindakanList.forEach(t => {
     const isSel = (selectedNama && (selectedNama === t.nama || selectedNama === t.kode)) ? 'selected' : '';
@@ -13505,6 +13640,13 @@ function onTkdDokterChange() {
   const sel = document.getElementById('tkdDokter');
   if (!sel) return;
   const opt = sel.options[sel.selectedIndex];
+  const role = (opt && opt.dataset && opt.dataset.role) ? opt.dataset.role : "";
+
+  // Filter ulang dropdown tindakan sesuai role dokter yang dipilih
+  const curTindakan = document.getElementById('tkdTindakan')?.value || "";
+  populateDropdownTindakanTKD(curTindakan, role);
+  onTkdTindakanChange();
+
   if (opt && opt.dataset && opt.dataset.rate && !window._isEditModeTKD) {
     const inputPersen = document.getElementById('tkdPersenJM');
     if (inputPersen && (!inputPersen.value || inputPersen.value === '0')) {
@@ -18965,6 +19107,60 @@ assert("TKD-6: Simulasi Hak Klinik 50% dari Rp 1.000.000 adalah Rp 500.000", doc
 switchMasterUserSubTab('user');
 assert("TKD-7: Panel User Kembali Aktif", !document.getElementById('subpanelMasterUser').classList.contains('hidden'));
 assert("TKD-7: Panel TKD Kembali Tersembunyi", document.getElementById('subpanelMasterTarifKhusus').classList.contains('hidden'));
+
+// 5c. Uji Penyaringan Tindakan Medis Sesuai Role Dokter Penanggung Jawab di Kasir
+const mockSampleTindakan = [
+  { kode: "UMM-0001", nama: "Konsultasi Dokter Gigi", kategori: "Umum", tarif: 50000 },
+  { kode: "DGU-0001", nama: "Penambalan Komposit Light-Cure", kategori: "Dokter Gigi Umum", tarif: 250000 },
+  { kode: "DGU-0002", nama: "Scaling Rahang Atas & Bawah", kategori: "Dokter Gigi Umum", tarif: 300000 },
+  { kode: "DGS-0001", nama: "Perawatan Saluran Akar (PSA) Molar", kategori: "Dokter Gigi Spesialis", tarif: 1500000 },
+  { kode: "DGS-0002", nama: "Odontektomi Gigi Impaksi M3", kategori: "Dokter Gigi Spesialis", tarif: 2500000 }
+];
+
+// Test Dokter Gigi Umum: Hanya tindakan Kategori "Dokter Gigi Umum" + "Umum"
+const tindakanDGU = filterTindakanByRoleDokter(mockSampleTindakan, "Dokter Gigi Umum");
+assert("KASIR-FILTER-1: Dokter Gigi Umum Memuat Tindakan Kategori Dokter Gigi Umum", tindakanDGU.some(t => t.kode === "DGU-0001"));
+assert("KASIR-FILTER-1: Dokter Gigi Umum Memuat Tindakan Kategori Umum", tindakanDGU.some(t => t.kode === "UMM-0001"));
+assert("KASIR-FILTER-1: Dokter Gigi Umum TIDAK Memuat Tindakan Dokter Gigi Spesialis", !tindakanDGU.some(t => t.kode === "DGS-0001"));
+assert("KASIR-FILTER-1: Dokter Gigi Umum TIDAK Memuat Odontektomi", !tindakanDGU.some(t => t.kode === "DGS-0002"));
+
+// Test Dokter Gigi Spesialis: Hanya tindakan Kategori "Dokter Gigi Spesialis" + "Umum"
+const tindakanDGS = filterTindakanByRoleDokter(mockSampleTindakan, "Dokter Gigi Spesialis");
+assert("KASIR-FILTER-2: Dokter Gigi Spesialis Memuat Tindakan Kategori Dokter Gigi Spesialis", tindakanDGS.some(t => t.kode === "DGS-0001"));
+assert("KASIR-FILTER-2: Dokter Gigi Spesialis Memuat Odontektomi", tindakanDGS.some(t => t.kode === "DGS-0002"));
+assert("KASIR-FILTER-2: Dokter Gigi Spesialis Memuat Tindakan Kategori Umum", tindakanDGS.some(t => t.kode === "UMM-0001"));
+assert("KASIR-FILTER-2: Dokter Gigi Spesialis TIDAK Memuat Tindakan Dokter Gigi Umum", !tindakanDGS.some(t => t.kode === "DGU-0001"));
+assert("KASIR-FILTER-2: Dokter Gigi Spesialis TIDAK Memuat Penambalan DGU", !tindakanDGS.some(t => t.kode === "DGU-0002"));
+
+// Test Kategori Umum: Selalu muncul untuk SEMUA dokter
+assert("KASIR-FILTER-3: Kategori Umum (UMM) Muncul untuk Dokter Gigi Umum", tindakanDGU.some(t => t.kategori.toLowerCase() === "umum"));
+assert("KASIR-FILTER-3: Kategori Umum (UMM) Muncul untuk Dokter Gigi Spesialis", tindakanDGS.some(t => t.kategori.toLowerCase() === "umum"));
+
+// Test Update Datalist Kasir saat Dokter Dipilih di UI
+const ksrDokEl = document.getElementById('ksrDokter');
+if (ksrDokEl) {
+  window.KlinikData.tindakan = mockSampleTindakan;
+  window.KlinikData.staff = [
+    { nama: "drg. Regyana Oktavaria", role: "Dokter Gigi Umum" },
+    { nama: "drg. Rahma Yulinda D, Sp. BMM", role: "Dokter Gigi Spesialis" }
+  ];
+  
+  // Pilih Dokter Gigi Umum
+  ksrDokEl.value = "drg. Regyana Oktavaria";
+  updateDatalistTindakan();
+  const dlKasirContentDGU = document.getElementById('dlTindakanKasir')?.innerHTML || '';
+  assert("KASIR-UI-1: Datalist Kasir Berisi Tindakan DGU saat Dokter Gigi Umum Dipilih", dlKasirContentDGU.includes("Penambalan Komposit Light-Cure"));
+  assert("KASIR-UI-1: Datalist Kasir Berisi Tindakan Umum saat Dokter Gigi Umum Dipilih", dlKasirContentDGU.includes("Konsultasi Dokter Gigi"));
+  assert("KASIR-UI-1: Datalist Kasir TIDAK Berisi Tindakan Spesialis saat Dokter Gigi Umum Dipilih", !dlKasirContentDGU.includes("Odontektomi Gigi Impaksi M3"));
+
+  // Ganti ke Dokter Gigi Spesialis
+  ksrDokEl.value = "drg. Rahma Yulinda D, Sp. BMM";
+  updateDatalistTindakan();
+  const dlKasirContentDGS = document.getElementById('dlTindakanKasir')?.innerHTML || '';
+  assert("KASIR-UI-2: Datalist Kasir Berisi Tindakan Spesialis saat Dokter Spesialis Dipilih", dlKasirContentDGS.includes("Odontektomi Gigi Impaksi M3"));
+  assert("KASIR-UI-2: Datalist Kasir Berisi Tindakan Umum saat Dokter Spesialis Dipilih", dlKasirContentDGS.includes("Konsultasi Dokter Gigi"));
+  assert("KASIR-UI-2: Datalist Kasir TIDAK Berisi Tindakan DGU saat Dokter Spesialis Dipilih", !dlKasirContentDGS.includes("Penambalan Komposit Light-Cure"));
+}
 
 // 6. Uji Urutan Navigasi Sidebar Pelayanan Pasien & Administrasi
 assert("SIDEBAR-ORDER-1: Urutan Tombol Pelayanan Pasien Sesuai Spesifikasi (Pasien, EMR, Kasir, Invoice, Surat)", isPelayananOrderedInHtml);

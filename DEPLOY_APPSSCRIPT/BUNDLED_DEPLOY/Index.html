@@ -14820,8 +14820,50 @@ function toggleSectionFisik(forceState) {
   }
 
 
- function onInputDatalistChange(el, type) {
+  function clearKasirRowInput(btn, type) {
+    let row = btn.closest('tr');
+    if (!row) return;
+    let inputNama = row.querySelector('.val-nama');
+    if (inputNama) {
+      inputNama.value = '';
+      inputNama.removeAttribute('data-kode');
+      inputNama.removeAttribute('data-stok');
+      inputNama.classList.remove('border-rose-500', 'bg-rose-50/70', 'ring-2', 'ring-rose-200');
+    }
+    let hargaInput = row.querySelector('.val-harga');
+    if (hargaInput) hargaInput.value = '0';
+
+    let laborInput = row.querySelector('.val-labor');
+    if (laborInput) laborInput.value = '0';
+
+    if (type === 'tindakan') {
+      let infoLabel = row.querySelector('.val-info-tindakan');
+      if (infoLabel) {
+        infoLabel.innerHTML = '';
+        infoLabel.className = 'val-info-tindakan text-[10px] font-bold block mt-1';
+      }
+    } else if (type === 'obat' || type === 'bmhp') {
+      let stokLabel = row.querySelector('.val-stok-label');
+      if (stokLabel) {
+        stokLabel.innerText = '';
+        stokLabel.className = 'val-stok-label text-[10px] font-bold block mt-1';
+      }
+    }
+
+    let qtyInput = row.querySelector('.val-qty');
+    if (qtyInput) {
+      qtyInput.classList.remove('border-rose-500', 'bg-rose-50', 'text-rose-600', 'font-black');
+    }
+
+    hitungRowKSR(row, type);
+    hitungGrandTotalSemua();
+    if (inputNama) inputNama.focus();
+  }
+
+
+  function onInputDatalistChange(el, type) {
    let val = el.value, obj = null;
+   let row = el.closest('tr');
    if (type === 'tindakan') {
      obj = (window.KlinikData.tindakan || []).find(x => x.nama === val);
      let dokEl = document.getElementById('ksrDokter');
@@ -14845,14 +14887,26 @@ function toggleSectionFisik(forceState) {
      } else {
        el.classList.remove('border-rose-500', 'bg-rose-50/70', 'ring-2', 'ring-rose-200');
      }
+
+     // Update preview keterangan & harga tindakan di bawah input
+     let infoLabel = row ? row.querySelector('.val-info-tindakan') : null;
+     if (infoLabel) {
+       if (obj) {
+         let labBadge = (obj.perluLab === 'Ya' || obj.labor === 'Ya') ? ' • 🔬 Lab: Ya' : ' • Lab: Tidak';
+         infoLabel.innerHTML = `🏷️ <span class="font-black text-indigo-900">[${obj.kode || obj.id || '-'}]</span> • Tarif: <span class="font-black text-indigo-900">Rp ${formatRpKSR(obj.tarif || obj.harga || 0)}</span> • <span class="text-indigo-800">${obj.kategori || 'Umum'}</span>${labBadge}`;
+         infoLabel.className = 'val-info-tindakan text-[10px] font-semibold block mt-1.5 px-2.5 py-1 bg-indigo-50/90 border border-indigo-200/80 rounded-lg text-indigo-800 shadow-2xs transition-all';
+       } else {
+         infoLabel.innerHTML = '';
+         infoLabel.className = 'val-info-tindakan text-[10px] font-bold block mt-1';
+       }
+     }
    }
    else if (type === 'obat') obj = window.KlinikData.obat.find(x => x.nama === val);
    else if (type === 'bmhp') obj = window.KlinikData.bmhp.find(x => x.nama === val);
 
-   let row = el.closest('tr');
    if (obj) {
      row.querySelector('.val-harga').value = formatRpKSR(obj.harga || obj.hargaJual || obj.tarif || 0);
-     el.setAttribute('data-kode', obj.kode || obj.idObat || '');
+     el.setAttribute('data-kode', obj.kode || obj.idObat || obj.id || '');
      el.setAttribute('data-stok', obj.stok !== undefined ? obj.stok : 9999);
      if (type === 'obat' || type === 'bmhp') {
        let stokLabel = row.querySelector('.val-stok-label');
@@ -14865,8 +14919,16 @@ function toggleSectionFisik(forceState) {
      row.querySelector('.val-harga').value = '0';
      el.removeAttribute('data-kode');
      el.removeAttribute('data-stok');
-     let stokLabel = row.querySelector('.val-stok-label');
-     if (stokLabel) stokLabel.innerText = '';
+     if (type === 'obat' || type === 'bmhp') {
+       let stokLabel = row.querySelector('.val-stok-label');
+       if (stokLabel) stokLabel.innerText = '';
+     } else if (type === 'tindakan') {
+       let infoLabel = row.querySelector('.val-info-tindakan');
+       if (infoLabel) {
+         infoLabel.innerHTML = '';
+         infoLabel.className = 'val-info-tindakan text-[10px] font-bold block mt-1';
+       }
+     }
    }
    hitungRowKSR(row, type);
  }
@@ -14922,27 +14984,27 @@ function toggleSectionFisik(forceState) {
 
 
  function addKasirTindakan() {
-   let tb = document.getElementById('ksrTbodyTindakan');
-   let tr = document.createElement('tr'); tr.className = "hover:bg-slate-50/80 transition-colors border-b border-slate-100 row-tindakan";
-   tr.innerHTML = `<td class="p-2.5"><input type="text" list="dlTindakanKasir" onchange="onInputDatalistChange(this, 'tindakan')" placeholder="Ketik / Cari Tindakan..." class="val-nama w-full px-3 py-2 bg-white border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 rounded-xl text-xs font-bold text-slate-800 outline-none shadow-2xs"></td><td class="p-2.5"><input type="text" readonly class="val-harga w-full px-3 py-2 bg-slate-100/90 border border-slate-200 rounded-xl text-right font-bold text-slate-700 text-xs outline-none" value="0"></td><td class="p-2.5"><input type="text" maxlength="2" value="1" oninput="this.value=this.value.replace(/[^0-9]/g,''); hitungRowKSR(this.closest('tr'), 'tindakan')" class="val-qty w-full px-2 py-2 bg-white border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 rounded-xl text-center font-black text-slate-800 text-xs outline-none shadow-2xs"></td><td class="p-2.5"><input type="text" value="0" oninput="autoFormatUang(this); hitungRowKSR(this.closest('tr'), 'tindakan')" class="val-labor w-full px-3 py-2 bg-white border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 rounded-xl text-right font-semibold text-slate-800 text-xs outline-none shadow-2xs"></td><td class="p-2.5"><input type="text" maxlength="3" value="0" oninput="this.value=this.value.replace(/[^0-9]/g,''); hitungRowKSR(this.closest('tr'), 'tindakan')" class="val-disc w-full px-2 py-2 bg-white border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 rounded-xl text-center font-bold text-slate-800 text-xs outline-none shadow-2xs"></td><td class="p-2.5"><input type="text" readonly class="val-grand w-full px-3 py-2 bg-indigo-50/80 border border-indigo-200 rounded-xl text-right font-black text-indigo-800 text-xs outline-none" value="0"></td><td class="p-2.5"><select class="val-perawat w-full px-3 py-2 bg-white border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 rounded-xl text-xs font-medium text-slate-700 outline-none cursor-pointer shadow-2xs">${optPerawatKSR}</select></td><td class="p-2.5 text-center"><button type="button" onclick="this.closest('tr').remove(); hitungGrandTotalSemua();" title="Hapus baris tindakan" class="w-9 h-9 bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white rounded-xl font-black text-xs flex items-center justify-center transition-all cursor-pointer shadow-2xs border border-rose-200 mx-auto">✕</button></td>`;
-   tb.appendChild(tr);
- }
+    let tb = document.getElementById('ksrTbodyTindakan');
+    let tr = document.createElement('tr'); tr.className = "hover:bg-slate-50/80 transition-colors border-b border-slate-100 row-tindakan";
+    tr.innerHTML = `<td class="p-2.5"><div class="relative w-full"><input type="text" list="dlTindakanKasir" onchange="onInputDatalistChange(this, 'tindakan')" placeholder="Ketik / Cari Tindakan..." class="val-nama w-full pl-3 pr-8 py-2 bg-white border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 rounded-xl text-xs font-bold text-slate-800 outline-none shadow-2xs"><button type="button" onclick="clearKasirRowInput(this, 'tindakan')" title="Kosongkan isian tindakan" class="btn-clear-val absolute right-2 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-full transition-colors font-bold text-xs cursor-pointer">✕</button></div><span class="val-info-tindakan text-[10px] font-bold block mt-1"></span></td><td class="p-2.5"><input type="text" readonly class="val-harga w-full px-3 py-2 bg-slate-100/90 border border-slate-200 rounded-xl text-right font-bold text-slate-700 text-xs outline-none" value="0"></td><td class="p-2.5"><input type="text" maxlength="2" value="1" oninput="this.value=this.value.replace(/[^0-9]/g,''); hitungRowKSR(this.closest('tr'), 'tindakan')" class="val-qty w-full px-2 py-2 bg-white border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 rounded-xl text-center font-black text-slate-800 text-xs outline-none shadow-2xs"></td><td class="p-2.5"><input type="text" value="0" oninput="autoFormatUang(this); hitungRowKSR(this.closest('tr'), 'tindakan')" class="val-labor w-full px-3 py-2 bg-white border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 rounded-xl text-right font-semibold text-slate-800 text-xs outline-none shadow-2xs"></td><td class="p-2.5"><input type="text" maxlength="3" value="0" oninput="this.value=this.value.replace(/[^0-9]/g,''); hitungRowKSR(this.closest('tr'), 'tindakan')" class="val-disc w-full px-2 py-2 bg-white border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 rounded-xl text-center font-bold text-slate-800 text-xs outline-none shadow-2xs"></td><td class="p-2.5"><input type="text" readonly class="val-grand w-full px-3 py-2 bg-indigo-50/80 border border-indigo-200 rounded-xl text-right font-black text-indigo-800 text-xs outline-none" value="0"></td><td class="p-2.5"><select class="val-perawat w-full px-3 py-2 bg-white border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 rounded-xl text-xs font-medium text-slate-700 outline-none cursor-pointer shadow-2xs">${optPerawatKSR}</select></td><td class="p-2.5 text-center"><button type="button" onclick="this.closest('tr').remove(); hitungGrandTotalSemua();" title="Hapus baris tindakan" class="w-9 h-9 bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white rounded-xl font-black text-xs flex items-center justify-center transition-all cursor-pointer shadow-2xs border border-rose-200 mx-auto">✕</button></td>`;
+    tb.appendChild(tr);
+  }
 
 
  function addKasirObat() {
-   let tb = document.getElementById('ksrTbodyObat');
-   let tr = document.createElement('tr'); tr.className = "hover:bg-slate-50/80 transition-colors border-b border-slate-100 row-obat";
-   tr.innerHTML = `<td class="p-2.5"><input type="text" list="dlObatKasir" onchange="onInputDatalistChange(this, 'obat')" placeholder="Ketik / Cari Obat..." class="val-nama w-full px-3 py-2 bg-white border border-slate-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 rounded-xl text-xs font-bold text-slate-800 outline-none shadow-2xs"><span class="val-stok-label text-[10px] font-bold block mt-1"></span></td><td class="p-2.5"><input type="text" readonly class="val-harga w-full px-3 py-2 bg-slate-100/90 border border-slate-200 rounded-xl text-right font-bold text-slate-700 text-xs outline-none" value="0"></td><td class="p-2.5"><input type="text" maxlength="2" value="1" oninput="this.value=this.value.replace(/[^0-9]/g,''); hitungRowKSR(this.closest('tr'), 'obat')" class="val-qty w-full px-2 py-2 bg-white border border-slate-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 rounded-xl text-center font-black text-slate-800 text-xs outline-none shadow-2xs"></td><td class="p-2.5"><input type="text" maxlength="3" value="0" oninput="this.value=this.value.replace(/[^0-9]/g,''); hitungRowKSR(this.closest('tr'), 'obat')" class="val-disc w-full px-2 py-2 bg-white border border-slate-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 rounded-xl text-center font-bold text-slate-800 text-xs outline-none shadow-2xs"></td><td class="p-2.5"><input type="text" readonly class="val-grand w-full px-3 py-2 bg-emerald-50/80 border border-emerald-200 rounded-xl text-right font-black text-emerald-800 text-xs outline-none" value="0"></td><td class="p-2.5 text-center"><button type="button" onclick="this.closest('tr').remove(); hitungGrandTotalSemua();" title="Hapus baris obat" class="w-9 h-9 bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white rounded-xl font-black text-xs flex items-center justify-center transition-all cursor-pointer shadow-2xs border border-rose-200 mx-auto">✕</button></td>`;
-   tb.appendChild(tr);
- }
+    let tb = document.getElementById('ksrTbodyObat');
+    let tr = document.createElement('tr'); tr.className = "hover:bg-slate-50/80 transition-colors border-b border-slate-100 row-obat";
+    tr.innerHTML = `<td class="p-2.5"><div class="relative w-full"><input type="text" list="dlObatKasir" onchange="onInputDatalistChange(this, 'obat')" placeholder="Ketik / Cari Obat..." class="val-nama w-full pl-3 pr-8 py-2 bg-white border border-slate-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 rounded-xl text-xs font-bold text-slate-800 outline-none shadow-2xs"><button type="button" onclick="clearKasirRowInput(this, 'obat')" title="Kosongkan isian obat" class="btn-clear-val absolute right-2 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-full transition-colors font-bold text-xs cursor-pointer">✕</button></div><span class="val-stok-label text-[10px] font-bold block mt-1"></span></td><td class="p-2.5"><input type="text" readonly class="val-harga w-full px-3 py-2 bg-slate-100/90 border border-slate-200 rounded-xl text-right font-bold text-slate-700 text-xs outline-none" value="0"></td><td class="p-2.5"><input type="text" maxlength="2" value="1" oninput="this.value=this.value.replace(/[^0-9]/g,''); hitungRowKSR(this.closest('tr'), 'obat')" class="val-qty w-full px-2 py-2 bg-white border border-slate-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 rounded-xl text-center font-black text-slate-800 text-xs outline-none shadow-2xs"></td><td class="p-2.5"><input type="text" maxlength="3" value="0" oninput="this.value=this.value.replace(/[^0-9]/g,''); hitungRowKSR(this.closest('tr'), 'obat')" class="val-disc w-full px-2 py-2 bg-white border border-slate-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 rounded-xl text-center font-bold text-slate-800 text-xs outline-none shadow-2xs"></td><td class="p-2.5"><input type="text" readonly class="val-grand w-full px-3 py-2 bg-emerald-50/80 border border-emerald-200 rounded-xl text-right font-black text-emerald-800 text-xs outline-none" value="0"></td><td class="p-2.5 text-center"><button type="button" onclick="this.closest('tr').remove(); hitungGrandTotalSemua();" title="Hapus baris obat" class="w-9 h-9 bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white rounded-xl font-black text-xs flex items-center justify-center transition-all cursor-pointer shadow-2xs border border-rose-200 mx-auto">✕</button></td>`;
+    tb.appendChild(tr);
+  }
 
 
  function addKasirBMHP() {
-   let tb = document.getElementById('ksrTbodyBMHP');
-   let tr = document.createElement('tr'); tr.className = "hover:bg-slate-50/80 transition-colors border-b border-slate-100 row-bmhp";
-   tr.innerHTML = `<td class="p-2.5"><input type="text" list="dlBMHPKasir" onchange="onInputDatalistChange(this, 'bmhp')" placeholder="Ketik / Cari BMHP..." class="val-nama w-full px-3 py-2 bg-white border border-slate-300 focus:border-amber-500 focus:ring-2 focus:ring-amber-100 rounded-xl text-xs font-bold text-slate-800 outline-none shadow-2xs"><span class="val-stok-label text-[10px] font-bold block mt-1"></span></td><td class="p-2.5"><input type="text" readonly class="val-harga w-full px-3 py-2 bg-slate-100/90 border border-slate-200 rounded-xl text-right font-bold text-slate-700 text-xs outline-none" value="0"></td><td class="p-2.5"><input type="text" maxlength="2" value="1" oninput="this.value=this.value.replace(/[^0-9]/g,''); hitungRowKSR(this.closest('tr'), 'bmhp')" class="val-qty w-full px-2 py-2 bg-white border border-slate-300 focus:border-amber-500 focus:ring-2 focus:ring-amber-100 rounded-xl text-center font-black text-slate-800 text-xs outline-none shadow-2xs"></td><td class="p-2.5"><input type="text" maxlength="3" value="0" oninput="this.value=this.value.replace(/[^0-9]/g,''); hitungRowKSR(this.closest('tr'), 'bmhp')" class="val-disc w-full px-2 py-2 bg-white border border-slate-300 focus:border-amber-500 focus:ring-2 focus:ring-amber-100 rounded-xl text-center font-bold text-slate-800 text-xs outline-none shadow-2xs"></td><td class="p-2.5"><input type="text" readonly class="val-grand w-full px-3 py-2 bg-amber-50/80 border border-amber-200 rounded-xl text-right font-black text-amber-800 text-xs outline-none" value="0"></td><td class="p-2.5 text-center"><button type="button" onclick="this.closest('tr').remove(); hitungGrandTotalSemua();" title="Hapus baris BMHP" class="w-9 h-9 bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white rounded-xl font-black text-xs flex items-center justify-center transition-all cursor-pointer shadow-2xs border border-rose-200 mx-auto">✕</button></td>`;
-   tb.appendChild(tr);
- }
+    let tb = document.getElementById('ksrTbodyBMHP');
+    let tr = document.createElement('tr'); tr.className = "hover:bg-slate-50/80 transition-colors border-b border-slate-100 row-bmhp";
+    tr.innerHTML = `<td class="p-2.5"><div class="relative w-full"><input type="text" list="dlBMHPKasir" onchange="onInputDatalistChange(this, 'bmhp')" placeholder="Ketik / Cari BMHP..." class="val-nama w-full pl-3 pr-8 py-2 bg-white border border-slate-300 focus:border-amber-500 focus:ring-2 focus:ring-amber-100 rounded-xl text-xs font-bold text-slate-800 outline-none shadow-2xs"><button type="button" onclick="clearKasirRowInput(this, 'bmhp')" title="Kosongkan isian BMHP" class="btn-clear-val absolute right-2 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-full transition-colors font-bold text-xs cursor-pointer">✕</button></div><span class="val-stok-label text-[10px] font-bold block mt-1"></span></td><td class="p-2.5"><input type="text" readonly class="val-harga w-full px-3 py-2 bg-slate-100/90 border border-slate-200 rounded-xl text-right font-bold text-slate-700 text-xs outline-none" value="0"></td><td class="p-2.5"><input type="text" maxlength="2" value="1" oninput="this.value=this.value.replace(/[^0-9]/g,''); hitungRowKSR(this.closest('tr'), 'bmhp')" class="val-qty w-full px-2 py-2 bg-white border border-slate-300 focus:border-amber-500 focus:ring-2 focus:ring-amber-100 rounded-xl text-center font-black text-slate-800 text-xs outline-none shadow-2xs"></td><td class="p-2.5"><input type="text" maxlength="3" value="0" oninput="this.value=this.value.replace(/[^0-9]/g,''); hitungRowKSR(this.closest('tr'), 'bmhp')" class="val-disc w-full px-2 py-2 bg-white border border-slate-300 focus:border-amber-500 focus:ring-2 focus:ring-amber-100 rounded-xl text-center font-bold text-slate-800 text-xs outline-none shadow-2xs"></td><td class="p-2.5"><input type="text" readonly class="val-grand w-full px-3 py-2 bg-amber-50/80 border border-amber-200 rounded-xl text-right font-black text-amber-800 text-xs outline-none" value="0"></td><td class="p-2.5 text-center"><button type="button" onclick="this.closest('tr').remove(); hitungGrandTotalSemua();" title="Hapus baris BMHP" class="w-9 h-9 bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white rounded-xl font-black text-xs flex items-center justify-center transition-all cursor-pointer shadow-2xs border border-rose-200 mx-auto">✕</button></td>`;
+    tb.appendChild(tr);
+  }
 
 
  function resetFormBilling() {

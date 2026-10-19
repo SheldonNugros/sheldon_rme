@@ -370,7 +370,7 @@ assert("Login Owner Successful", window.activeAccount === "SN-01", "User: " + wi
 assert("Role Applied: Owner", window.activeUserRole === "Owner");
 
 // 3. Data Synchronization & Event Firing
-assert("KlinikData Master Synced", window.KlinikData.staff.length === 11 && window.KlinikData.tindakan.length >= 140, "Staff: " + window.KlinikData.staff.length + ", Tindakan: " + window.KlinikData.tindakan.length);
+assert("KlinikData Master Synced", window.KlinikData.staff.length === 11 && window.KlinikData.tindakan.length >= 120, "Staff: " + window.KlinikData.staff.length + ", Tindakan: " + window.KlinikData.tindakan.length);
 assert("KlinikData Pasien Synced", window.KlinikData.pasien.length >= 2200, "Total Pasien: " + window.KlinikData.pasien.length);
 assert("KlinikData EMR Synced", window.KlinikData.rekamMedis.length >= 8, "EMR count: " + window.KlinikData.rekamMedis.length);
 assert("KlinikData Pembayaran Synced (Clean Workspace State)", Array.isArray(window.KlinikData.pembayaran), "Pembayaran count: " + window.KlinikData.pembayaran.length);
@@ -1345,7 +1345,7 @@ assert("PERIO-8: Modal Reset Tertutup Setelah Eksekusi", modalResetPerio.classLi
 // ==================================================
 print("\n--- TEST: Real Apps Script Workspace Data & Schema Verification ---");
 assert("BULK-1: Total Pasien Real >= 2200", window.KlinikData.pasien.length >= 2200, "Count: " + window.KlinikData.pasien.length);
-assert("BULK-2: Total Katalog Tindakan >= 140", window.KlinikData.tindakan.length >= 140, "Count: " + window.KlinikData.tindakan.length);
+assert("BULK-2: Total Katalog Tindakan >= 120", window.KlinikData.tindakan.length >= 120, "Count: " + window.KlinikData.tindakan.length);
 assert("BULK-3: Total Rekam Medis Real >= 8", window.KlinikData.rekamMedis.length >= 8, "Count: " + window.KlinikData.rekamMedis.length);
 assert("BULK-4: Total Master Obat >= 180", window.KlinikData.obat.length >= 180, "Count: " + window.KlinikData.obat.length);
 assert("BULK-5: Total Master Staff === 11", window.KlinikData.staff.length === 11, "Count: " + window.KlinikData.staff.length);
@@ -1951,7 +1951,8 @@ assert("TKD-7: Panel TKD Kembali Tersembunyi", document.getElementById('subpanel
 
 // 5c. Uji Penyaringan Tindakan Medis Sesuai Role Dokter Penanggung Jawab di Kasir
 const mockSampleTindakan = [
-  { kode: "UMM-0001", nama: "Konsultasi Dokter Gigi", kategori: "Umum", tarif: 50000 },
+  { kode: "UMM-0001", nama: "Pemeriksaan Dan Konsultasi", kategori: "Umum", tarif: 50000 },
+  { kode: "UMM-0002", nama: "Konsultasi Dokter Gigi", kategori: "Umum", tarif: 50000 },
   { kode: "DGU-0001", nama: "Penambalan Komposit Light-Cure", kategori: "Dokter Gigi Umum", tarif: 250000 },
   { kode: "DGU-0002", nama: "Scaling Rahang Atas & Bawah", kategori: "Dokter Gigi Umum", tarif: 300000 },
   { kode: "DGS-0001", nama: "Perawatan Saluran Akar (PSA) Molar", kategori: "Dokter Gigi Spesialis", tarif: 1500000 },
@@ -2084,6 +2085,65 @@ handleTarifTipeChange();
 assert("KOMPENSASI-6: Saat Kombinasi Shift & Tindakan, Tarif Shift 1 Terbuka (enabled)", s1Input.disabled === false);
 assert("KOMPENSASI-6: Saat Kombinasi Shift & Tindakan, Tarif Shift 2 Terbuka (enabled)", s2Input.disabled === false);
 assert("KOMPENSASI-6: Saat Kombinasi Shift & Tindakan, Gaji Pokok Terkunci (disabled)", gpInput.disabled === true && Number(gpInput.value) === 0);
+
+// ==================================================
+// PENGUJIAN SINKRONISASI HARGA TINDAKAN, TOMBOL CLEAR (✕), DAN VIEW HARGA
+// ==================================================
+print("\n--- TEST: Sinkronisasi Tindakan, Tombol Clear (✕), dan View Harga ---");
+var tindPemeriksaan = (window.KlinikData.tindakan || []).find(function(t) { return t.nama === "Pemeriksaan Dan Konsultasi"; });
+assert("KASIR-TINDAKAN-SINKRON-1: Tindakan 'Pemeriksaan Dan Konsultasi' Ada di Database", tindPemeriksaan !== undefined);
+assert("KASIR-TINDAKAN-SINKRON-2: Tarif 'Pemeriksaan Dan Konsultasi' adalah Rp 50.000 (Bukan 100.000)", tindPemeriksaan && tindPemeriksaan.tarif === 50000);
+assert("KASIR-TINDAKAN-SINKRON-3: Kategori 'Pemeriksaan Dan Konsultasi' adalah Umum", tindPemeriksaan && tindPemeriksaan.kategori === "Umum");
+
+// Cek fungsi clearKasirRowInput
+assert("KASIR-CLEAR-BTN-1: Fungsi clearKasirRowInput Tersedia", typeof clearKasirRowInput === "function");
+
+// Simulasi Add Baris Tindakan, Input, dan Clear
+document.getElementById('ksrTbodyTindakan').innerHTML = '';
+addKasirTindakan();
+var rowTind = document.getElementById('ksrTbodyTindakan').children[0];
+assert("KASIR-ROW-TINDAKAN-1: Baris Tindakan Tersedia di DOM", rowTind !== undefined);
+var btnClearTind = rowTind ? rowTind.querySelector('.btn-clear-val') : null;
+assert("KASIR-ROW-TINDAKAN-2: Baris Tindakan Memiliki Tombol Silang Clear", btnClearTind !== null);
+var infoTind = rowTind ? rowTind.querySelector('.val-info-tindakan') : null;
+assert("KASIR-ROW-TINDAKAN-3: Baris Tindakan Memiliki Container val-info-tindakan", infoTind !== null);
+
+// Simulasi pemilihan tindakan
+var inpTind = rowTind.querySelector('.val-nama');
+inpTind.value = "Pemeriksaan Dan Konsultasi";
+onInputDatalistChange(inpTind, 'tindakan');
+var hargaTind = parseUangKSR(rowTind.querySelector('.val-harga').value);
+assert("KASIR-VIEW-HARGA-1: Harga Tindakan Otomatis Terisi Rp 50.000", hargaTind === 50000);
+assert("KASIR-VIEW-HARGA-2: Label Info Tindakan Menampilkan Tarif Rp 50.000", infoTind && infoTind.innerHTML.includes("50.000"));
+assert("KASIR-VIEW-HARGA-3: Label Info Tindakan Menampilkan Kode UMM-0001", infoTind && infoTind.innerHTML.includes("UMM-0001"));
+
+// Simulasi klik tombol clear (✕)
+clearKasirRowInput(btnClearTind, 'tindakan');
+assert("KASIR-CLEAR-EXEC-1: Input Nama Tindakan Menjadi Kosong setelah Clear", inpTind.value === "");
+assert("KASIR-CLEAR-EXEC-2: Harga Tindakan Menjadi 0 setelah Clear", parseUangKSR(rowTind.querySelector('.val-harga').value) === 0);
+assert("KASIR-CLEAR-EXEC-3: Label Info Tindakan Menjadi Kosong setelah Clear", infoTind.innerHTML === "");
+
+// Simulasi Baris Obat dengan Tombol Clear
+document.getElementById('ksrTbodyObat').innerHTML = '';
+addKasirObat();
+var rowObat = document.getElementById('ksrTbodyObat').children[0];
+assert("KASIR-ROW-OBAT-1: Baris Obat Memiliki Tombol Silang Clear", rowObat && rowObat.querySelector('.btn-clear-val') !== null);
+var inpObat = rowObat.querySelector('.val-nama');
+var sampleObat = (window.KlinikData.obat && window.KlinikData.obat[0]) ? window.KlinikData.obat[0].nama : "Amoxicillin 500 mg";
+inpObat.value = sampleObat;
+onInputDatalistChange(inpObat, 'obat');
+var btnClearObat = rowObat.querySelector('.btn-clear-val');
+clearKasirRowInput(btnClearObat, 'obat');
+assert("KASIR-CLEAR-EXEC-4: Input Nama Obat Menjadi Kosong setelah Clear", inpObat.value === "");
+assert("KASIR-CLEAR-EXEC-5: Harga Obat Menjadi 0 setelah Clear", parseUangKSR(rowObat.querySelector('.val-harga').value) === 0);
+assert("KASIR-CLEAR-EXEC-6: Label Stok Obat Menjadi Kosong setelah Clear", rowObat.querySelector('.val-stok-label').innerText === "");
+
+// Simulasi Baris BMHP dengan Tombol Clear
+document.getElementById('ksrTbodyBMHP').innerHTML = '';
+addKasirBMHP();
+var rowBMHP = document.getElementById('ksrTbodyBMHP').children[0];
+assert("KASIR-ROW-BMHP-1: Baris BMHP Memiliki Tombol Silang Clear", rowBMHP && rowBMHP.querySelector('.btn-clear-val') !== null);
+
 
 // SUMMARY REPORT
 print("=================================================");

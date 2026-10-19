@@ -4740,8 +4740,9 @@ const SPREADSHEET_DEFINITIONS = {
             "E": ["Ya", "Tidak"]
           },
           "seedRows": [
-            ["UMM-0001", "Konsultasi Dokter Gigi", "Umum", 50000, "Tidak", ""],
+            ["UMM-0001", "Pemeriksaan Dan Konsultasi", "Umum", 50000, "Tidak", ""],
             ["UMM-0002", "Foto Rontgen Periapikal Digital", "Umum", 100000, "Tidak", 0.15],
+            ["UMM-0003", "Konsultasi Dokter Gigi", "Umum", 50000, "Tidak", ""],
             ["DGU-0001", "Penambalan Komposit Light-Cure", "Dokter Gigi Umum", 250000, "Tidak", ""],
             ["DGU-0002", "Scaling Rahang Atas & Bawah", "Dokter Gigi Umum", 300000, "Tidak", ""],
             ["DGU-0003", "Pencabutan Gigi Permanen Ringan", "Dokter Gigi Umum", 200000, "Tidak", ""],

@@ -2038,16 +2038,16 @@ var console = {
     window.activeMenuId = menuId;
     document.querySelectorAll('.module-view').forEach(el => el.classList.add('hidden'));
     document.querySelectorAll('.nav-btn').forEach(el => {
-      el.classList.remove('bg-gradient-to-r', 'from-cyan-600', 'via-blue-600', 'to-indigo-600', 'to-indigo-600', 'text-white', 'shadow-lg', 'shadow-cyan-500/25', 'ring-1', 'ring-cyan-400/40', 'bg-indigo-600');
-      el.classList.add('text-slate-300', 'hover:bg-slate-800/90', 'hover:text-white');
+      el.classList.remove('bg-gradient-to-r', 'from-cyan-600', 'via-blue-600', 'to-indigo-600', 'text-white', 'shadow-lg', 'shadow-cyan-500/25', 'shadow-cyan-500/30', 'ring-1', 'ring-cyan-400/40', 'ring-cyan-400/50', 'bg-indigo-600', 'font-black');
+      el.classList.add('text-slate-100', 'hover:bg-slate-800', 'hover:text-white');
     });
     const targetView = document.getElementById('view-' + menuId);
     const targetNav = document.getElementById('nav-' + menuId);
   
     if (targetView) targetView.classList.remove('hidden');
     if (targetNav) {
-      targetNav.classList.remove('text-slate-300', 'hover:bg-slate-800/90');
-      targetNav.classList.add('bg-gradient-to-r', 'from-cyan-600', 'via-blue-600', 'to-indigo-600', 'text-white', 'shadow-lg', 'shadow-cyan-500/25', 'ring-1', 'ring-cyan-400/40');
+      targetNav.classList.remove('text-slate-100', 'text-slate-300', 'hover:bg-slate-800', 'hover:bg-slate-800/90');
+      targetNav.classList.add('bg-gradient-to-r', 'from-cyan-600', 'via-blue-600', 'to-indigo-600', 'text-white', 'shadow-lg', 'shadow-cyan-500/30', 'ring-1', 'ring-cyan-400/50', 'font-black');
       document.getElementById('topbarTitle').innerText = targetNav.innerText.replace(/[^a-zA-Z0-9\s&]/gi, '').trim();
     }
 

@@ -35,7 +35,8 @@ function getInitMaster() {
     tindakan: getDaftarTindakanLengkap(),
     obat: getDaftarObatLengkap(),
     bmhp: getDaftarBMHPLengkap(),
-    tarifKhusus: getTarifKhususDokter()
+    tarifKhusus: getTarifKhususDokter(),
+    pekerjaan: (typeof getDaftarPekerjaan === 'function') ? getDaftarPekerjaan() : []
   };
   putCacheJson(cacheKey, result, 900); // Cache 15 menit di RAM
   return result;
@@ -1428,6 +1429,14 @@ function getTarifKhususDokter() {
     const v = readFast(idTindakan, "Tarif_Khusus_Dokter");
     if (!v || v.length <= 1) return [];
     let h = v[0];
+    
+    // Deteksi cerdas pergeseran header atau Column 1 di Google Sheets live
+    let isShifted = false;
+    let hFirstClean = String(h[0] || '').toLowerCase().replace(/[\s_.]/g, '');
+    if (hFirstClean.includes('column1') || (h.length >= 12 && String(h[6] || '').toLowerCase().includes('idaturan'))) {
+      isShifted = true;
+    }
+
     let idAturanCol = getColIdx(h, ['idaturan', 'id_aturan', 'id', 'kode_aturan']);
     let idDok = getColIdx(h, ['namadokter', 'dokter', 'nama_dokter']);
     let idC = getColIdx(h, ['idtindakan', 'id_tindakan', 'kodetindakan', 'kode', 'kode_tindakan']);
@@ -1437,30 +1446,140 @@ function getTarifKhususDokter() {
     let idJM = getColIdx(h, ['persen_jm_dokter', 'persenjm', 'persen_jm', 'persen_jm_khusus']);
     let idKet = getColIdx(h, ['keterangan', 'catatan', 'simulasi']);
 
-    return v.slice(1).filter(r => r[idDok] && r[idJM] !== "").map((r, idx) => {
-      let pct = Number(r[idJM]);
-      if (pct > 1) pct = pct / 100;
-      let idA = idAturanCol !== -1 ? String(r[idAturanCol] || '').trim() : '';
-      if (!idA) idA = 'TKD-' + String(idx + 1).padStart(2, '0');
-      let idT = idC !== -1 ? String(r[idC] || '').trim() : '';
-      let namaT = idN !== -1 ? String(r[idN] || '').trim() : '';
-      return {
+    // Jika header tergeser atau data di kolom 0..5 terisi sementara idDok > 5 kosong
+    if (!isShifted && idDok > 5 && v.length > 1 && !v[1][idDok] && String(v[1][1] || '').toLowerCase().includes('drg')) {
+      isShifted = true;
+    }
+
+    // Ambil master tindakan sebagai fallback tarif & labor
+    let allTindakan = [];
+    try {
+      allTindakan = typeof getDaftarTindakanLengkap === 'function' ? getDaftarTindakanLengkap() : [];
+    } catch (eT) {}
+
+    let results = [];
+    let counter = 0;
+
+    for (let i = 1; i < v.length; i++) {
+      let r = v[i];
+      if (!r || !r.some(cell => String(cell || '').trim() !== '')) continue;
+
+      let idA = '', dok = '', idT = '', namaT = '', tarif = 0, labor = 'Tidak', pct = 0, ket = '';
+
+      if (isShifted) {
+        // Mode shifted: data ada di 6 kolom pertama (0..5)
+        // 0: ID_Aturan, 1: Nama_Dokter, 2: Kode_Tindakan, 3: Nama_Tindakan, 4: Persen_JM, 5: Keterangan
+        idA = String(r[0] || '').trim();
+        dok = String(r[1] || '').trim();
+        idT = String(r[2] || '').trim();
+        namaT = String(r[3] || '').trim();
+        let rawPct = String(r[4] || '').replace('%', '').trim();
+        pct = Number(rawPct) || 0;
+        if (pct > 1) pct = pct / 100;
+        ket = String(r[5] || '').trim();
+      } else {
+        // Mode standar / header terpetakan
+        idA = idAturanCol !== -1 ? String(r[idAturanCol] || '').trim() : '';
+        dok = idDok !== -1 ? String(r[idDok] || '').trim() : '';
+        idT = idC !== -1 ? String(r[idC] || '').trim() : '';
+        namaT = idN !== -1 ? String(r[idN] || '').trim() : '';
+        let rawPct = idJM !== -1 ? String(r[idJM] || '').replace('%', '').trim() : '0';
+        pct = Number(rawPct) || 0;
+        if (pct > 1) pct = pct / 100;
+        tarif = idTarifCol !== -1 ? (Number(String(r[idTarifCol] || '').replace(/,/g, '')) || 0) : 0;
+        labor = idLaborCol !== -1 ? String(r[idLaborCol] || 'Tidak').trim() : 'Tidak';
+        ket = idKet !== -1 ? String(r[idKet] || '').trim() : '';
+      }
+
+      if (!dok) continue;
+      counter++;
+
+      if (!idA) {
+        idA = 'TKD-' + String(counter).padStart(2, '0');
+      }
+
+      // Lookup tarif dan status lab jika belum ada
+      if (allTindakan.length > 0) {
+        let matchT = allTindakan.find(t => (idT && t.kode === idT) || (namaT && t.nama.toLowerCase() === namaT.toLowerCase()));
+        if (matchT) {
+          if (!idT) idT = matchT.kode;
+          if (!namaT) namaT = matchT.nama;
+          if (tarif <= 0) tarif = matchT.harga || matchT.tarif || 0;
+          if (labor === 'Tidak' && matchT.perluLab === 'Ya') labor = 'Ya';
+        }
+      }
+
+      results.push({
         idAturan: idA,
-        dokter: String(r[idDok]).trim(),
-        namaDokter: String(r[idDok]).trim(),
+        dokter: dok,
+        namaDokter: dok,
         kode: idT,
         idTindakan: idT,
         nama: namaT,
         namaTindakan: namaT,
-        tarif: idTarifCol !== -1 ? (Number(r[idTarifCol]) || 0) : 0,
-        labor: idLaborCol !== -1 ? String(r[idLaborCol] || 'Tidak').trim() : 'Tidak',
+        tarif: tarif,
+        labor: labor,
         persenJM: pct,
         persenJMDisplay: Math.round(pct * 100) + '%',
-        keterangan: idKet !== -1 ? String(r[idKet] || '').trim() : ''
-      };
-    });
+        keterangan: ket
+      });
+    }
+
+    return results;
   } catch (e) {
+    Logger.log("Error getTarifKhususDokter: " + e.message);
     return [];
+  }
+}
+
+/**
+ * Normalisasi otomatis sheet Tarif_Khusus_Dokter di Google Sheets live jika terdapat
+ * header bergeser ('Column 1' .. 'Column 6') atau inkonsistensi struktur kolom.
+ */
+function healTarifKhususDokterSheet(ssId) {
+  try {
+    const idDb = ssId || DB_CONFIG.DATABASE;
+    const sheet = getSheetEksternal(idDb, "Tarif_Khusus_Dokter");
+    if (!sheet) return false;
+
+    let data = sheet.getDataRange().getValues();
+    if (data.length <= 1) return false;
+
+    let h = data[0];
+    let h0 = String(h[0] || '').toLowerCase().replace(/[\s_.]/g, '');
+    let isBroken = h0.includes('column1') || (h.length >= 12 && String(h[6] || '').toLowerCase().includes('idaturan'));
+
+    if (isBroken) {
+      let cleanedRules = getTarifKhususDokter();
+      sheet.clear();
+      sheet.appendRow(["ID_Aturan", "Nama_Dokter", "ID_Tindakan", "Nama_Tindakan", "Tarif", "Labor", "Persen_JM_Dokter", "Keterangan"]);
+      
+      let newRows = cleanedRules.map(r => [
+        r.idAturan,
+        r.namaDokter,
+        r.idTindakan,
+        r.namaTindakan,
+        r.tarif,
+        r.labor,
+        r.persenJM,
+        r.keterangan
+      ]);
+
+      if (newRows.length > 0) {
+        sheet.getRange(2, 1, newRows.length, 8).setValues(newRows);
+      }
+      
+      sheet.getRange(1, 1, 1, 8).setFontWeight("bold").setBackground("#1e293b").setFontColor("#ffffff");
+      sheet.setFrozenRows(1);
+      sheet.getRange(2, 5, Math.max(1, newRows.length), 1).setNumberFormat("#,##0");
+      sheet.getRange(2, 7, Math.max(1, newRows.length), 1).setNumberFormat("0.0%");
+      Logger.log("✅ Berhasil menormalisasi Sheet Tarif_Khusus_Dokter menjadi 8 kolom resmi.");
+      return true;
+    }
+    return false;
+  } catch (e) {
+    Logger.log("healTarifKhususDokterSheet error: " + e.message);
+    return false;
   }
 }
 
@@ -1472,6 +1591,7 @@ function simpanTarifKhususDokter(payload) {
     const sheet = getSheetEksternal(idDb, "Tarif_Khusus_Dokter");
     if (!sheet) return { success: false, message: "Sheet Tarif_Khusus_Dokter tidak ditemukan di Database." };
 
+    healTarifKhususDokterSheet(idDb);
     let data = sheet.getDataRange().getValues();
     if (data.length === 0 || !data[0] || data[0].length < 8) {
       sheet.clear();

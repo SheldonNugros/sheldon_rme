@@ -29,6 +29,13 @@ while re.search(r'<\?!=\s*include\([\'"]([^\'"]+)[\'"]\);\s*\?>', bundle):
 def read_csv_rows(sub, fname):
     p = os.path.join(csv_dir, sub, fname)
     if not os.path.exists(p):
+        sub_dir = os.path.join(csv_dir, sub)
+        if os.path.exists(sub_dir):
+            for f in os.listdir(sub_dir):
+                if f.lower() == fname.lower():
+                    p = os.path.join(sub_dir, f)
+                    break
+    if not os.path.exists(p):
         return []
     with open(p, 'r', encoding='utf-8-sig') as fp:
         rows = list(csv.reader(fp))
@@ -377,7 +384,7 @@ for r in libur_csv:
             "waktuUpdate": r[7].strip() if len(r) > 7 else ""
         })
 
-pekerjaan_csv = read_csv_rows('LOG', 'pekerjaan.csv')
+pekerjaan_csv = read_csv_rows('LOG', 'Pekerjaan.csv')
 pekerjaan_list = [r[0].strip() for r in pekerjaan_csv if r and r[0].strip()]
 
 icd10_csv = read_csv_rows('ICD10', 'ICD_10.csv')

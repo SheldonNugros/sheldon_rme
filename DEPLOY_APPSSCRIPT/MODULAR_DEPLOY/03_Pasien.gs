@@ -8,23 +8,47 @@ function getInitPasien() {
 
 function getDaftarPekerjaan() {
   try {
-    const v = readFast(DB_CONFIG.LOG, "pekerjaan");
-    if (v.length <= 1) return [];
-    let h = v[0];
-    let idx = getColIdx(h, ['nama_pekerjaan', 'namapekerjaan', 'pekerjaan', 'nama']);
-    if (idx === -1) idx = 0;
-    
-    let result = [];
-    for (let i = 1; i < v.length; i++) {
-      let namaPekerjaan = String(v[i][idx]).trim();
-      if (namaPekerjaan !== "") {
-        result.push(namaPekerjaan);
+    const v = readFast(DB_CONFIG.LOG, "Pekerjaan");
+    if (v && v.length > 1) {
+      let h = v[0];
+      let idx = getColIdx(h, ['nama_pekerjaan', 'namapekerjaan', 'pekerjaan', 'nama']);
+      if (idx === -1) idx = 0;
+      
+      let result = [];
+      for (let i = 1; i < v.length; i++) {
+        let namaPekerjaan = String(v[i][idx] || '').trim();
+        if (namaPekerjaan !== "") {
+          result.push(namaPekerjaan);
+        }
       }
+      if (result.length > 0) return result;
     }
-    return result;
   } catch (e) {
-    return [];
+    Logger.log("getDaftarPekerjaan fallback to default list: " + e.message);
   }
+
+  // Fallback standar 89 pekerjaan resmi Klinik Sheldon / Kemendagri
+  return [
+    "Belum/Tidak Bekerja", "Mengurus Rumah Tangga", "Pelajar/Mahasiswa", "Pensiunan",
+    "Pegawai Negeri Sipil (PNS)", "Tentara Nasional Indonesia (TNI)", "Kepolisian RI (POLRI)",
+    "Perdagangan", "Petani/Pekebun", "Peternak", "Nelayan/Perikanan", "Industri",
+    "Konstruksi", "Transportasi", "Karyawan Swasta", "Karyawan BUMN", "Karyawan BUMD",
+    "Karyawan Honorer", "Buruh Harian Lepas", "Buruh Tani/Perkebunan", "Buruh Nelayan/Perikanan",
+    "Buruh Peternakan", "Pembantu Rumah Tangga", "Tukang Cukur", "Tukang Listrik",
+    "Tukang Batu", "Tukang Kayu", "Tukang Sol Sepatu", "Tukang Las/Pandai Besi",
+    "Tukang Jahit", "Tukang Gigi", "Penata Rias", "Penata Busana", "Penata Rambut",
+    "Mekanik", "Seniman", "Tabib", "Paraji", "Perancang Busana", "Penerjemah",
+    "Imam Masjid", "Pendeta", "Pastur", "Wartawan", "Ustadz/Mubaligh", "Juru Masak",
+    "Promotor Acara", "Anggota DPR-RI", "Anggota DPD", "Anggota BPK", "Presiden",
+    "Wakil Presiden", "Anggota Mahkamah Konstitusi", "Anggota Kabinet/Kementerian",
+    "Duta Besar", "Gubernur", "Wakil Gubernur", "Bupati", "Wakil Bupati",
+    "Walikota", "Wakil Walikota", "Anggota DPRD Provinsi", "Anggota DPRD Kabupaten/Kota",
+    "Dosen", "Guru", "Pilot", "Pengacara", "Notaris", "Arsitek", "Akuntan",
+    "Konsultan", "Dokter", "Bidan", "Perawat", "Apoteker", "Psikiater/Psikolog",
+    "Penyiar Televisi", "Penyiar Radio", "Pelaut", "Peneliti", "Sopir", "Pialang",
+    "Paranormal", "Pedagang", "Perangkat Desa", "Kepala Desa", "Biarawati",
+    "Wiraswasta", "Lainnya"
+  ];
 }
 
 function getDaftarPasien() {

@@ -82,23 +82,23 @@ const SPREADSHEET_DEFINITIONS = {
         },
         {
           "name": "Tindakan",
-          "headers": ["Kode_Tindakan", "Nama_Tindakan", "Kategori", "Tarif", "Labor", "Persen_JM_Default"],
+          "headers": ["Kode_Tindakan", "Nama_Tindakan", "Kategori", "Tarif", "Labor", "Persen_JM_Default", "Deskripsi"],
           "formats": { "D": "#,##0", "F": "0.0%" },
           "validations": {
             "E": ["Ya", "Tidak"]
           },
           "seedRows": [
-            ["UMM-0001", "Pemeriksaan Dan Konsultasi", "Umum", 50000, "Tidak", ""],
-            ["UMM-0002", "Foto Rontgen Periapikal Digital", "Umum", 100000, "Tidak", 0.15],
-            ["UMM-0003", "Konsultasi Dokter Gigi", "Umum", 50000, "Tidak", ""],
-            ["DGU-0001", "Penambalan Komposit Light-Cure", "Dokter Gigi Umum", 250000, "Tidak", ""],
-            ["DGU-0002", "Scaling Rahang Atas & Bawah", "Dokter Gigi Umum", 300000, "Tidak", ""],
-            ["DGU-0003", "Pencabutan Gigi Permanen Ringan", "Dokter Gigi Umum", 200000, "Tidak", ""],
-            ["DGS-0001", "Perawatan Saluran Akar (PSA) Molar", "Dokter Gigi Spesialis", 1500000, "Tidak", ""],
-            ["DGS-0002", "Odontektomi Gigi Impaksi M3", "Dokter Gigi Spesialis", 2500000, "Tidak", ""],
-            ["DGS-0003", "Pemasangan Behel Standar (Include Scaling)", "Dokter Gigi Spesialis", 5000000, "Tidak", ""],
-            ["LAB-0001", "Pemasangan Mahkota PFM (Crown)", "Dokter Gigi Spesialis", 1500000, "Ya", ""],
-            ["LAB-0002", "Gigi Tiruan Sebagian Lepasan (Valplast)", "Dokter Gigi Spesialis", 1800000, "Ya", ""]
+            ["UMM-0001", "Pemeriksaan Dan Konsultasi", "Umum", 50000, "Tidak", "", "Pemeriksaan umum dan konsultasi dokter"],
+            ["UMM-0002", "Foto Rontgen Periapikal Digital", "Umum", 100000, "Tidak", 0.15, "Foto radiologi gigi periapikal digital"],
+            ["UMM-0003", "Konsultasi Dokter Gigi", "Umum", 50000, "Tidak", "", "Konsultasi rencana perawatan gigi"],
+            ["DGU-0001", "Penambalan Komposit Light-Cure", "Dokter Gigi Umum", 250000, "Tidak", "", "Penambalan estetik sinar"],
+            ["DGU-0002", "Scaling Rahang Atas & Bawah", "Dokter Gigi Umum", 300000, "Tidak", "", "Pembersihan karang gigi penuh"],
+            ["DGU-0003", "Pencabutan Gigi Permanen Ringan", "Dokter Gigi Umum", 200000, "Tidak", "", "Ekstraksi gigi tetap tanpa penyulit"],
+            ["DGS-0001", "Perawatan Saluran Akar (PSA) Molar", "Dokter Gigi Spesialis", 1500000, "Tidak", "", "PSA gigi geraham spesialis"],
+            ["DGS-0002", "Odontektomi Gigi Impaksi M3", "Dokter Gigi Spesialis", 2500000, "Tidak", "", "Operasi gigi bungsu impaksi"],
+            ["DGS-0003", "Pemasangan Behel Standar (Include Scaling)", "Dokter Gigi Spesialis", 5000000, "Tidak", "", "Perawatan ortodonti cekat"],
+            ["LAB-0001", "Pemasangan Mahkota PFM (Crown)", "Dokter Gigi Spesialis", 1500000, "Ya", "", "Pemasangan crown porselen metal lab"],
+            ["LAB-0002", "Gigi Tiruan Sebagian Lepasan (Valplast)", "Dokter Gigi Spesialis", 1800000, "Ya", "", "Gigi tiruan fleksibel lepasan lab"]
           ]
         },
         {
@@ -162,7 +162,19 @@ const SPREADSHEET_DEFINITIONS = {
     "LOG": {
       "title": "RME Sheldon - 07 Log & Referensi",
       "sheets": [
-        { "name": "Log_Aktivitas", "headers": ["Waktu_Aktivitas", "Nama_Account", "Aksi", "Detail"] }
+        { "name": "Log_Aktivitas", "headers": ["Waktu_Aktivitas", "Nama_Account", "Aksi", "Detail"] },
+        {
+          "name": "Pekerjaan",
+          "headers": ["Nama_Pekerjaan"],
+          "seedRows": [
+            ["Belum/Tidak Bekerja"], ["Mengurus Rumah Tangga"], ["Pelajar/Mahasiswa"], ["Pensiunan"],
+            ["Pegawai Negeri Sipil (PNS)"], ["Tentara Nasional Indonesia (TNI)"], ["Kepolisian RI (POLRI)"],
+            ["Perdagangan"], ["Petani/Pekebun"], ["Peternak"], ["Nelayan/Perikanan"], ["Industri"],
+            ["Konstruksi"], ["Transportasi"], ["Karyawan Swasta"], ["Karyawan BUMN"], ["Karyawan BUMD"],
+            ["Karyawan Honorer"], ["Buruh Harian Lepas"], ["Dokter"], ["Bidan"], ["Perawat"], ["Apoteker"],
+            ["Wiraswasta"], ["Lainnya"]
+          ]
+        }
       ]
     },
 
@@ -181,12 +193,12 @@ const SPREADSHEET_DEFINITIONS = {
         },
         {
           "name": "Riwayat_Pembelian",
-          "headers": ["Tanggal", "No_Faktur", "ID_Obat", "Nama_Obat", "Harga", "Tanggal_Kadaluarsa", "Jumlah_Beli", "Total_Beli", "Supplier", "Petugas", "Waktu_Sistem"],
+          "headers": ["Tanggal", "ID_Obat", "Nama_Obat", "Harga", "Tanggal_Kadaluarsa", "Jumlah_Beli", "Total_Beli", "Supplier", "Petugas", "Waktu_Sistem", "No_Faktur"],
           "formats": { "D": "#,##0" },
           "seedRows": [
-            ["01-10-2026", "INV-KF-001", "OBT-0001", "Amoxicillin 500 mg", 80000, "31-12-2027", 5, 500, "PT Kimia Farma", "Super User", "01-10-2026 09:00:00"],
-            ["01-10-2026", "INV-KF-002", "OBT-0002", "Asam Mefenamat 500 mg", 50000, "31-12-2027", 5, 500, "PT Kimia Farma", "Super User", "01-10-2026 09:00:00"],
-            ["01-10-2026", "INV-KF-003", "OBT-0003", "Paracetamol 500 mg", 30000, "31-12-2027", 6, 600, "PT Kimia Farma", "Super User", "01-10-2026 09:00:00"]
+            ["01-10-2026", "OBT-0001", "Amoxicillin 500 mg", 80000, "31-12-2027", 5, 400000, "PT Kimia Farma", "Super User", "01-10-2026 09:00:00", "INV-KF-001"],
+            ["01-10-2026", "OBT-0002", "Asam Mefenamat 500 mg", 50000, "31-12-2027", 5, 250000, "PT Kimia Farma", "Super User", "01-10-2026 09:00:00", "INV-KF-002"],
+            ["01-10-2026", "OBT-0003", "Paracetamol 500 mg", 30000, "31-12-2027", 6, 180000, "PT Kimia Farma", "Super User", "01-10-2026 09:00:00", "INV-KF-003"]
           ]
         }
       ]
@@ -209,7 +221,7 @@ const SPREADSHEET_DEFINITIONS = {
     },
 
     "ICD10": {
-      "title": "RME Sheldon - 10 ICD-10",
+      "title": "RME Sheldon - 10 ICD",
       "sheets": [
         {
           "name": "ICD_10",
@@ -221,6 +233,17 @@ const SPREADSHEET_DEFINITIONS = {
             ["K05.1", "Chronic gingivitis"],
             ["K05.3", "Chronic periodontitis"],
             ["S02.5", "Fracture of tooth"]
+          ]
+        },
+        {
+          "name": "ICD_9",
+          "headers": ["ICD9_Code", "Disease_Description"],
+          "seedRows": [
+            ["23.09", "Extraction of other tooth"],
+            ["23.19", "Other surgical extraction of tooth"],
+            ["23.2", "Restoration of tooth by filling"],
+            ["23.70", "Root canal therapy, not otherwise specified"],
+            ["96.54", "Dental scaling and polishing"]
           ]
         }
       ]
@@ -916,6 +939,12 @@ function sinkronkanSemuaSheetOtomatis() {
             sheet = ss.insertSheet(shDef.name);
           }
           laporan.push("➕ Ditambahkan Sheet Baru: [" + def.title + " -> " + shDef.name + "]");
+        }
+
+        // Khusus sheet Tarif_Khusus_Dokter: Lakukan auto-heal jika ditemukan header bergeser / Column 1
+        if (shDef.name === 'Tarif_Khusus_Dokter' && typeof healTarifKhususDokterSheet === 'function') {
+          let healed = healTarifKhususDokterSheet(ss.getId());
+          if (healed) laporan.push("🛠️ Dinormalisasi Sheet [Tarif_Khusus_Dokter] menjadi 8 kolom standar.");
         }
 
         // Cek Headers

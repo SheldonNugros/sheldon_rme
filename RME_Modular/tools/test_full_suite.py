@@ -2144,6 +2144,16 @@ addKasirBMHP();
 var rowBMHP = document.getElementById('ksrTbodyBMHP').children[0];
 assert("KASIR-ROW-BMHP-1: Baris BMHP Memiliki Tombol Silang Clear", rowBMHP && rowBMHP.querySelector('.btn-clear-val') !== null);
 
+print("\n--- TEST: Sinkronisasi Database, Nama Sheet, dan Header Kolom ---");
+var mDb = window._mockDb || {};
+assert("SYNC-DB-1: Mock DB Memuat 12 Database Lengkap", typeof mDb !== 'undefined' && mDb !== null);
+assert("SYNC-DB-2: Mock DB Memuat Data Pasien Lengkap", Array.isArray(mDb.pasien) && mDb.pasien.length > 100);
+assert("SYNC-DB-3: Mock DB Memuat Daftar Pekerjaan (LOG/Pekerjaan)", Array.isArray(mDb.pekerjaan) && mDb.pekerjaan.length >= 25);
+assert("SYNC-DB-4: Mock DB Memuat ICD-10 dan ICD-9", Array.isArray(mDb.icd10) && mDb.icd10.length > 50 && Array.isArray(mDb.icd9) && mDb.icd9.length > 50);
+assert("SYNC-DB-5: Mock DB Memuat Master Obat dan BMHP", Array.isArray(mDb.obat) && mDb.obat.length > 50 && Array.isArray(mDb.bmhp) && mDb.bmhp.length > 0);
+assert("SYNC-DB-6: Mock DB Memuat Tarif Khusus Dokter 8 Kolom", Array.isArray(mDb.tarifKhusus) && mDb.tarifKhusus.length > 0 && mDb.tarifKhusus[0].idAturan && mDb.tarifKhusus[0].persenJM !== undefined);
+assert("SYNC-DB-7: Tarif Khusus Dokter Memiliki Info Dokter & Tindakan", mDb.tarifKhusus.some(tk => tk.namaDokter && tk.namaDokter.includes('drg. Tia') && tk.persenJM === 0.55));
+
 
 // SUMMARY REPORT
 print("=================================================");

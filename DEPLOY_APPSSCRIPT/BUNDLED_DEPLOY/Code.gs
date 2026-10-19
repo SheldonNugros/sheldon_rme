@@ -704,23 +704,47 @@ function getInitPasien() {
 
 function getDaftarPekerjaan() {
   try {
-    const v = readFast(DB_CONFIG.LOG, "pekerjaan");
-    if (v.length <= 1) return [];
-    let h = v[0];
-    let idx = getColIdx(h, ['nama_pekerjaan', 'namapekerjaan', 'pekerjaan', 'nama']);
-    if (idx === -1) idx = 0;
-    
-    let result = [];
-    for (let i = 1; i < v.length; i++) {
-      let namaPekerjaan = String(v[i][idx]).trim();
-      if (namaPekerjaan !== "") {
-        result.push(namaPekerjaan);
+    const v = readFast(DB_CONFIG.LOG, "Pekerjaan");
+    if (v && v.length > 1) {
+      let h = v[0];
+      let idx = getColIdx(h, ['nama_pekerjaan', 'namapekerjaan', 'pekerjaan', 'nama']);
+      if (idx === -1) idx = 0;
+      
+      let result = [];
+      for (let i = 1; i < v.length; i++) {
+        let namaPekerjaan = String(v[i][idx] || '').trim();
+        if (namaPekerjaan !== "") {
+          result.push(namaPekerjaan);
+        }
       }
+      if (result.length > 0) return result;
     }
-    return result;
   } catch (e) {
-    return [];
+    Logger.log("getDaftarPekerjaan fallback to default list: " + e.message);
   }
+
+  // Fallback standar 89 pekerjaan resmi Klinik Sheldon / Kemendagri
+  return [
+    "Belum/Tidak Bekerja", "Mengurus Rumah Tangga", "Pelajar/Mahasiswa", "Pensiunan",
+    "Pegawai Negeri Sipil (PNS)", "Tentara Nasional Indonesia (TNI)", "Kepolisian RI (POLRI)",
+    "Perdagangan", "Petani/Pekebun", "Peternak", "Nelayan/Perikanan", "Industri",
+    "Konstruksi", "Transportasi", "Karyawan Swasta", "Karyawan BUMN", "Karyawan BUMD",
+    "Karyawan Honorer", "Buruh Harian Lepas", "Buruh Tani/Perkebunan", "Buruh Nelayan/Perikanan",
+    "Buruh Peternakan", "Pembantu Rumah Tangga", "Tukang Cukur", "Tukang Listrik",
+    "Tukang Batu", "Tukang Kayu", "Tukang Sol Sepatu", "Tukang Las/Pandai Besi",
+    "Tukang Jahit", "Tukang Gigi", "Penata Rias", "Penata Busana", "Penata Rambut",
+    "Mekanik", "Seniman", "Tabib", "Paraji", "Perancang Busana", "Penerjemah",
+    "Imam Masjid", "Pendeta", "Pastur", "Wartawan", "Ustadz/Mubaligh", "Juru Masak",
+    "Promotor Acara", "Anggota DPR-RI", "Anggota DPD", "Anggota BPK", "Presiden",
+    "Wakil Presiden", "Anggota Mahkamah Konstitusi", "Anggota Kabinet/Kementerian",
+    "Duta Besar", "Gubernur", "Wakil Gubernur", "Bupati", "Wakil Bupati",
+    "Walikota", "Wakil Walikota", "Anggota DPRD Provinsi", "Anggota DPRD Kabupaten/Kota",
+    "Dosen", "Guru", "Pilot", "Pengacara", "Notaris", "Arsitek", "Akuntan",
+    "Konsultan", "Dokter", "Bidan", "Perawat", "Apoteker", "Psikiater/Psikolog",
+    "Penyiar Televisi", "Penyiar Radio", "Pelaut", "Peneliti", "Sopir", "Pialang",
+    "Paranormal", "Pedagang", "Perangkat Desa", "Kepala Desa", "Biarawati",
+    "Wiraswasta", "Lainnya"
+  ];
 }
 
 function getDaftarPasien() {
@@ -2252,7 +2276,8 @@ function getInitMaster() {
     tindakan: getDaftarTindakanLengkap(),
     obat: getDaftarObatLengkap(),
     bmhp: getDaftarBMHPLengkap(),
-    tarifKhusus: getTarifKhususDokter()
+    tarifKhusus: getTarifKhususDokter(),
+    pekerjaan: (typeof getDaftarPekerjaan === 'function') ? getDaftarPekerjaan() : []
   };
   putCacheJson(cacheKey, result, 900); // Cache 15 menit di RAM
   return result;
@@ -3645,6 +3670,14 @@ function getTarifKhususDokter() {
     const v = readFast(idTindakan, "Tarif_Khusus_Dokter");
     if (!v || v.length <= 1) return [];
     let h = v[0];
+    
+    // Deteksi cerdas pergeseran header atau Column 1 di Google Sheets live
+    let isShifted = false;
+    let hFirstClean = String(h[0] || '').toLowerCase().replace(/[\s_.]/g, '');
+    if (hFirstClean.includes('column1') || (h.length >= 12 && String(h[6] || '').toLowerCase().includes('idaturan'))) {
+      isShifted = true;
+    }
+
     let idAturanCol = getColIdx(h, ['idaturan', 'id_aturan', 'id', 'kode_aturan']);
     let idDok = getColIdx(h, ['namadokter', 'dokter', 'nama_dokter']);
     let idC = getColIdx(h, ['idtindakan', 'id_tindakan', 'kodetindakan', 'kode', 'kode_tindakan']);
@@ -3654,30 +3687,140 @@ function getTarifKhususDokter() {
     let idJM = getColIdx(h, ['persen_jm_dokter', 'persenjm', 'persen_jm', 'persen_jm_khusus']);
     let idKet = getColIdx(h, ['keterangan', 'catatan', 'simulasi']);
 
-    return v.slice(1).filter(r => r[idDok] && r[idJM] !== "").map((r, idx) => {
-      let pct = Number(r[idJM]);
-      if (pct > 1) pct = pct / 100;
-      let idA = idAturanCol !== -1 ? String(r[idAturanCol] || '').trim() : '';
-      if (!idA) idA = 'TKD-' + String(idx + 1).padStart(2, '0');
-      let idT = idC !== -1 ? String(r[idC] || '').trim() : '';
-      let namaT = idN !== -1 ? String(r[idN] || '').trim() : '';
-      return {
+    // Jika header tergeser atau data di kolom 0..5 terisi sementara idDok > 5 kosong
+    if (!isShifted && idDok > 5 && v.length > 1 && !v[1][idDok] && String(v[1][1] || '').toLowerCase().includes('drg')) {
+      isShifted = true;
+    }
+
+    // Ambil master tindakan sebagai fallback tarif & labor
+    let allTindakan = [];
+    try {
+      allTindakan = typeof getDaftarTindakanLengkap === 'function' ? getDaftarTindakanLengkap() : [];
+    } catch (eT) {}
+
+    let results = [];
+    let counter = 0;
+
+    for (let i = 1; i < v.length; i++) {
+      let r = v[i];
+      if (!r || !r.some(cell => String(cell || '').trim() !== '')) continue;
+
+      let idA = '', dok = '', idT = '', namaT = '', tarif = 0, labor = 'Tidak', pct = 0, ket = '';
+
+      if (isShifted) {
+        // Mode shifted: data ada di 6 kolom pertama (0..5)
+        // 0: ID_Aturan, 1: Nama_Dokter, 2: Kode_Tindakan, 3: Nama_Tindakan, 4: Persen_JM, 5: Keterangan
+        idA = String(r[0] || '').trim();
+        dok = String(r[1] || '').trim();
+        idT = String(r[2] || '').trim();
+        namaT = String(r[3] || '').trim();
+        let rawPct = String(r[4] || '').replace('%', '').trim();
+        pct = Number(rawPct) || 0;
+        if (pct > 1) pct = pct / 100;
+        ket = String(r[5] || '').trim();
+      } else {
+        // Mode standar / header terpetakan
+        idA = idAturanCol !== -1 ? String(r[idAturanCol] || '').trim() : '';
+        dok = idDok !== -1 ? String(r[idDok] || '').trim() : '';
+        idT = idC !== -1 ? String(r[idC] || '').trim() : '';
+        namaT = idN !== -1 ? String(r[idN] || '').trim() : '';
+        let rawPct = idJM !== -1 ? String(r[idJM] || '').replace('%', '').trim() : '0';
+        pct = Number(rawPct) || 0;
+        if (pct > 1) pct = pct / 100;
+        tarif = idTarifCol !== -1 ? (Number(String(r[idTarifCol] || '').replace(/,/g, '')) || 0) : 0;
+        labor = idLaborCol !== -1 ? String(r[idLaborCol] || 'Tidak').trim() : 'Tidak';
+        ket = idKet !== -1 ? String(r[idKet] || '').trim() : '';
+      }
+
+      if (!dok) continue;
+      counter++;
+
+      if (!idA) {
+        idA = 'TKD-' + String(counter).padStart(2, '0');
+      }
+
+      // Lookup tarif dan status lab jika belum ada
+      if (allTindakan.length > 0) {
+        let matchT = allTindakan.find(t => (idT && t.kode === idT) || (namaT && t.nama.toLowerCase() === namaT.toLowerCase()));
+        if (matchT) {
+          if (!idT) idT = matchT.kode;
+          if (!namaT) namaT = matchT.nama;
+          if (tarif <= 0) tarif = matchT.harga || matchT.tarif || 0;
+          if (labor === 'Tidak' && matchT.perluLab === 'Ya') labor = 'Ya';
+        }
+      }
+
+      results.push({
         idAturan: idA,
-        dokter: String(r[idDok]).trim(),
-        namaDokter: String(r[idDok]).trim(),
+        dokter: dok,
+        namaDokter: dok,
         kode: idT,
         idTindakan: idT,
         nama: namaT,
         namaTindakan: namaT,
-        tarif: idTarifCol !== -1 ? (Number(r[idTarifCol]) || 0) : 0,
-        labor: idLaborCol !== -1 ? String(r[idLaborCol] || 'Tidak').trim() : 'Tidak',
+        tarif: tarif,
+        labor: labor,
         persenJM: pct,
         persenJMDisplay: Math.round(pct * 100) + '%',
-        keterangan: idKet !== -1 ? String(r[idKet] || '').trim() : ''
-      };
-    });
+        keterangan: ket
+      });
+    }
+
+    return results;
   } catch (e) {
+    Logger.log("Error getTarifKhususDokter: " + e.message);
     return [];
+  }
+}
+
+/**
+ * Normalisasi otomatis sheet Tarif_Khusus_Dokter di Google Sheets live jika terdapat
+ * header bergeser ('Column 1' .. 'Column 6') atau inkonsistensi struktur kolom.
+ */
+function healTarifKhususDokterSheet(ssId) {
+  try {
+    const idDb = ssId || DB_CONFIG.DATABASE;
+    const sheet = getSheetEksternal(idDb, "Tarif_Khusus_Dokter");
+    if (!sheet) return false;
+
+    let data = sheet.getDataRange().getValues();
+    if (data.length <= 1) return false;
+
+    let h = data[0];
+    let h0 = String(h[0] || '').toLowerCase().replace(/[\s_.]/g, '');
+    let isBroken = h0.includes('column1') || (h.length >= 12 && String(h[6] || '').toLowerCase().includes('idaturan'));
+
+    if (isBroken) {
+      let cleanedRules = getTarifKhususDokter();
+      sheet.clear();
+      sheet.appendRow(["ID_Aturan", "Nama_Dokter", "ID_Tindakan", "Nama_Tindakan", "Tarif", "Labor", "Persen_JM_Dokter", "Keterangan"]);
+      
+      let newRows = cleanedRules.map(r => [
+        r.idAturan,
+        r.namaDokter,
+        r.idTindakan,
+        r.namaTindakan,
+        r.tarif,
+        r.labor,
+        r.persenJM,
+        r.keterangan
+      ]);
+
+      if (newRows.length > 0) {
+        sheet.getRange(2, 1, newRows.length, 8).setValues(newRows);
+      }
+      
+      sheet.getRange(1, 1, 1, 8).setFontWeight("bold").setBackground("#1e293b").setFontColor("#ffffff");
+      sheet.setFrozenRows(1);
+      sheet.getRange(2, 5, Math.max(1, newRows.length), 1).setNumberFormat("#,##0");
+      sheet.getRange(2, 7, Math.max(1, newRows.length), 1).setNumberFormat("0.0%");
+      Logger.log("✅ Berhasil menormalisasi Sheet Tarif_Khusus_Dokter menjadi 8 kolom resmi.");
+      return true;
+    }
+    return false;
+  } catch (e) {
+    Logger.log("healTarifKhususDokterSheet error: " + e.message);
+    return false;
   }
 }
 
@@ -3689,6 +3832,7 @@ function simpanTarifKhususDokter(payload) {
     const sheet = getSheetEksternal(idDb, "Tarif_Khusus_Dokter");
     if (!sheet) return { success: false, message: "Sheet Tarif_Khusus_Dokter tidak ditemukan di Database." };
 
+    healTarifKhususDokterSheet(idDb);
     let data = sheet.getDataRange().getValues();
     if (data.length === 0 || !data[0] || data[0].length < 8) {
       sheet.clear();
@@ -4734,23 +4878,23 @@ const SPREADSHEET_DEFINITIONS = {
         },
         {
           "name": "Tindakan",
-          "headers": ["Kode_Tindakan", "Nama_Tindakan", "Kategori", "Tarif", "Labor", "Persen_JM_Default"],
+          "headers": ["Kode_Tindakan", "Nama_Tindakan", "Kategori", "Tarif", "Labor", "Persen_JM_Default", "Deskripsi"],
           "formats": { "D": "#,##0", "F": "0.0%" },
           "validations": {
             "E": ["Ya", "Tidak"]
           },
           "seedRows": [
-            ["UMM-0001", "Pemeriksaan Dan Konsultasi", "Umum", 50000, "Tidak", ""],
-            ["UMM-0002", "Foto Rontgen Periapikal Digital", "Umum", 100000, "Tidak", 0.15],
-            ["UMM-0003", "Konsultasi Dokter Gigi", "Umum", 50000, "Tidak", ""],
-            ["DGU-0001", "Penambalan Komposit Light-Cure", "Dokter Gigi Umum", 250000, "Tidak", ""],
-            ["DGU-0002", "Scaling Rahang Atas & Bawah", "Dokter Gigi Umum", 300000, "Tidak", ""],
-            ["DGU-0003", "Pencabutan Gigi Permanen Ringan", "Dokter Gigi Umum", 200000, "Tidak", ""],
-            ["DGS-0001", "Perawatan Saluran Akar (PSA) Molar", "Dokter Gigi Spesialis", 1500000, "Tidak", ""],
-            ["DGS-0002", "Odontektomi Gigi Impaksi M3", "Dokter Gigi Spesialis", 2500000, "Tidak", ""],
-            ["DGS-0003", "Pemasangan Behel Standar (Include Scaling)", "Dokter Gigi Spesialis", 5000000, "Tidak", ""],
-            ["LAB-0001", "Pemasangan Mahkota PFM (Crown)", "Dokter Gigi Spesialis", 1500000, "Ya", ""],
-            ["LAB-0002", "Gigi Tiruan Sebagian Lepasan (Valplast)", "Dokter Gigi Spesialis", 1800000, "Ya", ""]
+            ["UMM-0001", "Pemeriksaan Dan Konsultasi", "Umum", 50000, "Tidak", "", "Pemeriksaan umum dan konsultasi dokter"],
+            ["UMM-0002", "Foto Rontgen Periapikal Digital", "Umum", 100000, "Tidak", 0.15, "Foto radiologi gigi periapikal digital"],
+            ["UMM-0003", "Konsultasi Dokter Gigi", "Umum", 50000, "Tidak", "", "Konsultasi rencana perawatan gigi"],
+            ["DGU-0001", "Penambalan Komposit Light-Cure", "Dokter Gigi Umum", 250000, "Tidak", "", "Penambalan estetik sinar"],
+            ["DGU-0002", "Scaling Rahang Atas & Bawah", "Dokter Gigi Umum", 300000, "Tidak", "", "Pembersihan karang gigi penuh"],
+            ["DGU-0003", "Pencabutan Gigi Permanen Ringan", "Dokter Gigi Umum", 200000, "Tidak", "", "Ekstraksi gigi tetap tanpa penyulit"],
+            ["DGS-0001", "Perawatan Saluran Akar (PSA) Molar", "Dokter Gigi Spesialis", 1500000, "Tidak", "", "PSA gigi geraham spesialis"],
+            ["DGS-0002", "Odontektomi Gigi Impaksi M3", "Dokter Gigi Spesialis", 2500000, "Tidak", "", "Operasi gigi bungsu impaksi"],
+            ["DGS-0003", "Pemasangan Behel Standar (Include Scaling)", "Dokter Gigi Spesialis", 5000000, "Tidak", "", "Perawatan ortodonti cekat"],
+            ["LAB-0001", "Pemasangan Mahkota PFM (Crown)", "Dokter Gigi Spesialis", 1500000, "Ya", "", "Pemasangan crown porselen metal lab"],
+            ["LAB-0002", "Gigi Tiruan Sebagian Lepasan (Valplast)", "Dokter Gigi Spesialis", 1800000, "Ya", "", "Gigi tiruan fleksibel lepasan lab"]
           ]
         },
         {
@@ -4814,7 +4958,19 @@ const SPREADSHEET_DEFINITIONS = {
     "LOG": {
       "title": "RME Sheldon - 07 Log & Referensi",
       "sheets": [
-        { "name": "Log_Aktivitas", "headers": ["Waktu_Aktivitas", "Nama_Account", "Aksi", "Detail"] }
+        { "name": "Log_Aktivitas", "headers": ["Waktu_Aktivitas", "Nama_Account", "Aksi", "Detail"] },
+        {
+          "name": "Pekerjaan",
+          "headers": ["Nama_Pekerjaan"],
+          "seedRows": [
+            ["Belum/Tidak Bekerja"], ["Mengurus Rumah Tangga"], ["Pelajar/Mahasiswa"], ["Pensiunan"],
+            ["Pegawai Negeri Sipil (PNS)"], ["Tentara Nasional Indonesia (TNI)"], ["Kepolisian RI (POLRI)"],
+            ["Perdagangan"], ["Petani/Pekebun"], ["Peternak"], ["Nelayan/Perikanan"], ["Industri"],
+            ["Konstruksi"], ["Transportasi"], ["Karyawan Swasta"], ["Karyawan BUMN"], ["Karyawan BUMD"],
+            ["Karyawan Honorer"], ["Buruh Harian Lepas"], ["Dokter"], ["Bidan"], ["Perawat"], ["Apoteker"],
+            ["Wiraswasta"], ["Lainnya"]
+          ]
+        }
       ]
     },
 
@@ -4833,12 +4989,12 @@ const SPREADSHEET_DEFINITIONS = {
         },
         {
           "name": "Riwayat_Pembelian",
-          "headers": ["Tanggal", "No_Faktur", "ID_Obat", "Nama_Obat", "Harga", "Tanggal_Kadaluarsa", "Jumlah_Beli", "Total_Beli", "Supplier", "Petugas", "Waktu_Sistem"],
+          "headers": ["Tanggal", "ID_Obat", "Nama_Obat", "Harga", "Tanggal_Kadaluarsa", "Jumlah_Beli", "Total_Beli", "Supplier", "Petugas", "Waktu_Sistem", "No_Faktur"],
           "formats": { "D": "#,##0" },
           "seedRows": [
-            ["01-10-2026", "INV-KF-001", "OBT-0001", "Amoxicillin 500 mg", 80000, "31-12-2027", 5, 500, "PT Kimia Farma", "Super User", "01-10-2026 09:00:00"],
-            ["01-10-2026", "INV-KF-002", "OBT-0002", "Asam Mefenamat 500 mg", 50000, "31-12-2027", 5, 500, "PT Kimia Farma", "Super User", "01-10-2026 09:00:00"],
-            ["01-10-2026", "INV-KF-003", "OBT-0003", "Paracetamol 500 mg", 30000, "31-12-2027", 6, 600, "PT Kimia Farma", "Super User", "01-10-2026 09:00:00"]
+            ["01-10-2026", "OBT-0001", "Amoxicillin 500 mg", 80000, "31-12-2027", 5, 400000, "PT Kimia Farma", "Super User", "01-10-2026 09:00:00", "INV-KF-001"],
+            ["01-10-2026", "OBT-0002", "Asam Mefenamat 500 mg", 50000, "31-12-2027", 5, 250000, "PT Kimia Farma", "Super User", "01-10-2026 09:00:00", "INV-KF-002"],
+            ["01-10-2026", "OBT-0003", "Paracetamol 500 mg", 30000, "31-12-2027", 6, 180000, "PT Kimia Farma", "Super User", "01-10-2026 09:00:00", "INV-KF-003"]
           ]
         }
       ]
@@ -4861,7 +5017,7 @@ const SPREADSHEET_DEFINITIONS = {
     },
 
     "ICD10": {
-      "title": "RME Sheldon - 10 ICD-10",
+      "title": "RME Sheldon - 10 ICD",
       "sheets": [
         {
           "name": "ICD_10",
@@ -4873,6 +5029,17 @@ const SPREADSHEET_DEFINITIONS = {
             ["K05.1", "Chronic gingivitis"],
             ["K05.3", "Chronic periodontitis"],
             ["S02.5", "Fracture of tooth"]
+          ]
+        },
+        {
+          "name": "ICD_9",
+          "headers": ["ICD9_Code", "Disease_Description"],
+          "seedRows": [
+            ["23.09", "Extraction of other tooth"],
+            ["23.19", "Other surgical extraction of tooth"],
+            ["23.2", "Restoration of tooth by filling"],
+            ["23.70", "Root canal therapy, not otherwise specified"],
+            ["96.54", "Dental scaling and polishing"]
           ]
         }
       ]
@@ -5568,6 +5735,12 @@ function sinkronkanSemuaSheetOtomatis() {
             sheet = ss.insertSheet(shDef.name);
           }
           laporan.push("➕ Ditambahkan Sheet Baru: [" + def.title + " -> " + shDef.name + "]");
+        }
+
+        // Khusus sheet Tarif_Khusus_Dokter: Lakukan auto-heal jika ditemukan header bergeser / Column 1
+        if (shDef.name === 'Tarif_Khusus_Dokter' && typeof healTarifKhususDokterSheet === 'function') {
+          let healed = healTarifKhususDokterSheet(ss.getId());
+          if (healed) laporan.push("🛠️ Dinormalisasi Sheet [Tarif_Khusus_Dokter] menjadi 8 kolom standar.");
         }
 
         // Cek Headers

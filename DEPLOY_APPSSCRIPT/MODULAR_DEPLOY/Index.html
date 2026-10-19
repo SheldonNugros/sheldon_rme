@@ -695,7 +695,7 @@
   window.activeNamaAccount = null;
   window.activeUserRole = null;
   window.KlinikData = {
-    pasien: [], staff: [], tindakan: [], obat: [], bmhp: [], rekamMedis: [], pembayaran: [], statusLoad: { master: false, pasien: false, emr: false }
+    pasien: [], staff: [], tindakan: [], tarifKhusus: [], obat: [], bmhp: [], rekamMedis: [], pembayaran: [], statusLoad: { master: false, pasien: false, emr: false }
   };
 
   // INSTANT STARTUP HYDRATION (Solusi A: Stale-While-Revalidate)
@@ -707,6 +707,7 @@
       if (Array.isArray(window._mockDb.pasien) && window._mockDb.pasien.length > 0) window.KlinikData.pasien = window._mockDb.pasien;
       if (Array.isArray(window._mockDb.staff) && window._mockDb.staff.length > 0) window.KlinikData.staff = window._mockDb.staff;
       if (Array.isArray(window._mockDb.tindakan) && window._mockDb.tindakan.length > 0) window.KlinikData.tindakan = window._mockDb.tindakan;
+      if (Array.isArray(window._mockDb.tarifKhusus) && window._mockDb.tarifKhusus.length > 0) window.KlinikData.tarifKhusus = window._mockDb.tarifKhusus;
       if (Array.isArray(window._mockDb.obat) && window._mockDb.obat.length > 0) window.KlinikData.obat = window._mockDb.obat;
       if (Array.isArray(window._mockDb.bmhp) && window._mockDb.bmhp.length > 0) window.KlinikData.bmhp = window._mockDb.bmhp;
       if (Array.isArray(window._mockDb.rekamMedis) && window._mockDb.rekamMedis.length > 0) window.KlinikData.rekamMedis = window._mockDb.rekamMedis;
@@ -724,6 +725,7 @@
             if (Array.isArray(parsed.pasien) && parsed.pasien.length > 0) window.KlinikData.pasien = parsed.pasien;
             if (Array.isArray(parsed.staff) && parsed.staff.length > 0) window.KlinikData.staff = parsed.staff;
             if (Array.isArray(parsed.tindakan) && parsed.tindakan.length > 0) window.KlinikData.tindakan = parsed.tindakan;
+            if (Array.isArray(parsed.tarifKhusus) && parsed.tarifKhusus.length > 0) window.KlinikData.tarifKhusus = parsed.tarifKhusus;
             if (Array.isArray(parsed.obat) && parsed.obat.length > 0) window.KlinikData.obat = parsed.obat;
             if (Array.isArray(parsed.bmhp) && parsed.bmhp.length > 0) window.KlinikData.bmhp = parsed.bmhp;
             if (Array.isArray(parsed.rekamMedis) && parsed.rekamMedis.length > 0) window.KlinikData.rekamMedis = parsed.rekamMedis;
@@ -899,6 +901,11 @@
       if (typeof switchMasterUserSubTab === 'function') switchMasterUserSubTab('owner-utility');
       return;
     }
+    if (menuId === 'tarif-khusus' || menuId === 'tkd') {
+      switchMenu('user-master');
+      if (typeof switchMasterUserSubTab === 'function') switchMasterUserSubTab('tarif-khusus');
+      return;
+    }
     if (menuId === 'inventory') {
       switchMenu('database');
       if (typeof changeDBMenu === 'function') changeDBMenu('gudang');
@@ -1065,6 +1072,7 @@
           const toCache = {
             staff: window.KlinikData.staff,
             tindakan: window.KlinikData.tindakan,
+            tarifKhusus: window.KlinikData.tarifKhusus,
             obat: window.KlinikData.obat,
             bmhp: window.KlinikData.bmhp,
             pasien: (window.KlinikData.pasien || []).slice(0, 500),
@@ -1080,6 +1088,7 @@
       google.script.run.withSuccessHandler(res => {
         if (res && res.staff) window.KlinikData.staff = res.staff;
         if (res && res.tindakan) window.KlinikData.tindakan = res.tindakan;
+        if (res && res.tarifKhusus) window.KlinikData.tarifKhusus = res.tarifKhusus;
         if (res && res.obat) window.KlinikData.obat = res.obat;
         if (res && res.bmhp) window.KlinikData.bmhp = res.bmhp;
         window.KlinikData.statusLoad.master = true;
@@ -1141,6 +1150,7 @@
           if (res.master) {
             if (res.master.staff) window.KlinikData.staff = res.master.staff;
             if (res.master.tindakan) window.KlinikData.tindakan = res.master.tindakan;
+            if (res.master.tarifKhusus) window.KlinikData.tarifKhusus = res.master.tarifKhusus;
             if (res.master.obat) window.KlinikData.obat = res.master.obat;
             if (res.master.bmhp) window.KlinikData.bmhp = res.master.bmhp;
             window.KlinikData.statusLoad.master = true;

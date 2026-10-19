@@ -336,7 +336,11 @@ function hitungDanCatatJasaMedis(ctx) {
         tipeAturan = "Kunci Tindakan Global (" + Math.round(finalPersen * 100) + "%)";
       } else {
         // Tingkat 2: Cek apakah dokter punya Tarif Khusus untuk tindakan ini
-        let exc = listTarifKhusus.find(x => x.dokter === ctx.dokter && (x.nama === namaTindakan || (masterT && x.kode === masterT.kode)));
+        let exc = listTarifKhusus.find(x => 
+          ((x.dokter && x.dokter === ctx.dokter) || (x.namaDokter && x.namaDokter === ctx.dokter)) && 
+          ((x.nama && x.nama === namaTindakan) || (x.namaTindakan && x.namaTindakan === namaTindakan) || 
+           (masterT && ((x.kode && x.kode === masterT.kode) || (x.idTindakan && x.idTindakan === masterT.kode))))
+        );
         if (exc && exc.persenJM !== undefined && exc.persenJM !== null) {
           finalPersen = exc.persenJM;
           tipeAturan = "Tarif Khusus Dokter (" + Math.round(finalPersen * 100) + "%)";

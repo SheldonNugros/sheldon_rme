@@ -1756,7 +1756,11 @@ function hitungDanCatatJasaMedis(ctx) {
         tipeAturan = "Kunci Tindakan Global (" + Math.round(finalPersen * 100) + "%)";
       } else {
         // Tingkat 2: Cek apakah dokter punya Tarif Khusus untuk tindakan ini
-        let exc = listTarifKhusus.find(x => x.dokter === ctx.dokter && (x.nama === namaTindakan || (masterT && x.kode === masterT.kode)));
+        let exc = listTarifKhusus.find(x => 
+          ((x.dokter && x.dokter === ctx.dokter) || (x.namaDokter && x.namaDokter === ctx.dokter)) && 
+          ((x.nama && x.nama === namaTindakan) || (x.namaTindakan && x.namaTindakan === namaTindakan) || 
+           (masterT && ((x.kode && x.kode === masterT.kode) || (x.idTindakan && x.idTindakan === masterT.kode))))
+        );
         if (exc && exc.persenJM !== undefined && exc.persenJM !== null) {
           finalPersen = exc.persenJM;
           tipeAturan = "Tarif Khusus Dokter (" + Math.round(finalPersen * 100) + "%)";
@@ -2247,7 +2251,8 @@ function getInitMaster() {
     staff: getDaftarStaffLengkap(),
     tindakan: getDaftarTindakanLengkap(),
     obat: getDaftarObatLengkap(),
-    bmhp: getDaftarBMHPLengkap()
+    bmhp: getDaftarBMHPLengkap(),
+    tarifKhusus: getTarifKhususDokter()
   };
   putCacheJson(cacheKey, result, 900); // Cache 15 menit di RAM
   return result;
@@ -3640,19 +3645,184 @@ function getTarifKhususDokter() {
     const v = readFast(idTindakan, "Tarif_Khusus_Dokter");
     if (!v || v.length <= 1) return [];
     let h = v[0];
+    let idAturanCol = getColIdx(h, ['idaturan', 'id_aturan', 'id', 'kode_aturan']);
     let idDok = getColIdx(h, ['namadokter', 'dokter', 'nama_dokter']);
-    let idC = getColIdx(h, ['kodetindakan', 'kode', 'kode_tindakan']);
+    let idC = getColIdx(h, ['idtindakan', 'id_tindakan', 'kodetindakan', 'kode', 'kode_tindakan']);
     let idN = getColIdx(h, ['namatindakan', 'tindakan', 'nama_tindakan']);
-    let idJM = getColIdx(h, ['persen_jm_dokter', 'persenjm', 'persen_jm']);
+    let idTarifCol = getColIdx(h, ['tarif', 'harga', 'tarif_tindakan']);
+    let idLaborCol = getColIdx(h, ['labor', 'laboratorium', 'biaya_lab']);
+    let idJM = getColIdx(h, ['persen_jm_dokter', 'persenjm', 'persen_jm', 'persen_jm_khusus']);
+    let idKet = getColIdx(h, ['keterangan', 'catatan', 'simulasi']);
 
-    return v.slice(1).filter(r => r[idDok] && r[idJM] !== "").map(r => ({
-      dokter: String(r[idDok]).trim(),
-      kode: idC !== -1 ? String(r[idC]).trim() : "",
-      nama: idN !== -1 ? String(r[idN]).trim() : "",
-      persenJM: Number(r[idJM])
-    }));
+    return v.slice(1).filter(r => r[idDok] && r[idJM] !== "").map((r, idx) => {
+      let pct = Number(r[idJM]);
+      if (pct > 1) pct = pct / 100;
+      let idA = idAturanCol !== -1 ? String(r[idAturanCol] || '').trim() : '';
+      if (!idA) idA = 'TKD-' + String(idx + 1).padStart(2, '0');
+      let idT = idC !== -1 ? String(r[idC] || '').trim() : '';
+      let namaT = idN !== -1 ? String(r[idN] || '').trim() : '';
+      return {
+        idAturan: idA,
+        dokter: String(r[idDok]).trim(),
+        namaDokter: String(r[idDok]).trim(),
+        kode: idT,
+        idTindakan: idT,
+        nama: namaT,
+        namaTindakan: namaT,
+        tarif: idTarifCol !== -1 ? (Number(r[idTarifCol]) || 0) : 0,
+        labor: idLaborCol !== -1 ? String(r[idLaborCol] || 'Tidak').trim() : 'Tidak',
+        persenJM: pct,
+        persenJMDisplay: Math.round(pct * 100) + '%',
+        keterangan: idKet !== -1 ? String(r[idKet] || '').trim() : ''
+      };
+    });
   } catch (e) {
     return [];
+  }
+}
+
+function simpanTarifKhususDokter(payload) {
+  const lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(10000);
+    const idDb = DB_CONFIG.DATABASE;
+    const sheet = getSheetEksternal(idDb, "Tarif_Khusus_Dokter");
+    if (!sheet) return { success: false, message: "Sheet Tarif_Khusus_Dokter tidak ditemukan di Database." };
+
+    let data = sheet.getDataRange().getValues();
+    if (data.length === 0 || !data[0] || data[0].length < 8) {
+      sheet.clear();
+      sheet.appendRow(["ID_Aturan", "Nama_Dokter", "ID_Tindakan", "Nama_Tindakan", "Tarif", "Labor", "Persen_JM_Dokter", "Keterangan"]);
+      data = sheet.getDataRange().getValues();
+    }
+
+    let h = data[0];
+    let idAturanCol = getColIdx(h, ['idaturan', 'id_aturan', 'id', 'kode_aturan']);
+    let idDokCol = getColIdx(h, ['namadokter', 'dokter', 'nama_dokter']);
+    let idTindakanCol = getColIdx(h, ['idtindakan', 'id_tindakan', 'kodetindakan', 'kode', 'kode_tindakan']);
+    let idNamaCol = getColIdx(h, ['namatindakan', 'tindakan', 'nama_tindakan']);
+
+    let targetIdAturan = String(payload.idAturan || '').trim();
+    let namaDokter = String(payload.namaDokter || payload.dokter || '').trim();
+    let idTindakan = String(payload.idTindakan || payload.kode || '').trim();
+    let namaTindakan = String(payload.namaTindakan || payload.nama || '').trim();
+    let tarif = Number(payload.tarif) || 0;
+    let labor = String(payload.labor || 'Tidak').trim();
+    let persenJM = Number(payload.persenJM) || 0;
+    if (persenJM > 1) persenJM = persenJM / 100;
+    let keterangan = String(payload.keterangan || '').trim();
+
+    // Auto increase ID Aturan: TKD-XX (2 digit) jika belum ada
+    if (!targetIdAturan || targetIdAturan === 'AUTO' || !targetIdAturan.startsWith('TKD-')) {
+      let maxNum = 0;
+      for (let i = 1; i < data.length; i++) {
+        let curId = idAturanCol !== -1 ? String(data[i][idAturanCol] || '').trim().toUpperCase() : '';
+        let m = curId.match(/TKD-(\d+)/);
+        if (m) {
+          let n = parseInt(m[1], 10);
+          if (n > maxNum) maxNum = n;
+        }
+      }
+      targetIdAturan = "TKD-" + String(maxNum + 1).padStart(2, '0');
+    }
+
+    if (!keterangan) {
+      keterangan = namaDokter + ": " + namaTindakan + " JM Khusus " + Math.round(persenJM * 100) + "%";
+    }
+
+    let rowIndex = -1;
+    for (let i = 1; i < data.length; i++) {
+      let curId = idAturanCol !== -1 ? String(data[i][idAturanCol] || '').trim() : '';
+      if (curId === targetIdAturan) {
+        rowIndex = i + 1;
+        break;
+      }
+    }
+
+    if (rowIndex === -1) {
+      for (let i = 1; i < data.length; i++) {
+        let curDok = idDokCol !== -1 ? String(data[i][idDokCol] || '').trim() : '';
+        let curTind = idNamaCol !== -1 ? String(data[i][idNamaCol] || '').trim() : '';
+        let curKode = idTindakanCol !== -1 ? String(data[i][idTindakanCol] || '').trim() : '';
+        if (curDok === namaDokter && (curTind === namaTindakan || (idTindakan && curKode === idTindakan))) {
+          rowIndex = i + 1;
+          break;
+        }
+      }
+    }
+
+    let newRow = [
+      targetIdAturan,
+      namaDokter,
+      idTindakan,
+      namaTindakan,
+      tarif,
+      labor,
+      persenJM,
+      keterangan
+    ];
+
+    if (rowIndex > 0) {
+      sheet.getRange(rowIndex, 1, 1, newRow.length).setValues([newRow]);
+    } else {
+      sheet.appendRow(newRow);
+    }
+
+    try {
+      sheet.getRange(2, 7, Math.max(1, sheet.getLastRow() - 1), 1).setNumberFormat("0.0%");
+      sheet.getRange(2, 5, Math.max(1, sheet.getLastRow() - 1), 1).setNumberFormat("#,##0");
+    } catch (eFmt) {}
+
+    invalidateMasterCache();
+    return {
+      success: true,
+      message: "Aturan tarif khusus " + targetIdAturan + " untuk " + namaDokter + " berhasil disimpan!",
+      idAturan: targetIdAturan
+    };
+  } catch (err) {
+    return { success: false, message: "Gagal menyimpan aturan khusus: " + err.message };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function hapusTarifKhususDokter(payload) {
+  const lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(10000);
+    const idDb = DB_CONFIG.DATABASE;
+    const sheet = getSheetEksternal(idDb, "Tarif_Khusus_Dokter");
+    if (!sheet) return { success: false, message: "Sheet Tarif_Khusus_Dokter tidak ditemukan." };
+
+    let targetId = (typeof payload === 'string') ? payload.trim() : String(payload.idAturan || payload.id || '').trim();
+    if (!targetId) return { success: false, message: "ID Aturan tidak valid untuk dihapus." };
+
+    let data = sheet.getDataRange().getValues();
+    if (data.length <= 1) return { success: false, message: "Belum ada data aturan di sheet." };
+
+    let h = data[0];
+    let idAturanCol = getColIdx(h, ['idaturan', 'id_aturan', 'id', 'kode_aturan']);
+    let deleted = false;
+
+    for (let i = 1; i < data.length; i++) {
+      let curId = idAturanCol !== -1 ? String(data[i][idAturanCol] || '').trim() : '';
+      if (curId === targetId) {
+        sheet.deleteRow(i + 1);
+        deleted = true;
+        break;
+      }
+    }
+
+    if (!deleted) {
+      return { success: false, message: "Aturan " + targetId + " tidak ditemukan di Database." };
+    }
+
+    invalidateMasterCache();
+    return { success: true, message: "Aturan tindakan khusus " + targetId + " berhasil dihapus!" };
+  } catch (err) {
+    return { success: false, message: "Gagal menghapus aturan: " + err.message };
+  } finally {
+    lock.releaseLock();
   }
 }
 
@@ -4584,12 +4754,15 @@ const SPREADSHEET_DEFINITIONS = {
         },
         {
           "name": "Tarif_Khusus_Dokter",
-          "headers": ["ID_Aturan", "Nama_Dokter", "Kode_Tindakan", "Nama_Tindakan", "Persen_JM_Dokter", "Keterangan"],
-          "formats": { "E": "0.0%" },
+          "headers": ["ID_Aturan", "Nama_Dokter", "ID_Tindakan", "Nama_Tindakan", "Tarif", "Labor", "Persen_JM_Dokter", "Keterangan"],
+          "formats": { "A": "@", "C": "@", "E": "#,##0", "G": "0.0%" },
+          "validations": {
+            "F": ["Ya", "Tidak"]
+          },
           "seedRows": [
-            ["EXC-0001", "drg. Tia Ardhana R", "DGS-0001", "Perawatan Saluran Akar (PSA) Molar", 0.55, "drg. Tia Ardhana R: PSA Molar JM Khusus 55% (Default 50%)"],
-            ["EXC-0002", "drg. Tia Ardhana R", "DGS-0002", "Odontektomi Gigi Impaksi M3", 0.55, "drg. Tia Ardhana R: Bedah Minor JM Khusus 55% (Default 50%)"],
-            ["EXC-0003", "drg. Tia Ardhana R", "LAB-0001", "Pemasangan Mahkota PFM (Crown)", 0.55, "drg. Tia Ardhana R: Crown PFM JM Khusus 55% setelah potong Lab (Default 50%)"]
+            ["TKD-01", "drg. Tia Ardhana R", "DGS-0001", "Perawatan Saluran Akar (PSA) Molar", 1500000, "Tidak", 0.55, "drg. Tia Ardhana R: PSA Molar JM Khusus 55% (Default 50%)"],
+            ["TKD-02", "drg. Tia Ardhana R", "DGS-0002", "Odontektomi Gigi Impaksi M3", 2500000, "Tidak", 0.55, "drg. Tia Ardhana R: Bedah Minor JM Khusus 55% (Default 50%)"],
+            ["TKD-03", "drg. Tia Ardhana R", "LAB-0001", "Pemasangan Mahkota PFM (Crown)", 1500000, "Ya", 0.55, "drg. Tia Ardhana R: Crown PFM JM Khusus 55% setelah potong Lab (Default 50%)"]
           ]
         }
       ]

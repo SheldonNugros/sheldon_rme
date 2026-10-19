@@ -110,13 +110,30 @@ tarif_khusus_csv = read_csv_rows('DATABASE', 'Tarif_Khusus_Dokter.csv')
 tarif_khusus_list = []
 for r in tarif_khusus_csv:
     if len(r) >= 5 and r[0].strip():
+        id_aturan = r[0].strip()
+        nama_dokter = r[1].strip()
+        id_tindakan = r[2].strip()
+        nama_tindakan = r[3].strip()
+        if len(r) >= 8:
+            tarif_val = clean_int(r[4], 0)
+            labor_val = r[5].strip()
+            persen_jm = clean_float(r[6], 0.55)
+            ket = r[7].strip()
+        else:
+            tarif_val = 0
+            labor_val = "Tidak"
+            persen_jm = clean_float(r[4], 0.55)
+            ket = r[5].strip() if len(r) > 5 else ""
         tarif_khusus_list.append({
-            "idAturan": r[0].strip(),
-            "namaDokter": r[1].strip(),
-            "kodeTindakan": r[2].strip(),
-            "namaTindakan": r[3].strip(),
-            "persenJM": clean_float(r[4], 0.55),
-            "keterangan": r[5].strip() if len(r) > 5 else ""
+            "idAturan": id_aturan,
+            "namaDokter": nama_dokter,
+            "idTindakan": id_tindakan,
+            "kodeTindakan": id_tindakan,
+            "namaTindakan": nama_tindakan,
+            "tarif": tarif_val,
+            "labor": labor_val,
+            "persenJM": persen_jm,
+            "keterangan": ket
         })
 
 obat_csv = read_csv_rows('OBAT', 'Master_Obat.csv')

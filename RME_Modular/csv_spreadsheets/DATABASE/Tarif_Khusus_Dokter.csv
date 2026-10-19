@@ -1,4 +1,4 @@
-ID_Aturan,Nama_Dokter,Kode_Tindakan,Nama_Tindakan,Persen_JM_Dokter,Keterangan
-EXC-0001,"drg. Tia Ardhana R",DGS-0001,"Perawatan Saluran Akar (PSA) Molar",55.0%,"drg. Tia Ardhana R mendapat JM Khusus 55% (Default beliau 50%)"
-EXC-0002,"drg. Tia Ardhana R",DGS-0002,"Odontektomi Gigi Impaksi M3",55.0%,"drg. Tia Ardhana R mendapat JM Khusus 55% (Default beliau 50%)"
-EXC-0003,"drg. Tia Ardhana R",LAB-0001,"Pemasangan Mahkota PFM (Crown)",55.0%,"drg. Tia Ardhana R mendapat JM Khusus 55% setelah dikurangi Biaya Lab"
+ID_Aturan,Nama_Dokter,ID_Tindakan,Nama_Tindakan,Tarif,Labor,Persen_JM_Dokter,Keterangan
+TKD-01,"drg. Tia Ardhana R",DGS-0001,"Perawatan Saluran Akar (PSA) Molar","1,500,000",Tidak,55.0%,"drg. Tia Ardhana R: PSA Molar JM Khusus 55% (Default beliau 50%)"
+TKD-02,"drg. Tia Ardhana R",DGS-0002,"Odontektomi Gigi Impaksi M3","2,500,000",Tidak,55.0%,"drg. Tia Ardhana R: Bedah Minor JM Khusus 55% (Default beliau 50%)"
+TKD-03,"drg. Tia Ardhana R",LAB-0001,"Pemasangan Mahkota PFM (Crown)","1,500,000",Ya,55.0%,"drg. Tia Ardhana R: Crown PFM JM Khusus 55% setelah potong Lab (Default beliau 50%)"

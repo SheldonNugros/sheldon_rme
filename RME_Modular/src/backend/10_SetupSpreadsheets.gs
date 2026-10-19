@@ -102,12 +102,15 @@ const SPREADSHEET_DEFINITIONS = {
         },
         {
           "name": "Tarif_Khusus_Dokter",
-          "headers": ["ID_Aturan", "Nama_Dokter", "Kode_Tindakan", "Nama_Tindakan", "Persen_JM_Dokter", "Keterangan"],
-          "formats": { "E": "0.0%" },
+          "headers": ["ID_Aturan", "Nama_Dokter", "ID_Tindakan", "Nama_Tindakan", "Tarif", "Labor", "Persen_JM_Dokter", "Keterangan"],
+          "formats": { "A": "@", "C": "@", "E": "#,##0", "G": "0.0%" },
+          "validations": {
+            "F": ["Ya", "Tidak"]
+          },
           "seedRows": [
-            ["EXC-0001", "drg. Tia Ardhana R", "DGS-0001", "Perawatan Saluran Akar (PSA) Molar", 0.55, "drg. Tia Ardhana R: PSA Molar JM Khusus 55% (Default 50%)"],
-            ["EXC-0002", "drg. Tia Ardhana R", "DGS-0002", "Odontektomi Gigi Impaksi M3", 0.55, "drg. Tia Ardhana R: Bedah Minor JM Khusus 55% (Default 50%)"],
-            ["EXC-0003", "drg. Tia Ardhana R", "LAB-0001", "Pemasangan Mahkota PFM (Crown)", 0.55, "drg. Tia Ardhana R: Crown PFM JM Khusus 55% setelah potong Lab (Default 50%)"]
+            ["TKD-01", "drg. Tia Ardhana R", "DGS-0001", "Perawatan Saluran Akar (PSA) Molar", 1500000, "Tidak", 0.55, "drg. Tia Ardhana R: PSA Molar JM Khusus 55% (Default 50%)"],
+            ["TKD-02", "drg. Tia Ardhana R", "DGS-0002", "Odontektomi Gigi Impaksi M3", 2500000, "Tidak", 0.55, "drg. Tia Ardhana R: Bedah Minor JM Khusus 55% (Default 50%)"],
+            ["TKD-03", "drg. Tia Ardhana R", "LAB-0001", "Pemasangan Mahkota PFM (Crown)", 1500000, "Ya", 0.55, "drg. Tia Ardhana R: Crown PFM JM Khusus 55% setelah potong Lab (Default 50%)"]
           ]
         }
       ]

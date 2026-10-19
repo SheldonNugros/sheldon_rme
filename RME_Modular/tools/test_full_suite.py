@@ -1891,6 +1891,64 @@ switchMasterUserSubTab('user');
 assert("OWNER-UTIL-3: Panel User Kembali Aktif", !document.getElementById('subpanelMasterUser').classList.contains('hidden'));
 assert("OWNER-UTIL-3: Panel Owner Utility Kembali Tersembunyi", document.getElementById('subpanelMasterOwnerUtility').classList.contains('hidden'));
 
+// 5b. Uji Tab Tindakan Khusus Dokter (TKD) di dalam Management User
+assert("TKD-1: Tab Tindakan Khusus Dokter Tersedia di Master User", document.getElementById('btnTabMasterTarifKhusus') !== null);
+assert("TKD-1: Subpanel Tindakan Khusus Dokter Tersedia", document.getElementById('subpanelMasterTarifKhusus') !== null);
+
+// Uji Beralih ke Tab Tindakan Khusus Dokter
+switchMasterUserSubTab('tarif-khusus');
+assert("TKD-2: Panel Tindakan Khusus Dokter Aktif", !document.getElementById('subpanelMasterTarifKhusus').classList.contains('hidden'));
+assert("TKD-2: Panel User Tersembunyi saat Tab TKD Aktif", document.getElementById('subpanelMasterUser').classList.contains('hidden'));
+assert("TKD-2: Panel Payroll Tersembunyi saat Tab TKD Aktif", document.getElementById('subpanelMasterPayroll').classList.contains('hidden'));
+
+// Uji Filter Dokter: Hanya role Dokter Gigi Umum dan Dokter Gigi Spesialis
+const dokterGigiList = getDaftarDokterGigiTKD();
+assert("TKD-3: Daftar Dokter Gigi Terfilter Tidak Kosong", dokterGigiList.length > 0);
+const allDokterValidRole = dokterGigiList.every(d => {
+  const r = String(d.role || '').toLowerCase();
+  return r.includes('dokter gigi umum') || r.includes('dokter gigi spesialis');
+});
+assert("TKD-3: Hanya Memuat Role Dokter Gigi Umum & Spesialis", allDokterValidRole);
+const hasPerawatInDokter = dokterGigiList.some(d => String(d.role || '').toLowerCase().includes('perawat'));
+assert("TKD-3: Perawat Tidak Masuk di Dropdown Dokter", !hasPerawatInDokter);
+
+// Uji Auto Increment ID Aturan TKD-XX (2 Digit)
+window._tarifKhususList = [
+  { idAturan: "TKD-01", namaDokter: "drg. Regyana Oktavaria", idTindakan: "TND-01", persenJM: 0.5 },
+  { idAturan: "TKD-02", namaDokter: "drg. Latifah Mulyana", idTindakan: "TND-02", persenJM: 0.45 }
+];
+const nextTkdId = generateNextIdAturanTKD();
+assert("TKD-4: Next ID Aturan Otomatis 'TKD-03' (2 Digit)", nextTkdId === 'TKD-03');
+
+// Uji Auto-fill Info Tindakan saat dipilih
+const tindakanList = getDaftarMasterTindakanTKD();
+assert("TKD-5: Master Tindakan Tersedia untuk Auto-fill", tindakanList.length > 0);
+if (tindakanList.length > 0) {
+  const testItem = tindakanList[0];
+  const selectTindakan = document.getElementById('tkdTindakan');
+  if (selectTindakan) {
+    selectTindakan.value = testItem.nama;
+    onTkdTindakanChange();
+    const idTindakanVal = document.getElementById('tkdIdTindakan').value;
+    const tarifVal = Number(document.getElementById('tkdTarif').value);
+    assert("TKD-5: ID Tindakan Terisi Otomatis dari Master", idTindakanVal === (testItem.kode || testItem.id));
+    assert("TKD-5: Tarif Tindakan Terisi Otomatis dari Master", tarifVal === Number(testItem.tarif || testItem.harga || 0));
+  }
+}
+
+// Uji Live Simulasi JM Khusus: (Tarif - Lab) * % JM
+document.getElementById('tkdTarif').value = 1000000;
+document.getElementById('tkdLabor').value = 'Tidak';
+document.getElementById('tkdPersenJM').value = 50;
+hitungSimulasiJMKhusus();
+assert("TKD-6: Simulasi Hak Dokter 50% dari Rp 1.000.000 adalah Rp 500.000", document.getElementById('simulasiHakDokter').textContent.includes('500.000'));
+assert("TKD-6: Simulasi Hak Klinik 50% dari Rp 1.000.000 adalah Rp 500.000", document.getElementById('simulasiHakKlinik').textContent.includes('500.000'));
+
+// Kembalikan ke Tab User
+switchMasterUserSubTab('user');
+assert("TKD-7: Panel User Kembali Aktif", !document.getElementById('subpanelMasterUser').classList.contains('hidden'));
+assert("TKD-7: Panel TKD Kembali Tersembunyi", document.getElementById('subpanelMasterTarifKhusus').classList.contains('hidden'));
+
 // 6. Uji Urutan Navigasi Sidebar Pelayanan Pasien & Administrasi
 assert("SIDEBAR-ORDER-1: Urutan Tombol Pelayanan Pasien Sesuai Spesifikasi (Pasien, EMR, Kasir, Invoice, Surat)", isPelayananOrderedInHtml);
 assert("SIDEBAR-ORDER-2: Label Kelompok Administrasi Berubah Menjadi ADMINISTRASI", isAdminHeaderInHtml);

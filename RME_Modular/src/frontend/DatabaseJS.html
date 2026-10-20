@@ -640,7 +640,27 @@ function renderTabelTindakan() {
        filtered = filtered.filter(t => (t.nama && t.nama.toLowerCase().includes(q)) || (t.kode && t.kode.toLowerCase().includes(q)));
    }
   
-   filtered.sort((a, b) => (b.kode || "").localeCompare(a.kode || ""));
+   filtered = filtered.slice().sort(function(a, b) {
+       let kA = String(a.kode || '').trim().toUpperCase();
+       let kB = String(b.kode || '').trim().toUpperCase();
+
+       let mA = kA.match(/^([A-Z]+)[-_]?(\d+)/);
+       let mB = kB.match(/^([A-Z]+)[-_]?(\d+)/);
+
+       if (mA && mB) {
+           let prefA = mA[1];
+           let prefB = mB[1];
+           if (prefA !== prefB) {
+               return prefA.localeCompare(prefB);
+           }
+           let numA = parseInt(mA[2], 10);
+           let numB = parseInt(mB[2], 10);
+           if (numA !== numB) {
+               return numA - numB;
+           }
+       }
+       return kA.localeCompare(kB, undefined, { numeric: true, sensitivity: 'base' });
+   });
 
    if (filtered.length === 0) {
        tbody.innerHTML = '<tr><td colspan="6" class="text-center py-6 text-slate-400 font-bold">Data tindakan tidak ditemukan.</td></tr>';

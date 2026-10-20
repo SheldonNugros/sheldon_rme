@@ -1496,11 +1496,17 @@
 
    <!-- TABEL DAFTAR TINDAKAN -->
    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-      <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 border-b border-slate-100 pb-3 gap-3">
-         <h3 class="font-black text-slate-800 text-sm">Daftar Tindakan Medis</h3>
-         <div class="w-full md:w-64 relative">
-           <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">🔍</span>
-           <input type="text" id="cariDbTindakan" oninput="renderTabelTindakan()" placeholder="Cari Tindakan / Kode..." class="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs outline-none focus:ring-2 focus:ring-indigo-500">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-5 border-b border-slate-100 pb-4 gap-4">
+         <div>
+           <h3 class="font-black text-slate-800 text-base sm:text-lg flex items-center gap-2">
+             <span class="text-indigo-600">📋</span> Daftar Tindakan Medis
+           </h3>
+           <p class="text-xs text-slate-500 font-medium mt-0.5">Kelola dan telusuri daftar master tarif, kategori role, dan kode tindakan klinik</p>
+         </div>
+         <div class="w-full sm:w-96 md:w-[460px] relative">
+           <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-indigo-500 text-base pointer-events-none">🔍</span>
+           <input type="text" id="cariDbTindakan" oninput="renderTabelTindakan()" placeholder="Cari Tindakan / Kode (cth: DGU, UMM, Penambalan)..." class="w-full pl-11 pr-11 py-3 bg-slate-50/80 hover:bg-slate-50 border-2 border-slate-200 focus:border-indigo-600 focus:bg-white focus:ring-4 focus:ring-indigo-100 rounded-xl text-xs sm:text-sm font-bold text-slate-800 outline-none transition-all shadow-2xs placeholder:text-slate-400 placeholder:font-normal">
+           <button type="button" onclick="let el=document.getElementById('cariDbTindakan'); if(el){el.value=''; el.focus(); renderTabelTindakan();}" title="Bersihkan pencarian" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all cursor-pointer">✕</button>
          </div>
       </div>
       <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-sm max-h-[50vh]">
@@ -1627,14 +1633,17 @@
 
     <!-- TABEL DAFTAR OBAT -->
     <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-       <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 border-b border-slate-100 pb-3 gap-3">
+       <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-5 border-b border-slate-100 pb-4 gap-4">
           <div>
-            <h3 class="font-black text-slate-800 text-sm">Katalog Master Obat</h3>
-            <p class="text-[11px] text-slate-400 font-medium">Total item obat terdaftar dalam inventory</p>
+            <h3 class="font-black text-slate-800 text-base sm:text-lg flex items-center gap-2">
+              <span class="text-emerald-600">💊</span> Katalog Master Obat
+            </h3>
+            <p class="text-xs text-slate-500 font-medium mt-0.5">Total item obat terdaftar dalam inventory klinik</p>
           </div>
-          <div class="w-full md:w-80 relative">
-            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">🔍</span>
-            <input type="text" id="cariDbObat" oninput="renderTabelObat()" placeholder="Cari Nama / Kandungan / Kode..." class="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs outline-none focus:ring-2 focus:ring-indigo-500">
+          <div class="w-full sm:w-96 md:w-[460px] relative">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-emerald-500 text-base pointer-events-none">🔍</span>
+            <input type="text" id="cariDbObat" oninput="renderTabelObat()" placeholder="Cari Nama / Kandungan / Kode Obat..." class="w-full pl-11 pr-11 py-3 bg-slate-50/80 hover:bg-slate-50 border-2 border-slate-200 focus:border-emerald-600 focus:bg-white focus:ring-4 focus:ring-emerald-100 rounded-xl text-xs sm:text-sm font-bold text-slate-800 outline-none transition-all shadow-2xs placeholder:text-slate-400 placeholder:font-normal">
+            <button type="button" onclick="let el=document.getElementById('cariDbObat'); if(el){el.value=''; el.focus(); renderTabelObat();}" title="Bersihkan pencarian" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all cursor-pointer">✕</button>
           </div>
        </div>
        <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-sm max-h-[50vh]">
@@ -1738,14 +1747,17 @@
 
     <!-- TABEL DAFTAR BMHP -->
     <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-       <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 border-b border-slate-100 pb-3 gap-3">
+       <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-5 border-b border-slate-100 pb-4 gap-4">
           <div>
-            <h3 class="font-black text-slate-800 text-sm">Katalog Master BMHP & Alkes</h3>
-            <p class="text-[11px] text-slate-400 font-medium">Total item BMHP terdaftar dalam inventory</p>
+            <h3 class="font-black text-slate-800 text-base sm:text-lg flex items-center gap-2">
+              <span class="text-amber-600">📦</span> Katalog Master BMHP & Alkes
+            </h3>
+            <p class="text-xs text-slate-500 font-medium mt-0.5">Total item BMHP terdaftar dalam inventory klinik</p>
           </div>
-          <div class="w-full md:w-72 relative">
-            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">🔍</span>
-            <input type="text" id="cariDbBmhp" oninput="renderTabelBmhp()" placeholder="Cari Nama / Kode / Supplier..." class="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs outline-none focus:ring-2 focus:ring-indigo-500">
+          <div class="w-full sm:w-96 md:w-[460px] relative">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-amber-500 text-base pointer-events-none">🔍</span>
+            <input type="text" id="cariDbBmhp" oninput="renderTabelBmhp()" placeholder="Cari Nama / Kode / Supplier BMHP..." class="w-full pl-11 pr-11 py-3 bg-slate-50/80 hover:bg-slate-50 border-2 border-slate-200 focus:border-amber-600 focus:bg-white focus:ring-4 focus:ring-amber-100 rounded-xl text-xs sm:text-sm font-bold text-slate-800 outline-none transition-all shadow-2xs placeholder:text-slate-400 placeholder:font-normal">
+            <button type="button" onclick="let el=document.getElementById('cariDbBmhp'); if(el){el.value=''; el.focus(); renderTabelBmhp();}" title="Bersihkan pencarian" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all cursor-pointer">✕</button>
           </div>
        </div>
        <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-sm max-h-[50vh]">
@@ -17671,7 +17683,27 @@ function renderTabelTindakan() {
        filtered = filtered.filter(t => (t.nama && t.nama.toLowerCase().includes(q)) || (t.kode && t.kode.toLowerCase().includes(q)));
    }
   
-   filtered.sort((a, b) => (b.kode || "").localeCompare(a.kode || ""));
+   filtered = filtered.slice().sort(function(a, b) {
+       let kA = String(a.kode || '').trim().toUpperCase();
+       let kB = String(b.kode || '').trim().toUpperCase();
+
+       let mA = kA.match(/^([A-Z]+)[-_]?(\d+)/);
+       let mB = kB.match(/^([A-Z]+)[-_]?(\d+)/);
+
+       if (mA && mB) {
+           let prefA = mA[1];
+           let prefB = mB[1];
+           if (prefA !== prefB) {
+               return prefA.localeCompare(prefB);
+           }
+           let numA = parseInt(mA[2], 10);
+           let numB = parseInt(mB[2], 10);
+           if (numA !== numB) {
+               return numA - numB;
+           }
+       }
+       return kA.localeCompare(kB, undefined, { numeric: true, sensitivity: 'base' });
+   });
 
    if (filtered.length === 0) {
        tbody.innerHTML = '<tr><td colspan="6" class="text-center py-6 text-slate-400 font-bold">Data tindakan tidak ditemukan.</td></tr>';

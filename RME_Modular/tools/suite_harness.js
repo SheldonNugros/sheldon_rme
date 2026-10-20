@@ -23,6 +23,7 @@ var isPanelRefInHtml = true;
 var isMetodeCashTfOnly = true;
 var isStatusSplitInHtml = true;
 var isBoxSplitInHtml = true;
+var isSearchTindakanLargeInHtml = true;
 
 // Enhanced DOM Mock for JavaScriptCore
 var window = this;
@@ -12426,7 +12427,27 @@ function renderTabelTindakan() {
        filtered = filtered.filter(t => (t.nama && t.nama.toLowerCase().includes(q)) || (t.kode && t.kode.toLowerCase().includes(q)));
    }
   
-   filtered.sort((a, b) => (b.kode || "").localeCompare(a.kode || ""));
+   filtered = filtered.slice().sort(function(a, b) {
+       let kA = String(a.kode || '').trim().toUpperCase();
+       let kB = String(b.kode || '').trim().toUpperCase();
+
+       let mA = kA.match(/^([A-Z]+)[-_]?(\d+)/);
+       let mB = kB.match(/^([A-Z]+)[-_]?(\d+)/);
+
+       if (mA && mB) {
+           let prefA = mA[1];
+           let prefB = mB[1];
+           if (prefA !== prefB) {
+               return prefA.localeCompare(prefB);
+           }
+           let numA = parseInt(mA[2], 10);
+           let numB = parseInt(mB[2], 10);
+           if (numA !== numB) {
+               return numA - numB;
+           }
+       }
+       return kA.localeCompare(kB, undefined, { numeric: true, sensitivity: 'base' });
+   });
 
    if (filtered.length === 0) {
        tbody.innerHTML = '<tr><td colspan="6" class="text-center py-6 text-slate-400 font-bold">Data tindakan tidak ditemukan.</td></tr>';
@@ -19598,6 +19619,46 @@ var infoNewTind = rowNewTind.querySelector('.val-info-tindakan');
 assert("KASIR-DL-SELECT-3: Info Menampilkan Kode [UMM-0001]", infoNewTind && infoNewTind.innerHTML.includes("[UMM-0001]"));
 assert("KASIR-DL-SELECT-4: Info Menampilkan Tarif Rp 50.000", infoNewTind && infoNewTind.innerHTML.includes("50.000"));
 assert("KASIR-DL-SELECT-5: Info Menampilkan Status Labor", infoNewTind && (infoNewTind.innerHTML.includes("Lab: Tidak") || infoNewTind.innerHTML.includes("Lab: Ya")));
+
+print("\n--- TEST: Urutan Tindakan Medis Berdasarkan Kode dan Nomor Urut & Form Search Diperbesar ---");
+assert("SEARCH-FORM-TINDAKAN-1: Form Search Tindakan Medis Diperbesar di HTML", isSearchTindakanLargeInHtml);
+
+var sampleTindakanUntukUrutan = [
+  { kode: "UMM-004", nama: "Pemeriksaan Asam Urat", kategori: "Umum", tarif: 75000 },
+  { kode: "UMM-002", nama: "Pemeriksaan Gula Darah", kategori: "Umum", tarif: 75000 },
+  { kode: "DGU-107", nama: "Pulp Capping", kategori: "Dokter Gigi Umum", tarif: 250000 },
+  { kode: "UMM-001", nama: "Rontgen Periapikal", kategori: "Umum", tarif: 100000 },
+  { kode: "DGU-001", nama: "Penambalan Gigi Anak", kategori: "Dokter Gigi Umum", tarif: 150000 },
+  { kode: "DGS-002", nama: "Odontektomi Gigi Impaksi M3", kategori: "Dokter Gigi Spesialis", tarif: 1500000 },
+  { kode: "DGS-001", nama: "Odontektomi Sederhana", kategori: "Dokter Gigi Spesialis", tarif: 1200000 },
+  { kode: "UMM-003", nama: "Pemeriksaan Cholesterol", kategori: "Umum", tarif: 75000 }
+];
+
+listMasterTindakan = sampleTindakanUntukUrutan;
+document.getElementById('cariDbTindakan').value = '';
+renderTabelTindakan();
+
+var tbodyTind = document.getElementById('tbodyDbTindakan');
+var htmlTbody = tbodyTind ? tbodyTind.innerHTML : '';
+
+var renderedKodes = [];
+var reKodes = /class="p-3 font-mono font-bold text-indigo-600">([^<]+)<\/td>/g;
+var mK;
+while ((mK = reKodes.exec(htmlTbody)) !== null) {
+  renderedKodes.push(mK[1].trim());
+}
+
+assert("SORT-TINDAKAN-1: Tindakan Terurut Ascending DGS-001 lalu DGS-002", renderedKodes.indexOf("DGS-001") < renderedKodes.indexOf("DGS-002"));
+assert("SORT-TINDAKAN-2: Tindakan Terurut Ascending DGU-001 sebelum DGU-107", renderedKodes.indexOf("DGU-001") < renderedKodes.indexOf("DGU-107"));
+assert("SORT-TINDAKAN-3: Tindakan UMM Terurut Ascending UMM-001, UMM-002, UMM-003, UMM-004", 
+  renderedKodes.indexOf("UMM-001") < renderedKodes.indexOf("UMM-002") && 
+  renderedKodes.indexOf("UMM-002") < renderedKodes.indexOf("UMM-003") && 
+  renderedKodes.indexOf("UMM-003") < renderedKodes.indexOf("UMM-004")
+);
+assert("SORT-TINDAKAN-4: Prefiks DGS sebelum DGU dan DGU sebelum UMM", 
+  renderedKodes.indexOf("DGS-001") < renderedKodes.indexOf("DGU-001") &&
+  renderedKodes.indexOf("DGU-001") < renderedKodes.indexOf("UMM-001")
+);
 
 print("\n--- TEST: Sinkronisasi Database, Nama Sheet, dan Header Kolom ---");
 var mDb = window._mockDb || {};

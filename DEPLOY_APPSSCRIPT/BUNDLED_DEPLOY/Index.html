@@ -6377,7 +6377,7 @@
         <!-- DOKTER PENANGGUNG JAWAB -->
         <div class="md:col-span-6">
           <label class="block font-bold text-slate-700 mb-1.5 text-xs">Dokter Penanggung Jawab <span class="text-rose-500 font-black">*</span></label>
-          <select id="ksrDokter" onchange="updateDatalistTindakan()" class="w-full px-3.5 py-2.5 bg-white border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 rounded-xl text-xs font-bold text-slate-800 outline-none cursor-pointer shadow-2xs">
+          <select id="ksrDokter" onchange="onKasirDokterChange()" class="w-full px-3.5 py-2.5 bg-white border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 rounded-xl text-xs font-bold text-slate-800 outline-none cursor-pointer shadow-2xs transition-all">
             <option value="">-- Pilih Dokter --</option>
           </select>
         </div>
@@ -6399,16 +6399,19 @@
     </div>
 
     <!-- CARD 2: TINDAKAN MEDIS -->
-    <div class="bg-slate-50/70 p-5 rounded-2xl border border-slate-200/90 space-y-3.5">
+    <div id="cardKasirTindakan" class="bg-slate-50/70 p-5 rounded-2xl border border-slate-200/90 space-y-3.5 transition-all">
       <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3">
         <div class="flex items-center gap-2.5">
           <span class="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center text-base font-bold shadow-2xs">🩺</span>
           <div>
-            <h3 class="text-sm font-black text-slate-900 tracking-tight">Tindakan Medis & Gigi</h3>
+            <div class="flex items-center gap-2">
+              <h3 class="text-sm font-black text-slate-900 tracking-tight">Tindakan Medis & Gigi</h3>
+              <span id="badgeLockTindakan" class="badge-lock-dokter inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-800 text-[10px] font-black border border-rose-200">🔒 Pilih Dokter Dahulu</span>
+            </div>
             <p class="text-[11px] text-slate-500 font-medium">Input tarif tindakan klinik, biaya laboratorium, dan asistensi perawat</p>
           </div>
         </div>
-        <button type="button" onclick="addKasirTindakan()" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs shadow-md shadow-indigo-500/20 hover:shadow-lg hover:shadow-indigo-500/30 transition-all flex items-center gap-2 cursor-pointer self-start sm:self-auto active:scale-95">
+        <button type="button" id="btnAddKasirTindakan" onclick="addKasirTindakan()" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs shadow-md shadow-indigo-500/20 hover:shadow-lg hover:shadow-indigo-500/30 transition-all flex items-center gap-2 cursor-pointer self-start sm:self-auto active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none">
           <span class="text-base leading-none">➕</span>
           <span>Tambah Tindakan</span>
         </button>
@@ -6434,16 +6437,19 @@
     </div>
 
     <!-- CARD 3: RESEP OBAT -->
-    <div class="bg-slate-50/70 p-5 rounded-2xl border border-slate-200/90 space-y-3.5">
+    <div id="cardKasirObat" class="bg-slate-50/70 p-5 rounded-2xl border border-slate-200/90 space-y-3.5 transition-all">
       <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3">
         <div class="flex items-center gap-2.5">
           <span class="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-base font-bold shadow-2xs">💊</span>
           <div>
-            <h3 class="text-sm font-black text-slate-900 tracking-tight">Resep Obat Pasien</h3>
+            <div class="flex items-center gap-2">
+              <h3 class="text-sm font-black text-slate-900 tracking-tight">Resep Obat Pasien</h3>
+              <span id="badgeLockObat" class="badge-lock-dokter inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-800 text-[10px] font-black border border-rose-200">🔒 Pilih Dokter Dahulu</span>
+            </div>
             <p class="text-[11px] text-slate-500 font-medium">Input obat yang diresepkan dan otomatis memotong persediaan stok apotek</p>
           </div>
         </div>
-        <button type="button" onclick="addKasirObat()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-md shadow-emerald-500/20 hover:shadow-lg hover:shadow-emerald-500/30 transition-all flex items-center gap-2 cursor-pointer self-start sm:self-auto active:scale-95">
+        <button type="button" id="btnAddKasirObat" onclick="addKasirObat()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-md shadow-emerald-500/20 hover:shadow-lg hover:shadow-emerald-500/30 transition-all flex items-center gap-2 cursor-pointer self-start sm:self-auto active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none">
           <span class="text-base leading-none">➕</span>
           <span>Tambah Obat</span>
         </button>
@@ -6467,16 +6473,19 @@
     </div>
 
     <!-- CARD 4: PENGGUNAAN BMHP -->
-    <div class="bg-slate-50/70 p-5 rounded-2xl border border-slate-200/90 space-y-3.5">
+    <div id="cardKasirBMHP" class="bg-slate-50/70 p-5 rounded-2xl border border-slate-200/90 space-y-3.5 transition-all">
       <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3">
         <div class="flex items-center gap-2.5">
           <span class="w-8 h-8 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-base font-bold shadow-2xs">📦</span>
           <div>
-            <h3 class="text-sm font-black text-slate-900 tracking-tight">Penggunaan BMHP (Bahan Medis Habis Pakai)</h3>
+            <div class="flex items-center gap-2">
+              <h3 class="text-sm font-black text-slate-900 tracking-tight">Penggunaan BMHP (Bahan Medis Habis Pakai)</h3>
+              <span id="badgeLockBMHP" class="badge-lock-dokter inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-800 text-[10px] font-black border border-rose-200">🔒 Pilih Dokter Dahulu</span>
+            </div>
             <p class="text-[11px] text-slate-500 font-medium">Input pemakaian bahan medis habis pakai selama proses tindakan</p>
           </div>
         </div>
-        <button type="button" onclick="addKasirBMHP()" class="px-5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-bold text-xs shadow-md shadow-amber-500/20 hover:shadow-lg hover:shadow-amber-500/30 transition-all flex items-center gap-2 cursor-pointer self-start sm:self-auto active:scale-95">
+        <button type="button" id="btnAddKasirBMHP" onclick="addKasirBMHP()" class="px-5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-bold text-xs shadow-md shadow-amber-500/20 hover:shadow-lg hover:shadow-amber-500/30 transition-all flex items-center gap-2 cursor-pointer self-start sm:self-auto active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none">
           <span class="text-base leading-none">➕</span>
           <span>Tambah BMHP</span>
         </button>
@@ -14290,6 +14299,7 @@ function toggleSectionFisik(forceState) {
    let dlBMHP = document.getElementById('dlBMHPKasir'); if(dlBMHP) dlBMHP.innerHTML = window.KlinikData.bmhp.map(b => `<option value="${b.nama}">${b.nama} (Stok: ${b.stok !== undefined ? b.stok : 0} ${b.satuan || 'Pcs'})</option>`).join('');
   
    updateDatalistTindakan();
+   syncKasirDokterLockState();
 
 
    let searchPas = document.getElementById('ksrSearchPasien');
@@ -14789,6 +14799,93 @@ function toggleSectionFisik(forceState) {
     }
   }
 
+  function syncKasirDokterLockState() {
+    let dokEl = document.getElementById('ksrDokter');
+    let isDokterSelected = !!(dokEl && dokEl.value && dokEl.value.trim() !== '');
+
+    // 1. Kunci / Buka Tombol Tambah Item
+    let btnTindakan = document.getElementById('btnAddKasirTindakan');
+    let btnObat = document.getElementById('btnAddKasirObat');
+    let btnBMHP = document.getElementById('btnAddKasirBMHP');
+
+    [btnTindakan, btnObat, btnBMHP].forEach(btn => {
+      if (btn) {
+        btn.disabled = !isDokterSelected;
+        if (!isDokterSelected) {
+          btn.classList.add('opacity-40', 'cursor-not-allowed', 'pointer-events-none');
+        } else {
+          btn.classList.remove('opacity-40', 'cursor-not-allowed', 'pointer-events-none');
+        }
+      }
+    });
+
+    // 2. Badge Status Kunci di Header Card
+    let bTindakan = document.getElementById('badgeLockTindakan');
+    if (bTindakan) {
+      if (!isDokterSelected) bTindakan.classList.remove('hidden');
+      else bTindakan.classList.add('hidden');
+    }
+    let bObat = document.getElementById('badgeLockObat');
+    if (bObat) {
+      if (!isDokterSelected) bObat.classList.remove('hidden');
+      else bObat.classList.add('hidden');
+    }
+    let bBMHP = document.getElementById('badgeLockBMHP');
+    if (bBMHP) {
+      if (!isDokterSelected) bBMHP.classList.remove('hidden');
+      else bBMHP.classList.add('hidden');
+    }
+
+    // 3. Card Visual Dimmed
+    ['cardKasirTindakan', 'cardKasirObat', 'cardKasirBMHP'].forEach(cid => {
+      let card = document.getElementById(cid);
+      if (card) {
+        if (!isDokterSelected) card.classList.add('opacity-90');
+        else card.classList.remove('opacity-90');
+      }
+    });
+
+    // 4. Kunci / Buka seluruh input dan kontrol di dalam tabel
+    let selector = '#ksrTbodyTindakan input, #ksrTbodyTindakan select, #ksrTbodyTindakan button, #ksrTbodyObat input, #ksrTbodyObat select, #ksrTbodyObat button, #ksrTbodyBMHP input, #ksrTbodyBMHP select, #ksrTbodyBMHP button';
+    document.querySelectorAll(selector).forEach(el => {
+      if (el.classList.contains('val-nama')) {
+        el.disabled = !isDokterSelected;
+        if (!isDokterSelected) {
+          if (!el.getAttribute('data-orig-placeholder')) {
+            el.setAttribute('data-orig-placeholder', el.placeholder || '');
+          }
+          el.placeholder = '🔒 Pilih Dokter Penanggung Jawab terlebih dahulu...';
+          el.classList.add('bg-slate-100/90', 'cursor-not-allowed', 'text-slate-400');
+        } else {
+          if (el.getAttribute('data-orig-placeholder')) {
+            el.placeholder = el.getAttribute('data-orig-placeholder');
+          }
+          el.classList.remove('bg-slate-100/90', 'cursor-not-allowed', 'text-slate-400');
+        }
+      } else if (el.classList.contains('val-qty') || el.classList.contains('val-labor') || el.classList.contains('val-disc') || el.classList.contains('val-perawat') || el.classList.contains('btn-clear-val')) {
+        el.disabled = !isDokterSelected;
+        if (!isDokterSelected) {
+          el.classList.add('opacity-40', 'cursor-not-allowed');
+        } else {
+          el.classList.remove('opacity-40', 'cursor-not-allowed');
+        }
+      }
+    });
+  }
+
+  function onKasirDokterChange() {
+    updateDatalistTindakan();
+    syncKasirDokterLockState();
+
+    let dokEl = document.getElementById('ksrDokter');
+    if (dokEl && dokEl.value && dokEl.value.trim() !== '') {
+      let tbTindakan = document.getElementById('ksrTbodyTindakan');
+      if (tbTindakan && tbTindakan.children.length === 0) {
+        addKasirTindakan();
+      }
+    }
+  }
+
   function updateDatalistTindakan() {
     let dokEl = document.getElementById('ksrDokter');
     if(!dokEl) return;
@@ -14804,7 +14901,14 @@ function toggleSectionFisik(forceState) {
     let allTindakan = window.KlinikData.tindakan || [];
     let filtered = filterTindakanByRoleDokter(allTindakan, targetRole);
 
-    let htmlOptions = filtered.map(function(t) { return `<option value="${t.nama}">`; }).join('');
+    let htmlOptions = filtered.map(function(t) {
+      let kode = t.kode || t.id || '-';
+      let tarif = t.tarif || t.harga || 0;
+      let tarifRp = formatRpKSR(tarif);
+      let isLab = (t.perluLab === 'Ya' || t.labor === 'Ya');
+      let labText = isLab ? 'Lab: Ya' : 'Lab: Tidak';
+      return `<option value="[${kode}] ${t.nama} • Rp ${tarifRp} • ${labText}">`;
+    }).join('');
 
     let dlKasir = document.getElementById('dlTindakanKasir');
     if (dlKasir) dlKasir.innerHTML = htmlOptions;
@@ -14862,10 +14966,35 @@ function toggleSectionFisik(forceState) {
 
 
   function onInputDatalistChange(el, type) {
-   let val = el.value, obj = null;
+   let rawVal = (el.value || '').trim(), obj = null;
    let row = el.closest('tr');
    if (type === 'tindakan') {
-     obj = (window.KlinikData.tindakan || []).find(x => x.nama === val);
+     let allTindakan = window.KlinikData.tindakan || [];
+
+     // 1. Coba exact match nama tindakan
+     obj = allTindakan.find(x => x.nama === rawVal);
+
+     // 2. Jika belum cocok, ekstrak kode dari "[KODE] Nama • Rp ... • Lab: ..."
+     if (!obj && rawVal) {
+       let m = rawVal.match(/^\[(.*?)\]/);
+       if (m && m[1]) {
+         let kd = m[1].trim();
+         obj = allTindakan.find(x => (x.kode || x.id) === kd);
+       }
+     }
+
+     // 3. Jika belum cocok, cari berdasarkan nama atau kode yang terkandung di string
+     if (!obj && rawVal) {
+       obj = allTindakan.find(x => {
+         return (x.nama && rawVal.includes(x.nama)) || (x.kode && rawVal.includes(x.kode));
+       });
+     }
+
+     // 4. Normalisasi value el menjadi nama murni agar invoice dan backend konsisten
+     if (obj) {
+       el.value = obj.nama;
+     }
+
      let dokEl = document.getElementById('ksrDokter');
      let dokName = dokEl ? dokEl.value : "";
      if (obj && dokName) {
@@ -14888,12 +15017,13 @@ function toggleSectionFisik(forceState) {
        el.classList.remove('border-rose-500', 'bg-rose-50/70', 'ring-2', 'ring-rose-200');
      }
 
-     // Update preview keterangan & harga tindakan di bawah input
+     // Update preview keterangan, kode, harga, kategori, dan labor tindakan di bawah input
      let infoLabel = row ? row.querySelector('.val-info-tindakan') : null;
      if (infoLabel) {
        if (obj) {
-         let labBadge = (obj.perluLab === 'Ya' || obj.labor === 'Ya') ? ' • 🔬 Lab: Ya' : ' • Lab: Tidak';
-         infoLabel.innerHTML = `🏷️ <span class="font-black text-indigo-900">[${obj.kode || obj.id || '-'}]</span> • Tarif: <span class="font-black text-indigo-900">Rp ${formatRpKSR(obj.tarif || obj.harga || 0)}</span> • <span class="text-indigo-800">${obj.kategori || 'Umum'}</span>${labBadge}`;
+         let isLab = (obj.perluLab === 'Ya' || obj.labor === 'Ya');
+         let labBadge = isLab ? ' • <span class="text-rose-600 font-black">🔬 Lab: Ya</span>' : ' • <span class="text-slate-500 font-medium">Lab: Tidak</span>';
+         infoLabel.innerHTML = `🏷️ <span class="font-black text-indigo-900">[${obj.kode || obj.id || '-'}]</span> • Tarif: <span class="font-black text-indigo-900">Rp ${formatRpKSR(obj.tarif || obj.harga || 0)}</span> • <span class="text-indigo-800 font-bold">${obj.kategori || 'Umum'}</span>${labBadge}`;
          infoLabel.className = 'val-info-tindakan text-[10px] font-semibold block mt-1.5 px-2.5 py-1 bg-indigo-50/90 border border-indigo-200/80 rounded-lg text-indigo-800 shadow-2xs transition-all';
        } else {
          infoLabel.innerHTML = '';
@@ -14901,8 +15031,8 @@ function toggleSectionFisik(forceState) {
        }
      }
    }
-   else if (type === 'obat') obj = window.KlinikData.obat.find(x => x.nama === val);
-   else if (type === 'bmhp') obj = window.KlinikData.bmhp.find(x => x.nama === val);
+   else if (type === 'obat') obj = window.KlinikData.obat.find(x => x.nama === rawVal);
+   else if (type === 'bmhp') obj = window.KlinikData.bmhp.find(x => x.nama === rawVal);
 
    if (obj) {
      row.querySelector('.val-harga').value = formatRpKSR(obj.harga || obj.hargaJual || obj.tarif || 0);
@@ -14984,26 +15114,65 @@ function toggleSectionFisik(forceState) {
 
 
  function addKasirTindakan() {
+    let dokEl = document.getElementById('ksrDokter');
+    if (!dokEl || !dokEl.value.trim()) {
+      if (typeof showToast === 'function') {
+        showToast('warning', 'Silakan pilih Dokter Penanggung Jawab terlebih dahulu sebelum menambah tindakan!');
+      }
+      if (dokEl) {
+        dokEl.focus();
+        dokEl.classList.add('ring-2', 'ring-rose-400');
+        setTimeout(() => dokEl.classList.remove('ring-2', 'ring-rose-400'), 2000);
+      }
+      return;
+    }
     let tb = document.getElementById('ksrTbodyTindakan');
     let tr = document.createElement('tr'); tr.className = "hover:bg-slate-50/80 transition-colors border-b border-slate-100 row-tindakan";
     tr.innerHTML = `<td class="p-2.5"><div class="relative w-full"><input type="text" list="dlTindakanKasir" onchange="onInputDatalistChange(this, 'tindakan')" placeholder="Ketik / Cari Tindakan..." class="val-nama w-full pl-3 pr-8 py-2 bg-white border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 rounded-xl text-xs font-bold text-slate-800 outline-none shadow-2xs"><button type="button" onclick="clearKasirRowInput(this, 'tindakan')" title="Kosongkan isian tindakan" class="btn-clear-val absolute right-2 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-full transition-colors font-bold text-xs cursor-pointer">✕</button></div><span class="val-info-tindakan text-[10px] font-bold block mt-1"></span></td><td class="p-2.5"><input type="text" readonly class="val-harga w-full px-3 py-2 bg-slate-100/90 border border-slate-200 rounded-xl text-right font-bold text-slate-700 text-xs outline-none" value="0"></td><td class="p-2.5"><input type="text" maxlength="2" value="1" oninput="this.value=this.value.replace(/[^0-9]/g,''); hitungRowKSR(this.closest('tr'), 'tindakan')" class="val-qty w-full px-2 py-2 bg-white border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 rounded-xl text-center font-black text-slate-800 text-xs outline-none shadow-2xs"></td><td class="p-2.5"><input type="text" value="0" oninput="autoFormatUang(this); hitungRowKSR(this.closest('tr'), 'tindakan')" class="val-labor w-full px-3 py-2 bg-white border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 rounded-xl text-right font-semibold text-slate-800 text-xs outline-none shadow-2xs"></td><td class="p-2.5"><input type="text" maxlength="3" value="0" oninput="this.value=this.value.replace(/[^0-9]/g,''); hitungRowKSR(this.closest('tr'), 'tindakan')" class="val-disc w-full px-2 py-2 bg-white border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 rounded-xl text-center font-bold text-slate-800 text-xs outline-none shadow-2xs"></td><td class="p-2.5"><input type="text" readonly class="val-grand w-full px-3 py-2 bg-indigo-50/80 border border-indigo-200 rounded-xl text-right font-black text-indigo-800 text-xs outline-none" value="0"></td><td class="p-2.5"><select class="val-perawat w-full px-3 py-2 bg-white border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 rounded-xl text-xs font-medium text-slate-700 outline-none cursor-pointer shadow-2xs">${optPerawatKSR}</select></td><td class="p-2.5 text-center"><button type="button" onclick="this.closest('tr').remove(); hitungGrandTotalSemua();" title="Hapus baris tindakan" class="w-9 h-9 bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white rounded-xl font-black text-xs flex items-center justify-center transition-all cursor-pointer shadow-2xs border border-rose-200 mx-auto">✕</button></td>`;
     tb.appendChild(tr);
+    syncKasirDokterLockState();
   }
 
 
  function addKasirObat() {
+    let dokEl = document.getElementById('ksrDokter');
+    if (!dokEl || !dokEl.value.trim()) {
+      if (typeof showToast === 'function') {
+        showToast('warning', 'Silakan pilih Dokter Penanggung Jawab terlebih dahulu sebelum menambah resep obat!');
+      }
+      if (dokEl) {
+        dokEl.focus();
+        dokEl.classList.add('ring-2', 'ring-rose-400');
+        setTimeout(() => dokEl.classList.remove('ring-2', 'ring-rose-400'), 2000);
+      }
+      return;
+    }
     let tb = document.getElementById('ksrTbodyObat');
     let tr = document.createElement('tr'); tr.className = "hover:bg-slate-50/80 transition-colors border-b border-slate-100 row-obat";
     tr.innerHTML = `<td class="p-2.5"><div class="relative w-full"><input type="text" list="dlObatKasir" onchange="onInputDatalistChange(this, 'obat')" placeholder="Ketik / Cari Obat..." class="val-nama w-full pl-3 pr-8 py-2 bg-white border border-slate-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 rounded-xl text-xs font-bold text-slate-800 outline-none shadow-2xs"><button type="button" onclick="clearKasirRowInput(this, 'obat')" title="Kosongkan isian obat" class="btn-clear-val absolute right-2 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-full transition-colors font-bold text-xs cursor-pointer">✕</button></div><span class="val-stok-label text-[10px] font-bold block mt-1"></span></td><td class="p-2.5"><input type="text" readonly class="val-harga w-full px-3 py-2 bg-slate-100/90 border border-slate-200 rounded-xl text-right font-bold text-slate-700 text-xs outline-none" value="0"></td><td class="p-2.5"><input type="text" maxlength="2" value="1" oninput="this.value=this.value.replace(/[^0-9]/g,''); hitungRowKSR(this.closest('tr'), 'obat')" class="val-qty w-full px-2 py-2 bg-white border border-slate-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 rounded-xl text-center font-black text-slate-800 text-xs outline-none shadow-2xs"></td><td class="p-2.5"><input type="text" maxlength="3" value="0" oninput="this.value=this.value.replace(/[^0-9]/g,''); hitungRowKSR(this.closest('tr'), 'obat')" class="val-disc w-full px-2 py-2 bg-white border border-slate-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 rounded-xl text-center font-bold text-slate-800 text-xs outline-none shadow-2xs"></td><td class="p-2.5"><input type="text" readonly class="val-grand w-full px-3 py-2 bg-emerald-50/80 border border-emerald-200 rounded-xl text-right font-black text-emerald-800 text-xs outline-none" value="0"></td><td class="p-2.5 text-center"><button type="button" onclick="this.closest('tr').remove(); hitungGrandTotalSemua();" title="Hapus baris obat" class="w-9 h-9 bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white rounded-xl font-black text-xs flex items-center justify-center transition-all cursor-pointer shadow-2xs border border-rose-200 mx-auto">✕</button></td>`;
     tb.appendChild(tr);
+    syncKasirDokterLockState();
   }
 
 
  function addKasirBMHP() {
+    let dokEl = document.getElementById('ksrDokter');
+    if (!dokEl || !dokEl.value.trim()) {
+      if (typeof showToast === 'function') {
+        showToast('warning', 'Silakan pilih Dokter Penanggung Jawab terlebih dahulu sebelum menambah penggunaan BMHP!');
+      }
+      if (dokEl) {
+        dokEl.focus();
+        dokEl.classList.add('ring-2', 'ring-rose-400');
+        setTimeout(() => dokEl.classList.remove('ring-2', 'ring-rose-400'), 2000);
+      }
+      return;
+    }
     let tb = document.getElementById('ksrTbodyBMHP');
     let tr = document.createElement('tr'); tr.className = "hover:bg-slate-50/80 transition-colors border-b border-slate-100 row-bmhp";
     tr.innerHTML = `<td class="p-2.5"><div class="relative w-full"><input type="text" list="dlBMHPKasir" onchange="onInputDatalistChange(this, 'bmhp')" placeholder="Ketik / Cari BMHP..." class="val-nama w-full pl-3 pr-8 py-2 bg-white border border-slate-300 focus:border-amber-500 focus:ring-2 focus:ring-amber-100 rounded-xl text-xs font-bold text-slate-800 outline-none shadow-2xs"><button type="button" onclick="clearKasirRowInput(this, 'bmhp')" title="Kosongkan isian BMHP" class="btn-clear-val absolute right-2 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-full transition-colors font-bold text-xs cursor-pointer">✕</button></div><span class="val-stok-label text-[10px] font-bold block mt-1"></span></td><td class="p-2.5"><input type="text" readonly class="val-harga w-full px-3 py-2 bg-slate-100/90 border border-slate-200 rounded-xl text-right font-bold text-slate-700 text-xs outline-none" value="0"></td><td class="p-2.5"><input type="text" maxlength="2" value="1" oninput="this.value=this.value.replace(/[^0-9]/g,''); hitungRowKSR(this.closest('tr'), 'bmhp')" class="val-qty w-full px-2 py-2 bg-white border border-slate-300 focus:border-amber-500 focus:ring-2 focus:ring-amber-100 rounded-xl text-center font-black text-slate-800 text-xs outline-none shadow-2xs"></td><td class="p-2.5"><input type="text" maxlength="3" value="0" oninput="this.value=this.value.replace(/[^0-9]/g,''); hitungRowKSR(this.closest('tr'), 'bmhp')" class="val-disc w-full px-2 py-2 bg-white border border-slate-300 focus:border-amber-500 focus:ring-2 focus:ring-amber-100 rounded-xl text-center font-bold text-slate-800 text-xs outline-none shadow-2xs"></td><td class="p-2.5"><input type="text" readonly class="val-grand w-full px-3 py-2 bg-amber-50/80 border border-amber-200 rounded-xl text-right font-black text-amber-800 text-xs outline-none" value="0"></td><td class="p-2.5 text-center"><button type="button" onclick="this.closest('tr').remove(); hitungGrandTotalSemua();" title="Hapus baris BMHP" class="w-9 h-9 bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white rounded-xl font-black text-xs flex items-center justify-center transition-all cursor-pointer shadow-2xs border border-rose-200 mx-auto">✕</button></td>`;
     tb.appendChild(tr);
+    syncKasirDokterLockState();
   }
 
 
@@ -15017,6 +15186,7 @@ function toggleSectionFisik(forceState) {
    document.getElementById('ksrSearchPasien').value = '';
    let alertCicilan = document.getElementById('alertCicilanPasien');
    if (alertCicilan) alertCicilan.classList.add('hidden');
+   syncKasirDokterLockState();
    hitungGrandTotalSemua(); window.scrollTo({ top: 0, behavior: 'smooth' });
  }
 
@@ -15446,7 +15616,7 @@ function initKasirDropdowns() {
         kasirDokter.innerHTML = html;
        
         // Event listener untuk memicu penyaringan "Tindakan" saat dokter dipilih
-        kasirDokter.addEventListener('change', updateDatalistTindakan);
+        kasirDokter.addEventListener('change', onKasirDokterChange);
     }
    
     // B. Injeksi Perawat (Khusus Role Perawat Gigi)
@@ -15461,12 +15631,13 @@ function initKasirDropdowns() {
  }
   // 2, 4, 5: Buat daftar Tindakan, Obat, dan BMHP awal
  renderDatalistKasir();
+ syncKasirDokterLockState();
 }
 
 
-// Logika Pemotongan Pilihan Tindakan Sesuai Role (Delegasikan ke updateDatalistTindakan)
+// Logika Pemotongan Pilihan Tindakan Sesuai Role (Delegasikan ke onKasirDokterChange)
 function filterTindakanKasir(e) {
-  updateDatalistTindakan();
+  onKasirDokterChange();
 }
 
 
@@ -15485,7 +15656,14 @@ function renderDatalistKasir(tindakanTersaring = null) {
   }
 
   let listTindakan = tindakanTersaring || (typeof filterTindakanByRoleDokter === 'function' ? filterTindakanByRoleDokter(window.KlinikData.tindakan || [], targetRole) : (window.KlinikData.tindakan || []));
-  let htmlOpts = listTindakan.map(t => `<option value="${t.nama}">`).join('');
+  let htmlOpts = listTindakan.map(t => {
+    let kode = t.kode || t.id || '-';
+    let tarif = t.tarif || t.harga || 0;
+    let tarifRp = formatRpKSR(tarif);
+    let isLab = (t.perluLab === 'Ya' || t.labor === 'Ya');
+    let labText = isLab ? 'Lab: Ya' : 'Lab: Tidak';
+    return `<option value="[${kode}] ${t.nama} • Rp ${tarifRp} • ${labText}">`;
+  }).join('');
 
   let dlTindakan = document.getElementById('listTindakanKasir');
   if (!dlTindakan) {

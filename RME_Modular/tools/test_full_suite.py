@@ -2144,6 +2144,71 @@ addKasirBMHP();
 var rowBMHP = document.getElementById('ksrTbodyBMHP').children[0];
 assert("KASIR-ROW-BMHP-1: Baris BMHP Memiliki Tombol Silang Clear", rowBMHP && rowBMHP.querySelector('.btn-clear-val') !== null);
 
+print("\n--- TEST: Lock Kasir Dokter dan Tampilan Kode, Harga, Labor Tindakan ---");
+
+// 1. Kondisi Awal: Dokter Penanggung Jawab Belum Dipilih (ksrDokter = '')
+var ksrDok = document.getElementById('ksrDokter');
+ksrDok.value = '';
+syncKasirDokterLockState();
+
+var btnAddTind = document.getElementById('btnAddKasirTindakan');
+var btnAddOb = document.getElementById('btnAddKasirObat');
+var btnAddBm = document.getElementById('btnAddKasirBMHP');
+assert("KASIR-LOCK-1: Tombol Tambah Tindakan Terkunci saat Dokter Kosong", btnAddTind && btnAddTind.disabled === true);
+assert("KASIR-LOCK-1: Tombol Tambah Obat Terkunci saat Dokter Kosong", btnAddOb && btnAddOb.disabled === true);
+assert("KASIR-LOCK-1: Tombol Tambah BMHP Terkunci saat Dokter Kosong", btnAddBm && btnAddBm.disabled === true);
+
+var bLockTind = document.getElementById('badgeLockTindakan');
+var bLockOb = document.getElementById('badgeLockObat');
+var bLockBm = document.getElementById('badgeLockBMHP');
+assert("KASIR-LOCK-2: Badge Lock Tindakan Aktif", bLockTind && !bLockTind.classList.contains('hidden'));
+assert("KASIR-LOCK-2: Badge Lock Obat Aktif", bLockOb && !bLockOb.classList.contains('hidden'));
+assert("KASIR-LOCK-2: Badge Lock BMHP Aktif", bLockBm && !bLockBm.classList.contains('hidden'));
+
+// Coba panggil addKasir saat dokter kosong -> harus ditolak
+var countTindBefore = document.getElementById('ksrTbodyTindakan').children.length;
+addKasirTindakan();
+assert("KASIR-LOCK-3: addKasirTindakan Ditolak saat Dokter Kosong", document.getElementById('ksrTbodyTindakan').children.length === countTindBefore);
+
+var countObatBefore = document.getElementById('ksrTbodyObat').children.length;
+addKasirObat();
+assert("KASIR-LOCK-4: addKasirObat Ditolak saat Dokter Kosong", document.getElementById('ksrTbodyObat').children.length === countObatBefore);
+
+var countBMHPBefore = document.getElementById('ksrTbodyBMHP').children.length;
+addKasirBMHP();
+assert("KASIR-LOCK-5: addKasirBMHP Ditolak saat Dokter Kosong", document.getElementById('ksrTbodyBMHP').children.length === countBMHPBefore);
+
+// 2. Dokter Dipilih: onKasirDokterChange -> Membuka Kunci
+ksrDok.value = 'drg. Regyana Oktavaria';
+onKasirDokterChange();
+
+assert("KASIR-UNLOCK-1: Tombol Tambah Tindakan Terbuka saat Dokter Dipilih", btnAddTind.disabled === false);
+assert("KASIR-UNLOCK-1: Tombol Tambah Obat Terbuka saat Dokter Dipilih", btnAddOb.disabled === false);
+assert("KASIR-UNLOCK-1: Tombol Tambah BMHP Terbuka saat Dokter Dipilih", btnAddBm.disabled === false);
+assert("KASIR-UNLOCK-2: Badge Lock Tindakan Tersembunyi", bLockTind.classList.contains('hidden'));
+
+// 3. Verifikasi Isi Datalist Tindakan Memuat Kode, Harga, dan Labor
+var dlKasirHtml = document.getElementById('dlTindakanKasir')?.innerHTML || '';
+assert("KASIR-DL-DETAIL-1: Datalist Memuat Kode Tindakan [UMM-0001]", dlKasirHtml.includes("[UMM-0001]"));
+assert("KASIR-DL-DETAIL-2: Datalist Memuat Tarif Rp 50.000", dlKasirHtml.includes("Rp 50.000"));
+assert("KASIR-DL-DETAIL-3: Datalist Memuat Status Labor", dlKasirHtml.includes("Lab: Tidak") || dlKasirHtml.includes("Lab: Ya"));
+
+// 4. Simulasi Pemilihan Opsi Berformat [UMM-0001] ...
+document.getElementById('ksrTbodyTindakan').innerHTML = '';
+addKasirTindakan();
+var rowNewTind = document.getElementById('ksrTbodyTindakan').children[0];
+var inputNewTind = rowNewTind.querySelector('.val-nama');
+inputNewTind.value = "[UMM-0001] Pemeriksaan Dan Konsultasi • Rp 50.000 • Lab: Tidak";
+onInputDatalistChange(inputNewTind, 'tindakan');
+
+assert("KASIR-DL-SELECT-1: Input Dinormalkan Menjadi Nama Bersih", inputNewTind.value === "Pemeriksaan Dan Konsultasi");
+var hargaNewTind = parseUangKSR(rowNewTind.querySelector('.val-harga').value);
+assert("KASIR-DL-SELECT-2: Tarif Otomatis Terisi Rp 50.000", hargaNewTind === 50000);
+var infoNewTind = rowNewTind.querySelector('.val-info-tindakan');
+assert("KASIR-DL-SELECT-3: Info Menampilkan Kode [UMM-0001]", infoNewTind && infoNewTind.innerHTML.includes("[UMM-0001]"));
+assert("KASIR-DL-SELECT-4: Info Menampilkan Tarif Rp 50.000", infoNewTind && infoNewTind.innerHTML.includes("50.000"));
+assert("KASIR-DL-SELECT-5: Info Menampilkan Status Labor", infoNewTind && (infoNewTind.innerHTML.includes("Lab: Tidak") || infoNewTind.innerHTML.includes("Lab: Ya")));
+
 print("\n--- TEST: Sinkronisasi Database, Nama Sheet, dan Header Kolom ---");
 var mDb = window._mockDb || {};
 assert("SYNC-DB-1: Mock DB Memuat 12 Database Lengkap", typeof mDb !== 'undefined' && mDb !== null);

@@ -3843,132 +3843,140 @@
   <!-- ======================================================================= -->
   <!-- TAB 3: PENGATURAN TARIF SHIFT & GAJI POKOK                              -->
   <!-- ======================================================================= -->
+  <!-- ======================================================================= -->
+  <!-- TAB 3: PENGATURAN TARIF SHIFT & GAJI POKOK                              -->
+  <!-- ======================================================================= -->
   <div id="panelPay-tarif" class="payroll-tab-panel hidden space-y-6">
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <!-- Form Update Tarif Shift / Gaji Pokok -->
-      <div id="cardFormTarifShift" class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-        <div class="flex items-center gap-2.5 mb-4 pb-3 border-b border-slate-100">
-          <span class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg font-black border border-indigo-200">⚙️</span>
+
+    <!-- Form Update Tarif Shift / Gaji Pokok (DEFAULT HIDDEN, HANYA KELUAR SAAT TOMBOL DIKLIK) -->
+    <div id="cardFormTarifShift" class="hidden bg-white p-6 md:p-7 rounded-2xl shadow-md border-2 border-indigo-200 transition-all duration-300">
+      <div class="flex items-center justify-between pb-4 mb-5 border-b border-slate-100">
+        <div class="flex items-center gap-3">
+          <span class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl font-black border border-indigo-200 shadow-sm">⚙️</span>
           <div>
-            <h3 class="text-sm font-black text-slate-800">Atur Tarif Shift & Gaji Pokok</h3>
+            <h3 class="text-sm md:text-base font-black text-slate-800">Atur Tarif Shift & Gaji Pokok</h3>
             <p class="text-[11px] text-slate-500">Tersinkron ke Master User & Payroll</p>
           </div>
         </div>
+        <button type="button" onclick="toggleFormTarifShift(false)" class="px-3.5 py-1.5 bg-slate-100 hover:bg-rose-50 text-slate-600 hover:text-rose-600 rounded-xl text-xs font-bold transition-all border border-slate-200 flex items-center gap-1.5 cursor-pointer">
+          <span>✕</span> Tutup Form
+        </button>
+      </div>
 
-        <form onsubmit="handleSimpanTarifShift(event)" class="space-y-3.5">
-          <div>
+      <form onsubmit="handleSimpanTarifShift(event)" class="space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="md:col-span-2">
             <label class="block text-[11px] font-extrabold text-slate-700 mb-1">Nama Pekerja (Wajib terdaftar di Sheet Data) *</label>
-            <input type="text" id="tarifNamaPekerja" required list="listStaffMasterData" oninput="handleTarifNamaPekerjaChange()" onchange="handleTarifNamaPekerjaChange()" placeholder="Pilih atau ketik nama pekerja terdaftar..." class="w-full px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-800">
+            <input type="text" id="tarifNamaPekerja" required list="listStaffMasterData" oninput="handleTarifNamaPekerjaChange()" onchange="handleTarifNamaPekerjaChange()" placeholder="Pilih atau ketik nama pekerja terdaftar..." class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-800">
             <datalist id="listStaffMasterData"></datalist>
             <p id="tarifNamaHint" class="text-[10px] text-slate-500 mt-1">Nama harus sesuai dengan yang ada di Master User & Role</p>
           </div>
 
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="block text-[11px] font-extrabold text-slate-700 mb-1">Role Jabatan (Otomatis dari Sheet Data)</label>
-              <input type="text" id="tarifRole" readonly placeholder="(Otomatis terisi)" class="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl text-xs font-bold text-slate-600">
-            </div>
-            <div>
-              <label class="block text-[11px] font-extrabold text-slate-700 mb-1">Tipe Kompensasi *</label>
-              <select id="tarifTipe" required onchange="handleTarifTipeChange()" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-emerald-500 transition-all">
-                <option value="" selected>-- Pilih Tipe Kompensasi --</option>
-                <option value="Tindakan">Tindakan</option>
-                <option value="Uang Harian Shift">Uang Harian Shift</option>
-                <option value="Gaji Bulanan Tetap">Gaji Bulanan Tetap</option>
-                <option value="Kombinasi Shift & Tindakan">Kombinasi Shift & Tindakan</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="block text-[11px] font-extrabold text-slate-700 mb-1">Tarif Shift 1 (Rp)</label>
-              <input type="number" id="tarifShift1" value="0" disabled class="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl text-xs font-bold text-slate-400 cursor-not-allowed transition-all">
-            </div>
-            <div>
-              <label class="block text-[11px] font-extrabold text-slate-700 mb-1">Tarif Shift 2 (Rp)</label>
-              <input type="number" id="tarifShift2" value="0" disabled class="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl text-xs font-bold text-slate-400 cursor-not-allowed transition-all">
-            </div>
-          </div>
-
           <div>
-            <label class="block text-[11px] font-extrabold text-slate-700 mb-1">Gaji Pokok Bulanan Tetap (Khusus Admin Non-Shift)</label>
-            <input type="number" id="tarifGajiPokok" value="0" disabled class="w-full px-3.5 py-2 bg-slate-100 border border-slate-200 rounded-xl text-xs font-bold text-slate-400 cursor-not-allowed transition-all">
+            <label class="block text-[11px] font-extrabold text-slate-700 mb-1">Role Jabatan (Otomatis dari Sheet Data)</label>
+            <input type="text" id="tarifRole" readonly placeholder="(Otomatis terisi)" class="w-full px-3.5 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-xs font-bold text-slate-600">
           </div>
+        </div>
 
-          <!-- Persentase Jasa Medis (JM) Standar Dokter -->
-          <div id="wrapperTarifPersenJM" class="p-3.5 bg-amber-50/90 border-2 border-amber-300 rounded-xl space-y-2 transition-all">
-            <div class="flex items-center justify-between">
-              <label class="block text-[11px] font-black text-amber-900 flex items-center gap-1.5">
-                <span>🩺</span> Persentase Jasa Medis (JM) Dokter (%)
-              </label>
-              <span class="text-[9px] font-black px-2 py-0.5 bg-amber-200 text-amber-900 rounded-full border border-amber-300">Standar Bawaan Dokter</span>
-            </div>
-            <div class="flex items-center gap-2">
-              <input type="number" id="tarifPersenJM" min="0" max="100" step="1" value="50" placeholder="50" class="w-24 px-3 py-1.5 bg-white border border-amber-400 rounded-lg text-xs font-black text-amber-900 focus:ring-2 focus:ring-amber-500 text-center">
-              <span class="text-xs font-black text-amber-900">%</span>
-              <span class="text-[10px] text-amber-800 font-medium">Bawaan standar untuk seluruh tindakan medis yang dikerjakan dokter ini.</span>
-            </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div>
+            <label class="block text-[11px] font-extrabold text-slate-700 mb-1">Tipe Kompensasi *</label>
+            <select id="tarifTipe" required onchange="handleTarifTipeChange()" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-emerald-500 transition-all">
+              <option value="" selected>-- Pilih Tipe Kompensasi --</option>
+              <option value="Tindakan">Tindakan</option>
+              <option value="Uang Harian Shift">Uang Harian Shift</option>
+              <option value="Gaji Bulanan Tetap">Gaji Bulanan Tetap</option>
+              <option value="Kombinasi Shift & Tindakan">Kombinasi Shift & Tindakan</option>
+            </select>
           </div>
+          <div>
+            <label class="block text-[11px] font-extrabold text-slate-700 mb-1">Tarif Shift 1 (Rp)</label>
+            <input type="number" id="tarifShift1" value="0" disabled class="w-full px-3 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-xs font-bold text-slate-400 cursor-not-allowed transition-all">
+          </div>
+          <div>
+            <label class="block text-[11px] font-extrabold text-slate-700 mb-1">Tarif Shift 2 (Rp)</label>
+            <input type="number" id="tarifShift2" value="0" disabled class="w-full px-3 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-xs font-bold text-slate-400 cursor-not-allowed transition-all">
+          </div>
+          <div>
+            <label class="block text-[11px] font-extrabold text-slate-700 mb-1">Gaji Pokok Bulanan Tetap</label>
+            <input type="number" id="tarifGajiPokok" value="0" disabled class="w-full px-3.5 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-xs font-bold text-slate-400 cursor-not-allowed transition-all">
+          </div>
+        </div>
 
+        <!-- Persentase Jasa Medis (JM) Standar Dokter -->
+        <div id="wrapperTarifPersenJM" class="p-4 bg-amber-50/90 border-2 border-amber-300 rounded-xl space-y-2 transition-all">
+          <div class="flex items-center justify-between">
+            <label class="block text-[11px] font-black text-amber-900 flex items-center gap-1.5">
+              <span>🩺</span> Persentase Jasa Medis (JM) Dokter (%)
+            </label>
+            <span class="text-[9px] font-black px-2 py-0.5 bg-amber-200 text-amber-900 rounded-full border border-amber-300">Standar Bawaan Dokter</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <input type="number" id="tarifPersenJM" min="0" max="100" step="1" value="0" placeholder="0" class="w-24 px-3 py-1.5 bg-white border border-amber-400 rounded-lg text-xs font-black text-amber-900 focus:ring-2 focus:ring-amber-500 text-center">
+            <span class="text-xs font-black text-amber-900">%</span>
+            <span class="text-[10px] text-amber-800 font-medium">Bawaan standar untuk seluruh tindakan medis yang dikerjakan dokter ini.</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label class="block text-[11px] font-extrabold text-slate-700 mb-1">Keterangan (Opsional)</label>
-            <input type="text" id="tarifKeterangan" placeholder="Catatan tambahan bila diperlukan (opsional)" class="w-full px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-800">
+            <input type="text" id="tarifKeterangan" placeholder="Catatan tambahan bila diperlukan (opsional)" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-800">
           </div>
-
           <div>
             <label class="block text-[11px] font-extrabold text-slate-700 mb-1">Status Aktivasi Payroll *</label>
-            <select id="tarifStatus" class="w-full px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-800">
+            <select id="tarifStatus" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-800">
               <option value="Aktif" selected>Aktif (Dihitung di Payroll & Slip Gaji)</option>
               <option value="Tidak Aktif">Tidak Aktif (Tidak Dihitung di Payroll)</option>
             </select>
           </div>
+        </div>
 
-          <button type="submit" id="btnSubmitTarifShift" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs rounded-xl shadow-md shadow-emerald-500/20 transition-all">
-            💾 SIMPAN ATURAN TARIF SHIFT & GAJI
+        <button type="submit" id="btnSubmitTarifShift" class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs md:text-sm rounded-xl shadow-md shadow-emerald-500/20 active:scale-95 transition-all cursor-pointer">
+          💾 SIMPAN ATURAN TARIF SHIFT & GAJI
+        </button>
+      </form>
+    </div>
+
+    <!-- Tabel Master Pengaturan Tarif Shift & Gaji Pokok (FULL WIDTH KE KIRI DAN KANAN) -->
+    <div class="w-full bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
+      <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50/70">
+        <div>
+          <h3 class="text-sm md:text-base font-black text-slate-800">Tabel Master Pengaturan Tarif Shift & Gaji Pokok</h3>
+          <p class="text-[11px] text-slate-500">Klik tombol <b>Pilih</b> pada baris untuk mengedit tarif pekerja</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-3">
+          <!-- Tombol Input Tarif Shift Baru DIPERBESAR sesuai request -->
+          <button type="button" id="btnToggleFormTarifShift" onclick="toggleFormTarifShift(true)" class="px-5 py-2.5 sm:px-6 sm:py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-xl text-xs sm:text-sm font-black shadow-md hover:shadow-lg shadow-emerald-600/25 active:scale-95 transition-all flex items-center gap-2 cursor-pointer">
+            <span class="text-base sm:text-lg">➕</span> Input Tarif Shift Baru
           </button>
-        </form>
+          <span class="px-3.5 py-1.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-extrabold hidden md:inline-flex items-center gap-1.5">
+            06 Master User & Role &rarr; Sheet: Pengaturan_Tarif_Shift
+          </span>
+        </div>
       </div>
 
-      <!-- Tabel Master Pengaturan Tarif Shift -->
-      <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
-        <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/60">
-          <div>
-            <h3 class="text-sm font-black text-slate-800">Tabel Master Pengaturan Tarif Shift & Gaji Pokok</h3>
-            <p class="text-[11px] text-slate-500">Klik tombol <b>Pilih</b> pada baris untuk mengedit tarif pekerja</p>
-          </div>
-          <div class="flex items-center gap-2">
-            <button type="button" onclick="resetFormTarifShiftBaru()" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-sm transition-all flex items-center gap-1.5">
-              <span>➕</span> Input Tarif Shift Baru
-            </button>
-            <span class="px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] font-extrabold">
-              06 Master User & Role &rarr; Sheet: Pengaturan_Tarif_Shift
-            </span>
-          </div>
-        </div>
-
-        <div class="overflow-x-auto flex-1">
-          <table class="w-full text-left border-collapse">
-            <thead>
-              <tr class="bg-slate-900 text-white text-[10px] font-extrabold uppercase tracking-wider">
-                <th class="py-3 px-4">ID</th>
-                <th class="py-3 px-4">Nama Pekerja</th>
-                <th class="py-3 px-3">Role</th>
-                <th class="py-3 px-3">Tipe Kompensasi</th>
-                <th class="py-3 px-3 text-center">JM Dokter</th>
-                <th class="py-3 px-3 text-right">Tarif Shift 1</th>
-                <th class="py-3 px-3 text-right">Tarif Shift 2</th>
-                <th class="py-3 px-4 text-right">Gaji Bulanan</th>
-                <th class="py-3 px-3 text-center">Status Payroll</th>
-                <th class="py-3 px-4">Keterangan</th>
-                <th class="py-3 px-3 text-center">Aksi</th>
-              </tr>
-            </thead>
-            <tbody id="tbodyTarifShift" class="divide-y divide-slate-200 text-xs">
-              <tr><td colspan="11" class="py-8 text-center text-slate-400 font-bold">Memuat pengaturan tarif shift...</td></tr>
-            </tbody>
-          </table>
-        </div>
+      <div class="overflow-x-auto flex-1">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-slate-900 text-white text-[10px] font-extrabold uppercase tracking-wider">
+              <th class="py-3 px-4">ID</th>
+              <th class="py-3 px-4">Nama Pekerja</th>
+              <th class="py-3 px-3">Role</th>
+              <th class="py-3 px-3">Tipe Kompensasi</th>
+              <th class="py-3 px-3 text-center">JM Dokter</th>
+              <th class="py-3 px-3 text-right">Tarif Shift 1</th>
+              <th class="py-3 px-3 text-right">Tarif Shift 2</th>
+              <th class="py-3 px-4 text-right">Gaji Bulanan</th>
+              <th class="py-3 px-3 text-center">Status Payroll</th>
+              <th class="py-3 px-4">Keterangan</th>
+              <th class="py-3 px-3 text-center">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyTarifShift" class="divide-y divide-slate-200 text-xs">
+            <tr><td colspan="11" class="py-8 text-center text-slate-400 font-bold">Memuat pengaturan tarif shift...</td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
@@ -22379,9 +22387,8 @@ function renderInfoBmhp() {
       if (isDokterNama && inpJMNama) {
         let p = (exTarif && exTarif.persenJM !== undefined && exTarif.persenJM !== null && exTarif.persenJM !== '')
           ? Number(exTarif.persenJM)
-          : ((found.persenJM !== undefined && found.persenJM !== null && found.persenJM !== '') ? Number(found.persenJM) : 50);
+          : ((found.persenJM !== undefined && found.persenJM !== null && found.persenJM !== '') ? Number(found.persenJM) : 0);
         if (p <= 1 && p > 0) p = Math.round(p * 100);
-        if (p === 0) p = 50;
         inpJMNama.value = p;
       }
       const tipeEl = document.getElementById('tarifTipe');
@@ -22428,8 +22435,8 @@ function renderInfoBmhp() {
       if (isDokterTipe) wrapJM.classList.remove('hidden');
       else wrapJM.classList.add('hidden');
     }
-    if (isDokterTipe && inpJM && (!inpJM.value || inpJM.value === '0')) {
-      inpJM.value = 50;
+    if (isDokterTipe && inpJM && (!inpJM.value || inpJM.value === '')) {
+      inpJM.value = 0;
     }
 
     if (!s1 || !s2 || !gp) return;
@@ -22477,7 +22484,26 @@ function renderInfoBmhp() {
     }
   }
 
+  function toggleFormTarifShift(show, isEdit) {
+    const card = document.getElementById('cardFormTarifShift');
+    if (!card) return;
+    const shouldShow = (show !== undefined) ? !!show : card.classList.contains('hidden');
+    if (shouldShow) {
+      card.classList.remove('hidden');
+      if (!isEdit) {
+        resetFormTarifShiftBaru();
+      }
+      if (typeof card.scrollIntoView === 'function') {
+        card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    } else {
+      card.classList.add('hidden');
+    }
+  }
+
   function resetFormTarifShiftBaru() {
+    const card = document.getElementById('cardFormTarifShift');
+    if (card) card.classList.remove('hidden');
     const elNama = document.getElementById('tarifNamaPekerja');
     if (elNama) { elNama.value = ''; elNama.focus(); }
     const elRole = document.getElementById('tarifRole');
@@ -22491,20 +22517,21 @@ function renderInfoBmhp() {
     const wrapJM = document.getElementById('wrapperTarifPersenJM');
     const inpJM = document.getElementById('tarifPersenJM');
     if (wrapJM) wrapJM.classList.add('hidden');
-    if (inpJM) inpJM.value = 50;
+    if (inpJM) inpJM.value = 0;
     const hint = document.getElementById('tarifNamaHint');
     if (hint) {
       hint.textContent = 'Pilih atau ketik nama pekerja terdaftar di Sheet Data';
       hint.className = 'text-[10px] text-slate-500 mt-1';
     }
     handleTarifTipeChange();
-    const card = document.getElementById('cardFormTarifShift');
     if (card && typeof card.scrollIntoView === 'function') {
-      card.scrollIntoView({ behavior: 'smooth' });
+      card.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }
 
   function pilihTarifShiftToEdit(idx) {
+    const card = document.getElementById('cardFormTarifShift');
+    if (card) card.classList.remove('hidden');
     const item = (window.PayrollState.tarifShift || [])[idx];
     if (!item) return;
     document.getElementById('tarifNamaPekerja').value = item.namaPekerja || '';
@@ -22536,9 +22563,8 @@ function renderInfoBmhp() {
     }
     if (inpJM) {
       if (isDokterItem) {
-        let p = (item.persenJM !== undefined && item.persenJM !== null && item.persenJM !== '') ? Number(item.persenJM) : 50;
+        let p = (item.persenJM !== undefined && item.persenJM !== null && item.persenJM !== '') ? Number(item.persenJM) : 0;
         if (p <= 1 && p > 0) p = Math.round(p * 100);
-        if (p === 0) p = 50;
         inpJM.value = p;
       } else {
         inpJM.value = 0;
@@ -22557,9 +22583,8 @@ function renderInfoBmhp() {
       hint.textContent = '✓ Mengedit aturan: ' + item.namaPekerja + ' (' + (item.idAturan || '-') + ')';
       hint.className = 'text-[10px] text-indigo-600 font-bold mt-1';
     }
-    const card = document.getElementById('cardFormTarifShift');
     if (card && typeof card.scrollIntoView === 'function') {
-      card.scrollIntoView({ behavior: 'smooth' });
+      card.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }
 
@@ -22630,8 +22655,7 @@ function renderInfoBmhp() {
     if (isDokterSave) {
       const inpJM = document.getElementById('tarifPersenJM');
       const rawVal = inpJM ? inpJM.value.trim() : '';
-      pjmVal = (rawVal !== '' && !isNaN(Number(rawVal))) ? Number(rawVal) : 50;
-      if (pjmVal === 0) pjmVal = 50;
+      pjmVal = (rawVal !== '' && !isNaN(Number(rawVal))) ? Number(rawVal) : 0;
     }
 
     const payload = {
@@ -22876,6 +22900,7 @@ function renderInfoBmhp() {
   window.handleTarifNamaPekerjaChange = handleTarifNamaPekerjaChange;
   window.pilihTarifShiftToEdit = pilihTarifShiftToEdit;
   window.resetFormTarifShiftBaru = resetFormTarifShiftBaru;
+  window.toggleFormTarifShift = toggleFormTarifShift;
   window.handleSimpanTarifShift = handleSimpanTarifShift;
   window.togglePayrollPaidStatus = togglePayrollPaidStatus;
   window.triggerGeneratePayrollPeriode = triggerGeneratePayrollPeriode;

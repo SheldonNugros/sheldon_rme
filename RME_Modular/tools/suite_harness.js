@@ -27,6 +27,8 @@ var isStatusSplitInHtml = true;
 var isBoxSplitInHtml = true;
 var isSearchTindakanLargeInHtml = true;
 var isHeaderJMInHtml = true;
+var isBtnTarifLargeInHtml = true;
+var isCardTarifHiddenDefaultInHtml = true;
 
 // Enhanced DOM Mock for JavaScriptCore
 var window = this;
@@ -15846,9 +15848,8 @@ function renderInfoBmhp() {
       if (isDokterNama && inpJMNama) {
         let p = (exTarif && exTarif.persenJM !== undefined && exTarif.persenJM !== null && exTarif.persenJM !== '')
           ? Number(exTarif.persenJM)
-          : ((found.persenJM !== undefined && found.persenJM !== null && found.persenJM !== '') ? Number(found.persenJM) : 50);
+          : ((found.persenJM !== undefined && found.persenJM !== null && found.persenJM !== '') ? Number(found.persenJM) : 0);
         if (p <= 1 && p > 0) p = Math.round(p * 100);
-        if (p === 0) p = 50;
         inpJMNama.value = p;
       }
       const tipeEl = document.getElementById('tarifTipe');
@@ -15895,8 +15896,8 @@ function renderInfoBmhp() {
       if (isDokterTipe) wrapJM.classList.remove('hidden');
       else wrapJM.classList.add('hidden');
     }
-    if (isDokterTipe && inpJM && (!inpJM.value || inpJM.value === '0')) {
-      inpJM.value = 50;
+    if (isDokterTipe && inpJM && (!inpJM.value || inpJM.value === '')) {
+      inpJM.value = 0;
     }
 
     if (!s1 || !s2 || !gp) return;
@@ -15944,7 +15945,26 @@ function renderInfoBmhp() {
     }
   }
 
+  function toggleFormTarifShift(show, isEdit) {
+    const card = document.getElementById('cardFormTarifShift');
+    if (!card) return;
+    const shouldShow = (show !== undefined) ? !!show : card.classList.contains('hidden');
+    if (shouldShow) {
+      card.classList.remove('hidden');
+      if (!isEdit) {
+        resetFormTarifShiftBaru();
+      }
+      if (typeof card.scrollIntoView === 'function') {
+        card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    } else {
+      card.classList.add('hidden');
+    }
+  }
+
   function resetFormTarifShiftBaru() {
+    const card = document.getElementById('cardFormTarifShift');
+    if (card) card.classList.remove('hidden');
     const elNama = document.getElementById('tarifNamaPekerja');
     if (elNama) { elNama.value = ''; elNama.focus(); }
     const elRole = document.getElementById('tarifRole');
@@ -15958,20 +15978,21 @@ function renderInfoBmhp() {
     const wrapJM = document.getElementById('wrapperTarifPersenJM');
     const inpJM = document.getElementById('tarifPersenJM');
     if (wrapJM) wrapJM.classList.add('hidden');
-    if (inpJM) inpJM.value = 50;
+    if (inpJM) inpJM.value = 0;
     const hint = document.getElementById('tarifNamaHint');
     if (hint) {
       hint.textContent = 'Pilih atau ketik nama pekerja terdaftar di Sheet Data';
       hint.className = 'text-[10px] text-slate-500 mt-1';
     }
     handleTarifTipeChange();
-    const card = document.getElementById('cardFormTarifShift');
     if (card && typeof card.scrollIntoView === 'function') {
-      card.scrollIntoView({ behavior: 'smooth' });
+      card.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }
 
   function pilihTarifShiftToEdit(idx) {
+    const card = document.getElementById('cardFormTarifShift');
+    if (card) card.classList.remove('hidden');
     const item = (window.PayrollState.tarifShift || [])[idx];
     if (!item) return;
     document.getElementById('tarifNamaPekerja').value = item.namaPekerja || '';
@@ -16003,9 +16024,8 @@ function renderInfoBmhp() {
     }
     if (inpJM) {
       if (isDokterItem) {
-        let p = (item.persenJM !== undefined && item.persenJM !== null && item.persenJM !== '') ? Number(item.persenJM) : 50;
+        let p = (item.persenJM !== undefined && item.persenJM !== null && item.persenJM !== '') ? Number(item.persenJM) : 0;
         if (p <= 1 && p > 0) p = Math.round(p * 100);
-        if (p === 0) p = 50;
         inpJM.value = p;
       } else {
         inpJM.value = 0;
@@ -16024,9 +16044,8 @@ function renderInfoBmhp() {
       hint.textContent = '✓ Mengedit aturan: ' + item.namaPekerja + ' (' + (item.idAturan || '-') + ')';
       hint.className = 'text-[10px] text-indigo-600 font-bold mt-1';
     }
-    const card = document.getElementById('cardFormTarifShift');
     if (card && typeof card.scrollIntoView === 'function') {
-      card.scrollIntoView({ behavior: 'smooth' });
+      card.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }
 
@@ -16097,8 +16116,7 @@ function renderInfoBmhp() {
     if (isDokterSave) {
       const inpJM = document.getElementById('tarifPersenJM');
       const rawVal = inpJM ? inpJM.value.trim() : '';
-      pjmVal = (rawVal !== '' && !isNaN(Number(rawVal))) ? Number(rawVal) : 50;
-      if (pjmVal === 0) pjmVal = 50;
+      pjmVal = (rawVal !== '' && !isNaN(Number(rawVal))) ? Number(rawVal) : 0;
     }
 
     const payload = {
@@ -16343,6 +16361,7 @@ function renderInfoBmhp() {
   window.handleTarifNamaPekerjaChange = handleTarifNamaPekerjaChange;
   window.pilihTarifShiftToEdit = pilihTarifShiftToEdit;
   window.resetFormTarifShiftBaru = resetFormTarifShiftBaru;
+  window.toggleFormTarifShift = toggleFormTarifShift;
   window.handleSimpanTarifShift = handleSimpanTarifShift;
   window.togglePayrollPaidStatus = togglePayrollPaidStatus;
   window.triggerGeneratePayrollPeriode = triggerGeneratePayrollPeriode;
@@ -19552,10 +19571,11 @@ assert("KASIR-FILTER-3: Kategori Umum (UMM) Muncul untuk Dokter Gigi Spesialis",
 // Test Update Datalist Kasir saat Dokter Dipilih di UI
 const ksrDokEl = document.getElementById('ksrDokter');
 if (ksrDokEl) {
+  var origStaffList = window.KlinikData.staff;
   window.KlinikData.tindakan = mockSampleTindakan;
   window.KlinikData.staff = [
-    { nama: "drg. Regyana Oktavaria", role: "Dokter Gigi Umum" },
-    { nama: "drg. Rahma Yulinda D, Sp. BMM", role: "Dokter Gigi Spesialis" }
+    { nama: "drg. Regyana Oktavaria", role: "Dokter Gigi Umum", persenJM: 0.40 },
+    { nama: "drg. Rahma Yulinda D, Sp. BMM", role: "Dokter Gigi Spesialis", persenJM: 0.65 }
   ];
   
   // Pilih Dokter Gigi Umum
@@ -19573,6 +19593,8 @@ if (ksrDokEl) {
   assert("KASIR-UI-2: Datalist Kasir Berisi Tindakan Spesialis saat Dokter Spesialis Dipilih", dlKasirContentDGS.includes("Odontektomi Gigi Impaksi M3"));
   assert("KASIR-UI-2: Datalist Kasir Berisi Tindakan Umum saat Dokter Spesialis Dipilih", dlKasirContentDGS.includes("Konsultasi Dokter Gigi"));
   assert("KASIR-UI-2: Datalist Kasir TIDAK Berisi Tindakan DGU saat Dokter Spesialis Dipilih", !dlKasirContentDGS.includes("Penambalan Komposit Light-Cure"));
+
+  if (origStaffList) window.KlinikData.staff = origStaffList;
 }
 
 // 6. Uji Urutan Navigasi Sidebar Pelayanan Pasien & Administrasi
@@ -19659,8 +19681,17 @@ assert("KOMPENSASI-6: Saat Kombinasi Shift & Tindakan, Gaji Pokok Terkunci (disa
 
 // --- TEST: Pengaturan Persentase JM Dokter di Tab Pengaturan Tarif Shift & Gaji ---
 print("\n--- TEST: Pengaturan Persentase JM Dokter di Tab Pengaturan Tarif Shift & Gaji ---");
+var cardTarifShift = document.getElementById('cardFormTarifShift');
 var wrapTarifJM = document.getElementById('wrapperTarifPersenJM');
 var inpTarifJM = document.getElementById('tarifPersenJM');
+assert("TARIF-JM-0: Form Isian Tarif Shift Hidden secara Default", isCardTarifHiddenDefaultInHtml);
+assert("TARIF-JM-0: Tombol Input Tarif Shift Baru Diperbesar", isBtnTarifLargeInHtml);
+assert("TARIF-TOGGLE-1: Fungsi toggleFormTarifShift Tersedia", typeof toggleFormTarifShift === "function");
+toggleFormTarifShift(false);
+assert("TARIF-TOGGLE-2: Form Tarif Shift Tersembunyi saat Ditutup", cardTarifShift.classList.contains('hidden'));
+toggleFormTarifShift(true);
+assert("TARIF-TOGGLE-3: Form Tarif Shift Tampil saat Tombol Ditekan", !cardTarifShift.classList.contains('hidden'));
+assert("TARIF-JM-DEFAULT-0: Persentase JM Dokter Terisi Default 0 saat Form Baru", Number(inpTarifJM.value) === 0);
 assert("TARIF-JM-1: Wrapper Persentase JM Dokter Tersedia di DOM", wrapTarifJM !== null);
 assert("TARIF-JM-1: Input Persentase JM Dokter Tersedia di DOM", inpTarifJM !== null);
 
@@ -19670,7 +19701,7 @@ var docStaff = (window.KlinikData.staff || []).find(function(s) { return (s.role
 namaPekInput.value = docStaff ? docStaff.nama : "drg. Rahma Yulinda D, Sp. BMM";
 handleTarifNamaPekerjaChange();
 assert("TARIF-JM-2: Wrapper JM Dokter Tampil saat Nama Dokter Dipilih", !wrapTarifJM.classList.contains('hidden'));
-assert("TARIF-JM-2: Default Persentase JM Dokter adalah 50% atau Sesuai Master", Number(inpTarifJM.value) > 0);
+assert("TARIF-JM-2: Persentase JM Dokter Mengikuti Data Master jika Ada", Number(inpTarifJM.value) > 0);
 
 // Uji saat pekerja Staff Non-Dokter dipilih (misal Eva Nurmiza, Perawat Gigi)
 namaPekInput.value = "Eva Nurmiza, AMKG";

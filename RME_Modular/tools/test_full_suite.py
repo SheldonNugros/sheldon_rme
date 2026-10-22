@@ -68,6 +68,8 @@ is_status_split_in_html = ('Split' in ksr_status_options)
 is_box_split_in_html = ('id="boxSplitPayment"' in html and 'id="ksrSplitCash"' in html and 'id="ksrSplitTransfer"' in html)
 is_search_tindakan_large = ('id="cariDbTindakan"' in html and 'md:w-[460px]' in html and 'py-3' in html)
 is_header_jm_in_html = ('JM Dokter' in html and 'tbodyTarifShift' in html)
+is_btn_tarif_large = ('id="btnToggleFormTarifShift"' in html and 'Input Tarif Shift Baru' in html and ('px-5' in html or 'px-6' in html))
+is_card_tarif_hidden_default = bool(re.search(r'id=["\']cardFormTarifShift["\'][^>]*hidden', html))
 
 test_harness_file = os.path.join(BASE_DIR, 'tools', 'suite_harness.js')
 
@@ -1973,10 +1975,11 @@ assert("KASIR-FILTER-3: Kategori Umum (UMM) Muncul untuk Dokter Gigi Spesialis",
 // Test Update Datalist Kasir saat Dokter Dipilih di UI
 const ksrDokEl = document.getElementById('ksrDokter');
 if (ksrDokEl) {
+  var origStaffList = window.KlinikData.staff;
   window.KlinikData.tindakan = mockSampleTindakan;
   window.KlinikData.staff = [
-    { nama: "drg. Regyana Oktavaria", role: "Dokter Gigi Umum" },
-    { nama: "drg. Rahma Yulinda D, Sp. BMM", role: "Dokter Gigi Spesialis" }
+    { nama: "drg. Regyana Oktavaria", role: "Dokter Gigi Umum", persenJM: 0.40 },
+    { nama: "drg. Rahma Yulinda D, Sp. BMM", role: "Dokter Gigi Spesialis", persenJM: 0.65 }
   ];
   
   // Pilih Dokter Gigi Umum
@@ -1994,6 +1997,8 @@ if (ksrDokEl) {
   assert("KASIR-UI-2: Datalist Kasir Berisi Tindakan Spesialis saat Dokter Spesialis Dipilih", dlKasirContentDGS.includes("Odontektomi Gigi Impaksi M3"));
   assert("KASIR-UI-2: Datalist Kasir Berisi Tindakan Umum saat Dokter Spesialis Dipilih", dlKasirContentDGS.includes("Konsultasi Dokter Gigi"));
   assert("KASIR-UI-2: Datalist Kasir TIDAK Berisi Tindakan DGU saat Dokter Spesialis Dipilih", !dlKasirContentDGS.includes("Penambalan Komposit Light-Cure"));
+
+  if (origStaffList) window.KlinikData.staff = origStaffList;
 }
 
 // 6. Uji Urutan Navigasi Sidebar Pelayanan Pasien & Administrasi
@@ -2080,8 +2085,17 @@ assert("KOMPENSASI-6: Saat Kombinasi Shift & Tindakan, Gaji Pokok Terkunci (disa
 
 // --- TEST: Pengaturan Persentase JM Dokter di Tab Pengaturan Tarif Shift & Gaji ---
 print("\n--- TEST: Pengaturan Persentase JM Dokter di Tab Pengaturan Tarif Shift & Gaji ---");
+var cardTarifShift = document.getElementById('cardFormTarifShift');
 var wrapTarifJM = document.getElementById('wrapperTarifPersenJM');
 var inpTarifJM = document.getElementById('tarifPersenJM');
+assert("TARIF-JM-0: Form Isian Tarif Shift Hidden secara Default", isCardTarifHiddenDefaultInHtml);
+assert("TARIF-JM-0: Tombol Input Tarif Shift Baru Diperbesar", isBtnTarifLargeInHtml);
+assert("TARIF-TOGGLE-1: Fungsi toggleFormTarifShift Tersedia", typeof toggleFormTarifShift === "function");
+toggleFormTarifShift(false);
+assert("TARIF-TOGGLE-2: Form Tarif Shift Tersembunyi saat Ditutup", cardTarifShift.classList.contains('hidden'));
+toggleFormTarifShift(true);
+assert("TARIF-TOGGLE-3: Form Tarif Shift Tampil saat Tombol Ditekan", !cardTarifShift.classList.contains('hidden'));
+assert("TARIF-JM-DEFAULT-0: Persentase JM Dokter Terisi Default 0 saat Form Baru", Number(inpTarifJM.value) === 0);
 assert("TARIF-JM-1: Wrapper Persentase JM Dokter Tersedia di DOM", wrapTarifJM !== null);
 assert("TARIF-JM-1: Input Persentase JM Dokter Tersedia di DOM", inpTarifJM !== null);
 
@@ -2091,7 +2105,7 @@ var docStaff = (window.KlinikData.staff || []).find(function(s) { return (s.role
 namaPekInput.value = docStaff ? docStaff.nama : "drg. Rahma Yulinda D, Sp. BMM";
 handleTarifNamaPekerjaChange();
 assert("TARIF-JM-2: Wrapper JM Dokter Tampil saat Nama Dokter Dipilih", !wrapTarifJM.classList.contains('hidden'));
-assert("TARIF-JM-2: Default Persentase JM Dokter adalah 50% atau Sesuai Master", Number(inpTarifJM.value) > 0);
+assert("TARIF-JM-2: Persentase JM Dokter Mengikuti Data Master jika Ada", Number(inpTarifJM.value) > 0);
 
 // Uji saat pekerja Staff Non-Dokter dipilih (misal Eva Nurmiza, Perawat Gigi)
 namaPekInput.value = "Eva Nurmiza, AMKG";
@@ -2289,7 +2303,7 @@ if (failedTotal > 0) {
 }
 '''
 
-full_test_script = f"var isButtonKonsultasiRemoved = {str(is_kon_removed).lower()};\nvar isModalResetPerioInHtml = {str(is_modal_perio_in_html).lower()};\nvar roleSelectOptionsFromHtml = {json.dumps(role_options)};\nvar isDatePickerLargeInHtml = {str(is_date_picker_large).lower()};\nvar isPaginasiHariIniRemoved = {str(is_paginasi_hari_ini_removed).lower()};\nvar isSubtitleAbsensiRemoved = {str(is_subtitle_absensi_removed).lower()};\nvar isTercatatMasukRemoved = {str(is_tercatat_masuk_removed).lower()};\nvar isIzinSakitOffRemoved = {str(is_izin_sakit_off_removed).lower()};\nvar isBtnDbUserRemoved = {str(is_btn_db_user_removed).lower()};\nvar isWrapperDokterJMRemoved = {str(is_wrapper_dokter_jm_removed).lower()};\nvar isDbUserPersenJMRemoved = {str(is_db_user_persen_jm_removed).lower()};\nvar isPelayananOrderedInHtml = {str(is_pelayanan_ordered).lower()};\nvar isAdminHeaderInHtml = {str(is_admin_header).lower()};\nvar isAdminOrderedInHtml = {str(is_admin_ordered).lower()};\nvar isTabBtnPayInHtml = {str(is_tab_btn_pay_in_html).lower()};\nvar isPanelPayInHtml = {str(is_panel_pay_in_html).lower()};\nvar isBtnAturLiburRemoved = {str(is_btn_atur_libur_removed).lower()};\nvar isBtnRefreshInHtml = {str(is_btn_refresh_in_html).lower()};\nvar isEmrTitleRenamedInHtml = {str(is_emr_title_renamed).lower()};\nvar isClearPasienBtnInHtml = {str(is_clear_pasien_btn_in_html).lower()};\nvar isTglLargeInHtml = {str(is_tgl_large_in_html).lower()};\nvar isTempatLahirInHtml = {str(is_tempat_lahir_in_html).lower()};\nvar isModalToothTglInHtml = {str(is_modal_tooth_tgl_in_html).lower()};\nvar isPanelRefInHtml = {str(is_panel_ref_in_html).lower()};\nvar isMetodeCashTfOnly = {str(is_metode_cash_tf_only).lower()};\nvar isStatusSplitInHtml = {str(is_status_split_in_html).lower()};\nvar isBoxSplitInHtml = {str(is_box_split_in_html).lower()};\nvar isSearchTindakanLargeInHtml = {str(is_search_tindakan_large).lower()};\nvar isHeaderJMInHtml = {str(is_header_jm_in_html).lower()};\n" + dom_shim + "\n" + all_js + "\n" + test_runner_js
+full_test_script = f"var isButtonKonsultasiRemoved = {str(is_kon_removed).lower()};\nvar isModalResetPerioInHtml = {str(is_modal_perio_in_html).lower()};\nvar roleSelectOptionsFromHtml = {json.dumps(role_options)};\nvar isDatePickerLargeInHtml = {str(is_date_picker_large).lower()};\nvar isPaginasiHariIniRemoved = {str(is_paginasi_hari_ini_removed).lower()};\nvar isSubtitleAbsensiRemoved = {str(is_subtitle_absensi_removed).lower()};\nvar isTercatatMasukRemoved = {str(is_tercatat_masuk_removed).lower()};\nvar isIzinSakitOffRemoved = {str(is_izin_sakit_off_removed).lower()};\nvar isBtnDbUserRemoved = {str(is_btn_db_user_removed).lower()};\nvar isWrapperDokterJMRemoved = {str(is_wrapper_dokter_jm_removed).lower()};\nvar isDbUserPersenJMRemoved = {str(is_db_user_persen_jm_removed).lower()};\nvar isPelayananOrderedInHtml = {str(is_pelayanan_ordered).lower()};\nvar isAdminHeaderInHtml = {str(is_admin_header).lower()};\nvar isAdminOrderedInHtml = {str(is_admin_ordered).lower()};\nvar isTabBtnPayInHtml = {str(is_tab_btn_pay_in_html).lower()};\nvar isPanelPayInHtml = {str(is_panel_pay_in_html).lower()};\nvar isBtnAturLiburRemoved = {str(is_btn_atur_libur_removed).lower()};\nvar isBtnRefreshInHtml = {str(is_btn_refresh_in_html).lower()};\nvar isEmrTitleRenamedInHtml = {str(is_emr_title_renamed).lower()};\nvar isClearPasienBtnInHtml = {str(is_clear_pasien_btn_in_html).lower()};\nvar isTglLargeInHtml = {str(is_tgl_large_in_html).lower()};\nvar isTempatLahirInHtml = {str(is_tempat_lahir_in_html).lower()};\nvar isModalToothTglInHtml = {str(is_modal_tooth_tgl_in_html).lower()};\nvar isPanelRefInHtml = {str(is_panel_ref_in_html).lower()};\nvar isMetodeCashTfOnly = {str(is_metode_cash_tf_only).lower()};\nvar isStatusSplitInHtml = {str(is_status_split_in_html).lower()};\nvar isBoxSplitInHtml = {str(is_box_split_in_html).lower()};\nvar isSearchTindakanLargeInHtml = {str(is_search_tindakan_large).lower()};\nvar isHeaderJMInHtml = {str(is_header_jm_in_html).lower()};\nvar isBtnTarifLargeInHtml = {str(is_btn_tarif_large).lower()};\nvar isCardTarifHiddenDefaultInHtml = {str(is_card_tarif_hidden_default).lower()};\n" + dom_shim + "\n" + all_js + "\n" + test_runner_js
 
 with open(test_harness_file, 'w', encoding='utf-8') as f:
     f.write(full_test_script)

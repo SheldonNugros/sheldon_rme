@@ -13072,13 +13072,10 @@ function handleRoleChange() {
   const wrapJM = document.getElementById('wrapperDokterJM');
   const jmInput = document.getElementById('dbUserPersenJM');
   if (!roleEl || !wrapJM) return;
-  const role = (roleEl.value || '').trim();
-  const isDokter = (role === 'Dokter Gigi Spesialis' || role === 'Dokter Gigi Umum');
+  const role = (roleEl.value || '').trim().toLowerCase();
+  const isDokter = role.includes('dokter gigi') || role === 'dokter';
   if (isDokter) {
     wrapJM.classList.remove('hidden');
-    if (jmInput && !jmInput.value) {
-      jmInput.value = '0';
-    }
   } else {
     wrapJM.classList.add('hidden');
     if (jmInput) {
@@ -13249,9 +13246,10 @@ function renderTabelUser() {
 
     let jmDisplay = '-';
     if (rLow.includes('dokter')) {
-      let pct = (u.persenJM ? Number(u.persenJM) : 0);
+      let pct = (u.persenJM !== undefined && u.persenJM !== null && u.persenJM !== '') ? Number(u.persenJM) : 0;
       if (pct <= 1 && pct > 0) pct = Math.round(pct * 100);
-      jmDisplay = '<span class="font-bold text-amber-800">' + pct + '%</span>';
+      if (pct === 0) pct = 50;
+      jmDisplay = '<span class="px-2 py-0.5 bg-amber-100 text-amber-900 border border-amber-300 rounded font-black text-xs inline-flex items-center gap-1">🩺 ' + pct + '%</span>';
     }
 
     let safeUName = String(u.username || '').replace(/'/g, "\\'");
@@ -13424,7 +13422,12 @@ function simpanDbUser(e) {
   const noHp = (document.getElementById('dbUserNoHp').value || '').trim();
   const email = (document.getElementById('dbUserEmail') ? document.getElementById('dbUserEmail').value : '').trim();
   const isDokterRole = (role === 'Dokter Gigi Spesialis' || role === 'Dokter Gigi Umum');
-  const persenJM = isDokterRole ? (Number(document.getElementById('dbUserPersenJM').value) || 0) : 0;
+  let persenJM = 0;
+  if (isDokterRole) {
+    const rawVal = document.getElementById('dbUserPersenJM') ? document.getElementById('dbUserPersenJM').value.trim() : '';
+    persenJM = (rawVal !== '' && !isNaN(Number(rawVal))) ? Number(rawVal) : 50;
+    if (persenJM === 0) persenJM = 50;
+  }
 
   if (!nama || !username) {
     showToast('warning', 'Nama Pekerja dan Username wajib diisi!');
@@ -13563,9 +13566,13 @@ function editDbUser(username) {
 
   let isDokterRole = (roleSelect.value === 'Dokter Gigi Spesialis' || roleSelect.value === 'Dokter Gigi Umum');
   let pct = 0;
-  if (isDokterRole && user.persenJM) {
-    pct = Number(user.persenJM);
-    if (pct <= 1 && pct > 0) pct = Math.round(pct * 100);
+  if (isDokterRole) {
+    if (user.persenJM !== undefined && user.persenJM !== null && user.persenJM !== '' && Number(user.persenJM) > 0) {
+      pct = Number(user.persenJM);
+      if (pct <= 1 && pct > 0) pct = Math.round(pct * 100);
+    } else {
+      pct = 50; // Default 50% bagi dokter
+    }
   }
   document.getElementById('dbUserPersenJM').value = pct;
 

@@ -139,6 +139,12 @@ function getDaftarUserMaster() {
       } catch (eMig) {}
     }
 
+    // Auto-heal: Pastikan kolom Persen_JM_Dokter ada di Sheet Data
+    healMasterUserDataSheet();
+    v = readFast(DB_CONFIG.MASTER, "Data");
+    h = v[0];
+    idPek = getColIdx(h, ['idpekerja', 'id_pekerja', 'id']);
+
     let idNama = getColIdx(h, ['namapekerja', 'nama_pekerja', 'nama', 'namalengkap']); if (idNama === -1) idNama = (idPek === 0 ? 1 : 0);
     let idUser = getColIdx(h, ['username', 'user']); if (idUser === -1) idUser = (idPek === 0 ? 2 : 1);
     let idRole = getColIdx(h, ['kategorirole', 'kategori_role', 'role', 'kategori']); if (idRole === -1) idRole = (idPek === 0 ? 3 : 2);
@@ -160,18 +166,24 @@ function getDaftarUserMaster() {
       let isHashed = pVal.length === 64;
       let rawId = (idPek !== -1 && r[idPek]) ? String(r[idPek]).trim() : "";
       let snId = (rawId && rawId.toUpperCase().startsWith("SN-")) ? rawId : ("SN-" + String(counter).padStart(2, '0'));
-      
+      let rawRole = String(r[idRole] || "Staff").trim();
+      let isDokter = rawRole.toLowerCase().includes("dokter");
+      let rawJM = (idJM !== -1 && r[idJM] !== "" && r[idJM] !== null && r[idJM] !== undefined) ? Number(r[idJM]) : 0;
+      if (rawJM === 0 && isDokter) {
+        rawJM = 0.50; // Default 50% bagi dokter jika belum diatur
+      }
+
       users.push({
         idPekerja: snId,
         nama: String(r[idNama] || "").trim(),
         username: String(r[idUser] || "").trim(),
-        role: String(r[idRole] || "Staff").trim(),
+        role: rawRole,
         hasPassword: hasPass,
         isHashed: isHashed,
         status: String(r[idStatus] || "Aktif").trim(),
         noReg: String(r[idSIP] || "-").trim(),
         noHp: String(r[idHP] || "").trim(),
-        persenJM: (idJM !== -1 && r[idJM] !== "" && r[idJM] !== null && r[idJM] !== undefined) ? Number(r[idJM]) : 0,
+        persenJM: rawJM,
         email: (idEmail !== -1 && r[idEmail] !== undefined && r[idEmail] !== null) ? String(r[idEmail]).trim() : ""
       });
     }
@@ -179,6 +191,49 @@ function getDaftarUserMaster() {
   } catch (e) {
     Logger.log("Error getDaftarUserMaster: " + e.message);
     return [];
+  }
+}
+
+/**
+ * Normalisasi otomatis Sheet Data di Spreadsheet Master (RME Sheldon - 06 Master User & Role)
+ * Memastikan kolom Persen_JM_Dokter tersedia dan terisi persentase default untuk seluruh dokter.
+ */
+function healMasterUserDataSheet() {
+  try {
+    const ss = SpreadsheetApp.openById(DB_CONFIG.MASTER.trim());
+    const sheet = ss.getSheetByName("Data");
+    if (!sheet) return false;
+
+    let v = sheet.getDataRange().getValues();
+    if (v.length === 0) return false;
+
+    let h = v[0].map(x => String(x || '').trim());
+    let hLow = h.map(x => x.toLowerCase().replace(/[\s_.]/g, ''));
+    let idJM = hLow.findIndex(x => x === 'persenjmdokter' || x === 'persenjm' || x === 'jm');
+
+    if (idJM === -1) {
+      let idEmail = hLow.findIndex(x => x === 'email');
+      let insertCol = idEmail !== -1 ? (idEmail + 1) : (h.length + 1);
+      sheet.insertColumnBefore(insertCol);
+      sheet.getRange(1, insertCol).setValue("Persen_JM_Dokter").setFontWeight("bold").setBackground("#e2e8f0");
+      
+      let idRole = hLow.findIndex(x => x.includes('role') || x.includes('kategori'));
+      let lastR = sheet.getLastRow();
+      if (idRole !== -1 && lastR > 1) {
+        for (let r = 2; r <= lastR; r++) {
+          let rVal = String(sheet.getRange(r, idRole + 1).getValue() || '').toLowerCase();
+          if (rVal.includes('dokter')) {
+            sheet.getRange(r, insertCol).setValue(0.50).setNumberFormat("0.0%");
+          }
+        }
+      }
+      Logger.log("✅ Berhasil menambahkan kolom Persen_JM_Dokter ke Sheet Data");
+      return true;
+    }
+    return false;
+  } catch (err) {
+    Logger.log("healMasterUserDataSheet error: " + err.message);
+    return false;
   }
 }
 
@@ -208,7 +263,15 @@ function simpanUserMaster(payload) {
     let idStatus = getColIdx(h, ['status']); if (idStatus === -1) idStatus = (idCol === 0 ? 5 : 4);
     let idSIP = getColIdx(h, ['noregistrasi', 'sip', 'noreg']); if (idSIP === -1) idSIP = (idCol === 0 ? 6 : 5);
     let idHP = getColIdx(h, ['nohp', 'no_hp', 'telepon', 'wa']); if (idHP === -1) idHP = (idCol === 0 ? 7 : 6);
-    let idJM = getColIdx(h, ['persen_jm_dokter', 'persen_jm', 'persenjm']); if (idJM === -1) idJM = (idCol === 0 ? 8 : 7);
+    let idJM = getColIdx(h, ['persen_jm_dokter', 'persen_jm', 'persenjm']);
+    if (idJM === -1) {
+      let idEmailCur = getColIdx(h, ['email', 'surel', 'e-mail']);
+      let insertCol = idEmailCur !== -1 ? (idEmailCur + 1) : (h.length + 1);
+      sheet.insertColumnBefore(insertCol);
+      sheet.getRange(1, insertCol).setValue("Persen_JM_Dokter").setFontWeight("bold").setBackground("#e2e8f0");
+      h = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+      idJM = insertCol - 1;
+    }
     let idEmail = getColIdx(h, ['email', 'surel', 'e-mail']);
 
     if (idEmail === -1) {
@@ -231,6 +294,7 @@ function simpanUserMaster(payload) {
     let isDokterRole = (rClean === "Dokter Gigi Spesialis" || rClean === "Dokter Gigi Umum");
     let pjmVal = isDokterRole && payload.persenJM !== undefined && payload.persenJM !== "" ? Number(payload.persenJM) : 0;
     if (pjmVal > 1) pjmVal = pjmVal / 100;
+    if (pjmVal === 0 && isDokterRole) pjmVal = 0.50; // Default 50% bagi dokter jika tidak diisi
 
     let rawSt = String(payload.status || "Aktif").trim().toLowerCase();
     let normStatus = (rawSt === "tidak aktif" || rawSt === "non aktif" || rawSt === "nonaktif" || rawSt === "inactive") ? "Tidak Aktif" : "Aktif";

@@ -27,6 +27,8 @@ is_subtitle_absensi_removed = ('Pencatatan absensi pegawai klinik (2 Shift' not 
 is_tercatat_masuk_removed = ('Tercatat masuk tugas' not in html)
 is_izin_sakit_off_removed = ('Izin / Sakit / Off' not in html)
 is_btn_db_user_removed = ('id="btnDbUser"' not in html)
+is_wrapper_dokter_jm_removed = ('id="wrapperDokterJM"' not in html)
+is_db_user_persen_jm_removed = ('id="dbUserPersenJM"' not in html)
 
 klinis_m = re.search(r'id=["\']section-klinis["\'][^>]*>(.*?)</div>\s*<!-- Group 3', html, re.DOTALL)
 klinis_html = klinis_m.group(1) if klinis_m else ""
@@ -1824,37 +1826,8 @@ assert("ROLE-4: Role Office Menyembunyikan Menu Kasir & Payroll", document.getEl
 terapkanRoleAkses("Owner");
 assert("ROLE-5: Role Owner Menampilkan Seluruh Menu Termasuk User Master", !document.getElementById('nav-user-master').classList.contains('hidden') && !document.getElementById('nav-dashboard').classList.contains('hidden'));
 
-// --- TEST: Pengaturan Jasa Medis (JM) Dokter Hanya Tampil untuk Dokter Gigi Spesialis & Umum ---
-var wrapJM = document.getElementById('wrapperDokterJM');
-var inputJM = document.getElementById('dbUserPersenJM');
-var roleSelect = document.getElementById('dbUserRole');
-
-// 1. Uji saat Dokter Gigi Spesialis dipilih -> wrapper tampil, default tetap 0
-inputJM.value = "0";
-roleSelect.value = "Dokter Gigi Spesialis";
-handleRoleChange();
-assert("ROLE-JM-1: Pengaturan JM Tampil saat Role Dokter Gigi Spesialis", !wrapJM.classList.contains('hidden'));
-assert("ROLE-JM-1: Default JM Dokter Gigi Spesialis Tetap 0", inputJM.value === "0");
-
-// 2. Uji saat Dokter Gigi Umum dipilih -> wrapper tampil, default tetap 0
-inputJM.value = "0";
-roleSelect.value = "Dokter Gigi Umum";
-handleRoleChange();
-assert("ROLE-JM-2: Pengaturan JM Tampil saat Role Dokter Gigi Umum", !wrapJM.classList.contains('hidden'));
-assert("ROLE-JM-2: Default JM Dokter Gigi Umum Tetap 0", inputJM.value === "0");
-
-// 3. Uji saat Role Selain Dokter dipilih (Owner, Perawat Gigi, Perawat Umum, Admin, Office) -> wrapper tersembunyi, default 0
-var nonDokterRoles = ["Perawat Gigi", "Perawat Umum", "Admin", "Office", "Owner"];
-nonDokterRoles.forEach(function(r) {
-  roleSelect.value = r;
-  handleRoleChange();
-  assert("ROLE-JM-3: Pengaturan JM Tidak Tampil untuk Role " + r, wrapJM.classList.contains('hidden'));
-  assert("ROLE-JM-3: Default JM untuk Role " + r + " adalah 0", inputJM.value === "0");
-});
-
-// Kembalikan ke default tambah user
-batalEditDbUser(false);
-assert("ROLE-JM-4: Form Baru Mereset JM ke 0 dan Tersembunyi", wrapJM.classList.contains('hidden') && inputJM.value === "0");
+// --- TEST: Isian JM di Master User Dihapus (Dipusatkan ke Pengaturan Tarif Shift & Gaji) ---
+assert("ROLE-JM-1: Isian JM Dokter Dihapus dari Form Master User", isWrapperDokterJMRemoved && isDbUserPersenJMRemoved);
 
 // 4. Uji Integrasi Tab Master User & Payroll dalam Master User & Role
 assert("USER-PAYROLL-1: Tab Master User Tersedia", document.getElementById('btnTabMasterUser') !== null);
@@ -2316,7 +2289,7 @@ if (failedTotal > 0) {
 }
 '''
 
-full_test_script = f"var isButtonKonsultasiRemoved = {str(is_kon_removed).lower()};\nvar isModalResetPerioInHtml = {str(is_modal_perio_in_html).lower()};\nvar roleSelectOptionsFromHtml = {json.dumps(role_options)};\nvar isDatePickerLargeInHtml = {str(is_date_picker_large).lower()};\nvar isPaginasiHariIniRemoved = {str(is_paginasi_hari_ini_removed).lower()};\nvar isSubtitleAbsensiRemoved = {str(is_subtitle_absensi_removed).lower()};\nvar isTercatatMasukRemoved = {str(is_tercatat_masuk_removed).lower()};\nvar isIzinSakitOffRemoved = {str(is_izin_sakit_off_removed).lower()};\nvar isBtnDbUserRemoved = {str(is_btn_db_user_removed).lower()};\nvar isPelayananOrderedInHtml = {str(is_pelayanan_ordered).lower()};\nvar isAdminHeaderInHtml = {str(is_admin_header).lower()};\nvar isAdminOrderedInHtml = {str(is_admin_ordered).lower()};\nvar isTabBtnPayInHtml = {str(is_tab_btn_pay_in_html).lower()};\nvar isPanelPayInHtml = {str(is_panel_pay_in_html).lower()};\nvar isBtnAturLiburRemoved = {str(is_btn_atur_libur_removed).lower()};\nvar isBtnRefreshInHtml = {str(is_btn_refresh_in_html).lower()};\nvar isEmrTitleRenamedInHtml = {str(is_emr_title_renamed).lower()};\nvar isClearPasienBtnInHtml = {str(is_clear_pasien_btn_in_html).lower()};\nvar isTglLargeInHtml = {str(is_tgl_large_in_html).lower()};\nvar isTempatLahirInHtml = {str(is_tempat_lahir_in_html).lower()};\nvar isModalToothTglInHtml = {str(is_modal_tooth_tgl_in_html).lower()};\nvar isPanelRefInHtml = {str(is_panel_ref_in_html).lower()};\nvar isMetodeCashTfOnly = {str(is_metode_cash_tf_only).lower()};\nvar isStatusSplitInHtml = {str(is_status_split_in_html).lower()};\nvar isBoxSplitInHtml = {str(is_box_split_in_html).lower()};\nvar isSearchTindakanLargeInHtml = {str(is_search_tindakan_large).lower()};\nvar isHeaderJMInHtml = {str(is_header_jm_in_html).lower()};\n" + dom_shim + "\n" + all_js + "\n" + test_runner_js
+full_test_script = f"var isButtonKonsultasiRemoved = {str(is_kon_removed).lower()};\nvar isModalResetPerioInHtml = {str(is_modal_perio_in_html).lower()};\nvar roleSelectOptionsFromHtml = {json.dumps(role_options)};\nvar isDatePickerLargeInHtml = {str(is_date_picker_large).lower()};\nvar isPaginasiHariIniRemoved = {str(is_paginasi_hari_ini_removed).lower()};\nvar isSubtitleAbsensiRemoved = {str(is_subtitle_absensi_removed).lower()};\nvar isTercatatMasukRemoved = {str(is_tercatat_masuk_removed).lower()};\nvar isIzinSakitOffRemoved = {str(is_izin_sakit_off_removed).lower()};\nvar isBtnDbUserRemoved = {str(is_btn_db_user_removed).lower()};\nvar isWrapperDokterJMRemoved = {str(is_wrapper_dokter_jm_removed).lower()};\nvar isDbUserPersenJMRemoved = {str(is_db_user_persen_jm_removed).lower()};\nvar isPelayananOrderedInHtml = {str(is_pelayanan_ordered).lower()};\nvar isAdminHeaderInHtml = {str(is_admin_header).lower()};\nvar isAdminOrderedInHtml = {str(is_admin_ordered).lower()};\nvar isTabBtnPayInHtml = {str(is_tab_btn_pay_in_html).lower()};\nvar isPanelPayInHtml = {str(is_panel_pay_in_html).lower()};\nvar isBtnAturLiburRemoved = {str(is_btn_atur_libur_removed).lower()};\nvar isBtnRefreshInHtml = {str(is_btn_refresh_in_html).lower()};\nvar isEmrTitleRenamedInHtml = {str(is_emr_title_renamed).lower()};\nvar isClearPasienBtnInHtml = {str(is_clear_pasien_btn_in_html).lower()};\nvar isTglLargeInHtml = {str(is_tgl_large_in_html).lower()};\nvar isTempatLahirInHtml = {str(is_tempat_lahir_in_html).lower()};\nvar isModalToothTglInHtml = {str(is_modal_tooth_tgl_in_html).lower()};\nvar isPanelRefInHtml = {str(is_panel_ref_in_html).lower()};\nvar isMetodeCashTfOnly = {str(is_metode_cash_tf_only).lower()};\nvar isStatusSplitInHtml = {str(is_status_split_in_html).lower()};\nvar isBoxSplitInHtml = {str(is_box_split_in_html).lower()};\nvar isSearchTindakanLargeInHtml = {str(is_search_tindakan_large).lower()};\nvar isHeaderJMInHtml = {str(is_header_jm_in_html).lower()};\n" + dom_shim + "\n" + all_js + "\n" + test_runner_js
 
 with open(test_harness_file, 'w', encoding='utf-8') as f:
     f.write(full_test_script)

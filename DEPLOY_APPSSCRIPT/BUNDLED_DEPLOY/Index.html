@@ -2071,24 +2071,6 @@
             </div>
           </div>
 
-          <!-- Pengaturan Persentase JM Dokter (Muncul Jelas saat Role Dokter Dipilih) -->
-          <div id="wrapperDokterJM" class="hidden p-4 bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-300 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
-            <div class="space-y-1">
-              <div class="text-xs font-black text-amber-950 flex items-center gap-2">
-                <span class="w-6 h-6 rounded-lg bg-amber-200 text-amber-900 flex items-center justify-center font-bold text-xs">🩺</span>
-                <span>Default % Jasa Medis (JM) Dokter</span>
-                <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-200 text-amber-900">Standar Bawaan Dokter</span>
-              </div>
-              <p class="text-[11px] text-amber-800 font-medium">Persentase bagi hasil baku untuk seluruh tindakan medis dokter ini (Contoh: ketik 50 untuk 50%, atau 40 untuk 40%).</p>
-            </div>
-            <div class="w-full sm:w-40 flex-shrink-0 flex items-center gap-2">
-              <div class="relative w-full">
-                <input type="number" id="dbUserPersenJM" min="0" max="100" step="1" placeholder="50" class="w-full px-3.5 py-2.5 bg-white border-2 border-amber-400 rounded-xl text-sm font-black text-amber-950 text-right outline-none focus:ring-2 focus:ring-amber-500 pr-8 shadow-xs">
-                <span class="absolute right-3 top-2.5 font-black text-amber-800 text-xs">%</span>
-              </div>
-            </div>
-          </div>
-
           <div class="flex justify-end gap-2 pt-2">
             <button type="button" onclick="batalEditDbUser(true)" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-all text-xs active:scale-95 cursor-pointer">
               🔄 Bersihkan Form
@@ -18350,16 +18332,15 @@ function handleRoleChange() {
   const roleEl = document.getElementById('dbUserRole');
   const wrapJM = document.getElementById('wrapperDokterJM');
   const jmInput = document.getElementById('dbUserPersenJM');
-  if (!roleEl || !wrapJM) return;
+  if (!roleEl) return;
   const role = (roleEl.value || '').trim().toLowerCase();
   const isDokter = role.includes('dokter gigi') || role === 'dokter';
-  if (isDokter) {
-    wrapJM.classList.remove('hidden');
-  } else {
-    wrapJM.classList.add('hidden');
-    if (jmInput) {
-      jmInput.value = '0';
-    }
+  if (wrapJM) {
+    if (isDokter) wrapJM.classList.remove('hidden');
+    else wrapJM.classList.add('hidden');
+  }
+  if (jmInput) {
+    if (!isDokter) jmInput.value = '0';
   }
 }
 
@@ -18703,9 +18684,14 @@ function simpanDbUser(e) {
   const isDokterRole = (role === 'Dokter Gigi Spesialis' || role === 'Dokter Gigi Umum');
   let persenJM = 0;
   if (isDokterRole) {
-    const rawVal = document.getElementById('dbUserPersenJM') ? document.getElementById('dbUserPersenJM').value.trim() : '';
-    persenJM = (rawVal !== '' && !isNaN(Number(rawVal))) ? Number(rawVal) : 50;
-    if (persenJM === 0) persenJM = 50;
+    const rawEl = document.getElementById('dbUserPersenJM');
+    if (rawEl && rawEl.value.trim() !== '') {
+      persenJM = Number(rawEl.value) || 50;
+    } else {
+      let existingU = (listMasterUser || []).find(u => String(u.username || '').toLowerCase() === username.toLowerCase());
+      persenJM = (existingU && existingU.persenJM) ? Number(existingU.persenJM) : 50;
+    }
+    if (persenJM <= 1 && persenJM > 0) persenJM = Math.round(persenJM * 100);
   }
 
   if (!nama || !username) {
@@ -18853,7 +18839,8 @@ function editDbUser(username) {
       pct = 50; // Default 50% bagi dokter
     }
   }
-  document.getElementById('dbUserPersenJM').value = pct;
+  const elJM = document.getElementById('dbUserPersenJM');
+  if (elJM) elJM.value = pct;
 
   // Password in edit mode is optional
   const passInp = document.getElementById('dbUserPassword');

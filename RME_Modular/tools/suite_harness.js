@@ -7,6 +7,8 @@ var isSubtitleAbsensiRemoved = true;
 var isTercatatMasukRemoved = true;
 var isIzinSakitOffRemoved = true;
 var isBtnDbUserRemoved = true;
+var isWrapperDokterJMRemoved = true;
+var isDbUserPersenJMRemoved = true;
 var isPelayananOrderedInHtml = true;
 var isAdminHeaderInHtml = true;
 var isAdminOrderedInHtml = true;
@@ -13072,16 +13074,15 @@ function handleRoleChange() {
   const roleEl = document.getElementById('dbUserRole');
   const wrapJM = document.getElementById('wrapperDokterJM');
   const jmInput = document.getElementById('dbUserPersenJM');
-  if (!roleEl || !wrapJM) return;
+  if (!roleEl) return;
   const role = (roleEl.value || '').trim().toLowerCase();
   const isDokter = role.includes('dokter gigi') || role === 'dokter';
-  if (isDokter) {
-    wrapJM.classList.remove('hidden');
-  } else {
-    wrapJM.classList.add('hidden');
-    if (jmInput) {
-      jmInput.value = '0';
-    }
+  if (wrapJM) {
+    if (isDokter) wrapJM.classList.remove('hidden');
+    else wrapJM.classList.add('hidden');
+  }
+  if (jmInput) {
+    if (!isDokter) jmInput.value = '0';
   }
 }
 
@@ -13425,9 +13426,14 @@ function simpanDbUser(e) {
   const isDokterRole = (role === 'Dokter Gigi Spesialis' || role === 'Dokter Gigi Umum');
   let persenJM = 0;
   if (isDokterRole) {
-    const rawVal = document.getElementById('dbUserPersenJM') ? document.getElementById('dbUserPersenJM').value.trim() : '';
-    persenJM = (rawVal !== '' && !isNaN(Number(rawVal))) ? Number(rawVal) : 50;
-    if (persenJM === 0) persenJM = 50;
+    const rawEl = document.getElementById('dbUserPersenJM');
+    if (rawEl && rawEl.value.trim() !== '') {
+      persenJM = Number(rawEl.value) || 50;
+    } else {
+      let existingU = (listMasterUser || []).find(u => String(u.username || '').toLowerCase() === username.toLowerCase());
+      persenJM = (existingU && existingU.persenJM) ? Number(existingU.persenJM) : 50;
+    }
+    if (persenJM <= 1 && persenJM > 0) persenJM = Math.round(persenJM * 100);
   }
 
   if (!nama || !username) {
@@ -13575,7 +13581,8 @@ function editDbUser(username) {
       pct = 50; // Default 50% bagi dokter
     }
   }
-  document.getElementById('dbUserPersenJM').value = pct;
+  const elJM = document.getElementById('dbUserPersenJM');
+  if (elJM) elJM.value = pct;
 
   // Password in edit mode is optional
   const passInp = document.getElementById('dbUserPassword');
@@ -19398,37 +19405,8 @@ assert("ROLE-4: Role Office Menyembunyikan Menu Kasir & Payroll", document.getEl
 terapkanRoleAkses("Owner");
 assert("ROLE-5: Role Owner Menampilkan Seluruh Menu Termasuk User Master", !document.getElementById('nav-user-master').classList.contains('hidden') && !document.getElementById('nav-dashboard').classList.contains('hidden'));
 
-// --- TEST: Pengaturan Jasa Medis (JM) Dokter Hanya Tampil untuk Dokter Gigi Spesialis & Umum ---
-var wrapJM = document.getElementById('wrapperDokterJM');
-var inputJM = document.getElementById('dbUserPersenJM');
-var roleSelect = document.getElementById('dbUserRole');
-
-// 1. Uji saat Dokter Gigi Spesialis dipilih -> wrapper tampil, default tetap 0
-inputJM.value = "0";
-roleSelect.value = "Dokter Gigi Spesialis";
-handleRoleChange();
-assert("ROLE-JM-1: Pengaturan JM Tampil saat Role Dokter Gigi Spesialis", !wrapJM.classList.contains('hidden'));
-assert("ROLE-JM-1: Default JM Dokter Gigi Spesialis Tetap 0", inputJM.value === "0");
-
-// 2. Uji saat Dokter Gigi Umum dipilih -> wrapper tampil, default tetap 0
-inputJM.value = "0";
-roleSelect.value = "Dokter Gigi Umum";
-handleRoleChange();
-assert("ROLE-JM-2: Pengaturan JM Tampil saat Role Dokter Gigi Umum", !wrapJM.classList.contains('hidden'));
-assert("ROLE-JM-2: Default JM Dokter Gigi Umum Tetap 0", inputJM.value === "0");
-
-// 3. Uji saat Role Selain Dokter dipilih (Owner, Perawat Gigi, Perawat Umum, Admin, Office) -> wrapper tersembunyi, default 0
-var nonDokterRoles = ["Perawat Gigi", "Perawat Umum", "Admin", "Office", "Owner"];
-nonDokterRoles.forEach(function(r) {
-  roleSelect.value = r;
-  handleRoleChange();
-  assert("ROLE-JM-3: Pengaturan JM Tidak Tampil untuk Role " + r, wrapJM.classList.contains('hidden'));
-  assert("ROLE-JM-3: Default JM untuk Role " + r + " adalah 0", inputJM.value === "0");
-});
-
-// Kembalikan ke default tambah user
-batalEditDbUser(false);
-assert("ROLE-JM-4: Form Baru Mereset JM ke 0 dan Tersembunyi", wrapJM.classList.contains('hidden') && inputJM.value === "0");
+// --- TEST: Isian JM di Master User Dihapus (Dipusatkan ke Pengaturan Tarif Shift & Gaji) ---
+assert("ROLE-JM-1: Isian JM Dokter Dihapus dari Form Master User", isWrapperDokterJMRemoved && isDbUserPersenJMRemoved);
 
 // 4. Uji Integrasi Tab Master User & Payroll dalam Master User & Role
 assert("USER-PAYROLL-1: Tab Master User Tersedia", document.getElementById('btnTabMasterUser') !== null);

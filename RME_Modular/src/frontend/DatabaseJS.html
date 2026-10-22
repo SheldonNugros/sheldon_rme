@@ -1284,16 +1284,15 @@ function handleRoleChange() {
   const roleEl = document.getElementById('dbUserRole');
   const wrapJM = document.getElementById('wrapperDokterJM');
   const jmInput = document.getElementById('dbUserPersenJM');
-  if (!roleEl || !wrapJM) return;
+  if (!roleEl) return;
   const role = (roleEl.value || '').trim().toLowerCase();
   const isDokter = role.includes('dokter gigi') || role === 'dokter';
-  if (isDokter) {
-    wrapJM.classList.remove('hidden');
-  } else {
-    wrapJM.classList.add('hidden');
-    if (jmInput) {
-      jmInput.value = '0';
-    }
+  if (wrapJM) {
+    if (isDokter) wrapJM.classList.remove('hidden');
+    else wrapJM.classList.add('hidden');
+  }
+  if (jmInput) {
+    if (!isDokter) jmInput.value = '0';
   }
 }
 
@@ -1637,9 +1636,14 @@ function simpanDbUser(e) {
   const isDokterRole = (role === 'Dokter Gigi Spesialis' || role === 'Dokter Gigi Umum');
   let persenJM = 0;
   if (isDokterRole) {
-    const rawVal = document.getElementById('dbUserPersenJM') ? document.getElementById('dbUserPersenJM').value.trim() : '';
-    persenJM = (rawVal !== '' && !isNaN(Number(rawVal))) ? Number(rawVal) : 50;
-    if (persenJM === 0) persenJM = 50;
+    const rawEl = document.getElementById('dbUserPersenJM');
+    if (rawEl && rawEl.value.trim() !== '') {
+      persenJM = Number(rawEl.value) || 50;
+    } else {
+      let existingU = (listMasterUser || []).find(u => String(u.username || '').toLowerCase() === username.toLowerCase());
+      persenJM = (existingU && existingU.persenJM) ? Number(existingU.persenJM) : 50;
+    }
+    if (persenJM <= 1 && persenJM > 0) persenJM = Math.round(persenJM * 100);
   }
 
   if (!nama || !username) {
@@ -1787,7 +1791,8 @@ function editDbUser(username) {
       pct = 50; // Default 50% bagi dokter
     }
   }
-  document.getElementById('dbUserPersenJM').value = pct;
+  const elJM = document.getElementById('dbUserPersenJM');
+  if (elJM) elJM.value = pct;
 
   // Password in edit mode is optional
   const passInp = document.getElementById('dbUserPassword');

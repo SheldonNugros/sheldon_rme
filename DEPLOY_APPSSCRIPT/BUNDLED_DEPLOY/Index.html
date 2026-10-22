@@ -2205,13 +2205,15 @@
             <p class="text-[10px] text-slate-400">Khusus Dokter Gigi Umum / Spesialis terdaftar</p>
           </div>
 
-          <!-- Nama Tindakan (Dropdown dari master sheet Tindakan) -->
+          <!-- Nama Tindakan (Input text dengan autocomplete datalist dan tombol clear) -->
           <div class="md:col-span-5 space-y-1.5">
             <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wide">Nama Tindakan <span class="text-rose-500">*</span></label>
-            <select id="tkdTindakan" required onchange="onTkdTindakanChange()" class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl font-bold text-slate-800 text-xs focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all cursor-pointer">
-              <option value="">-- Pilih Tindakan Medis --</option>
-            </select>
-            <p class="text-[10px] text-slate-400">Pilih dari Master Sheet Tindakan</p>
+            <div class="relative w-full">
+              <input type="text" id="tkdTindakan" list="dlTindakanTKD" required oninput="onTkdTindakanChange()" onchange="onTkdTindakanChange()" placeholder="Ketik / Cari Nama Tindakan..." class="w-full pl-3.5 pr-8 py-2.5 bg-white border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 rounded-xl font-bold text-slate-800 text-xs transition-all outline-none shadow-2xs">
+              <button type="button" id="btnClearTkdTindakan" onclick="clearTkdTindakanInput()" title="Kosongkan pilihan tindakan" class="absolute right-2.5 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-full font-bold text-xs transition-colors cursor-pointer">✕</button>
+            </div>
+            <datalist id="dlTindakanTKD"></datalist>
+            <p class="text-[10px] text-slate-400">Ketik untuk mencari, atau pilih dari daftar Master Tindakan</p>
           </div>
         </div>
 
@@ -2236,11 +2238,11 @@
             <input type="text" id="tkdLabor" readonly class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg font-bold text-slate-700 text-xs cursor-not-allowed shadow-inner focus:outline-none" placeholder="Tidak">
           </div>
 
-          <!-- Input Persentase Hak JM Dokter Khusus -->
+          <!-- Input Persentase Hak JM Dokter Khusus (Default Kosong) -->
           <div class="md:col-span-3 space-y-1">
             <label class="block text-[10px] font-black text-emerald-800 uppercase">% Hak Dokter Khusus <span class="text-rose-500">*</span></label>
             <div class="relative">
-              <input type="number" id="tkdPersenJM" required min="1" max="100" step="1" oninput="hitungSimulasiJMKhusus()" class="w-full px-3 py-2 bg-white border-2 border-emerald-400 rounded-lg font-black text-emerald-700 text-xs focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 pr-8" placeholder="50">
+              <input type="number" id="tkdPersenJM" required min="1" max="100" step="1" oninput="hitungSimulasiJMKhusus()" class="w-full px-3 py-2 bg-white border-2 border-emerald-400 rounded-lg font-black text-emerald-700 text-xs focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 pr-8" placeholder="Contoh: 50" value="">
               <span class="absolute right-3 top-2 font-black text-emerald-600 text-xs">%</span>
             </div>
           </div>
@@ -19119,9 +19121,6 @@ function filterTindakanByRoleTKD(allTindakan, roleDokter) {
 window.filterTindakanByRoleTKD = filterTindakanByRoleTKD;
 
 function populateDropdownTindakanTKD(selectedNama, filterRole = null) {
-  const select = document.getElementById('tkdTindakan');
-  if (!select) return;
-
   let targetRole = filterRole;
   if (!targetRole) {
     const selDok = document.getElementById('tkdDokter');
@@ -19133,16 +19132,58 @@ function populateDropdownTindakanTKD(selectedNama, filterRole = null) {
   const allTindakan = getDaftarMasterTindakanTKD();
   const tindakanList = filterTindakanByRoleTKD(allTindakan, targetRole);
 
-  let html = '<option value="">-- Pilih Tindakan Medis --</option>';
-  tindakanList.forEach(t => {
-    const isSel = (selectedNama && (selectedNama === t.nama || selectedNama === t.kode)) ? 'selected' : '';
-    const tarif = Number(t.tarif || t.harga || 0);
-    const lab = t.perluLab === 'Ya' || t.labor === 'Ya' || (Number(t.labor) > 0) ? 'Lab: Ya' : 'Lab: Tidak';
-    html += `<option value="${t.nama}" data-kode="${t.kode || t.id || ''}" data-tarif="${tarif}" data-labor="${t.perluLab || t.labor || 'Tidak'}" ${isSel}>${t.nama} [${t.kode || '-'}] - Rp ${tarif.toLocaleString('id-ID')} (${lab})</option>`;
-  });
-  select.innerHTML = html;
+  // Injeksi ke datalist dlTindakanTKD untuk input autocomplete
+  const dl = document.getElementById('dlTindakanTKD');
+  if (dl) {
+    let opts = tindakanList.map(t => {
+      const tarif = Number(t.tarif || t.harga || 0);
+      const lab = t.perluLab === 'Ya' || t.labor === 'Ya' || (Number(t.labor) > 0) ? 'Lab: Ya' : 'Lab: Tidak';
+      const kode = t.kode || t.id || '-';
+      return `<option value="${t.nama}">[${kode}] Rp ${tarif.toLocaleString('id-ID')} • ${lab}</option>`;
+    }).join('');
+    dl.innerHTML = opts;
+  }
+
+  // Kompatibilitas jika elemen tkdTindakan adalah select atau input text
+  const elTind = document.getElementById('tkdTindakan');
+  if (elTind) {
+    if (elTind.tagName === 'SELECT') {
+      let html = '<option value="">-- Pilih Tindakan Medis --</option>';
+      tindakanList.forEach(t => {
+        const isSel = (selectedNama && (selectedNama === t.nama || selectedNama === t.kode)) ? 'selected' : '';
+        const tarif = Number(t.tarif || t.harga || 0);
+        const lab = t.perluLab === 'Ya' || t.labor === 'Ya' || (Number(t.labor) > 0) ? 'Lab: Ya' : 'Lab: Tidak';
+        html += `<option value="${t.nama}" data-kode="${t.kode || t.id || ''}" data-tarif="${tarif}" data-labor="${t.perluLab || t.labor || 'Tidak'}" ${isSel}>${t.nama} [${t.kode || '-'}] - Rp ${tarif.toLocaleString('id-ID')} (${lab})</option>`;
+      });
+      elTind.innerHTML = html;
+    } else if (selectedNama !== undefined && selectedNama !== null) {
+      elTind.value = selectedNama;
+    }
+  }
 }
 window.populateDropdownTindakanTKD = populateDropdownTindakanTKD;
+
+function clearTkdTindakanInput() {
+  const elTind = document.getElementById('tkdTindakan');
+  if (elTind) {
+    elTind.value = '';
+    elTind.focus();
+  }
+  const elIdTindakan = document.getElementById('tkdIdTindakan');
+  if (elIdTindakan) elIdTindakan.value = '-';
+
+  const elTarif = document.getElementById('tkdTarif');
+  if (elTarif) elTarif.value = 0;
+
+  const elTarifDisplay = document.getElementById('tkdTarifDisplay');
+  if (elTarifDisplay) elTarifDisplay.value = 'Rp 0';
+
+  const elLabor = document.getElementById('tkdLabor');
+  if (elLabor) elLabor.value = 'Tidak';
+
+  hitungSimulasiJMKhusus();
+}
+window.clearTkdTindakanInput = clearTkdTindakanInput;
 
 function onTkdDokterChange() {
   const sel = document.getElementById('tkdDokter');
@@ -19155,23 +19196,36 @@ function onTkdDokterChange() {
   populateDropdownTindakanTKD(curTindakan, role);
   onTkdTindakanChange();
 
-  if (opt && opt.dataset && opt.dataset.rate && !window._isEditModeTKD) {
-    const inputPersen = document.getElementById('tkdPersenJM');
-    if (inputPersen && (!inputPersen.value || inputPersen.value === '0')) {
-      const defaultRate = Math.round(Number(opt.dataset.rate) * 100);
-      inputPersen.value = defaultRate;
-    }
-  }
+  // % Hak Dokter Khusus default kosong (tidak menimpa nilai)
   hitungSimulasiJMKhusus();
 }
 window.onTkdDokterChange = onTkdDokterChange;
 
 function onTkdTindakanChange() {
-  const sel = document.getElementById('tkdTindakan');
-  if (!sel) return;
-  const namaTindakan = sel.value;
+  const elTind = document.getElementById('tkdTindakan');
+  if (!elTind) return;
+  const rawVal = String(elTind.value || '').trim();
   const tindakanList = getDaftarMasterTindakanTKD();
-  const item = tindakanList.find(t => t.nama === namaTindakan || t.kode === namaTindakan);
+
+  let item = null;
+  if (rawVal) {
+    // 1. Coba exact match nama atau kode
+    item = tindakanList.find(t => (t.nama && t.nama.toLowerCase() === rawVal.toLowerCase()) || (t.kode && t.kode.toLowerCase() === rawVal.toLowerCase()));
+
+    // 2. Ekstrak format [KODE] jika user memilih string dengan kode
+    if (!item) {
+      const m = rawVal.match(/^\[(.*?)\]/);
+      if (m && m[1]) {
+        const kd = m[1].trim().toLowerCase();
+        item = tindakanList.find(t => (t.kode || t.id || '').toLowerCase() === kd);
+      }
+    }
+
+    // 3. Cek pencarian substring nama atau kode
+    if (!item) {
+      item = tindakanList.find(t => (t.nama && rawVal.toLowerCase().includes(t.nama.toLowerCase())) || (t.kode && rawVal.toLowerCase().includes(t.kode.toLowerCase())));
+    }
+  }
 
   const elIdTindakan = document.getElementById('tkdIdTindakan');
   const elTarifDisplay = document.getElementById('tkdTarifDisplay');
@@ -19179,6 +19233,9 @@ function onTkdTindakanChange() {
   const elLabor = document.getElementById('tkdLabor');
 
   if (item) {
+    // Normalisasi input menjadi nama tindakan bersih
+    elTind.value = item.nama;
+
     const kode = item.kode || item.id || '-';
     const tarif = Number(item.tarif || item.harga || 0);
     const perluLab = (item.perluLab === 'Ya' || item.labor === 'Ya' || Number(item.labor) > 0) ? 'Ya' : 'Tidak';
@@ -19201,11 +19258,36 @@ window.onTkdTindakanChange = onTkdTindakanChange;
 function hitungSimulasiJMKhusus() {
   const tarif = Number(document.getElementById('tkdTarif')?.value || 0);
   const laborStr = String(document.getElementById('tkdLabor')?.value || 'Tidak').toLowerCase();
-  const persenInput = Number(document.getElementById('tkdPersenJM')?.value || 0);
-  const persen = Math.min(100, Math.max(0, persenInput)) / 100;
+  const elPersen = document.getElementById('tkdPersenJM');
+  const rawPersen = elPersen ? String(elPersen.value || '').trim() : '';
 
   let biayaLab = 0;
   const dasarBagiHasil = Math.max(0, tarif - biayaLab);
+
+  if (rawPersen === '') {
+    if (document.getElementById('simulasiTarif')) {
+      document.getElementById('simulasiTarif').textContent = 'Rp ' + tarif.toLocaleString('id-ID');
+    }
+    if (document.getElementById('simulasiLab')) {
+      document.getElementById('simulasiLab').textContent = (laborStr.includes('ya') ? 'Ada (Syarat Lab)' : 'Rp 0 (Tidak Ada)');
+    }
+    if (document.getElementById('simulasiPersenDokter')) {
+      document.getElementById('simulasiPersenDokter').textContent = '0%';
+    }
+    if (document.getElementById('simulasiHakDokter')) {
+      document.getElementById('simulasiHakDokter').textContent = 'Rp 0';
+    }
+    if (document.getElementById('simulasiPersenKlinik')) {
+      document.getElementById('simulasiPersenKlinik').textContent = '100%';
+    }
+    if (document.getElementById('simulasiHakKlinik')) {
+      document.getElementById('simulasiHakKlinik').textContent = 'Rp ' + tarif.toLocaleString('id-ID');
+    }
+    return;
+  }
+
+  const persenInput = Number(rawPersen);
+  const persen = Math.min(100, Math.max(0, persenInput)) / 100;
   const hakDokter = Math.round(dasarBagiHasil * persen);
   const hakKlinik = Math.max(0, tarif - hakDokter);
 
@@ -19292,8 +19374,11 @@ function resetFormTarifKhusus(closeBox = true) {
   const elLabor = document.getElementById('tkdLabor');
   if (elLabor) elLabor.value = 'Tidak';
 
+  const elTind = document.getElementById('tkdTindakan');
+  if (elTind) elTind.value = '';
+
   const elPersen = document.getElementById('tkdPersenJM');
-  if (elPersen) elPersen.value = 50;
+  if (elPersen) elPersen.value = '';
 
   const badgeMode = document.getElementById('badgeModeTKD');
   if (badgeMode) {

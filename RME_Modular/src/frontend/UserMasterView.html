@@ -300,13 +300,15 @@
             <p class="text-[10px] text-slate-400">Khusus Dokter Gigi Umum / Spesialis terdaftar</p>
           </div>
 
-          <!-- Nama Tindakan (Dropdown dari master sheet Tindakan) -->
+          <!-- Nama Tindakan (Input text dengan autocomplete datalist dan tombol clear) -->
           <div class="md:col-span-5 space-y-1.5">
             <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wide">Nama Tindakan <span class="text-rose-500">*</span></label>
-            <select id="tkdTindakan" required onchange="onTkdTindakanChange()" class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl font-bold text-slate-800 text-xs focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all cursor-pointer">
-              <option value="">-- Pilih Tindakan Medis --</option>
-            </select>
-            <p class="text-[10px] text-slate-400">Pilih dari Master Sheet Tindakan</p>
+            <div class="relative w-full">
+              <input type="text" id="tkdTindakan" list="dlTindakanTKD" required oninput="onTkdTindakanChange()" onchange="onTkdTindakanChange()" placeholder="Ketik / Cari Nama Tindakan..." class="w-full pl-3.5 pr-8 py-2.5 bg-white border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 rounded-xl font-bold text-slate-800 text-xs transition-all outline-none shadow-2xs">
+              <button type="button" id="btnClearTkdTindakan" onclick="clearTkdTindakanInput()" title="Kosongkan pilihan tindakan" class="absolute right-2.5 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-full font-bold text-xs transition-colors cursor-pointer">✕</button>
+            </div>
+            <datalist id="dlTindakanTKD"></datalist>
+            <p class="text-[10px] text-slate-400">Ketik untuk mencari, atau pilih dari daftar Master Tindakan</p>
           </div>
         </div>
 
@@ -331,11 +333,11 @@
             <input type="text" id="tkdLabor" readonly class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg font-bold text-slate-700 text-xs cursor-not-allowed shadow-inner focus:outline-none" placeholder="Tidak">
           </div>
 
-          <!-- Input Persentase Hak JM Dokter Khusus -->
+          <!-- Input Persentase Hak JM Dokter Khusus (Default Kosong) -->
           <div class="md:col-span-3 space-y-1">
             <label class="block text-[10px] font-black text-emerald-800 uppercase">% Hak Dokter Khusus <span class="text-rose-500">*</span></label>
             <div class="relative">
-              <input type="number" id="tkdPersenJM" required min="1" max="100" step="1" oninput="hitungSimulasiJMKhusus()" class="w-full px-3 py-2 bg-white border-2 border-emerald-400 rounded-lg font-black text-emerald-700 text-xs focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 pr-8" placeholder="50">
+              <input type="number" id="tkdPersenJM" required min="1" max="100" step="1" oninput="hitungSimulasiJMKhusus()" class="w-full px-3 py-2 bg-white border-2 border-emerald-400 rounded-lg font-black text-emerald-700 text-xs focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 pr-8" placeholder="Contoh: 50" value="">
               <span class="absolute right-3 top-2 font-black text-emerald-600 text-xs">%</span>
             </div>
           </div>

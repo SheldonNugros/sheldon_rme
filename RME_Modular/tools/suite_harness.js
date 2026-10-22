@@ -13863,9 +13863,6 @@ function filterTindakanByRoleTKD(allTindakan, roleDokter) {
 window.filterTindakanByRoleTKD = filterTindakanByRoleTKD;
 
 function populateDropdownTindakanTKD(selectedNama, filterRole = null) {
-  const select = document.getElementById('tkdTindakan');
-  if (!select) return;
-
   let targetRole = filterRole;
   if (!targetRole) {
     const selDok = document.getElementById('tkdDokter');
@@ -13877,16 +13874,58 @@ function populateDropdownTindakanTKD(selectedNama, filterRole = null) {
   const allTindakan = getDaftarMasterTindakanTKD();
   const tindakanList = filterTindakanByRoleTKD(allTindakan, targetRole);
 
-  let html = '<option value="">-- Pilih Tindakan Medis --</option>';
-  tindakanList.forEach(t => {
-    const isSel = (selectedNama && (selectedNama === t.nama || selectedNama === t.kode)) ? 'selected' : '';
-    const tarif = Number(t.tarif || t.harga || 0);
-    const lab = t.perluLab === 'Ya' || t.labor === 'Ya' || (Number(t.labor) > 0) ? 'Lab: Ya' : 'Lab: Tidak';
-    html += `<option value="${t.nama}" data-kode="${t.kode || t.id || ''}" data-tarif="${tarif}" data-labor="${t.perluLab || t.labor || 'Tidak'}" ${isSel}>${t.nama} [${t.kode || '-'}] - Rp ${tarif.toLocaleString('id-ID')} (${lab})</option>`;
-  });
-  select.innerHTML = html;
+  // Injeksi ke datalist dlTindakanTKD untuk input autocomplete
+  const dl = document.getElementById('dlTindakanTKD');
+  if (dl) {
+    let opts = tindakanList.map(t => {
+      const tarif = Number(t.tarif || t.harga || 0);
+      const lab = t.perluLab === 'Ya' || t.labor === 'Ya' || (Number(t.labor) > 0) ? 'Lab: Ya' : 'Lab: Tidak';
+      const kode = t.kode || t.id || '-';
+      return `<option value="${t.nama}">[${kode}] Rp ${tarif.toLocaleString('id-ID')} • ${lab}</option>`;
+    }).join('');
+    dl.innerHTML = opts;
+  }
+
+  // Kompatibilitas jika elemen tkdTindakan adalah select atau input text
+  const elTind = document.getElementById('tkdTindakan');
+  if (elTind) {
+    if (elTind.tagName === 'SELECT') {
+      let html = '<option value="">-- Pilih Tindakan Medis --</option>';
+      tindakanList.forEach(t => {
+        const isSel = (selectedNama && (selectedNama === t.nama || selectedNama === t.kode)) ? 'selected' : '';
+        const tarif = Number(t.tarif || t.harga || 0);
+        const lab = t.perluLab === 'Ya' || t.labor === 'Ya' || (Number(t.labor) > 0) ? 'Lab: Ya' : 'Lab: Tidak';
+        html += `<option value="${t.nama}" data-kode="${t.kode || t.id || ''}" data-tarif="${tarif}" data-labor="${t.perluLab || t.labor || 'Tidak'}" ${isSel}>${t.nama} [${t.kode || '-'}] - Rp ${tarif.toLocaleString('id-ID')} (${lab})</option>`;
+      });
+      elTind.innerHTML = html;
+    } else if (selectedNama !== undefined && selectedNama !== null) {
+      elTind.value = selectedNama;
+    }
+  }
 }
 window.populateDropdownTindakanTKD = populateDropdownTindakanTKD;
+
+function clearTkdTindakanInput() {
+  const elTind = document.getElementById('tkdTindakan');
+  if (elTind) {
+    elTind.value = '';
+    elTind.focus();
+  }
+  const elIdTindakan = document.getElementById('tkdIdTindakan');
+  if (elIdTindakan) elIdTindakan.value = '-';
+
+  const elTarif = document.getElementById('tkdTarif');
+  if (elTarif) elTarif.value = 0;
+
+  const elTarifDisplay = document.getElementById('tkdTarifDisplay');
+  if (elTarifDisplay) elTarifDisplay.value = 'Rp 0';
+
+  const elLabor = document.getElementById('tkdLabor');
+  if (elLabor) elLabor.value = 'Tidak';
+
+  hitungSimulasiJMKhusus();
+}
+window.clearTkdTindakanInput = clearTkdTindakanInput;
 
 function onTkdDokterChange() {
   const sel = document.getElementById('tkdDokter');
@@ -13899,23 +13938,36 @@ function onTkdDokterChange() {
   populateDropdownTindakanTKD(curTindakan, role);
   onTkdTindakanChange();
 
-  if (opt && opt.dataset && opt.dataset.rate && !window._isEditModeTKD) {
-    const inputPersen = document.getElementById('tkdPersenJM');
-    if (inputPersen && (!inputPersen.value || inputPersen.value === '0')) {
-      const defaultRate = Math.round(Number(opt.dataset.rate) * 100);
-      inputPersen.value = defaultRate;
-    }
-  }
+  // % Hak Dokter Khusus default kosong (tidak menimpa nilai)
   hitungSimulasiJMKhusus();
 }
 window.onTkdDokterChange = onTkdDokterChange;
 
 function onTkdTindakanChange() {
-  const sel = document.getElementById('tkdTindakan');
-  if (!sel) return;
-  const namaTindakan = sel.value;
+  const elTind = document.getElementById('tkdTindakan');
+  if (!elTind) return;
+  const rawVal = String(elTind.value || '').trim();
   const tindakanList = getDaftarMasterTindakanTKD();
-  const item = tindakanList.find(t => t.nama === namaTindakan || t.kode === namaTindakan);
+
+  let item = null;
+  if (rawVal) {
+    // 1. Coba exact match nama atau kode
+    item = tindakanList.find(t => (t.nama && t.nama.toLowerCase() === rawVal.toLowerCase()) || (t.kode && t.kode.toLowerCase() === rawVal.toLowerCase()));
+
+    // 2. Ekstrak format [KODE] jika user memilih string dengan kode
+    if (!item) {
+      const m = rawVal.match(/^\[(.*?)\]/);
+      if (m && m[1]) {
+        const kd = m[1].trim().toLowerCase();
+        item = tindakanList.find(t => (t.kode || t.id || '').toLowerCase() === kd);
+      }
+    }
+
+    // 3. Cek pencarian substring nama atau kode
+    if (!item) {
+      item = tindakanList.find(t => (t.nama && rawVal.toLowerCase().includes(t.nama.toLowerCase())) || (t.kode && rawVal.toLowerCase().includes(t.kode.toLowerCase())));
+    }
+  }
 
   const elIdTindakan = document.getElementById('tkdIdTindakan');
   const elTarifDisplay = document.getElementById('tkdTarifDisplay');
@@ -13923,6 +13975,9 @@ function onTkdTindakanChange() {
   const elLabor = document.getElementById('tkdLabor');
 
   if (item) {
+    // Normalisasi input menjadi nama tindakan bersih
+    elTind.value = item.nama;
+
     const kode = item.kode || item.id || '-';
     const tarif = Number(item.tarif || item.harga || 0);
     const perluLab = (item.perluLab === 'Ya' || item.labor === 'Ya' || Number(item.labor) > 0) ? 'Ya' : 'Tidak';
@@ -13945,11 +14000,36 @@ window.onTkdTindakanChange = onTkdTindakanChange;
 function hitungSimulasiJMKhusus() {
   const tarif = Number(document.getElementById('tkdTarif')?.value || 0);
   const laborStr = String(document.getElementById('tkdLabor')?.value || 'Tidak').toLowerCase();
-  const persenInput = Number(document.getElementById('tkdPersenJM')?.value || 0);
-  const persen = Math.min(100, Math.max(0, persenInput)) / 100;
+  const elPersen = document.getElementById('tkdPersenJM');
+  const rawPersen = elPersen ? String(elPersen.value || '').trim() : '';
 
   let biayaLab = 0;
   const dasarBagiHasil = Math.max(0, tarif - biayaLab);
+
+  if (rawPersen === '') {
+    if (document.getElementById('simulasiTarif')) {
+      document.getElementById('simulasiTarif').textContent = 'Rp ' + tarif.toLocaleString('id-ID');
+    }
+    if (document.getElementById('simulasiLab')) {
+      document.getElementById('simulasiLab').textContent = (laborStr.includes('ya') ? 'Ada (Syarat Lab)' : 'Rp 0 (Tidak Ada)');
+    }
+    if (document.getElementById('simulasiPersenDokter')) {
+      document.getElementById('simulasiPersenDokter').textContent = '0%';
+    }
+    if (document.getElementById('simulasiHakDokter')) {
+      document.getElementById('simulasiHakDokter').textContent = 'Rp 0';
+    }
+    if (document.getElementById('simulasiPersenKlinik')) {
+      document.getElementById('simulasiPersenKlinik').textContent = '100%';
+    }
+    if (document.getElementById('simulasiHakKlinik')) {
+      document.getElementById('simulasiHakKlinik').textContent = 'Rp ' + tarif.toLocaleString('id-ID');
+    }
+    return;
+  }
+
+  const persenInput = Number(rawPersen);
+  const persen = Math.min(100, Math.max(0, persenInput)) / 100;
   const hakDokter = Math.round(dasarBagiHasil * persen);
   const hakKlinik = Math.max(0, tarif - hakDokter);
 
@@ -14036,8 +14116,11 @@ function resetFormTarifKhusus(closeBox = true) {
   const elLabor = document.getElementById('tkdLabor');
   if (elLabor) elLabor.value = 'Tidak';
 
+  const elTind = document.getElementById('tkdTindakan');
+  if (elTind) elTind.value = '';
+
   const elPersen = document.getElementById('tkdPersenJM');
-  if (elPersen) elPersen.value = 50;
+  if (elPersen) elPersen.value = '';
 
   const badgeMode = document.getElementById('badgeModeTKD');
   if (badgeMode) {
@@ -19331,19 +19414,36 @@ window._tarifKhususList = [
 const nextTkdId = generateNextIdAturanTKD();
 assert("TKD-4: Next ID Aturan Otomatis 'TKD-03' (2 Digit)", nextTkdId === 'TKD-03');
 
-// Uji Auto-fill Info Tindakan saat dipilih
+// Uji Reset Form TKD: Persen Hak Dokter Khusus Default Kosong
+resetFormTarifKhusus(false);
+const persenDefaultVal = document.getElementById('tkdPersenJM').value;
+assert("TKD-PERSEN-1: % Hak Dokter Khusus Default Kosong", persenDefaultVal === '');
+assert("TKD-CLEAR-1: Fungsi clearTkdTindakanInput Tersedia", typeof clearTkdTindakanInput === 'function');
+
+// Uji Ketik / Pilih Info Tindakan saat dipilih
 const tindakanList = getDaftarMasterTindakanTKD();
 assert("TKD-5: Master Tindakan Tersedia untuk Auto-fill", tindakanList.length > 0);
 if (tindakanList.length > 0) {
   const testItem = tindakanList[0];
-  const selectTindakan = document.getElementById('tkdTindakan');
-  if (selectTindakan) {
-    selectTindakan.value = testItem.nama;
+  const inputTindakan = document.getElementById('tkdTindakan');
+  if (inputTindakan) {
+    // 1. Ketik / Pilih nama tindakan
+    inputTindakan.value = testItem.nama;
     onTkdTindakanChange();
     const idTindakanVal = document.getElementById('tkdIdTindakan').value;
     const tarifVal = Number(document.getElementById('tkdTarif').value);
     assert("TKD-5: ID Tindakan Terisi Otomatis dari Master", idTindakanVal === (testItem.kode || testItem.id));
     assert("TKD-5: Tarif Tindakan Terisi Otomatis dari Master", tarifVal === Number(testItem.tarif || testItem.harga || 0));
+
+    // 2. Klik tombol silang (clear) untuk membatalkan / menghapus tindakan
+    clearTkdTindakanInput();
+    assert("TKD-CLEAR-2: Input Tindakan Menjadi Kosong setelah Tombol Silang Diklik", inputTindakan.value === '');
+    assert("TKD-CLEAR-3: ID Tindakan Reset ke '-' setelah Clear", document.getElementById('tkdIdTindakan').value === '-');
+    assert("TKD-CLEAR-4: Tarif Tindakan Reset ke 0 setelah Clear", Number(document.getElementById('tkdTarif').value) === 0);
+
+    // Kembalikan lagi testItem untuk pengujian simulasi
+    inputTindakan.value = testItem.nama;
+    onTkdTindakanChange();
   }
 }
 

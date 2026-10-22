@@ -1921,19 +1921,36 @@ window._tarifKhususList = [
 const nextTkdId = generateNextIdAturanTKD();
 assert("TKD-4: Next ID Aturan Otomatis 'TKD-03' (2 Digit)", nextTkdId === 'TKD-03');
 
-// Uji Auto-fill Info Tindakan saat dipilih
+// Uji Reset Form TKD: Persen Hak Dokter Khusus Default Kosong
+resetFormTarifKhusus(false);
+const persenDefaultVal = document.getElementById('tkdPersenJM').value;
+assert("TKD-PERSEN-1: % Hak Dokter Khusus Default Kosong", persenDefaultVal === '');
+assert("TKD-CLEAR-1: Fungsi clearTkdTindakanInput Tersedia", typeof clearTkdTindakanInput === 'function');
+
+// Uji Ketik / Pilih Info Tindakan saat dipilih
 const tindakanList = getDaftarMasterTindakanTKD();
 assert("TKD-5: Master Tindakan Tersedia untuk Auto-fill", tindakanList.length > 0);
 if (tindakanList.length > 0) {
   const testItem = tindakanList[0];
-  const selectTindakan = document.getElementById('tkdTindakan');
-  if (selectTindakan) {
-    selectTindakan.value = testItem.nama;
+  const inputTindakan = document.getElementById('tkdTindakan');
+  if (inputTindakan) {
+    // 1. Ketik / Pilih nama tindakan
+    inputTindakan.value = testItem.nama;
     onTkdTindakanChange();
     const idTindakanVal = document.getElementById('tkdIdTindakan').value;
     const tarifVal = Number(document.getElementById('tkdTarif').value);
     assert("TKD-5: ID Tindakan Terisi Otomatis dari Master", idTindakanVal === (testItem.kode || testItem.id));
     assert("TKD-5: Tarif Tindakan Terisi Otomatis dari Master", tarifVal === Number(testItem.tarif || testItem.harga || 0));
+
+    // 2. Klik tombol silang (clear) untuk membatalkan / menghapus tindakan
+    clearTkdTindakanInput();
+    assert("TKD-CLEAR-2: Input Tindakan Menjadi Kosong setelah Tombol Silang Diklik", inputTindakan.value === '');
+    assert("TKD-CLEAR-3: ID Tindakan Reset ke '-' setelah Clear", document.getElementById('tkdIdTindakan').value === '-');
+    assert("TKD-CLEAR-4: Tarif Tindakan Reset ke 0 setelah Clear", Number(document.getElementById('tkdTarif').value) === 0);
+
+    // Kembalikan lagi testItem untuk pengujian simulasi
+    inputTindakan.value = testItem.nama;
+    onTkdTindakanChange();
   }
 }
 

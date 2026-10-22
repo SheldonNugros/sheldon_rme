@@ -24,6 +24,7 @@ var isMetodeCashTfOnly = true;
 var isStatusSplitInHtml = true;
 var isBoxSplitInHtml = true;
 var isSearchTindakanLargeInHtml = true;
+var isHeaderJMInHtml = true;
 
 // Enhanced DOM Mock for JavaScriptCore
 var window = this;
@@ -15733,6 +15734,14 @@ function renderInfoBmhp() {
         else if (rLowTarif.includes('perawat')) rBadgeTarif = 'bg-emerald-100 text-emerald-800 border-emerald-300';
         else if (rLowTarif.includes('office')) rBadgeTarif = 'bg-rose-100 text-rose-800 border-rose-300';
         else if (rLowTarif.includes('admin') || rLowTarif.includes('kasir')) rBadgeTarif = 'bg-amber-100 text-amber-900 border-amber-300';
+        let isDokterTarif = rLowTarif.includes('dokter');
+        let rawPctTarif = (t.persenJM !== undefined && t.persenJM !== null && t.persenJM !== '') ? Number(t.persenJM) : 0;
+        if (rawPctTarif <= 1 && rawPctTarif > 0) rawPctTarif = Math.round(rawPctTarif * 100);
+        if (rawPctTarif === 0 && isDokterTarif) rawPctTarif = 50;
+        let jmBadgeTarif = isDokterTarif
+          ? `<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300 font-black text-[11px] inline-flex items-center gap-1">🩺 ${rawPctTarif}%</span>`
+          : '<span class="text-slate-400 font-bold">-</span>';
+
         return `
         <tr>
           <td class="py-3 px-4 font-mono font-bold text-slate-500 text-[11px]">${t.idAturan}</td>
@@ -15741,6 +15750,7 @@ function renderInfoBmhp() {
           <td class="py-3 px-3">
             <span class="px-2.5 py-0.5 rounded-lg bg-slate-100 border border-slate-200 font-bold text-[10px] text-slate-700">${t.tipeKompensasi}</span>
           </td>
+          <td class="py-3 px-3 text-center">${jmBadgeTarif}</td>
           <td class="py-3 px-3 text-right font-black text-indigo-700">${fmtRpPayroll(t.tarifShift1)}</td>
           <td class="py-3 px-3 text-right font-black text-indigo-700">${fmtRpPayroll(t.tarifShift2)}</td>
           <td class="py-3 px-4 text-right font-black text-emerald-700">${fmtRpPayroll(t.gajiPokokBulanan)}</td>
@@ -15819,6 +15829,21 @@ function renderInfoBmhp() {
         hint.className = 'text-[10px] text-emerald-600 font-bold mt-1';
       }
       const exTarif = (window.PayrollState.tarifShift || []).find(x => String(x.namaPekerja || '').toLowerCase() === val.toLowerCase());
+      const isDokterNama = (found.role || '').toLowerCase().includes('dokter');
+      const wrapJMNama = document.getElementById('wrapperTarifPersenJM');
+      const inpJMNama = document.getElementById('tarifPersenJM');
+      if (wrapJMNama) {
+        if (isDokterNama) wrapJMNama.classList.remove('hidden');
+        else wrapJMNama.classList.add('hidden');
+      }
+      if (isDokterNama && inpJMNama) {
+        let p = (exTarif && exTarif.persenJM !== undefined && exTarif.persenJM !== null && exTarif.persenJM !== '')
+          ? Number(exTarif.persenJM)
+          : ((found.persenJM !== undefined && found.persenJM !== null && found.persenJM !== '') ? Number(found.persenJM) : 50);
+        if (p <= 1 && p > 0) p = Math.round(p * 100);
+        if (p === 0) p = 50;
+        inpJMNama.value = p;
+      }
       const tipeEl = document.getElementById('tarifTipe');
       if (tipeEl) {
         if (exTarif && exTarif.tipeKompensasi) {
@@ -15840,6 +15865,8 @@ function renderInfoBmhp() {
       }
     } else {
       roleInput.value = '';
+      const wrapJMNama = document.getElementById('wrapperTarifPersenJM');
+      if (wrapJMNama) wrapJMNama.classList.add('hidden');
       if (hint) {
         hint.textContent = '⚠️ Nama tidak terdaftar di Sheet Data. Pendaftaran akan ditolak!';
         hint.className = 'text-[10px] text-rose-600 font-bold mt-1';
@@ -15853,6 +15880,17 @@ function renderInfoBmhp() {
     const s1 = document.getElementById('tarifShift1');
     const s2 = document.getElementById('tarifShift2');
     const gp = document.getElementById('tarifGajiPokok');
+    const roleVal = ((document.getElementById('tarifRole') || {}).value || '').toLowerCase();
+    const wrapJM = document.getElementById('wrapperTarifPersenJM');
+    const inpJM = document.getElementById('tarifPersenJM');
+    const isDokterTipe = roleVal.includes('dokter') || tipe === 'Tindakan' || tipe === 'Kombinasi Shift & Tindakan';
+    if (wrapJM) {
+      if (isDokterTipe) wrapJM.classList.remove('hidden');
+      else wrapJM.classList.add('hidden');
+    }
+    if (isDokterTipe && inpJM && (!inpJM.value || inpJM.value === '0')) {
+      inpJM.value = 50;
+    }
 
     if (!s1 || !s2 || !gp) return;
 
@@ -15910,6 +15948,10 @@ function renderInfoBmhp() {
     if (elKet) elKet.value = '';
     const elStat = document.getElementById('tarifStatus');
     if (elStat) elStat.value = 'Aktif';
+    const wrapJM = document.getElementById('wrapperTarifPersenJM');
+    const inpJM = document.getElementById('tarifPersenJM');
+    if (wrapJM) wrapJM.classList.add('hidden');
+    if (inpJM) inpJM.value = 50;
     const hint = document.getElementById('tarifNamaHint');
     if (hint) {
       hint.textContent = 'Pilih atau ketik nama pekerja terdaftar di Sheet Data';
@@ -15944,6 +15986,25 @@ function renderInfoBmhp() {
     } else {
       document.getElementById('tarifGajiPokok').value = 0;
     }
+
+    const wrapJM = document.getElementById('wrapperTarifPersenJM');
+    const inpJM = document.getElementById('tarifPersenJM');
+    const isDokterItem = (item.role || '').toLowerCase().includes('dokter');
+    if (wrapJM) {
+      if (isDokterItem) wrapJM.classList.remove('hidden');
+      else wrapJM.classList.add('hidden');
+    }
+    if (inpJM) {
+      if (isDokterItem) {
+        let p = (item.persenJM !== undefined && item.persenJM !== null && item.persenJM !== '') ? Number(item.persenJM) : 50;
+        if (p <= 1 && p > 0) p = Math.round(p * 100);
+        if (p === 0) p = 50;
+        inpJM.value = p;
+      } else {
+        inpJM.value = 0;
+      }
+    }
+
     document.getElementById('tarifKeterangan').value = item.keterangan || '';
     const statEl = document.getElementById('tarifStatus');
     if (statEl) {
@@ -16024,6 +16085,15 @@ function renderInfoBmhp() {
       ? (Number((document.getElementById('tarifGajiPokok') || {}).value) || 0)
       : 0;
 
+    const isDokterSave = autoRole.toLowerCase().includes('dokter') || tipeKompensasi === 'Tindakan' || tipeKompensasi === 'Kombinasi Shift & Tindakan';
+    let pjmVal = 0;
+    if (isDokterSave) {
+      const inpJM = document.getElementById('tarifPersenJM');
+      const rawVal = inpJM ? inpJM.value.trim() : '';
+      pjmVal = (rawVal !== '' && !isNaN(Number(rawVal))) ? Number(rawVal) : 50;
+      if (pjmVal === 0) pjmVal = 50;
+    }
+
     const payload = {
       idAturan: idAturan,
       idPekerja: idAturan,
@@ -16033,9 +16103,14 @@ function renderInfoBmhp() {
       tarifShift1: s1Val,
       tarifShift2: s2Val,
       gajiPokokBulanan: gpVal,
+      persenJM: pjmVal,
       keterangan: ((document.getElementById('tarifKeterangan') || {}).value || '').trim(),
       status: (document.getElementById('tarifStatus') || {}).value || 'Aktif'
     };
+
+    if (foundStaff && isDokterSave) {
+      foundStaff.persenJM = pjmVal > 1 ? (pjmVal / 100) : pjmVal;
+    }
 
     let exIdx = (window.PayrollState.tarifShift || []).findIndex(x => String(x.namaPekerja || '').toLowerCase() === payload.namaPekerja.toLowerCase());
     if (exIdx >= 0) {
@@ -19603,6 +19678,29 @@ handleTarifTipeChange();
 assert("KOMPENSASI-6: Saat Kombinasi Shift & Tindakan, Tarif Shift 1 Terbuka (enabled)", s1Input.disabled === false);
 assert("KOMPENSASI-6: Saat Kombinasi Shift & Tindakan, Tarif Shift 2 Terbuka (enabled)", s2Input.disabled === false);
 assert("KOMPENSASI-6: Saat Kombinasi Shift & Tindakan, Gaji Pokok Terkunci (disabled)", gpInput.disabled === true && Number(gpInput.value) === 0);
+
+// --- TEST: Pengaturan Persentase JM Dokter di Tab Pengaturan Tarif Shift & Gaji ---
+print("\n--- TEST: Pengaturan Persentase JM Dokter di Tab Pengaturan Tarif Shift & Gaji ---");
+var wrapTarifJM = document.getElementById('wrapperTarifPersenJM');
+var inpTarifJM = document.getElementById('tarifPersenJM');
+assert("TARIF-JM-1: Wrapper Persentase JM Dokter Tersedia di DOM", wrapTarifJM !== null);
+assert("TARIF-JM-1: Input Persentase JM Dokter Tersedia di DOM", inpTarifJM !== null);
+
+// Uji saat pekerja Dokter dipilih
+var namaPekInput = document.getElementById('tarifNamaPekerja');
+var docStaff = (window.KlinikData.staff || []).find(function(s) { return (s.role || '').toLowerCase().includes('dokter'); });
+namaPekInput.value = docStaff ? docStaff.nama : "drg. Rahma Yulinda D, Sp. BMM";
+handleTarifNamaPekerjaChange();
+assert("TARIF-JM-2: Wrapper JM Dokter Tampil saat Nama Dokter Dipilih", !wrapTarifJM.classList.contains('hidden'));
+assert("TARIF-JM-2: Default Persentase JM Dokter adalah 50% atau Sesuai Master", Number(inpTarifJM.value) > 0);
+
+// Uji saat pekerja Staff Non-Dokter dipilih (misal Eva Nurmiza, Perawat Gigi)
+namaPekInput.value = "Eva Nurmiza, AMKG";
+handleTarifNamaPekerjaChange();
+assert("TARIF-JM-3: Wrapper JM Dokter Tersembunyi untuk Staff Non-Dokter", wrapTarifJM.classList.contains('hidden'));
+
+// Uji Tabel Pengaturan Tarif Shift Memiliki Kolom JM Dokter
+assert("TARIF-JM-4: Tabel Pengaturan Tarif Shift Memuat Header JM Dokter", isHeaderJMInHtml);
 
 // ==================================================
 // PENGUJIAN SINKRONISASI HARGA TINDAKAN, TOMBOL CLEAR (✕), DAN VIEW HARGA

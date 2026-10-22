@@ -7532,6 +7532,9 @@ function getPayrollModuleData() {
     const tarifShift = readSheetRowsFrom(ssM, "Pengaturan_Tarif_Shift").map(r => {
       let rawSt = String(r[8] || "Aktif").trim().toLowerCase();
       let stVal = (rawSt === "tidak aktif" || rawSt === "non aktif" || rawSt === "nonaktif" || rawSt === "inactive") ? "Tidak Aktif" : "Aktif";
+      let isDokter = String(r[1] || "").toLowerCase().includes("dokter");
+      let pjm = (r[9] !== undefined && r[9] !== null && r[9] !== "") ? Number(r[9]) : 0;
+      if (pjm === 0 && isDokter) pjm = 0.50;
       return {
         idAturan: String(r[0] || ""),
         role: String(r[1] || ""),
@@ -7541,7 +7544,8 @@ function getPayrollModuleData() {
         tarifShift2: Number(r[5]) || 0,
         gajiPokokBulanan: Number(r[6]) || 0,
         keterangan: String(r[7] || ""),
-        status: stVal
+        status: stVal,
+        persenJM: pjm
       };
     }).filter(x => x.namaPekerja !== "");
 
@@ -7873,10 +7877,18 @@ function simpanTarifShift(payload) {
     } catch (eDelP) {}
 
     // Pastikan header lengkap
+    let lastCol = sh.getLastColumn();
+    let hTarif = lastCol > 0 ? sh.getRange(1, 1, 1, lastCol).getValues()[0].map(x => String(x || '').trim()) : [];
+    let idJMCol = getColIdx(hTarif, ['persen_jm_dokter', 'persen_jm', 'persenjm', 'jm_dokter']);
+
     if (sh.getLastRow() === 0) {
-      const headers = ["ID_Pekerja", "Role", "Nama_Pekerja", "Tipe_Kompensasi", "Tarif_Shift_1", "Tarif_Shift_2", "Gaji_Pokok_Bulanan", "Keterangan", "Status"];
+      const headers = ["ID_Pekerja", "Role", "Nama_Pekerja", "Tipe_Kompensasi", "Tarif_Shift_1", "Tarif_Shift_2", "Gaji_Pokok_Bulanan", "Keterangan", "Status", "Persen_JM_Dokter"];
       sh.getRange(1, 1, 1, headers.length).setValues([headers]).setFontWeight("bold").setBackground("#e2e8f0");
       sh.setFrozenRows(1);
+      idJMCol = 9;
+    } else if (idJMCol === -1) {
+      idJMCol = Math.max(9, lastCol);
+      sh.getRange(1, idJMCol + 1).setValue("Persen_JM_Dokter").setFontWeight("bold").setBackground("#e2e8f0");
     }
 
     let data = sh.getDataRange().getValues();
@@ -7926,7 +7938,12 @@ function simpanTarifShift(payload) {
     const rawStatus = String(payload.status || foundInSheetData.status || "Aktif").trim().toLowerCase();
     const status = (rawStatus === "tidak aktif" || rawStatus === "non aktif" || rawStatus === "nonaktif" || rawStatus === "inactive") ? "Tidak Aktif" : "Aktif";
 
-    const rowValues = [idAturan, role, foundInSheetData.nama, tipe, s1, s2, gp, ket, status];
+    const isDokterSave = role.toLowerCase().includes("dokter") || tipe === "Tindakan" || tipe === "Kombinasi Shift & Tindakan";
+    let rawPJM = (payload.persenJM !== undefined && payload.persenJM !== null && payload.persenJM !== "") ? Number(payload.persenJM) : 0;
+    if (rawPJM > 1) rawPJM = rawPJM / 100;
+    if (rawPJM === 0 && isDokterSave) rawPJM = 0.50;
+
+    const rowValues = [idAturan, role, foundInSheetData.nama, tipe, s1, s2, gp, ket, status, rawPJM];
 
     // Sinkronkan validasi kolom D (Tipe_Kompensasi) agar mencakup 'Tindakan' dan setAllowInvalid(true)
     try {
@@ -7945,17 +7962,47 @@ function simpanTarifShift(payload) {
     try {
       if (foundRow > 1) {
         sh.getRange(foundRow, 1, 1, rowValues.length).setValues([rowValues]);
+        if (rawPJM > 0) sh.getRange(foundRow, 10).setNumberFormat("0.0%");
       } else {
         sh.appendRow(rowValues);
+        if (rawPJM > 0) sh.getRange(sh.getLastRow(), 10).setNumberFormat("0.0%");
       }
     } catch (eSet) {
       // Fallback jika validasi sel lama masih menolak: hapus validasi baris tersebut dan ulangi simpan
       if (foundRow > 1) {
         sh.getRange(foundRow, 1, 1, rowValues.length).clearDataValidations();
         sh.getRange(foundRow, 1, 1, rowValues.length).setValues([rowValues]);
+        if (rawPJM > 0) sh.getRange(foundRow, 10).setNumberFormat("0.0%");
       } else {
         sh.appendRow(rowValues);
+        if (rawPJM > 0) sh.getRange(sh.getLastRow(), 10).setNumberFormat("0.0%");
       }
+    }
+
+    // Sinkronkan juga persen JM ke Sheet Data (agar Kasir Pembayaran & EMR langsung sinkron)
+    try {
+      if (sheetData && sheetData.getLastRow() > 1 && isDokterSave) {
+        let vD = sheetData.getDataRange().getValues();
+        let hD = vD[0].map(x => String(x || '').trim());
+        let idJMD = getColIdx(hD, ['persen_jm_dokter', 'persen_jm', 'persenjm']);
+        if (idJMD === -1) {
+          if (typeof healMasterUserDataSheet === 'function') healMasterUserDataSheet();
+          vD = sheetData.getDataRange().getValues();
+          hD = vD[0].map(x => String(x || '').trim());
+          idJMD = getColIdx(hD, ['persen_jm_dokter', 'persen_jm', 'persenjm']);
+        }
+        if (idJMD !== -1) {
+          let idNmD = getColIdx(hD, ['namapekerja', 'nama']); if (idNmD === -1) idNmD = 0;
+          for (let r = 1; r < vD.length; r++) {
+            if (String(vD[r][idNmD] || '').trim().toLowerCase() === namaPekerja.toLowerCase()) {
+              sheetData.getRange(r + 1, idJMD + 1).setValue(rawPJM).setNumberFormat("0.0%");
+              break;
+            }
+          }
+        }
+      }
+    } catch (eSyncData) {
+      Logger.log("Sync persenJM to Sheet Data: " + eSyncData.message);
     }
 
     SpreadsheetApp.flush();
@@ -8215,13 +8262,14 @@ function syncAllUsersToPayrollTarifShift() {
     let idNama = getColIdx(hData, ['namapekerja', 'nama']); if (idNama === -1) idNama = idPekerjaDataCol !== -1 ? 1 : 0;
     let idRole = getColIdx(hData, ['kategorirole', 'role', 'kategori']); if (idRole === -1) idRole = idNama + 2;
     let idStatus = getColIdx(hData, ['status']); if (idStatus === -1) idStatus = idRole + 2;
+    let idJMData = getColIdx(hData, ['persen_jm_dokter', 'persen_jm', 'persenjm']);
 
-    const headers = ["ID_Pekerja", "Role", "Nama_Pekerja", "Tipe_Kompensasi", "Tarif_Shift_1", "Tarif_Shift_2", "Gaji_Pokok_Bulanan", "Keterangan", "Status"];
+    const headers = ["ID_Pekerja", "Role", "Nama_Pekerja", "Tipe_Kompensasi", "Tarif_Shift_1", "Tarif_Shift_2", "Gaji_Pokok_Bulanan", "Keterangan", "Status", "Persen_JM_Dokter"];
 
     // Ambil data yang sudah ada di Pengaturan_Tarif_Shift
     let existingTarif = [];
     if (shTarif.getLastRow() > 1) {
-      existingTarif = shTarif.getRange(2, 1, shTarif.getLastRow() - 1, Math.max(9, shTarif.getLastColumn())).getValues();
+      existingTarif = shTarif.getRange(2, 1, shTarif.getLastRow() - 1, Math.max(10, shTarif.getLastColumn())).getValues();
     }
 
     let mapTarif = {};
@@ -8238,6 +8286,7 @@ function syncAllUsersToPayrollTarifShift() {
       if (nm) {
         let curSt = String(r[8] || "Aktif").trim().toLowerCase();
         let normSt = (curSt === "tidak aktif" || curSt === "non aktif" || curSt === "nonaktif" || curSt === "inactive") ? "Tidak Aktif" : "Aktif";
+        let pjmFromEx = (r[9] !== undefined && r[9] !== null && r[9] !== "") ? Number(r[9]) : 0;
         mapTarif[nm] = {
           idAturan: idStr,
           role: String(r[1] || ""),
@@ -8247,7 +8296,8 @@ function syncAllUsersToPayrollTarifShift() {
           tarifShift2: Number(r[5]) || 0,
           gajiPokokBulanan: Number(r[6]) || 0,
           keterangan: String(r[7] || ""),
-          status: normSt
+          status: normSt,
+          persenJM: pjmFromEx
         };
       }
     }
@@ -8268,6 +8318,18 @@ function syncAllUsersToPayrollTarifShift() {
       let role = r[idRole] ? String(r[idRole]).trim() : "Admin";
       let rawStatus = r[idStatus] ? String(r[idStatus]).trim().toLowerCase() : "aktif";
       let status = (rawStatus === "tidak aktif" || rawStatus === "non aktif" || rawStatus === "nonaktif" || rawStatus === "inactive") ? "Tidak Aktif" : "Aktif";
+
+      let isDokter = role.toLowerCase().includes("dokter");
+      let pjm = 0;
+      if (isDokter) {
+        if (mapTarif[nmKey] && mapTarif[nmKey].persenJM && mapTarif[nmKey].persenJM > 0) {
+          pjm = mapTarif[nmKey].persenJM;
+        } else if (idJMData !== -1 && r[idJMData] !== "" && r[idJMData] !== null && r[idJMData] !== undefined) {
+          pjm = Number(r[idJMData]);
+        }
+        if (pjm > 1) pjm = pjm / 100;
+        if (pjm === 0) pjm = 0.50;
+      }
 
       if (mapTarif[nmKey]) {
         let curr = mapTarif[nmKey];
@@ -8293,7 +8355,8 @@ function syncAllUsersToPayrollTarifShift() {
           curr.tarifShift2,
           curr.gajiPokokBulanan,
           curr.keterangan,
-          curr.status
+          curr.status,
+          pjm
         ]);
       } else {
         // Otomatis isi ID_Pekerja (SN-XX) dan default tarif berdasarkan Role
@@ -8359,7 +8422,8 @@ function syncAllUsersToPayrollTarifShift() {
           s2,
           gp,
           ket,
-          newWorkerStatus
+          newWorkerStatus,
+          pjm
         ]);
       }
     }
@@ -8375,6 +8439,7 @@ function syncAllUsersToPayrollTarifShift() {
       shTarif.getRange(2, 5, finalRows.length, 3).setNumberFormat("#,##0");
       shTarif.getRange(2, 1, finalRows.length, 1).setHorizontalAlignment("center");
       shTarif.getRange(2, 9, finalRows.length, 1).setHorizontalAlignment("center");
+      shTarif.getRange(2, 10, finalRows.length, 1).setNumberFormat("0.0%").setHorizontalAlignment("center");
     }
 
     // Validasi Data Dropdown Status: Aktif / Tidak Aktif dan Tipe Kompensasi

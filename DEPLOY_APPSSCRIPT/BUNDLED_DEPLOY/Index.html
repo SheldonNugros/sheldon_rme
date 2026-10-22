@@ -2636,6 +2636,21 @@
             <input type="number" id="tarifGajiPokok" value="0" disabled class="w-full px-3.5 py-2 bg-slate-100 border border-slate-200 rounded-xl text-xs font-bold text-slate-400 cursor-not-allowed transition-all">
           </div>
 
+          <!-- Persentase Jasa Medis (JM) Standar Dokter -->
+          <div id="wrapperTarifPersenJM" class="p-3.5 bg-amber-50/90 border-2 border-amber-300 rounded-xl space-y-2 transition-all">
+            <div class="flex items-center justify-between">
+              <label class="block text-[11px] font-black text-amber-900 flex items-center gap-1.5">
+                <span>🩺</span> Persentase Jasa Medis (JM) Dokter (%)
+              </label>
+              <span class="text-[9px] font-black px-2 py-0.5 bg-amber-200 text-amber-900 rounded-full border border-amber-300">Standar Bawaan Dokter</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <input type="number" id="tarifPersenJM" min="0" max="100" step="1" value="50" placeholder="50" class="w-24 px-3 py-1.5 bg-white border border-amber-400 rounded-lg text-xs font-black text-amber-900 focus:ring-2 focus:ring-amber-500 text-center">
+              <span class="text-xs font-black text-amber-900">%</span>
+              <span class="text-[10px] text-amber-800 font-medium">Bawaan standar untuk seluruh tindakan medis yang dikerjakan dokter ini.</span>
+            </div>
+          </div>
+
           <div>
             <label class="block text-[11px] font-extrabold text-slate-700 mb-1">Keterangan (Opsional)</label>
             <input type="text" id="tarifKeterangan" placeholder="Catatan tambahan bila diperlukan (opsional)" class="w-full px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-800">
@@ -2680,6 +2695,7 @@
                 <th class="py-3 px-4">Nama Pekerja</th>
                 <th class="py-3 px-3">Role</th>
                 <th class="py-3 px-3">Tipe Kompensasi</th>
+                <th class="py-3 px-3 text-center">JM Dokter</th>
                 <th class="py-3 px-3 text-right">Tarif Shift 1</th>
                 <th class="py-3 px-3 text-right">Tarif Shift 2</th>
                 <th class="py-3 px-4 text-right">Gaji Bulanan</th>
@@ -2689,7 +2705,7 @@
               </tr>
             </thead>
             <tbody id="tbodyTarifShift" class="divide-y divide-slate-200 text-xs">
-              <tr><td colspan="10" class="py-8 text-center text-slate-400 font-bold">Memuat pengaturan tarif shift...</td></tr>
+              <tr><td colspan="11" class="py-8 text-center text-slate-400 font-bold">Memuat pengaturan tarif shift...</td></tr>
             </tbody>
           </table>
         </div>
@@ -20993,6 +21009,14 @@ function renderInfoBmhp() {
         else if (rLowTarif.includes('perawat')) rBadgeTarif = 'bg-emerald-100 text-emerald-800 border-emerald-300';
         else if (rLowTarif.includes('office')) rBadgeTarif = 'bg-rose-100 text-rose-800 border-rose-300';
         else if (rLowTarif.includes('admin') || rLowTarif.includes('kasir')) rBadgeTarif = 'bg-amber-100 text-amber-900 border-amber-300';
+        let isDokterTarif = rLowTarif.includes('dokter');
+        let rawPctTarif = (t.persenJM !== undefined && t.persenJM !== null && t.persenJM !== '') ? Number(t.persenJM) : 0;
+        if (rawPctTarif <= 1 && rawPctTarif > 0) rawPctTarif = Math.round(rawPctTarif * 100);
+        if (rawPctTarif === 0 && isDokterTarif) rawPctTarif = 50;
+        let jmBadgeTarif = isDokterTarif
+          ? `<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300 font-black text-[11px] inline-flex items-center gap-1">🩺 ${rawPctTarif}%</span>`
+          : '<span class="text-slate-400 font-bold">-</span>';
+
         return `
         <tr>
           <td class="py-3 px-4 font-mono font-bold text-slate-500 text-[11px]">${t.idAturan}</td>
@@ -21001,6 +21025,7 @@ function renderInfoBmhp() {
           <td class="py-3 px-3">
             <span class="px-2.5 py-0.5 rounded-lg bg-slate-100 border border-slate-200 font-bold text-[10px] text-slate-700">${t.tipeKompensasi}</span>
           </td>
+          <td class="py-3 px-3 text-center">${jmBadgeTarif}</td>
           <td class="py-3 px-3 text-right font-black text-indigo-700">${fmtRpPayroll(t.tarifShift1)}</td>
           <td class="py-3 px-3 text-right font-black text-indigo-700">${fmtRpPayroll(t.tarifShift2)}</td>
           <td class="py-3 px-4 text-right font-black text-emerald-700">${fmtRpPayroll(t.gajiPokokBulanan)}</td>
@@ -21079,6 +21104,21 @@ function renderInfoBmhp() {
         hint.className = 'text-[10px] text-emerald-600 font-bold mt-1';
       }
       const exTarif = (window.PayrollState.tarifShift || []).find(x => String(x.namaPekerja || '').toLowerCase() === val.toLowerCase());
+      const isDokterNama = (found.role || '').toLowerCase().includes('dokter');
+      const wrapJMNama = document.getElementById('wrapperTarifPersenJM');
+      const inpJMNama = document.getElementById('tarifPersenJM');
+      if (wrapJMNama) {
+        if (isDokterNama) wrapJMNama.classList.remove('hidden');
+        else wrapJMNama.classList.add('hidden');
+      }
+      if (isDokterNama && inpJMNama) {
+        let p = (exTarif && exTarif.persenJM !== undefined && exTarif.persenJM !== null && exTarif.persenJM !== '')
+          ? Number(exTarif.persenJM)
+          : ((found.persenJM !== undefined && found.persenJM !== null && found.persenJM !== '') ? Number(found.persenJM) : 50);
+        if (p <= 1 && p > 0) p = Math.round(p * 100);
+        if (p === 0) p = 50;
+        inpJMNama.value = p;
+      }
       const tipeEl = document.getElementById('tarifTipe');
       if (tipeEl) {
         if (exTarif && exTarif.tipeKompensasi) {
@@ -21100,6 +21140,8 @@ function renderInfoBmhp() {
       }
     } else {
       roleInput.value = '';
+      const wrapJMNama = document.getElementById('wrapperTarifPersenJM');
+      if (wrapJMNama) wrapJMNama.classList.add('hidden');
       if (hint) {
         hint.textContent = '⚠️ Nama tidak terdaftar di Sheet Data. Pendaftaran akan ditolak!';
         hint.className = 'text-[10px] text-rose-600 font-bold mt-1';
@@ -21113,6 +21155,17 @@ function renderInfoBmhp() {
     const s1 = document.getElementById('tarifShift1');
     const s2 = document.getElementById('tarifShift2');
     const gp = document.getElementById('tarifGajiPokok');
+    const roleVal = ((document.getElementById('tarifRole') || {}).value || '').toLowerCase();
+    const wrapJM = document.getElementById('wrapperTarifPersenJM');
+    const inpJM = document.getElementById('tarifPersenJM');
+    const isDokterTipe = roleVal.includes('dokter') || tipe === 'Tindakan' || tipe === 'Kombinasi Shift & Tindakan';
+    if (wrapJM) {
+      if (isDokterTipe) wrapJM.classList.remove('hidden');
+      else wrapJM.classList.add('hidden');
+    }
+    if (isDokterTipe && inpJM && (!inpJM.value || inpJM.value === '0')) {
+      inpJM.value = 50;
+    }
 
     if (!s1 || !s2 || !gp) return;
 
@@ -21170,6 +21223,10 @@ function renderInfoBmhp() {
     if (elKet) elKet.value = '';
     const elStat = document.getElementById('tarifStatus');
     if (elStat) elStat.value = 'Aktif';
+    const wrapJM = document.getElementById('wrapperTarifPersenJM');
+    const inpJM = document.getElementById('tarifPersenJM');
+    if (wrapJM) wrapJM.classList.add('hidden');
+    if (inpJM) inpJM.value = 50;
     const hint = document.getElementById('tarifNamaHint');
     if (hint) {
       hint.textContent = 'Pilih atau ketik nama pekerja terdaftar di Sheet Data';
@@ -21204,6 +21261,25 @@ function renderInfoBmhp() {
     } else {
       document.getElementById('tarifGajiPokok').value = 0;
     }
+
+    const wrapJM = document.getElementById('wrapperTarifPersenJM');
+    const inpJM = document.getElementById('tarifPersenJM');
+    const isDokterItem = (item.role || '').toLowerCase().includes('dokter');
+    if (wrapJM) {
+      if (isDokterItem) wrapJM.classList.remove('hidden');
+      else wrapJM.classList.add('hidden');
+    }
+    if (inpJM) {
+      if (isDokterItem) {
+        let p = (item.persenJM !== undefined && item.persenJM !== null && item.persenJM !== '') ? Number(item.persenJM) : 50;
+        if (p <= 1 && p > 0) p = Math.round(p * 100);
+        if (p === 0) p = 50;
+        inpJM.value = p;
+      } else {
+        inpJM.value = 0;
+      }
+    }
+
     document.getElementById('tarifKeterangan').value = item.keterangan || '';
     const statEl = document.getElementById('tarifStatus');
     if (statEl) {
@@ -21284,6 +21360,15 @@ function renderInfoBmhp() {
       ? (Number((document.getElementById('tarifGajiPokok') || {}).value) || 0)
       : 0;
 
+    const isDokterSave = autoRole.toLowerCase().includes('dokter') || tipeKompensasi === 'Tindakan' || tipeKompensasi === 'Kombinasi Shift & Tindakan';
+    let pjmVal = 0;
+    if (isDokterSave) {
+      const inpJM = document.getElementById('tarifPersenJM');
+      const rawVal = inpJM ? inpJM.value.trim() : '';
+      pjmVal = (rawVal !== '' && !isNaN(Number(rawVal))) ? Number(rawVal) : 50;
+      if (pjmVal === 0) pjmVal = 50;
+    }
+
     const payload = {
       idAturan: idAturan,
       idPekerja: idAturan,
@@ -21293,9 +21378,14 @@ function renderInfoBmhp() {
       tarifShift1: s1Val,
       tarifShift2: s2Val,
       gajiPokokBulanan: gpVal,
+      persenJM: pjmVal,
       keterangan: ((document.getElementById('tarifKeterangan') || {}).value || '').trim(),
       status: (document.getElementById('tarifStatus') || {}).value || 'Aktif'
     };
+
+    if (foundStaff && isDokterSave) {
+      foundStaff.persenJM = pjmVal > 1 ? (pjmVal / 100) : pjmVal;
+    }
 
     let exIdx = (window.PayrollState.tarifShift || []).findIndex(x => String(x.namaPekerja || '').toLowerCase() === payload.namaPekerja.toLowerCase());
     if (exIdx >= 0) {

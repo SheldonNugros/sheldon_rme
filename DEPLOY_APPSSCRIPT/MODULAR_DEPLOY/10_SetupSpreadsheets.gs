@@ -2255,6 +2255,143 @@ function simpanKalenderLibur(payload) {
 }
 
 /**
+ * Menyinkronkan dan merekap ulang Jasa Medis (JM) dari sheet Data_Pembayaran ke Rekap_Jasa_Medis.
+ * Memastikan setiap transaksi tindakan kasir otomatis terhitung JM-nya.
+ */
+function syncDanRekapUlangJasaMedis() {
+  try {
+    let ssBayarId = (DB_CONFIG && DB_CONFIG.PEMBAYARAN) ? DB_CONFIG.PEMBAYARAN.trim() : "";
+    if (!ssBayarId) {
+      try {
+        const defBayar = (typeof SPREADSHEET_DEFINITIONS !== 'undefined' && SPREADSHEET_DEFINITIONS["PEMBAYARAN"]) ? SPREADSHEET_DEFINITIONS["PEMBAYARAN"] : null;
+        let foundBayar = defBayar ? _findOrCreateSpreadsheetInFolder("PEMBAYARAN", defBayar.title) : null;
+        if (foundBayar && foundBayar.ssId) ssBayarId = foundBayar.ssId;
+      } catch (eF0) {}
+    }
+    if (!ssBayarId) return;
+
+    let ssBayar = SpreadsheetApp.openById(ssBayarId);
+    if (!ssBayar) return;
+
+    let shBayar = ssBayar.getSheetByName("Data_Pembayaran");
+    if (!shBayar || shBayar.getLastRow() <= 1) return;
+
+    let shJM = ssBayar.getSheetByName("Rekap_Jasa_Medis");
+    if (!shJM) {
+      shJM = ssBayar.insertSheet("Rekap_Jasa_Medis");
+    }
+
+    if (shJM.getLastRow() === 0) {
+      shJM.appendRow([
+        "ID_Invoice", "Tanggal", "Dokter", "Perawat", "Kategori_Item", "Nama_Item",
+        "Tarif_Kotor", "Biaya_Lab", "Dasar_Bagi_Hasil", "Persen_JM", "Tipe_Aturan",
+        "JM_Dokter_Kotor", "Potongan_Perawat", "JM_Dokter_Bersih", "JM_Perawat",
+        "Bagian_Klinik", "Status_JM", "Waktu_Hitung"
+      ]);
+    }
+
+    let existingInvoices = new Set();
+    if (shJM.getLastRow() > 1) {
+      let curVals = shJM.getRange(2, 1, shJM.getLastRow() - 1, Math.min(6, shJM.getLastColumn())).getValues();
+      curVals.forEach(r => {
+        let key = String(r[0] || '').trim() + '|' + String(r[5] || '').trim();
+        if (key) existingInvoices.add(key);
+      });
+    }
+
+    let rawBayar = shBayar.getRange(1, 1, shBayar.getLastRow(), shBayar.getLastColumn()).getValues();
+    if (!rawBayar || rawBayar.length <= 1) return;
+
+    let hBayar = rawBayar[0];
+    let idxInv = getColIdx(hBayar, ['id_invoice', 'idinvoice', 'no_invoice']); if (idxInv === -1) idxInv = 0;
+    let idxTgl = getColIdx(hBayar, ['tanggal_tindakan', 'tanggal', 'tgl']); if (idxTgl === -1) idxTgl = 1;
+    let idxDok = getColIdx(hBayar, ['dokter_pemeriksa', 'dokter']); if (idxDok === -1) idxDok = 5;
+    let idxKat = getColIdx(hBayar, ['kategori_item', 'kategori']); if (idxKat === -1) idxKat = 6;
+    let idxItem = getColIdx(hBayar, ['nama_item', 'item', 'tindakan']); if (idxItem === -1) idxItem = 7;
+    let idxTarif = getColIdx(hBayar, ['grand_total_item', 'total_invoice', 'harga_satuan']); if (idxTarif === -1) idxTarif = 12;
+    let idxLab = getColIdx(hBayar, ['labor', 'biaya_lab']); if (idxLab === -1) idxLab = 10;
+    let idxPrw = getColIdx(hBayar, ['perawat']); if (idxPrw === -1) idxPrw = 13;
+
+    let listDokter = (typeof getDaftarDokterSIP === 'function') ? getDaftarDokterSIP() : [];
+    let listTarifKhusus = (typeof getTarifKhususDokter === 'function') ? getTarifKhususDokter() : [];
+    let listTindakan = (typeof getDaftarTindakanLengkap === 'function') ? getDaftarTindakanLengkap() : [];
+
+    let newRows = [];
+    for (let i = 1; i < rawBayar.length; i++) {
+      let r = rawBayar[i];
+      let invId = String(r[idxInv] || '').trim();
+      let dokName = String(r[idxDok] || '').trim();
+      let itemName = String(r[idxItem] || '').trim();
+      let katItem = String(r[idxKat] || 'Tindakan').trim();
+      if (!invId || !dokName || !itemName) continue;
+
+      let key = invId + '|' + itemName;
+      if (existingInvoices.has(key)) continue;
+
+      let isNonJM = (katItem.toLowerCase() === 'obat' || katItem.toLowerCase() === 'bmhp');
+      if (isNonJM) continue;
+
+      let tglStr = fDate(r[idxTgl]);
+      let prwName = String(r[idxPrw] || '').trim();
+      let tarifKotor = Number(r[idxTarif]) || 0;
+      let biayaLab = Number(r[idxLab]) || 0;
+
+      let dokObj = listDokter.find(d => d.nama === dokName);
+      let defaultRateDokter = (dokObj && dokObj.persenJM !== undefined && dokObj.persenJM !== null) ? Number(dokObj.persenJM) : 0.40;
+      if (defaultRateDokter > 1) defaultRateDokter = defaultRateDokter / 100;
+
+      let masterT = listTindakan.find(x => x.nama === itemName);
+      let finalPersen = defaultRateDokter;
+      let tipeAturan = "Default Dokter (" + Math.round(defaultRateDokter * 100) + "%)";
+
+      if (masterT && masterT.persenJMDefault !== null && masterT.persenJMDefault !== undefined && masterT.persenJMDefault > 0) {
+        finalPersen = masterT.persenJMDefault;
+        tipeAturan = "Kunci Tindakan Global (" + Math.round(finalPersen * 100) + "%)";
+      } else {
+        let exc = listTarifKhusus.find(x => 
+          ((x.dokter && x.dokter === dokName) || (x.namaDokter && x.namaDokter === dokName)) && 
+          ((x.nama && x.nama === itemName) || (x.namaTindakan && x.namaTindakan === itemName) || 
+           (masterT && ((x.kode && x.kode === masterT.kode) || (x.idTindakan && x.idTindakan === masterT.kode))))
+        );
+        if (exc && exc.persenJM !== undefined && exc.persenJM !== null) {
+          finalPersen = Number(exc.persenJM);
+          if (finalPersen > 1) finalPersen = finalPersen / 100;
+          tipeAturan = "Tarif Khusus Dokter (" + Math.round(finalPersen * 100) + "%)";
+        }
+      }
+
+      let dasarBagiHasil = Math.max(0, tarifKotor - biayaLab);
+      let jmDokterKotor = Math.round(dasarBagiHasil * finalPersen);
+      let potonganPerawat = 0;
+      let itemNameLower = itemName.toLowerCase();
+      if (prwName && (itemNameLower.includes("behel") || itemNameLower.includes("ortho") || itemNameLower.includes("orto"))) {
+        potonganPerawat = Math.min(jmDokterKotor, 50000);
+        tipeAturan += " + Asistensi Perawat Rp 50k";
+      }
+
+      let jmDokterBersih = Math.max(0, jmDokterKotor - potonganPerawat);
+      let jmPerawat = potonganPerawat;
+      let bagianKlinik = Math.max(0, tarifKotor - jmDokterBersih - jmPerawat - biayaLab);
+
+      newRows.push([
+        invId, tglStr, dokName, prwName, "Tindakan", itemName,
+        tarifKotor, biayaLab, dasarBagiHasil, finalPersen, tipeAturan,
+        jmDokterKotor, potonganPerawat, jmDokterBersih, jmPerawat,
+        bagianKlinik, "SIAP_CAIR", new Date()
+      ]);
+      existingInvoices.add(key);
+    }
+
+    if (newRows.length > 0) {
+      shJM.getRange(shJM.getLastRow() + 1, 1, newRows.length, newRows[0].length).setValues(newRows);
+      SpreadsheetApp.flush();
+    }
+  } catch (e) {
+    Logger.log("syncDanRekapUlangJasaMedis error: " + e.message);
+  }
+}
+
+/**
  * Otomatisasi Rekap Tutup Buku Bulanan:
  * Menarik seluruh tindakan ber-JM dari sheet Rekap_Jasa_Medis
  * lalu membuat draft slip gaji di sheet Penggajian_Dokter.
@@ -2265,6 +2402,11 @@ function generatePayrollPeriode(periodeBulan) {
     lock.waitLock(15000);
     const targetBulan = periodeBulan || Utilities.formatDate(new Date(), "Asia/Jakarta", "MMMM yyyy");
     
+    // Auto-rekap dari Data_Pembayaran jika ada invoice yang belum masuk Rekap_Jasa_Medis
+    try {
+      syncDanRekapUlangJasaMedis();
+    } catch(eSR) {}
+
     // 1. Baca Rekap_Jasa_Medis jika ada
     let dokterMap = {};
     try {
@@ -2829,14 +2971,19 @@ function getPayrollModuleData() {
     try {
       let rawJM = [];
       try {
-        const defBayar = (typeof SPREADSHEET_DEFINITIONS !== 'undefined' && SPREADSHEET_DEFINITIONS["PEMBAYARAN"]) ? SPREADSHEET_DEFINITIONS["PEMBAYARAN"] : null;
+        let defBayar = (typeof SPREADSHEET_DEFINITIONS !== 'undefined' && SPREADSHEET_DEFINITIONS["PEMBAYARAN"]) ? SPREADSHEET_DEFINITIONS["PEMBAYARAN"] : null;
         let foundBayar = defBayar ? _findOrCreateSpreadsheetInFolder("PEMBAYARAN", defBayar.title) : null;
         let shJM = foundBayar ? foundBayar.ss.getSheetByName("Rekap_Jasa_Medis") : null;
+        if (!shJM || shJM.getLastRow() <= 1) {
+          try { syncDanRekapUlangJasaMedis(); } catch(eSJM) {}
+          if (foundBayar) shJM = foundBayar.ss.getSheetByName("Rekap_Jasa_Medis");
+        }
         if (shJM && shJM.getLastRow() > 1) {
           rawJM = shJM.getRange(1, 1, shJM.getLastRow(), shJM.getLastColumn()).getValues();
         }
       } catch (eF) {}
       if (rawJM.length === 0) {
+        try { syncDanRekapUlangJasaMedis(); } catch(eSJM2) {}
         rawJM = readFast(DB_CONFIG.PEMBAYARAN, "Rekap_Jasa_Medis");
       }
       for (let i = 1; i < rawJM.length; i++) {
